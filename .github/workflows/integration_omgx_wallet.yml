@@ -2,12 +2,21 @@ name: integration omgx wallet
 
 on:
   push:
+    paths:
+      - 'packages/omgx/**'
     branches:
       - 'master'
       - 'develop'
       - '*rc'
       - 'regenesis/*'
   pull_request:
+    paths:
+      - 'packages/omgx/**'
+    branches:
+      - 'master'
+      - 'develop'
+      - '*rc'
+      - 'regenesis/*'
   workflow_dispatch:
 
 jobs:
