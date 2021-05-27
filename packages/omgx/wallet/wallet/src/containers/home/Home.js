@@ -33,6 +33,8 @@ import {
   checkPendingExitStatus
 } from 'actions/networkAction';
 
+import { checkVersion } from 'actions/serviceAction';
+
 import DepositModal from 'containers/modals/deposit/DepositModal';
 import TransferModal from 'containers/modals/transfer/TransferModal';
 import ExitModal from 'containers/modals/exit/ExitModal';
@@ -85,7 +87,6 @@ function Home () {
   useEffect(() => {
     window.scrollTo(0, 0);
     dispatch(fetchDeposits());
-    dispatch(fetchExits());
     setPageDisplay("AccountNow");
   }, [ dispatch ]);
 
@@ -99,13 +100,18 @@ function Home () {
       // watcher only calls
       dispatch(checkWatcherStatus());
       dispatch(fetchBalances());
+      dispatch(fetchExits());
       dispatch(fetchTransactions());
     });
-  }, POLL_INTERVAL * 10);
+  }, POLL_INTERVAL * 5);
 
   useInterval(() => {
     dispatch(fetchBalances());
   }, POLL_INTERVAL);
+
+  useEffect(() => {
+    checkVersion()
+  }, [])
 
   const handleSetPage = async (page) => {
     setPageDisplay(page);

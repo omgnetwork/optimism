@@ -44,9 +44,9 @@ function InputStep ({
     if (value > 0 && tokenInfo) {
       let res
       if (fast) {
-        res = await dispatch(depositETHL2(value));
-      } else {
         res = await dispatch(depositL1LP(currency, value))
+      } else {
+        res = await dispatch(depositETHL2(value));
       }
       if (res) {
         dispatch(setActiveHistoryTab1('Deposits'));

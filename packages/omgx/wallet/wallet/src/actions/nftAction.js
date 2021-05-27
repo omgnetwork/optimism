@@ -20,9 +20,6 @@ export async function getNFTs () {
   return state.nftList;
 }
 
-/* 
-Get the token info from networkService.web3.eth.Contract
-*/
 export async function addNFT ( NFTproperties ) {
 
   const state = store.getState();

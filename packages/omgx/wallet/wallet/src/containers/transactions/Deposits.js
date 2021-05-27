@@ -82,8 +82,10 @@ function Deposits ({ searchHistory, transactions }) {
             <Transaction
               key={index}
               link={ 
-                (networkService.chainID === 4 || networkService.chainID === 28) ? 
+                networkService.chainID === 4 ? 
                   `https://rinkeby.etherscan.io/tx/${i.hash}`:
+                  networkService.chainID === 28 ? 
+                  `https://blockexplorer.rinkeby.omgx.network/tx/${i.hash}`:
                   undefined
               }
               title={truncate(i.hash, 6, 4, '...')}

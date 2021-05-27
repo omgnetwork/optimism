@@ -1,6 +1,6 @@
 {
-  "name": "@enyalabs/wallet",
-  "version": "0.0.10",
+  "name": "@omgnetwork/wallet_react",
+  "version": "0.0.1",
   "private": true,
   "dependencies": {
     "@eth-optimism/watcher": "^0.0.1-alpha.9",
@@ -60,7 +60,7 @@
     "test:coverage": "npm run test --coverage",
     "audit-check": "audit-ci --moderate",
     "postinstall": "patch-package",
-    "deploy": "aws s3 rm s3://omgx --recursive && aws s3 sync build s3://omgx && aws s3 cp s3://omgx/index.html s3://omgx/index.html --metadata-directive REPLACE --cache-control max-age=0"
+    "deploy": "aws s3 rm s3://omgx-wallet --recursive && aws s3 sync build s3://omgx-wallet && aws s3 cp s3://omgx-wallet/index.html s3://omgx-wallet/index.html --metadata-directive REPLACE --cache-control max-age=0"
   },
   "eslintConfig": {
     "extends": "react-app"
