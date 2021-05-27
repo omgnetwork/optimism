@@ -103,6 +103,7 @@ describe('System setup', async () => {
 
     L1LiquidityPool = await Factory__L1LiquidityPool.deploy(
       env.watcher.l1.messengerAddress,
+      "0x247ADeE8E350cBEB05aB73DE88Be07CFbD736b2E"
     )
     await L1LiquidityPool.deployTransaction.wait()
     console.log("L1LiquidityPool deployed to:", L1LiquidityPool.address)
