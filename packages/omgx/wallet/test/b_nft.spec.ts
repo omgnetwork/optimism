@@ -17,9 +17,8 @@ describe('NFT Test', async () => {
   
   let env: OptimismEnv
 
-  //Test Marc's BioBase NFT system
-  const nftName = 'BioBase'
-  const nftSymbol = 'BEE' //BioEconomy Explodes
+  const nftName = 'TestNFT'
+  const nftSymbol = 'TST'
 
   const getBalances = async (
     _address: string, 
@@ -66,10 +65,15 @@ describe('NFT Test', async () => {
     L2ERC721 = await Factory__L2ERC721.deploy(
       nftSymbol,
       nftName,
-      BigNumber.from(String(0)) //starting index for the tokenIDs
+      BigNumber.from(String(0)), //starting index for the tokenIDs
+      "" //the base URI is empty in this case
     )
     await L2ERC721.deployTransaction.wait()
-    console.log("Marc's BioBase NFT L2ERC721 deployed to:", L2ERC721.address)
+    console.log("NFT L2ERC721 deployed to:", L2ERC721.address)
+
+    let owner = await L2ERC721.owner()
+    //await owner.wait()
+    console.log("ERC721 owner:",owner)
     
   })
 
@@ -107,13 +111,13 @@ describe('NFT Test', async () => {
 
     const tokenID = BigNumber.from(String(50));
     
-    let meta = ownerName + "#" + Date.now().toString() + '#https://www.atcc.org/products/all/CCL-2.aspx';
+    let meta = ownerName + '#' + Date.now().toString() + '#' + 'https://www.atcc.org/products/all/CCL-2.aspx';
     console.log("meta:",meta)
 
     //mint one NFT
     let nft = await L2ERC721.mintNFT(recipient,meta)
     await nft.wait()
-    //console.log("ERC721:",nft)
+    // console.log("ERC721:",nft)
 
     const balanceOwner = await L2ERC721.balanceOf(owner)
     const balanceRecipient = await L2ERC721.balanceOf(recipient)
@@ -130,7 +134,7 @@ describe('NFT Test', async () => {
     console.log("TID:",TID.toString())
 
     //mint a second NFT
-    meta = ownerName + "#" + Date.now().toString() + '#https://www.atcc.org/products/all/CCL-185.aspx';
+    meta = ownerName + '#' + Date.now().toString() + '#' + 'https://www.atcc.org/products/all/CCL-185.aspx';
     nft = await L2ERC721.mintNFT(recipient,meta)
     await nft.wait()
 

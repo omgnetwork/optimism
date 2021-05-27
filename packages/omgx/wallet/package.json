@@ -1,5 +1,5 @@
 {
-  "name": "@enyalabs/OMGX_Wallet",
+  "name": "@omgnetwork/omgx_wallet",
   "version": "0.0.1",
   "description": "OMGX Example Wallet and Associated Smart Contracts",
   "private": true,
@@ -24,11 +24,11 @@
     "chai": "^4.3.3",
     "chai-as-promised": "^7.1.1",
     "directory-tree": "^2.2.7",
-    "enyalabs_core-utils": "git+https://github.com/enyalabs/core-utils.git",
     "ethereum-waffle": "^3.3.0",
     "ethers": "^5.0.32",
     "hardhat": "^2.1.2",
     "mocha": "^8.3.1",
+    "omgx_core-utils": "git+https://github.com/omgnetwork/omgx_core-utils",
     "rimraf": "^3.0.2",
     "shx": "^0.3.3",
     "ts-node": "^9.1.1",
@@ -37,8 +37,8 @@
   "dependencies": {
     "@openzeppelin/contracts": "^3.3.0",
     "dotenv": "^8.2.0",
-    "enyalabs_contracts": "git+ssh://git@github.com:enyalabs/contracts.git",
     "glob": "^7.1.6",
+    "omgx_contracts": "git+https://github.com/omgnetwork/omgx_contracts",
     "patch-package": "^6.4.7"
   }
 }
