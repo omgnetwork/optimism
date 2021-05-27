@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "./interfaces/iL2LiquidityPool.sol";
 
 /* Library Imports */
-import "omgx_contracts/build/contracts/libraries/bridge/OVM_CrossDomainEnabled.sol";
+import "@eth-optimism/contracts/libraries/bridge/OVM_CrossDomainEnabled.sol";
 
 /* External Imports */
 import '@openzeppelin/contracts/math/SafeMath.sol';

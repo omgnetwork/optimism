@@ -2,10 +2,10 @@ import { expect } from 'chai'
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
-import { Contract, ContractFactory, BigNumber, Wallet, utils, providers, ethers } from 'ethers'
+import { Contract, ContractFactory, BigNumber, utils } from 'ethers'
 import { Direction } from './shared/watcher-utils'
 
-import L1ERC20Json from '../artifacts/contracts/ERC20.sol/ERC20.json'
+import L1ERC20Json from '../artifacts/contracts/L1ERC20.sol/L1ERC20.json'
 import L1ERC20GatewayJson from '../artifacts/contracts/L1ERC20Gateway.sol/L1ERC20Gateway.json'
 import L2DepositedERC20Json from '../artifacts-ovm/contracts/L2DepositedERC20.sol/L2DepositedERC20.json'
 
@@ -41,9 +41,8 @@ describe('System setup', async () => {
   let env: OptimismEnv
 
   //Test ERC20 
-  const initialAmount = utils.parseEther("10000000000")
+  const initialSupply = utils.parseEther("10000000000")
   const tokenName = 'JLKN'
-  const tokenDecimals = 18
   const tokenSymbol = 'JLKN'
 
   /************* BOB owns all the pools, and ALICE mints a new token ***********/
@@ -131,9 +130,8 @@ describe('System setup', async () => {
     // [initialSupply, name, decimals, symbol]
     // this is owned by bobl1Wallet
     L1ERC20 = await Factory__L1ERC20.deploy(
-      initialAmount,
+      initialSupply,
       tokenName,
-      tokenDecimals,
       tokenSymbol
     )
     await L1ERC20.deployTransaction.wait()
@@ -268,7 +266,7 @@ describe('System setup', async () => {
   })
 
   it('should add ERC20 token to token pool', async () => {
-    const addL2TPAmount = utils.parseEther("10000")
+    const addL2TPAmount = utils.parseEther("1000")
 
     const approveL2TPTX = await L2DepositedERC20.approve(
       L2TokenPool.address,
