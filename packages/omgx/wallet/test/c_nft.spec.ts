@@ -2,15 +2,15 @@ import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 chai.use(chaiAsPromised)
 const expect = chai.expect;
+import chalk from 'chalk';
 
-import { Contract, ContractFactory, BigNumber, Wallet, utils, providers } from 'ethers'
-import { Direction } from './shared/watcher-utils'
+import { Contract, ContractFactory, BigNumber } from 'ethers'
 import L2ERC721Json from '../artifacts-ovm/contracts/ERC721Mock.sol/ERC721Mock.json'
 import { OptimismEnv } from './shared/env'
 
 import * as fs from 'fs'
 
-describe('NFT Test', async () => {
+describe('NFT Test\n', async () => {
 
   let Factory__L2ERC721: ContractFactory
   let L2ERC721: Contract
@@ -19,30 +19,6 @@ describe('NFT Test', async () => {
 
   const nftName = 'TestNFT'
   const nftSymbol = 'TST'
-
-  const getBalances = async (
-    _address: string, 
-    _env=env
-   ) => {
-
-    const aliceL1Balance = await _env.alicel1Wallet.getBalance()
-    const aliceL2Balance = await _env.alicel2Wallet.getBalance()
-
-    const bobL1Balance = await _env.bobl1Wallet.getBalance()
-    const bobL2Balance = await _env.bobl2Wallet.getBalance()
-
-    console.log("\nbobL1Balance:", bobL1Balance.toString())
-    console.log("bobL2Balance:", bobL2Balance.toString())
-    console.log("aliceL1Balance:", aliceL1Balance.toString())
-    console.log("aliceL2Balance:", aliceL2Balance.toString())
-
-    return {
-      aliceL1Balance,
-      aliceL2Balance,
-      bobL1Balance,
-      bobL2Balance,
-    }
-  }
 
   /************* BOB owns all the pools, and ALICE Mints a new token ***********/
   before(async () => {
@@ -69,12 +45,10 @@ describe('NFT Test', async () => {
       "" //the base URI is empty in this case
     )
     await L2ERC721.deployTransaction.wait()
-    console.log("NFT L2ERC721 deployed to:", L2ERC721.address)
+    console.log(` 🌕 ${chalk.red('NFT L2ERC721 deployed to:')} ${chalk.green(L2ERC721.address)}`)
 
     let owner = await L2ERC721.owner()
-    //await owner.wait()
-    console.log("ERC721 owner:",owner)
-    
+    console.log(` 🔒 ${chalk.red('ERC721 owner:')} ${chalk.green(owner)}`)
   })
 
   before(async () => {
@@ -93,9 +67,9 @@ describe('NFT Test', async () => {
 
       fs.writeFile('./deployment/local/addresses.json', JSON.stringify(addressArray, null, 2), err => {
         if (err) {
-          console.log('Error adding NFT address to file:', err)
+          console.log(` 🚨 ${chalk.red(`Error adding NFT address to file: ${err}`)}`)
         } else {
-          console.log('Successfully added NFT address to file')
+          console.log(` 📬 ${chalk.red('Successfully added NFT address to file')}`)
         }
       })
     })
@@ -106,13 +80,10 @@ describe('NFT Test', async () => {
     
     const owner = env.bobl2Wallet.address;
     const recipient = env.alicel2Wallet.address;
-
     const ownerName = "Henrietta Lacks"
-
-    const tokenID = BigNumber.from(String(50));
     
     let meta = ownerName + '#' + Date.now().toString() + '#' + 'https://www.atcc.org/products/all/CCL-2.aspx';
-    console.log("meta:",meta)
+    console.log(` ⚽️ ${chalk.red(`meta:`)} ${chalk.green(`${meta}`)}`)
 
     //mint one NFT
     let nft = await L2ERC721.mintNFT(recipient,meta)
@@ -122,16 +93,16 @@ describe('NFT Test', async () => {
     const balanceOwner = await L2ERC721.balanceOf(owner)
     const balanceRecipient = await L2ERC721.balanceOf(recipient)
 
-    console.log("balanceOwner:",balanceOwner.toString())
-    console.log("balanceRecipient:",balanceRecipient.toString())
+    console.log(` ⚽️ ${chalk.red(`balanceOwner:`)} ${chalk.green(`${balanceOwner.toString()}`)}`)
+    console.log(` ⚽️ ${chalk.red(`balanceRecipient:`)} ${chalk.green(`${balanceRecipient.toString()}`)}`)
 
     //Get the URL
     let nftURL = await L2ERC721.getTokenURI(BigNumber.from(String(0))) 
-    console.log("nftURL:",nftURL)
+    console.log(` ⚽️ ${chalk.red(`nftURL:`)} ${chalk.green(`${nftURL}`)}`)
 
     //Should be 1
     let TID = await L2ERC721.getLastTID() 
-    console.log("TID:",TID.toString())
+    console.log(` ⚽️ ${chalk.red(`TID:`)} ${chalk.green(`${TID.toString()}`)}`)
 
     //mint a second NFT
     meta = ownerName + '#' + Date.now().toString() + '#' + 'https://www.atcc.org/products/all/CCL-185.aspx';
@@ -140,7 +111,7 @@ describe('NFT Test', async () => {
 
     //Should be 2
     TID = await L2ERC721.getLastTID() 
-    console.log("TID:",TID.toString())
+    console.log(` ⚽️ ${chalk.red(`TID:`)} ${chalk.green(`${TID.toString()}`)}`)
 
     //it('returns the amount of tokens owned by the given address', async function () {
     expect(await L2ERC721.balanceOf(owner)).to.deep.eq(BigNumber.from(String(0)));

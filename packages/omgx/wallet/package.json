@@ -36,7 +36,8 @@
   },
   "dependencies": {
     "@eth-optimism/contracts": "^0.3.4",
-    "@openzeppelin/contracts": "^3.3.0",
+    "@openzeppelin/contracts": "3.4.1",
+    "chalk": "^4.1.1",
     "dotenv": "^8.2.0",
     "glob": "^7.1.6",
     "omgx_contracts": "git+https://github.com/omgnetwork/omgx_contracts",
