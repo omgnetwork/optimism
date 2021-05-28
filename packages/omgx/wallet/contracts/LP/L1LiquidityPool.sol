@@ -4,9 +4,10 @@ pragma solidity >0.5.0;
 pragma experimental ABIEncoderV2;
 
 import "./interfaces/iL2LiquidityPool.sol";
+import "./libraries/OVM_CrossDomainEnabled.sol";
 
 /* Library Imports */
-import "@eth-optimism/contracts/libraries/bridge/OVM_CrossDomainEnabled.sol";
+// import "@eth-optimism/contracts/libraries/bridge/OVM_CrossDomainEnabled.sol";
 
 /* External Imports */
 import '@openzeppelin/contracts/math/SafeMath.sol';
@@ -139,12 +140,14 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
      *    Constructor   *
      ********************/
     /**
-     * @param _l1CrossDomainMessenger L1 Messenger address being used for cross-chain communications.
+     * @param _l1CrossDomainMessenger L1 Messenger address being used for sending the cross-chain message.
+     * @param _l1CustomCrossDomainMessenger L1 Messenger address being used for receiving the cross-chain message.
      */
     constructor (
-        address _l1CrossDomainMessenger
+        address _l1CrossDomainMessenger,
+        address _l1CustomCrossDomainMessenger
     )
-        OVM_CrossDomainEnabled(_l1CrossDomainMessenger)
+        OVM_CrossDomainEnabled(_l1CrossDomainMessenger, _l1CustomCrossDomainMessenger)
     {}
 
     /**********************
