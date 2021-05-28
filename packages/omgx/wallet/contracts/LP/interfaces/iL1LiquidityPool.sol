@@ -11,20 +11,20 @@ interface iL1LiquidityPool {
      *       Events     *
      ********************/
 
-    event addLiquidity_EVENT(
+    event AddLiquidity(
         address sender,
         uint256 amount,
         address tokenAddress
     );
 
-    event ownerRecoverFee_EVENT(
+    event OwnerRecoverFee(
         address sender,
         address receiver,
-        address tokenAddress,
-        uint256 amount
+        uint256 amount,
+        address tokenAddress
     );
 
-    event clientDepositL1_EVENT(
+    event ClientDepositL1(
         address sender,
         uint256 receivedAmount,
         uint256 userRewardFee,
@@ -33,21 +33,23 @@ interface iL1LiquidityPool {
         address tokenAddress
     );
 
-    event clientPayL1_EVENT(
+    event ClientPayL1(
         address sender,
-        uint256 receivedAmount,
-        uint256 userRewardFee,
-        uint256 ownerRewardFee,
-        uint256 totalFee,
+        uint256 amount,
         address tokenAddress
     );
 
-    event withdrawLiqudiity_EVENT(
+    event WithdrawLiqudiity(
         address sender,
         address receiver,
-        uint256 pendingAmount,
-        uint256 requestAmount,
-        uint256 withdrawAmount,
+        uint256 amount,
+        address tokenAddress
+    );
+
+    event WithdrawReward(
+        address sender,
+        address receiver,
+        uint256 amount,
         address tokenAddress
     );
 

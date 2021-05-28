@@ -23,7 +23,6 @@ export function createAction (key, asyncAction) {
       dispatch({ type: `${key}/SUCCESS`, payload: response });
       return true;
     } catch (error) {
-      // console.log(error);
       // cancel request loading state
       dispatch({ type: `${key}/ERROR` });
 

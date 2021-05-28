@@ -6,9 +6,6 @@ pragma experimental ABIEncoderV2;
 import "./interfaces/iL2LiquidityPool.sol";
 import "./libraries/OVM_CrossDomainEnabled.sol";
 
-/* Library Imports */
-// import "@eth-optimism/contracts/libraries/bridge/OVM_CrossDomainEnabled.sol";
-
 /* External Imports */
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
@@ -60,16 +57,14 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
         uint256 userDepositAmount; // user deposit amount;
 
         // user rewards
-        // uint256 lastUserRewardBlock; // Last block number that SUSHIs distribution occurs.
         uint256 lastAccUserReward; // Last accumulated user reward
         uint256 accUserReward; // Accumulated user reward.
         uint256 accUserRewardPerShare; // Accumulated user rewards per share, times 1e12. See below.
 
         // owner rewards
         uint256 accOwnerReward; // Accumulated owner reward.
-        uint256 latestUserRewardPerShare;
 
-        // start time
+        // start time -- used to calculate APR
         uint256 startTime;
     }
 
@@ -77,7 +72,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
      * Variables *
      *************/
 
-    // mapping L2 token address to poolInfo
+    // mapping L1 and L2 token address to poolInfo
     mapping(address => PoolInfo) public poolInfo;
     // Info of each user that stakes tokens.
     mapping(address => mapping(address => UserInfo)) public userInfo;
@@ -165,9 +160,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
 
 
     /**
-     * @dev Initialize this contract with the L1 token gateway address.
-     * The flow: 1) this contract gets deployed on L2, 2) the L1
-     * gateway is deployed with addr from (1), 3) L1 gateway address passed here.
+     * @dev Initialize this contract.
      *
      * @param _userRewardFeeRate fee rate that users get
      * @param _ownerRewardFeeRate fee rate that contract owner gets
@@ -189,7 +182,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
 
 
     /***
-     * @dev Add the new token to the poll
+     * @dev Add the new token pair to the pool
      * DO NOT add the same LP token more than once. Rewards will be messed up if you do.
      * 
      * @param _l1TokenAddress
@@ -216,7 +209,6 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
                 accUserReward: 0,
                 accUserRewardPerShare: 0,
                 accOwnerReward: 0,
-                latestUserRewardPerShare: 0,
                 startTime: block.timestamp
             });
     } 
@@ -237,8 +229,8 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
     }
 
     /**
-     * Update user reward per share
-     * @param _tokenAddress Address of ERC20.
+     * Update the user reward per share
+     * @param _tokenAddress Address of the target token.
      */
     function updateUserRewardPerShare(
         address _tokenAddress
@@ -246,24 +238,21 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
         public
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
-        // block.number is not working
-        // if (pool.lastUserRewardBlock < block.number &&  pool.lastAccUserReward < pool.accUserReward) {
         if (pool.lastAccUserReward < pool.accUserReward) {
             uint256 accUserRewardDiff = (pool.accUserReward.sub(pool.lastAccUserReward));
             if (pool.userDepositAmount != 0) {
-                uint256 updatedUserRewardPerShare = accUserRewardDiff.mul(1e12).div(pool.userDepositAmount);
-                pool.accUserRewardPerShare = pool.accUserRewardPerShare.add(updatedUserRewardPerShare);
-                pool.latestUserRewardPerShare = updatedUserRewardPerShare;
+                pool.accUserRewardPerShare = pool.accUserRewardPerShare.add(
+                    accUserRewardDiff.mul(1e12).div(pool.userDepositAmount)
+                );
             }
-            // pool.lastUserRewardBlock = block.number;
             pool.lastAccUserReward = pool.accUserReward;
         }
     }
 
-        /**
-     * Add ERC20 to pool
-     * @param _amount Amount to transfer to the other account.
-     * @param _tokenAddress ERC20 L2 token address.
+    /**
+     * Liquididity providers add liquidity
+     * @param _amount liquidity amount that users want to deposit.
+     * @param _tokenAddress address of the liquidity token.
      */
      function addLiquidity(
         uint256 _amount,
@@ -293,7 +282,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
             user.pendingReward = user.pendingReward.add(
                 user.amount.mul(pool.accUserRewardPerShare).div(1e12).sub(user.rewardDebt)
             );
-            user.rewardDebt = user.amount.mul(pool.accUserRewardPerShare).div(1e12);
+            user.rewardDebt = (user.amount.add(_amount)).mul(pool.accUserRewardPerShare).div(1e12);
         } else {
             user.rewardDebt = _amount.mul(pool.accUserRewardPerShare).div(1e12);
         }
@@ -315,9 +304,9 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
     }
 
     /**
-     * Client deposit ERC20 from their account to this contract, which then releases funds on the L1 side
-     * @param _amount Amount to transfer to the other account.
-     * @param _tokenAddress ERC20 token address
+     * Client deposit ERC20 from their account to this contract, which then releases funds on the L2 side
+     * @param _amount amount that client wants to transfer.
+     * @param _tokenAddress L2 token address
      */
     function clientDepositL1(
         uint256 _amount,
@@ -379,8 +368,8 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
     /**
      * Users withdraw token from LP
      * @param _amount amount to withdraw
-     * @param _tokenAddress L2 token address
-     * @param _to the address that users withdraw to
+     * @param _tokenAddress L1 token address
+     * @param _to receiver to get the funds
      */
     function withdrawLiqudity(
         uint256 _amount,
@@ -425,9 +414,9 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
     }
 
     /**
-     * owner recover fee from ERC20
-     * @param _amount Amount to transfer to the other account.
-     * @param _tokenAddress ERC20 token address.
+     * owner recovers fee from ERC20
+     * @param _amount amount that owner wants to recover.
+     * @param _tokenAddress L1 token address
      * @param _to receiver to get the fee.
      */
     function ownerRecoverFee(
@@ -462,9 +451,9 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
 
     /**
      * withdraw reward from ERC20
-     * @param _amount Amount to transfer to the other account.
-     * @param _tokenAddress ERC20 token address.
-     * @param _to receiver to get the fee.
+     * @param _amount reward amount that liquidity providers want to withdraw
+     * @param _tokenAddress L1 token address
+     * @param _to receiver to get the reward
      */
     function withdrawReward(
         uint256 _amount,
@@ -509,9 +498,9 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
 
     /**
      * Move funds from L2 to L1, and pay out from the right liquidity pool
-     * @param _to Address that will receive the funds.
-     * @param _amount amount to be transferred.
-     * @param _tokenAddress L1 erc20 token.
+     * @param _to receiver to get the funds
+     * @param _amount amount to to be transferred.
+     * @param _tokenAddress L1 token address
      */
     function clientPayL1(
         address payable _to,
