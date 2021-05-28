@@ -115,7 +115,7 @@ describe('System setup\n', async () => {
       L2LiquidityPool.address
     )
     await L1LiquidityPoolTX.wait()
-    console.log(` ⭐️ ${chalk.blue('L1 LP initialized:')} ${chalk.green(L1LiquidityPoolTX.hash)}`)
+    console.log(`⭐️ ${chalk.blue('L1 LP initialized:')} ${chalk.green(L1LiquidityPoolTX.hash)}`)
 
     // Initialize L2 liquidity pool
     const L2LiquidityPoolTX = await L2LiquidityPool.init(
@@ -124,7 +124,7 @@ describe('System setup\n', async () => {
       L1LiquidityPool.address
     )
     await L2LiquidityPoolTX.wait()
-    console.log(` ⭐️ ${chalk.blue('L2 LP initialized:')} ${chalk.green(L2LiquidityPoolTX.hash)}`)
+    console.log(`⭐️ ${chalk.blue('L2 LP initialized:')} ${chalk.green(L2LiquidityPoolTX.hash)}`)
 
     //Mint a new token on L1 and set up the L1 and L2 infrastructure
     // [initialSupply, name, symbol]
@@ -203,6 +203,6 @@ describe('System setup\n', async () => {
       console.log(`\n📬 ${chalk.red(`Error writing addresses to file: ${err}\n`)}`)
     }
 
-    console.log(`${chalk.yellow('********************************\n\n')}`)
+    console.log(`${chalk.yellow('********************************')}`)
   })
 })
