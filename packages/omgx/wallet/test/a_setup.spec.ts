@@ -3,7 +3,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
 import { Contract, ContractFactory, BigNumber, utils } from 'ethers'
-import { Direction } from './shared/watcher-utils'
+import { Direction, Relayer } from './shared/watcher-utils'
 
 import L1ERC20Json from '../artifacts/contracts/L1ERC20.sol/L1ERC20.json'
 import L1ERC20GatewayJson from '../artifacts/contracts/L1ERC20Gateway.sol/L1ERC20Gateway.json'
@@ -103,7 +103,7 @@ describe('System setup', async () => {
 
     L1LiquidityPool = await Factory__L1LiquidityPool.deploy(
       env.watcher.l1.messengerAddress,
-      "0x247ADeE8E350cBEB05aB73DE88Be07CFbD736b2E"
+      env.customWatcher.l1.messengerAddress,
     )
     await L1LiquidityPool.deployTransaction.wait()
     console.log("L1LiquidityPool deployed to:", L1LiquidityPool.address)
@@ -444,9 +444,10 @@ describe('System setup', async () => {
         fastExitAmount,
         L2DepositedERC20.address
       ),
-      Direction.L2ToL1
+      Direction.L2ToL1,
+      Relayer.custom,
     )
-
+    
     const poolInfo = await L2LiquidityPool.poolInfo(L2DepositedERC20.address)
 
     expect(poolInfo.accOwnerReward).to.deep.eq(fastExitAmount.mul(15).div(1000))
