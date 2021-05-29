@@ -45,6 +45,7 @@ import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol
 import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
 
 import { powAmount, logAmount } from 'util/amountConvert';
+import { accDiv, accMul } from 'util/calculation';
 import { getAllNetworks } from 'util/networkName';
 
 import { ETHERSCAN_URL, OMGX_WATCHER_URL, L1ETHGATEWAY, L2DEPOSITEDERC20 } from "Settings";
@@ -427,7 +428,7 @@ class NetworkService {
     try {
 
       const rootChainBalance = await this.l1Provider.getBalance(this.account);
-      const ERC20L1Balance = await this.ERC20L1Contract.methods.balances(this.account).call({from: this.account});
+      const ERC20L1Balance = await this.ERC20L1Contract.methods.balanceOf(this.account).call({from: this.account});
 
       const childChainBalance = await this.l2Provider.getBalance(this.account);
       const ERC20L2Balance = await this.ERC20L2Contract.methods.balanceOf(this.account).call({from: this.account});
@@ -817,6 +818,11 @@ class NetworkService {
         latestUserRewardPerShare: poolTokenInfo.latestUserRewardPerShare,
         userDepositAmount: poolTokenInfo.userDepositAmount,
         startTime: poolTokenInfo.startTime,
+        APR: Number(poolTokenInfo.userDepositAmount) === 0 ? 0 : 
+          accMul(accDiv(accDiv(poolTokenInfo.accUserReward, poolTokenInfo.userDepositAmount), accDiv(
+            (new Date().getTime() - Number(poolTokenInfo.startTime) * 1000), 365 * 24 * 60 * 60 * 1000)
+          ), 100
+        ) // ( accUserReward - userDepositAmount ) / timeDuration
       }
       userInfo[token] = {
         l1TokenAddress: token,
@@ -848,6 +854,11 @@ class NetworkService {
         latestUserRewardPerShare: poolTokenInfo.latestUserRewardPerShare,
         userDepositAmount: poolTokenInfo.userDepositAmount,
         startTime: poolTokenInfo.startTime,
+        APR: Number(poolTokenInfo.userDepositAmount) === 0 ? 0 : 
+          accMul(accDiv(accDiv(poolTokenInfo.accUserReward, poolTokenInfo.userDepositAmount), accDiv(
+            (new Date().getTime() - Number(poolTokenInfo.startTime) * 1000), 365 * 24 * 60 * 60 * 1000)
+          ), 100
+        ) // ( accUserReward - userDepositAmount ) / timeDuration
       }
       userInfo[token] = {
         l2TokenAddress: token,

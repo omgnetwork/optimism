@@ -7,8 +7,6 @@ import { BigNumber } from 'ethers';
 import { openAlert, openError, openModal } from 'actions/uiAction';
 import { getFarmInfo, updateStakeToken, updateWithdrawToken } from 'actions/farmAction';
 
-import { accDiv, accMul } from 'util/calculation';
-
 import Button from 'components/button/Button';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -110,7 +108,7 @@ class FarmList extends React.Component {
       loading, L1orL2Pool
     } = this.state;
 
-    let userReward = 0, APR = 0;
+    let userReward = 0;
     if (Object.keys(userInfo).length && Object.keys(poolInfo).length) {
       userReward = BigNumber.from(userInfo.pendingReward).add(
         BigNumber.from(userInfo.amount)
@@ -118,12 +116,6 @@ class FarmList extends React.Component {
         .div(BigNumber.from(powAmount(1, 12)))
         .sub(BigNumber.from(userInfo.rewardDebt))
       ).toString();
-      if (Number(poolInfo.userDepositAmount)) {
-        // ( accUserReward - userDepositAmount ) / timeDuration
-        APR = accMul(accDiv(accDiv(poolInfo.accUserReward, poolInfo.userDepositAmount), accDiv(
-          (new Date().getTime() - Number(poolInfo.startTime) * 1000), 365 * 24 * 60 * 60 * 1000)
-        ), 100);
-      }
     }
 
     // L1orL2Pool: L1LP || L2LP
@@ -161,7 +153,7 @@ class FarmList extends React.Component {
           <div className={styles.Table4}>
             <div className={styles.BasicText}>APR</div>
             <div className={styles.BasicLightText}>
-              {`${APR.toFixed(2)}%`}
+              {`${poolInfo.APR ? poolInfo.APR.toFixed(2) : 0}%`}
             </div>
           </div>
           <div className={styles.Table5}>
