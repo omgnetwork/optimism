@@ -23,6 +23,7 @@ jobs:
     outputs:
       builder: ${{ steps.packages.outputs.builder }}
       l2geth: ${{ steps.packages.outputs.l2geth }}
+      l1hardhat: ${{ steps.packages.outputs.l1hardhat }}
       batch-submitter: ${{ steps.packages.outputs.batch-submitter }}
       message-relayer: ${{ steps.packages.outputs.message-relayer }}
       data-transport-layer: ${{ steps.packages.outputs.data-transport-layer }}
@@ -87,6 +88,32 @@ jobs:
           file: ./ops/docker/Dockerfile.geth
           push: true
           tags: omgx/l2geth:develop,omgx/l2geth:latest
+
+  l1hardhat:
+    name: Publish L1Hardhat Version ${{ needs.develop-publish.outputs.l1hardhat }}
+    needs: develop-publish
+    #if: needs.develop-publish.outputs.l2geth != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Publish L1Hardhat
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./ops/docker/hardhat/Dockerfile
+          push: true
+          tags: omgx/hardhat:develop,omgx/hardhat:latest
 
 
   # pushes the base builder image to dockerhub
