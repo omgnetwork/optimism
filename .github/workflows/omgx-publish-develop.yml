@@ -86,9 +86,8 @@ jobs:
           context: .
           file: ./ops/docker/Dockerfile.geth
           push: true
-          tags: omgx/l2geth:develop
-          flavor: |
-            latest=true
+          tags: omgx/l2geth:develop,omgx/l2geth:latest
+
 
   # pushes the base builder image to dockerhub
   builder:
@@ -121,7 +120,7 @@ jobs:
           context: .
           file: ./ops/docker/Dockerfile.monorepo
           push: true
-          tags: omgx/builder:develop
+          tags: omgx/builder:develop,omgx/builder:latest
 
   message-relayer:
     name: Publish Message Relayer Version ${{ needs.builder.outputs.message-relayer }}
@@ -146,7 +145,7 @@ jobs:
           context: .
           file: ./ops/docker/Dockerfile.message-relayer
           push: true
-          tags: omgx/message-relayer:develop
+          tags: omgx/message-relayer:develop,omgx/message-relayer:latest
 
   batch-submitter:
     name: Publish Batch Submitter Version ${{ needs.builder.outputs.batch-submitter }}
@@ -171,7 +170,7 @@ jobs:
           context: .
           file: ./ops/docker/Dockerfile.batch-submitter
           push: true
-          tags: omgx/batch-submitter:develop
+          tags: omgx/batch-submitter:develop,omgx/batch-submitter:latest
 
   data-transport-layer:
     name: Publish Data Transport Layer Version ${{ needs.builder.outputs.data-transport-layer }}
@@ -196,7 +195,7 @@ jobs:
           context: .
           file: ./ops/docker/Dockerfile.data-transport-layer
           push: true
-          tags: omgx/data-transport-layer:develop
+          tags: omgx/data-transport-layer:develop,omgx/data-transport-layer:latest
 
   contracts:
     name: Publish Deployer Version ${{ needs.builder.outputs.contracts }}
@@ -221,7 +220,7 @@ jobs:
           context: .
           file: ./ops/docker/Dockerfile.deployer
           push: true
-          tags: omgx/deployer:develop
+          tags: omgx/deployer:develop,omgx/deployer:latest
 
   integration_tests:
     name: Publish Integration tests ${{ needs.builder.outputs.integration-tests }}
@@ -246,4 +245,4 @@ jobs:
           context: .
           file: ./ops/docker/Dockerfile.integration-tests
           push: true
-          tags: omgx/integration-tests:develop
+          tags: omgx/integration-tests:develop,omgx/integration-tests:latest
