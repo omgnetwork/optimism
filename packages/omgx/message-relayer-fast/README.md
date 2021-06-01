@@ -10,7 +10,8 @@ The custom `OVM_L1CrossDomainMessenger` works with the default `OVM_L2CrossDomai
 
 - Your bridge/gateway contract must implement `contracts/libraries/OVM_CrossDomainEnabled.sol` instead. This uses the default L1 Messenger to send messages and the custom L1 Messenger to relay.
 
-## Running the Alt_Relayer
+
+## Running the message-relayer-fast
 
 Env Settings -
 
