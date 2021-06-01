@@ -1,4 +1,4 @@
-# OMGX_Alt_Messenger
+# OMGX_CustomCrossDomainMessenger
 
 Customized L1 Cross Domain Messenger without dispute period time restrictions and associated message relayer service.
 
@@ -6,7 +6,7 @@ The custom `OVM_L1CrossDomainMessenger` works with the default `OVM_L2CrossDomai
 
 ## Using the custom messenger
 
-- Deploy `contracts/OVM_L1_CrossDomainMessenger.sol` on L1, this will be the contract used by your contracts for L2->L1 message passing
+- Deploy `contracts/OVM_L1_CustomCrossDomainMessenger.sol` on L1, this will be the contract used by your contracts for L2->L1 message passing
 
 - Your bridge/gateway contract must implement `contracts/libraries/OVM_CrossDomainEnabled.sol` instead. This uses the default L1 Messenger to send messages and the custom L1 Messenger to relay.
 
@@ -14,7 +14,7 @@ The custom `OVM_L1CrossDomainMessenger` works with the default `OVM_L2CrossDomai
 
 Env Settings -
 
-**THESE MAY BE OUTDATED!!!** The examples in the .env are definitive
+**THESE ARE OUTDATED!!!**
 
 ```
 

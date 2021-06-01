@@ -17,7 +17,7 @@ import { iOVM_StateCommitmentChain } from "../../../iOVM/chain/iOVM_StateCommitm
 import { Abs_BaseCrossDomainMessenger } from "./Abs_BaseCrossDomainMessenger.sol";
 
 /**
- * @title OVM_L1CrossDomainMessenger
+ * @title OVM_L1CustomCrossDomainMessenger
  * @dev The L1 Cross Domain Messenger contract sends messages from L1 to L2, and relays messages from L2 onto L1.
  * In the event that a message sent from L1 to L2 is rejected for exceeding the L2 epoch gas limit, it can be resubmitted
  * via this contract's replay function.
