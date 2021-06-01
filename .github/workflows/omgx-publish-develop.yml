@@ -110,7 +110,7 @@ jobs:
       - name: Publish L1Hardhat
         uses: docker/build-push-action@v2
         with:
-          context: .
+          context: ./ops/docker/hardhat/
           file: ./ops/docker/hardhat/Dockerfile
           push: true
           tags: omgx/hardhat:develop,omgx/hardhat:latest
