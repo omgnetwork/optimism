@@ -83,11 +83,12 @@ describe('Liquidity Pool Test', async () => {
     const approveL1ERC20TX = await L1ERC20.approve(
       L1ERC20Gateway.address,
       depositL2ERC20Amount,
+      {gasLimit: 999999, gasPrice: 0}
     )
     await approveL1ERC20TX.wait()
 
     await env.waitForXDomainTransaction(
-      L1ERC20Gateway.deposit(depositL2ERC20Amount),
+      L1ERC20Gateway.deposit(depositL2ERC20Amount, {gasLimit: 999999, gasPrice: 0}),
       Direction.L1ToL2
     )
     

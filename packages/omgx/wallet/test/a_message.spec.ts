@@ -36,12 +36,19 @@ describe('Messenge Relayer Test', async () => {
       L2MessageJson.bytecode,
       env.bobl2Wallet
     )
+
+    const accountNonceBob1 = await env.l1Provider.getTransactionCount(env.bobl1Wallet.address)
+    console.log(`accountNonceBob1:`,accountNonceBob1)
+
+    const accountNonceBob2 = await env.l2Provider.getTransactionCount(env.bobl2Wallet.address)
+    console.log(`accountNonceBob2:`,accountNonceBob2)
+
   })
 
   it('should deploy contracts', async () => {
-    // Deploy L2 liquidity pool
     L2Message = await Factory__L2Message.deploy(
       env.watcher.l2.messengerAddress,
+      {gasLimit: 999999, gasPrice: 0}
     )
     await L2Message.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L2Message deployed to:')} ${chalk.green(L2Message.address)}`)
@@ -49,6 +56,7 @@ describe('Messenge Relayer Test', async () => {
     // Deploy L1 liquidity pool
     L1Message = await Factory__L1Message.deploy(
       env.watcher.l1.messengerAddress,
+      {gasLimit: 999999, gasPrice: 0}
       // env.customWatcher.l1.messengerAddress,
     )
     await L1Message.deployTransaction.wait()
@@ -56,14 +64,16 @@ describe('Messenge Relayer Test', async () => {
     
     // Initialize L1 message
     const L1MessageTX = await L1Message.init(
-      L2Message.address
+      L2Message.address,
+      {gasLimit: 999999, gasPrice: 0}
     )
     await L1MessageTX.wait()
     console.log(`⭐️ ${chalk.blue('L1 Message initialized:')} ${chalk.green(L1MessageTX.hash)}`)
 
     // Initialize L2 message
     const L2MessageTX = await L2Message.init(
-      L1Message.address
+      L1Message.address,
+      {gasLimit: 999999, gasPrice: 0}
     )
     await L2MessageTX.wait()
     console.log(`⭐️ ${chalk.blue('L2 Message initialized:')} ${chalk.green(L2MessageTX.hash)}`)
@@ -71,15 +81,23 @@ describe('Messenge Relayer Test', async () => {
 
   it('should send message from L2 to L1', async () => {
     await env.waitForXDomainTransaction(
-      L2Message.sendMessageL2ToL1(),
-      Direction.L2ToL1,
+      L2Message.sendMessageL2ToL1({
+        gasLimit: 999999, 
+        gasPrice: 0, 
+        //nonce: 221
+      }),
+      Direction.L2ToL1
       // Relayer.custom
     )
   })
 
   it('should send message from L1 to L2', async () => {
     await env.waitForXDomainTransaction(
-      L1Message.sendMessageL1ToL2(),
+      L1Message.sendMessageL1ToL2({
+        gasLimit: 999999, 
+        gasPrice: 0, 
+        //nonce: 28
+      }),
       Direction.L1ToL2
     )
   })

@@ -41,6 +41,7 @@ export class OptimismEnv {
   l1MessengerAddress: String
   ctc: Contract
 
+  l1Provider
   l2Provider
 
   // L2 Contracts
@@ -76,6 +77,7 @@ export class OptimismEnv {
     this.alicel2Wallet = args.alicel2Wallet
     this.katel1Wallet = args.katel1Wallet
     this.katel2Wallet = args.katel2Wallet
+    this.l1Provider = args.l1Provider
     this.l2Provider = args.l2Provider
     this.ctc = args.ctc
   }
@@ -125,6 +127,7 @@ export class OptimismEnv {
       katel1Wallet,
       katel2Wallet,
 
+      l1Provider,
       l2Provider
     })
   }
