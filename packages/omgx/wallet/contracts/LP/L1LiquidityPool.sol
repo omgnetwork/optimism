@@ -510,20 +510,46 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
         external
         onlyFromCrossDomainAccount(address(L2LiquidityPoolAddress))
     {   
+        bool replyNeeded = false;
+
         if (_tokenAddress != address(0)) {
-            IERC20(_tokenAddress).safeTransfer(_to, _amount);
+            if (_amount > IERC20(_tokenAddress).balanceOf(address(this))) {
+                replyNeeded = true;
+            } else {
+                IERC20(_tokenAddress).safeTransfer(_to, _amount);
+            }
         } else {
-            //this is ETH
-            // balances[address(0)] = balances[address(0)].sub(_amount);
-            //_to.transfer(_amount); UNSAFE
-            (bool sent,) = _to.call{gas: SAFE_GAS_STIPEND, value: _amount}("");
-            require(sent, "Failed to send Ether");
+            if (_amount > address(this).balance) {
+                replyNeeded = true;
+            } else {
+                //this is ETH
+                // balances[address(0)] = balances[address(0)].sub(_amount);
+                //_to.transfer(_amount); UNSAFE
+                (bool sent,) = _to.call{gas: SAFE_GAS_STIPEND, value: _amount}("");
+                require(sent, "Failed to send Ether");
+            }
         }
-        
-        emit ClientPayL1(
-          _to,
-          _amount,
-          _tokenAddress
-        );
+
+        if (replyNeeded) {
+            // send cross domain message
+            bytes memory data = abi.encodeWithSelector(
+            iL2LiquidityPool.clientPayL2.selector,
+            _to,
+            _amount,
+            poolInfo[_tokenAddress].l2TokenAddress
+            );
+
+            sendCrossDomainMessage(
+                address(L2LiquidityPoolAddress),
+                data,
+                getFinalizeDepositL2Gas()
+            );
+        } else {
+            emit ClientPayL1(
+            _to,
+            _amount,
+            _tokenAddress
+            );
+        }
     }
 }
