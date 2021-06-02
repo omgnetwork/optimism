@@ -13,7 +13,8 @@ export const initWatcher = async (
 ) => {
   
   const l1MessengerAddress = await AddressManager.getAddress('Proxy__OVM_L1CrossDomainMessenger')
-
+  const SCC = await AddressManager.getAddress('OVM_StateCommitmentChain')
+  console.log(SCC)
   return new Watcher({
     l1: {
       provider: l1Provider,
@@ -32,7 +33,7 @@ export const initCustomWatcher = async (
   AddressManager: Contract
 ) => {
   
-  const l1CustomMessengerAddress = await AddressManager.getAddress('OVM_L1CustomCrossDomainMessenger')
+  const l1CustomMessengerAddress = await AddressManager.getAddress('Proxy__OVM_L1CustomCrossDomainMessenger')
 
   return new Watcher({
     l1: {

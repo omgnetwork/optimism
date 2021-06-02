@@ -46,7 +46,7 @@ contract OVM_L1CustomCrossDomainMessenger is iOVM_L1CrossDomainMessenger, Abs_Ba
     )
         public
     {
-        require(address(libAddressManager) == address(0), "L1CrossDomainMessenger already intialized.");
+        require(address(libAddressManager) == address(0), "L1CustomCrossDomainMessenger already intialized.");
         libAddressManager = Lib_AddressManager(_libAddressManager);
         xDomainMsgSender = DEFAULT_XDOMAIN_SENDER;
     }

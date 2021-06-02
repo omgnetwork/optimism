@@ -20,6 +20,8 @@ interface MessageRelayerOptions {
   // within this service.
   addressManagerAddress: string
 
+  //l1MessengerAddress: string
+
   l1Target: string
 
   // Wallet instance, used to sign and send the L1 relay transactions.
@@ -74,7 +76,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     eventCache: ethers.Event[]
     Lib_AddressManager: Contract
     OVM_StateCommitmentChain: Contract
-    OVM_L1CrossDomainMessenger: Contract
+    OVM_L1CustomCrossDomainMessenger: Contract
     OVM_L2CrossDomainMessenger: Contract
     OVM_L2ToL1MessagePasser: Contract
   }
@@ -110,17 +112,15 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       address: this.state.OVM_StateCommitmentChain.address,
     })
 
-    this.logger.info('Connecting to OVM_L1CrossDomainMessenger...')
-    const l1MessengerAddress = await this.state.Lib_AddressManager.getAddress(
-      'OVM_L1CustomCrossDomainMessenger'
-    )
-    this.state.OVM_L1CrossDomainMessenger = loadContract(
-      'OVM_L1CrossDomainMessenger',
-      l1MessengerAddress,
-      this.options.l1RpcProvider,
-    )
-    this.logger.info('Connected to OVM_L1CrossDomainMessenger', {
-      address: this.state.OVM_L1CrossDomainMessenger.address,
+    this.logger.info('Connecting to OVM_L1CustomCrossDomainMessenger...')
+    this.state.OVM_L1CustomCrossDomainMessenger = await loadContractFromManager({
+      name: 'OVM_L1CustomCrossDomainMessenger',
+      proxy: 'Proxy__OVM_L1CustomCrossDomainMessenger',
+      Lib_AddressManager: this.state.Lib_AddressManager,
+      provider: this.options.l1RpcProvider,
+    })
+    this.logger.info('Connected to OVM_L1CustomCrossDomainMessenger', {
+      address: this.state.OVM_L1CustomCrossDomainMessenger.address,
     })
 
     this.logger.info('Connecting to OVM_L2CrossDomainMessenger...')
@@ -381,7 +381,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   }
 
   private async _wasMessageRelayed(message: SentMessage): Promise<boolean> {
-    return this.state.OVM_L1CrossDomainMessenger.successfulMessages(
+    return this.state.OVM_L1CustomCrossDomainMessenger.successfulMessages(
       message.encodedMessageHash
     )
   }
@@ -491,7 +491,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           'Dry-run, checking to make sure proof would succeed...'
         )
 
-        await this.state.OVM_L1CrossDomainMessenger.connect(
+        await this.state.OVM_L1CustomCrossDomainMessenger.connect(
           this.options.l1Wallet
         ).callStatic.relayMessage(
           message.target,
@@ -516,7 +516,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         return
       }
 
-      const result = await this.state.OVM_L1CrossDomainMessenger.connect(
+      const result = await this.state.OVM_L1CustomCrossDomainMessenger.connect(
         this.options.l1Wallet
       ).relayMessage(
         message.target,

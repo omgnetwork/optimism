@@ -19,7 +19,7 @@ import { OptimismEnv } from './shared/env'
 
 import { promises as fs } from 'fs'
 
-describe('System setup\n', async () => {
+describe('LP System setup\n', async () => {
 
   let Factory__L1LiquidityPool: ContractFactory
   let Factory__L2LiquidityPool: ContractFactory
