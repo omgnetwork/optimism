@@ -2,7 +2,7 @@
 pragma solidity >0.5.0;
 
 /* Library Imports */
-import "@eth-optimism/contracts/libraries/bridge/OVM_CrossDomainEnabled.sol";
+import "@eth-optimism/contracts/contracts/optimistic-ethereum/libraries/bridge/OVM_CrossDomainEnabled.sol";
 // import "../libraries/OVM_CrossDomainEnabled.sol";
 
 import { L2Message } from "./L2Message.sol";

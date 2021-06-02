@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >0.5.0;
 
-import "../interfaces/iL1LiquidityPool.sol";
+import "./interfaces/iL1LiquidityPool.sol";
 
 /* Library Imports */
 import "@eth-optimism/contracts/contracts/optimistic-ethereum/libraries/bridge/OVM_CrossDomainEnabled.sol";

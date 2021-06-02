@@ -16,8 +16,9 @@ Supplementing the base configuration is an additional metric enabling file, `doc
 
 The base stack can be started and stopped with a command like this (there is no need to specify the default docker-compose.yml)
 ```
-docker-compose \
-    up --build --detach
+
+docker-compose up --build --detach
+
 ```
 
 To start the stack with monitoring enabled, just add the metric composition file.
@@ -30,8 +31,9 @@ docker-compose \
 
 Optionally, run a verifier along the rest of the stack.
 ```
-docker-compose up --scale verifier=1 \
-    --build --detach
+
+docker-compose up --scale verifier=1 --build --detach
+
 ```
 
 A Makefile has been provided for convience. The following targets are available.
