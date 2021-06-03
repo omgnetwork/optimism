@@ -312,8 +312,7 @@ describe('Liquidity Pool Test', async () => {
         fastExitAmount,
         L2DepositedERC20.address
       ),
-      Direction.L2ToL1,
-      Relayer.custom,
+      Direction.L2ToL1
     )
     
     const poolInfo = await L2LiquidityPool.poolInfo(L2DepositedERC20.address)

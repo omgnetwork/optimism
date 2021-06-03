@@ -105,7 +105,6 @@ describe('LP System setup', async () => {
     // Deploy L1 liquidity pool
     L1LiquidityPool = await Factory__L1LiquidityPool.deploy(
       env.watcher.l1.messengerAddress,
-      env.customWatcher.l1.messengerAddress//,
       //{gasLimit: 999999, gasPrice: 0}
     )
     await L1LiquidityPool.deployTransaction.wait()
@@ -187,7 +186,7 @@ describe('LP System setup', async () => {
     console.log(`⭐️ ${chalk.blue('L2TokenPool registered:')} ${chalk.green(registerL2TokenPoolTX.hash)}`)
 
     // Deploy atomic swap
-    AtomicSwap = await Factory__AtomicSwap.deploy({gasLimit: 999999, gasPrice: 0})
+    AtomicSwap = await Factory__AtomicSwap.deploy({gasLimit: 1500000, gasPrice: 0})
     await AtomicSwap.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('AtomicSwap deployed to:')} ${chalk.green(AtomicSwap.address)}`)
   })
