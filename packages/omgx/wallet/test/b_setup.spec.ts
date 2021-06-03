@@ -97,15 +97,14 @@ describe('LP System setup', async () => {
     // Deploy L2 liquidity pool
     L2LiquidityPool = await Factory__L2LiquidityPool.deploy(
       env.watcher.l2.messengerAddress,
-      {gasLimit: 999999, gasPrice: 0}
+      {gasLimit: 800000, gasPrice: 0}
     )
     await L2LiquidityPool.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L2LiquidityPool deployed to:')} ${chalk.green(L2LiquidityPool.address)}`)
     
     // Deploy L1 liquidity pool
     L1LiquidityPool = await Factory__L1LiquidityPool.deploy(
-      env.watcher.l1.messengerAddress,
-      //{gasLimit: 999999, gasPrice: 0}
+      env.watcher.l1.messengerAddress
     )
     await L1LiquidityPool.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L1LiquidityPool deployed to:')} ${chalk.green(L1LiquidityPool.address)}`)
@@ -115,7 +114,7 @@ describe('LP System setup', async () => {
       /* userRewardFeeRate 3.5% */ 35, 
       /* ownerRewardFeeRate 1.5% */ 15, 
       L2LiquidityPool.address,
-      {gasLimit: 999999, gasPrice: 0}
+      {gasLimit: 800000, gasPrice: 0}
     )
     await L1LiquidityPoolTX.wait()
     console.log(`⭐️ ${chalk.blue('L1 LP initialized:')} ${chalk.green(L1LiquidityPoolTX.hash)}`)
@@ -125,7 +124,7 @@ describe('LP System setup', async () => {
       /* userRewardFeeRate 3.5% */ 35, 
       /* ownerRewardFeeRate 1.5% */ 15, 
       L1LiquidityPool.address,
-      {gasLimit: 999999, gasPrice: 0}
+      {gasLimit: 800000, gasPrice: 0}
     )
     await L2LiquidityPoolTX.wait()
     console.log(`⭐️ ${chalk.blue('L2 LP initialized:')} ${chalk.green(L2LiquidityPoolTX.hash)}`)
@@ -136,8 +135,7 @@ describe('LP System setup', async () => {
     L1ERC20 = await Factory__L1ERC20.deploy(
       initialSupply,
       tokenName,
-      tokenSymbol,
-      //{gasLimit: 999999, gasPrice: 0}
+      tokenSymbol
     )
     await L1ERC20.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L1ERC20 deployed to:')} ${chalk.green(L1ERC20.address)}`)
@@ -148,7 +146,7 @@ describe('LP System setup', async () => {
       env.watcher.l2.messengerAddress,
       tokenName,
       tokenSymbol,
-      {gasLimit: 999999, gasPrice: 0}
+      {gasLimit: 800000, gasPrice: 0}
     )
     await L2DepositedERC20.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L2DepositedERC20 deployed to:')} ${chalk.green(L2DepositedERC20.address)}`)
@@ -158,8 +156,7 @@ describe('LP System setup', async () => {
     L1ERC20Gateway = await Factory__L1ERC20Gateway.deploy(
       L1ERC20.address,
       L2DepositedERC20.address,
-      env.watcher.l1.messengerAddress,
-      //{gasLimit: 999999, gasPrice: 0}
+      env.watcher.l1.messengerAddress
     )
     await L1ERC20Gateway.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L1ERC20Gateway deployed to:')} ${chalk.green(L1ERC20Gateway.address)}`)
@@ -167,20 +164,20 @@ describe('LP System setup', async () => {
     //Initialize the ERC20 for the new token
     const initL2ERC20TX = await L2DepositedERC20.init(
       L1ERC20Gateway.address,
-      {gasLimit: 999999, gasPrice: 0}
+      {gasLimit: 800000, gasPrice: 0}
     );
     await initL2ERC20TX.wait();
     console.log(`⭐️ ${chalk.blue('L2DepositedERC20 initialized:')} ${chalk.green(initL2ERC20TX.hash)}`)
 
     //Deploy L2 token pool for the new token
-    L2TokenPool = await Factory__L2TokenPool.deploy({gasLimit: 999999, gasPrice: 0})
+    L2TokenPool = await Factory__L2TokenPool.deploy({gasLimit: 1000000, gasPrice: 0})
     await L2TokenPool.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L2TokenPool deployed to:')} ${chalk.green(L2TokenPool.address)}`)
 
     //Register ERC20 token address in L2 token pool
     const registerL2TokenPoolTX = await L2TokenPool.registerTokenAddress(
       L2DepositedERC20.address,
-      {gasLimit: 999999, gasPrice: 0}
+      {gasLimit: 800000, gasPrice: 0}
     );
     await registerL2TokenPoolTX.wait()
     console.log(`⭐️ ${chalk.blue('L2TokenPool registered:')} ${chalk.green(registerL2TokenPoolTX.hash)}`)

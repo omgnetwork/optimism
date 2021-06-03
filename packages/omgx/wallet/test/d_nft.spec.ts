@@ -43,7 +43,7 @@ describe('NFT Test\n', async () => {
       nftName,
       BigNumber.from(String(0)), //starting index for the tokenIDs
       "", //the base URI is empty in this case
-      {gasLimit: 999999, gasPrice: 0}
+      {gasLimit: 800000, gasPrice: 0}
     )
     await L2ERC721.deployTransaction.wait()
     console.log(` 🌕 ${chalk.red('NFT L2ERC721 deployed to:')} ${chalk.green(L2ERC721.address)}`)
@@ -90,7 +90,7 @@ describe('NFT Test\n', async () => {
     let nft = await L2ERC721.mintNFT(
       recipient,
       meta,
-      {gasLimit: 999999, gasPrice: 0}
+      {gasLimit: 800000, gasPrice: 0}
     )
     await nft.wait()
     // console.log("ERC721:",nft)
@@ -104,12 +104,12 @@ describe('NFT Test\n', async () => {
     //Get the URL
     let nftURL = await L2ERC721.getTokenURI(
       BigNumber.from(String(0)),
-      {gasLimit: 999999, gasPrice: 0}
+      {gasLimit: 800000, gasPrice: 0}
     ) 
     console.log(` ⚽️ ${chalk.red(`nftURL:`)} ${chalk.green(`${nftURL}`)}`)
 
     //Should be 1
-    let TID = await L2ERC721.getLastTID({gasLimit: 999999, gasPrice: 0}) 
+    let TID = await L2ERC721.getLastTID({gasLimit: 800000, gasPrice: 0}) 
     console.log(` ⚽️ ${chalk.red(`TID:`)} ${chalk.green(`${TID.toString()}`)}`)
 
     //mint a second NFT
@@ -117,12 +117,12 @@ describe('NFT Test\n', async () => {
     nft = await L2ERC721.mintNFT(
       recipient,
       meta,
-      {gasLimit: 999999, gasPrice: 0}
+      {gasLimit: 800000, gasPrice: 0}
     )
     await nft.wait()
 
     //Should be 2
-    TID = await L2ERC721.getLastTID({gasLimit: 999999, gasPrice: 0}) 
+    TID = await L2ERC721.getLastTID({gasLimit: 800000, gasPrice: 0}) 
     console.log(` ⚽️ ${chalk.red(`TID:`)} ${chalk.green(`${TID.toString()}`)}`)
 
     //it('returns the amount of tokens owned by the given address', async function () {

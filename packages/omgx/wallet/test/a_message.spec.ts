@@ -48,43 +48,39 @@ describe('Messenge Relayer Test', async () => {
   it('should deploy contracts', async () => {
     
     L1Message = await Factory__L1Message.deploy(
-      env.watcher.l1.messengerAddress,
-      {gasLimit: 999999, gasPrice: 0}
-      // env.customWatcher.l1.messengerAddress,
+      env.watcher.l1.messengerAddress
     )
     await L1Message.deployTransaction.wait()
-    console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
+    console.log(`🌕 ${chalk.green('L1 Message deployed to:')} ${chalk.white(L1Message.address)}`)
     
     L2Message = await Factory__L2Message.deploy(
       env.watcher.l2.messengerAddress,
-      {gasLimit: 999999, gasPrice: 0}
+      {gasLimit: 800000, gasPrice: 0}
     )
     await L2Message.deployTransaction.wait()
-    console.log(`🌕 ${chalk.red('L2 Message deployed to:')} ${chalk.green(L2Message.address)}`)
+    console.log(`🌕 ${chalk.green('L2 Message deployed to:')} ${chalk.white(L2Message.address)}`)
 
     // Initialize L1 message
     const L1MessageTX = await L1Message.init(
-      L2Message.address,
-      {gasLimit: 999999, gasPrice: 0}
+      L2Message.address
     )
     await L1MessageTX.wait()
-    console.log(`⭐️ ${chalk.blue('L1 Message initialized:')} ${chalk.green(L1MessageTX.hash)}`)
+    console.log(`⭐️ ${chalk.green('L1 Message initialized:')} ${chalk.white(L1MessageTX.hash)}`)
 
     // Initialize L2 message
     const L2MessageTX = await L2Message.init(
       L1Message.address,
-      {gasLimit: 999999, gasPrice: 0}
+      {gasLimit: 800000, gasPrice: 0}
     )
     await L2MessageTX.wait()
-    console.log(`⭐️ ${chalk.blue('L2 Message initialized:')} ${chalk.green(L2MessageTX.hash)}`)
+    console.log(`⭐️ ${chalk.green('L2 Message initialized:')} ${chalk.white(L2MessageTX.hash)}`)
   })
 
   it('should send message from L2 to L1', async () => {
     await env.waitForXDomainTransaction(
       L2Message.sendMessageL2ToL1({
-        gasLimit: 999999, 
-        gasPrice: 0, 
-        //nonce: 221
+        gasLimit: 800000, 
+        gasPrice: 0
       }),
       Direction.L2ToL1
     )
@@ -92,11 +88,7 @@ describe('Messenge Relayer Test', async () => {
 
   it('should send message from L1 to L2', async () => {
     await env.waitForXDomainTransaction(
-      L1Message.sendMessageL1ToL2({
-        gasLimit: 999999, 
-        gasPrice: 0, 
-        //nonce: 28
-      }),
+      L1Message.sendMessageL1ToL2(),
       Direction.L1ToL2
     )
   })
