@@ -357,7 +357,9 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   }
 
   private async _isTransactionFinalized(height: number): Promise<boolean> {
+    
     this.logger.info('Checking if tx is finalized', { height })
+    
     const header = await this._getStateBatchHeader(height)
 
     if (header === undefined) {
@@ -367,9 +369,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       this.logger.info('Got state batch header', { header })
     }
 
-    return !(await this.state.OVM_StateCommitmentChain.insideFraudProofWindow(
-      header.batch
-    ))
+    return true
+
+    // return !(await this.state.OVM_StateCommitmentChain.insideFraudProofWindow(
+    //   header.batch
+    // ))
   }
 
   /**

@@ -4,7 +4,7 @@ pragma solidity >0.5.0;
 pragma experimental ABIEncoderV2;
 
 import "./interfaces/iL2LiquidityPool.sol";
-import "./libraries/OVM_CrossDomainEnabled.sol";
+import "@eth-optimism/contracts/contracts/optimistic-ethereum/libraries/bridge/OVM_CrossDomainEnabled.sol";
 
 /* External Imports */
 import '@openzeppelin/contracts/math/SafeMath.sol';
@@ -117,7 +117,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
         address tokenAddress
     );
 
-    event WithdrawLiqudiity(
+    event WithdrawLiquidity(
         address sender,
         address receiver,
         uint256 amount,
@@ -405,7 +405,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
             require(sent, "Failed to send Ether");
         }
 
-        emit WithdrawLiqudiity(
+        emit WithdrawLiquidity(
             msg.sender,
             _to,
             _amount,

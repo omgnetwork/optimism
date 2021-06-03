@@ -30,9 +30,6 @@ export interface RollupDeployConfig {
   l1CrossDomainMessengerConfig: {
     relayerAddress?: string | Signer
   }
-  l1CustomCrossDomainMessengerConfig: {
-    //Add any specially needed setting here
-  }
   whitelistConfig: {
     owner: string | Signer
     allowArbitraryContractDeployment: boolean
@@ -109,20 +106,6 @@ export const makeContractDeployConfig = async (
           )
         )
       },
-    },
-    //does not currently need afterDeploys
-    //but that could change so stubbing in
-    OVM_L1CustomCrossDomainMessenger: {
-      factory: getContractFactory('OVM_L1CustomCrossDomainMessenger'),
-      params: []
-      //afterDeploy: [] This is where to add afterDeploys, if needed
-    },
-    //does not currently need afterDeploys
-    //but that could change so stubbing in
-    Proxy__OVM_L1CustomCrossDomainMessenger: {
-      factory: getContractFactory('Lib_ResolvedDelegateProxy'),
-      params: [AddressManager.address, 'OVM_L1CustomCrossDomainMessenger']
-      //afterDeploy: [] This is where to add afterDeploys, if needed
     },
     OVM_L1ETHGateway: {
       factory: getContractFactory('OVM_L1ETHGateway'),

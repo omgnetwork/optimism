@@ -10,8 +10,10 @@ import {
   
   bobl1Wallet,
   bobl2Wallet,
+  
   alicel1Wallet,
   alicel2Wallet,
+
   katel1Wallet,
   katel2Wallet,
 
@@ -21,7 +23,6 @@ import {
 
 import {
   initWatcher,
-  initCustomWatcher,
   CrossDomainMessagePair,
   Direction,
   Relayer,
@@ -50,7 +51,6 @@ export class OptimismEnv {
 
   // The L1 <> L2 State watcher
   watcher: Watcher
-  customWatcher: Watcher
 
   // The wallets
   bobl1Wallet: Wallet
@@ -70,7 +70,6 @@ export class OptimismEnv {
     this.L2ETHGateway = args.L2ETHGateway
     this.l2Messenger = args.l2Messenger
     this.watcher = args.watcher
-    this.customWatcher = args.customWatcher
     this.bobl1Wallet = args.bobl1Wallet
     this.bobl2Wallet = args.bobl2Wallet
     this.alicel1Wallet = args.alicel1Wallet
@@ -86,7 +85,6 @@ export class OptimismEnv {
 
     const addressManager = getAddressManager(bobl1Wallet)
     const watcher = await initWatcher(l1Provider, l2Provider, addressManager)
-    const customWatcher = await initCustomWatcher(l1Provider, l2Provider, addressManager)
 
     const L1ETHGateway = await getL1ETHGateway(bobl1Wallet, addressManager)
     const L2ETHGateway = getL2ETHGateway(bobl2Wallet)
@@ -118,12 +116,13 @@ export class OptimismEnv {
       l2Messenger,
       
       watcher,
-      customWatcher,
 
       bobl1Wallet,
       bobl2Wallet,
+
       alicel1Wallet,
       alicel2Wallet,
+      
       katel1Wallet,
       katel2Wallet,
 
@@ -135,8 +134,7 @@ export class OptimismEnv {
   async waitForXDomainTransaction(
     tx: Promise<TransactionResponse> | TransactionResponse,
     direction: Direction,
-    relayer: Relayer = Relayer.origin,
   ): Promise<CrossDomainMessagePair> {
-    return waitForXDomainTransaction(relayer === Relayer.origin ? this.watcher : this.customWatcher, tx, direction)
+    return waitForXDomainTransaction(this.watcher, tx, direction)
   }
 }
