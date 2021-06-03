@@ -2,9 +2,11 @@
 import { BigNumber, ethers, constants } from 'ethers'
 import { getContractFactory } from '@eth-optimism/contracts'
 import {
+  ctcCoder,
   fromHexString,
   toHexString,
   toRpcHexString,
+  TxType,
   EventArgsSequencerBatchAppended,
 } from '@eth-optimism/core-utils'
 
@@ -67,7 +69,7 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
       submitter: l1Transaction.from,
       l1TransactionHash: l1Transaction.hash,
       l1TransactionData: l1Transaction.data,
-      gasLimit: `${SEQUENCER_GAS_LIMIT}`,
+      gasLimit: SEQUENCER_GAS_LIMIT,
 
       prevTotalElements: batchSubmissionEvent.args._prevTotalElements,
       batchIndex: batchSubmissionEvent.args._batchIndex,
@@ -113,7 +115,7 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
           batchIndex: extraData.batchIndex.toNumber(),
           blockNumber: BigNumber.from(context.blockNumber).toNumber(),
           timestamp: BigNumber.from(context.timestamp).toNumber(),
-          gasLimit: BigNumber.from(extraData.gasLimit).toString(),
+          gasLimit: BigNumber.from(extraData.gasLimit).toNumber(),
           target: SEQUENCER_ENTRYPOINT_ADDRESS,
           origin: null,
           data: toHexString(sequencerTransaction),
@@ -145,7 +147,7 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
           batchIndex: extraData.batchIndex.toNumber(),
           blockNumber: BigNumber.from(0).toNumber(),
           timestamp: BigNumber.from(0).toNumber(),
-          gasLimit: BigNumber.from(0).toString(),
+          gasLimit: BigNumber.from(0).toNumber(),
           target: constants.AddressZero,
           origin: constants.AddressZero,
           data: '0x',

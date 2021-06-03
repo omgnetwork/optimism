@@ -16,7 +16,7 @@ export interface EnqueueEntry {
   index: number
   target: string
   data: string
-  gasLimit: string
+  gasLimit: number
   origin: string
   blockNumber: number
   timestamp: number
@@ -28,7 +28,7 @@ export interface TransactionEntry {
   data: string
   blockNumber: number
   timestamp: number
-  gasLimit: string
+  gasLimit: number
   target: string
   origin: string
   value: string

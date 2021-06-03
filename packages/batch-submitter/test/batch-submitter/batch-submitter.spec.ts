@@ -33,6 +33,7 @@ import {
   QueueOrigin,
   Batch,
   Signature,
+  TxType,
   remove0x,
 } from '@eth-optimism/core-utils'
 import { Logger, Metrics } from '@eth-optimism/common-ts'
@@ -252,7 +253,7 @@ describe('BatchSubmitter', () => {
           {
             rawTransaction: '0x1234',
             l1BlockNumber: nextQueueElement.blockNumber - 1,
-            txType: 0,
+            txType: TxType.EIP155,
             queueOrigin: QueueOrigin.Sequencer,
             l1TxOrigin: null,
           } as any,
@@ -301,7 +302,7 @@ describe('BatchSubmitter', () => {
           {
             rawTransaction: '0x1234',
             l1BlockNumber: nextQueueElement.blockNumber - 1,
-            txType: 1,
+            txType: TxType.EthSign,
             queueOrigin: QueueOrigin.Sequencer,
             l1TxOrigin: null,
           } as any,
@@ -405,7 +406,7 @@ describe('BatchSubmitter', () => {
         {
           rawTransaction: '0x1234',
           l1BlockNumber: nextQueueElement.blockNumber - 1,
-          txType: 0,
+          txType: TxType.EIP155,
           queueOrigin: QueueOrigin.Sequencer,
           l1TxOrigin: null,
         } as any,

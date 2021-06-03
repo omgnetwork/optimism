@@ -17,7 +17,6 @@ module.exports = {
       host: '127.0.0.1',
       port: 8545,
       gasPrice: 0,
-      gas: 54180127,
     }
   },
   compilers: {
