@@ -46,14 +46,7 @@ describe('Messenge Relayer Test', async () => {
   })
 
   it('should deploy contracts', async () => {
-    L2Message = await Factory__L2Message.deploy(
-      env.watcher.l2.messengerAddress,
-      {gasLimit: 999999, gasPrice: 0}
-    )
-    await L2Message.deployTransaction.wait()
-    console.log(`🌕 ${chalk.red('L2 Message deployed to:')} ${chalk.green(L2Message.address)}`)
     
-    // Deploy L1 liquidity pool
     L1Message = await Factory__L1Message.deploy(
       env.watcher.l1.messengerAddress,
       {gasLimit: 999999, gasPrice: 0}
@@ -62,6 +55,13 @@ describe('Messenge Relayer Test', async () => {
     await L1Message.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
     
+    L2Message = await Factory__L2Message.deploy(
+      env.watcher.l2.messengerAddress,
+      {gasLimit: 999999, gasPrice: 0}
+    )
+    await L2Message.deployTransaction.wait()
+    console.log(`🌕 ${chalk.red('L2 Message deployed to:')} ${chalk.green(L2Message.address)}`)
+
     // Initialize L1 message
     const L1MessageTX = await L1Message.init(
       L2Message.address,
