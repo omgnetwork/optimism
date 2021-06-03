@@ -136,13 +136,11 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
      ********************/
     /**
      * @param _l1CrossDomainMessenger L1 Messenger address being used for sending the cross-chain message.
-     * @param _l1CustomCrossDomainMessenger L1 Messenger address being used for receiving the cross-chain message.
      */
     constructor (
-        address _l1CrossDomainMessenger,
-        address _l1CustomCrossDomainMessenger
+        address _l1CrossDomainMessenger
     )
-        OVM_CrossDomainEnabled(_l1CrossDomainMessenger, _l1CustomCrossDomainMessenger)
+        OVM_CrossDomainEnabled(_l1CrossDomainMessenger)
     {}
 
     /**********************
@@ -199,7 +197,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabled, Ownable {
         // use with caution, can register only once
         PoolInfo storage pool = poolInfo[_l2TokenAddress];
         // l2 token address equal to zero, then pair is not registered.
-        require(pool.l2TokenAddress == address(0), "Token Address Already Registerd");
+        require(pool.l2TokenAddress == address(0), "Token Address Already Registered");
         poolInfo[_l1TokenAddress] =
             PoolInfo({
                 l1TokenAddress: _l1TokenAddress,
