@@ -5,6 +5,7 @@ import {
 } from '@ethersproject/providers'
 import { Watcher } from './watcher'
 import { Contract, Transaction } from 'ethers'
+import { loadContract, loadContractFromManager } from '@eth-optimism/contracts'
 
 export const initWatcher = async (
   l1Provider: JsonRpcProvider,
