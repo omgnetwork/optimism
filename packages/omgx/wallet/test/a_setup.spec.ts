@@ -15,11 +15,15 @@ import L2TokenPoolJson from '../artifacts-ovm/contracts/TokenPool.sol/TokenPool.
 
 import AtomicSwapJson from '../artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json';
 
+import L1MessageJson from '../artifacts/contracts/Message/L1Message.sol/L1Message.json'
+import L2MessageJson from '../artifacts-ovm/contracts/Message/L2Message.sol/L2Message.json'
+
+
 import { OptimismEnv } from './shared/env'
 
 import { promises as fs } from 'fs'
 
-describe('LP System setup', async () => {
+describe('System setup', async () => {
 
   let Factory__L1LiquidityPool: ContractFactory
   let Factory__L2LiquidityPool: ContractFactory
@@ -28,6 +32,8 @@ describe('LP System setup', async () => {
   let Factory__L1ERC20Gateway: ContractFactory
   let Factory__L2TokenPool: ContractFactory
   let Factory__AtomicSwap: ContractFactory
+  let Factory__L1Message: ContractFactory
+  let Factory__L2Message: ContractFactory
 
   let L1LiquidityPool: Contract
   let L2LiquidityPool: Contract
@@ -36,6 +42,8 @@ describe('LP System setup', async () => {
   let L1ERC20Gateway: Contract
   let L2TokenPool: Contract
   let AtomicSwap: Contract
+  let L1Message: Contract
+  let L2Message: Contract
 
   let env: OptimismEnv
 
@@ -89,6 +97,18 @@ describe('LP System setup', async () => {
       AtomicSwapJson.abi,
       AtomicSwapJson.bytecode,
       env.bobl1Wallet
+    )
+
+    Factory__L1Message = new ContractFactory(
+      L1MessageJson.abi,
+      L1MessageJson.bytecode,
+      env.bobl1Wallet
+    )
+
+    Factory__L2Message = new ContractFactory(
+      L2MessageJson.abi,
+      L2MessageJson.bytecode,
+      env.bobl2Wallet
     )
   })
 
@@ -186,6 +206,34 @@ describe('LP System setup', async () => {
     AtomicSwap = await Factory__AtomicSwap.deploy({gasLimit: 1500000, gasPrice: 0})
     await AtomicSwap.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('AtomicSwap deployed to:')} ${chalk.green(AtomicSwap.address)}`)
+
+    L1Message = await Factory__L1Message.deploy(
+      env.watcher.l1.messengerAddress
+    )
+    await L1Message.deployTransaction.wait()
+    console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
+    
+    L2Message = await Factory__L2Message.deploy(
+      env.watcher.l2.messengerAddress,
+      {gasLimit: 800000, gasPrice: 0}
+    )
+    await L2Message.deployTransaction.wait()
+    console.log(`🌕 ${chalk.red('L2 Message deployed to:')} ${chalk.green(L2Message.address)}`)
+
+    // Initialize L1 message
+    const L1MessageTX = await L1Message.init(
+      L2Message.address
+    )
+    await L1MessageTX.wait()
+    console.log(`⭐️ ${chalk.blue('L1 Message initialized:')} ${chalk.green(L1MessageTX.hash)}`)
+
+    // Initialize L2 message
+    const L2MessageTX = await L2Message.init(
+      L1Message.address,
+      {gasLimit: 800000, gasPrice: 0}
+    )
+    await L2MessageTX.wait()
+    console.log(`⭐️ ${chalk.blue('L2 Message initialized:')} ${chalk.green(L2MessageTX.hash)}`)
   })
 
   it('should write addresses to file', async () => {
@@ -202,6 +250,8 @@ describe('LP System setup', async () => {
       l1MessengerAddress: env.l1MessengerAddress,
       L2TokenPool: L2TokenPool.address,
       AtomicSwap: AtomicSwap.address,
+      L1Message: L1Message.address,
+      L2Message: L2Message.address
     }
 
     console.log(chalk.green(JSON.stringify(addresses, null, 2)))

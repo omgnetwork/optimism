@@ -11,10 +11,9 @@ import L2MessageJson from '../artifacts-ovm/contracts/Message/L2Message.sol/L2Me
 
 import { OptimismEnv } from './shared/env'
 
-describe('Messenge Relayer Test', async () => {
+import * as fs from 'fs'
 
-  let Factory__L1Message: ContractFactory
-  let Factory__L2Message: ContractFactory
+describe('Messenge Relayer Test', async () => {
 
   let L1Message: Contract
   let L2Message: Contract
@@ -23,17 +22,20 @@ describe('Messenge Relayer Test', async () => {
 
   before(async () => {
 
+    const addressData = fs.readFileSync('./deployment/local/addresses.json', 'utf8')
+    const addressArray = JSON.parse(addressData)
+
     env = await OptimismEnv.new()
 
-    Factory__L1Message = new ContractFactory(
+    L1Message = new Contract(
+      addressArray.L1Message,
       L1MessageJson.abi,
-      L1MessageJson.bytecode,
       env.bobl1Wallet
     )
 
-    Factory__L2Message = new ContractFactory(
+    L2Message = new Contract(
+      addressArray.L2Message,
       L2MessageJson.abi,
-      L2MessageJson.bytecode,
       env.bobl2Wallet
     )
 
@@ -44,38 +46,7 @@ describe('Messenge Relayer Test', async () => {
     console.log(`accountNonceBob2:`,accountNonceBob2)
 
   })
-
-  it('should deploy contracts', async () => {
-    
-    L1Message = await Factory__L1Message.deploy(
-      env.watcher.l1.messengerAddress
-    )
-    await L1Message.deployTransaction.wait()
-    console.log(`🌕 ${chalk.green('L1 Message deployed to:')} ${chalk.white(L1Message.address)}`)
-    
-    L2Message = await Factory__L2Message.deploy(
-      env.watcher.l2.messengerAddress,
-      {gasLimit: 800000, gasPrice: 0}
-    )
-    await L2Message.deployTransaction.wait()
-    console.log(`🌕 ${chalk.green('L2 Message deployed to:')} ${chalk.white(L2Message.address)}`)
-
-    // Initialize L1 message
-    const L1MessageTX = await L1Message.init(
-      L2Message.address
-    )
-    await L1MessageTX.wait()
-    console.log(`⭐️ ${chalk.green('L1 Message initialized:')} ${chalk.white(L1MessageTX.hash)}`)
-
-    // Initialize L2 message
-    const L2MessageTX = await L2Message.init(
-      L1Message.address,
-      {gasLimit: 800000, gasPrice: 0}
-    )
-    await L2MessageTX.wait()
-    console.log(`⭐️ ${chalk.green('L2 Message initialized:')} ${chalk.white(L2MessageTX.hash)}`)
-  })
-
+  
   it('should send message from L2 to L1', async () => {
     await env.waitForXDomainTransaction(
       L2Message.sendMessageL2ToL1({
