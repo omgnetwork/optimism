@@ -102,9 +102,8 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
           nextTxPointer
         )
 
-        const decoded = maybeDecodeSequencerBatchTransaction(
-          sequencerTransaction
-        )
+        const decoded =
+          maybeDecodeSequencerBatchTransaction(sequencerTransaction)
 
         transactionEntries.push({
           index: extraData.prevTotalElements

@@ -23,10 +23,8 @@ const main = async () => {
   const L1_WALLET_KEY = config.str('l1-wallet-key', env.L1_WALLET_KEY)
   const MNEMONIC = config.str('mnemonic', env.MNEMONIC)
   const HD_PATH = config.str('hd-path', env.HD_PATH)
-  const WHITELIST_ENDPOINT = config.str(
-    'whitlist-endpoint', 
-    env.WHITELIST_ENDPOINT
-  ) || ''
+  const WHITELIST_ENDPOINT =
+    config.str('whitlist-endpoint', env.WHITELIST_ENDPOINT) || ''
   const WHITELIST_POLLING_INTERVAL = config.uint(
     'whitlist-polling-interval',
     parseInt(env.WHITELIST_POLLING_INTERVAL, 10) || 60000

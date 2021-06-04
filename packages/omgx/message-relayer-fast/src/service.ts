@@ -117,7 +117,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     this.state.OVM_L1CrossDomainMessenger = loadContract(
       'OVM_L1CrossDomainMessenger',
       l1MessengerAddress,
-      this.options.l1RpcProvider,
+      this.options.l1RpcProvider
     )
     this.logger.info('Connected to OVM_L1CrossDomainMessenger', {
       address: this.state.OVM_L1CrossDomainMessenger.address,
@@ -263,16 +263,15 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     }
   }
 
-  private async _getStateBatchHeader(
-    height: number
-  ): Promise<
+  private async _getStateBatchHeader(height: number): Promise<
     | {
         batch: StateRootBatchHeader
         stateRoots: string[]
       }
     | undefined
   > {
-    const filter = this.state.OVM_StateCommitmentChain.filters.StateBatchAppended()
+    const filter =
+      this.state.OVM_StateCommitmentChain.filters.StateBatchAppended()
 
     let startingBlock = this.state.lastQueriedL1Block
     while (
@@ -284,11 +283,12 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         endBlock: startingBlock + this.options.getLogsInterval,
       })
 
-      const events: ethers.Event[] = await this.state.OVM_StateCommitmentChain.queryFilter(
-        filter,
-        startingBlock,
-        startingBlock + this.options.getLogsInterval
-      )
+      const events: ethers.Event[] =
+        await this.state.OVM_StateCommitmentChain.queryFilter(
+          filter,
+          startingBlock,
+          startingBlock + this.options.getLogsInterval
+        )
 
       this.state.eventCache = this.state.eventCache.concat(events)
       startingBlock += this.options.getLogsInterval
@@ -308,12 +308,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       const transaction = await this.options.l1RpcProvider.getTransaction(
         event.transactionHash
       )
-      const [
-        stateRoots,
-      ] = this.state.OVM_StateCommitmentChain.interface.decodeFunctionData(
-        'appendStateBatch',
-        transaction.data
-      )
+      const [stateRoots] =
+        this.state.OVM_StateCommitmentChain.interface.decodeFunctionData(
+          'appendStateBatch',
+          transaction.data
+        )
 
       return {
         batch: {
@@ -362,10 +361,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
 
     return events.map((event) => {
       const message = event.args.message
-      const decoded = this.state.OVM_L2CrossDomainMessenger.interface.decodeFunctionData(
-        'relayMessage',
-        message
-      )
+      const decoded =
+        this.state.OVM_L2CrossDomainMessenger.interface.decodeFunctionData(
+          'relayMessage',
+          message
+        )
 
       return {
         target: decoded._target,
@@ -473,7 +473,8 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           batchIndex: proof.stateRootBatchHeader.batchIndex.toString(),
           batchRoot: proof.stateRootBatchHeader.batchRoot,
           batchSize: proof.stateRootBatchHeader.batchSize.toString(),
-          prevTotalElements: proof.stateRootBatchHeader.prevTotalElements.toString(),
+          prevTotalElements:
+            proof.stateRootBatchHeader.prevTotalElements.toString(),
           extraData: proof.stateRootBatchHeader.extraData,
           index: proof.stateRootProof.index,
           siblings: proof.stateRootProof.siblings.join(','),

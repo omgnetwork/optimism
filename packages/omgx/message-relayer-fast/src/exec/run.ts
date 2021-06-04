@@ -21,10 +21,7 @@ const main = async () => {
     'address-manager-address',
     env.ADDRESS_MANAGER_ADDRESS
   )
-  const L1_TARGET = config.str(
-    'l1-target',
-    env.L1_TARGET
-  )
+  const L1_TARGET = config.str('l1-target', env.L1_TARGET)
   const L1_WALLET_KEY = config.str('l1-wallet-key', env.L1_WALLET_KEY)
   const MNEMONIC = config.str('mnemonic', env.MNEMONIC)
   const HD_PATH = config.str('hd-path', env.HD_PATH)
