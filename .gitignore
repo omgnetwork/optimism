@@ -28,3 +28,5 @@ env.js
 env.yml
 
 .serverless
+packages/omgx/wallet/deployment/local/addresses.json
+packages/omgx/wallet/wallet/src/deployment/local/addresses.json

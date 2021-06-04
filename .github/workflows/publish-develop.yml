@@ -48,15 +48,16 @@ jobs:
 
       - name: Setup Canary Snapshot
         run: yarn changeset version --snapshot
-
-      - name: Publish To NPM
-        uses: changesets/action@master
-        id: changesets
-        with:
-          publish: yarn changeset publish --tag canary
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      # Turn off until we have npm set up
+      # - name: Publish To NPM
+      #   uses: changesets/action@master
+      #   id: changesets
+      #   with:
+      #     publish: yarn changeset publish --tag canary
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # Conditional on the release being executed, we unbundle the publishedPackages to specific
       # job outputs
