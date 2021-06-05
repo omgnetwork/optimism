@@ -42,7 +42,6 @@ interface MessageRelayerOptions {
 
   // Number of blocks within each getLogs query - max is 2000
   getLogsInterval?: number
-
 }
 
 const optionSettings = {
@@ -445,40 +444,12 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     message: SentMessage,
     proof: SentMessageProof
   ): Promise<void> {
+    try {
+      this.logger.info('Dry-run, checking to make sure proof would succeed...')
 
-      try {
-        this.logger.info(
-          'Dry-run, checking to make sure proof would succeed...'
-        )
-
-        await this.state.OVM_L1CrossDomainMessenger.connect(
-          this.options.l1Wallet
-        ).callStatic.relayMessage(
-          message.target,
-          message.sender,
-          message.message,
-          message.messageNonce,
-          proof,
-          {
-            gasLimit: this.options.relayGasLimit,
-          }
-        )
-
-        this.logger.info(
-          'Proof should succeed. Submitting for real this time...'
-        )
-      } catch (err) {
-        this.logger.error('Proof would fail, skipping', {
-          message: err.toString(),
-          stack: err.stack,
-          code: err.code,
-        })
-        return
-      }
-
-      const result = await this.state.OVM_L1CrossDomainMessenger.connect(
+      await this.state.OVM_L1CrossDomainMessenger.connect(
         this.options.l1Wallet
-      ).relayMessage(
+      ).callStatic.relayMessage(
         message.target,
         message.sender,
         message.message,
@@ -489,28 +460,51 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         }
       )
 
-      this.logger.info('Relay message transaction sent', {
-        transactionHash: result,
+      this.logger.info('Proof should succeed. Submitting for real this time...')
+    } catch (err) {
+      this.logger.error('Proof would fail, skipping', {
+        message: err.toString(),
+        stack: err.stack,
+        code: err.code,
       })
-
-      try {
-        const receipt = await result.wait()
-
-        this.logger.info('Relay message included in block', {
-          transactionHash: receipt.transactionHash,
-          blockNumber: receipt.blockNumber,
-          gasUsed: receipt.gasUsed.toString(),
-          confirmations: receipt.confirmations,
-          status: receipt.status,
-        })
-      } catch (err) {
-        this.logger.error('Real relay attempt failed, skipping.', {
-          message: err.toString(),
-          stack: err.stack,
-          code: err.code,
-        })
-        return
-      }
-      this.logger.info('Message successfully relayed to Layer 1!')
+      return
     }
+
+    const result = await this.state.OVM_L1CrossDomainMessenger.connect(
+      this.options.l1Wallet
+    ).relayMessage(
+      message.target,
+      message.sender,
+      message.message,
+      message.messageNonce,
+      proof,
+      {
+        gasLimit: this.options.relayGasLimit,
+      }
+    )
+
+    this.logger.info('Relay message transaction sent', {
+      transactionHash: result,
+    })
+
+    try {
+      const receipt = await result.wait()
+
+      this.logger.info('Relay message included in block', {
+        transactionHash: receipt.transactionHash,
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed.toString(),
+        confirmations: receipt.confirmations,
+        status: receipt.status,
+      })
+    } catch (err) {
+      this.logger.error('Real relay attempt failed, skipping.', {
+        message: err.toString(),
+        stack: err.stack,
+        code: err.code,
+      })
+      return
+    }
+    this.logger.info('Message successfully relayed to Layer 1!')
   }
+}
