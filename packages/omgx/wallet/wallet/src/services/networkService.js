@@ -748,8 +748,8 @@ class NetworkService {
       const [l2ToL1msgHash] = await this.watcher.getMessageHashesFromL2Tx(tx.hash)
       console.log(' got L2->L1 message hash', l2ToL1msgHash)
       
-      const l1Receipt = await this.watcher.getL1TransactionReceipt(l2ToL1msgHash)
-      console.log(' completed Deposit! L1 tx hash:', l1Receipt.transactionHash)
+      // const l1Receipt = await this.watcher.getL1TransactionReceipt(l2ToL1msgHash)
+      // console.log(' completed Deposit! L1 tx hash:', l1Receipt.transactionHash)
     
       return tx
     }
@@ -764,8 +764,8 @@ class NetworkService {
       const [l2ToL1msgHash] = await this.watcher.getMessageHashesFromL2Tx(tx.hash)
       console.log(' got L2->L1 message hash', l2ToL1msgHash)
       
-      const l1Receipt = await this.watcher.getL1TransactionReceipt(l2ToL1msgHash)
-      console.log(' completed Deposit! L1 tx hash:', l1Receipt.transactionHash)
+      // const l1Receipt = await this.watcher.getL1TransactionReceipt(l2ToL1msgHash)
+      // console.log(' completed Deposit! L1 tx hash:', l1Receipt.transactionHash)
       
       return tx
     }
