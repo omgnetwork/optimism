@@ -392,7 +392,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     
     if (insideWhitelist) {
       this.logger.info('Found the batch header in whitelist')
-      return true 
+      return false 
     } else {
       const insideFPW = await this.state.OVM_StateCommitmentChain.insideFraudProofWindow(header.batch);
       if (insideFPW === true) {

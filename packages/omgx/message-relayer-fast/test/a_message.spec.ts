@@ -48,14 +48,14 @@ describe('Messenge Relayer Test', async () => {
   it('should deploy contracts', async () => {
     
     L1Message = await Factory__L1Message.deploy(
-      env.watcher.l1.messengerAddress
+      env.watcher.l1.messengerAddress,
+      env.altWatcher.l1.messengerAddress
     )
     await L1Message.deployTransaction.wait()
     console.log(`🌕 ${chalk.green('L1 Message deployed to:')} ${chalk.white(L1Message.address)}`)
     
     L2Message = await Factory__L2Message.deploy(
-      env.watcher.l2.messengerAddress,
-      {gasLimit: 800000, gasPrice: 0}
+      env.watcher.l2.messengerAddress
     )
     await L2Message.deployTransaction.wait()
     console.log(`🌕 ${chalk.green('L2 Message deployed to:')} ${chalk.white(L2Message.address)}`)
@@ -77,7 +77,7 @@ describe('Messenge Relayer Test', async () => {
   })
 
   it('should send message from L2 to L1', async () => {
-    await env.waitForXDomainTransaction(
+    await env.waitForXDomainTransactionAlt(
       L2Message.sendMessageL2ToL1({
         gasLimit: 800000, 
         gasPrice: 0

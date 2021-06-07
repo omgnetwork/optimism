@@ -16,7 +16,8 @@
     "build:contracts": "./scripts/build.sh",
     "build:contracts:evm": "hardhat compile",
     "build:contracts:ovm": "hardhat compile --network omgx",
-    "deploy": "./scripts/build.sh && hardhat --network omgx test",
+    "deploy": "npx hardhat run --network omgx scripts/deploy_messenger.js",
+    "test": "./scripts/build.sh && hardhat --network omgx test",
     "lint": "yarn lint:fix && yarn lint:check",
     "lint:fix": "prettier --config .prettierrc.json --write \"{src,exec,test}/**/*.ts\"",
     "lint:check": "tslint --format stylish --project ."
@@ -34,8 +35,9 @@
     "url": "https://github.com/ethereum-optimism/optimism.git"
   },
   "devDependencies": {
-    "@eth-optimism/hardhat-ovm": "^0.0.2",
+    "@eth-optimism/contracts": "^0.3.4",
     "@eth-optimism/core-utils": "^0.4.2",
+    "@eth-optimism/hardhat-ovm": "^0.0.2",
     "@ethersproject/providers": "^5.0.24",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@types/jest": "^26.0.22",
@@ -47,11 +49,10 @@
     "ethers": "^5.1.0",
     "hardhat": "^2.1.2",
     "mocha": "^8.3.1",
+    "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
     "shx": "^0.3.3",
     "ts-node": "^9.1.1",
-    "typescript": "^4.2.4",
-    "prettier": "^2.2.1",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
     "tslint-no-focused-test": "^0.5.0",
@@ -62,7 +63,6 @@
     "@eth-optimism/hardhat-ovm": "^0.0.2",
     "@eth-optimism/core-utils": "^0.4.2",
     "@eth-optimism/common-ts": "^0.1.0",
-    "@eth-optimism/contracts": "^0.3.4",
     "bcfg": "^0.1.6",
     "dotenv": "^8.2.0",
     "ethers": "^5.1.0",
@@ -70,10 +70,8 @@
     "google-spreadsheet": "^3.1.15",
     "merkletreejs": "^0.2.18",
     "rlp": "^2.2.6",
-    "@eth-optimism/contracts": "^0.3.4",
     "@openzeppelin/contracts": "3.4.1",
     "chalk": "^4.1.1",
-    "dotenv": "^8.2.0",
     "glob": "^7.1.6",
     "patch-package": "^6.4.7"
   }

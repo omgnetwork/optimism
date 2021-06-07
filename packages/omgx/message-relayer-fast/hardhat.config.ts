@@ -2,6 +2,7 @@ import { HardhatUserConfig } from 'hardhat/types'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@eth-optimism/hardhat-ovm'
+import 'hardhat-deploy'
 
 const config: HardhatUserConfig = {
   mocha: {
@@ -21,6 +22,9 @@ const config: HardhatUserConfig = {
   ovm: {
     solcVersion: '0.7.6',
   },
+  namedAccounts: {
+    deployer: 0
+  }
 }
 
 export default config
