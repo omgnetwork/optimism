@@ -17,6 +17,11 @@ const config: HardhatUserConfig = {
       gasPrice: 0,
       ovm: true,
     },
+    localhost: {
+			url: "http://localhost:9545",
+			allowUnlimitedContractSize: true,
+			timeout: 1800000,
+		},
   },
   solidity: '0.7.6',
   ovm: {
