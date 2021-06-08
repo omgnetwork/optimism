@@ -5,29 +5,17 @@ AWS related resources for deploying omgx_optimism integration to AWS ECS
 
 ## How to use the automation hosted here?
 
-1. Make sure you've created a tag or a branch with your service changes for each of the services in the stack:
-  * [batch-submitter](https://github.com/omgnetwork/omgx_batch-submitter)
-  * [deployer](https://github.com/omgnetwork/omgx_contracts)
-  * [data-transport-layer](https://github.com/omgnetwork/omgx_data-transport-layer)
-  * [go-ethereum](https://github.com/omgnetwork/go-ethereum)
-  * [optimism-scanner](https://github.com/enyalabs/optimism-scanner)
-  * [message-relayer](https://github.com/omgnetwork/omgx_ts-services)
-
-_Note - this information is important for now, but going forward the repos will all live inside the monorepo - e.g. the batch-submitter will be the optimism/packages/batch-submitter etc. (CP)_
+1. Make the code changes for each of the services you need in the monorepo, they're located in the packages directory, one level up from this README.md file
 
 2. Make sure you've got your secrets already imported in AWS, either by adding them manually or by using the `aws-secrets-importer.py` script hosted in this repository. The `aws-secrets-importer.py` can be used the following way, which would read a particular yaml file and import the secrets from it in AWS Secret Manager.
 
-**You must name the secrets with your tag/branch name, which will be used to deploy the containers to AWS. If your secrets are already in AWS, you can skip this step**
-
-_This is unclear - please give an example of what you mean by naming the secrets with the tag/branch. If the tag/branch name is `foo`, then what specifically needs to be named `foo`? (CP)_
-
-Here is an example of how to run the `aws-secrets-importer.py`: 
+Here is an example of how to run the `aws-secrets-importer.py`:
 
 ```
-$ ./aws-secrets-importer.py -i docker-compose-local.env.yml -d `echo "$(git rev-parse --abbrev-ref HEAD)"` -n `echo $(git rev-parse --abbrev-ref HEAD)` -r us-east-1 -p default
+$ ./aws-secrets-importer.py -i docker-compose-local.env.yml -d secret-foo -n secret-foo -r us-east-1 -p default
 {
-    "ARN": "arn:aws:secretsmanager:us-east-1:942431445534:secret:push2aws-lAl7Pu",
-    "Name": "push2aws",
+    "ARN": "arn:aws:secretsmanager:us-east-1:942431445534:secret:secret-foo-lAl7Pu",
+    "Name": "secret-foo",
     "VersionId": "5848d972-98ba-4b97-8b0c-e04db2560613"
 }
 ```
@@ -45,6 +33,8 @@ Assuming you have been running a production system, the information needed to re
 * ?????????????
 * ?????????????
 
+_This is all part of the secrets, the L2_NODE_WEB3_URL, DEPLOYER_HTTP are being automatically generated from the cloudformation template_
+
 Restart special settings and considerations:
 
 Since the smart contracts have already all been deployed, you do not want the deployer to redeploy the smart contracts. This is controlled through the ???? setting in the deployer configuration. You just want the deployer to serve the correct addresses and state dumps.
@@ -53,8 +43,8 @@ While the L2 is syncing with the L1, the batch submitter will hold off on submit
 
 ## Critical databases and folders
 
-* Geth DATADIR=/root/.ethereum ELABORATE
-* DATA_TRANSPORT_LAYER__DB_PATH=/db ELABORATE
+* Geth DATADIR=/root/.ethereum saved in /mnt/efs/geth_l2 on EFS service, attached to the EC2 instance running the ECSCluster
+* DATA_TRANSPORT_LAYER__DB_PATH=/db saved in /mnt/efs/db on EFS service, attached to the EC2 instance running the ECSCluster
 
 ## Deployment: how to use the key cfn-devenv.sh script
 
@@ -86,44 +76,9 @@ To generate new AWS container for only one service, you can specifiy the service
 ./cfn-devenv.sh update --stack-name test-stack --region us-east-1 --deploy-tag aws-latest --registry-prefix omgx --secret-name aws-secret-name --service-name batch-submitter
 ```
 
-*WARNING: Stable function of the system generally depends on the services being spun up in a particular order. Most services cannot be simply updated and restarted with any expectation of then having the entire stack work correctly. The correct way to do update a service, is to take the entire system down and then restart it in the cannonical order, which is:*
-
-l1_chain:
-
-deployer:
-    depends_on:
-      - l1_chain
-
-dtl:
-    depends_on:
-      - l1_chain
-      - deployer - `addresses.json`
-      - l2geth
-
-l2geth:
-    depends_on:
-      - l1_chain
-      - deployer - `state-dump.latest.json` and `addresses.json`
-    
-relayer:
-    depends_on:
-      - l1_chain
-      - deployer - `addresses.json`
-      - l2geth
-
-batch_submitter:
-    depends_on:
-      - l1_chain
-      - deployer - `addresses.json`
-      - l2geth
-
-verifier:
-    depends_on:
-      - l1_chain
-      - deployer - `state-dump.latest.json` and `addresses.json`
-      - dtl
-    
 integration_tests:
+
+_I haven't done cloudformation template for the integration tests, will make sure to do it_
 
 * If you don't specify `--service-name` - all services are going to be updated
 
@@ -141,12 +96,16 @@ sh-4.2$ sudo su
 [root@ip-10-0-2-250 bin]# docker ps
 ```
 
-* To restart a service in a cluster, simply use the command below, it will pull latest container with the same tag and re-read the AWS Secrets again, then run the container:
+* To restart all services in a cluster, simply use the command below, it will pull all latest containers with the same tag and re-read the AWS Secrets again, then run all the containers:
 ```
-./cfn-devenv.sh restart --stack-name test-stack --service-name batch-submitter
+./cfn-devenv.sh restart --stack-name test-stack
 ```
 
-*WARNING: Stable function of the system generally depends on the services being spun up in a particular order. Most services cannot be simply updated and restarted with any expectation of then having the entire stack work correctly. The correct way to update a service, for example, is to take the entire system down and then restart it in the cannonical order given above.*
+* To restart all services in a cluster and remove the contents in the /mnt/efs directory, you can run:
+```
+./cfn-devenv.sh restart --stack-name test-stack --force
+```
+
 
 * To see all current ECS clusters provisioned with this automation, run:
 ```

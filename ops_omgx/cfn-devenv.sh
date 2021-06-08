@@ -17,6 +17,7 @@ AWS_ECR="942431445534.dkr.ecr.${REGION}.amazonaws.com"
 SKIPSERVICE=
 DOCKER_IMAGES_LIST=`ls ${PATH_TO_CFN}|egrep -v '^0|datadog'|sed 's/.yaml//g'`
 ENV_PREFIX=
+FORCE=no
 
 # FUNCTIONS
 
@@ -362,12 +363,26 @@ function destroy_dev_services {
   }
 
   function restart_service {
+      local force="${1:-}"
       ECS_CLUSTER=$(aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f2|sed 's#",##g')
-      SRV=$(echo ${SERVICE_NAME}|sed 's#-##g')
+      SRV=$(echo ${DOCKER_IMAGES_LIST}|sed 's#-##g')
       SERVICE4RESTART=$(aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i $SRV|cut -d/ -f3|sed 's#",##g')
-      info "Restarting ${SERVICE_NAME}"
-      aws ecs update-service  --region ${REGION} --force-new-deployment --service $SERVICE4RESTART --cluster $ECS_CLUSTER >> /dev/null
-      info "Restarted, please allow 1-2 minutes for the new task to actually replace the old one"
+      CONTAINER_INSTANCE=$(aws ecs list-container-instances  --region ${REGION} --cluster $ECS_CLUSTER|grep $ECS_CLUSTER|cut -d/ -f3|sed 's#"##g')
+      EC2_INSTANCE=$(aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId')
+      info "Restarting ${ECS_CLUSTER}"
+      if [[ "${force}" == "yes" ]] ; then
+        aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 0 >> /dev/null
+        sleep 10
+        aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/db/*" --region ${REGION} --output text
+        aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/geth_l2/*" --region ${REGION} --output text
+        aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 1 >> /dev/null
+        info "Removed contents in /mnt/efs/ and restarted, please allow 1-2 minutes for the new tasks to actually start"
+      elif [[ "${force}" == "no" ]] ; then
+        aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 0 >> /dev/null
+        sleep 10
+        aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 1 >> /dev/null
+        info "Restarted, please allow 1-2 minutes for the new tasks to actually start"
+      fi
     }
 
     function ssh_to_ecs_cluster {
@@ -435,6 +450,10 @@ if [[ $# -gt 0 ]]; then
                 ENV_PREFIX="${2}"
                 shift 2
                 ;;
+            --force|-f)
+                FORCE="${2}"
+                shift 1
+                ;;
             --*)
                 error "Unknown option ${1}"
                 ;;
@@ -469,6 +488,7 @@ case "${SUBCMD}" in
     restart)
         [[ -z "${SERVICE_NAME}" ]] && error 'Missing required option --service-name'
         [[ -z "${ENV_PREFIX}" ]] && error 'Missing required option --stack-name'
+        [[ -z "${FORCE}"]] && warn 'Missing --force, so not going to delete the /mnt/efs directory contents'
         restart_service
         ;;
     ssh)
