@@ -371,16 +371,24 @@ function destroy_dev_services {
       EC2_INSTANCE=$(aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId')
       info "Restarting ${ECS_CLUSTER}"
       if [[ "${force}" == "yes" ]] ; then
-        aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 0 >> /dev/null
+        for num in $SERVICE4RESTART; do
+          aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 0 >> /dev/null
+        done
         sleep 10
         aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/db/*" --region ${REGION} --output text
         aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/geth_l2/*" --region ${REGION} --output text
-        aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 1 >> /dev/null
+        for num in $SERVICE4RESTART; do
+          aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 1 >> /dev/null
+        done
         info "Removed contents in /mnt/efs/ and restarted, please allow 1-2 minutes for the new tasks to actually start"
       elif [[ "${force}" == "no" ]] ; then
-        aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 0 >> /dev/null
+        for num in $SERVICE4RESTART; do
+          aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 0 >> /dev/null
+        done
         sleep 10
-        aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 1 >> /dev/null
+        for num in $SERVICE4RESTART; do
+          aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 1 >> /dev/null
+        done
         info "Restarted, please allow 1-2 minutes for the new tasks to actually start"
       fi
     }
