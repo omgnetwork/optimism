@@ -151,11 +151,16 @@ class NetworkService {
       console.log("meta:",meta)
       console.log("receiverAddress:",receiverAddress)
 
-      let nft = await this.ERC721Contract.mintNFT(
+      const ERC721Contract = new ethers.Contract(
+        this.ERC721Address,
+        ERC721Json.abi,
+        this.web3Provider.getSigner(),
+      )
+      let nft = await ERC721Contract.mintNFT(
         receiverAddress,
         meta
       )
-      
+
       await nft.wait()
       console.log("New ERC721:",nft)
       return true;
@@ -590,7 +595,7 @@ class NetworkService {
 
   async transfer(address, value, currency) {
 
-    if (currency === '0x4200000000000000000000000000000000000006') {
+    if (currency === this.l2ETHGatewayAddress) {
       const txStatus = await this.L2ETHGatewayContract.transfer(
         address,
         parseEther(value.toString()), 
@@ -738,7 +743,7 @@ class NetworkService {
   }
 
   async exitOMGX(currency, value) {
-    if (currency === '0x4200000000000000000000000000000000000006') {
+    if (currency === this.l2ETHGatewayAddress) {
       const tx = await this.L2ETHGatewayContract.withdraw(
         parseEther(value.toString()), 
         {gasLimit: 5000000}, 
@@ -806,9 +811,12 @@ class NetworkService {
     );
     const poolInfo = {}, userInfo = {};
     for (let token of tokenList) {
-      const [poolTokenInfo, userTokenInfo] = await Promise.all([
+      const [poolTokenInfo, userTokenInfo, tokenBalance] = await Promise.all([
         L1LPContract.methods.poolInfo(token).call({ from : this.account }),
-        L1LPContract.methods.userInfo(token, this.account).call({ from : this.account })
+        L1LPContract.methods.userInfo(token, this.account).call({ from : this.account }),
+        token === this.l1ETHAddress ?
+          this.l1Provider.getBalance(this.L1LPAddress):
+          this.ERC20L1Contract.methods.balanceOf(this.L1LPAddress).call({from: this.account})
       ]);
       poolInfo[token] = {
         l1TokenAddress: poolTokenInfo.l1TokenAddress,
@@ -822,7 +830,8 @@ class NetworkService {
           accMul(accDiv(accDiv(poolTokenInfo.accUserReward, poolTokenInfo.userDepositAmount), accDiv(
             (new Date().getTime() - Number(poolTokenInfo.startTime) * 1000), 365 * 24 * 60 * 60 * 1000)
           ), 100
-        ) // ( accUserReward - userDepositAmount ) / timeDuration
+        ), // ( accUserReward - userDepositAmount ) / timeDuration
+        tokenBalance: tokenBalance.toString(),
       }
       userInfo[token] = {
         l1TokenAddress: token,
@@ -842,9 +851,12 @@ class NetworkService {
     );
     const poolInfo = {}, userInfo = {};
     for (let token of tokenList) {
-      const [poolTokenInfo, userTokenInfo] = await Promise.all([
+      const [poolTokenInfo, userTokenInfo, tokenBalance] = await Promise.all([
         L2LPContract.methods.poolInfo(token).call({ from : this.account }),
-        L2LPContract.methods.userInfo(token, this.account).call({ from : this.account })
+        L2LPContract.methods.userInfo(token, this.account).call({ from : this.account }),
+        token === this.l2ETHGatewayAddress ? 
+          this.l2Provider.getBalance(this.L2LPAddress):
+          this.ERC20L2Contract.methods.balanceOf(this.L2LPAddress).call({from: this.account})
       ]);
       poolInfo[token] = {
         l1TokenAddress: poolTokenInfo.l1TokenAddress,
@@ -858,7 +870,8 @@ class NetworkService {
           accMul(accDiv(accDiv(poolTokenInfo.accUserReward, poolTokenInfo.userDepositAmount), accDiv(
             (new Date().getTime() - Number(poolTokenInfo.startTime) * 1000), 365 * 24 * 60 * 60 * 1000)
           ), 100
-        ) // ( accUserReward - userDepositAmount ) / timeDuration
+        ), // ( accUserReward - userDepositAmount ) / timeDuration
+        tokenBalance: tokenBalance.toString(),
       }
       userInfo[token] = {
         l2TokenAddress: token,
