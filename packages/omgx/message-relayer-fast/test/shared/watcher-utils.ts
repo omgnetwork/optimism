@@ -33,9 +33,14 @@ export const initWatcher = async (
 export const initWatcherAltMessenger = async (
   l1Provider: JsonRpcProvider,
   l2Provider: JsonRpcProvider,
+  AddressManager: Contract,
   l1MessengerAddress: string
 ) => {
 
+  if (l1MessengerAddress === '') {
+    l1MessengerAddress = await AddressManager.getAddress('OVM_L1CustomCrossDomainMessenger')
+  }
+ 
   return new Watcher({
     l1: {
       provider: l1Provider,

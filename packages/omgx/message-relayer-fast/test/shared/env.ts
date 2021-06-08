@@ -90,7 +90,7 @@ export class OptimismEnv {
 
     const addressManager = getAddressManager(bobl1Wallet)
     const watcher = await initWatcher(l1Provider, l2Provider, addressManager)
-    const altWatcher = await initWatcherAltMessenger(l1Provider, l2Provider, l1MessengerAddressAlt)
+    const altWatcher = await initWatcherAltMessenger(l1Provider, l2Provider, addressManager, l1MessengerAddressAlt)
 
     const L1ETHGateway = await getL1ETHGateway(bobl1Wallet, addressManager)
     const L2ETHGateway = getL2ETHGateway(bobl2Wallet)
