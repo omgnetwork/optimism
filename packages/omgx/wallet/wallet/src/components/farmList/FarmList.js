@@ -165,6 +165,14 @@ class FarmList extends React.Component {
             </div>
           </div>
           <div className={styles.Table6}>
+           <div className={styles.BasicText}>Balance</div>
+             <div className={styles.BasicLightText}>
+               {poolInfo.tokenBalance ? 
+                 `${logAmount(poolInfo.tokenBalance, 18).slice(0, 6)} ${shortName}` : `0 ${shortName}`
+               }
+             </div>
+           </div>
+           <div className={styles.Table7}>
             <div className={styles.LinkText}>Details</div>
             <ExpandMoreIcon className={styles.LinkButton} />
           </div>
