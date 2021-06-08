@@ -2,8 +2,8 @@ import json
 
 def get_whitelist(event, context):
   whitelist = [
-    "0xb1b9F48d1DFF3C08288c73117FC21fAE47c5a8Ec",
-    "0x79F81178B1358F209dbFCeC57f42918CC3a36cEC"
+    "0xD0Fb87bf4017e0A5A3bcE2eF33Bf0B95348a479E",
+    "0x1383fF5A0Ef67f4BE949408838478917d87FeAc7",
   ]
   response = {
     "statusCode": 201,
