@@ -11,7 +11,6 @@ export MYSQL_HOST_URL=`/opt/secret2env -name $SECRETNAME|grep -w MYSQL_HOST_URL|
 export MYSQL_PASSWORD=`/opt/secret2env -name $SECRETNAME|grep -w MYSQL_PASSWORD|sed 's/MYSQL_PASSWORD=//g'`
 export MYSQL_PORT=`/opt/secret2env -name $SECRETNAME|grep -w MYSQL_PORT|sed 's/MYSQL_PORT=//g'`
 export MYSQL_USERNAME=`/opt/secret2env -name $SECRETNAME|grep -w MYSQL_USERNAME|sed 's/MYSQL_USERNAME=//g'`
-export RETRIES=`/opt/secret2env -name $SECRETNAME|grep -w RETRIES|sed 's/RETRIES=//g'`
 cmd="$@"
 JSON='{"jsonrpc":"2.0","id":0,"method":"net_version","params":[]}'
 

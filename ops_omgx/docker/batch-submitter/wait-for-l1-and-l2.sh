@@ -17,7 +17,6 @@ export MIN_L1_TX_SIZE=`/opt/secret2env -name $SECRETNAME|grep -w MIN_L1_TX_SIZE|
 export NUM_CONFIRMATIONS=`/opt/secret2env -name $SECRETNAME|grep -w NUM_CONFIRMATIONS|sed 's/NUM_CONFIRMATIONS=//g'`
 export POLL_INTERVAL=`/opt/secret2env -name $SECRETNAME|grep -w POLL_INTERVAL|sed 's/POLL_INTERVAL=//g'`
 export RESUBMISSION_TIMEOUT=`/opt/secret2env -name $SECRETNAME|grep -w RESUBMISSION_TIMEOUT|sed 's/RESUBMISSION_TIMEOUT=//g'`
-export RETRIES=`/opt/secret2env -name $SECRETNAME|grep -w RETRIES|sed 's/RETRIES=//g'`
 export RUN_STATE_BATCH_SUBMITTER=`/opt/secret2env -name $SECRETNAME|grep -w RUN_STATE_BATCH_SUBMITTER|sed 's/RUN_STATE_BATCH_SUBMITTER=//g'`
 export RUN_TX_BATCH_SUBMITTER=`/opt/secret2env -name $SECRETNAME|grep -w RUN_TX_BATCH_SUBMITTER|sed 's/RUN_TX_BATCH_SUBMITTER=//g'`
 export SAFE_MINIMUM_ETHER_BALANCE=`/opt/secret2env -name $SECRETNAME|grep -w SAFE_MINIMUM_ETHER_BALANCE|sed 's/SAFE_MINIMUM_ETHER_BALANCE=//g'`
