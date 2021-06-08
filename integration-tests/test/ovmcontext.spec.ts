@@ -49,8 +49,9 @@ describe('OVM Context: Layer 2 EVM Context', () => {
       'OVM_CanonicalTransactionChain'
     )
 
-    CanonicalTransactionChain =
-      CanonicalTransactionChainFactory.connect(l1Wallet).attach(ctcAddress)
+    CanonicalTransactionChain = CanonicalTransactionChainFactory.connect( // tslint:disable-line
+      l1Wallet
+    ).attach(ctcAddress)
 
     const OVMMulticallFactory = await ethers.getContractFactory(
       'OVMMulticall',

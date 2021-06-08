@@ -75,7 +75,7 @@ describe('System setup', async () => {
       env.watcher.l2.messengerAddress,
       tokenName,
       tokenSymbol,
-      {gasLimit: 800000, gasPrice: 0}
+      { gasLimit: 800000, gasPrice: 0 }
     )
     await L2DepositedERC20.deployTransaction.wait()
     console.log('L2DepositedERC20 deployed to:', L2DepositedERC20.address)
@@ -91,10 +91,10 @@ describe('System setup', async () => {
     console.log('L1ERC20Gateway deployed to:', L1ERC20Gateway.address)
 
     //Initialize the contracts for the new token
-    const initL2 = await L2DepositedERC20.init(
-      L1ERC20Gateway.address,
-      {gasLimit: 800000, gasPrice: 0}
-    )
+    const initL2 = await L2DepositedERC20.init(L1ERC20Gateway.address, {
+      gasLimit: 800000,
+      gasPrice: 0,
+    })
     await initL2.wait()
     console.log('L2 ERC20 initialized:', initL2.hash)
   })
@@ -154,14 +154,14 @@ describe('System setup', async () => {
     const tranferToAliceTX = await L2DepositedERC20.transfer(
       env.alicel2Wallet.address,
       transferL2ERC20Amount,
-      {gasLimit: 800000, gasPrice: 0}
+      { gasLimit: 800000, gasPrice: 0 }
     )
     await tranferToAliceTX.wait()
 
     const tranferToFraudTX = await L2DepositedERC20.transfer(
       env.fraudl2Wallet.address,
       transferL2ERC20Amount,
-      {gasLimit: 800000, gasPrice: 0}
+      { gasLimit: 800000, gasPrice: 0 }
     )
     await tranferToFraudTX.wait()
 
@@ -206,11 +206,10 @@ describe('System setup', async () => {
 
     const tranferToFraudTX = await L2DepositedERC20.connect(
       env.alicel2Wallet
-    ).transfer(
-      env.fraudl2Wallet.address, 
-      transferL2ERC20Amount,
-      {gasLimit: 800000, gasPrice: 0}
-    )
+    ).transfer(env.fraudl2Wallet.address, transferL2ERC20Amount, {
+      gasLimit: 800000,
+      gasPrice: 0,
+    })
     await tranferToFraudTX.wait()
 
     const postAliceL2ERC20Balance = await L2DepositedERC20.balanceOf(
@@ -247,11 +246,10 @@ describe('System setup', async () => {
 
     const tranferToFraudTX = await L2DepositedERC20.connect(
       env.fraudl2Wallet
-    ).transfer(
-      env.bobl2Wallet.address, 
-      transferL2ERC20Amount,
-      {gasLimit: 800000, gasPrice: 0}
-    )
+    ).transfer(env.bobl2Wallet.address, transferL2ERC20Amount, {
+      gasLimit: 800000,
+      gasPrice: 0,
+    })
     await tranferToFraudTX.wait()
 
     const postBobL2ERC20Balance = await L2DepositedERC20.balanceOf(
