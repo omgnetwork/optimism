@@ -55,7 +55,8 @@ describe('Messenge Relayer Test', async () => {
     console.log(`🌕 ${chalk.green('L1 Message deployed to:')} ${chalk.white(L1Message.address)}`)
     
     L2Message = await Factory__L2Message.deploy(
-      env.watcher.l2.messengerAddress
+      env.watcher.l2.messengerAddress,
+      {gasLimit: 800000, gasPrice: 0}
     )
     await L2Message.deployTransaction.wait()
     console.log(`🌕 ${chalk.green('L2 Message deployed to:')} ${chalk.white(L2Message.address)}`)
