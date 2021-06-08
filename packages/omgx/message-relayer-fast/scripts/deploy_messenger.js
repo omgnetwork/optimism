@@ -16,7 +16,7 @@ const L1_Messenger_Deployed = await factory__L1_Messenger.attach(L1_Messenger.ad
 console.log('Initializing ...')
 // initialize with address_manager
 await L1_Messenger_Deployed.initialize(
-    process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
+    process.env.ADDRESS_MANAGER_ADDRESS
 )
 
 console.log('Custom L1 Messenger Initialized')
@@ -28,7 +28,7 @@ const myContract = getContractFactory(
   deployer
 )
 
-const Lib_AddressManager = await myContract.attach(process.env.ETH1_ADDRESS_RESOLVER_ADDRESS)
+const Lib_AddressManager = await myContract.attach(process.env.ADDRESS_MANAGER_ADDRESS)
 
 // this will fail for non deployer account
 console.log('Registering L1 Messenger...')
