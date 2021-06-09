@@ -151,7 +151,13 @@ class NetworkService {
       console.log("meta:",meta)
       console.log("receiverAddress:",receiverAddress)
       
-      let nft = await this.ERC721Contract.mintNFT(
+      const ERC721Contract = new ethers.Contract(
+        this.ERC721Address,
+        ERC721Json.abi,
+        this.web3Provider.getSigner(),
+      )
+
+      let nft = await ERC721Contract.mintNFT(
         receiverAddress,
         meta
       )
@@ -287,10 +293,9 @@ class NetworkService {
         this.web3Provider.getSigner(),
       );
 
-      const ERC721Contract = new ethers.Contract(
-        this.ERC721Address,
+      this.ERC721Contract = new this.l2Web3Provider.eth.Contract(
         ERC721Json.abi,
-        this.web3Provider.getSigner(),
+        this.ERC721Address,
       );
 
       this.L2TokenPoolContract = new ethers.Contract(
