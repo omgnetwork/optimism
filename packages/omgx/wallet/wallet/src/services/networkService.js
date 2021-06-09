@@ -151,7 +151,7 @@ class NetworkService {
       console.log("meta:",meta)
       console.log("receiverAddress:",receiverAddress)
       
-      let nft = await ERC721Contract.mintNFT(
+      let nft = await this.ERC721Contract.mintNFT(
         receiverAddress,
         meta
       )
