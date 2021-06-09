@@ -25,6 +25,7 @@ const main = async () => {
     'l1-target',
     env.L1_TARGET
   )
+  const L1_ALT_MESSENGER = config.str('l1-alt-messenger', env.L1_ALT_MESSENGER)
   const L1_WALLET_KEY = config.str('l1-wallet-key', env.L1_WALLET_KEY)
   const MNEMONIC = config.str('mnemonic', env.MNEMONIC)
   const HD_PATH = config.str('hd-path', env.HD_PATH)
@@ -112,6 +113,7 @@ const main = async () => {
     l2RpcProvider: l2Provider,
     addressManagerAddress: ADDRESS_MANAGER_ADDRESS,
     l1Target: L1_TARGET,
+    l1AltMessenger: L1_ALT_MESSENGER,
     l1Wallet: wallet,
     relayGasLimit: RELAY_GAS_LIMIT,
     fromL2TransactionIndex: FROM_L2_TRANSACTION_INDEX,
