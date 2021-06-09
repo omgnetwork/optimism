@@ -44,6 +44,17 @@ A Makefile has been provided for convience. The following targets are available.
 - make up-metrics
 - make down-metrics
 
+Running the integration tests
+
+```
+
+docker-compose run integration_tests
+
+```
+
+```
+
+
 ## Authentication
 
 Influxdb has authentication disabled.

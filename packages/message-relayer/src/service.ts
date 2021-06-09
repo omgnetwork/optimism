@@ -2,7 +2,7 @@
 import { Contract, ethers, Wallet, BigNumber, providers } from 'ethers'
 import * as rlp from 'rlp'
 import { MerkleTree } from 'merkletreejs'
-import fetch from 'node-fetch';
+import fetch from 'node-fetch'
 
 /* Imports: Internal */
 import { fromHexString, sleep } from '@eth-optimism/core-utils'
@@ -153,7 +153,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     while (this.running) {
       await sleep(this.options.pollingInterval)
 
-      await this._getWhitelist();
+      await this._getWhitelist()
 
       try {
         // Check that the correct address is set in the address manager
@@ -276,9 +276,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     }
   }
 
-  private async _getStateBatchHeader(
-    height: number
-  ): Promise<
+  private async _getStateBatchHeader(height: number): Promise<
     | {
         batch: StateRootBatchHeader
         stateRoots: string[]
@@ -310,11 +308,12 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         endBlock: startingBlock + this.options.getLogsInterval,
       })
 
-      const events: ethers.Event[] = await this.state.OVM_StateCommitmentChain.queryFilter(
-        this.state.OVM_StateCommitmentChain.filters.StateBatchAppended(),
-        startingBlock,
-        startingBlock + this.options.getLogsInterval
-      )
+      const events: ethers.Event[] =
+        await this.state.OVM_StateCommitmentChain.queryFilter(
+          this.state.OVM_StateCommitmentChain.filters.StateBatchAppended(),
+          startingBlock,
+          startingBlock + this.options.getLogsInterval
+        )
 
       this.state.eventCache = this.state.eventCache.concat(events)
       startingBlock += this.options.getLogsInterval
@@ -335,12 +334,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       event.transactionHash
     )
 
-    const [
-      stateRoots,
-    ] = this.state.OVM_StateCommitmentChain.interface.decodeFunctionData(
-      'appendStateBatch',
-      transaction.data
-    )
+    const [stateRoots] =
+      this.state.OVM_StateCommitmentChain.interface.decodeFunctionData(
+        'appendStateBatch',
+        transaction.data
+      )
 
     return {
       batch: {
@@ -357,7 +355,6 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   private async _isTransactionFinalized(height: number): Promise<boolean> {
     
     this.logger.info('Checking if tx is finalized', { height })
-    
     const header = await this._getStateBatchHeader(height)
 
     if (header === undefined) {
@@ -367,7 +364,9 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       this.logger.info('Got state batch header', { header })
     }
 
-    const size = (await this._getStateBatchHeader(height)).batch.batchSize.toNumber()
+    const size = (
+      await this._getStateBatchHeader(height)
+    ).batch.batchSize.toNumber()
     const filter = this.state.OVM_L2CrossDomainMessenger.filters.SentMessage()
     const events = await this.state.OVM_L2CrossDomainMessenger.queryFilter(
       filter,
@@ -377,10 +376,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
 
     const messages = events.map((event) => {
       const message = event.args.message
-      const decoded = this.state.OVM_L2CrossDomainMessenger.interface.decodeFunctionData(
-        'relayMessage',
-        message
-      )
+      const decoded =
+        this.state.OVM_L2CrossDomainMessenger.interface.decodeFunctionData(
+          'relayMessage',
+          message
+        )
 
       return {
         target: decoded._target,
@@ -388,18 +388,23 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       }
     })
 
-    const insideWhitelist = messages.every(message => this.state.whitelist.includes(message.target))
-    
+    const insideWhitelist = messages.every((message) =>
+      this.state.whitelist.includes(message.target)
+    )
+
     if (insideWhitelist) {
       this.logger.info('Found the batch header in whitelist')
-      return true 
+      return true
     } else {
-      const insideFPW = await this.state.OVM_StateCommitmentChain.insideFraudProofWindow(header.batch);
+      const insideFPW =
+        await this.state.OVM_StateCommitmentChain.insideFraudProofWindow(
+          header.batch
+        )
       if (insideFPW === true) {
-        this.logger.info('INSIDE FRAUD PRROF WINDOW - BLOCKING TRANSACTION.');
-        return false;
+        this.logger.info('INSIDE FRAUD PRROF WINDOW - BLOCKING TRANSACTION.')
+        return false
       } else {
-        this.logger.info('Fraud proof window elapsed.');
+        this.logger.info('Fraud proof window elapsed.')
         return true
       }
     }
@@ -426,10 +431,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
 
     const messages = events.map((event) => {
       const message = event.args.message
-      const decoded = this.state.OVM_L2CrossDomainMessenger.interface.decodeFunctionData(
-        'relayMessage',
-        message
-      )
+      const decoded =
+        this.state.OVM_L2CrossDomainMessenger.interface.decodeFunctionData(
+          'relayMessage',
+          message
+        )
 
       return {
         target: decoded._target,
@@ -594,25 +600,30 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   private async _getWhitelist(): Promise<Array<String>> {
     try {
       if (this.options.whitelistEndpoint) {
-        if (this.state.lastWhitelistPollingTimestamp === 0 || 
-          new Date().getTime() > this.state.lastWhitelistPollingTimestamp + this.options.whitelistPollingInterval
+        if (
+          this.state.lastWhitelistPollingTimestamp === 0 ||
+          new Date().getTime() >
+            this.state.lastWhitelistPollingTimestamp +
+              this.options.whitelistPollingInterval
         ) {
-          const response = await fetch(this.options.whitelistEndpoint);
-          const whitelist = await response.json();
-          this.state.lastWhitelistPollingTimestamp = new Date().getTime();
-          this.state.whitelist = whitelist;
-          this.logger.info('Found the whitelist', { whitelist: whitelist })
+          const response = await fetch(this.options.whitelistEndpoint)
+          const whitelist = await response.json()
+          this.state.lastWhitelistPollingTimestamp = new Date().getTime()
+          this.state.whitelist = whitelist
+          this.logger.info('Found the whitelist', { whitelist })
         } else {
-          this.logger.info('Loading the whitelist', { whitelist: this.state.whitelist })
-          return this.state.whitelist;
+          this.logger.info('Loading the whitelist', {
+            whitelist: this.state.whitelist,
+          })
+          return this.state.whitelist
         }
       } else {
         this.logger.info('The whitelist endpoint was not provided')
-        this.state.whitelist = [];
+        this.state.whitelist = []
       }
     } catch {
       this.logger.info('Failed to fetch the whitelist')
-      this.state.whitelist = [];
+      this.state.whitelist = []
     }
   }
 }

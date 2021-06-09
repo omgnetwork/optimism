@@ -5,7 +5,7 @@ import '@eth-optimism/hardhat-ovm'
 
 const config: HardhatUserConfig = {
   mocha: {
-    timeout: 200000,
+    timeout: 60000,
   },
   networks: {
     omgx: {

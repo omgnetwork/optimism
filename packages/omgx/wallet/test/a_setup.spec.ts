@@ -90,13 +90,13 @@ describe('System setup', async () => {
     Factory__L2TokenPool = new ContractFactory(
       L2TokenPoolJson.abi,
       L2TokenPoolJson.bytecode,
-      env.bobl1Wallet
+      env.bobl2Wallet
     )
 
     Factory__AtomicSwap = new ContractFactory(
       AtomicSwapJson.abi,
       AtomicSwapJson.bytecode,
-      env.bobl1Wallet
+      env.bobl2Wallet
     )
 
     Factory__L1Message = new ContractFactory(
