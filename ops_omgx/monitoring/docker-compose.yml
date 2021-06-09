@@ -1,0 +1,11 @@
+version: "3.1"
+
+services:
+  utils:
+    image: enyalabs/omgx-monitor:v1.0.0
+    environment:
+      - NODE_ENV=local
+      - L1_NODE_WEB3_WS=ws://localhost:9545
+      - L2_NODE_WEB3_WS=ws://localhost:8546
+      - L1_LIQUIDITY_POOL_ADDRESS=0x2b57c4aB6D64a2befcb67D46bdc302809418bd1c
+      - L2_LIQUIDITY_POOL_ADDRESS=0x1c7F686451CE532735677f9A70d1831a653d7035

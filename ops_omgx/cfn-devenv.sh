@@ -496,7 +496,7 @@ case "${SUBCMD}" in
     restart)
         [[ -z "${SERVICE_NAME}" ]] && error 'Missing required option --service-name'
         [[ -z "${ENV_PREFIX}" ]] && error 'Missing required option --stack-name'
-        [[ -z "${FORCE}"]] && warn 'Missing --force, so not going to delete the /mnt/efs directory contents'
+        [[ -z "${FORCE}" ]] && warn 'Missing --force, so not going to delete the /mnt/efs directory contents'
         restart_service
         ;;
     ssh)
