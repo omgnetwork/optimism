@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Enya Go-Ethereum Application Deployment"
+Description: "Enya L2Geth Application Deployment"
 
 Parameters:
   EnvironmentName:
@@ -16,7 +16,7 @@ Parameters:
 
   GoEthereumImage:
     Type: String
-    Default: go-ethereum
+    Default: l2geth
 
   DockerPrefix:
     Type: String
