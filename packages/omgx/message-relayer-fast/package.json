@@ -12,6 +12,7 @@
   "scripts": {
     "start:service": "node ./exec/run-message-relayer-fast.js",
     "start": "yarn deploy:contracts && yarn start:service",
+    "build": "tsc -p ./tsconfig.build.json",
     "build:service": "tsc -p ./tsconfig.build.json",
     "clean": "rimraf  dist/ ./tsconfig.build.tsbuildinfo",
     "build:contracts": "./scripts/build.sh",
