@@ -1,0 +1,28 @@
+diff --git a/node_modules/@openzeppelin/contracts/.DS_Store b/node_modules/@openzeppelin/contracts/.DS_Store
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/@openzeppelin/contracts/utils/Address.sol b/node_modules/@openzeppelin/contracts/utils/Address.sol
+index 42a9dc1..22ab3de 100644
+--- a/node_modules/@openzeppelin/contracts/utils/Address.sol
++++ b/node_modules/@openzeppelin/contracts/utils/Address.sol
+@@ -2,6 +2,8 @@
+ 
+ pragma solidity >=0.6.2 <0.8.0;
+ 
++import "../token/ERC20/ERC20.sol";
++
+ /**
+  * @dev Collection of functions related to the address type
+  */
+@@ -112,7 +114,10 @@ library Address {
+      * _Available since v3.1._
+      */
+     function functionCallWithValue(address target, bytes memory data, uint256 value, string memory errorMessage) internal returns (bytes memory) {
+-        require(address(this).balance >= value, "Address: insufficient balance for call");
++        // require(address(this).balance >= value, "Address: insufficient balance for call");
++        // replace it to oWETH
++        ERC20 oWETH = ERC20(address(0x4200000000000000000000000000000000000006));
++        require(oWETH.balanceOf(address(this)) >= value, "Address: insufficient balance for call");
+         require(isContract(target), "Address: call to non-contract");
+ 
+         // solhint-disable-next-line avoid-low-level-calls
