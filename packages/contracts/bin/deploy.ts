@@ -36,7 +36,7 @@ const main = async () => {
     sccSequencerPublishWindow: config.sccFraudProofWindow,
     ovmSequencerAddress: sequencer.address,
     ovmProposerAddress: sequencer.address,
-    ovmRelayerAddress: sequencer.address,
+    ovmRelayerAddress: relayer.address,
     ovmAddressManagerOwner: deployer.address,
     noCompile: process.env.NO_COMPILE ? true : false,
   })
