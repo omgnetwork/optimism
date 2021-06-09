@@ -76,14 +76,6 @@ const config: HardhatUserConfig = {
   },
 }
 
-/*
-old: DEPLOYER_PRIVATE_KEY
-new: CONTRACTS_DEPLOYER_KEY
-
-old: L1_NODE_WEB3_URL
-new: CONTRACTS_RPC_URL
-*/
-
 if (
   process.env.CONTRACTS_TARGET_NETWORK &&
   process.env.CONTRACTS_DEPLOYER_KEY &&

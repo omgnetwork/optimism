@@ -353,8 +353,8 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   }
 
   private async _isTransactionFinalized(height: number): Promise<boolean> {
-    
     this.logger.info('Checking if tx is finalized', { height })
+
     const header = await this._getStateBatchHeader(height)
 
     if (header === undefined) {
