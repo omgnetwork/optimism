@@ -440,9 +440,9 @@ function destroy_dev_services {
 
 
     function ssh_to_ecs_cluster {
-        ECS_CLUSTER=$(aws ecs list-clusters --region ${REGION} |grep ${ENV_PREFIX}|cut -d/ -f2|sed 's#",##g')
-        CONTAINER_INSTANCE=$(aws ecs list-container-instances  --region ${REGION} --cluster $ECS_CLUSTER|grep $ECS_CLUSTER|cut -d/ -f3|sed 's#"##g')
-        EC2_INSTANCE=$(aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId')
+        ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|tail -1|cut -d/ -f2|sed 's#,##g'|sed 's#"##g'`
+        CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
+        EC2_INSTANCE=`aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId'|sed 's#"##g'`
         info "SSH to server $EC2_INSTANCE"
         aws ssm start-session --target $EC2_INSTANCE
       }
