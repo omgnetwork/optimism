@@ -19,12 +19,12 @@ import {
 
   getL2ETHGateway,
   getL1ETHGateway,
-  l1MessengerAddressAlt,
+  l1MessengerFastAddress,
 } from './utils'
 
 import {
   initWatcher,
-  initWatcherAltMessenger,
+  initWatcherMessengerFast,
   CrossDomainMessagePair,
   Direction,
   Relayer,
@@ -54,7 +54,7 @@ export class OptimismEnv {
   // The L1 <> L2 State watcher
   watcher: Watcher
 
-  altWatcher: Watcher
+  watcherMessengerFast: Watcher
 
   // The wallets
   bobl1Wallet: Wallet
@@ -74,7 +74,7 @@ export class OptimismEnv {
     this.L2ETHGateway = args.L2ETHGateway
     this.l2Messenger = args.l2Messenger
     this.watcher = args.watcher
-    this.altWatcher = args.altWatcher
+    this.watcherMessengerFast = args.watcherMessengerFast
     this.bobl1Wallet = args.bobl1Wallet
     this.bobl2Wallet = args.bobl2Wallet
     this.alicel1Wallet = args.alicel1Wallet
@@ -90,7 +90,7 @@ export class OptimismEnv {
 
     const addressManager = getAddressManager(bobl1Wallet)
     const watcher = await initWatcher(l1Provider, l2Provider, addressManager)
-    const altWatcher = await initWatcherAltMessenger(l1Provider, l2Provider, addressManager, l1MessengerAddressAlt)
+    const watcherMessengerFast = await initWatcherMessengerFast(l1Provider, l2Provider, addressManager, l1MessengerFastAddress)
 
     const L1ETHGateway = await getL1ETHGateway(bobl1Wallet, addressManager)
     const L2ETHGateway = getL2ETHGateway(bobl2Wallet)
@@ -122,7 +122,7 @@ export class OptimismEnv {
       l2Messenger,
       
       watcher,
-      altWatcher,
+      watcherMessengerFast,
 
       bobl1Wallet,
       bobl2Wallet,
@@ -145,11 +145,11 @@ export class OptimismEnv {
     return waitForXDomainTransaction(this.watcher, tx, direction)
   }
 
-  async waitForXDomainTransactionAlt(
+  async waitForXDomainTransactionMessengerFast(
     tx: Promise<TransactionResponse> | TransactionResponse,
     direction: Direction
   ): Promise<CrossDomainMessagePair> {
-    return waitForXDomainTransaction(this.altWatcher, tx, direction)
+    return waitForXDomainTransaction(this.watcherMessengerFast, tx, direction)
   }
 
   async waitForRevertXDomainTransaction(

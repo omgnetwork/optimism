@@ -1,4 +1,4 @@
-# OMGX_Alt_Messenger
+# OMGX_Messenger_Relayer_Fast
 
 Customized L1 Cross Domain Messenger without dispute period time restrictions and associated message relayer service.
 
@@ -47,7 +47,7 @@ TEST_PRIVATE_KEY_3=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cda
 
 optional - while running message relayer for specific custom messenger
 ```
-L1_ALT_MESSENGER= <optional>
+L1_MESSENGER_FAST= <optional>
 ```
 
 ### Additional Setting for stopping failed relay attempts
@@ -68,15 +68,15 @@ yarn deploy:contracts
 yarn start:service
 ```
 
-This starts the service for the registered custom messenger. Specify L1_ALT_MESSENGER=<messenger> to spin up the relayer for your messenger
+This starts the service for the registered custom messenger. Specify L1_MESSENGER_FAST=<messenger> to spin up the relayer for your messenger
 
-## Build a DockerHub Message Relayer Alt
+## Build a DockerHub Message Relayer Fast
 
-To build the Message Relayer Alt docker image:
+To build the Message Relayer Fast docker image:
 
 ```bash
 
-docker build . --file Dockerfile.message-relayer-fast --tag omgx/custom-message-relayer:latest
-docker push omgx/custom-message-relayer:latest
+docker build . --file Dockerfile.message-relayer-fast --tag omgx/message-relayer-fast:latest
+docker push omgx/message-relayer-fast:latest
 
 ```

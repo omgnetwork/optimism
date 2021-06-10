@@ -49,7 +49,7 @@ describe('Messenge Relayer Test', async () => {
     
     L1Message = await Factory__L1Message.deploy(
       env.watcher.l1.messengerAddress,
-      env.altWatcher.l1.messengerAddress
+      env.watcherMessengerFast.l1.messengerAddress
     )
     await L1Message.deployTransaction.wait()
     console.log(`🌕 ${chalk.green('L1 Message deployed to:')} ${chalk.white(L1Message.address)}`)
@@ -78,7 +78,7 @@ describe('Messenge Relayer Test', async () => {
   })
 
   it('should send message from L2 to L1', async () => {
-    await env.waitForXDomainTransactionAlt(
+    await env.waitForXDomainTransactionMessengerFast(
       L2Message.sendMessageL2ToL1({
         gasLimit: 800000, 
         gasPrice: 0

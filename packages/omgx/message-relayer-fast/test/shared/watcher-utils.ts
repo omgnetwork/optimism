@@ -30,7 +30,7 @@ export const initWatcher = async (
   })
 }
 
-export const initWatcherAltMessenger = async (
+export const initWatcherMessengerFast = async (
   l1Provider: JsonRpcProvider,
   l2Provider: JsonRpcProvider,
   AddressManager: Contract,
