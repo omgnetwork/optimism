@@ -2,6 +2,7 @@
 
 - [Porting to OMGX and Optimism - A case study.](#porting-to-omgx-and-optimism---a-case-study)
   * [SUSHI](#sushi)
+  * [0. Basics](#0-basics)
   * [1. No native ETH](#1-no-native-eth)
   * [2. Timing, `now`, and `block.timestamp`](#2-timing---now---and--blocktimestamp)
   * [3. Replace `chainid()` with `uint256 chainId = ___`](#3-replace--chainid----with--uint256-chainid)
@@ -11,21 +12,78 @@
 
 ## SUSHI
 
-SUSHI is a DeFi exchange that supports token swapping and many other actions. We started by copying SUSHI's smart contracts into the [packages/analyzer/contracts](https://github.com/enyalabs/contracts-analyzer/tree/master/packages/analyzer/contracts) folder. Then, we ran:
+SUSHI is a DeFi exchange that supports token swapping and many other actions. We started by copying SUSHI's smart contracts into the `/contracts` folder. Then, we ran:
 
 ```bash
 
 yarn install
 yarn build
 yarn analyze
-
-yarn deploy:local #may need additional configuration in /scripts/deployLocal.js
-  # or...
-yarn deploy:rinkeby #may need additional configuration in /scripts/deployRinkeby.js
+yarn deploy #will need additional configuration in /scripts/deploy.js and the .env
 
 ```
 
-We then addressed the warnings and errors one by one. 
+We then addressed the warnings and errors one by one. Let's now take that all, step by step.
+
+## 0. Basics
+
+**your contracts** As noted, drop your contracts into a folder called `contracts`. That's what solc and hardhat will look at, compile, and deploy. Then, run:
+
+```bash
+
+yarn install
+yarn build
+
+```
+
+The first time you do this, you will typically see dozens of errors.
+
+**missing libraries** The provided `package.json` is generic and you will see HH411 errors such as 
+
+```
+
+Error HH411: The library foo, imported from contracts/something.sol, is not installed. Try installing it using npm.
+
+```
+
+This means that you have to install the foo library, like this:
+
+```bash
+
+yarn add foo
+
+```
+
+**pragma solidity** Once all the missing libraries have been installed, you will see `HH606` errors:
+
+```
+Error HH606: The project cannot be compiled, see reasons below.
+
+The Solidity version pragma statement in these files don't match any of the configured compilers in your config. Change the pragma or configure additional compiler versions in your hardhat config.
+
+  * contracts/something.sol (^0.6.0)
+```
+
+The optimism solc compiler supports Solidity versions 0.5.16, 0.6.12, and 0.7.6. This value is set in `hardhat.config.js`. The first time you run `yarn build` you will typically see many errors relating to your pragmas. If most of your pragmas are around 0.6 you would chose 0.6.12, and so forth. In general, small modifications (such as replacing `^0.5.17` with `^0.5.16` or specifying a broader range such as `pragma solidity >= 0.5.16 < 0.6.5;`) will not affect your code and your unit and integration tests will pick up any exceptions. 
+
+At this point, solc and hardhat have all the information they need to get started. Now, you will see actual code issies, such as: 
+
+```solc
+
+OVM Compiler Error (insert "// @unsupported: ovm" if you don't want this file to be compiled for the OVM):
+ contracts/foo.sol:72:31: ParserError: OVM: ORIGIN is not implemented in the OVM.
+        require(msg.sender == tx.origin, "not eoa");
+
+OVM Compiler Error (insert "// @unsupported: ovm" if you don't want this file to be compiled for the OVM):
+ contracts/WETH.sol:51:16: ParserError: OVM: SELFBALANCE is not implemented in the OVM. (We have no native ETH -- use deposited WETH instead!)
+        return address(this).balance;
+               ^-------------------^
+
+Error HH600: Compilation failed
+
+```
+
+Let's now tackle those one by one.
 
 ## 1. No native ETH
 
