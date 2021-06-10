@@ -1,19 +1,19 @@
 name: Publish Packages (omgx-develop)
 
 
-# on:
-#   push:
-#     branches:
-#       - 'develop'
 on:
   push:
     branches:
-      - 'master'
       - 'develop'
-      - '*rc'
-      - 'regenesis/*'
-  pull_request:
-  workflow_dispatch:
+# on:
+#   push:
+#     branches:
+#       - 'master'
+#       - 'develop'
+#       - '*rc'
+#       - 'regenesis/*'
+#   pull_request:
+#   workflow_dispatch:
 
 jobs:
   develop-publish:
