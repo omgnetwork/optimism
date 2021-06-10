@@ -6,7 +6,7 @@ set -o nounset -o errexit
 PATH_TO_CFN="$PWD/cloudformation"
 PATH_TO_DOCKER="$PWD/docker"
 REGION=us-east-1
-REGISTRY_PREFIX=
+REGISTRY_PREFIX=omgx
 SERVICE_NAME=
 SECRETNAME=
 DEPLOYTAG=
@@ -530,7 +530,6 @@ case "${SUBCMD}" in
     deploy)
         [[ -z "${DEPLOYTAG}" ]] && error 'Missing required option --deploy-tag'
         [[ -z "${SECRETNAME}" ]] && warn 'Missing option --secret-name, defaulting to --deploy-tag'
-        [[ -z "${REGISTRY_PREFIX}" ]] && error 'Missing required option --registry-prefix'
         [[ -z "${ENV_PREFIX}" ]] && error 'Missing required option --stack-name'
         deploy_dev_services
         ;;
@@ -559,7 +558,6 @@ case "${SUBCMD}" in
         ;;
     push2aws)
         [[ -z "${DEPLOYTAG}" ]] && error 'Missing required option --deploy-tag'
-        [[ -z "${REGISTRY_PREFIX}" ]] && error 'Missing required option --registry-prefix'
         verify_images_in_ecr
         ;;
     destroy)
@@ -572,4 +570,8 @@ esac
 # Default to us-east-1 region
 if [[ -z "${REGION}" ]] ; then
     warn "Missing option --region, defaulting to ${REGION}"
+fi
+
+if [[ -z "${REGISTRY_PREFIX}" ]] ; then
+    warn "Missing option --registry-prefix, defaulting to ${REGISTRY_PREFIX}"
 fi
