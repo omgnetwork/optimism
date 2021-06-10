@@ -41,11 +41,11 @@ const main = async () => {
   )
   const L2_BLOCK_OFFSET = config.uint(
     'l2-start-offset',
-    parseInt(env.L2_BLOCK_OFFSET, 10) || 1
+    parseInt(env.L2_BLOCK_OFFSET  || '1', 10)
   )
   const L1_START_OFFSET = config.uint(
     'l1-start-offset',
-    parseInt(env.L1_BLOCK_OFFSET, 10) || 1
+    parseInt(env.L1_START_OFFSET  || '1', 10)
   )
   const FROM_L2_TRANSACTION_INDEX = config.uint(
     'from-l2-transaction-index',
