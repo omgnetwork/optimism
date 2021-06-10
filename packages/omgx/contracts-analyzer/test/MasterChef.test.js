@@ -2,7 +2,7 @@
 const { Contract, Wallet, ContractFactory, BigNumber, providers } = require('ethers');
 const { expect } = require("chai");
 const { advanceBlockTo } = require("./utilities/time");
-const { bob, alice, carol, dev, minter } = require('./utilities/env');
+const { bob, alice, carol, dev, minter } = require('./utilities/wallet');
 
 const MasterChefJSON = require('../artifacts/contracts/MasterChef.sol/MasterChef.ovm.json');
 const SushiTokenJSON = require('../artifacts/contracts/SushiToken.sol/SushiToken.ovm.json');

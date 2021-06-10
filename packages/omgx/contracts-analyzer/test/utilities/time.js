@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat")
 const { BigNumber, providers } = require('ethers');
-const { Provider } = require('./env');
+const { Provider } = require('./wallet');
 
 async function advanceBlock() {
   const mine = await Provider.send("evm_mine", [])

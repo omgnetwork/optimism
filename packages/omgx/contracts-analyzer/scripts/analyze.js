@@ -22,7 +22,7 @@ async function main() {
       console.log(` 📡 Analyzing ${chalk.cyan(contractName)}`);
       
       const contract = fs
-        .readFileSync(`${bre.config.paths.artifacts}/contracts/${contractName}.sol/${contractName}.ovm.json`)
+        .readFileSync(`${bre.config.paths.artifacts}-ovm/contracts/${contractName}.sol/${contractName}.json`)
         .toString();
 
       const sizeByte = Buffer.from(

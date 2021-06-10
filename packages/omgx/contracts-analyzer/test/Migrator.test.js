@@ -3,7 +3,7 @@ const { expect } = require("chai");
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
-const { bob, alice, carol, dev, minter } = require('./utilities/env');
+const { bob, alice, carol, dev, minter } = require('./utilities/wallet');
 
 const MasterChefJSON = require('../artifacts/contracts/MasterChef.sol/MasterChef.ovm.json');
 const SushiTokenJSON = require('../artifacts/contracts/SushiToken.sol/SushiToken.ovm.json');
