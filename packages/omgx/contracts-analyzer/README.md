@@ -24,8 +24,8 @@ Set up the project by running:
 
 ```bash
 
+yarn install
 cd packages/omgx/contracts-analyzer
-npm install
 
 ```
 
@@ -35,6 +35,7 @@ Copy your contracts into `/contracts` and run:
 
 ```bash
 
+cd packages/omgx/contracts-analyzer
 yarn build #build the smart contracts with optimistic solc
 yarn analyze
 
