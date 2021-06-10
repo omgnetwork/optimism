@@ -20,20 +20,12 @@ Please make sure you've installed:
 
 ## Setting Up
 
-Please clone and cd to [this repository](https://github.com/enyalabs/contracts-analyzer):
-
-```bash
-
-git clone https://github.com/enyalabs/omgx_contracts-analyzer.git
-cd omgx_contracts-analyzer
-
-```
-
 Set up the project by running:
 
 ```bash
 
-yarn install
+cd packages/omgx/contracts-analyzer
+npm install
 
 ```
 
@@ -56,44 +48,23 @@ The code compliles the contracts, which will typically provide extensive debug i
 
 ## Deploying Contracts to local test system or to OMGX Rinkeby
 
-First, provide your Infura key, if needed, in `scripts/deployRinkeby.js`:
+First, add `.env` in the `packages/omgx/contracts-analyzer`.
 
 ```javascript
-
-//Update these to fit your deployment
-const network = 'rinkeby';
-const deployPrivateKey = "0x754fde3f5e60ef2c7649061e06957c29017fe21032a8017132c0078e37f6193a"
-
-...
-
-let deployConfig = {
-  local: {
-    l1RpcUrl: 'http://localhost:9545/',
-    l2RpcUrl: 'http://localhost:8545',
-    l1MessengerAddress: '0xA6404B184Ad3f6F41b6472f02ba45f25C6A66d49',
-    l1ETHAddress: '0x4F53A01556Dc6f120db9a1b4caE786D5f0b5792C',
-    l2MessengerAddress: '0x4200000000000000000000000000000000000007',
-    l2ETHAddress: '0x4200000000000000000000000000000000000006',
-  },
-  rinkeby: {
-    l1RpcUrl: 'https://rinkeby.infura.io/v3/YOUR_INFURA_KEY_HERE', //CHANGE HERE
-    l2RpcUrl: 'http://3.85.224.26:8545',
-    l1MessengerAddress: '0x07A5992d8bE8c271B3baa5320975b6E8d8816e34',
-    l1ETHAddress: '0xBa67f68C956178CB7fd1c882f9B882487Fa28898',
-    l2MessengerAddress: '0x4200000000000000000000000000000000000007',
-    l2ETHAddress: '0x4200000000000000000000000000000000000006',
-  }
-}
-
+L2_NODE_WEB3_URL=http://localhost:8545 || https://rinkeby.omgx.network
+DEPLOYER_PRIVATE_KEY = 0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6
+TEST_PRIVATE_KEY_1 = 0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6
+TEST_PRIVATE_KEY_2 = 0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a
+TEST_PRIVATE_KEY_3 = 0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba
+TEST_PRIVATE_KEY_4 = 0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e
+TEST_PRIVATE_KEY_5 = 0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356
 ```
 
 Then, deploy:
 
 ```bash
 
-yarn deploy:local #may need additional configuration in /scripts/deployLocal.js
-  # or...
-yarn deploy:rinkeby #may need additional configuration in /scripts/deployRinkeby.js
+yarn deploy
 
 ```
 
@@ -102,10 +73,11 @@ yarn deploy:rinkeby #may need additional configuration in /scripts/deployRinkeby
 Create a `.env` file in the root directory of this project. Add environment-specific variables on new lines in the form of `NAME=VALUE`, for example, 
 
 ```
-NETWORK = http://localhost:8545
-TEST_PRIVATE_KEY_1 = 0xd2ab07f7c10ac88d5f86f1b4c1035d5195e81f27dbe62ad65e59cbf88205629b
-TEST_PRIVATE_KEY_2 = 0x754fde3f5e60ef2c7649061e06957c29017fe21032a8017132c0078e37f6193a
-TEST_PRIVATE_KEY_3 = 0xea8b000efb33c49d819e8d6452f681eed55cdf7de47d655887fc0e318906f2e7
-TEST_PRIVATE_KEY_4 = 0x5b1c2653250e5c580dcb4e51c2944455e144c57ebd6a0645bd359d2e69ca0f0c
-TEST_PRIVATE_KEY_5 = 0xea8b000efb33c49d819e8d6452f681eed55cdf7de47d655887fc0e318906f2e7
+L2_NODE_WEB3_URL=http://localhost:8545
+DEPLOYER_PRIVATE_KEY = 0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6
+TEST_PRIVATE_KEY_1 = 0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6
+TEST_PRIVATE_KEY_2 = 0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a
+TEST_PRIVATE_KEY_3 = 0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba
+TEST_PRIVATE_KEY_4 = 0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e
+TEST_PRIVATE_KEY_5 = 0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356
 ```

@@ -1,9 +1,11 @@
-import { HardhatUserConfig } from 'hardhat/types'
-import '@nomiclabs/hardhat-ethers'
-import '@nomiclabs/hardhat-waffle'
-import '@eth-optimism/hardhat-ovm'
+import '@eth-optimism/hardhat-ovm';
+import '@eth-optimism/plugins/hardhat/compiler';
+import '@eth-optimism/plugins/hardhat/ethers';
+import '@nomiclabs/hardhat-ethers';
+import '@nomiclabs/hardhat-waffle';
+import "@tenderly/hardhat-tenderly";
 
-const config: HardhatUserConfig = {
+const config = {
   mocha: {
     timeout: 60000,
   },
@@ -16,21 +18,6 @@ const config: HardhatUserConfig = {
       gasPrice: 0,
       ovm: true,
     },
-    rinkeby: {
-      url: "https://rinkeby.omgx.network",
-      chainId: 28,
-      gasPrice: 0,
-      ovm: true,
-    },
-    local: {
-      url: "http://localhost:8545",
-      chainId: 28,
-      gasPrice: 0,
-      ovm: true,
-      accounts: {
-        mnemonic:"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
-      }
-    }
   },
   solidity: {
     compilers: [
@@ -44,7 +31,6 @@ const config: HardhatUserConfig = {
         }
       },
     ],
-
   },
   ovm: {
     solcVersion: '0.6.12',
@@ -52,5 +38,3 @@ const config: HardhatUserConfig = {
 }
 
 export default config
-
-

@@ -3,7 +3,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const { Contract, Wallet, ContractFactory, BigNumber, providers } = require('ethers');
-const { bob, alice, carol } = require('./utilities/env');
+const { bob, alice, carol } = require('./utilities/wallet');
 
 const SushiTokenJSON = require('../artifacts/contracts/SushiToken.sol/SushiToken.ovm.json');
 

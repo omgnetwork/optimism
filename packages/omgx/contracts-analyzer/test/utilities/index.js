@@ -1,5 +1,5 @@
 const { Contract, Wallet, ContractFactory, BigNumber, providers } = require('ethers');
-const { bob } = require('./env');
+const { bob } = require('./wallet');
 
 const BASE_TEN = 10
 const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000"

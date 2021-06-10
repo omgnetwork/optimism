@@ -1,18 +1,18 @@
 {
-  "name": "OMGX_contracts-analyzer",
+  "name": "@omgx/contract-analyzer",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "./scripts/build.sh",
-    "build:contracts:ovm": "hardhat compile --show-stack-traces --network local",
-    "analyze": "hardhat run scripts/analyze.js",
+    "build": "TARGET=ovm hardhat compile --network omgx ",
+    "deploy": "TARGET=ovm hardhat --network omgx run scripts/deploy.js",
+    "analyze": "TARGET=ovm hardhat run scripts/analyze.js",
+    "test": "hardhat test",
     "lint": "eslint --ignore-path .gitignore",
-    "postinstall": "patch-package",
-    "deploy:local": "hardhat --network local run scripts/deployLocal.js",
-    "deploy:rinkeby": "hardhat --network rinkeby run scripts/deployRinkeby.js",
-    "test:local": "hardhat test"
+    "postinstall": "patch-package"
   },
   "dependencies": {
+    "@eth-optimism/hardhat-ovm": "^0.0.3",
+    "@eth-optimism/plugins": "^0.0.16",
     "@ethersproject/providers": "^5.1.2",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
@@ -30,8 +30,6 @@
     "ramda": "^0.27.1"
   },
   "devDependencies": {
-    "@eth-optimism/hardhat-ovm": "^0.2.2",
-    "@eth-optimism/plugins": "^0.0.20",
     "@boringcrypto/boring-solidity": "boringcrypto/BoringSolidity#e06e943",
     "@openzeppelin/contracts": "^3.1.0",
     "eslint": "^7.25.0",
