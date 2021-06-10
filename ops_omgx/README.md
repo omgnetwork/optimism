@@ -106,6 +106,15 @@ sh-4.2$ sudo su
 ./cfn-devenv.sh restart --stack-name test-stack --force
 ```
 
+* To stop all services in a cluster, you can run:
+```
+./cfn-devenv.sh stop --stack-name test-stack
+```
+
+* To stop all services in a cluster and remove the contents in the /mnt/efs directory, you can run:
+```
+./cfn-devenv.sh stop --stack-name test-stack --force
+```
 
 * To see all current ECS clusters provisioned with this automation, run:
 ```
@@ -113,11 +122,13 @@ sh-4.2$ sudo su
  ---------------
  CLUSTER: rinkeby-infrastructure-application-EcsCluster-UAw9PLUNKtWg
  L2-URL: https://rinkeby.omgx.network
+ STACK-NAME: rinkeby
  ---------------
 
  ---------------
  CLUSTER: dev-integration-infrastructure-application-EcsCluster-MO5arb28VUsC"
  L2-URL: https://dev-integration.omgx.network
+ STACK-NAME: dev-integration
  ---------------
 
 ```

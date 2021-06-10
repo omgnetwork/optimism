@@ -47,6 +47,7 @@ Parameters:
     Type: String
     Default: infrastructure-core
 
+
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -170,15 +171,11 @@ Resources:
     Properties:
       IpAddressType: dualstack
       Scheme: internet-facing
-      LoadBalancerAttributes:
-      - Key: idle_timeout.timeout_seconds
-        Value: '3600'
       SecurityGroups:
       - !Ref LoadBalancerSecurityGroup
       Subnets:
       - Fn::ImportValue: !Sub ${InfrastructureStackName}:PublicSubnet1
       - Fn::ImportValue: !Sub ${InfrastructureStackName}:PublicSubnet2
-      Type: application
 
   DeployerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener

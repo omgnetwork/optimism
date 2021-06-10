@@ -85,7 +85,7 @@ Resources:
             - Name: RETRIES
               Value: 3600
           EntryPoint:
-            - "/opt/wait-for-l1-and-l2.sh"
+            - "/opt/optimism/packages/message-relayer/relayer.sh"
           DockerLabels:
             com.datadoghq.ad.check_names: '["message_relayer"]'
             com.datadoghq.ad.init_configs: '[{}]'

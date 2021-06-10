@@ -217,6 +217,15 @@ function check_dev_environment {
           info "Waiting for the ${ENV_PREFIX}-infrastructure-application to create"
           aws cloudformation wait stack-create-complete --stack-name=${ENV_PREFIX}-infrastructure-application
           info "${ENV_PREFIX}-infrastructure-application created"
+          info "Adding Datadog to the ECS Cluster"
+          aws cloudformation create-stack \
+               --stack-name ${ENV_PREFIX}-datadog \
+               --capabilities CAPABILITY_IAM \
+               --template-body=file://datadog.yaml \
+               --region ${REGION} \
+               --parameters \
+                   ParameterKey=InfrastructureStackName,ParameterValue=${ENV_PREFIX}-infrastructure-core | jq '.StackId'
+            aws cloudformation wait stack-create-complete --stack-name=${ENV_PREFIX}-datadog
           cd ..
       else
           info "VPC exists ... checking ECS Cluster"
@@ -364,34 +373,71 @@ function destroy_dev_services {
 
   function restart_service {
       local force="${1:-}"
-      ECS_CLUSTER=$(aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f2|sed 's#",##g')
-      SRV=$(echo ${DOCKER_IMAGES_LIST}|sed 's#-##g')
-      SERVICE4RESTART=$(aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i $SRV|cut -d/ -f3|sed 's#",##g')
-      CONTAINER_INSTANCE=$(aws ecs list-container-instances  --region ${REGION} --cluster $ECS_CLUSTER|grep $ECS_CLUSTER|cut -d/ -f3|sed 's#"##g')
-      EC2_INSTANCE=$(aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId')
+      ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|tail -1|cut -d/ -f2|sed 's#",##g'`
+      SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
+      CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
+      ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|tr '\n' ' '`
+      EC2_INSTANCE=`aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId'`
       info "Restarting ${ECS_CLUSTER}"
       if [[ "${force}" == "yes" ]] ; then
         for num in $SERVICE4RESTART; do
-          aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 0 >> /dev/null
+          aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
+        done
+        for task in $ECS_TASKS; do
+          aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
         done
         sleep 10
         aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/db/*" --region ${REGION} --output text
         aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/geth_l2/*" --region ${REGION} --output text
         for num in $SERVICE4RESTART; do
-          aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 1 >> /dev/null
+          aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 1 >> /dev/null
         done
         info "Removed contents in /mnt/efs/ and restarted, please allow 1-2 minutes for the new tasks to actually start"
-      elif [[ "${force}" == "no" ]] ; then
+      else
         for num in $SERVICE4RESTART; do
-          aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 0 >> /dev/null
+          aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
+        done
+        for task in $ECS_TASKS; do
+          aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
         done
         sleep 10
         for num in $SERVICE4RESTART; do
-          aws ecs update-service  --region ${REGION} --service $SERVICE4RESTART --cluster $ECS_CLUSTER --service $i --desired-count 1 >> /dev/null
+          aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 1 >> /dev/null
         done
         info "Restarted, please allow 1-2 minutes for the new tasks to actually start"
       fi
     }
+
+    function stop_cluster {
+        local force="${1:-}"
+        ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|tail -1|cut -d/ -f2|sed 's#",##g'`
+        SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
+        CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
+        ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|tr '\n' ' '`
+        EC2_INSTANCE=`aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId'`
+        info "STOP ${ECS_CLUSTER} and delete /mnt/efs contents"
+        if [[ "${force}" == "yes" ]] ; then
+          for num in $SERVICE4RESTART; do
+            aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
+          done
+          for task in $ECS_TASKS; do
+            aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
+          done
+          sleep 10
+          aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/db/*" --region ${REGION} --output text
+          aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/geth_l2/*" --region ${REGION} --output text
+          info "Removed contents in /mnt/efs/ and stopped cluster"
+        else
+          for num in $SERVICE4RESTART; do
+            aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
+          done
+          for task in $ECS_TASKS; do
+            aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
+          done
+          info "Stopped ${ECS_CLUSTER}"
+        fi
+      }
+
 
     function ssh_to_ecs_cluster {
         ECS_CLUSTER=$(aws ecs list-clusters --region ${REGION} |grep ${ENV_PREFIX}|cut -d/ -f2|sed 's#",##g')
@@ -405,7 +451,8 @@ function destroy_dev_services {
           ECS_CLUSTERS=$(aws ecs list-clusters --region ${REGION}|grep infrastructure-application|cut -d/ -f2|sed 's#",##g')
           for ecs in $ECS_CLUSTERS; do
           URL=$(echo $ecs|sed 's#-infrastructure-application.*#.omgx.network#')
-          echo -e " --------------- \n CLUSTER: $ecs \n L2-URL: https://$URL \n --------------- \n"
+          STACK_NAME=$(echo $ecs|sed 's#-infrastructure-application.*##')
+          echo -e " --------------- \n CLUSTER: $ecs \n L2-URL: https://$URL \n STACK-NAME: $STACK_NAME \n --------------- \n"
           done
         }
 
@@ -494,10 +541,14 @@ case "${SUBCMD}" in
         update_dev_services
         ;;
     restart)
-        [[ -z "${SERVICE_NAME}" ]] && error 'Missing required option --service-name'
         [[ -z "${ENV_PREFIX}" ]] && error 'Missing required option --stack-name'
         [[ -z "${FORCE}" ]] && warn 'Missing --force, so not going to delete the /mnt/efs directory contents'
         restart_service
+        ;;
+    stop)
+        [[ -z "${ENV_PREFIX}" ]] && error 'Missing required option --stack-name'
+        [[ -z "${FORCE}" ]] && warn 'Missing --force, so not going to delete the /mnt/efs directory contents'
+        stop_cluster
         ;;
     ssh)
         [[ -z "${ENV_PREFIX}" ]] && error 'Missing required option --stack-name'
