@@ -1,7 +1,6 @@
 /* Imports: External */
 import { DeployFunction, DeploymentSubmission } from 'hardhat-deploy/dist/types'
 import { Contract, ContractFactory, utils} from 'ethers'
-import { extendEnvironment } from 'hardhat/config'
 import chalk from 'chalk';
 
 import L1ERC20Json from '../artifacts/contracts/L1ERC20.sol/L1ERC20.json'
