@@ -136,6 +136,8 @@ function info {
 }
 
 function verify_images_in_ecr {
+# cached old docker images makes docker refuse to pull latest!
+  docker system prune -a -f --volumes
 
     if [[ -z ${FROMTAG} ]]; then
       info "Verifying whether there are images for all services in AWS ECR"
