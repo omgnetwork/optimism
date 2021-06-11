@@ -373,7 +373,7 @@ function destroy_dev_services {
 
   function restart_service {
       local force="${1:-}"
-      ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|tail -1|cut -d/ -f2|sed 's#",##g'`
+      ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|tail -1|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'`
       SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
       CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
       ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|tr '\n' ' '`
@@ -387,8 +387,8 @@ function destroy_dev_services {
           aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
         done
         sleep 10
-        aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/db/*" --region ${REGION} --output text
-        aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/geth_l2/*" --region ${REGION} --output text
+      #  aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/db/*" --region ${REGION} --output text
+      #  aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/geth_l2/*" --region ${REGION} --output text
         for num in $SERVICE4RESTART; do
           aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 1 >> /dev/null
         done
@@ -410,24 +410,12 @@ function destroy_dev_services {
 
     function stop_cluster {
         local force="${1:-}"
-        ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|tail -1|cut -d/ -f2|sed 's#",##g'`
+        ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|tail -1|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'`
         SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
         CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
         ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|tr '\n' ' '`
         EC2_INSTANCE=`aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId'`
-        info "STOP ${ECS_CLUSTER} and delete /mnt/efs contents"
-        if [[ "${force}" == "yes" ]] ; then
-          for num in $SERVICE4RESTART; do
-            aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
-          done
-          for task in $ECS_TASKS; do
-            aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
-          done
-          sleep 10
-          aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/db/*" --region ${REGION} --output text
-          aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/geth_l2/*" --region ${REGION} --output text
-          info "Removed contents in /mnt/efs/ and stopped cluster"
-        else
+        info "STOP ${ECS_CLUSTER}"
           for num in $SERVICE4RESTART; do
             aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
           done
@@ -435,7 +423,6 @@ function destroy_dev_services {
             aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
           done
           info "Stopped ${ECS_CLUSTER}"
-        fi
       }
 
 
@@ -458,18 +445,13 @@ function destroy_dev_services {
 
 
 
-
-
-
-
-
 if [[ $# -gt 0 ]]; then
     while [[ $# -gt 0 ]]; do
         case "${1}" in
             -h|--help)
                 print_usage_and_exit
                 ;;
-            create|deploy|update|destroy|restoredb|push2aws|restart|ssh|list-clusters)
+            create|deploy|update|destroy|restoredb|push2aws|restart|ssh|list-clusters|stop)
                 SUBCMD="${1}"
                 shift
                 ;;

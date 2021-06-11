@@ -21,9 +21,7 @@ const logger = createLogger({
   exitOnError: false,
   format: (process.env.NODE_ENV === 'local') ? alignColorsAndTime : format.json(),
   transports: [
-    new transports.Console({
-    format: format.simple(),
-  })
+    new transports.Console()
   ]
 })
 

@@ -16,7 +16,7 @@ Parameters:
 
   CustomMessageRelayerImage:
     Type: String
-    Default: custom-message-relayer
+    Default: message-relayer-fast
 
   DockerPrefix:
     Type: String

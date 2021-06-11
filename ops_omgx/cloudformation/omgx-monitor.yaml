@@ -14,7 +14,6 @@ Parameters:
     Type: String
     Default: push2aws
 
-
   OmgxMonitorImage:
     Type: String
     Default: omgx-monitor
@@ -65,24 +64,18 @@ Resources:
                 Resource:
                   - arn:aws:secretsmanager:us-east-1:942431445534:secret:*
 
-  OmgxMonitorLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      RetentionInDays: 7
-      LogGroupName: !Sub "/omgx/${EnvironmentName}/omgx-monitor/${ImageTag}"
-
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
       ContainerDefinitions:
         - Image: !Sub "${ECRRegistry}/${DockerPrefix}/${OmgxMonitorImage}:${ImageTag}"
-          Name: batch_submitter
+          Name: omgx_monitor
           Environment:
             - Name: SECRETNAME
               Value: !Ref SecretName
             - Name: L2_NODE_WEB3_WS
               Value: !Sub
-                - "https://${EndpointAddress}/ws"
+                - "wss://${EndpointAddress}/ws"
                 - EndpointAddress:
                     Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
           EntryPoint:
@@ -90,15 +83,8 @@ Resources:
           DockerLabels:
             com.datadoghq.ad.check_names: '["omgx-monitor"]'
             com.datadoghq.ad.init_configs: '[{}]'
-            com.datadoghq.ad.logs: '[{"source": "omgx_monitor", "service": "omgx_monitor"}]'
+            com.datadoghq.ad.logs: '[{"source": "omgx_monitor", "service": "omgx_monitor", "log_processing_rules": [{ "type": "multi_line", "name": "log_start_with_message", "pattern" : "%{PROG}" }]}]'
           Essential: true
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-group:
-                Ref: OmgxMonitorLogGroup
-              awslogs-region:
-                Ref: AWS::Region
           Memory: "512"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
