@@ -117,7 +117,7 @@ export class StateBatchSubmitter extends BatchSubmitter {
   }
 
   public async _getBatchStartAndEnd(): Promise<Range> {
-    this.logger.info('Getting batch start and end for state batch submitter...')
+    this.logger.info('TEST: Getting batch start and end for state batch submitter...')
     const startBlock: number =
       (await this.chainContract.getTotalElements()).toNumber() +
       this.blockOffset
@@ -222,12 +222,19 @@ export class StateBatchSubmitter extends BatchSubmitter {
           startBlock + i
         )) as L2Block
         const blockTx = block.transactions[0]
-        if (blockTx.from === this.fraudSubmissionAddress) {
+        
+        this.logger.warn('V2 Found transaction from', {
+          from: blockTx.from.toLowerCase(),
+          fraudSubmissionAddress: this.fraudSubmissionAddress.toLowerCase(),
+        })
+
+        if (blockTx.from.toLowerCase() === this.fraudSubmissionAddress.toLowerCase()) {
           this.logger.warn('Found transaction from fraud submission address', {
             txHash: blockTx.hash,
             fraudSubmissionAddress: this.fraudSubmissionAddress,
           })
-          this.fraudSubmissionAddress = 'no fraud'
+          //disable
+          //this.fraudSubmissionAddress = 'no fraud'
           return '0xbad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1'
         }
         return block.stateRoot

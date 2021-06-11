@@ -8,6 +8,8 @@ import { BaseService } from '@eth-optimism/common-ts'
 
 import { loadContract, loadContractFromManager } from '@eth-optimism/contracts'
 
+const L2_GENESIS_BLOCKS = 1
+
 /* Imports: Internal */
 import {
   ZERO_ADDRESS,
@@ -245,8 +247,10 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     this.state.eventCache = []
 
     this.state.lastFinalizedTxHeight = this.options.fromL2TransactionIndex || 0
+    
     this.state.nextUnfinalizedTxHeight =
       this.options.fromL2TransactionIndex || 0
+    
     this.state.nextUnverifiedStateRoot =
       this.options.fromL2TransactionIndex || 0
   }
@@ -265,13 +269,14 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
 
   protected async _start(): Promise<void> {
     while (this.running) {
+      
       await sleep(this.options.pollingInterval)
 
       try {
-        this.logger.info('Looking for mismatched state roots...')
+        
+        this.logger.info('STEP 0: Looking for mismatched state roots...')
 
-        const fraudulentStateRootIndex =
-          await this._findNextFraudulentStateRoot()
+        const fraudulentStateRootIndex = await this._findNextFraudulentStateRoot()
 
         if (fraudulentStateRootIndex === undefined) {
           this.logger.info('Did not find any mismatched state roots', {
@@ -289,6 +294,7 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
         const proof = await this._getFraudProofData(fraudulentStateRootIndex)
 
         this.logger.info('Initializing the fraud verification process...')
+        
         this.logger.info('The proof:', {
           pre: proof.preStateRootProof,
           tra: proof.transactionProof,
@@ -490,22 +496,25 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
   /**
    * Finds the index of the next fraudulent state root.
    * @return Index of the next fraudulent state root, if any.
+   * This is just a _discovery_ function 
+   * Nothing fancy going on here....
    */
   private async _findNextFraudulentStateRoot(): Promise<number | undefined> {
-    this.logger.info('getStateRootBatchHeader', {
-      nUSR: this.state.nextUnverifiedStateRoot,
+    
+    this.logger.info('STEP0:1 getStateRootBatchHeader for this', {
+      nUnvStateRoot: this.state.nextUnverifiedStateRoot,
     })
 
     let nextBatchHeader = await this.state.l1Provider.getStateRootBatchHeader(
       this.state.nextUnverifiedStateRoot
     )
 
-    this.logger.info('_findNextFraudulentStateRoot(): nextBatchHeader', {
+    this.logger.info('STEP0:2 _findNextFraudulentStateRoot(): nextBatchHeader - here it is', {
       nextBatchHeader,
     })
 
     while (nextBatchHeader !== undefined) {
-      //this.logger.info("ok, let's have a look", { nextBatchHeader })
+      this.logger.info("STEP0:3 ok, let's have a look, and get the BatchStateRoots for this header", { nextBatchHeader })
 
       const nextBatchStateRoots =
         await this.state.l1Provider.getBatchStateRoots(
@@ -513,24 +522,25 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
         )
 
       for (let i = 0; i < nextBatchHeader.batchSize.toNumber(); i++) {
+        
         const index = i + nextBatchHeader.prevTotalElements.toNumber()
 
-        this.logger.info('Checking state root for mismatch', { index })
+        this.logger.info('STEP0:4 Checking state root for mismatch', { index })
 
         const l1StateRoot = nextBatchStateRoots[i]
 
         const l2StateRoot = await this.state.l2Provider.getStateRoot(
-          index + this.options.l2BlockOffset
+          index + L2_GENESIS_BLOCKS //this.options.l2BlockOffset
         )
 
         if (l1StateRoot !== l2StateRoot) {
-          this.logger.info('State roots do not match')
+          this.logger.info('STEP0:5 State roots do not match')
           this.logger.info('L1 State Root', { l1StateRoot })
           this.logger.info('L2 State Root', { l2StateRoot })
           this.logger.info('Returning index of the mismatch', { index })
           return index
         } else {
-          this.logger.info('State root was not mismatched ✓')
+          this.logger.info('STEP0:5 State root was not mismatched ✓')
         }
       }
 

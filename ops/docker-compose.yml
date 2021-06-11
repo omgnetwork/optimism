@@ -1,5 +1,6 @@
 # TODO: Prefix all env vars with service name
 # TODO: Allow specifing the image tag to use
+
 version: "3"
 
 services:
@@ -131,6 +132,10 @@ services:
         L2_NODE_WEB3_URL: http://l2geth:8545
         URL: http://deployer:8081/addresses.json
         SEQUENCER_PRIVATE_KEY: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+        # hardhat's 17th account, DO NOT use in production
+        # Account #17: 0xbda5747bfd65f08deb54cb465eb87d40e51b197e (10000 ETH)
+        # Private Key: 0x689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd
+        FRAUD_SUBMISSION_ADDRESS: "0xbda5747bfd65f08deb54cb465eb87d40e51b197e"
 
   verifier:
     depends_on:
@@ -175,4 +180,3 @@ services:
       URL: http://deployer:8081/addresses.json
       ENABLE_GAS_REPORT: 1
       NO_NETWORK: 1
-

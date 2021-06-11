@@ -91,7 +91,7 @@ export class L2ProviderWrapper {
     ])
 
     console.log('If this is empty, there is a major problem')
-    console.log('proof:', proof)
+    console.log('Proof:', proof)
 
     return {
       header: proof.header,

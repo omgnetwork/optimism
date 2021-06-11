@@ -183,6 +183,7 @@ export class L1ProviderWrapper {
   public async getTransactionBatchHeader(
     index: number
   ): Promise<TransactionBatchHeader> {
+    
     const event = await this._getTransactionBatchEvent(index)
 
     if (!event) {
@@ -218,6 +219,7 @@ export class L1ProviderWrapper {
     )
 
     if ((event as any).isSequencerBatch) {
+      
       const transactions = []
 
       const txdata = fromHexString(transaction.data)
@@ -287,6 +289,7 @@ export class L1ProviderWrapper {
   public async getTransactionBatchProof(
     index: number
   ): Promise<TransactionBatchProof> {
+    
     const batchHeader = await this.getTransactionBatchHeader(index)
     console.log('\nbatchHeader:', batchHeader)
 
@@ -384,12 +387,14 @@ export class L1ProviderWrapper {
   }
 
   private async _getStateRootBatchEvent(index: number): Promise<Event> {
+    
     const events = await this.findAllEvents(
       this.OVM_StateCommitmentChain,
       this.OVM_StateCommitmentChain.filters.StateBatchAppended()
     )
 
-    console.log('All events in the OVM_StateCommitmentChain:', events)
+    //console.log('All events in the OVM_StateCommitmentChain:', events)
+    console.log('Step 1 (_getStateRootBatchEvent)')
 
     if (events.length === 0) {
       return
