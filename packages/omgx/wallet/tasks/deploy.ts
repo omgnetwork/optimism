@@ -34,26 +34,6 @@ task('deploy', 'Deploy contracts to L1 and L2').addOptionalParam(
   DEFAULT_EM_OVM_CHAIN_ID,
   types.int
 ).setAction(async (args, hre: any, runSuper) => {
-  // console.log(hre)
-
-  //   console.log(args)
-    // Factory__L2LiquidityPool = new ContractFactory(
-    //   L2LiquidityPoolJson.abi,
-    //   L2LiquidityPoolJson.bytecode,
-    //   args.deployer_l2
-    // )
-    // const watcher = await initWatcher(args.l1provider, args.l2provider, args.addressManager)
-    // L2LiquidityPool = await Factory__L2LiquidityPool.deploy(
-    //   watcher.l2.messengerAddress,
-    //   {gasLimit: 800000, gasPrice: 0}
-    // )
-    // await L2LiquidityPool.deployTransaction.wait()
-    // console.log(L2LiquidityPool.address)
-    // await deploy('L2LiquidityPool', {
-    //   from: args.deployer_l2,
-    //   args: [],
-    //   log: true,
-    // })
     hre.deployConfig = args
     return runSuper(args)
   })
