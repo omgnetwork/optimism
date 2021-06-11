@@ -164,8 +164,16 @@ function verify_images_in_ecr {
           aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
           cd ${PATH_TO_DOCKER}/${image}
           cp -fRv ../../secret2env .
-          docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-          docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG}
+          if [[ $image == 'l2geth' ]]; then
+            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/go-ethereum" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG}
+          elif [[ $image == 'custom-message-relayer' ]]; then
+            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG}
+          else
+            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG}
+          fi
           cd ../..
         done
       else
@@ -173,12 +181,30 @@ function verify_images_in_ecr {
         cd ${PATH_TO_DOCKER}/${SERVICE_NAME}
         cp -fRv ../../secret2env .
         if [ -z ${FROMTAG} ]; then
-          docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${SERVICE_NAME}" --build-arg BUILD_IMAGE_VERSION="${DEPLOYTAG}"
+          if [[ $SERVICE_NAME == 'l2geth' ]]; then
+            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/go-ethereum" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
+          elif [[ $SERVICE_NAME == 'custom-message-relayer' ]]; then
+            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
+          else
+            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
+          fi
           info "Login to AWS ECR and start building image"
           aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
           docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
         else
-          docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${SERVICE_NAME}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+          if [[ $SERVICE_NAME == 'l2geth' ]]; then
+            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/go-ethereum" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
+          elif [[ $SERVICE_NAME == 'custom-message-relayer' ]]; then
+            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
+          else
+            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${SERVICE_NAME}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
+          fi
           info "Login to AWS ECR and start building image"
           aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
           docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
