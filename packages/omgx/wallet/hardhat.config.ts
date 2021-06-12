@@ -3,7 +3,6 @@ import 'hardhat-deploy'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@eth-optimism/hardhat-ovm'
-import "hardhat-deploy-ethers";
 import './tasks/deploy'
 
 const config: HardhatUserConfig = {
