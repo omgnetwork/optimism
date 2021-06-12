@@ -15,10 +15,7 @@ const main = async () => {
 
   const env = process.env
   const L1_NODE_WEB3_URL = config.str('l1-node-web3-url', env.L1_NODE_WEB3_URL)
-  const L2_NODE_WEB3_URL = config.str(
-    'verifier-web3-url',
-    env.VERIFIER_WEB3_URL
-  )
+  const VERIFIER_WEB3_URL = config.str('verifier-web3-url', env.VERIFIER_WEB3_URL)
 
   const ADDRESS_MANAGER_ADDRESS = config.str(
     'address-manager-address',
@@ -27,6 +24,7 @@ const main = async () => {
   const L1_WALLET_KEY = config.str('l1-wallet-key', env.L1_WALLET_KEY)
   const MNEMONIC = config.str('mnemonic', env.MNEMONIC)
   const HD_PATH = config.str('hd-path', env.HD_PATH)
+  
   const RELAY_GAS_LIMIT = config.uint(
     'relay-gas-limit',
     parseInt(env.RELAY_GAS_LIMIT, 10) || 4000000
@@ -66,13 +64,13 @@ const main = async () => {
   if (!L1_NODE_WEB3_URL) {
     throw new Error('Must pass L1_NODE_WEB3_URL')
   }
-  if (!L2_NODE_WEB3_URL) {
-    throw new Error('Must pass L2_NODE_WEB3_URL')
+  if (!VERIFIER_WEB3_URL) {
+    throw new Error('Must pass VERIFIER_WEB3_URL')
   }
 
   console.log('The L2 block offset is:', L2_BLOCK_OFFSET)
 
-  const l2Provider = new providers.JsonRpcProvider(L2_NODE_WEB3_URL)
+  const l2Provider = new providers.JsonRpcProvider(VERIFIER_WEB3_URL)
   const l1Provider = new providers.JsonRpcProvider(L1_NODE_WEB3_URL)
 
   let wallet: Wallet

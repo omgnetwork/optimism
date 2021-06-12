@@ -73,13 +73,16 @@ export class StateBatchSubmitter extends BatchSubmitter {
    ****************************/
 
   public async _updateChainInfo(): Promise<void> {
+    
     const info: RollupInfo = await this._getRollupInfo()
+    
     if (info.mode === 'verifier') {
       this.logger.error(
         'Verifier mode enabled! Batch submitter only compatible with sequencer mode'
       )
       process.exit(1)
     }
+    
     this.syncing = info.syncing
     const addrs = await this._getChainAddresses()
     const sccAddress = addrs.sccAddress
@@ -117,17 +120,18 @@ export class StateBatchSubmitter extends BatchSubmitter {
   }
 
   public async _getBatchStartAndEnd(): Promise<Range> {
+    
     this.logger.info('TEST: Getting batch start and end for state batch submitter...')
-    const startBlock: number =
-      (await this.chainContract.getTotalElements()).toNumber() +
-      this.blockOffset
+    
+    const startBlock: number = (await this.chainContract.getTotalElements()).toNumber() + this.blockOffset
+    
     this.logger.info('Retrieved start block number from SCC', {
       startBlock,
     })
 
     // We will submit state roots for txs which have been in the tx chain for a while.
-    const totalElements: number =
-      (await this.ctcContract.getTotalElements()).toNumber() + this.blockOffset
+    const totalElements: number = (await this.ctcContract.getTotalElements()).toNumber() + this.blockOffset
+    
     this.logger.info('Retrieved total elements from CTC', {
       totalElements,
     })
@@ -138,6 +142,7 @@ export class StateBatchSubmitter extends BatchSubmitter {
     )
 
     if (startBlock >= endBlock) {
+      
       if (startBlock > endBlock) {
         this.logger.error(
           'State commitment chain is larger than transaction chain. This should never happen!'
@@ -148,6 +153,11 @@ export class StateBatchSubmitter extends BatchSubmitter {
       )
       return
     }
+
+    this.logger.info(
+      'Finally - we have something to do!'
+    )
+
     return {
       start: startBlock,
       end: endBlock,
@@ -158,12 +168,16 @@ export class StateBatchSubmitter extends BatchSubmitter {
     startBlock: number,
     endBlock: number
   ): Promise<TransactionReceipt> {
+    
     const batch = await this._generateStateCommitmentBatch(startBlock, endBlock)
+    
     const tx = this.chainContract.interface.encodeFunctionData(
       'appendStateBatch',
       [batch, startBlock]
     )
+    
     const batchSizeInBytes = remove0x(tx).length / 2
+    
     this.logger.debug('State batch generated', {
       batchSizeInBytes,
       tx,
@@ -174,9 +188,11 @@ export class StateBatchSubmitter extends BatchSubmitter {
     }
 
     const offsetStartsAtIndex = startBlock - this.blockOffset
+    
     this.logger.debug('Submitting batch.', { tx })
 
     const nonce = await this.signer.getTransactionCount()
+    
     const contractFunction = async (gasPrice): Promise<TransactionReceipt> => {
       this.logger.info('Submitting appendStateBatch transaction', {
         gasPrice,

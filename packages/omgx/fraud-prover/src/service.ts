@@ -38,6 +38,7 @@ import {
 } from './types'
 
 interface FraudProverOptions {
+  
   // Providers for interacting with L1 and L2.
   l1RpcProvider: providers.JsonRpcProvider
   l2RpcProvider: providers.JsonRpcProvider
@@ -268,6 +269,7 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
 */
 
   protected async _start(): Promise<void> {
+    
     while (this.running) {
       
       await sleep(this.options.pollingInterval)
@@ -320,7 +322,7 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
         const { OVM_StateTransitioner, OVM_StateManager } =
           await this._getFraudProofContracts(
             await this.state.l1Provider.getStateRoot(
-              fraudulentStateRootIndex - 1
+              fraudulentStateRootIndex
             ),
             proof.transactionProof.transaction
           )
@@ -334,6 +336,7 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
             this.logger.info('Fraud proof is now in the PRE_EXECUTION phase.')
 
             this.logger.info('Proving account states...')
+            
             await this._proveAccountStates(
               OVM_StateTransitioner,
               OVM_StateManager,
@@ -501,46 +504,67 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
    */
   private async _findNextFraudulentStateRoot(): Promise<number | undefined> {
     
-    this.logger.info('STEP0:1 getStateRootBatchHeader for this', {
-      nUnvStateRoot: this.state.nextUnverifiedStateRoot,
+    this.logger.info('STEP0:1 getStateRootBatchHeader for the nextUnverifiedStateRoot', {
+      nextUnverifiedStateRoot: this.state.nextUnverifiedStateRoot,
     })
 
     let nextBatchHeader = await this.state.l1Provider.getStateRootBatchHeader(
       this.state.nextUnverifiedStateRoot
     )
 
-    this.logger.info('STEP0:2 _findNextFraudulentStateRoot(): nextBatchHeader - here it is', {
-      nextBatchHeader,
-    })
+    console.log('STEP0:2 _findNextFraudulentStateRoot(): nextBatchHeader data from the l1: ', nextBatchHeader )
 
     while (nextBatchHeader !== undefined) {
-      this.logger.info("STEP0:3 ok, let's have a look, and get the BatchStateRoots for this header", { nextBatchHeader })
+      
+      this.logger.info("STEP0:3 ok, let's have a look, and get the L1 BatchStateRoots for this header", { nextBatchHeader })
 
-      const nextBatchStateRoots =
-        await this.state.l1Provider.getBatchStateRoots(
-          this.state.nextUnverifiedStateRoot
-        )
+      const nextBatchStateRoots = await this.state.l1Provider.getBatchStateRoots(this.state.nextUnverifiedStateRoot)
+
+      console.log("STEP0:4 ok here are the L1 nextBatchStateRoots for this header:", nextBatchStateRoots )
 
       for (let i = 0; i < nextBatchHeader.batchSize.toNumber(); i++) {
         
         const index = i + nextBatchHeader.prevTotalElements.toNumber()
 
-        this.logger.info('STEP0:4 Checking state root for mismatch', { index })
+        console.log('STEP0:5 Checking state root for mismatch', index)
 
-        const l1StateRoot = nextBatchStateRoots[i]
+        const l1StateRoot = nextBatchStateRoots[i] //seems dangerous, no?
+
+        console.log('STEP0:6 l1StateRoot', l1StateRoot)
+
+        // const l2StateRootm2 = await this.state.l2Provider.getStateRoot(
+        //   index + L2_GENESIS_BLOCKS - 2
+        // )
+        // console.log('STEP0:7 l2StateRoot - 2:', l2StateRootm2)
+
+        // const l2StateRootm1 = await this.state.l2Provider.getStateRoot(
+        //   index + L2_GENESIS_BLOCKS - 1
+        // )
+        // console.log('STEP0:7 l2StateRoot - 1:', l2StateRootm1)
 
         const l2StateRoot = await this.state.l2Provider.getStateRoot(
-          index + L2_GENESIS_BLOCKS //this.options.l2BlockOffset
+          index + L2_GENESIS_BLOCKS
         )
+        console.log('STEP0:7 l2StateRoot:', l2StateRoot)
+
+        // const l2StateRootp1 = await this.state.l2Provider.getStateRoot(
+        //   index + L2_GENESIS_BLOCKS + 1
+        // )
+        // console.log('STEP0:7 l2StateRoot + 1:', l2StateRootp1)
+
+        // const l2StateRootp2 = await this.state.l2Provider.getStateRoot(
+        //   index + L2_GENESIS_BLOCKS + 2
+        // )
+        // console.log('STEP0:7 l2StateRoot + 2:', l2StateRootp2)
 
         if (l1StateRoot !== l2StateRoot) {
-          this.logger.info('STEP0:5 State roots do not match')
+          this.logger.info('STEP0:8 State root MISMATCH')
           this.logger.info('L1 State Root', { l1StateRoot })
           this.logger.info('L2 State Root', { l2StateRoot })
           this.logger.info('Returning index of the mismatch', { index })
           return index
         } else {
-          this.logger.info('STEP0:5 State root was not mismatched ✓')
+          this.logger.info('STEP0:8 State root MATCH - all good ✓')
         }
       }
 
@@ -562,38 +586,62 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
   private async _getFraudProofData(
     transactionIndex: number
   ): Promise<FraudProofData> {
-    this.logger.info(
-      'Getting pre-state root inclusion proof for index - 1...',
-      { preIndex: transactionIndex - 1 }
-    )
+    
+    this.logger.info('Getting pre-state root inclusion proof for index:', { 
+      preIndex: transactionIndex - 1
+    })
+    
+    //does not make a lot of sense - one of these is wrong
+    //this breaks at the edge case where there is fraud in ther first block
+    if( transactionIndex - 1 < 0 ) {
+      this.logger.error('FRAUD IN BLOCK ZERO - EDGE CASE - NO PREVIOUS TRANSACTION', { 
+        preIndex: transactionIndex - 1
+      })
+    }
+
     const preStateRootProof =
       await this.state.l1Provider.getStateRootBatchProof(transactionIndex - 1)
 
-    this.logger.info('Getting post-state root inclusion proof for index...', {
-      postIndex: transactionIndex,
+    console.log("STEP:4:0 preStateRootProof:",preStateRootProof)
+
+    this.logger.info('Getting post-state root inclusion proof for index:', {
+      postIndex: transactionIndex
     })
+
     const postStateRootProof =
       await this.state.l1Provider.getStateRootBatchProof(transactionIndex)
 
+    console.log("STEP:4:1 preStateRootProof:",postStateRootProof)
+
     this.logger.info('Getting transaction inclusion proof...')
+    
     const transactionProof =
       await this.state.l1Provider.getTransactionBatchProof(transactionIndex)
+    
     //this might be ok at this point?
     //this.logger.info('Transaction inclusion proof...',{transactionProof})
 
     console.log(
       'The right index?',
-      transactionIndex + this.options.l2BlockOffset
+      transactionIndex + L2_GENESIS_BLOCKS
     )
     this.logger.info('Getting state diff proof...')
 
+/*
+this.logger.info('Getting state diff proof...')
+    const stateDiffProof: StateDiffProof = await this.state.l2Provider.getStateDiffProof(
+      transactionIndex + this.options.l2BlockOffset - 1
+    )
+*/
+
     const stateDiffProof: StateDiffProof =
       await this.state.l2Provider.getStateDiffProof(
-        transactionIndex + this.options.l2BlockOffset
+        transactionIndex + L2_GENESIS_BLOCKS
       )
-    //this.logger.info('State diff proof...',{stateDiffProof})
+    this.logger.info('State diff proof...',{stateDiffProof})
 
     const stateTrie = await this._makeStateTrie(stateDiffProof)
+    
     const storageTries = await this._makeAccountTries(stateDiffProof)
 
     return {
@@ -660,12 +708,13 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
    * @return View of the state trie.
    */
   private async _makeStateTrie(proof: StateDiffProof): Promise<BaseTrie> {
+    
     this.logger.info('_makeStateTrie for this proof:', { proof })
 
     if (proof.accountStateProofs === null) {
       //not sure why this is happening
       this.logger.info('_makeStateTrie proof.accountStateProofs === null')
-      return
+      //return
     }
 
     return makeTrieFromProofs(

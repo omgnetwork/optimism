@@ -66,9 +66,11 @@ export abstract class BatchSubmitter {
   public abstract _updateChainInfo(): Promise<void>
 
   public async submitNextBatch(): Promise<TransactionReceipt> {
+    
     if (typeof this.l2ChainId === 'undefined') {
       this.l2ChainId = await this._getL2ChainId()
     }
+    
     await this._updateChainInfo()
     await this._checkBalance()
 
@@ -83,8 +85,13 @@ export abstract class BatchSubmitter {
       )
       return this._onSync()
     }
+    
     const range = await this._getBatchStartAndEnd()
+    
     if (!range) {
+      this.logger.info(
+        'Nothing to do - not submitting a batch'
+      )
       return
     }
 
