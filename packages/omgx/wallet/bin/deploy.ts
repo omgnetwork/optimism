@@ -3,6 +3,8 @@ import {JsonRpcProvider} from '@ethersproject/providers'
 import { Contract } from 'ethers'
 import { getContractFactory } from '@eth-optimism/contracts'
 import { Watcher } from '@eth-optimism/core-utils'
+import * as request from "request-promise-native";
+
 // import path from 'path'
 // import dirtree from 'directory-tree'
 // import fs from 'fs'
@@ -17,29 +19,20 @@ process.env.CONTRACTS_DEPLOYER_KEY = process.env.DEPLOYER_PRIVATE_KEY
 process.env.CONTRACTS_RPC_URL =
   process.env.L1_NODE_WEB3_URL || 'http://127.0.0.1:8545'
 
+
 import hre from 'hardhat'
 
+const deployer = new Wallet(process.env.DEPLOYER_PRIVATE_KEY)
 
 const main = async () => {
-
+  console.log('Starting wallet deploy...')
   const config = parseEnv()
-
-//   const l1Messenger = getContractFactory('iOVM_L1CrossDomainMessenger')
-//   .connect(bobl1Wallet)
-//   .attach(watcher.l1.messengerAddress)
-
-// const l1MessengerAddress = l1Messenger.address;
-
-// const l2Messenger = getContractFactory('iOVM_L2CrossDomainMessenger')
-//   .connect(bobl2Wallet)
-//   .attach(watcher.l2.messengerAddress)
   const l1Provider = new providers.JsonRpcProvider(process.env.L1_NODE_WEB3_URL)
   const l2Provider = new providers.JsonRpcProvider(process.env.L2_NODE_WEB3_URL)
   const deployer_1 = new Wallet(process.env.DEPLOYER_PRIVATE_KEY, l1Provider)
   const deployer_2 = new Wallet(process.env.DEPLOYER_PRIVATE_KEY, l2Provider)
-  const addressManagerAddress = process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
 
-  const getAddressManager = (provider: any) => {
+  const getAddressManager = (provider: any, addressManagerAddress: any) => {
     return getContractFactory('Lib_AddressManager')
       .connect(provider)
       .attach(addressManagerAddress) as any
@@ -68,7 +61,14 @@ const main = async () => {
     })
   }
 
-  const watcher = await initWatcher(l1Provider, l2Provider, getAddressManager(deployer_1))
+  const deployer_url = process.env.URL
+    var options = {
+        uri: deployer_url,
+    };
+  const result = await request.get(options);
+  let addressManager = JSON.parse(result).AddressManager;
+
+  const watcher = await initWatcher(l1Provider, l2Provider, getAddressManager(deployer_1, addressManager))
   await hre.run('deploy', {
     watcher: watcher,
     l1provider: l1Provider,
@@ -77,39 +77,10 @@ const main = async () => {
     deployer_l2: deployer_2,
     emOvmChainId: config.emOvmChainId,
     noCompile: process.env.NO_COMPILE ? true : false,
-    addressManager: getAddressManager(deployer_1),
+    addressManager: getAddressManager(deployer_1, addressManager),
     getAddressManager: getAddressManager
   })
 
-  // // Stuff below this line is currently required for CI to work properly. We probably want to
-  // // update our CI so this is no longer necessary. But I'm adding it for backwards compat so we can
-  // // get the hardhat-deploy stuff merged. Woot.
-  // const nicknames = {
-  //   'Lib_AddressManager': 'AddressManager',
-  //   'mockOVM_BondManager': 'OVM_BondManager'
-  // }
-
-  // const contracts: any = dirtree(
-  //   path.resolve(__dirname, `../deployments/custom`)
-  // ).children.filter((child) => {
-  //   return child.extension === '.json'
-  // }).reduce((contracts, child) => {
-  //   const contractName = child.name.replace('.json', '')
-  //   const artifact = require(path.resolve(__dirname, `../deployments/custom/${child.name}`))
-  //   contracts[nicknames[contractName] || contractName] = artifact.address
-  //   return contracts
-  // }, {})
-
-  // contracts.OVM_Sequencer = await sequencer.getAddress()
-  // contracts.Deployer = await deployer.getAddress()
-
-  // const addresses = JSON.stringify(contracts, null, 2)
-  // const dumpsPath = path.resolve(__dirname, "../dist/dumps")
-  // if (!fs.existsSync(dumpsPath)) {
-  //   fs.mkdirSync(dumpsPath)
-  // }
-  // const addrsPath = path.resolve(dumpsPath, 'addresses.json')
-  // fs.writeFileSync(addrsPath, addresses)
 }
 
 main()
