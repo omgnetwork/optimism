@@ -41,7 +41,8 @@ interface FraudProverOptions {
   
   // Providers for interacting with L1 and L2.
   l1RpcProvider: providers.JsonRpcProvider
-  l2RpcProvider: providers.JsonRpcProvider
+  l2VRpcProvider: providers.JsonRpcProvider
+  l2SRpcProvider: providers.JsonRpcProvider
 
   // Address of the AddressManager contract, used to resolve the various addresses we'll need
   // within this service.
@@ -86,6 +87,7 @@ const optionSettings = {
 }
 
 export class FraudProverService extends BaseService<FraudProverOptions> {
+  
   constructor(options: FraudProverOptions) {
     super('Fraud_Prover', options, optionSettings)
   }
@@ -102,13 +104,15 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     OVM_L2CrossDomainMessenger: Contract
     OVM_L2ToL1MessagePasser: Contract
     l1Provider: L1ProviderWrapper
-    l2Provider: L2ProviderWrapper
+    l2SProvider: L2ProviderWrapper
+    l2VProvider: L2ProviderWrapper
     OVM_CanonicalTransactionChain: Contract
     OVM_FraudVerifier: Contract
     OVM_ExecutionManager: Contract
   }
 
   protected async _init(): Promise<void> {
+    
     this.logger.info('Initializing fraud prover', { options: this.options })
 
     // Need to improve this, sorry.
@@ -138,21 +142,41 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
       }
     }
 
-    this.logger.info('Trying to connect to the L2 network...')
+    this.logger.info('Trying to connect to the Sequencer...')
     for (let i = 0; i < 10; i++) {
       try {
-        await this.options.l2RpcProvider.detectNetwork()
-        this.logger.info('Successfully connected to the L2 network.')
+        await this.options.l2SRpcProvider.detectNetwork()
+        this.logger.info('Successfully connected to the L2 Sequencer (debug purposes only).')
         break
       } catch (err) {
         if (i < 9) {
-          this.logger.info('Unable to connect to L2 network', {
+          this.logger.info('Unable to connect to L2 Sequencer', {
             retryAttemptsRemaining: 10 - i,
           })
           await sleep(1000)
         } else {
           throw new Error(
-            `Unable to connect to the L2 network, check that your L2 endpoint is correct.`
+            `Unable to connect to the L2 Sequencer, check that your L2 Sequencer endpoint is correct.`
+          )
+        }
+      }
+    }
+
+    this.logger.info('Trying to connect to the Verifier...')
+    for (let i = 0; i < 10; i++) {
+      try {
+        await this.options.l2VRpcProvider.detectNetwork()
+        this.logger.info('Successfully connected to the L2 Verifier (debug purposes only).')
+        break
+      } catch (err) {
+        if (i < 9) {
+          this.logger.info('Unable to connect to L2 Verifier', {
+            retryAttemptsRemaining: 10 - i,
+          })
+          await sleep(1000)
+        } else {
+          throw new Error(
+            `Unable to connect to the L2 Verifier, check that your L2 Verifier endpoint is correct.`
           )
         }
       }
@@ -221,7 +245,8 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
       this.options.l1BlockFinality
     )
 
-    this.state.l2Provider = new L2ProviderWrapper(this.options.l2RpcProvider)
+    this.state.l2SProvider = new L2ProviderWrapper(this.options.l2SRpcProvider)
+    this.state.l2VProvider = new L2ProviderWrapper(this.options.l2VRpcProvider)
 
     this.logger.info(
       'Caching events for relevant contracts, this might take a while...'
@@ -255,18 +280,6 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     this.state.nextUnverifiedStateRoot =
       this.options.fromL2TransactionIndex || 0
   }
-
-  /*
-{"level":30,"time":1621896406019,"proof":{"header":{"number":6,"hash":"0xdf2e2dc16c24dcd3385d8965de1ac205e883199af730313915a3b971dc018f68","stateRoot":"0xf121b2f028e2f1810f16e9138712b14532ff6cf5ca101e8b93a2300aa87c2c61","timestamp":1621896367},"accountStateProofs":null},"msg":"_makeStateTrie"}
-
-{"level":50,"time":1621896406019,"err":{"type":"TypeError","message":"
-Cannot read property 'map' of null","stack":"TypeError: Cannot read property 'map' of null\n at 
-FraudProverService._makeStateTrie (/opt/fraud-prover/src/service.ts:661:32)\n at 
-FraudProverService._getFraudProofData (/opt/fraud-prover/src/service.ts:556:34)\n at 
-runMicrotasks (<anonymous>)\n at processTicksAndRejections (internal/process/task_queues.js:95:5)\n at 
-FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudProverService.start 
-(/opt/fraud-prover/node_modules/@eth-optimism/core-utils/src/base-service.ts:57:5)\n at main (/opt/fraud-prover/src/exec/run.ts:63:3)\n at /opt/fraud-prover/exec/run.js:6:3"},"msg":"Caught an unhandled error"}
-*/
 
   protected async _start(): Promise<void> {
     
@@ -542,10 +555,15 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
         // )
         // console.log('STEP0:7 l2StateRoot - 1:', l2StateRootm1)
 
-        const l2StateRoot = await this.state.l2Provider.getStateRoot(
+        const l2SStateRoot = await this.state.l2SProvider.getStateRoot(
           index + L2_GENESIS_BLOCKS
         )
-        console.log('STEP0:7 l2StateRoot:', l2StateRoot)
+        console.log('STEP0:7 l2_SEQUENCER_StateRoot:', l2SStateRoot)
+
+        const l2VStateRoot = await this.state.l2VProvider.getStateRoot(
+          index + L2_GENESIS_BLOCKS
+        )
+        console.log('STEP0:7 l2_VERIFIER_StateRoot:', l2VStateRoot)
 
         // const l2StateRootp1 = await this.state.l2Provider.getStateRoot(
         //   index + L2_GENESIS_BLOCKS + 1
@@ -557,6 +575,8 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
         // )
         // console.log('STEP0:7 l2StateRoot + 2:', l2StateRootp2)
 
+        const l2StateRoot = l2SStateRoot; //for now
+        
         if (l1StateRoot !== l2StateRoot) {
           this.logger.info('STEP0:8 State root MISMATCH')
           this.logger.info('L1 State Root', { l1StateRoot })
@@ -588,11 +608,10 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
   ): Promise<FraudProofData> {
     
     this.logger.info('Getting pre-state root inclusion proof for index:', { 
-      preIndex: transactionIndex - 1
+      preIndex: transactionIndex - 1 //because we care about the _pre-state root_ inclusion proof
     })
     
-    //does not make a lot of sense - one of these is wrong
-    //this breaks at the edge case where there is fraud in ther first block
+    //this breaks at the edge case where there is fraud in the first block
     if( transactionIndex - 1 < 0 ) {
       this.logger.error('FRAUD IN BLOCK ZERO - EDGE CASE - NO PREVIOUS TRANSACTION', { 
         preIndex: transactionIndex - 1
@@ -634,11 +653,23 @@ this.logger.info('Getting state diff proof...')
     )
 */
 
-    const stateDiffProof: StateDiffProof =
-      await this.state.l2Provider.getStateDiffProof(
+    const stateDiffProofV: StateDiffProof =
+      await this.state.l2VProvider.getStateDiffProof(
         transactionIndex + L2_GENESIS_BLOCKS
       )
-    this.logger.info('State diff proof...',{stateDiffProof})
+    this.logger.info('State diff proof V...',{stateDiffProofV})
+
+    const stateDiffProofS: StateDiffProof =
+      await this.state.l2SProvider.getStateDiffProof(
+        transactionIndex + L2_GENESIS_BLOCKS
+      )
+    this.logger.info('State diff proof S...',{stateDiffProofS})
+
+    const stateDiffProof: StateDiffProof =
+      await this.state.l2SProvider.getStateDiffProof(
+        transactionIndex + L2_GENESIS_BLOCKS
+      )
+    this.logger.info('State diff proof S...',{stateDiffProofS})
 
     const stateTrie = await this._makeStateTrie(stateDiffProof)
     
@@ -809,7 +840,7 @@ this.logger.info('Getting state diff proof...')
         continue
       }
 
-      const accountCode = await this.options.l2RpcProvider.getCode(
+      const accountCode = await this.options.l2SRpcProvider.getCode(
         accountStateProof.address,
         fraudulentStateRootIndex + this.options.l2BlockOffset
       )

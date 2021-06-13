@@ -29,12 +29,14 @@ describe('Syncing a verifier', () => {
   }
 
   const startVerifier = async () => {
+    
     // Bring up new verifier
     verifier = new DockerComposeNetwork(['verifier'])
     await verifier.up({ commandOptions: ['--scale', 'verifier=1'] })
 
     // Wait for verifier to be looping
     let logs = await verifier.logs()
+    
     while (!logs.out.includes('Starting Sequencer Loop')) {
       await sleep(500)
       logs = await verifier.logs()
@@ -44,8 +46,10 @@ describe('Syncing a verifier', () => {
   }
 
   const syncVerifier = async (sequencerBlockNumber: number) => {
+    
     // Wait until verifier has caught up to the sequencer
     let latestVerifierBlock = (await provider.getBlock('latest')) as any
+    
     while (latestVerifierBlock.number < sequencerBlockNumber) {
       await sleep(500)
       latestVerifierBlock = (await provider.getBlock('latest')) as any
@@ -60,12 +64,14 @@ describe('Syncing a verifier', () => {
   })
 
   describe('Basic transactions', () => {
+    
     after(async () => {
       await verifier.stop('verifier')
       await verifier.rm()
     })
 
     it('should sync dummy transaction', async () => {
+      
       const totalElementsBefore =
         (await env.ctc.getTotalElements()) as BigNumber
 
@@ -76,7 +82,9 @@ describe('Syncing a verifier', () => {
         data: '0x',
         value: 0,
       }
+
       const result = await wallet.sendTransaction(tx)
+      
       await result.wait()
 
       const totalElementsAfter = await waitForBatchSubmission(

@@ -7,14 +7,18 @@ import Config from 'bcfg'
 dotenv.config()
 
 const main = async () => {
+  
   const config: Bcfg = new Config('fraud-prover')
+  
   config.load({
     env: true,
     argv: true,
   })
 
   const env = process.env
+
   const L1_NODE_WEB3_URL = config.str('l1-node-web3-url', env.L1_NODE_WEB3_URL)
+  const L2_NODE_WEB3_URL = config.str('l2-node-web3-url', env.L2_NODE_WEB3_URL)
   const VERIFIER_WEB3_URL = config.str('verifier-web3-url', env.VERIFIER_WEB3_URL)
 
   const ADDRESS_MANAGER_ADDRESS = config.str(
@@ -64,14 +68,18 @@ const main = async () => {
   if (!L1_NODE_WEB3_URL) {
     throw new Error('Must pass L1_NODE_WEB3_URL')
   }
+  if (!L2_NODE_WEB3_URL) {
+    throw new Error('Must pass L2_NODE_WEB3_URL')
+  }
   if (!VERIFIER_WEB3_URL) {
     throw new Error('Must pass VERIFIER_WEB3_URL')
   }
 
   console.log('The L2 block offset is:', L2_BLOCK_OFFSET)
 
-  const l2Provider = new providers.JsonRpcProvider(VERIFIER_WEB3_URL)
-  const l1Provider = new providers.JsonRpcProvider(L1_NODE_WEB3_URL)
+  const l2SProvider = new providers.JsonRpcProvider(L2_NODE_WEB3_URL)
+  const l2VProvider = new providers.JsonRpcProvider(VERIFIER_WEB3_URL)
+  const l1Provider  = new providers.JsonRpcProvider(L1_NODE_WEB3_URL)
 
   let wallet: Wallet
   if (L1_WALLET_KEY) {
@@ -85,7 +93,8 @@ const main = async () => {
 
   const service = new FraudProverService({
     l1RpcProvider: l1Provider,
-    l2RpcProvider: l2Provider,
+    l2SRpcProvider: l2SProvider,
+    l2VRpcProvider: l2VProvider,
     addressManagerAddress: ADDRESS_MANAGER_ADDRESS,
     l1Wallet: wallet,
     deployGasLimit: RELAY_GAS_LIMIT, //should reconcile naming
