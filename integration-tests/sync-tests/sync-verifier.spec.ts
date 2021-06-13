@@ -29,14 +29,12 @@ describe('Syncing a verifier', () => {
   }
 
   const startVerifier = async () => {
-    
     // Bring up new verifier
     verifier = new DockerComposeNetwork(['verifier'])
     await verifier.up({ commandOptions: ['--scale', 'verifier=1'] })
 
     // Wait for verifier to be looping
     let logs = await verifier.logs()
-    
     while (!logs.out.includes('Starting Sequencer Loop')) {
       await sleep(500)
       logs = await verifier.logs()
