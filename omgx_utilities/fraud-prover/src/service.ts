@@ -560,10 +560,10 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         )
         console.log('STEP0:7 l2_SEQUENCER_StateRoot:', l2SStateRoot)
 
-        const l2VStateRoot = await this.state.l2VProvider.getStateRoot(
-          index + L2_GENESIS_BLOCKS
-        )
-        console.log('STEP0:7 l2_VERIFIER_StateRoot:', l2VStateRoot)
+        //const l2VStateRoot = await this.state.l2VProvider.getStateRoot(
+        //  index + L2_GENESIS_BLOCKS
+        //)
+        //console.log('STEP0:7 l2_VERIFIER_StateRoot:', l2VStateRoot)
 
         // const l2StateRootp1 = await this.state.l2Provider.getStateRoot(
         //   index + L2_GENESIS_BLOCKS + 1
@@ -653,28 +653,28 @@ this.logger.info('Getting state diff proof...')
     )
 */
 
-    const stateDiffProofV: StateDiffProof =
-      await this.state.l2VProvider.getStateDiffProof(
-        transactionIndex + L2_GENESIS_BLOCKS
-      )
-    this.logger.info('State diff proof V...',{stateDiffProofV})
+    // const stateDiffProofV: StateDiffProof =
+    //   await this.state.l2SProvider.getStateDiffProof(
+    //     transactionIndex + L2_GENESIS_BLOCKS
+    //   )
+    // this.logger.info('State diff proof V...',{stateDiffProofV})
 
-    const stateDiffProofS: StateDiffProof =
-      await this.state.l2SProvider.getStateDiffProof(
-        transactionIndex + L2_GENESIS_BLOCKS
-      )
-    this.logger.info('State diff proof S...',{stateDiffProofS})
+    // const stateDiffProofS: StateDiffProof =
+    //   await this.state.l2SProvider.getStateDiffProof(
+    //     transactionIndex + L2_GENESIS_BLOCKS
+    //   )
+    // this.logger.info('State diff proof S...',{stateDiffProofS})
 
     const stateDiffProof: StateDiffProof =
       await this.state.l2SProvider.getStateDiffProof(
         transactionIndex + L2_GENESIS_BLOCKS
       )
-    this.logger.info('State diff proof S...',{stateDiffProofS})
+    this.logger.info('State diff proof S...',{stateDiffProof})
 
     const stateTrie = await this._makeStateTrie(stateDiffProof)
-    
-    const storageTries = await this._makeAccountTries(stateDiffProof)
 
+    const storageTries = await this._makeAccountTries(stateDiffProof)
+    
     return {
       stateDiffProof,
       transactionProof,

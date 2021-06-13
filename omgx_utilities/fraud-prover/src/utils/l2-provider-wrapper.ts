@@ -16,7 +16,6 @@ export class L2ProviderWrapper {
     ])
 
     //console.log("getStateRoot full L2 block:",block)
-    
     return block.stateRoot
   }
 
@@ -66,8 +65,8 @@ seems to be broken because no accounts are ever returned
     let proof = await this.provider.send('eth_getStateDiffProof', [
       toUnpaddedHexString(index),
     ])
-    console.log('If the next line is empty, there is a major problem:')
-    console.log('Proof:', proof)
+    console.log('If the next line is null, there is a major problem:')
+    console.log('Proof:', proof.accounts)
 
     return {
       header: proof.header,

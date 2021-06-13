@@ -1169,7 +1169,12 @@ func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 		addr := ctx.GlobalString(RollupAddressManagerOwnerAddressFlag.Name)
 		cfg.AddressManagerOwnerAddress = common.HexToAddress(addr)
 	}
-	if ctx.GlobalIsSet(RollupEnableVerifierFlag.Name) {
+	if (ctx.GlobalIsSet(RollupEnableVerifierFlag.Name) == false) {
+		log.Error("ctx.GlobalIsSet(RollupEnableVerifierFlag.Name) == false")
+		cfg.IsVerifier = false
+	}
+	if (ctx.GlobalIsSet(RollupEnableVerifierFlag.Name) == true ) {
+		log.Error("ctx.GlobalIsSet(RollupEnableVerifierFlag.Name) == true")
 		cfg.IsVerifier = true
 	}
 	if ctx.GlobalIsSet(RollupStateDumpPathFlag.Name) {
