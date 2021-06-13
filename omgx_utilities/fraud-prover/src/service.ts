@@ -560,10 +560,10 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         )
         console.log('STEP0:7 l2_SEQUENCER_StateRoot:', l2SStateRoot)
 
-        //const l2VStateRoot = await this.state.l2VProvider.getStateRoot(
-        //  index + L2_GENESIS_BLOCKS
-        //)
-        //console.log('STEP0:7 l2_VERIFIER_StateRoot:', l2VStateRoot)
+        const l2VStateRoot = await this.state.l2VProvider.getStateRoot(
+         index + L2_GENESIS_BLOCKS
+        )
+        console.log('STEP0:7 l2_VERIFIER_StateRoot:', l2VStateRoot)
 
         // const l2StateRootp1 = await this.state.l2Provider.getStateRoot(
         //   index + L2_GENESIS_BLOCKS + 1
