@@ -44,8 +44,6 @@ l2Provider.pollingInterval = env.L2_POLLING_INTERVAL
 export const verifierProvider = new providers.JsonRpcProvider(env.VERIFIER_URL)
 verifierProvider.pollingInterval = env.VERIFIER_POLLING_INTERVAL
 
-console.log("VP:", verifierProvider)
-
 // The sequencer private key which is funded on L1
 export const l1Wallet = new Wallet(env.PRIVATE_KEY, l1Provider)
 
