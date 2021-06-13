@@ -50,7 +50,7 @@ export const PROXY_SEQUENCER_ENTRYPOINT_ADDRESS =
 export const OVM_ETH_ADDRESS = '0x4200000000000000000000000000000000000006'
 export const Proxy__OVM_L2CrossDomainMessenger =
   '0x4200000000000000000000000000000000000007'
-export const addressManagerAddress = process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
+export const addressManagerAddress = process.env.ADDRESS_MANAGER_ADDRESS
 
 export const getAddressManager = (provider: any) => {
   return getContractFactory('Lib_AddressManager')

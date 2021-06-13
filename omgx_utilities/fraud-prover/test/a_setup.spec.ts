@@ -17,7 +17,8 @@ import { OptimismEnv } from './shared/env'
 
 import * as fs from 'fs'
 
-describe('System setup', async () => {
+describe('Fraud Prover Testing System Setup', async () => {
+  
   let Factory__L1ERC20: ContractFactory
   let Factory__L2DepositedERC20: ContractFactory
   let Factory__L1ERC20Gateway: ContractFactory
@@ -57,9 +58,11 @@ describe('System setup', async () => {
   })
 
   before(async () => {
+    
     //Mint a new token on L1 and set up the L1 and L2 infrastructure
     // [initialSupply, name, decimals, symbol]
     // this is owned by bobl1Wallet
+    
     L1ERC20 = await Factory__L1ERC20.deploy(
       initialAmount,
       tokenName,
@@ -87,6 +90,7 @@ describe('System setup', async () => {
       L2DepositedERC20.address,
       env.watcher.l1.messengerAddress
     )
+    
     await L1ERC20Gateway.deployTransaction.wait()
     console.log('L1ERC20Gateway deployed to:', L1ERC20Gateway.address)
 
