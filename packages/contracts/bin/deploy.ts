@@ -3,6 +3,12 @@ import path from 'path'
 import dirtree from 'directory-tree'
 import fs from 'fs'
 
+/*
+CONTRACTS_TARGET_NETWORK=...
+CONTRACTS_DEPLOYER_KEY=...
+CONTRACTS_RPC_URL=...
+*/
+
 // Ensures that all relevant environment vars are properly set. These lines *must* come before the
 // hardhat import because importing will load the config (which relies on these vars). Necessary
 // because CI currently uses different var names than the ones we've chosen here.
@@ -10,8 +16,7 @@ import fs from 'fs'
 process.env.HARDHAT_NETWORK = 'custom' // "custom" here is an arbitrary name. only used for CI.
 process.env.CONTRACTS_TARGET_NETWORK = 'custom'
 process.env.CONTRACTS_DEPLOYER_KEY = process.env.DEPLOYER_PRIVATE_KEY
-process.env.CONTRACTS_RPC_URL =
-  process.env.L1_NODE_WEB3_URL || 'http://127.0.0.1:8545'
+process.env.CONTRACTS_RPC_URL = process.env.L1_NODE_WEB3_URL || 'http://127.0.0.1:8545'
 
 import hre from 'hardhat'
 

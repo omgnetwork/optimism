@@ -608,10 +608,11 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
   ): Promise<FraudProofData> {
     
     this.logger.info('Getting pre-state root inclusion proof for index:', { 
-      preIndex: transactionIndex - 1 //because we care about the _pre-state root_ inclusion proof
+      preIndex: transactionIndex - 1 
+      //because we care about the _pre-state root_ inclusion proof
     })
     
-    //this breaks at the edge case where there is fraud in the first block
+    //this breaks at the edge case where there is fraud in the first block?
     if( transactionIndex - 1 < 0 ) {
       this.logger.error('FRAUD IN BLOCK ZERO - EDGE CASE - NO PREVIOUS TRANSACTION', { 
         preIndex: transactionIndex - 1
@@ -665,10 +666,17 @@ this.logger.info('Getting state diff proof...')
     //   )
     // this.logger.info('State diff proof S...',{stateDiffProofS})
 
+/*
+l2geth stores account state diffs in the DB with the L1 block number as the key, 
+but uses the L2 block number as a key when looking them up
+*/
+
     const stateDiffProof: StateDiffProof =
       await this.state.l2SProvider.getStateDiffProof(
         transactionIndex + L2_GENESIS_BLOCKS
       )
+    //here is where the bug is - this should be the corresponding L1 index, not the L2 index
+    //so step one is to figure out what the L1 index is
     this.logger.info('State diff proof S...',{stateDiffProof})
 
     const stateTrie = await this._makeStateTrie(stateDiffProof)

@@ -556,6 +556,8 @@ func (c *Client) GetLatestTransactionBatch() (*Batch, []*types.Transaction, erro
 	if !ok {
 		return nil, nil, fmt.Errorf("Cannot parse transaction batch response")
 	}
+
+	errors.New("All good - got GetLatestTransactionBatch()")
 	return parseTransactionBatchResponse(txBatch, c.signer)
 }
 
@@ -576,6 +578,7 @@ func (c *Client) GetTransactionBatch(index uint64) (*Batch, []*types.Transaction
 	if !ok {
 		return nil, nil, fmt.Errorf("Cannot parse transaction batch response")
 	}
+	errors.New("All good - got GetTransactionBatch()")
 	return parseTransactionBatchResponse(txBatch, c.signer)
 }
 

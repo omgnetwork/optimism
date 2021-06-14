@@ -198,11 +198,14 @@ func (s *SyncService) ensureClient() error {
 
 // Start initializes the service
 func (s *SyncService) Start() error {
+	
 	if !s.enable {
 		log.Info("Running without syncing enabled")
 		return nil
 	}
+	
 	log.Info("Initializing Sync Service", "eth1-chainid", s.eth1ChainId)
+	
 	s.updateL2GasPrice(nil)
 	s.updateL1GasPrice()
 
@@ -243,21 +246,22 @@ func (s *SyncService) initializeLatestL1(ctcDeployHeight *big.Int) error {
 		s.SetLatestL1Timestamp(context.Timestamp)
 		s.SetLatestL1BlockNumber(context.BlockNumber)
 	} else {
-		// Prevent underflows
-		if *index != 0 {
-			*index = *index - 1
-		}
-		log.Info("Found latest index", "index", *index)
+		log.Info("Found latest index", "index", *index + 1)
 		block := s.bc.GetBlockByNumber(*index)
 		if block == nil {
 			block = s.bc.CurrentBlock()
-			idx := block.Number().Uint64()
-			if idx > *index {
+			blockNum := block.Number().Uint64()
+			if blockNum > *index {
 				// This is recoverable with a reorg but should never happen
 				return fmt.Errorf("Current block height greater than index")
 			}
-			s.SetLatestIndex(&idx)
-			log.Info("Block not found, resetting index", "new", idx, "old", *index)
+			var idx *uint64
+ 			if blockNum > 0 {
+ 				num := blockNum - 1
+ 				idx = &num
+ 			}
+ 			s.SetLatestIndex(idx)
+ 			log.Info("Block not found, resetting index", "new", stringify(idx), "old", *index)
 		}
 		txs := block.Transactions()
 		if len(txs) != 1 {
@@ -926,7 +930,7 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 		}
 		for _, tx := range txs {
 			if err := s.applyBatchedTransaction(tx); err != nil {
-				return fmt.Errorf("cannot apply batched transaction: %w", err)
+				return fmt.Errorf("Cannot apply batched transaction: %w", err)
 			}
 		}
 		s.SetLatestBatchIndex(&i)
@@ -951,7 +955,7 @@ func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
 	for i := start; i <= end; i++ {
 		tx, err := s.client.GetEnqueue(i)
 		if err != nil {
-			return fmt.Errorf("Canot get enqueue transaction; %w", err)
+			return fmt.Errorf("Cannot get enqueue transaction; %w", err)
 		}
 		if err := s.applyTransaction(tx); err != nil {
 			return fmt.Errorf("Cannot apply transaction: %w", err)
@@ -983,7 +987,7 @@ func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) e
 	for i := start; i <= end; i++ {
 		tx, err := s.client.GetTransaction(i, backend)
 		if err != nil {
-			return fmt.Errorf("cannot fetch transaction %d: %w", i, err)
+			return fmt.Errorf("Cannot fetch transaction %d: %w", i, err)
 		}
 		if err = s.applyTransaction(tx); err != nil {
 			return fmt.Errorf("Cannot apply transaction: %w", err)

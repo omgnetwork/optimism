@@ -85,6 +85,7 @@ yarn build:contracts
 ```
 
 ### Deploying the Contracts
+
 To deploy the contracts first clone, install, and build the contracts package.
 
 Next set the following env vars:

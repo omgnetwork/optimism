@@ -63,6 +63,10 @@ services:
         # connect to the 2 layers
         DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT: http://l1_chain:8545
         DATA_TRANSPORT_LAYER__L2_RPC_ENDPOINT: http://l2geth:8545
+        # normally, this is false? default settings 
+        # syncFromL1: config.bool('sync-from-l1', true),
+        # syncFromL2: config.bool('sync-from-l2', false),
+        DATA_TRANSPORT_LAYER__SYNC_FROM_L2: 'true'
         DATA_TRANSPORT_LAYER__L2_CHAIN_ID: 28
     ports:
       - ${DTL_PORT:-7878}:7878
@@ -107,7 +111,7 @@ services:
         L1_NODE_WEB3_URL: http://l1_chain:8545
         L2_NODE_WEB3_URL: http://l2geth:8545
         URL: http://deployer:8081/addresses.json
-        WHITELIST_ENDPOINT: https://api-message-relayer.rinkeby.omgx.network/get.whitelist
+        # WHITELIST_ENDPOINT: https://api-message-relayer.rinkeby.omgx.network/get.whitelist
         # a funded hardhat account
         L1_WALLET_KEY: "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
         RETRIES: 60
@@ -158,13 +162,38 @@ services:
         URL: http://deployer:8081/addresses.json
         # connecting to the DTL
         ROLLUP_CLIENT_HTTP: http://dtl:7878
+        ROLLUP_BACKEND: 'l1'
+        ROLLUP_VERIFIER_ENABLE: 'true'
         ETH1_CTC_DEPLOYMENT_HEIGHT: 8
         RETRIES: 60
-        # IS_VERIFIER: "true"
-        ROLLUP_VERIFIER_ENABLE: "true"
     ports:
       - ${VERIFIER_HTTP_PORT:-8547}:8545
       - ${VERIFIER_WS_PORT:-8548}:8546
+
+  replica:
+    depends_on:
+      - dtl
+    image: ethereumoptimism/l2geth
+    deploy:
+      replicas: 0
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.geth
+    entrypoint: sh ./geth.sh
+    env_file:
+      - ./envs/geth.env
+    environment:
+        ETH1_HTTP: http://l1_chain:8545
+        ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
+        URL: http://deployer:8081/addresses.json
+        ROLLUP_CLIENT_HTTP: http://dtl:7878
+        ROLLUP_BACKEND: 'l2'
+        ROLLUP_VERIFIER_ENABLE: 'true'
+        ETH1_CTC_DEPLOYMENT_HEIGHT: 8
+        RETRIES: 60
+    ports:
+      - ${L2GETH_HTTP_PORT:-8549}:8545
+      - ${L2GETH_WS_PORT:-8550}:8546
 
   integration_tests:
     image: ethereumoptimism/integration-tests

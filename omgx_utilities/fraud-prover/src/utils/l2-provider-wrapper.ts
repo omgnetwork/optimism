@@ -15,7 +15,7 @@ export class L2ProviderWrapper {
       false,
     ])
 
-    //console.log("getStateRoot full L2 block:",block)
+    console.log("getStateRoot full L2 block:",block)
     return block.stateRoot
   }
 
