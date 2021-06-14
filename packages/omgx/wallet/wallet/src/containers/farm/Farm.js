@@ -83,8 +83,6 @@ class Farm extends React.Component {
 
   render() {
     const { 
-      // Fee
-      totalFeeRate, userRewardFeeRate,
       // Pool
       poolInfo,
       // user

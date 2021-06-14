@@ -57,7 +57,7 @@ function DepositModal ({ open, omgOnly = false, fast = false }) {
   }, [ dispatch ]);
 
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal open={open}>
       {step === 'INPUT_STEP' && (
         <InputStep
           onClose={handleClose}

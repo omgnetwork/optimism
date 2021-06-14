@@ -46,7 +46,9 @@ function DoExitStep ({
   const [ disabledSubmit, setDisabledSubmit ] = useState(true);
 
   const balances = useSelector(selectChildchainBalance, isEqual);
-
+  const exitLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]))
+  const approveLoading = useSelector(selectLoading([ 'APPROVE/CREATE' ]))
+  
   useEffect(() => {
     if (balances.length && !currency) {
       setCurrency(balances[0].currency);
@@ -58,14 +60,16 @@ function DoExitStep ({
       networkService.getTotalFeeRate().then((feeRate)=>{
         setFeeRate(feeRate)
       })
-      networkService.checkAllowance(
-        currency, 
-        networkService.L2LPAddress
-      ).then((allowance) => {
-        setAllowance(allowance)
-      })
+      if (!exitLoading) {
+        networkService.checkAllowance(
+          currency, 
+          networkService.L2LPAddress
+        ).then((allowance) => {
+          setAllowance(allowance)
+        })
+      }
     }
-  }, [ balances, currency, fast ]);
+  }, [ balances, currency, fast, exitLoading ]);
 
   const selectOptions = balances.map(i => ({
     title: i.symbol,
@@ -77,9 +81,6 @@ function DoExitStep ({
     acc[cur.currency] = cur.symbol;
     return acc;
   }, {})
-
-  const exitLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]))
-  const approveLoading = useSelector(selectLoading([ 'APPROVE/CREATE' ]))
 
   async function doApprove() {
     const res = await dispatch(approveErc20(
