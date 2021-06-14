@@ -1,0 +1,12 @@
+FROM ethereumoptimism/builder:latest
+
+WORKDIR /optimism
+COPY packages/omgx/wallet/package.json ./packages/omgx/wallet/package.json
+COPY ./packages/omgx ./packages/omgx
+
+WORKDIR /optimism/packages/omgx/wallet
+RUN rm -rf node_modules
+RUN yarn
+RUN yarn build
+
+CMD ["true"]

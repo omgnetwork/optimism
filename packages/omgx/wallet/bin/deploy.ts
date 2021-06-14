@@ -3,26 +3,12 @@ import {JsonRpcProvider} from '@ethersproject/providers'
 import { Contract } from 'ethers'
 import { getContractFactory } from '@eth-optimism/contracts'
 import { Watcher } from '@eth-optimism/core-utils'
-import * as request from "request-promise-native";
 
-// import path from 'path'
-// import dirtree from 'directory-tree'
-// import fs from 'fs'
-
-// Ensures that all relevant environment vars are properly set. These lines *must* come before the
-// hardhat import because importing will load the config (which relies on these vars). Necessary
-// because CI currently uses different var names than the ones we've chosen here.
-// TODO: Update CI so that we don't have to do this anymore.
-process.env.HARDHAT_NETWORK = 'optimism' // "custom" here is an arbitrary name. only used for CI.
-process.env.CONTRACTS_TARGET_NETWORK = 'optimism'
 process.env.CONTRACTS_DEPLOYER_KEY = process.env.DEPLOYER_PRIVATE_KEY
 process.env.CONTRACTS_RPC_URL =
   process.env.L1_NODE_WEB3_URL || 'http://127.0.0.1:8545'
 
-
 import hre from 'hardhat'
-
-const deployer = new Wallet(process.env.DEPLOYER_PRIVATE_KEY)
 
 const main = async () => {
   console.log('Starting wallet deploy...')
@@ -61,13 +47,8 @@ const main = async () => {
     })
   }
 
-  const deployer_url = process.env.URL
-    var options = {
-        uri: deployer_url,
-    };
-  const result = await request.get(options);
-  let addressManager = JSON.parse(result).AddressManager;
-
+  let addressManager = process.env.ADDRESS_MANAGER_ADDRESS;
+  console.log(`ADDRESS_MANAGER_ADDRESS was set to ${addressManager}`)
   const watcher = await initWatcher(l1Provider, l2Provider, getAddressManager(deployer_1, addressManager))
   await hre.run('deploy', {
     watcher: watcher,
@@ -78,7 +59,7 @@ const main = async () => {
     emOvmChainId: config.emOvmChainId,
     noCompile: process.env.NO_COMPILE ? true : false,
     addressManager: getAddressManager(deployer_1, addressManager),
-    getAddressManager: getAddressManager
+    getAddressManager: getAddressManager,
   })
 
 }
