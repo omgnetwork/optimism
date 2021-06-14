@@ -240,7 +240,9 @@ export abstract class BatchSubmitter {
 
     this.logger.info('Received transaction receipt', { receipt })
     this.logger.info(successMessage)
-    this.metrics.submissionGasUsed.observe(receipt.gasUsed.toNumber())
+    // bug
+    // this.metrics.submissionGasUsed.observe(receipt.gasUsed.toNumber())
+    this.metrics.submissionGasUsed.observe(receipt ? receipt.gasUsed.toNumber() : 0)
     this.metrics.submissionTimestamp.observe(Date.now())
     return receipt
   }

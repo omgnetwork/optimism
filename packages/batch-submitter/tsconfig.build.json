@@ -1,27 +1,23 @@
 {
   "compilerOptions": {
+    "outDir": "build",
     "module": "commonjs",
     "target": "es2017",
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "composite": true,
+    "resolveJsonModule": true,
     "declaration": true,
     "noImplicitAny": false,
     "removeComments": true,
     "noLib": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "sourceMap": true,
+    "lib": [
+      "es7"
+    ],
+    "esModuleInterop": true,
     "typeRoots": [
       "node_modules/@types"
-    ],
-    "rootDir": "./src",
-    "outDir": "./dist"
+    ]
   },
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
-  "include": [
-    "src/**/*"
-  ]
+  "include": ["*.ts", "**/*.ts"]
 }
