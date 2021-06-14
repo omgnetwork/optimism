@@ -63,6 +63,12 @@ Resources:
                   - "secretsmanager:ListSecretVersionIds"
                 Resource:
                   - arn:aws:secretsmanager:us-east-1:942431445534:secret:*
+  MessageRelayerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub "/omgx/${EnvironmentName}/message-relayer/${ImageTag}"
+
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:

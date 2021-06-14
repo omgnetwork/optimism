@@ -87,13 +87,9 @@ Resources:
         Fn::ImportValue: !Sub "${InfrastructureStackName}:VpcId"
       SecurityGroupIngress:
       - IpProtocol: tcp
-        FromPort: 7878
-        ToPort: 7878
+        FromPort: 80
+        ToPort: 80
         CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 7878
-        ToPort: 7878
-        CidrIpv6: ::/0
       - IpProtocol: tcp
         FromPort: 8080
         ToPort: 8080
@@ -194,7 +190,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       LoadBalancerArn: !Ref LoadBalancerInt
-      Port: 7878
+      Port: 80
       Protocol: HTTP
       DefaultActions:
       - Type: fixed-response

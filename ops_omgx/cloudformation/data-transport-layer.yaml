@@ -70,7 +70,7 @@ Resources:
   DataTransportLayerLBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Port: 7878
+      Port: 80
       Protocol: HTTP
       VpcId:
         Fn::ImportValue: !Sub "${InfrastructureStackName}:VpcId"
@@ -78,7 +78,7 @@ Resources:
         - Key: deregistration_delay.timeout_seconds
           Value: 30
       HealthCheckIntervalSeconds: 60
-      HealthCheckPath: /
+      HealthCheckPath: /health
       HealthCheckProtocol: HTTP # TODO Implement proper healthcheck
       HealthCheckTimeoutSeconds: 15
       HealthyThresholdCount: 3
@@ -148,6 +148,28 @@ Resources:
             com.datadoghq.ad.logs: '[{"source": "data_transport_layer", "service": "data_transport_layer"}]'
           Essential: true
           Memory: "512"
+        - Image: 942431445534.dkr.ecr.us-east-1.amazonaws.com/omgx/nginx-eth-proxy:data_tr_layer
+          Name: nginx-dtl
+          PortMappings:
+            - ContainerPort: 80
+              HostPort: 0
+          Environment:
+            - Name: SEQUENCER
+              Value: geth_l2:8545
+            - Name: ETH_CALLS_ALLOWED
+              Value: eth_getTransactionByHash,eth_getTransactionReceipt,eth_sendRawTransaction,eth_blockNumber
+          Command:
+            - "nginx-debug"
+            - "-g"
+            - "daemon off;"
+          DockerLabels:
+            com.datadoghq.ad.check_names: '["nginx"]'
+            com.datadoghq.ad.init_configs: '[{}]'
+            com.datadoghq.ad.logs: '[{"source": "nginx", "service": "nginx"}]'
+          Essential: true
+          Memory: "256"
+          Links:
+            - data_transport_layer
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
       Family: !Sub "DataTransportLayer-${ImageTag}-${EnvironmentName}"
@@ -158,8 +180,8 @@ Resources:
       Cluster:
         Fn::ImportValue: !Sub "${InfrastructureStackName}:EcsCluster"
       LoadBalancers:
-        - ContainerName: data_transport_layer
-          ContainerPort: 7878
+        - ContainerName: nginx-dtl
+          ContainerPort: 80
           TargetGroupArn: !Ref DataTransportLayerLBTargetGroup
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2

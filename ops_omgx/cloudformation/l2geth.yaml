@@ -170,7 +170,7 @@ Resources:
                     Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerInt:DNSName"
             - Name: ROLLUP_CLIENT_HTTP
               Value: !Sub
-                - "http://${EndpointAddress}:7878"
+                - "http://${EndpointAddress}"
                 - EndpointAddress:
                     Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerInt:DNSName"
             - Name: ROLLUP_STATE_DUMP_PATH
@@ -192,6 +192,13 @@ Resources:
           Essential: true
           Memory: "8192"
         - Image: 942431445534.dkr.ecr.us-east-1.amazonaws.com/omgx/nginx-eth-proxy:no_lua
+          Ulimits:
+            - Name: nofile
+              SoftLimit: 8192
+              HardLimit: 8192
+            - Name: nproc
+              SoftLimit: 8192
+              HardLimit: 8192
           Name: nginx
           PortMappings:
             - ContainerPort: 80
@@ -201,14 +208,14 @@ Resources:
               Value: geth_l2:8545
             - Name: ETH_CALLS_ALLOWED
               Value: eth_getTransactionByHash,eth_getTransactionReceipt,eth_sendRawTransaction,eth_blockNumber
+          DockerLabels:
+            com.datadoghq.ad.check_names: '["nginx"]'
+            com.datadoghq.ad.init_configs: '[{}]'
+            com.datadoghq.ad.logs: '[{"source": "l2_proxy", "service": "l2_proxy"}]'
           Command:
             - "nginx-debug"
             - "-g"
             - "daemon off;"
-          DockerLabels:
-            com.datadoghq.ad.check_names: '["nginx"]'
-            com.datadoghq.ad.init_configs: '[{}]'
-            com.datadoghq.ad.logs: '[{"source": "nginx", "service": "nginx"}]'
           Essential: true
           Memory: "256"
           Links:

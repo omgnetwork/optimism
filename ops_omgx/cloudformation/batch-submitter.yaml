@@ -68,6 +68,12 @@ Resources:
                   - "secretsmanager:ListSecretVersionIds"
                 Resource:
                   - arn:aws:secretsmanager:us-east-1:942431445534:secret:*
+  BatchSubmitterLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub "/omgx/${EnvironmentName}/batch-submitter/${ImageTag}"
+
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
