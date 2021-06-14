@@ -151,6 +151,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
           const tx = await this.chainContract.appendQueueBatch(99999999, {
             nonce,
             gasPrice,
+            gasLimit: 9999999
           })
           this.logger.info('Submitted appendQueueBatch transaction', {
             txHash: tx.hash,
@@ -261,6 +262,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       const tx = await this.chainContract.appendSequencerBatch(batchParams, {
         nonce,
         gasPrice,
+        gasLimit: 9999999
       })
       this.logger.info('Submitted appendSequencerBatch transaction', {
         txHash: tx.hash,
