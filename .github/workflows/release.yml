@@ -2,8 +2,13 @@ name: Release
 
 on:
   push:
-    branches:
-      - master
+    branches-ignore:
+      - '*'
+      - '*/**'
+  pull_request:
+    branches-ignore:
+      - '*'
+      - '*/**'
 
 jobs:
   release:

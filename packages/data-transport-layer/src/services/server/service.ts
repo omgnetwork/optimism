@@ -233,7 +233,8 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
             highestL2BlockNumber = await this.state.db.getHighestL2BlockNumber()
             break
           case 'l2':
-            currentL2Block = await this.state.db.getLatestUnconfirmedTransaction()
+            currentL2Block =
+              await this.state.db.getLatestUnconfirmedTransaction()
             highestL2BlockNumber =
               (await this.state.db.getHighestSyncedUnconfirmedBlock()) - 1
             break
@@ -476,11 +477,12 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           }
         }
 
-        const transactions = await this.state.db.getFullTransactionsByIndexRange(
-          BigNumber.from(batch.prevTotalElements).toNumber(),
-          BigNumber.from(batch.prevTotalElements).toNumber() +
-            BigNumber.from(batch.size).toNumber()
-        )
+        const transactions =
+          await this.state.db.getFullTransactionsByIndexRange(
+            BigNumber.from(batch.prevTotalElements).toNumber(),
+            BigNumber.from(batch.prevTotalElements).toNumber() +
+              BigNumber.from(batch.size).toNumber()
+          )
 
         return {
           batch,
@@ -504,11 +506,12 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           }
         }
 
-        const transactions = await this.state.db.getFullTransactionsByIndexRange(
-          BigNumber.from(batch.prevTotalElements).toNumber(),
-          BigNumber.from(batch.prevTotalElements).toNumber() +
-            BigNumber.from(batch.size).toNumber()
-        )
+        const transactions =
+          await this.state.db.getFullTransactionsByIndexRange(
+            BigNumber.from(batch.prevTotalElements).toNumber(),
+            BigNumber.from(batch.prevTotalElements).toNumber() +
+              BigNumber.from(batch.size).toNumber()
+          )
 
         return {
           batch,
