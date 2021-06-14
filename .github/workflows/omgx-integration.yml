@@ -32,17 +32,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Build the services
-        working-directory: ./ops
-        run: ./scripts/build-ci.sh
-
-      - name: Build the OMGX services
-        working-directory: ./
-        run: docker build . --file ./packages/omgx/integration/Dockerfile.omgx_monorepo --tag omgx/builder:latest && docker build . --file ./packages/omgx/integration/Dockerfile.wallet_deployer --tag omgx/wallet_deployer:latest
+      - name: Install yq
+        run: sudo snap install yq
 
       - name: Bring the stack up + OMGX
-        working-directory: ./
-        run: docker compose -f ops/docker-compose.yml -f packages/omgx/integration/docker-compose.yml up
+        working-directory: ./ops
+        run: BUILD=1 DAEMON=1 ./up_local.sh
+
+      - name: Background logs
+        working-directory: ./ops
+        run: docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml logs --follow &
 
       - name: Run the integration tests
         working-directory: ./ops
@@ -89,6 +88,29 @@ jobs:
           yarn compile:ovm
           yarn test:integration:ovm
           yarn deploy:ovm
+
+      - name: Test serving Wallet contracts
+        working-directory: ./
+        run: |
+          RETRIES=60
+          URL=http://127.0.0.1:8078/addresses.json
+          until $(curl --silent --fail --output /dev/null "$URL"); do
+            sleep 20s
+            echo "Will wait $((RETRIES--)) more times for $URL to be up..."
+
+            if [ "$RETRIES" -lt 0 ]; then
+              echo "Timeout waiting for contract deployment"
+              exit 1
+            fi
+          done
+          echo "Wallet contracts are deployed"
+          L2LIQUIDITY_POOL=$(curl --silent $URL | jq -r .L2LiquidityPool)
+          echo $L2LIQUIDITY_POOL
+          if [[ $L2LIQUIDITY_POOL =~ "0x" ]]; then
+            exit 0
+          else
+            exit 1
+          fi
 
       - name: Test l1-l2-deposit-withdrawal example on Optimistic Ethereum with cross-domain message passing
         working-directory: ./examples/l1-l2-deposit-withdrawal

@@ -50,7 +50,7 @@ if [ ! -z "$URL" ]; then
         exit 1
       fi
     done
-    echo "Contracts are deployed"
+    echo "Rollup contracts are deployed"
     ADDRESS_MANAGER_ADDRESS=$(curl --silent $URL | jq -r .AddressManager)
     exec env \
         ADDRESS_MANAGER_ADDRESS=$ADDRESS_MANAGER_ADDRESS \

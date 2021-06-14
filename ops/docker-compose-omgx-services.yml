@@ -4,8 +4,8 @@ version: "3"
 
 services:
   # base service builder
-  omgx_builder:
-    image: omgx/builder
+  omgx_wallet_builder:
+    image: omgx/wallet_builder
     build:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.omgx_monorepo

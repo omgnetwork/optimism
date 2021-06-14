@@ -1,5 +1,5 @@
 FROM ethereumoptimism/builder AS builder
-FROM omgx/builder AS omgx_builder
+FROM omgx/wallet_builder AS wallet_builder
 FROM node:14-alpine
 
 RUN apk add --no-cache git curl python bash jq
@@ -35,12 +35,12 @@ COPY packages/contracts/scripts ./scripts
 
 # get the needed built artifacts
 WORKDIR /opt/optimism/packages/omgx/wallet
-COPY --from=omgx_builder /optimism/packages/omgx/wallet/tsconfig.json ./tsconfig.json
-COPY --from=omgx_builder /optimism/packages/omgx/wallet/package-lock.json ./package-lock.json
-COPY --from=omgx_builder /optimism/packages/omgx/wallet/package.json ./package.json
-COPY --from=omgx_builder /optimism/packages/omgx/wallet/node_modules ./node_modules
-COPY --from=omgx_builder /optimism/packages/omgx/wallet/artifacts ./artifacts
-COPY --from=omgx_builder /optimism/packages/omgx/wallet/artifacts-ovm ./artifacts-ovm
+COPY --from=wallet_builder /optimism/packages/omgx/wallet/tsconfig.json ./tsconfig.json
+COPY --from=wallet_builder /optimism/packages/omgx/wallet/package-lock.json ./package-lock.json
+COPY --from=wallet_builder /optimism/packages/omgx/wallet/package.json ./package.json
+COPY --from=wallet_builder /optimism/packages/omgx/wallet/node_modules ./node_modules
+COPY --from=wallet_builder /optimism/packages/omgx/wallet/artifacts ./artifacts
+COPY --from=wallet_builder /optimism/packages/omgx/wallet/artifacts-ovm ./artifacts-ovm
 
 
 # get non-build artifacts from the host

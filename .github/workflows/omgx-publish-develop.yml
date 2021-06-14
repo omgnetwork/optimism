@@ -1,6 +1,5 @@
 name: Publish Packages (omgx-develop)
 
-
 on:
   push:
     branches:
@@ -28,6 +27,8 @@ jobs:
       message-relayer: ${{ steps.packages.outputs.message-relayer }}
       data-transport-layer: ${{ steps.packages.outputs.data-transport-layer }}
       contracts: ${{ steps.packages.outputs.contracts }}
+      omgx_wallet_builder: ${{ steps.packages.outputs.omgx_wallet_builder }}
+      omgx_wallet_deployer: ${{ steps.packages.outputs.omgx_wallet_deployer }}
 
     steps:
       - name: Check out source code
@@ -273,3 +274,58 @@ jobs:
           file: ./ops/docker/Dockerfile.integration-tests
           push: true
           tags: omgx/integration-tests:develop,omgx/integration-tests:latest
+
+    # pushes the base builder image to dockerhub
+
+  omgx_wallet_builder:
+    name: Publish wallet builder
+    needs: builder
+    runs-on: ubuntu-latest
+    # we re-output the variables so that the child jobs can access them
+    outputs:
+      builder: ${{ needs.develop-publish.outputs.omgx_wallet_deployer }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./packages/omgx/integration/Dockerfile.omgx_monorepo
+          push: true
+          tags: omgx/wallet_builder:develop,omgx/wallet_builder:latest
+
+  omgx_wallet_deployer:
+    name: Prepare the wallet deployer service
+    needs: omgx_wallet_builder
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./packages/omgx/integration/Dockerfile.omgx_monorepo
+          push: true
+          tags: omgx/wallet_deployer:develop,omgx/wallet_deployer:latest
