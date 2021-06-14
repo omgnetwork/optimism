@@ -14,7 +14,7 @@ const deployFn: DeployFunction = async (hre) => {
     const addresses = JSON.stringify(contracts, null, 2)
     const dumpsPath = path.resolve(__dirname, "../dist/dumps")
     if (!fs.existsSync(dumpsPath)) {
-      fs.mkdirSync(dumpsPath)
+      fs.mkdirSync(dumpsPath, { recursive: true })
     }
     const addrsPath = path.resolve(dumpsPath, 'addresses.json')
     fs.writeFileSync(addrsPath, addresses)

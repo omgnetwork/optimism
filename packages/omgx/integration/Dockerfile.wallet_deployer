@@ -35,7 +35,6 @@ COPY packages/contracts/scripts ./scripts
 
 # get the needed built artifacts
 WORKDIR /opt/optimism/packages/omgx/wallet
-COPY --from=omgx_builder /optimism/packages/omgx/wallet/dist ./dist
 COPY --from=omgx_builder /optimism/packages/omgx/wallet/tsconfig.json ./tsconfig.json
 COPY --from=omgx_builder /optimism/packages/omgx/wallet/package-lock.json ./package-lock.json
 COPY --from=omgx_builder /optimism/packages/omgx/wallet/package.json ./package.json
