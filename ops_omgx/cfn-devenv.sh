@@ -447,8 +447,11 @@ function destroy_dev_services {
           for num in $SERVICE4RESTART; do
             aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
           done
-          for task in $ECS_TASKS; do
-            aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
+          while [ ! -z "$ECS_TASKS"]; do
+            for task in $ECS_TASKS; do
+              aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
+            done
+            printf "%10s \r" waiting
           done
           info "Stopped ${ECS_CLUSTER}"
       }
