@@ -37,7 +37,10 @@ jobs:
 
       - name: Bring the stack up + OMGX
         working-directory: ./ops
-        run: BUILD=1 DAEMON=1 ./up_local.sh
+        env:
+          BUILD: 1
+          DAEMON: 1
+        run: ./up_local.sh
 
       - name: Background logs
         working-directory: ./ops
@@ -124,7 +127,7 @@ jobs:
         if: failure()
         uses: jwalton/gh-docker-logs@v1
         with:
-          images: 'ethereumoptimism/builder,ethereumoptimism/hardhat,ethereumoptimism/deployer,ethereumoptimism/data-transport-layer,ethereumoptimism/l2geth,ethereumoptimism/message-relayer,ethereumoptimism/batch-submitter,ethereumoptimism/l2geth,ethereumoptimism/integration-tests'
+          images: 'omgx/builder,omgx/hardhat,omgx/deployer,omgx/data-transport-layer,omgx/l2geth,omgx/message-relayer,omgx/batch-submitter,omgx/l2geth,omgx/integration-tests,omgx/wallet_builder,omgx/wallet_deployer'
           dest: './logs'
 
       - name: Tar logs

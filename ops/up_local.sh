@@ -16,14 +16,14 @@ yq eval '(.services.[].image) += ":latest"' - \
 if [[ $BUILD == 1 ]]; then
     docker-compose build --parallel -- builder l2geth l1_chain
     docker-compose build --parallel -- deployer dtl batch_submitter relayer integration_tests
-    docker image tag ethereumoptimism/builder omgx/builder
-    docker image tag ethereumoptimism/hardhat omgx/hardhat
-    docker image tag ethereumoptimism/deployer omgx/deployer
-    docker image tag ethereumoptimism/data-transport-layer omgx/data-transport-layer
-    docker image tag ethereumoptimism/l2geth omgx/l2geth
-    docker image tag ethereumoptimism/message-relayer omgx/message-relayer
-    docker image tag ethereumoptimism/batch-submitter omgx/batch-submitter
-    docker image tag ethereumoptimism/integration-tests omgx/integration-tests
+    docker image tag ethereumoptimism/builder omgx/builder:latest
+    docker image tag ethereumoptimism/hardhat omgx/hardhat:latest
+    docker image tag ethereumoptimism/deployer omgx/deployer:latest
+    docker image tag ethereumoptimism/data-transport-layer omgx/data-transport-layer:latest
+    docker image tag ethereumoptimism/l2geth omgx/l2geth:latest
+    docker image tag ethereumoptimism/message-relayer omgx/message-relayer:latest
+    docker image tag ethereumoptimism/batch-submitter omgx/batch-submitter:latest
+    docker image tag ethereumoptimism/integration-tests omgx/integration-tests:latest
     docker build ../ --file $DIR/docker/Dockerfile.omgx_monorepo --tag omgx/wallet_builder:latest
     docker build ../ --file $DIR/docker/Dockerfile.wallet_deployer --tag omgx/wallet_deployer:latest
 else

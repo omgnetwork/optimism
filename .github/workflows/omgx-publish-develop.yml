@@ -71,7 +71,12 @@ jobs:
           docker image tag ethereumoptimism/batch-submitter omgx/batch-submitter:develop
           docker image tag ethereumoptimism/integration-tests omgx/integration-tests:develop
           docker rmi $(docker images | grep 'ethereumoptimism/' | awk '{print $1}')
+          docker images
 
       - name: Rename and retag the optimism images
         working-directory: ./ops
-        run: docker push --all-tags
+        run: |
+          for i in $(docker images | grep omgx | awk '{print $1}'); do
+            echo "$1"
+            docker push "$i"
+          done
