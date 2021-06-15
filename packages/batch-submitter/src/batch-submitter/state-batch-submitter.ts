@@ -186,7 +186,7 @@ export class StateBatchSubmitter extends BatchSubmitter {
       const contractTx = await this.chainContract.appendStateBatch(
         batch,
         offsetStartsAtIndex,
-        { nonce, gasPrice, gasLimit: 9999999 }
+        { nonce, gasPrice }
       )
       this.logger.info('Submitted appendStateBatch transaction', {
         txHash: contractTx.hash,
