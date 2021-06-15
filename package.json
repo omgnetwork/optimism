@@ -6,11 +6,13 @@
   "workspaces": {
     "packages": [
       "packages/*",
-      "l2geth",
-      "integration-tests",
-      "specs",
       "packages/omgx/*",
-      "examples/*"
+      "l2geth",
+      "specs",
+      "integration-tests",
+      "examples/*",
+      "packages/omgx/*",
+      "omgx_utilities/*"
     ]
   },
   "private": true,

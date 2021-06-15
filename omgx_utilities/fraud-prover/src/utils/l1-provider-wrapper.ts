@@ -73,11 +73,17 @@ export class L1ProviderWrapper {
   public async getStateRootBatchHeader(
     index: number
   ): Promise<StateRootBatchHeader> {
+    
+    console.log('STEP0:1:1 getStateRootBatchHeader for index', index)
+
     const event = await this._getStateRootBatchEvent(index)
 
     if (!event) {
+      console.log('STEP0:1:2 - sorry - no event')
       return
     }
+
+    console.log('STEP0:1:3 All good - we have an event')
 
     return {
       batchIndex: event.args._batchIndex,
@@ -107,6 +113,7 @@ export class L1ProviderWrapper {
   }
 
   public async getBatchStateRoots(index: number): Promise<string[]> {
+    
     const event = await this._getStateRootBatchEvent(index)
 
     if (!event) {
@@ -183,6 +190,7 @@ export class L1ProviderWrapper {
   public async getTransactionBatchHeader(
     index: number
   ): Promise<TransactionBatchHeader> {
+    
     const event = await this._getTransactionBatchEvent(index)
 
     if (!event) {
@@ -218,6 +226,7 @@ export class L1ProviderWrapper {
     )
 
     if ((event as any).isSequencerBatch) {
+      
       const transactions = []
 
       const txdata = fromHexString(transaction.data)
@@ -287,6 +296,7 @@ export class L1ProviderWrapper {
   public async getTransactionBatchProof(
     index: number
   ): Promise<TransactionBatchProof> {
+    
     const batchHeader = await this.getTransactionBatchHeader(index)
     console.log('\nbatchHeader:', batchHeader)
 
@@ -384,19 +394,22 @@ export class L1ProviderWrapper {
   }
 
   private async _getStateRootBatchEvent(index: number): Promise<Event> {
+    
     const events = await this.findAllEvents(
       this.OVM_StateCommitmentChain,
       this.OVM_StateCommitmentChain.filters.StateBatchAppended()
     )
 
-    console.log('All events in the OVM_StateCommitmentChain:', events)
+    //console.log('All events in the OVM_StateCommitmentChain:', events)
+    console.log('Step 1 (_getStateRootBatchEvent)')
 
     if (events.length === 0) {
       return
     }
 
     const matching = events.filter((event) => {
-      console.log('index', index)
+      //console.log('index', index)
+      /*
       console.log(
         'event.args._prevTotalElements.toNumber():',
         event.args._prevTotalElements.toNumber()
@@ -405,7 +418,7 @@ export class L1ProviderWrapper {
         'event.args._batchSize.toNumber()',
         event.args._batchSize.toNumber()
       )
-
+      */
       return (
         event.args._prevTotalElements.toNumber() <= index &&
         event.args._prevTotalElements.toNumber() +
@@ -414,7 +427,7 @@ export class L1ProviderWrapper {
       )
     })
 
-    console.log('This StateRootBatchEvent matches:', matching)
+    //console.log('This StateRootBatchEvent matches:', matching)
 
     const deletions = await this.findAllEvents(
       this.OVM_StateCommitmentChain,

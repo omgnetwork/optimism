@@ -222,7 +222,13 @@ export class StateBatchSubmitter extends BatchSubmitter {
           startBlock + i
         )) as L2Block
         const blockTx = block.transactions[0]
-        if (blockTx.from === this.fraudSubmissionAddress) {
+
+        this.logger.warn('Found transaction', {
+            from: blockTx.from,
+            fraudSubmissionAddress: this.fraudSubmissionAddress,
+          })
+
+        if (blockTx.from.toLowerCase() === this.fraudSubmissionAddress.toLowerCase()) {
           this.logger.warn('Found transaction from fraud submission address', {
             txHash: blockTx.hash,
             fraudSubmissionAddress: this.fraudSubmissionAddress,
