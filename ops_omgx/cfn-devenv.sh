@@ -167,9 +167,6 @@ function verify_images_in_ecr {
           if [[ $image == 'l2geth' ]]; then
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/go-ethereum" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
             docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG}
-          elif [[ $image == 'custom-message-relayer' ]]; then
-            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG}
           else
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
             docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG}
@@ -184,9 +181,6 @@ function verify_images_in_ecr {
           if [[ $SERVICE_NAME == 'l2geth' ]]; then
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/go-ethereum" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
             docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
-          elif [[ $SERVICE_NAME == 'custom-message-relayer' ]]; then
-            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
           else
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
             docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
@@ -197,9 +191,6 @@ function verify_images_in_ecr {
         else
           if [[ $SERVICE_NAME == 'l2geth' ]]; then
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/go-ethereum" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
-          elif [[ $SERVICE_NAME == 'custom-message-relayer' ]]; then
-            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
             docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
           else
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${SERVICE_NAME}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
