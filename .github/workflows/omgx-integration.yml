@@ -123,6 +123,10 @@ jobs:
           yarn compile:ovm
           yarn test:integration:ovm
 
+      - name: List all built images
+        if: failure()
+        run: docker images
+
       - name: Collect docker logs on failure
         if: failure()
         uses: jwalton/gh-docker-logs@v1
