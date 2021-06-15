@@ -16,7 +16,8 @@ contract TestLib_MerkleTrie {
         bytes32 _root
     )
         public
-        pure
+        view
+        //pure
         returns (
             bool
         )
@@ -36,7 +37,8 @@ contract TestLib_MerkleTrie {
         bytes32 _root
     )
         public
-        pure
+        view
+        //pure
         returns (
             bytes32
         )
@@ -55,7 +57,8 @@ contract TestLib_MerkleTrie {
         bytes32 _root
     )
         public
-        pure
+        view
+        //pure
         returns (
             bool,
             bytes memory
@@ -73,7 +76,8 @@ contract TestLib_MerkleTrie {
         bytes memory _value
     )
         public
-        pure
+        view
+        //pure
         returns (
             bytes32
         )
