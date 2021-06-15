@@ -76,7 +76,7 @@ jobs:
       - name: Rename and retag the optimism images
         working-directory: ./ops
         run: |
-          for i in $(docker images | grep omgx | awk '{print $1}'); do
+          for i in $(docker images --format "{{.Repository}}:{{.Tag}}" | grep omgx); do
             echo "$1"
             docker push "$i"
           done
