@@ -102,7 +102,11 @@ class NetworkService {
     console.log("NS: enableBrowserWallet()")
     try {
       // connect to the wallet
+      await window.ethereum.enable()
       this.provider = new ethers.providers.Web3Provider(window.ethereum)
+      await window.ethereum.request({
+        method: 'eth_requestAccounts'
+      })
       return true;
     } catch(error) {
       return false;
