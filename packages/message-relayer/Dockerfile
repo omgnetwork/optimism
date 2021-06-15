@@ -19,5 +19,6 @@ COPY wait-for-l1-and-l2.sh /opt/
 RUN chmod +x /opt/wait-for-l1-and-l2.sh
 
 RUN ln -s /opt/message-relayer/exec/run-message-relayer.js /usr/local/bin/
+RUN chmod +x /opt/message-relayer/exec/run-message-relayer.js
 
 ENTRYPOINT ["/opt/wait-for-l1-and-l2.sh", "run-message-relayer.js"]
