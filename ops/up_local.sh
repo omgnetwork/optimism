@@ -27,7 +27,6 @@ if [[ $BUILD == 1 ]]; then
     docker build ../ --file $DIR/docker/Dockerfile.omgx_monorepo --tag omgx/wallet_builder:latest
     docker build ../ --file $DIR/docker/Dockerfile.wallet_deployer --tag omgx/wallet_deployer:latest
 else
-    echo "This doesn't work just yet."
     docker-compose -f $DIR/$DOCKERFILE -f $DIR/$OMGX_DOCKERFILE pull
 fi
 
