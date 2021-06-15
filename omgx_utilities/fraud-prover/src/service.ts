@@ -356,10 +356,11 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         this.logger.info('Loading fraud proof contracts...')
 
         const { OVM_StateTransitioner, OVM_StateManager } =
+          
           await this._getFraudProofContracts(
-            await this.state.l1Provider.getStateRoot(
-              fraudulentStateRootIndex
-            ),
+            //await this.state.l1Provider.getStateRoot(fraudulentStateRootIndex),
+            //
+            proof.preStateRootProof.stateRoot,
             proof.transactionProof.transaction
           )
 
@@ -381,6 +382,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
             )
 
             this.logger.info('Proving storage slot states...')
+            
             await this._proveContractStorageStates(
               OVM_StateTransitioner,
               OVM_StateManager,
