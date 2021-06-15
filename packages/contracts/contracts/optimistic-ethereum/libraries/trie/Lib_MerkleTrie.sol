@@ -243,8 +243,13 @@ library Lib_MerkleTrie {
             if (currentKeyIndex == 0) {
                 // First proof element is always the root node.
                 
-                console.log("_walkNodePath keccak256(currentNode.encoded)"); //" %s", keccak256(currentNode.encoded));
-                //console.log("_walkNodePath currentNodeID %s", currentNodeID);
+                //DEBUG CT
+                console.log("Should be equal");
+                console.log("_walkNodePath keccak256(currentNode.encoded)");
+                console.logBytes32(keccak256(currentNode.encoded));
+                console.log("_walkNodePath currentNodeID");
+                console.logBytes32(currentNodeID);
+                //DEBUG CT END
                 
                 require(
                     keccak256(currentNode.encoded) == currentNodeID,
