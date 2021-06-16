@@ -164,10 +164,7 @@ function verify_images_in_ecr {
           aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
           cd ${PATH_TO_DOCKER}/${image}
           cp -fRv ../../secret2env .
-          if [[ $image == 'l2geth' ]]; then
-            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/go-ethereum" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG}
-          elif [[ $image == 'custom-message-relayer' ]]; then
+        if [[ $image == 'custom-message-relayer' ]]; then
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
             docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG}
           else
@@ -181,10 +178,7 @@ function verify_images_in_ecr {
         cd ${PATH_TO_DOCKER}/${SERVICE_NAME}
         cp -fRv ../../secret2env .
         if [ -z ${FROMTAG} ]; then
-          if [[ $SERVICE_NAME == 'l2geth' ]]; then
-            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/go-ethereum" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
-          elif [[ $SERVICE_NAME == 'custom-message-relayer' ]]; then
+          if [[ $SERVICE_NAME == 'custom-message-relayer' ]]; then
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
             docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
           else
@@ -195,10 +189,7 @@ function verify_images_in_ecr {
           aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
           docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
         else
-          if [[ $SERVICE_NAME == 'l2geth' ]]; then
-            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/go-ethereum" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
-          elif [[ $SERVICE_NAME == 'custom-message-relayer' ]]; then
+          if [[ $SERVICE_NAME == 'custom-message-relayer' ]]; then
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
             docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
           else
@@ -404,35 +395,44 @@ function destroy_dev_services {
       ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|tail -1|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'`
       SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
       CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
-      ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|tr '\n' ' '`
+      ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|egrep -vi datadog|tr '\n' ' '`
       EC2_INSTANCE=`aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId'`
-      info "Restarting ${ECS_CLUSTER}"
-      if [[ "${force}" == "yes" ]] ; then
-        for num in $SERVICE4RESTART; do
-          aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
-        done
-        for task in $ECS_TASKS; do
-          aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
-        done
-        sleep 10
-      #  aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/db/*" --region ${REGION} --output text
-      #  aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/geth_l2/*" --region ${REGION} --output text
-        for num in $SERVICE4RESTART; do
-          aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 1 >> /dev/null
-        done
-        info "Removed contents in /mnt/efs/ and restarted, please allow 1-2 minutes for the new tasks to actually start"
+      if [ -z ${SERVICE_NAME} ]; then
+        info "Restarting ${ECS_CLUSTER}"
+        if [[ "${force}" == "yes" ]] ; then
+          for num in $SERVICE4RESTART; do
+            aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
+          done
+          for task in $ECS_TASKS; do
+            aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
+          done
+          sleep 10
+          #  aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/db/*" --region ${REGION} --output text
+          #  aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/geth_l2/*" --region ${REGION} --output text
+          for num in $SERVICE4RESTART; do
+            aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 1 >> /dev/null
+          done
+          info "Removed contents in /mnt/efs/ and restarted, please allow 1-2 minutes for the new tasks to actually start"
+        else
+          for num in $SERVICE4RESTART; do
+            aws ecs update-service  --region ${REGION} --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
+          done
+          for task in $ECS_TASKS; do
+            aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
+          done
+          sleep 10
+          for num in $SERVICE4RESTART; do
+            aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 1 >> /dev/null
+          done
+          info "Restarted, please allow 1-2 minutes for the new tasks to actually start"
+        fi
       else
-        for num in $SERVICE4RESTART; do
-          aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
-        done
-        for task in $ECS_TASKS; do
-          aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
-        done
+        info "Restarting ${SERVICE_NAME} on ${ECS_CLUSTER}"
+        SERVICE2RESTART=`$SERVICE4RESTART| grep -i ${SERVICE_NAME}|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
+        aws ecs update-service  --region ${REGION} --service $SERVICE2RESTART --cluster $ECS_CLUSTER --desired-count 0 >> /dev/null
         sleep 10
-        for num in $SERVICE4RESTART; do
-          aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 1 >> /dev/null
-        done
-        info "Restarted, please allow 1-2 minutes for the new tasks to actually start"
+        aws ecs update-service  --region ${REGION} --service $SERVICE2RESTART --cluster $ECS_CLUSTER --desired-count 1 >> /dev/null
+        info "Restarted ${SERVICE_NAME} on ${ECS_CLUSTER}"
       fi
     }
 
@@ -441,7 +441,7 @@ function destroy_dev_services {
         ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|tail -1|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'`
         SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
         CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
-        ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|tr '\n' ' '`
+        ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|egrep -vi datadog|tr '\n' ' '`
         EC2_INSTANCE=`aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId'`
         info "STOP ${ECS_CLUSTER}"
           for num in $SERVICE4RESTART; do
@@ -466,7 +466,7 @@ function destroy_dev_services {
       }
 
       function list_clusters {
-          ECS_CLUSTERS=$(aws ecs list-clusters --region ${REGION}|grep infrastructure-application|cut -d/ -f2|sed 's#",##g')
+          ECS_CLUSTERS=$(aws ecs list-clusters --region ${REGION}|grep infrastructure-application|cut -d/ -f2|sed 's#"##g'|sed 's#,##g')
           for ecs in $ECS_CLUSTERS; do
           URL=$(echo $ecs|sed 's#-infrastructure-application.*#.omgx.network#')
           STACK_NAME=$(echo $ecs|sed 's#-infrastructure-application.*##')
