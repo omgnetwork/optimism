@@ -164,13 +164,8 @@ function verify_images_in_ecr {
           aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
           cd ${PATH_TO_DOCKER}/${image}
           cp -fRv ../../secret2env .
-        if [[ $image == 'custom-message-relayer' ]]; then
-            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG}
-          else
-            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG}
-          fi
+          docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+          docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG}
           cd ../..
         done
       else
@@ -178,24 +173,14 @@ function verify_images_in_ecr {
         cd ${PATH_TO_DOCKER}/${SERVICE_NAME}
         cp -fRv ../../secret2env .
         if [ -z ${FROMTAG} ]; then
-          if [[ $SERVICE_NAME == 'custom-message-relayer' ]]; then
-            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
-          else
-            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
-          fi
+          docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+          docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
           info "Login to AWS ECR and start building image"
           aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
           docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
         else
-          if [[ $SERVICE_NAME == 'custom-message-relayer' ]]; then
-            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
-          else
-            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${SERVICE_NAME}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
-          fi
+          docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${SERVICE_NAME}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+          docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
           info "Login to AWS ECR and start building image"
           aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
           docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}

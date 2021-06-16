@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Custom Message Relayer Application Deployment"
+Description: "Fast Message Relayer Application Deployment"
 
 Parameters:
   EnvironmentName:
@@ -14,9 +14,9 @@ Parameters:
     Type: String
     Default: push2aws
 
-  CustomMessageRelayerImage:
+  MessageRelayerFastImage:
     Type: String
-    Default: custom-message-relayer
+    Default: message-relayer-fast
 
   DockerPrefix:
     Type: String
@@ -67,7 +67,7 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       ContainerDefinitions:
-        - Image: !Sub "${ECRRegistry}/${DockerPrefix}/${CustomMessageRelayerImage}:${ImageTag}"
+        - Image: !Sub "${ECRRegistry}/${DockerPrefix}/${MessageRelayerFastImage}:${ImageTag}"
           Name: custom_message_relayer
           Environment:
             - Name: SECRETNAME
@@ -94,7 +94,7 @@ Resources:
           Memory: "512"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
-      Family: !Sub "CustomMessageRelayer-${ImageTag}-${EnvironmentName}"
+      Family: !Sub "MessageRelayerFast-${ImageTag}-${EnvironmentName}"
   ECSService:
     Type: AWS::ECS::Service
     Properties:
@@ -103,5 +103,5 @@ Resources:
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: !Sub "CustomMessageRelayer-${ImageTag}-${EnvironmentName}"
+      ServiceName: !Sub "MessageRelayerFast-${ImageTag}-${EnvironmentName}"
       TaskDefinition: !Ref TaskDefinition
