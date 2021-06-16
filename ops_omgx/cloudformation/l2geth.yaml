@@ -134,8 +134,8 @@ Resources:
       AliasTarget:
         DNSName:
           Fn::Sub:
-            - "dualstack.${LBNAME}"
-            - LBNAME:
+            - "dualstack.${DomainName}."
+            - DomainName:
                 Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancer:DNSName"
         HostedZoneId:
           Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancer:CanonicalHostedZoneID"
@@ -202,7 +202,7 @@ Resources:
             - Name: nproc
               SoftLimit: 8192
               HardLimit: 8192
-          Name: nginx
+          Name: l2_proxy
           PortMappings:
             - ContainerPort: 80
               HostPort: 0
@@ -225,7 +225,7 @@ Resources:
             - geth_l2
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
-      Family: !Sub "GoEthereum-${ImageTag}-${EnvironmentName}"
+      Family: !Sub "L2Geth-${ImageTag}-${EnvironmentName}"
   ECSService:
     Type: AWS::ECS::Service
     DependsOn: GoEthereumLBListenerRule
@@ -236,7 +236,7 @@ Resources:
         MaximumPercent: 133
         MinimumHealthyPercent: 66
       LoadBalancers:
-        - ContainerName: nginx
+        - ContainerName: l2_proxy
           ContainerPort: 80
           TargetGroupArn: !Ref GoEthereumLBTargetGroup
       DesiredCount: !Ref ServiceCount
