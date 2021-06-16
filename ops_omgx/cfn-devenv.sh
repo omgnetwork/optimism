@@ -413,7 +413,8 @@ function destroy_dev_services {
         fi
       else
         info "Restarting ${SERVICE_NAME} on ${ECS_CLUSTER}"
-        SERVICE2RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|sed 's#"##g'|grep -i ${SERVICE_NAME}`
+        SRV=`echo ${SERVICE_NAME}| sed 's#-##g'`
+        SERVICE2RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|sed 's#"##g'|grep -i $SRV`
         aws ecs update-service  --region ${REGION} --service $SERVICE2RESTART --cluster $ECS_CLUSTER --desired-count 0 >> /dev/null
         sleep 10
         aws ecs update-service  --region ${REGION} --service $SERVICE2RESTART --cluster $ECS_CLUSTER --desired-count 1 >> /dev/null

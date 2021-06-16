@@ -133,7 +133,10 @@ Resources:
       Type: A
       AliasTarget:
         DNSName:
-          Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancer:DNSName"
+          Fn::Sub:
+            - "dualstack.${LBNAME}"
+            - LBNAME:
+                Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancer:DNSName"
         HostedZoneId:
           Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancer:CanonicalHostedZoneID"
       HostedZoneName:
@@ -239,5 +242,5 @@ Resources:
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: !Sub "GoEthereum-${ImageTag}-${EnvironmentName}"
+      ServiceName: !Sub "L2Geth-${ImageTag}-${EnvironmentName}"
       TaskDefinition: !Ref TaskDefinition
