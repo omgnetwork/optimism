@@ -5,6 +5,7 @@
 # github.com/ethereum-optimism
 
 export SEQUENCER_PRIVATE_KEY=`/opt/secret2env -name $SECRETNAME|grep -w SEQUENCER_PRIVATE_KEY|sed 's/SEQUENCER_PRIVATE_KEY=//g'`
+export PROPOSER_PRIVATE_KEY=`/opt/secret2env -name $SECRETNAME|grep -w PROPOSER_PRIVATE_KEY|sed 's/PROPOSER_PRIVATE_KEY=//g'`
 export CLEAR_PENDING_TXS=`/opt/secret2env -name $SECRETNAME|grep -w CLEAR_PENDING_TXS|sed 's/CLEAR_PENDING_TXS=//g'`
 export DEBUG=`/opt/secret2env -name $SECRETNAME|grep -w DEBUG|sed 's/DEBUG=//g'`
 export FINALITY_CONFIRMATIONS=`/opt/secret2env -name $SECRETNAME|grep -w FINALITY_CONFIRMATIONS|sed 's/FINALITY_CONFIRMATIONS=//g'`
