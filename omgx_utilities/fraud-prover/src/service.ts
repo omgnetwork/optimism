@@ -293,6 +293,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     )
 
     this.state.lastQueriedL1Block = this.options.l1StartOffset
+    
     this.state.eventCache = []
 
     this.state.lastFinalizedTxHeight = this.options.fromL2TransactionIndex || 0
@@ -585,7 +586,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         )
         console.log('STEP0:7 l2_REPLICA_StateRoot:', l2RStateRoot)
 
-        const l2StateRoot = l2SStateRoot; //for now
+        const l2StateRoot = l2VStateRoot; //for now
         
         if (l1StateRoot !== l2StateRoot) {
           this.logger.info('STEP0:8 State root MISMATCH')
@@ -663,9 +664,9 @@ but uses the L2 block number as a key when looking them up
 */
 
     const stateDiffProof: StateDiffProof =
-      await this.state.l2SProvider.getStateDiffProof(
+      await this.state.l2VProvider.getStateDiffProof(
         transactionIndex + L2_GENESIS_BLOCKS,
-        transactionProof.transaction.blockNumber
+        transactionProof.transaction.blockNumber //this at least gives us some sort of non-null response
       )
     
     //console.log("transactionIndex + L2_GENESIS_BLOCKS:", transactionIndex + L2_GENESIS_BLOCKS)

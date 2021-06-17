@@ -346,7 +346,7 @@ export class L1ProviderWrapper {
     const tree = new MerkleTree(leaves, hash)
 
     //this seems to be off by one sometimes?????
-    const batchIndex = index - batchHeader.prevTotalElements.toNumber() - 1 //I HAVE NO IDEA WHY - 1 IS NEEDED HERE? JTL
+    const batchIndex = index - batchHeader.prevTotalElements.toNumber()// - 1 //I HAVE NO IDEA WHY - 1 IS NEEDED HERE? JTL
 
     console.log('leaves:', leaves)
     console.log('leaves batchindex?:', leaves[batchIndex])

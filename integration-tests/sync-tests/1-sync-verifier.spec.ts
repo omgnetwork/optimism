@@ -39,6 +39,14 @@ describe('Syncing a verifier', () => {
     await verifier.up({ commandOptions: ['--scale', 'verifier=1'] })
 
     provider = await waitForL2Geth(verifierProvider)
+    // // Wait for verifier to be looping
+    // let logs = await verifier.logs()
+    // while (!logs.out.includes('Starting Verifier Loop')) {
+    //   await sleep(500)
+    //   logs = await verifier.logs()
+    // }
+
+    // provider = injectL2Context(verifierProvider)
   }
 
   const syncVerifier = async (sequencerBlockNumber: number) => {
