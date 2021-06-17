@@ -250,7 +250,7 @@ describe('System setup', async () => {
       L1ERC20Gateway: L1ERC20Gateway.address,
       l1ETHGatewayAddress: env.L1ETHGateway.address,
       l1MessengerAddress: env.l1MessengerAddress,
-      l1CustomMessengerAddress: env.fastWatcher.l1.messengerAddress,
+      l1FastMessengerAddress: env.fastWatcher.l1.messengerAddress,
       L2TokenPool: L2TokenPool.address,
       AtomicSwap: AtomicSwap.address,
       L1Message: L1Message.address,

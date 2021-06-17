@@ -206,7 +206,7 @@ class NetworkService {
       // addresses
       this.l1ETHGatewayAddress = addresses.l1ETHGatewayAddress;
       this.l1MessengerAddress = addresses.l1MessengerAddress;
-      this.l1CustomMessengerAddress = addresses.l1CustomMessengerAddress;
+      this.l1FastMessengerAddress = addresses.l1FastMessengerAddress;
 
       this.l1ERC20Address = addresses.L1ERC20;
       this.L1ERC20GatewayAddress = addresses.L1ERC20Gateway
@@ -320,7 +320,7 @@ class NetworkService {
       this.fastWatcher = new Watcher({
         l1: {
           provider: this.l1Provider,
-          messengerAddress: this.l1CustomMessengerAddress
+          messengerAddress: this.l1FastMessengerAddress
         },
         l2: {
           provider: this.l2Provider,
