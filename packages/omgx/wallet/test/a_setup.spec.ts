@@ -125,7 +125,7 @@ describe('System setup', async () => {
     // Deploy L1 liquidity pool
     L1LiquidityPool = await Factory__L1LiquidityPool.deploy(
       env.watcher.l1.messengerAddress,
-      env.customWatcher.l1.messengerAddress,
+      env.fastWatcher.l1.messengerAddress,
     )
     await L1LiquidityPool.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L1LiquidityPool deployed to:')} ${chalk.green(L1LiquidityPool.address)}`)
@@ -210,7 +210,7 @@ describe('System setup', async () => {
 
     L1Message = await Factory__L1Message.deploy(
       env.watcher.l1.messengerAddress,
-      env.customWatcher.l1.messengerAddress,
+      env.fastWatcher.l1.messengerAddress,
     )
     await L1Message.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
@@ -250,7 +250,7 @@ describe('System setup', async () => {
       L1ERC20Gateway: L1ERC20Gateway.address,
       l1ETHGatewayAddress: env.L1ETHGateway.address,
       l1MessengerAddress: env.l1MessengerAddress,
-      l1CustomMessengerAddress: env.customWatcher.l1.messengerAddress,
+      l1CustomMessengerAddress: env.fastWatcher.l1.messengerAddress,
       L2TokenPool: L2TokenPool.address,
       AtomicSwap: AtomicSwap.address,
       L1Message: L1Message.address,

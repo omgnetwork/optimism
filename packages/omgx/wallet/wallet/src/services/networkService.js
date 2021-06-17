@@ -78,7 +78,7 @@ class NetworkService {
 
     // Watcher
     this.watcher = null;
-    this.customWatcher = null;
+    this.fastWatcher = null;
 
     // addresses
     this.ERC721Address = null;
@@ -317,7 +317,7 @@ class NetworkService {
         }
       })
 
-      this.customWatcher = new Watcher({
+      this.fastWatcher = new Watcher({
         l1: {
           provider: this.l1Provider,
           messengerAddress: this.l1CustomMessengerAddress
@@ -1003,10 +1003,10 @@ class NetworkService {
     await depositTX.wait();
 
     // Waiting the response from L1
-    const [l2ToL1msgHash] = await this.customWatcher.getMessageHashesFromL2Tx(depositTX.hash)
+    const [l2ToL1msgHash] = await this.fastWatcher.getMessageHashesFromL2Tx(depositTX.hash)
     console.log(' got L2->L1 message hash', l2ToL1msgHash)
     
-    const l1Receipt = await this.customWatcher.getL1TransactionReceipt(l2ToL1msgHash)
+    const l1Receipt = await this.fastWatcher.getL1TransactionReceipt(l2ToL1msgHash)
     console.log(' completed Deposit! L1 tx hash:', l1Receipt.transactionHash)
 
     return l1Receipt

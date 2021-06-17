@@ -333,7 +333,7 @@ describe('Liquidity Pool Test', async () => {
     )
     await approveKateL2TX.wait()
 
-    await env.waitForXCustomDomainTransaction(
+    await env.waitForXFastDomainTransaction(
       L2LiquidityPool.connect(env.katel2Wallet).clientDepositL2(
         fastExitAmount,
         L2DepositedERC20.address,
@@ -510,7 +510,7 @@ describe('Liquidity Pool Test', async () => {
      )
      await approveBobL2TX.wait()
 
-     await env.waitForRevertXCustomDomainTransaction(
+     await env.waitForRevertXFastDomainTransaction(
        L2LiquidityPool.connect(env.bobl2Wallet).clientDepositL2(
          fastExitAmount,
          L2DepositedERC20.address,

@@ -4,7 +4,7 @@ pragma solidity >0.5.0;
 pragma experimental ABIEncoderV2;
 
 import "./interfaces/iL2LiquidityPool.sol";
-import "../libraries/OVM_CustomCrossDomainEnabled.sol";
+import "../libraries/OVM_FastCrossDomainEnabled.sol";
 
 /* External Imports */
 import '@openzeppelin/contracts/math/SafeMath.sol';
@@ -14,7 +14,7 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 /**
  * @dev An L1 LiquidityPool implementation
  */
-contract L1LiquidityPool is OVM_CustomCrossDomainEnabled, Ownable {
+contract L1LiquidityPool is OVM_FastCrossDomainEnabled, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -142,7 +142,7 @@ contract L1LiquidityPool is OVM_CustomCrossDomainEnabled, Ownable {
         address _l1CrossDomainMessenger,
         address _l1CustomCrossDomainMessenger
     )
-        OVM_CustomCrossDomainEnabled(
+        OVM_FastCrossDomainEnabled(
             _l1CrossDomainMessenger,
             _l1CustomCrossDomainMessenger
         )

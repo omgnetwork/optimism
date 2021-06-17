@@ -50,7 +50,7 @@ export class OptimismEnv {
 
   // The L1 <> L2 State watcher
   watcher: Watcher
-  customWatcher: Watcher
+  fastWatcher: Watcher
 
   // The wallets
   bobl1Wallet: Wallet
@@ -70,7 +70,7 @@ export class OptimismEnv {
     this.L2ETHGateway = args.L2ETHGateway
     this.l2Messenger = args.l2Messenger
     this.watcher = args.watcher
-    this.customWatcher = args.customWatcher
+    this.fastWatcher = args.fastWatcher
     this.bobl1Wallet = args.bobl1Wallet
     this.bobl2Wallet = args.bobl2Wallet
     this.alicel1Wallet = args.alicel1Wallet
@@ -86,7 +86,7 @@ export class OptimismEnv {
 
     const addressManager = getAddressManager(bobl1Wallet)
     const watcher = await initWatcher(l1Provider, l2Provider, addressManager)
-    const customWatcher = await initCustomWatcher(l1Provider, l2Provider, addressManager)
+    const fastWatcher = await initFastWatcher(l1Provider, l2Provider, addressManager)
 
     const L1ETHGateway = await getL1ETHGateway(bobl1Wallet, addressManager)
     const L2ETHGateway = getL2ETHGateway(bobl2Wallet)
@@ -118,7 +118,7 @@ export class OptimismEnv {
       l2Messenger,
       
       watcher,
-      customWatcher,
+      fastWatcher,
 
       bobl1Wallet,
       bobl2Wallet,
@@ -141,11 +141,11 @@ export class OptimismEnv {
     return waitForXDomainTransaction(this.watcher, tx, direction)
   }
 
-  async waitForXCustomDomainTransaction(
+  async waitForXFastDomainTransaction(
     tx: Promise<TransactionResponse> | TransactionResponse,
     direction: Direction
   ): Promise<CrossDomainMessagePair> {
-    return waitForXDomainTransaction(this.customWatcher, tx, direction)
+    return waitForXDomainTransaction(this.fastWatcher, tx, direction)
   }
 
   async waitForRevertXDomainTransaction(
@@ -157,11 +157,11 @@ export class OptimismEnv {
      await this.watcher.getL2TransactionReceipt(xDomainMsgHash)
    }
 
-   async waitForRevertXCustomDomainTransaction(
+   async waitForRevertXFastDomainTransaction(
     tx: Promise<TransactionResponse> | TransactionResponse,
     direction: Direction
   ) {
-    const {remoteReceipt} = await waitForXDomainTransaction(this.customWatcher, tx, direction)
+    const {remoteReceipt} = await waitForXDomainTransaction(this.fastWatcher, tx, direction)
     const [xDomainMsgHash] = await this.watcher.getMessageHashesFromL1Tx(remoteReceipt.transactionHash)
     await this.watcher.getL2TransactionReceipt(xDomainMsgHash)
   }
