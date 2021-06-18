@@ -29,14 +29,14 @@ export const initWatcher = async (
 }
 
 
-export const initCustomWatcher = async (
+export const initFastWatcher = async (
   l1Provider: JsonRpcProvider,
   l2Provider: JsonRpcProvider,
   AddressManager: Contract,
 ) => {
 
-  const l1MessengerAddress = await AddressManager.getAddress('OVM_L1CustomCrossDomainMessenger')
-  console.log("l1CustomMessengerAddress:",l1MessengerAddress)
+  const l1MessengerAddress = await AddressManager.getAddress('OVM_L1FastCrossDomainMessenger')
+  console.log("l1FastMessengerAddress:",l1MessengerAddress)
   
   return new Watcher({
     l1: {
