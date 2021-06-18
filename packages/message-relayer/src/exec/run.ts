@@ -1,6 +1,8 @@
 import { Wallet, providers } from 'ethers'
 import { MessageRelayerService } from '../service'
 import { Bcfg } from '@eth-optimism/core-utils'
+import { Logger, LoggerOptions } from '@eth-optimism/common-ts'
+import * as Sentry from '@sentry/node'
 import * as dotenv from 'dotenv'
 import Config from 'bcfg'
 
@@ -14,6 +16,27 @@ const main = async () => {
   })
 
   const env = process.env
+
+  const SENTRY_DSN = config.str('sentry-dsn', env.SENTRY_DSN)
+  const USE_SENTRY = config.bool('use-sentry', env.USE_SENTRY === 'true')
+  const ETH_NETWORK_NAME = config.str('eth-network-name', env.ETH_NETWORK_NAME)
+
+  const loggerOptions: LoggerOptions = {
+    name: 'Message_Relayer',
+  }
+
+  if (USE_SENTRY) {
+    const sentryOptions = {
+      release: `message-relayer@${process.env.npm_package_version}`,
+      dsn: SENTRY_DSN,
+      environment: ETH_NETWORK_NAME,
+    }
+    loggerOptions.sentryOptions = sentryOptions
+    Sentry.init(sentryOptions)
+  }
+
+  const logger = new Logger(loggerOptions)
+
   const L2_NODE_WEB3_URL = config.str('l2-node-web3-url', env.L2_NODE_WEB3_URL)
   const L1_NODE_WEB3_URL = config.str('l1-node-web3-url', env.L1_NODE_WEB3_URL)
   const ADDRESS_MANAGER_ADDRESS = config.str(
@@ -23,12 +46,6 @@ const main = async () => {
   const L1_WALLET_KEY = config.str('l1-wallet-key', env.L1_WALLET_KEY)
   const MNEMONIC = config.str('mnemonic', env.MNEMONIC)
   const HD_PATH = config.str('hd-path', env.HD_PATH)
-  const WHITELIST_ENDPOINT =
-    config.str('whitlist-endpoint', env.WHITELIST_ENDPOINT) || ''
-  const WHITELIST_POLLING_INTERVAL = config.uint(
-    'whitlist-polling-interval',
-    parseInt(env.WHITELIST_POLLING_INTERVAL, 10) || 60000
-  )
   const RELAY_GAS_LIMIT = config.uint(
     'relay-gas-limit',
     parseInt(env.RELAY_GAS_LIMIT, 10) || 4000000
@@ -88,8 +105,7 @@ const main = async () => {
     l2BlockOffset: L2_BLOCK_OFFSET,
     l1StartOffset: L1_START_OFFSET,
     getLogsInterval: GET_LOGS_INTERVAL,
-    whitelistEndpoint: WHITELIST_ENDPOINT,
-    whitelistPollingInterval: WHITELIST_POLLING_INTERVAL,
+    logger,
   })
 
   await service.start()

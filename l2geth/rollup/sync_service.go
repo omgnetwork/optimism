@@ -138,17 +138,18 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		}
 
 		// Wait until the remote service is done syncing
-		for {
+		t := time.NewTicker(10 * time.Second)
+		for ; true; <-t.C {
 			status, err := service.client.SyncStatus(service.backend)
 			if err != nil {
 				log.Error("Cannot get sync status")
 				continue
 			}
 			if !status.Syncing {
+				t.Stop()
 				break
 			}
 			log.Info("Still syncing", "index", status.CurrentTransactionIndex, "tip", status.HighestKnownTransactionIndex)
-			time.Sleep(10 * time.Second)
 		}
 
 		// Initialize the latest L1 data here to make sure that
@@ -242,21 +243,22 @@ func (s *SyncService) initializeLatestL1(ctcDeployHeight *big.Int) error {
 		s.SetLatestL1Timestamp(context.Timestamp)
 		s.SetLatestL1BlockNumber(context.BlockNumber)
 	} else {
-		// Prevent underflows
-		if *index != 0 {
-			*index = *index - 1
-		}
 		log.Info("Found latest index", "index", *index)
-		block := s.bc.GetBlockByNumber(*index)
+		block := s.bc.GetBlockByNumber(*index + 1)
 		if block == nil {
 			block = s.bc.CurrentBlock()
-			idx := block.Number().Uint64()
-			if idx > *index {
+			blockNum := block.Number().Uint64()
+			if blockNum > *index {
 				// This is recoverable with a reorg but should never happen
 				return fmt.Errorf("Current block height greater than index")
 			}
-			s.SetLatestIndex(&idx)
-			log.Info("Block not found, resetting index", "new", idx, "old", *index)
+			var idx *uint64
+			if blockNum > 0 {
+				num := blockNum - 1
+				idx = &num
+			}
+			s.SetLatestIndex(idx)
+			log.Info("Block not found, resetting index", "new", stringify(idx), "old", *index)
 		}
 		txs := block.Transactions()
 		if len(txs) != 1 {
@@ -320,7 +322,8 @@ func (s *SyncService) Stop() error {
 // VerifierLoop is the main loop for Verifier mode
 func (s *SyncService) VerifierLoop() {
 	log.Info("Starting Verifier Loop", "poll-interval", s.pollInterval, "timestamp-refresh-threshold", s.timestampRefreshThreshold)
-	for {
+	t := time.NewTicker(s.pollInterval)
+	for ; true; <-t.C {
 		if err := s.updateL1GasPrice(); err != nil {
 			log.Error("Cannot update L1 gas price", "msg", err)
 		}
@@ -330,7 +333,6 @@ func (s *SyncService) VerifierLoop() {
 		if err := s.updateL2GasPrice(nil); err != nil {
 			log.Error("Cannot update L2 gas price", "msg", err)
 		}
-		time.Sleep(s.pollInterval)
 	}
 }
 
@@ -354,7 +356,8 @@ func (s *SyncService) verify() error {
 // transactions and then updates the EthContext.
 func (s *SyncService) SequencerLoop() {
 	log.Info("Starting Sequencer Loop", "poll-interval", s.pollInterval, "timestamp-refresh-threshold", s.timestampRefreshThreshold)
-	for {
+	t := time.NewTicker(s.pollInterval)
+	for ; true; <-t.C {
 		if err := s.updateL1GasPrice(); err != nil {
 			log.Error("Cannot update L1 gas price", "msg", err)
 		}
@@ -370,7 +373,6 @@ func (s *SyncService) SequencerLoop() {
 		if err := s.updateContext(); err != nil {
 			log.Error("Could not update execution context", "error", err)
 		}
-		time.Sleep(s.pollInterval)
 	}
 }
 
