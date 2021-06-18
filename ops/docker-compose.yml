@@ -159,7 +159,6 @@ services:
         ROLLUP_STATE_DUMP_PATH: http://deployer:8081/state-dump.latest.json
         URL: http://deployer:8081/addresses.json
         ROLLUP_CLIENT_HTTP: http://dtl:7878
-        #ROLLUP_BACKEND: 'l1'
         ROLLUP_BACKEND: 'l2'
         ROLLUP_VERIFIER_ENABLE: 'true'
         ETH1_CTC_DEPLOYMENT_HEIGHT: 8
