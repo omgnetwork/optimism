@@ -74,6 +74,20 @@ const deployFn: DeployFunction = async (hre) => {
     )
     await L2LiquidityPoolTX.wait()
     console.log(`⭐️ ${chalk.blue('L2 LP initialized:')} ${chalk.green(L2LiquidityPoolTX.hash)}`)
+
+    let registerPoolETHTX = await L1LiquidityPool.registerPool(
+      "0x0000000000000000000000000000000000000000",
+      "0x4200000000000000000000000000000000000006",
+    )
+    await registerPoolETHTX.wait()
+
+    registerPoolETHTX = await L2LiquidityPool.registerPool(
+      "0x0000000000000000000000000000000000000000",
+      "0x4200000000000000000000000000000000000006",
+      {gasLimit: 800000, gasPrice: 0}
+    )
+    await registerPoolETHTX.wait()
+    console.log(`L1 and L2 pools have registered ETH and OETH`)
 }
 
 deployFn.tags = ['L1LiquidityPool', 'L2LiquidityPool', 'required']
