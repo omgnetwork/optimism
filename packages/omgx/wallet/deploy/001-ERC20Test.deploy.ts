@@ -63,7 +63,7 @@ const deployFn: DeployFunction = async (hre) => {
       //Set up things on L2 for this new token
       // [l2MessengerAddress, name, symbol]
       L2DepositedERC20 = await Factory__L2DepositedERC20.deploy(
-        (hre as any).deployConfig.watcher.l2.messengerAddress,
+        (hre as any).deployConfig.l2MessengerAddress,
         tokenName,
         tokenSymbol,
         {gasLimit: 800000, gasPrice: 0}
@@ -83,7 +83,7 @@ const deployFn: DeployFunction = async (hre) => {
       L1ERC20Gateway = await Factory__L1ERC20Gateway.deploy(
         L1ERC20.address,
         L2DepositedERC20.address,
-        (hre as any).deployConfig.watcher.l1.messengerAddress
+        (hre as any).deployConfig.l1MessengerAddress
       )
       await L1ERC20Gateway.deployTransaction.wait()
       const L1ERC20GatewayDeploymentSubmission: DeploymentSubmission = {

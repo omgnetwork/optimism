@@ -49,7 +49,7 @@ const deployFn: DeployFunction = async (hre) => {
     console.log(`🌕 ${chalk.red('AtomicSwap deployed to:')} ${chalk.green(AtomicSwap.address)}`)
 
     L1Message = await Factory__L1Message.deploy(
-      (hre as any).deployConfig.watcher.l1.messengerAddress,
+      (hre as any).deployConfig.l1MessengerAddress,
     )
     await L1Message.deployTransaction.wait()
     const L1MessageDeploymentSubmission: DeploymentSubmission = {
@@ -62,7 +62,7 @@ const deployFn: DeployFunction = async (hre) => {
     console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
 
     L2Message = await Factory__L2Message.deploy(
-      (hre as any).deployConfig.watcher.l2.messengerAddress,
+      (hre as any).deployConfig.l2MessengerAddress,
       {gasLimit: 800000, gasPrice: 0}
     )
     await L2Message.deployTransaction.wait()

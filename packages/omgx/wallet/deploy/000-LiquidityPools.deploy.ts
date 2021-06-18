@@ -27,7 +27,7 @@ const deployFn: DeployFunction = async (hre) => {
     )
     // Deploy L2 liquidity pool
     L2LiquidityPool = await Factory__L2LiquidityPool.deploy(
-      (hre as any).deployConfig.watcher.l2.messengerAddress,
+      (hre as any).deployConfig.l2MessengerAddress,
       {gasLimit: 800000, gasPrice: 0}
     )
     await L2LiquidityPool.deployTransaction.wait()
@@ -42,7 +42,7 @@ const deployFn: DeployFunction = async (hre) => {
 
     // Deploy L1 liquidity pool
     L1LiquidityPool = await Factory__L1LiquidityPool.deploy(
-      (hre as any).deployConfig.watcher.l1.messengerAddress
+      (hre as any).deployConfig.l1MessengerAddress
     )
     await L1LiquidityPool.deployTransaction.wait()
     const L1LiquidityPoolDeploymentSubmission: DeploymentSubmission = {
@@ -54,6 +54,26 @@ const deployFn: DeployFunction = async (hre) => {
     await hre.deployments.save('L1LiquidityPool', L1LiquidityPoolDeploymentSubmission)
     console.log(`🌕 ${chalk.red('L1LiquidityPool deployed to:')} ${chalk.green(L1LiquidityPool.address)}`)
 
+
+    // Initialize L1 liquidity pool
+    const L1LiquidityPoolTX = await L1LiquidityPool.init(
+      /* userRewardFeeRate 3.5% */ 35,
+      /* ownerRewardFeeRate 1.5% */ 15,
+      L2LiquidityPool.address,
+      {gasLimit: 800000, gasPrice: 0}
+    )
+    await L1LiquidityPoolTX.wait()
+    console.log(`⭐️ ${chalk.blue('L1 LP initialized:')} ${chalk.green(L1LiquidityPoolTX.hash)}`)
+
+    // Initialize L2 liquidity pool
+    const L2LiquidityPoolTX = await L2LiquidityPool.init(
+      /* userRewardFeeRate 3.5% */ 35,
+      /* ownerRewardFeeRate 1.5% */ 15,
+      L1LiquidityPool.address,
+      {gasLimit: 800000, gasPrice: 0}
+    )
+    await L2LiquidityPoolTX.wait()
+    console.log(`⭐️ ${chalk.blue('L2 LP initialized:')} ${chalk.green(L2LiquidityPoolTX.hash)}`)
 }
 
 deployFn.tags = ['L1LiquidityPool', 'L2LiquidityPool', 'required']
