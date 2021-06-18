@@ -151,7 +151,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     this.state.lastFinalizedTxHeight = this.options.fromL2TransactionIndex || 0
     this.state.nextUnfinalizedTxHeight =
       this.options.fromL2TransactionIndex || 0
-      this.state.lastWhitelistPollingTimestamp = 0
+    this.state.lastWhitelistPollingTimestamp = 0
   }
 
   protected async _start(): Promise<void> {
@@ -566,7 +566,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     this.logger.info('Message successfully relayed to Layer 1!')
   }
 
-  private async _getWhitelist(): Promise<Array<String>> {
+  private async _getWhitelist(): Promise<void> {
     try {
       if (this.options.whitelistEndpoint) {
         if (this.state.lastWhitelistPollingTimestamp === 0 || 
@@ -577,12 +577,8 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           this.state.lastWhitelistPollingTimestamp = new Date().getTime();
           this.state.whitelist = whitelist;
           this.logger.info('Found the whitelist', { whitelist: whitelist })
-        } else {
-          this.logger.info('Loading the whitelist', { whitelist: this.state.whitelist })
-          return this.state.whitelist;
         }
       } else {
-        this.logger.info('The whitelist endpoint was not provided')
         this.state.whitelist = [];
       }
     } catch {
