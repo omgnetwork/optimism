@@ -85,13 +85,13 @@ Resources:
                     Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerInt:DNSName"
             - Name: L2_NODE_WEB3_URL
               Value: !Sub
-                - "https://${EndpointAddress}/"
+                - "https://${EndpointAddress}"
                 - EndpointAddress:
                     Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
             - Name: RETRIES
               Value: 3600
           EntryPoint:
-            - "/opt/optimism/packages/message-relayer/relayer.sh"
+            - "/opt/wait-for-l1-and-l2.sh"
           DockerLabels:
             com.datadoghq.ad.check_names: '["message_relayer"]'
             com.datadoghq.ad.init_configs: '[{}]'

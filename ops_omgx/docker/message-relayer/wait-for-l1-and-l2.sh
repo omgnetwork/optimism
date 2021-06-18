@@ -10,7 +10,7 @@ export L1_NODE_WEB3_URL=`/opt/secret2env -name $SECRETNAME|grep -w L1_NODE_WEB3_
 export L1_WALLET_KEY=`/opt/secret2env -name $SECRETNAME|grep -w RELAY_L1_WALLET_PRIV_KEY|sed 's/RELAY_L1_WALLET_PRIV_KEY=//g'`
 export WHITELIST_ENDPOINT=`/opt/secret2env -name $SECRETNAME|grep -w WHITELIST_ENDPOINT|sed 's/WHITELIST_ENDPOINT=//g'`
 
-cmd="node /opt/optimism-ts-services/build/exec/run.js"
+cmd="/opt/optimism/packages/message-relayer/exec/run-message-relayer.js"
 
 JSON='{"jsonrpc":"2.0","id":0,"method":"net_version","params":[]}'
 

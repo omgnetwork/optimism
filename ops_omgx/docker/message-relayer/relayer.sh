@@ -28,4 +28,4 @@ curl \
     $L2_NODE_WEB3_URL
 
 # go
-exec /opt/message-relayer/exec/run-message-relayer.js
+exec /opt/optimism/packages/message-relayer/exec/run-message-relayer.js
