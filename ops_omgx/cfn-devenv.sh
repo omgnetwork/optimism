@@ -138,6 +138,8 @@ function info {
 function verify_images_in_ecr {
 # cached old docker images makes docker refuse to pull latest!
   #docker system prune -a -f --volumes
+  info "Login to AWS ECR and start building image"
+  aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
 
     if [[ -z ${FROMTAG} ]]; then
       info "Verifying whether there are images for all services in AWS ECR"
@@ -148,8 +150,6 @@ function verify_images_in_ecr {
               info "${image}:${DEPLOYTAG} found"
           else
               warn "${image}:${DEPLOYTAG} not found"
-              info "Login to AWS ECR and start building image"
-              aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
               cd ${PATH_TO_DOCKER}/${image}
               cp -fRv ../../secret2env .
               docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${DEPLOYTAG}"
@@ -160,8 +160,6 @@ function verify_images_in_ecr {
         info "Verified all images exist in AWS ECR"
      elif [[ -z ${SERVICE_NAME} ]]; then
         for image in ${DOCKER_IMAGES_LIST}; do
-          info "Login to AWS ECR and start building image"
-          aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
           cd ${PATH_TO_DOCKER}/${image}
           cp -fRv ../../secret2env .
           docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
@@ -175,14 +173,8 @@ function verify_images_in_ecr {
         if [ -z ${FROMTAG} ]; then
           docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
           docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
-          info "Login to AWS ECR and start building image"
-          aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
-          docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
         else
           docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${SERVICE_NAME}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-          docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
-          info "Login to AWS ECR and start building image"
-          aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${AWS_ECR} 2> /dev/null
           docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
         fi
         cd ../..
