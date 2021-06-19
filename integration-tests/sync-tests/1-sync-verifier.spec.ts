@@ -11,7 +11,8 @@ import {
 import { OptimismEnv } from '../test/shared/env'
 import { DockerComposeNetwork } from '../test/shared/docker-compose'
 
-describe('Syncing a verifier', () => {
+describe('Syncing a Verifier', () => {
+  
   let env: OptimismEnv
   let wallet: Wallet
   let verifier: DockerComposeNetwork
@@ -52,7 +53,12 @@ describe('Syncing a verifier', () => {
   const syncVerifier = async (sequencerBlockNumber: number) => {
     // Wait until verifier has caught up to the sequencer
     let latestVerifierBlock = (await provider.getBlock('latest')) as any
+    console.log("SequencerBN:",sequencerBlockNumber)
+    console.log("VerifierBN:",latestVerifierBlock.number)
     while (latestVerifierBlock.number < sequencerBlockNumber) {
+      console.log("Verifier trying to catch up with the sequencer")
+      console.log("SequencerBN:",sequencerBlockNumber)
+      console.log("VerifierBN:",latestVerifierBlock.number)
       await sleep(500)
       latestVerifierBlock = (await provider.getBlock('latest')) as any
     }
@@ -66,6 +72,7 @@ describe('Syncing a verifier', () => {
   })
 
   describe('Basic transactions', () => {
+    
     after(async () => {
       await verifier.stop('verifier')
       await verifier.rm()
@@ -81,23 +88,32 @@ describe('Syncing a verifier', () => {
         data: '0x',
         value: 0,
       }
+
+      //send a tx
       const result = await wallet.sendTransaction(tx)
       await result.wait()
 
       const totalElementsAfter = await waitForBatchSubmission(
         totalElementsBefore
       )
-      expect(totalElementsAfter.gt(totalElementsAfter))
+
+      expect(totalElementsAfter.gt(totalElementsBefore))
 
       const latestSequencerBlock = (await sequencerProvider.getBlock(
         'latest'
       )) as any
 
+      //start the verifier
       await startVerifier()
-
+      
+      //start the verifier
+      //give it time to catch up
       const matchingVerifierBlock = (await syncVerifier(
         latestSequencerBlock.number
       )) as any
+
+      console.log("Verifier state root:",matchingVerifierBlock.stateRoot)
+      console.log("Sequencer state root:",latestSequencerBlock.stateRoot)
 
       expect(matchingVerifierBlock.stateRoot).to.eq(
         latestSequencerBlock.stateRoot
@@ -105,6 +121,7 @@ describe('Syncing a verifier', () => {
     })
 
     it('should have matching block data', async () => {
+      
       const sequencerTip = await sequencerProvider.getBlock('latest')
       const verifierTip = await provider.getBlock('latest')
 

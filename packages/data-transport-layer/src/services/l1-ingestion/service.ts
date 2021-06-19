@@ -77,6 +77,7 @@ const optionSettings = {
 }
 
 export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
+  
   constructor(options: L1IngestionServiceOptions) {
     super('L1_Ingestion_Service', options, optionSettings)
   }
@@ -408,9 +409,29 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
   }
 
   private async _findStartingL1BlockNumber(): Promise<number> {
+    
+    //get the current block number
     const currentL1Block = await this.state.l1RpcProvider.getBlockNumber()
 
+    //and now, figure out where things started...
     for (let i = 0; i < currentL1Block; i += 1000000) {
+
+      let queryStart = i; //so for example, for the first cycle, 0
+      let queryEnd = Math.min(i + 1000000, currentL1Block); 
+      //so for example, for the first cycle, if the current block is 68, then 
+      //the query would run from 0 to 68, which makes sense
+
+      console.log("Scan begin:",i)
+      console.log("Scan end:",Math.min(i + 1000000, currentL1Block))
+      
+      //this event (AddressSet) is sometimes not discovered
+      //let eventTopic = this.state.contracts.Lib_AddressManager.filters.AddressSet();
+      
+      //this is the ownershipTransferred event
+      //which is the first thing that happens
+      //seems more reliable
+      //eventTopic.topics = ["0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"]; 
+      
       const events = await this.state.contracts.Lib_AddressManager.queryFilter(
         this.state.contracts.Lib_AddressManager.filters.OwnershipTransferred(),
         i,

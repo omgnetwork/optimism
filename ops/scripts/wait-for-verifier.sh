@@ -10,6 +10,6 @@ do
         echo 'Timed out waiting for verifier'
         break
     fi
-    echo 'Waiting for verifier...'
+    echo 'Waiting for Verifier...'
     ((i=i+1))
 done

@@ -184,6 +184,9 @@ export class TransportDB {
   public async putHighestL2BlockNumber(
     block: number | BigNumber
   ): Promise<void> {
+    
+    console.log("putHighestL2BlockNumber:", block)
+    
     if (block <= (await this.getHighestL2BlockNumber())) {
       return
     }
@@ -249,13 +252,19 @@ export class TransportDB {
   public async getFullTransactionByIndex(
     index: number
   ): Promise<TransactionEntry> {
+    
     const transaction = await this.getTransactionByIndex(index)
+    
+    console.log("Transaction:",transaction)
+
     if (transaction === null) {
       return null
     }
 
     if (transaction.queueOrigin === 'l1') {
+      
       const enqueue = await this.getEnqueueByIndex(transaction.queueIndex)
+      
       if (enqueue === null) {
         return null
       }
@@ -286,7 +295,9 @@ export class TransportDB {
     start: number,
     end: number
   ): Promise<TransactionEntry[]> {
+    
     const transactions = await this.getTransactionsByIndexRange(start, end)
+    
     if (transactions === null) {
       return null
     }
