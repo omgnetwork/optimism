@@ -37,11 +37,11 @@ jobs:
         working-directory: ./ops
         run: docker-compose up -d && ./scripts/wait-for-sequencer.sh
 
-      - name: Run the sync tests
+      - name: Run the fraud tests
         working-directory: ./integration-tests
         run: |
           yarn
-          yarn test:sync
+          yarn test:fraud
 
       # - name: Collect docker logs on failure
       #   if: failure()
