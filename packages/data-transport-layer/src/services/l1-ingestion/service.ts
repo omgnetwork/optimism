@@ -141,6 +141,7 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
     )
 
     const startingL1BlockNumber = await this.state.db.getStartingL1Block()
+    
     if (startingL1BlockNumber) {
       this.state.startingL1BlockNumber = startingL1BlockNumber
     } else {
@@ -431,13 +432,25 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
       //which is the first thing that happens
       //seems more reliable
       //eventTopic.topics = ["0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"]; 
-      
+      // let eventTopic = this.state.contracts.Lib_AddressManager.filters.AddressSet();
+      // console.log("eventTopic AddressSet:",eventTopic)
+
+      let eventTopic = this.state.contracts.Lib_AddressManager.filters.OwnershipTransferred();
+      console.log("eventTopic OwnershipTransferred:",eventTopic)
+/*      
+      eventTopic OwnershipTransferred: {
+dtl_1                |   address: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+dtl_1                |   topics: [
+dtl_1                |     '0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0'
+dtl_1                |   ]
+eth_chainId (2)      | }
+*/
+     
       const events = await this.state.contracts.Lib_AddressManager.queryFilter(
         this.state.contracts.Lib_AddressManager.filters.OwnershipTransferred(),
         i,
         Math.min(i + 1000000, currentL1Block)
       )
-
       if (events.length > 0) {
         return events[0].blockNumber
       }
