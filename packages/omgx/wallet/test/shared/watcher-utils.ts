@@ -29,12 +29,14 @@ export const initWatcher = async (
 }
 
 
-export const initFastWatcher = async (
+export const initWatcherFast = async (
   l1Provider: JsonRpcProvider,
   l2Provider: JsonRpcProvider,
   AddressManager: Contract,
 ) => {
 
+  /* ALERT - this code will need to be changed once the new message-relayer-fast is autodeployed */
+  //const l1MessengerAddress = await AddressManager.getAddress('OVM_L1CrossDomainMessengerFast')
   const l1MessengerAddress = await AddressManager.getAddress('Proxy__OVM_L1CrossDomainMessenger')
   console.log("l1FastMessengerAddress:",l1MessengerAddress)
   
