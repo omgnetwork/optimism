@@ -207,7 +207,7 @@ function Account () {
               disabled={!isSynced || criticalTransactionLoading}
               style={{maxWidth: '150px', padding: '8px'}}
             >
-              FAST ONRAMP<ArrowForward/>
+              ONRAMP<ArrowForward/>
             </Button>
           </div>
         }
@@ -220,18 +220,6 @@ function Account () {
               style={{maxWidth: '150px', padding: '8px'}}
             > 
             <ArrowBack/>FAST EXIT
-            </Button>
-          </div>
-        }
-        {networkLayer === 'L1' &&
-          <div className={styles.buttons}>
-            <Button
-              onClick={() => handleModalClick('depositModal')}
-              type='primary'
-              disabled={!isSynced || criticalTransactionLoading}
-              style={{maxWidth: '150px', padding: '8px'}}
-            >
-              SLOW ONRAMP<ArrowForward/>
             </Button>
           </div>
         }

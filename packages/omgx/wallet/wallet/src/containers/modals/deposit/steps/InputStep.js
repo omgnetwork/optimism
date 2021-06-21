@@ -44,9 +44,11 @@ function InputStep ({
   async function depositETH () {
     if (value > 0 && tokenInfo) {
       let res
-      if (fast) {
+      if (Number(value) < (Number(LPBalance) / 2)) {
+        dispatch(openAlert(`About to transfer ${(Number(value) * 1.00).toFixed(2)} into oETH on L2 using Fast channel`));
         res = await dispatch(depositL1LP(currency, value))
       } else {
+        dispatch(openAlert(`About to transfer ${(Number(value) * 1.00).toFixed(2)} into oETH on L2 using Slow channel`));
         res = await dispatch(depositETHL2(value));
       }
       if (res) {
@@ -63,7 +65,7 @@ function InputStep ({
     }
   }
 
-  const disabledSubmit = value <= 0 || !currency || !ethers.utils.isAddress(currency) || (fast && Number(value) > Number(LPBalance));
+  const disabledSubmit = value <= 0 || !currency || !ethers.utils.isAddress(currency);
 
   if (fast && Object.keys(tokenInfo).length && currency) {
     networkService.L2LPBalance(currency).then((LPBalance)=>{
@@ -77,13 +79,7 @@ function InputStep ({
   return (
     <>
 
-      {fast &&
-        <h2>Fast swap onto OMGX</h2>
-      }
-
-      {!fast &&
-        <h2>Traditional Deposit</h2>
-      }
+      <h2>Unified onramp onto OMGX</h2>
       
       <Tabs
         className={styles.tabs}
@@ -114,11 +110,10 @@ function InputStep ({
         onChange={i=>setValue(i.target.value)} 
       />
 
-      {fast && activeTab1 === 'ETH' && Object.keys(tokenInfo).length && currency ? (
+      {activeTab1 === 'ETH' && Object.keys(tokenInfo).length && currency ? (
         <>
           <h3>
-            The L2 liquidity pool has {LPBalance} oETH. The liquidity fee is {feeRate}%.{" "} 
-            {value && `You will receive ${(Number(value) * 0.97).toFixed(2)} oETH on L2.`}
+            The L2 liquidity pool has {LPBalance} oETH. Onramp requests of {(Number(LPBalance) / 2.0).toFixed(2)} or less will be processed through the pool.
           </h3>
         </>
       ):<></>}
