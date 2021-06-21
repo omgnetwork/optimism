@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import { ethers } from 'ethers';
 import erc20abi from 'human-standard-token-abi';
 import networkService from 'services/networkService';
 import store from 'store';
@@ -61,17 +60,19 @@ export async function addToken ( tokenContractAddress ) {
     return state.tokenList[_tokenContractAddress];
   }
 
-  try {  
-    const tokenContract = new ethers.Contract(
-      _tokenContractAddress, 
-      erc20abi,
-      networkService.L1orL2 === 'L1' ? networkService.l1Provider: networkService.l2Provider,
-    );
+  try {
+    
+    let tokenContract = null;
+    if (networkService.L1orL2 === 'L1') {
+      tokenContract = new networkService.l1Web3Provider.eth.Contract(erc20abi, _tokenContractAddress);
+    } else {
+      tokenContract = new networkService.l2Web3Provider.eth.Contract(erc20abi, _tokenContractAddress);
+    }
 
     const [ _symbol, _decimals, _name ] = await Promise.all([
-      tokenContract.symbol(),
-      tokenContract.decimals(),
-      tokenContract.name()
+      tokenContract.methods.symbol().call(),
+      tokenContract.methods.decimals().call(),
+      tokenContract.methods.name().call()
     ]).catch(e => [ null, null, null ]);
     
     const decimals = _decimals ? Number(_decimals.toString()) : 'NOT ON ETHEREUM';

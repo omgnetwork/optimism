@@ -7,7 +7,7 @@ import './tasks/deploy'
 
 const config: HardhatUserConfig = {
   mocha: {
-    timeout: 300000,
+    timeout: 60000,
   },
   networks: {
     optimism: {

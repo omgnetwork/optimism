@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ethers } from 'ethers';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Button from 'components/button/Button';
@@ -63,7 +62,7 @@ function InputStep ({
     }
   }
 
-  const disabledSubmit = value <= 0 || !currency || !ethers.utils.isAddress(currency) || (fast && Number(value) > Number(LPBalance));
+  const disabledSubmit = value <= 0 || !currency || !networkService.l1Web3Provider.utils.isAddress(currency) || (fast && Number(value) > Number(LPBalance));
 
   if (fast && Object.keys(tokenInfo).length && currency) {
     networkService.L2LPBalance(currency).then((LPBalance)=>{
@@ -131,12 +130,6 @@ function InputStep ({
           </h3>
         </>
       ):<></>}
-
-      {fast && Number(LPBalance) < Number(value) && 
-        <h3 style={{color: 'red'}}>
-          The L2 liquidity pool doesn't have enough balance to cover your swap.
-        </h3>
-      }
 
       <div className={styles.buttons}>
         <Button
