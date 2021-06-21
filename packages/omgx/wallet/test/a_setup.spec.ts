@@ -18,7 +18,6 @@ import AtomicSwapJson from '../artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap
 import L1MessageJson from '../artifacts/contracts/Message/L1Message.sol/L1Message.json'
 import L2MessageJson from '../artifacts-ovm/contracts/Message/L2Message.sol/L2Message.json'
 
-
 import { OptimismEnv } from './shared/env'
 
 import { promises as fs } from 'fs'
@@ -124,7 +123,8 @@ describe('System setup', async () => {
     
     // Deploy L1 liquidity pool
     L1LiquidityPool = await Factory__L1LiquidityPool.deploy(
-      env.watcher.l1.messengerAddress
+      env.watcher.l1.messengerAddress,
+      env.watcherFast.l1.messengerAddress,
     )
     await L1LiquidityPool.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L1LiquidityPool deployed to:')} ${chalk.green(L1LiquidityPool.address)}`)
@@ -208,7 +208,8 @@ describe('System setup', async () => {
     console.log(`🌕 ${chalk.red('AtomicSwap deployed to:')} ${chalk.green(AtomicSwap.address)}`)
 
     L1Message = await Factory__L1Message.deploy(
-      env.watcher.l1.messengerAddress
+      env.watcher.l1.messengerAddress,
+      env.watcherFast.l1.messengerAddress,
     )
     await L1Message.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
@@ -248,6 +249,7 @@ describe('System setup', async () => {
       L1ERC20Gateway: L1ERC20Gateway.address,
       l1ETHGatewayAddress: env.L1ETHGateway.address,
       l1MessengerAddress: env.l1MessengerAddress,
+      l1FastMessengerAddress: env.fastWatcher.l1.messengerAddress,
       L2TokenPool: L2TokenPool.address,
       AtomicSwap: AtomicSwap.address,
       L1Message: L1Message.address,
