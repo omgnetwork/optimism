@@ -339,7 +339,7 @@ func (s *SyncService) verify() error {
 	switch s.backend {
 	case BackendL1:
 		if err := s.syncBatchesToTip(); err != nil {
-			return fmt.Errorf("Verifier cannot sync transaction batches to tip: %w", err)
+			return fmt.Errorf("Verifier cannot sync transaction batches to tip with BackendL1: %w", err)
 		}
 	case BackendL2:
 		if err := s.syncTransactionsToTip(); err != nil {
@@ -432,6 +432,13 @@ func (s *SyncService) updateL1GasPrice() error {
 // price oracle at the state that corresponds to the state root. If no state
 // root is passed in, then the tip is used.
 func (s *SyncService) updateL2GasPrice(hash *common.Hash) error {
+
+	// TODO(mark): this is temporary and will be able to be removed when the
+	// OVM_GasPriceOracle is moved into the predeploy contracts
+	if !s.enableL2GasPolling {
+		return nil
+	}
+
 	var state *state.StateDB
 	var err error
 	if hash != nil {
