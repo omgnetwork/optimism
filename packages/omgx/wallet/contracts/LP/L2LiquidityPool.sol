@@ -306,16 +306,7 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled, Ownable {
 
         require(pool.l2TokenAddress != address(0), "Token Address Not Registered");
 
-        //Augment the pool size for this ERC20
-        // uint256 userRewardFee = (_amount.mul(userRewardFeeRate)).div(1000);
-        // uint256 ownerRewardFee = (_amount.mul(ownerRewardFeeRate)).div(1000);
-        // uint256 totalFee = userRewardFee.add(ownerRewardFee);
-        // uint256 receivedAmount = _amount.sub(totalFee);
-
         IERC20(_tokenAddress).safeTransferFrom(msg.sender, address(this), _amount);
-
-        // pool.accUserReward = pool.accUserReward.add(userRewardFee);
-        // pool.accOwnerReward = pool.accOwnerReward.add(ownerRewardFee);
 
         // Construct calldata for L1LiquidityPool.depositToFinalize(_to, receivedAmount)
         bytes memory data = abi.encodeWithSelector(
