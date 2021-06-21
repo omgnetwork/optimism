@@ -50,6 +50,7 @@ const deployFn: DeployFunction = async (hre) => {
 
     L1Message = await Factory__L1Message.deploy(
       (hre as any).deployConfig.l1MessengerAddress,
+      (hre as any).deployConfig.l1MessengerAddress
     )
     await L1Message.deployTransaction.wait()
     const L1MessageDeploymentSubmission: DeploymentSubmission = {
