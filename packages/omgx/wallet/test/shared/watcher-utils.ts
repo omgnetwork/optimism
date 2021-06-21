@@ -35,7 +35,7 @@ export const initFastWatcher = async (
   AddressManager: Contract,
 ) => {
 
-  const l1MessengerAddress = await AddressManager.getAddress('OVM_L1FastCrossDomainMessenger')
+  const l1MessengerAddress = await AddressManager.getAddress('Proxy__OVM_L1CrossDomainMessenger')
   console.log("l1FastMessengerAddress:",l1MessengerAddress)
   
   return new Watcher({
