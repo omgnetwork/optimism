@@ -338,6 +338,7 @@ export const run = async () => {
 
   const sequencerAddress = await sequencerSigner.getAddress()
   const proposerAddress = await proposerSigner.getAddress()
+  
   // If the sequencer & proposer are the same, use a single wallet
   if (sequencerAddress === proposerAddress) {
     proposerSigner = sequencerSigner
@@ -372,7 +373,8 @@ export const run = async () => {
   )
 
   const stateBatchSubmitter = new StateBatchSubmitter(
-    proposerSigner,
+    sequencerSigner,
+    //proposerSigner,
     l2Provider,
     requiredEnvVars.MIN_L1_TX_SIZE,
     requiredEnvVars.MAX_L1_TX_SIZE,

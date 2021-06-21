@@ -22,7 +22,11 @@ export class L2ProviderWrapper {
 
     }
     else {
-      console.log("getStateRoot full L2 block:",block)
+      //console.log("getStateRoot full L2 block:",block)
+      //console.log("getStateRoot transactions:",block.transactions[0])
+      //console.log("getStateRoot extra:",block.extraData)
+      //console.log("getStateRoot number:",block.number.toString())
+      //console.log("getStateRoot stateroot:",block.stateRoot)
       return block.stateRoot
     }
   }

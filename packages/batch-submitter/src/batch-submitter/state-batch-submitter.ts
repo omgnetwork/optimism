@@ -224,9 +224,12 @@ export class StateBatchSubmitter extends BatchSubmitter {
         const blockTx = block.transactions[0]
 
         this.logger.warn('Found transaction', {
-            from: blockTx.from,
-            fraudSubmissionAddress: this.fraudSubmissionAddress,
-          })
+          from: blockTx.from
+        })
+        
+        this.logger.warn('Fraud submission address', {
+          fraudSubmissionAddress: this.fraudSubmissionAddress
+        })
 
         if (blockTx.from.toLowerCase() === this.fraudSubmissionAddress.toLowerCase()) {
           this.logger.warn('Found transaction from fraud submission address', {

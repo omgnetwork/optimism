@@ -301,7 +301,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     this.state.nextUnfinalizedTxHeight =
       this.options.fromL2TransactionIndex || 0
     
-    this.state.nextUnverifiedStateRoot =
+    this.state.nextUnverifiedStateRoot = 
       this.options.fromL2TransactionIndex || 0
   }
 
@@ -313,7 +313,8 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
 
       try {
         
-        this.logger.info('STEP 0: Looking for mismatched state roots...')
+        console.log("\nStep 0: Let's verify this state root:", this.state.nextUnverifiedStateRoot)
+        //this.logger.info('STEP 0: Looking for mismatched state roots...')
 
         const fraudulentStateRootIndex = await this._findNextFraudulentStateRoot()
 
@@ -543,15 +544,22 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
    */
   private async _findNextFraudulentStateRoot(): Promise<number | undefined> {
     
-    this.logger.info('STEP0:1 getStateRootBatchHeader for the nextUnverifiedStateRoot', {
-      nextUnverifiedStateRoot: this.state.nextUnverifiedStateRoot,
-    })
+    console.log("Step 1: getStateRootBatchHeader for the nextUnverifiedStateRoot:", this.state.nextUnverifiedStateRoot)
+
+    // this.logger.info('STEP0:1 getStateRootBatchHeader for the nextUnverifiedStateRoot', {
+    //   nextUnverifiedStateRoot: this.state.nextUnverifiedStateRoot,
+    // })
 
     let nextBatchHeader = await this.state.l1Provider.getStateRootBatchHeader(
       this.state.nextUnverifiedStateRoot
     )
 
-    console.log('STEP0:2 _findNextFraudulentStateRoot(): nextBatchHeader data from the l1: ', nextBatchHeader )
+    console.log('Step 7: _findNextFraudulentStateRoot(): nextBatchHeader data from the l1: ', nextBatchHeader)
+
+    // if(nextBatchHeader === undefined) {
+    //    this.state.nextUnverifiedStateRoot = this.state.nextUnverifiedStateRoot + 1;
+    //   console.log('Step 8: _findNextFraudulentStateRoot()')
+    // }
 
     while (nextBatchHeader !== undefined) {
       
@@ -586,7 +594,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         )
         console.log('STEP0:7 l2_REPLICA_StateRoot:', l2RStateRoot)
 
-        const l2StateRoot = l2VStateRoot; //for now
+        const l2StateRoot = l2RStateRoot; //for now
         
         if (l1StateRoot !== l2StateRoot) {
           this.logger.info('STEP0:8 State root MISMATCH')
@@ -607,6 +615,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         this.state.nextUnverifiedStateRoot
       )
     }
+
   }
 
   /**
@@ -664,7 +673,7 @@ but uses the L2 block number as a key when looking them up
 */
 
     const stateDiffProof: StateDiffProof =
-      await this.state.l2VProvider.getStateDiffProof(
+      await this.state.l2RProvider.getStateDiffProof(
         transactionIndex + L2_GENESIS_BLOCKS,
         transactionProof.transaction.blockNumber //this at least gives us some sort of non-null response
       )

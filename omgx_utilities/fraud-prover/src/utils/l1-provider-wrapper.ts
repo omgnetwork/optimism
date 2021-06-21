@@ -74,12 +74,13 @@ export class L1ProviderWrapper {
     index: number
   ): Promise<StateRootBatchHeader> {
     
-    console.log('STEP0:1:1 getStateRootBatchHeader for index', index)
+    //console.log('STEP0:1:1 getStateRootBatchHeader for index', index)
+    console.log("Step 2: getStateRootBatchHeader for ", index)
 
     const event = await this._getStateRootBatchEvent(index)
 
     if (!event) {
-      console.log('STEP0:1:2 - sorry - no event')
+      console.log('Step 6: _getStateRootBatchEvent(index) - no event - returning')
       return
     }
 
@@ -395,19 +396,43 @@ export class L1ProviderWrapper {
 
   private async _getStateRootBatchEvent(index: number): Promise<Event> {
     
+    console.log("Step 3: _getStateRootBatchEvent for index:", index)
+
+    let eventType = this.OVM_StateCommitmentChain.filters.StateBatchAppended();
+    //console.log("eventType",eventType)
+
+/*
+eventType {
+  address: '0x9A676e781A523b5d0C0e43731313A708CB607508',
+  topics: [
+    '0x16be4c5129a4e03cf3350262e181dc02ddfb4a6008d925368c0899fcd97ca9c5'
+  ]
+}
+*/
+
+    //eventType.topics = [];
+
     const events = await this.findAllEvents(
       this.OVM_StateCommitmentChain,
-      this.OVM_StateCommitmentChain.filters.StateBatchAppended()
+      eventType
+      //this.OVM_StateCommitmentChain.filters.StateBatchAppended()
     )
 
-    //console.log('All events in the OVM_StateCommitmentChain:', events)
-    console.log('Step 1 (_getStateRootBatchEvent)')
+    //this gives me a listing of everything with the StateBatchAppended events
+
+    console.log('Step 4: Events in the OVM_StateCommitmentChain'); //', events)
+    //console.log('Step 4: All events in the OVM_StateCommitmentChain:', events.length)
+    
+    //console.log('Step 1 (_getStateRootBatchEvent)')
 
     if (events.length === 0) {
+      console.log('Step 5: _getStateRootBatchEvent - no events found - returning')
       return
     }
 
+    //so now, let's filter by relevant range
     const matching = events.filter((event) => {
+      
       //console.log('index', index)
       /*
       console.log(
@@ -419,12 +444,22 @@ export class L1ProviderWrapper {
         event.args._batchSize.toNumber()
       )
       */
+/*
+      console.log("index", index);
+      console.log("event.args._prevTotalElements.toNumber()", event.args._prevTotalElements.toNumber());
+      console.log("event.args._prevTotalElements.toNumber() <= index:", event.args._prevTotalElements.toNumber() <= index);
+      console.log("(event.args._prevTotalElements.toNumber() + event.args._batchSize.toNumber())", (event.args._prevTotalElements.toNumber() + event.args._batchSize.toNumber()));
+      console.log("(event.args._prevTotalElements.toNumber() + event.args._batchSize.toNumber()) > index", (event.args._prevTotalElements.toNumber() + event.args._batchSize.toNumber()) > index);
+*/
+      //now we are filtering that list for everything that fits these constraints
+      const limitLower = event.args._prevTotalElements.toNumber();
+      const limitUpper = event.args._prevTotalElements.toNumber() + event.args._batchSize.toNumber();
+
+      //index is between those two limits
       return (
-        event.args._prevTotalElements.toNumber() <= index &&
-        event.args._prevTotalElements.toNumber() +
-          event.args._batchSize.toNumber() >
-          index
+         index >= limitLower && index < limitUpper
       )
+
     })
 
     //console.log('This StateRootBatchEvent matches:', matching)
