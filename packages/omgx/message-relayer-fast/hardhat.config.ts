@@ -27,9 +27,6 @@ const config: HardhatUserConfig = {
   solidity: '0.7.6',
   ovm: {
     solcVersion: '0.7.6',
-  },
-  namedAccounts: {
-    deployer: 0
   }
 }
 

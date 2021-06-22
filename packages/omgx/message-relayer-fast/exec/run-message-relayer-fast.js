@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const main = require("../dist/exec/run").default
+const main = require("../build/src/exec/run").default
 
 ;(async () => {
   await main()

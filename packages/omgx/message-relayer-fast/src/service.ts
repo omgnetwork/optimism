@@ -99,6 +99,9 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       this.options.addressManagerAddress,
       this.options.l1RpcProvider
     )
+    this.logger.info('Connected to Lib_AddressManager', {
+      address: this.state.Lib_AddressManager.address,
+    })
 
     this.logger.info('Connecting to OVM_StateCommitmentChain...')
     this.state.OVM_StateCommitmentChain = await loadContractFromManager({
@@ -112,7 +115,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
 
     this.logger.info('Connecting to OVM_L1CrossDomainMessenger...')
     const l1MessengerAddress = this.options.l1MessengerFast || await this.state.Lib_AddressManager.getAddress(
-      'OVM_L1CustomCrossDomainMessenger'
+      'OVM_L1CrossDomainMessengerFast'
     )
     this.state.OVM_L1CrossDomainMessenger = loadContract(
       'OVM_L1CrossDomainMessenger',

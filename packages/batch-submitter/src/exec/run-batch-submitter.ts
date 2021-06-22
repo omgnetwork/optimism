@@ -82,10 +82,9 @@ export const run = async () => {
 
   // Parse config
   const env = process.env
-  const environment = config.str('node-env', env.NODE_ENV)
-  const network = config.str('eth-network-name', env.ETH_NETWORK_NAME)
-  const service = `batch-submitter`
-  const release = `batch-submitter@${env.npm_package_version}`
+  const environment = config.str('node-env', env.NODE_ENV) || 'production'
+  const network = config.str('eth-network-name', env.ETH_NETWORK_NAME) || 'rinkeby'
+  const release = `batch-submitter@1.0.0` 
   const sentryDsn = config.str('sentry-dsn', env.SENTRY_DSN)
   const sentryTraceRate = config.ufloat(
     'sentry-trace-rate',
@@ -182,7 +181,8 @@ export const run = async () => {
 
   /* Metrics */
   const metrics = new Metrics({
-    labels: { environment, release, network, service },
+    prefix: name,
+    labels: { environment, release, network },
   })
 
   const FRAUD_SUBMISSION_ADDRESS = config.str(
