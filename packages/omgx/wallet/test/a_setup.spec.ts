@@ -46,7 +46,7 @@ describe('System setup', async () => {
 
   let env: OptimismEnv
 
-  //Test ERC20 
+  //Test ERC20
   const initialSupply = utils.parseEther("10000000000")
   const tokenName = 'JLKN'
   const tokenSymbol = 'JLKN'
@@ -112,7 +112,7 @@ describe('System setup', async () => {
   })
 
   it('should deploy contracts', async () => {
-    
+
     // Deploy L2 liquidity pool
     L2LiquidityPool = await Factory__L2LiquidityPool.deploy(
       env.watcher.l2.messengerAddress,
@@ -120,7 +120,7 @@ describe('System setup', async () => {
     )
     await L2LiquidityPool.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L2LiquidityPool deployed to:')} ${chalk.green(L2LiquidityPool.address)}`)
-    
+
     // Deploy L1 liquidity pool
     L1LiquidityPool = await Factory__L1LiquidityPool.deploy(
       env.watcher.l1.messengerAddress,
@@ -128,11 +128,11 @@ describe('System setup', async () => {
     )
     await L1LiquidityPool.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L1LiquidityPool deployed to:')} ${chalk.green(L1LiquidityPool.address)}`)
-    
+
     // Initialize L1 liquidity pool
     const L1LiquidityPoolTX = await L1LiquidityPool.init(
-      /* userRewardFeeRate 3.5% */ 35, 
-      /* ownerRewardFeeRate 1.5% */ 15, 
+      /* userRewardFeeRate 3.5% */ 35,
+      /* ownerRewardFeeRate 1.5% */ 15,
       L2LiquidityPool.address,
       {gasLimit: 800000, gasPrice: 0}
     )
@@ -141,8 +141,8 @@ describe('System setup', async () => {
 
     // Initialize L2 liquidity pool
     const L2LiquidityPoolTX = await L2LiquidityPool.init(
-      /* userRewardFeeRate 3.5% */ 35, 
-      /* ownerRewardFeeRate 1.5% */ 15, 
+      /* userRewardFeeRate 3.5% */ 35,
+      /* ownerRewardFeeRate 1.5% */ 15,
       L1LiquidityPool.address,
       {gasLimit: 800000, gasPrice: 0}
     )
@@ -213,7 +213,7 @@ describe('System setup', async () => {
     )
     await L1Message.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
-    
+
     L2Message = await Factory__L2Message.deploy(
       env.watcher.l2.messengerAddress,
       {gasLimit: 800000, gasPrice: 0}
@@ -249,7 +249,7 @@ describe('System setup', async () => {
       L1ERC20Gateway: L1ERC20Gateway.address,
       l1ETHGatewayAddress: env.L1ETHGateway.address,
       l1MessengerAddress: env.l1MessengerAddress,
-      l1FastMessengerAddress: env.fastWatcher.l1.messengerAddress,
+      //l1FastMessengerAddress: env.fastWatcher.l1.messengerAddress,
       L2TokenPool: L2TokenPool.address,
       AtomicSwap: AtomicSwap.address,
       L1Message: L1Message.address,

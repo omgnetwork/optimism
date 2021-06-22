@@ -112,8 +112,10 @@ jobs:
           done
           echo "Wallet contracts are deployed"
           L2LIQUIDITY_POOL=$(curl --silent $URL | jq -r .L2LiquidityPool)
+          OVM_L1CDMF=$(curl --silent $URL | jq -r .L2LiquidityPool)
           echo $L2LIQUIDITY_POOL
-          if [[ $L2LIQUIDITY_POOL =~ "0x" ]]; then
+          echo $OVM_L1CDMF
+          if [[ $L2LIQUIDITY_POOL =~ "0x" ]] && [[ $OVM_L1CDMF =~ "0x" ]] ; then
             exit 0
           else
             exit 1

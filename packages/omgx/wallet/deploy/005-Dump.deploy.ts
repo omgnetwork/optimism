@@ -8,6 +8,7 @@ const deployFn: DeployFunction = async (hre) => {
 
     let contracts = {};
     const deployments = await hre.deployments.all()
+    console.log(deployments)
     for (let key in await hre.deployments.all()) {
       contracts[key] = deployments[key].address
     }
