@@ -420,19 +420,11 @@ function destroy_dev_services {
         SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
         CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
         ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|egrep -vi ^datadog|tr '\n' ' '`
-        EC2_INSTANCE=`aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId'`
         info "STOP ${ECS_CLUSTER}"
           for num in $SERVICE4RESTART; do
             aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
           done
-          for task in $ECS_TASKS; do
-            aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
-          done
-          sleep 5
-          CHECK_TASKS_AGAIN=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|egrep -vi ^datadog|tr '\n' ' '`
-          for task in $ECS_TASKS; do
-            aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
-          done
+          aws ecs list-tasks --cluster $ECS_CLUSTER | jq -r ' .taskArns[] | [.] | @tsv' |  while IFS=$'\t' read -r taskArn; do  aws ecs stop-task --cluster $ECS_CLUSTER --task $taskArn; done
           info "Stopped ${ECS_CLUSTER}"
       }
 
