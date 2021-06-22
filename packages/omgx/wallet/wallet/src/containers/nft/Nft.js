@@ -36,7 +36,10 @@ class Nft extends React.Component {
   }
 
   componentDidUpdate(prevState) {
-    //ToDo
+    const { nftList } = this.props;
+    if (prevState.nftList !== nftList) {
+      this.setState({ NFTs: nftList });
+    }
   }
 
   async handleMintAndSend() {
