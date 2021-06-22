@@ -24,7 +24,7 @@ yarn test:integration
 
 ## env settings
 
-Use .env.example for quick tests
+Use .env.example for quick tests/reference
 
 ```
 
