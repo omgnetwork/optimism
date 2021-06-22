@@ -89,7 +89,7 @@ Now, build and deploy all the needed contracts:
 ```bash
 
 $ yarn build
-$ yarn deploy
+$ yarn deploy:legacy
 
 ```
 
@@ -221,6 +221,8 @@ First, create a `.env` in `/wallets` and provide your Infura and Etherscan keys:
 
 REACT_APP_INFURA_ID=
 REACT_APP_ETHERSCAN_API=
+REACT_APP_POLL_INTERVAL=20000
+SKIP_PREFLIGHT_CHECK=true
 
 ```
 
