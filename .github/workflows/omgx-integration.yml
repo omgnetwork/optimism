@@ -46,6 +46,10 @@ jobs:
         working-directory: ./
         run: yarn
 
+      - name: Build
+        working-directory: ./
+        run: yarn build
+
       - name: Background logs
         working-directory: ./ops
         run: docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml logs --follow &
@@ -112,7 +116,7 @@ jobs:
           done
           echo "Wallet contracts are deployed"
           L2LIQUIDITY_POOL=$(curl --silent $URL | jq -r .L2LiquidityPool)
-          OVM_L1CDMF=$(curl --silent $URL | jq -r .L2LiquidityPool)
+          OVM_L1CDMF=$(curl --silent $URL | jq -r .OVM_L1CrossDomainMessengerFast)
           echo $L2LIQUIDITY_POOL
           echo $OVM_L1CDMF
           if [[ $L2LIQUIDITY_POOL =~ "0x" ]] && [[ $OVM_L1CDMF =~ "0x" ]] ; then

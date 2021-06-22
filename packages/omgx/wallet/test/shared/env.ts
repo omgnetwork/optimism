@@ -1,5 +1,5 @@
 import { getContractFactory } from '@eth-optimism/contracts'
-import { Contract, utils, Wallet } from 'ethers'
+import { Contract, Wallet } from 'ethers'
 import { Watcher } from './watcher'
 
 import {
