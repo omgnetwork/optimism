@@ -9,9 +9,11 @@
           "packages/omgx/*",
           "l2geth",
           "integration-tests",
-          "specs"
+          "specs",
+          "examples/*",
+          "omgx_examples/*"
       ],
-        "nohoist": ["examples/*"]
+      "nohoist": []
   },
   "private": true,
   "devDependencies": {
