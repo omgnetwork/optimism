@@ -30,3 +30,18 @@ services:
     ports:
         # expose the service to the host for getting the contract addrs
       - ${WALLET_DEPLOYER_PORT:-8078}:8079
+
+  message-relayer-fast:
+    depends_on:
+      - l1_chain
+      - deployer
+      - wallet_deployer
+      - l2geth
+    image: omgx/message-relayer-fast
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.message-relayer-fast
+    environment:
+        L1_NODE_WEB3_URL: http://l1_chain:8545
+        L2_NODE_WEB3_URL: http://l2geth:8545
+        L1_TARGET: 0x0

@@ -11,13 +11,13 @@ export const initWatcher = async (
   l2Provider: JsonRpcProvider,
   AddressManager: Contract
 ) => {
-  
+
   const l1MessengerAddress = await AddressManager.getAddress('Proxy__OVM_L1CrossDomainMessenger')
   console.log("l1MessengerAddress:",l1MessengerAddress)
-  
+
   const SCC = await AddressManager.getAddress('OVM_StateCommitmentChain')
   console.log(SCC)
-  
+
   return new Watcher({
     l1: {
       provider: l1Provider,
@@ -38,9 +38,9 @@ export const initWatcherMessengerFast = async (
 ) => {
 
   if (l1MessengerAddress === '') {
-    l1MessengerAddress = await AddressManager.getAddress('OVM_L1CustomCrossDomainMessenger')
+    l1MessengerAddress = await AddressManager.getAddress('OVM_L1CrossDomainMessengerFast')
   }
- 
+
   return new Watcher({
     l1: {
       provider: l1Provider,
@@ -77,7 +77,7 @@ export const waitForXDomainTransaction = async (
 
   // await it if needed
   tx = await tx
-  
+
   // get the receipt and the full transaction
   const receipt = await tx.wait()
 
