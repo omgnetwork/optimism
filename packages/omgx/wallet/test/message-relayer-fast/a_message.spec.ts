@@ -90,10 +90,4 @@ describe('Messenge Relayer Test', async () => {
     )
   })
 
-  it('should send message from L1 to L2', async () => {
-    await env.waitForXDomainTransaction(
-      L1Message.sendMessageL1ToL2(),
-      Direction.L1ToL2
-    )
-  })
 })

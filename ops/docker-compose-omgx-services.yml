@@ -47,3 +47,5 @@ services:
         L1_WALLET_KEY: "0xde9be858da4a475276426320d5e9262ecfc3ba460bfac56360bfa6c4c28b4ee0"
         L1_TARGET: 0x0
         URL: http://deployer:8081/addresses.json
+        POLLING_INTERVAL: 1500
+        GET_LOGS_INTERVAL: 500
