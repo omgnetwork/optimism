@@ -50,8 +50,7 @@ describe('System setup', async () => {
     console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
     
     L2Message = await Factory__L2Message.deploy(
-      env.watcher.l2.messengerAddress,
-      {gasLimit: 800000, gasPrice: 0}
+      env.watcher.l2.messengerAddress
     )
     await L2Message.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L2 Message deployed to:')} ${chalk.green(L2Message.address)}`)
@@ -65,8 +64,7 @@ describe('System setup', async () => {
 
     // Initialize L2 message
     const L2MessageTX = await L2Message.init(
-      L1Message.address,
-      {gasLimit: 800000, gasPrice: 0}
+      L1Message.address
     )
     await L2MessageTX.wait()
     console.log(`⭐️ ${chalk.blue('L2 Message initialized:')} ${chalk.green(L2MessageTX.hash)}`)
