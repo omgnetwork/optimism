@@ -50,7 +50,11 @@ L1_MESSENGER_FAST= <optional>
 
 ### Additional Setting for stopping failed relay attempts
 
-- Add the target contract to the default message relayer's blacklist
+The relayer service can be run with the blacklist endpoint to avoid duplicate relay attempts.
+
+```
+BLACKLIST_ENDPOINT= <endpoint>
+```
 
 ### Deploying only Custom messenger
 
