@@ -27,3 +27,17 @@ functions:
           path: get.whitelist
           method: get
           cors: true
+
+  get_blacklist:
+    handler: whitelist.get_whitelist
+    vpc:
+      securityGroupIds:
+        - ${file(env.yml):SECURITYGROUP}
+      subnetIds:
+        - ${file(env.yml):SUBNET1}
+        - ${file(env.yml):SUBNET2}
+    events:
+      - http:
+          path: get.blacklist
+          method: get
+          cors: true

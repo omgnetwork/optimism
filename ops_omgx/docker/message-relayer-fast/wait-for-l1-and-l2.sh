@@ -11,7 +11,7 @@ export L1_WALLET_KEY=`/opt/secret2env -name $SECRETNAME|grep -w FAST_RELAY_L1_WA
 export WHITELIST_ENDPOINT=`/opt/secret2env -name $SECRETNAME|grep -w WHITELIST_ENDPOINT|sed 's/WHITELIST_ENDPOINT=//g'`
 export L1_TARGET=`/opt/secret2env -name $SECRETNAME|grep -w L1_TARGET|sed 's/L1_TARGET=//g'`
 
-cmd="node /opt/optimism-message-relayer-fast/exec/run-message-relayer-fast.js"
+cmd="node /opt/message-relayer-fast/exec/run-message-relayer-fast.js"
 
 JSON='{"jsonrpc":"2.0","id":0,"method":"net_version","params":[]}'
 
