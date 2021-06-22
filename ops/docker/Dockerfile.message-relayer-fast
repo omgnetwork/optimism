@@ -1,24 +1,62 @@
-FROM node:14-buster as base
+# FROM node:14-buster as base
 
-RUN apt-get update && apt-get install -y bash curl jq
+# RUN apt-get update && apt-get install -y bash curl jq
 
-FROM base as build
+# FROM base as build
 
-RUN apt-get update && apt-get install -y bash git python build-essential
+# RUN apt-get update && apt-get install -y bash git python build-essential
 
-ADD packages/omgx/message-relayer-fast /opt/optimism-message-relayer-fast
-RUN cd /opt/optimism-message-relayer-fast && yarn install && yarn build
+# ADD ./packages/omgx/message-relayer-fast /opt/optimism-message-relayer-fast
+# RUN cd /opt/optimism-message-relayer-fast
 
-FROM base
+# FROM base
 
-RUN apt-get update && apt-get install -y bash curl jq
+# RUN apt-get update && apt-get install -y bash curl jq
 
-COPY --from=build /opt/optimism-message-relayer-fast /opt/optimism-message-relayer-fast
+# COPY --from=build /opt/optimism-message-relayer-fast /opt/optimism-message-relayer-fast
 
-COPY packages/omgx/message-relayer-fast/wait-for-l1-and-l2.sh /opt/
-RUN chmod +x /opt/wait-for-l1-and-l2.sh
+# WORKDIR /opt/optimism-message-relayer-fast
+# RUN chmod +x wait-for-l1-and-l2.sh
 
-RUN ln -s /opt/optimism-message-relayer-fast/exec/run-message-relayer-fast.js /usr/local/bin/
-RUN chmod +x /usr/local/bin/run-message-relayer-fast.js
+# RUN ln -s /opt/optimism-message-relayer-fast/exec/run-message-relayer-fast.js /usr/local/bin/
+# RUN chmod +x /usr/local/bin/run-message-relayer-fast.js
 
-ENTRYPOINT ["/opt/wait-for-l1-and-l2.sh", "run-message-relayer-fast.js"]
+# RUN yarn install
+# RUN yarn build
+# ENTRYPOINT ["wait-for-l1-and-l2.sh", "run-message-relayer-fast.js"]
+
+
+FROM ethereumoptimism/builder AS builder
+FROM omgx/wallet_builder AS wallet_builder
+
+FROM node:14-alpine
+
+RUN apk add --no-cache curl bash jq
+
+WORKDIR /opt/optimism
+
+# copy top level files
+COPY --from=builder /optimism/*.json ./
+COPY --from=builder /optimism/yarn.lock .
+COPY --from=builder /optimism/node_modules ./node_modules
+
+# copy deps (would have been nice if docker followed the symlinks required)
+COPY --from=builder /optimism/packages/core-utils/package.json ./packages/core-utils/package.json
+COPY --from=builder /optimism/packages/core-utils/dist ./packages/core-utils/dist
+COPY --from=builder /optimism/packages/common-ts/package.json ./packages/common-ts/package.json
+COPY --from=builder /optimism/packages/common-ts/dist ./packages/common-ts/dist
+
+COPY --from=builder /optimism/packages/contracts/package.json ./packages/contracts/package.json
+COPY --from=builder /optimism/packages/contracts/dist ./packages/contracts/dist
+COPY --from=builder /optimism/packages/contracts/artifacts ./packages/contracts/artifacts
+COPY --from=builder /optimism/packages/contracts/artifacts-ovm ./packages/contracts/artifacts-ovm
+
+# copy the service
+WORKDIR /opt/optimism/packages/omgx/message-relayer-fast
+COPY --from=wallet_builder /optimism/packages/omgx/message-relayer-fast/scripts ./scripts
+COPY --from=wallet_builder /optimism/packages/omgx/message-relayer-fast/dist ./dist
+COPY --from=wallet_builder /optimism/packages/omgx/message-relayer-fast/package.json .
+COPY --from=wallet_builder /optimism/packages/omgx/message-relayer-fast/exec ./exec
+COPY --from=wallet_builder /optimism/packages/omgx/message-relayer-fast/node_modules ./node_modules
+
+ENTRYPOINT ["./scripts/relayer.sh"]
