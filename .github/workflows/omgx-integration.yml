@@ -48,7 +48,7 @@ jobs:
 
       - name: Build
         working-directory: ./
-        run: yarn build
+        run: yarn build &
 
       - name: Background logs
         working-directory: ./ops
