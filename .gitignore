@@ -4,6 +4,7 @@ results
 temp
 .nyc_output
 *.tsbuildinfo
+.vscode
 
 dist
 artifacts

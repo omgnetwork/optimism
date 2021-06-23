@@ -4,7 +4,8 @@
   "main": "src/app.ts",
   "scripts": {
     "test": "jest --coverage",
-    "start": "ts-node src/app.ts"
+    "start": "ts-node src/app.ts",
+    "dummy-transaction": "ts-node src/dummy-transaction.ts"
   },
   "dependencies": {
     "@ethersproject/providers": "5.3.0",
