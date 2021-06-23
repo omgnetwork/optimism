@@ -74,11 +74,17 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
 
   protected async _start(): Promise<void> {
     while (this.running) {
+      
       try {
         const highestSyncedL2BlockNumber =
-          (await this.state.db.getHighestSyncedUnconfirmedBlock()) || 1
+          (await this.state.db.getHighestSyncedUnconfirmedBlock()) || 0 //I think this needs to start with 0
 
         const currentL2Block = await this.state.l2RpcProvider.getBlockNumber()
+
+/*
+dtl_1                | {"level":30,"time":1624422628976,"fromBlock":1,"toBlock":0,"msg":"Synchronizing unconfirmed transactions from Layer 2 (Optimistic Ethereum)"}
+dtl_1                | {"level":40,"time":1624422628976,"startBlockNumber":1,"endBlockNumber":0,"msg":"Cannot query with start block number larger than end block number"}
+*/
 
         // Make sure we don't exceed the tip.
         const targetL2Block = Math.min(
@@ -87,8 +93,19 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
           currentL2Block
         )
 
+        /*
+        at spinup breaks due to highestSyncedL2BlockNumber being 1
+        */
+
         // We're already at the head, so no point in attempting to sync.
         if (highestSyncedL2BlockNumber === targetL2Block) {
+          this.logger.info(
+            'No need to synchronize transactions from Layer 2 (Optimistic Ethereum); blocks equal',
+            {
+              fromBlock: highestSyncedL2BlockNumber,
+              toBlock: targetL2Block,
+            }
+          )
           await sleep(this.options.pollingInterval)
           continue
         }

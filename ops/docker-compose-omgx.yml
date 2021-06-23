@@ -113,6 +113,7 @@ services:
       RETRIES: 60
       POLLING_INTERVAL: 1500
       GET_LOGS_INTERVAL: 500
+
   batch_submitter:
     depends_on:
       - l1_chain

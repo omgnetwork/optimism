@@ -228,16 +228,15 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
 
         let currentL2Block
         let highestL2BlockNumber
+        
         switch (backend) {
           case 'l1':
             currentL2Block = await this.state.db.getLatestTransaction()
             highestL2BlockNumber = await this.state.db.getHighestL2BlockNumber()
             break
           case 'l2':
-            currentL2Block =
-              await this.state.db.getLatestUnconfirmedTransaction()
-            highestL2BlockNumber =
-              (await this.state.db.getHighestSyncedUnconfirmedBlock()) - 1
+            currentL2Block = await this.state.db.getLatestUnconfirmedTransaction()
+            highestL2BlockNumber = (await this.state.db.getHighestSyncedUnconfirmedBlock()) - 1
             break
           default:
             throw new Error(`Unknown transaction backend ${backend}`)
@@ -289,10 +288,16 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       'get',
       '/eth/context/latest',
       async (): Promise<ContextResponse> => {
+
         const tip = await this.state.l1RpcProvider.getBlockNumber()
+        console.error(`/eth/context/latest Tip:`, tip)
+        console.error(`/eth/context/latest Tip diff:`, tip - this.options.confirmations)
+
         const blockNumber = Math.max(0, tip - this.options.confirmations)
+        console.error(`/eth/context/latest BN:`, blockNumber)
 
         const block = await this.state.l1RpcProvider.getBlock(blockNumber)
+        console.error(`/eth/context/latest block:`, block)
 
         return {
           blockNumber: block.number,
@@ -319,11 +324,13 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         }
 
         const block = await this.state.l1RpcProvider.getBlock(number)
+        
         return {
           blockNumber: block.number,
           timestamp: block.timestamp,
           blockHash: block.hash,
         }
+
       }
     )
 
@@ -393,7 +400,9 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       'get',
       '/transaction/latest',
       async (req): Promise<TransactionResponse> => {
+        
         const backend = req.query.backend || this.options.defaultBackend
+        
         let transaction = null
 
         switch (backend) {
@@ -469,7 +478,10 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       'get',
       '/batch/transaction/latest',
       async (): Promise<TransactionBatchResponse> => {
+        
         const batch = await this.state.db.getLatestTransactionBatch()
+
+        console.log("batch:",batch)
 
         if (batch === null) {
           return {
@@ -478,6 +490,10 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           }
         }
 
+        //so, at this point, we have a non null batch
+        console.log("index b:", BigNumber.from(batch.prevTotalElements).toNumber())
+        console.log("index e:", BigNumber.from(batch.prevTotalElements).toNumber() + BigNumber.from(batch.size).toNumber())
+
         const transactions =
           await this.state.db.getFullTransactionsByIndexRange(
             BigNumber.from(batch.prevTotalElements).toNumber(),
@@ -485,6 +501,9 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
               BigNumber.from(batch.size).toNumber()
           )
 
+        console.log("transactions:",transactions)
+        console.log("transactions:",transactions[0].decoded)
+        
         return {
           batch,
           transactions,
