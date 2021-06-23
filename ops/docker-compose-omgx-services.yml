@@ -31,26 +31,6 @@ services:
         # expose the service to the host for getting the contract addrs
       - ${WALLET_DEPLOYER_PORT:-8078}:8079
 
-  message-relayer-fast:
-    depends_on:
-      - l1_chain
-      - deployer
-      - wallet_deployer
-      - l2geth
-    image: omgx/message-relayer-fast
-    build:
-      context: ..
-      dockerfile: ./ops/docker/Dockerfile.message-relayer-fast
-    environment:
-        L1_NODE_WEB3_URL: http://l1_chain:8545
-        L2_NODE_WEB3_URL: http://l2geth:8545
-        L1_WALLET_KEY: "0xde9be858da4a475276426320d5e9262ecfc3ba460bfac56360bfa6c4c28b4ee0"
-        L1_TARGET: 0x0
-        URL: http://deployer:8081/addresses.json
-        POLLING_INTERVAL: 1500
-        GET_LOGS_INTERVAL: 500
-        WHITELIST_ENDPOINT: http://bl-wl:9000/whitelist.json
-
   bl-wl:
     depends_on:
       - l1_chain
@@ -66,4 +46,27 @@ services:
         BL_WL_PORT: 9000
     ports:
       - 9000:9000
+
+  message-relayer-fast:
+    depends_on:
+      - l1_chain
+      - deployer
+      - wallet_deployer
+      - l2geth
+      - bl-wl
+    image: omgx/message-relayer-fast
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.message-relayer-fast
+    environment:
+        L1_NODE_WEB3_URL: http://l1_chain:8545
+        L2_NODE_WEB3_URL: http://l2geth:8545
+        L1_WALLET_KEY: "0xde9be858da4a475276426320d5e9262ecfc3ba460bfac56360bfa6c4c28b4ee0"
+        L1_TARGET: 0x0
+        URL: http://deployer:8081/addresses.json
+        WALLET_URL: http://wallet_deployer:8079/addresses.json
+        POLLING_INTERVAL: 1500
+        GET_LOGS_INTERVAL: 500
+        WHITELIST_ENDPOINT: http://bl-wl:9000/whitelist.json
+
 
