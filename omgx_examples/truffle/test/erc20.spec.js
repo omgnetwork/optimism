@@ -1,7 +1,6 @@
 let token
 
 const ERC20 = artifacts.require('ERC20')
-console.log("This is a test!")
 contract('ERC20', (accounts) => {
   const tokenName = 'My Optimistic Coin'
   const tokenSymbol = 'OPT'
