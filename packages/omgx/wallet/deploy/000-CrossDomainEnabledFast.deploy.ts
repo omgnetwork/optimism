@@ -22,6 +22,10 @@ const deployFn: DeployFunction = async (hre) => {
     await OVM_L1CrossDomainMessengerFast.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('OVM_L1CrossDomainMessengerFast deployed to:')} ${chalk.green(OVM_L1CrossDomainMessengerFast.address)}`)
 
+    // initialize with address_manager
+    await OVM_L1CrossDomainMessengerFast.initialize((hre as any).deployConfig.addressManager.address)
+    console.log('OVM_L1CrossDomainMessengerFast Initialized')
+
     const OVM_L1CrossDomainMessengerFastSubmission: DeploymentSubmission = {
       ...OVM_L1CrossDomainMessengerFast,
       receipt: OVM_L1CrossDomainMessengerFast.receipt,
@@ -33,6 +37,7 @@ const deployFn: DeployFunction = async (hre) => {
       'OVM_L1CrossDomainMessengerFast',
       OVM_L1CrossDomainMessengerFast.address
     )
+
     console.log(`🌕 ${chalk.red('OVM_L1CrossDomainMessengerFast registered.')}`)
     await hre.deployments.save('OVM_L1CrossDomainMessengerFast', OVM_L1CrossDomainMessengerFastSubmission)
 
