@@ -259,6 +259,7 @@ describe('System setup', async () => {
     console.log(chalk.green(JSON.stringify(addresses, null, 2)))
 
     try{
+      await fs.mkdir('./deployment/local/', { recursive: true })
       await fs.writeFile('./deployment/local/addresses.json', JSON.stringify(addresses, null, 2))
       console.log(`\n🚨 ${chalk.red('Successfully wrote addresses to file\n')}`)
     } catch (err) {
