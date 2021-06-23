@@ -5,7 +5,7 @@
 # 
 # NOTE:
 # The data transport layer scans L2 from block 1. However, the block number is 0
-# when we start the local L2. Please deploy two or three contracts on L2 so that
+# when we start the local L2. Please deploy two or three contracts on L2 first so that
 # the data transport layer can start correctly.
 #  
 # RUN:
@@ -71,7 +71,7 @@ services:
         # IS_VERIFIER: "true"
         ROLLUP_BACKEND: 'l2'
         ROLLUP_VERIFIER_ENABLE: 'true'
-        # PRC
+        # PORT
         RPC_PORT: 8547
     ports:
       - ${REPLICA_HTTP_PORT:-8547}:8547
