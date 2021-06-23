@@ -24,6 +24,7 @@ if [[ $BUILD == 1 ]]; then
     docker image tag ethereumoptimism/message-relayer omgx/message-relayer:latest
     docker image tag ethereumoptimism/batch-submitter omgx/batch-submitter:latest
     docker image tag ethereumoptimism/integration-tests omgx/integration-tests:latest
+    docker build ../ --file $DIR/docker/Dockerfile.bl-wl --tag omgx/bl-wl:latest
     docker build ../ --file $DIR/docker/Dockerfile.omgx_monorepo --tag omgx/wallet_builder:latest
     docker build ../ --file $DIR/docker/Dockerfile.wallet_deployer --tag omgx/wallet_deployer:latest
     docker build ../ --file $DIR/docker/Dockerfile.message-relayer-fast --tag omgx/message-relayer-fast:latest

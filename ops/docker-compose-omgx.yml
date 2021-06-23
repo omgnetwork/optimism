@@ -103,7 +103,7 @@ services:
       L1_NODE_WEB3_URL: http://l1_chain:8545
       L2_NODE_WEB3_URL: http://l2geth:8545
       URL: http://deployer:8081/addresses.json
-      WHITELIST_ENDPOINT: https://api-message-relayer.rinkeby.omgx.network/get.whitelist
+      WHITELIST_ENDPOINT: http://bl-wl:9000/whitelist.json
       # a funded hardhat account
       L1_WALLET_KEY: "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
       RETRIES: 60

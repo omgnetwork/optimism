@@ -3,7 +3,7 @@ import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
 import { Contract, ContractFactory, utils } from 'ethers'
 import chalk from 'chalk';
-
+import { getWalletDeployerAddresses } from './shared/utils'
 import L1ERC20Json from '../artifacts/contracts/L1ERC20.sol/L1ERC20.json'
 import L1ERC20GatewayJson from '../artifacts/contracts/L1ERC20Gateway.sol/L1ERC20Gateway.json'
 import L2DepositedERC20Json from '../artifacts-ovm/contracts/L2DepositedERC20.sol/L2DepositedERC20.json'
@@ -21,6 +21,8 @@ import L2MessageJson from '../artifacts-ovm/contracts/Message/L2Message.sol/L2Me
 import { OptimismEnv } from './shared/env'
 
 import { promises as fs } from 'fs'
+
+let walletAddresses;
 
 describe('System setup', async () => {
 
@@ -113,42 +115,43 @@ describe('System setup', async () => {
 
   it('should deploy contracts', async () => {
 
-    // Deploy L2 liquidity pool
-    L2LiquidityPool = await Factory__L2LiquidityPool.deploy(
-      env.watcher.l2.messengerAddress,
-      {gasLimit: 800000, gasPrice: 0}
-    )
-    await L2LiquidityPool.deployTransaction.wait()
-    console.log(`🌕 ${chalk.red('L2LiquidityPool deployed to:')} ${chalk.green(L2LiquidityPool.address)}`)
+    // // Deploy L2 liquidity pool
+    // L2LiquidityPool = await Factory__L2LiquidityPool.deploy(
+    //   env.watcher.l2.messengerAddress,
+    //   {gasLimit: 800000, gasPrice: 0}
+    // )
+    // await L2LiquidityPool.deployTransaction.wait()
+    // console.log(`🌕 ${chalk.red('L2LiquidityPool deployed to:')} ${chalk.green(L2LiquidityPool.address)}`)
 
-    // Deploy L1 liquidity pool
-    L1LiquidityPool = await Factory__L1LiquidityPool.deploy(
-      env.watcher.l1.messengerAddress,
-      env.watcherFast.l1.messengerAddress,
-    )
-    await L1LiquidityPool.deployTransaction.wait()
-    console.log(`🌕 ${chalk.red('L1LiquidityPool deployed to:')} ${chalk.green(L1LiquidityPool.address)}`)
+    // // Deploy L1 liquidity pool
+    // L1LiquidityPool = await Factory__L1LiquidityPool.deploy(
+    //   env.watcher.l1.messengerAddress,
+    //   env.watcherFast.l1.messengerAddress,
+    // )
+    // await L1LiquidityPool.deployTransaction.wait()
+    // console.log(`🌕 ${chalk.red('L1LiquidityPool deployed to:')} ${chalk.green(L1LiquidityPool.address)}`)
 
-    // Initialize L1 liquidity pool
-    const L1LiquidityPoolTX = await L1LiquidityPool.init(
-      /* userRewardFeeRate 3.5% */ 35,
-      /* ownerRewardFeeRate 1.5% */ 15,
-      L2LiquidityPool.address,
-      {gasLimit: 800000, gasPrice: 0}
-    )
-    await L1LiquidityPoolTX.wait()
-    console.log(`⭐️ ${chalk.blue('L1 LP initialized:')} ${chalk.green(L1LiquidityPoolTX.hash)}`)
+    // // Initialize L1 liquidity pool
+    // const L1LiquidityPoolTX = await L1LiquidityPool.init(
+    //   /* userRewardFeeRate 3.5% */ 35,
+    //   /* ownerRewardFeeRate 1.5% */ 15,
+    //   L2LiquidityPool.address,
+    //   {gasLimit: 800000, gasPrice: 0}
+    // )
+    // await L1LiquidityPoolTX.wait()
+    // console.log(`⭐️ ${chalk.blue('L1 LP initialized:')} ${chalk.green(L1LiquidityPoolTX.hash)}`)
 
-    // Initialize L2 liquidity pool
-    const L2LiquidityPoolTX = await L2LiquidityPool.init(
-      /* userRewardFeeRate 3.5% */ 35,
-      /* ownerRewardFeeRate 1.5% */ 15,
-      L1LiquidityPool.address,
-      {gasLimit: 800000, gasPrice: 0}
-    )
-    await L2LiquidityPoolTX.wait()
-    console.log(`⭐️ ${chalk.blue('L2 LP initialized:')} ${chalk.green(L2LiquidityPoolTX.hash)}`)
+    // // Initialize L2 liquidity pool
+    // const L2LiquidityPoolTX = await L2LiquidityPool.init(
+    //   /* userRewardFeeRate 3.5% */ 35,
+    //   /* ownerRewardFeeRate 1.5% */ 15,
+    //   L1LiquidityPool.address,
+    //   {gasLimit: 800000, gasPrice: 0}
+    // )
+    // await L2LiquidityPoolTX.wait()
+    // console.log(`⭐️ ${chalk.blue('L2 LP initialized:')} ${chalk.green(L2LiquidityPoolTX.hash)}`)
 
+    walletAddresses = await getWalletDeployerAddresses()
     //Mint a new token on L1 and set up the L1 and L2 infrastructure
     // [initialSupply, name, symbol]
     // this is owned by bobl1Wallet
@@ -207,34 +210,34 @@ describe('System setup', async () => {
     await AtomicSwap.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('AtomicSwap deployed to:')} ${chalk.green(AtomicSwap.address)}`)
 
-    L1Message = await Factory__L1Message.deploy(
-      env.watcher.l1.messengerAddress,
-      env.watcherFast.l1.messengerAddress,
-    )
-    await L1Message.deployTransaction.wait()
-    console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
+    // L1Message = await Factory__L1Message.deploy(
+    //   env.watcher.l1.messengerAddress,
+    //   env.watcherFast.l1.messengerAddress,
+    // )
+    // await L1Message.deployTransaction.wait()
+    // console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
 
-    L2Message = await Factory__L2Message.deploy(
-      env.watcher.l2.messengerAddress,
-      {gasLimit: 800000, gasPrice: 0}
-    )
-    await L2Message.deployTransaction.wait()
-    console.log(`🌕 ${chalk.red('L2 Message deployed to:')} ${chalk.green(L2Message.address)}`)
+    // L2Message = await Factory__L2Message.deploy(
+    //   env.watcher.l2.messengerAddress,
+    //   {gasLimit: 800000, gasPrice: 0}
+    // )
+    // await L2Message.deployTransaction.wait()
+    // console.log(`🌕 ${chalk.red('L2 Message deployed to:')} ${chalk.green(L2Message.address)}`)
 
-    // Initialize L1 message
-    const L1MessageTX = await L1Message.init(
-      L2Message.address
-    )
-    await L1MessageTX.wait()
-    console.log(`⭐️ ${chalk.blue('L1 Message initialized:')} ${chalk.green(L1MessageTX.hash)}`)
+    // // Initialize L1 message
+    // const L1MessageTX = await L1Message.init(
+    //   L2Message.address
+    // )
+    // await L1MessageTX.wait()
+    // console.log(`⭐️ ${chalk.blue('L1 Message initialized:')} ${chalk.green(L1MessageTX.hash)}`)
 
-    // Initialize L2 message
-    const L2MessageTX = await L2Message.init(
-      L1Message.address,
-      {gasLimit: 800000, gasPrice: 0}
-    )
-    await L2MessageTX.wait()
-    console.log(`⭐️ ${chalk.blue('L2 Message initialized:')} ${chalk.green(L2MessageTX.hash)}`)
+    // // Initialize L2 message
+    // const L2MessageTX = await L2Message.init(
+    //   L1Message.address,
+    //   {gasLimit: 800000, gasPrice: 0}
+    // )
+    // await L2MessageTX.wait()
+    // console.log(`⭐️ ${chalk.blue('L2 Message initialized:')} ${chalk.green(L2MessageTX.hash)}`)
   })
 
   it('should write addresses to file', async () => {
@@ -242,8 +245,8 @@ describe('System setup', async () => {
     console.log(`${chalk.yellow('\n\n********************************')}`)
 
     const addresses = {
-      L1LiquidityPool: L1LiquidityPool.address,
-      L2LiquidityPool: L2LiquidityPool.address,
+      L1LiquidityPool: walletAddresses.L1LiquidityPool,
+      L2LiquidityPool: walletAddresses.L2LiquidityPool,
       L1ERC20: L1ERC20.address,
       L2DepositedERC20: L2DepositedERC20.address,
       L1ERC20Gateway: L1ERC20Gateway.address,
@@ -252,8 +255,8 @@ describe('System setup', async () => {
       l1FastMessengerAddress: env.watcherFast.l1.messengerAddress,
       L2TokenPool: L2TokenPool.address,
       AtomicSwap: AtomicSwap.address,
-      L1Message: L1Message.address,
-      L2Message: L2Message.address
+      L1Message: walletAddresses.L1Message,
+      L2Message: walletAddresses.L2Message
     }
 
     console.log(chalk.green(JSON.stringify(addresses, null, 2)))

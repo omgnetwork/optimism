@@ -49,3 +49,21 @@ services:
         URL: http://deployer:8081/addresses.json
         POLLING_INTERVAL: 1500
         GET_LOGS_INTERVAL: 500
+        WHITELIST_ENDPOINT: http://bl-wl:9000/whitelist.json
+
+  bl-wl:
+    depends_on:
+      - l1_chain
+      - deployer
+      - wallet_deployer
+      - l2geth
+    image: omgx/bl-wl
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.bl-wl
+    environment:
+        WALLET_URL: http://wallet_deployer:8079/addresses.json
+        BL_WL_PORT: 9000
+    ports:
+      - 9000:9000
+
