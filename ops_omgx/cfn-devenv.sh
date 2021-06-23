@@ -380,9 +380,7 @@ function destroy_dev_services {
           for num in $SERVICE4RESTART; do
             aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
           done
-          for task in $ECS_TASKS; do
-            aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
-          done
+          aws ecs list-tasks --cluster $ECS_CLUSTER | jq -r ' .taskArns[] | [.] | @tsv' |  while IFS=$'\t' read -r taskArn; do  aws ecs stop-task --cluster $ECS_CLUSTER --task $taskArn >> /dev/null; done
           sleep 10
           #  aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/db/*" --region ${REGION} --output text
           #  aws ssm send-command --document-name "AWS-RunShellScript" --instance-ids $EC2_INSTANCE --parameters commands="rm -rf /mnt/efs/geth_l2/*" --region ${REGION} --output text
@@ -394,9 +392,7 @@ function destroy_dev_services {
           for num in $SERVICE4RESTART; do
             aws ecs update-service  --region ${REGION} --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
           done
-          for task in $ECS_TASKS; do
-            aws ecs stop-task --region ${REGION} --cluster $ECS_CLUSTER --task $task >> /dev/null
-          done
+          aws ecs list-tasks --cluster $ECS_CLUSTER | jq -r ' .taskArns[] | [.] | @tsv' |  while IFS=$'\t' read -r taskArn; do  aws ecs stop-task --cluster $ECS_CLUSTER --task $taskArn >> /dev/null; done
           sleep 10
           for num in $SERVICE4RESTART; do
             aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 1 >> /dev/null
@@ -424,7 +420,7 @@ function destroy_dev_services {
           for num in $SERVICE4RESTART; do
             aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
           done
-          aws ecs list-tasks --cluster $ECS_CLUSTER | jq -r ' .taskArns[] | [.] | @tsv' |  while IFS=$'\t' read -r taskArn; do  aws ecs stop-task --cluster $ECS_CLUSTER --task $taskArn; done
+          aws ecs list-tasks --cluster $ECS_CLUSTER | jq -r ' .taskArns[] | [.] | @tsv' |  while IFS=$'\t' read -r taskArn; do  aws ecs stop-task --cluster $ECS_CLUSTER --task $taskArn >> /dev/null; done
           info "Stopped ${ECS_CLUSTER}"
       }
 
