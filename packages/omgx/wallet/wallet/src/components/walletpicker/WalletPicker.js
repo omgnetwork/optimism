@@ -117,6 +117,7 @@ function WalletPicker ({ onEnable, enabled }) {
   useEffect(() => {
     if (walletEnabled && wrongNetwork) {
       dispatch(openModal('wrongNetworkModal'));
+      localStorage.setItem('changeChain', false);
     }
   }, [ dispatch, walletEnabled, wrongNetwork ]);
 
@@ -134,7 +135,7 @@ function WalletPicker ({ onEnable, enabled }) {
   let allNetworks = [];
   for (var prop in networks) allNetworks.push(prop)
 
-  if (!enabled && isChangingChain) {
+  if (!wrongNetwork && !enabled && isChangingChain) {
     return <div className={styles.loading}>Switching Chain...</div>
   }
 

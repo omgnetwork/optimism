@@ -194,6 +194,7 @@ class NetworkService {
         //rinkeby, L2
         this.L1orL2 = 'L2';
       } else {
+        this.bindProviderListeners();
         return 'wrongnetwork'
       }
 
