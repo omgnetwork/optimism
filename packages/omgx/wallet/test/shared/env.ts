@@ -158,13 +158,6 @@ export class OptimismEnv {
      await this.watcher.getL2TransactionReceipt(xDomainMsgHash)
    }
 
-   async waitForXDomainTransactionMessengerFast(
-    tx: Promise<TransactionResponse> | TransactionResponse,
-    direction: Direction
-  ): Promise<CrossDomainMessagePair> {
-    return waitForXDomainTransaction(this.watcherFast, tx, direction)
-  }
-
    async waitForRevertXFastDomainTransaction(
     tx: Promise<TransactionResponse> | TransactionResponse,
     direction: Direction
