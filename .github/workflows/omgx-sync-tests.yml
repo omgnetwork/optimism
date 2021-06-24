@@ -1,4 +1,4 @@
-name: sync-tests
+name: omgx-sync-tests
 
 on:
   push:
@@ -29,13 +29,20 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-      - name: Build the services
-        working-directory: ./ops
-        run: ./scripts/build-ci.sh
+      
+      - name: Build
+        working-directory: ./
+        run: yarn && yarn build
 
-      - name: Bring the stack up
+      - name: Install yq
+        run: sudo snap install yq
+
+      - name: Bring the stack up + OMGX
         working-directory: ./ops
-        run: docker-compose up -d && ./scripts/wait-for-sequencer.sh
+        env:
+          BUILD: 1
+          DAEMON: 1
+        run: ./up_local.sh && ./scripts/wait-for-sequencer.sh
 
       - name: Run the sync tests
         working-directory: ./integration-tests
