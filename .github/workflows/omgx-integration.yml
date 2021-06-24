@@ -42,14 +42,6 @@ jobs:
           DAEMON: 1
         run: ./up_local.sh
 
-      - name: Apply patch
-        working-directory: ./
-        run: yarn
-
-      - name: Build
-        working-directory: ./
-        run: yarn build &
-
       - name: Background logs
         working-directory: ./ops
         run: docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml logs --follow &

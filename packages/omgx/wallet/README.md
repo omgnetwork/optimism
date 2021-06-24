@@ -66,33 +66,29 @@ Export the variables below:
 ```bash
 
 # Local
-L1_NODE_WEB3_URL=http://localhost:9545
-L2_NODE_WEB3_URL=http://localhost:8545
-ADDRESS_MANAGER_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
-DEPLOYER_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-TEST_PRIVATE_KEY_1=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-TEST_PRIVATE_KEY_2=0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-TEST_PRIVATE_KEY_3=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
-TARGET_GAS_LIMIT=9000000000
-CHAIN_ID=28
-L1_WALLET_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+L1_NODE_WEB3_URL=http://127.0.0.1:9545
+L2_NODE_WEB3_URL=http://127.0.0.1:8545
 URL=http://127.0.0.1:8080/addresses.json
 WALLET_URL=http://127.0.0.1:8078/addresses.json
+TEST_PRIVATE_KEY_1="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+TEST_PRIVATE_KEY_2="0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba"
+TEST_PRIVATE_KEY_3="0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e"
 
 ```
 
-Now, build and deploy all the needed contracts:
-
-```bash
-
-$ ./scripts/deploy.sh
-
-```
-
-You will now be able to fetch contract addresses using curl:
+You will now be able to fetch contract addresses using curl (if you ran the network with the up_local.sh script):
 ```
 curl http://127.0.0.1:8078/addresses.json
 ```
+
+You can run the wallet tests using `omgx_integration_tests` docker compose entry.
+
+```
+cd ops/
+docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml run omgx_integration_tests
+```
+
+or if you set the above environemnt variables, `yarn test:integration` works too.
 
 ## 4. Firing up the wallet
 
@@ -126,7 +122,7 @@ At that point, the wallet will start when you run `$ yarn start`. You can intera
 
 ### Integration Tests
 
-Note that the integration tests also set up parts of the system that the web wallet will need to work, such as liquidity pools and bridge contracts.
+Note that the integration tests also set up parts of the system that the web wallet will need to work, such as bridge contracts.
 
 ```bash
 
