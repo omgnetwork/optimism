@@ -8,9 +8,12 @@ import xor from 'buffer-xor'
 import { getContractDefinition } from '../../src/contract-defs'
 
 export const DEFAULT_ACCOUNTS = defaultAccounts
+
 export const DEFAULT_ACCOUNTS_HARDHAT = defaultAccounts.map((account) => {
+  console.log("DEFAULT_ACCOUNTS_HARDHAT")
+  console.log(account.balance)
   return {
-    balance: ethers.BigNumber.from(account.balance).toHexString(),
+    balance: account.balance,//ethers.BigNumber.from(account.balance).toHexString(),
     privateKey: account.secretKey,
   }
 })
@@ -20,8 +23,7 @@ export const RUN_OVM_TEST_GAS = 20_000_000
 export const FORCE_INCLUSION_PERIOD_SECONDS = 600
 export const FORCE_INCLUSION_PERIOD_BLOCKS = 600 / 12
 
-export const NON_NULL_BYTES32 =
-  '0x1111111111111111111111111111111111111111111111111111111111111111'
+export const NON_NULL_BYTES32 = '0x1111111111111111111111111111111111111111111111111111111111111111'
 export const NON_ZERO_ADDRESS = '0x1111111111111111111111111111111111111111'
 
 export const VERIFIED_EMPTY_CONTRACT_HASH =

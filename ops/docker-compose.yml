@@ -66,8 +66,7 @@ services:
         DATA_TRANSPORT_LAYER__L2_RPC_ENDPOINT: http://l2geth:8545
         DATA_TRANSPORT_LAYER__SYNC_FROM_L1: 'true' # <-that's set by default
         # DATA_TRANSPORT_LAYER__SYNC_FROM_L2 is normally set to false. 
-        DATA_TRANSPORT_LAYER__SYNC_FROM_L1: 'true'
-        DATA_TRANSPORT_LAYER__SYNC_FROM_L2: 'false'
+        # DATA_TRANSPORT_LAYER__SYNC_FROM_L2: 'false'
         DATA_TRANSPORT_LAYER__L2_CHAIN_ID: 28
     ports:
       - ${DTL_PORT:-7878}:7878

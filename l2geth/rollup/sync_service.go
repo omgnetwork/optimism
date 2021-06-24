@@ -435,9 +435,9 @@ func (s *SyncService) updateL2GasPrice(hash *common.Hash) error {
 
 	// TODO(mark): this is temporary and will be able to be removed when the
 	// OVM_GasPriceOracle is moved into the predeploy contracts
-	if !s.enableL2GasPolling {
-		return nil
-	}
+	//if !s.enableL2GasPolling {
+	//	return nil
+	//}
 
 	var state *state.StateDB
 	var err error

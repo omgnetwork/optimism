@@ -1,128 +1,77 @@
-import {
-  getContractInterface,
-  getContractFactory,
-} from '@eth-optimism/contracts'
-import { Contract, utils, Wallet } from 'ethers'
-import { Watcher } from './watcher'
+// import {
+//   getContractInterface,
+//   getContractFactory,
+// } from '@eth-optimism/contracts'
+// import { Contract, utils, Wallet } from 'ethers'
 
-import {
-  getAddressManager,
-  l1Provider,
-  l2Provider,
-  bobl1Wallet,
-  bobl2Wallet,
-  getL2ETHGateway,
-  getL1ETHGateway,
-  alicel1Wallet,
-  alicel2Wallet,
-  fraudl1Wallet,
-  fraudl2Wallet,
-} from './utils'
+// import {
+//   getAddressManager,
+//   l1Provider,
+//   l2Provider,
+//   bobl1Wallet,
+//   bobl2Wallet,
+//   alicel1Wallet,
+//   alicel2Wallet,
+//   fraudl1Wallet,
+//   fraudl2Wallet,
+// } from './utils'
 
-import {
-  initWatcher,
-  CrossDomainMessagePair,
-  Direction,
-  waitForXDomainTransaction,
-} from './watcher-utils'
+// import * as fs from 'fs'
 
-import * as fs from 'fs'
+// import { TransactionResponse } from '@ethersproject/providers'
 
-import { TransactionResponse } from '@ethersproject/providers'
+// export class OptimismEnv {
+  
+//   addressManager: Contract
+//   ctc: Contract
+  
+//   l2Provider
 
-/// Helper class for instantiating a test environment with a funded account
-export class OptimismEnv {
-  // L1 Contracts
-  addressManager: Contract
-  L1ETHGateway: Contract
-  l1Messenger: Contract
-  l1MessengerAddress: String
-  ctc: Contract
+//   // The wallets
+//   bobl1Wallet: Wallet
+//   bobl2Wallet: Wallet
 
-  l2Provider
+//   alicel2Wallet: Wallet
+//   alicel1Wallet: Wallet
 
-  // L2 Contracts
-  L2ETHGateway: Contract
-  l2Messenger: Contract
+//   fraudl2Wallet: Wallet
+//   fraudl1Wallet: Wallet
 
-  // The L1 <> L2 State watcher
-  watcher: Watcher
+//   constructor(args: any) {
+//     this.addressManager = args.addressManager
+//     this.bobl1Wallet = args.bobl1Wallet
+//     this.bobl2Wallet = args.bobl2Wallet
+//     this.alicel1Wallet = args.alicel1Wallet
+//     this.alicel2Wallet = args.alicel2Wallet
+//     this.fraudl1Wallet = args.fraudl1Wallet
+//     this.fraudl2Wallet = args.fraudl2Wallet
+//     this.l2Provider = args.l2Provider
+//     this.ctc = args.ctc
+//   }
 
-  // The wallets
-  bobl1Wallet: Wallet
-  bobl2Wallet: Wallet
+//   static async new(): Promise<OptimismEnv> {
+    
+//     const addressManager = getAddressManager(bobl1Wallet)
 
-  alicel2Wallet: Wallet
-  alicel1Wallet: Wallet
+//     const ctcAddress = await addressManager.getAddress(
+//       'OVM_CanonicalTransactionChain'
+//     )
 
-  fraudl2Wallet: Wallet
-  fraudl1Wallet: Wallet
+//     const ctc = getContractFactory('OVM_CanonicalTransactionChain')
+//       .connect(bobl1Wallet)
+//       .attach(ctcAddress)
 
-  constructor(args: any) {
-    this.addressManager = args.addressManager
-    this.L1ETHGateway = args.L1ETHGateway
-    this.l1Messenger = args.l1Messenger
-    this.l1MessengerAddress = args.l1MessengerAddress
-    this.L2ETHGateway = args.L2ETHGateway
-    this.l2Messenger = args.l2Messenger
-    this.watcher = args.watcher
-    this.bobl1Wallet = args.bobl1Wallet
-    this.bobl2Wallet = args.bobl2Wallet
-    this.alicel1Wallet = args.alicel1Wallet
-    this.alicel2Wallet = args.alicel2Wallet
-    this.fraudl1Wallet = args.fraudl1Wallet
-    this.fraudl2Wallet = args.fraudl2Wallet
-    this.l2Provider = args.l2Provider
-    this.ctc = args.ctc
-  }
+//     return new OptimismEnv({
+//       addressManager,
+//       ctc,
+//       bobl1Wallet,
+//       bobl2Wallet,
+//       alicel1Wallet,
+//       alicel2Wallet,
+//       fraudl1Wallet,
+//       fraudl2Wallet,
+//       l2Provider,
+//     })
+//   }
 
-  static async new(): Promise<OptimismEnv> {
-    const addressManager = getAddressManager(bobl1Wallet)
-    const watcher = await initWatcher(l1Provider, l2Provider, addressManager)
-
-    const L1ETHGateway = await getL1ETHGateway(bobl1Wallet, addressManager)
-    const L2ETHGateway = getL2ETHGateway(bobl2Wallet)
-
-    const l1Messenger = getContractFactory('iOVM_L1CrossDomainMessenger')
-      .connect(bobl1Wallet)
-      .attach(watcher.l1.messengerAddress)
-
-    const l1MessengerAddress = l1Messenger.address
-
-    const l2Messenger = getContractFactory('iOVM_L2CrossDomainMessenger')
-      .connect(bobl2Wallet)
-      .attach(watcher.l2.messengerAddress)
-
-    const ctcAddress = await addressManager.getAddress(
-      'OVM_CanonicalTransactionChain'
-    )
-    const ctc = getContractFactory('OVM_CanonicalTransactionChain')
-      .connect(bobl1Wallet)
-      .attach(ctcAddress)
-
-    return new OptimismEnv({
-      addressManager,
-      L1ETHGateway,
-      ctc,
-      l1Messenger,
-      l1MessengerAddress,
-      L2ETHGateway,
-      l2Messenger,
-      watcher,
-      bobl1Wallet,
-      bobl2Wallet,
-      alicel1Wallet,
-      alicel2Wallet,
-      fraudl1Wallet,
-      fraudl2Wallet,
-      l2Provider,
-    })
-  }
-
-  async waitForXDomainTransaction(
-    tx: Promise<TransactionResponse> | TransactionResponse,
-    direction: Direction
-  ): Promise<CrossDomainMessagePair> {
-    return waitForXDomainTransaction(this.watcher, tx, direction)
-  }
-}
+// }

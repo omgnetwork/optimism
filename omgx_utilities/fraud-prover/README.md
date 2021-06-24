@@ -12,10 +12,8 @@ Make sure dependencies are installed and everything is built - just run `yarn` a
 
 ```bash
 
-#OUTDATED ./up_local.sh #to spin up and verify a local OMGX
-#insted, use...
-
-docker-compose up --scale verifier=1 --build
+# the V clears various volumes so you start in a defined state
+docker-compose up --scale verifier=1 --build -V
 
 ```
 

@@ -1,6 +1,7 @@
 {
   "npmClient": "yarn",
   "useWorkspaces": true,
+  "ignoreVersionCheck": true,
   "packages": [
     "packages/*",
     "packages/omgx/*"
