@@ -45,10 +45,7 @@ jobs:
         working-directory: ./ops
         run: |
           ./scripts/build-ci.sh
-          docker build ../ --file docker/Dockerfile.bl-wl --tag omgx/bl-wl:latest
-          docker build ../ --file docker/Dockerfile.omgx_monorepo --tag omgx/wallet_builder:latest
-          docker build ../ --file docker/Dockerfile.wallet_deployer --tag omgx/wallet_deployer:latest
-          docker build ../ --file docker/Dockerfile.message-relayer-fast --tag omgx/message-relayer-fast:latest
+          ./scripts/build-ci-omgx.sh
 
       - name: Rename and retag the optimism images
         working-directory: ./ops

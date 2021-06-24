@@ -182,12 +182,14 @@ describe('Liquidity Pool Test', async () => {
 
     expect(poolERC20Info.l1TokenAddress).to.deep.eq(L1ERC20.address)
     expect(poolERC20Info.l2TokenAddress).to.deep.eq(L2DepositedERC20.address)
-
-    const registerPoolETHTX = await L1LiquidityPool.registerPool(
-      "0x0000000000000000000000000000000000000000",
-      env.L2ETHGateway.address,
-    )
-    await registerPoolETHTX.wait()
+    
+    //this actually *SHOULD* fail, because the registration for ETH happens in 001-LiquidityPools.deploy.ts
+    //https://github.com/omgnetwork/optimism/issues/84
+    // const registerPoolETHTX = await L1LiquidityPool.registerPool(
+    //   "0x0000000000000000000000000000000000000000",
+    //   env.L2ETHGateway.address,
+    // )
+    // await registerPoolETHTX.wait()
 
     const poolETHInfo = await L1LiquidityPool.poolInfo("0x0000000000000000000000000000000000000000")
 
@@ -195,9 +197,36 @@ describe('Liquidity Pool Test', async () => {
     expect(poolETHInfo.l2TokenAddress).to.deep.eq(env.L2ETHGateway.address)
   })
 
-  it('shouldn\'t allow re-registering the pool', async () => {
-    // first registration happens in 001-LiquidityPools.deploy.ts
-    const registerPoolTX = await L2LiquidityPool.registerPool(
+  it('should register L2 the ETH pool', async () => {
+    //https://github.com/omgnetwork/optimism/issues/84
+    //this actually fails, because the registration for ETH happens in 001-LiquidityPools.deploy.ts
+    //but we keep the check for the deployment script
+    // const registerPoolETHTX = await L2LiquidityPool.registerPool(
+    //   "0x0000000000000000000000000000000000000000",
+    //   env.L2ETHGateway.address,
+    //   {gasLimit: 800000, gasPrice: 0}  
+    // )
+    //await registerPoolETHTX.wait()
+
+    const poolETHInfo = await L2LiquidityPool.poolInfo(env.L2ETHGateway.address)
+
+    expect(poolETHInfo.l1TokenAddress).to.deep.eq("0x0000000000000000000000000000000000000000")
+    expect(poolETHInfo.l2TokenAddress).to.deep.eq(env.L2ETHGateway.address)
+  })  
+
+  it('shouldn\'t allow re-registering the L2 pool', async () => {
+    let registerPoolTX = await L2LiquidityPool.registerPool(
+      L1ERC20.address,
+      L2DepositedERC20.address,
+      {gasLimit: 800000, gasPrice: 0}
+    )
+    await registerPoolTX.wait()
+    const poolERC20Info = await L2LiquidityPool.poolInfo(L2DepositedERC20.address)
+
+    expect(poolERC20Info.l1TokenAddress).to.deep.eq(L1ERC20.address)
+    expect(poolERC20Info.l2TokenAddress).to.deep.eq(L2DepositedERC20.address)
+
+    registerPoolTX = await L2LiquidityPool.registerPool(
       L1ERC20.address,
       L2DepositedERC20.address,
       {gasLimit: 800000, gasPrice: 0}
