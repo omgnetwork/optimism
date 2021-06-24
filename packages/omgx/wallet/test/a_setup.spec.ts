@@ -115,41 +115,8 @@ describe('System setup', async () => {
 
   it('should deploy contracts', async () => {
 
-    // Deploy L2 liquidity pool
-    L2LiquidityPool = await Factory__L2LiquidityPool.deploy(
-      env.watcher.l2.messengerAddress,
-      {gasLimit: 800000, gasPrice: 0}
-    )
-    await L2LiquidityPool.deployTransaction.wait()
-    console.log(`🌕 ${chalk.red('L2LiquidityPool deployed to:')} ${chalk.green(L2LiquidityPool.address)}`)
-
-    // Deploy L1 liquidity pool
-    L1LiquidityPool = await Factory__L1LiquidityPool.deploy(
-      env.watcher.l1.messengerAddress,
-      env.watcherFast.l1.messengerAddress,
-    )
-    await L1LiquidityPool.deployTransaction.wait()
-    console.log(`🌕 ${chalk.red('L1LiquidityPool deployed to:')} ${chalk.green(L1LiquidityPool.address)}`)
-
-    // Initialize L1 liquidity pool
-    const L1LiquidityPoolTX = await L1LiquidityPool.init(
-      /* userRewardFeeRate 3.5% */ 35,
-      /* ownerRewardFeeRate 1.5% */ 15,
-      L2LiquidityPool.address,
-      {gasLimit: 800000, gasPrice: 0}
-    )
-    await L1LiquidityPoolTX.wait()
-    console.log(`⭐️ ${chalk.blue('L1 LP initialized:')} ${chalk.green(L1LiquidityPoolTX.hash)}`)
-
-    // Initialize L2 liquidity pool
-    const L2LiquidityPoolTX = await L2LiquidityPool.init(
-      /* userRewardFeeRate 3.5% */ 35,
-      /* ownerRewardFeeRate 1.5% */ 15,
-      L1LiquidityPool.address,
-      {gasLimit: 800000, gasPrice: 0}
-    )
-    await L2LiquidityPoolTX.wait()
-    console.log(`⭐️ ${chalk.blue('L2 LP initialized:')} ${chalk.green(L2LiquidityPoolTX.hash)}`)
+    //liquidity pools contracts already deployed so we just
+    //fetch them from our deployer
 
     walletAddresses = await getWalletDeployerAddresses()
     //Mint a new token on L1 and set up the L1 and L2 infrastructure
@@ -217,8 +184,8 @@ describe('System setup', async () => {
     console.log(`${chalk.yellow('\n\n********************************')}`)
 
     const addresses = {
-      L1LiquidityPool: L1LiquidityPool.address,
-      L2LiquidityPool: L2LiquidityPool.address,
+      L2LiquidityPool: walletAddresses.L2LiquidityPool,
+      L1LiquidityPool: walletAddresses.L1LiquidityPool,
       L1ERC20: L1ERC20.address,
       L2DepositedERC20: L2DepositedERC20.address,
       L1ERC20Gateway: L1ERC20Gateway.address,
