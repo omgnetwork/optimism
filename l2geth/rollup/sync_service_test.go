@@ -121,6 +121,7 @@ func TestSyncServiceTransactionEnqueued(t *testing.T) {
 		l1BlockNumber,
 		timestamp,
 		&l1TxOrigin,
+		types.SighashEIP155,
 		types.QueueOriginL1ToL2,
 		&index,
 		&queueIndex,
@@ -177,6 +178,7 @@ func TestTransactionToTipNoIndex(t *testing.T) {
 		l1BlockNumber,
 		timestamp,
 		&l1TxOrigin,
+		types.SighashEIP155,
 		types.QueueOriginL1ToL2,
 		nil, // The index is `nil`, expect it to be set afterwards
 		nil,
@@ -516,6 +518,8 @@ func TestSyncServiceL2GasPrice(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	service.enableL2GasPolling = true
+	service.gpoAddress = common.HexToAddress("0xF20b338752976878754518183873602902360704")
 
 	price, err := service.RollupGpo.SuggestL2GasPrice(context.Background())
 	if err != nil {
@@ -531,7 +535,7 @@ func TestSyncServiceL2GasPrice(t *testing.T) {
 		t.Fatal("Cannot get state db")
 	}
 	l2GasPrice := big.NewInt(100000000000)
-	state.SetState(l2GasPriceOracleAddress, l2GasPriceSlot, common.BigToHash(l2GasPrice))
+	state.SetState(service.gpoAddress, l2GasPriceSlot, common.BigToHash(l2GasPrice))
 	root, _ := state.Commit(false)
 
 	service.updateL2GasPrice(&root)
@@ -567,6 +571,7 @@ func TestSyncServiceSync(t *testing.T) {
 		l1BlockNumber,
 		timestamp,
 		&l1TxOrigin,
+		types.SighashEIP155,
 		types.QueueOriginL1ToL2,
 		&index,
 		&queueIndex,
@@ -618,6 +623,7 @@ func TestInitializeL1ContextPostGenesis(t *testing.T) {
 		l1BlockNumber,
 		timestamp,
 		&l1TxOrigin,
+		types.SighashEIP155,
 		types.QueueOriginL1ToL2,
 		&index,
 		&queueIndex,
@@ -693,7 +699,7 @@ func newTestSyncService(isVerifier bool) (*SyncService, chan core.NewTxsEvent, e
 		return nil, nil, nil, fmt.Errorf("Cannot initialize syncservice: %w", err)
 	}
 
-	service.RollupGpo = gasprice.NewRollupOracle()
+	service.RollupGpo = gasprice.NewRollupOracle(big.NewInt(0), big.NewInt(0))
 	txCh := make(chan core.NewTxsEvent, 1)
 	sub := service.SubscribeNewTxsEvent(txCh)
 
@@ -715,7 +721,7 @@ type mockClient struct {
 func setupMockClient(service *SyncService, responses map[string]interface{}) {
 	client := newMockClient(responses)
 	service.client = client
-	service.RollupGpo = gasprice.NewRollupOracle()
+	service.RollupGpo = gasprice.NewRollupOracle(big.NewInt(0), big.NewInt(0))
 }
 
 func newMockClient(responses map[string]interface{}) *mockClient {
@@ -865,6 +871,7 @@ func mockTx() *types.Transaction {
 		l1BlockNumber,
 		timestamp,
 		&l1TxOrigin,
+		types.SighashEIP155,
 		types.QueueOriginSequencer,
 		nil,
 		nil,

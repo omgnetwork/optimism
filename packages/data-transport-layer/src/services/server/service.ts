@@ -2,7 +2,6 @@
 import { BaseService, Logger, Metrics } from '@eth-optimism/common-ts'
 import express, { Request, Response } from 'express'
 import promBundle from 'express-prom-bundle'
-import { Gauge } from 'prom-client'
 import cors from 'cors'
 import { BigNumber } from 'ethers'
 import { JsonRpcProvider } from '@ethersproject/providers'
@@ -28,7 +27,6 @@ import { L1DataTransportServiceOptions } from '../main/service'
 export interface L1TransportServerOptions
   extends L1DataTransportServiceOptions {
   db: LevelUp
-  metrics: Metrics
 }
 
 const optionSettings = {
@@ -108,26 +106,14 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
   private _initializeApp() {
     // TODO: Maybe pass this in as a parameter instead of creating it here?
     this.state.app = express()
-
     if (this.options.useSentry) {
       this._initSentry()
     }
-
+    if (this.options.enableMetrics) {
+      this._initMetrics()
+    }
     this.state.app.use(cors())
-
-    // Add prometheus middleware to express BEFORE route registering
-    this.state.app.use(
-      // This also serves metrics on port 3000 at /metrics
-      promBundle({
-        // Provide metrics registry that other metrics uses
-        promRegistry: this.metrics.registry,
-        includeMethod: true,
-        includePath: true,
-      })
-    )
-
     this._registerAllRoutes()
-
     // Sentry error handling must be after all controllers
     // and before other error middleware
     if (this.options.useSentry) {
@@ -160,6 +146,25 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     })
     this.state.app.use(Sentry.Handlers.requestHandler())
     this.state.app.use(Sentry.Handlers.tracingHandler())
+  }
+
+  /**
+   * Initialize Prometheus metrics collection and endpoint
+   */
+  private _initMetrics() {
+    this.metrics = new Metrics({
+      labels: {
+        environment: this.options.nodeEnv,
+        network: this.options.ethNetworkName,
+        release: this.options.release,
+        service: this.name,
+      },
+    })
+    const metricsMiddleware = promBundle({
+      includeMethod: true,
+      includePath: true,
+    })
+    this.state.app.use(metricsMiddleware)
   }
 
   /**
@@ -196,7 +201,7 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         return res.json(json)
       } catch (e) {
         const elapsed = Date.now() - start
-        this.logger.error('Failed HTTP Request', {
+        this.logger.info('Failed HTTP Request', {
           method: req.method,
           url: req.url,
           elapsed,
@@ -229,7 +234,8 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
             highestL2BlockNumber = await this.state.db.getHighestL2BlockNumber()
             break
           case 'l2':
-            currentL2Block = await this.state.db.getLatestUnconfirmedTransaction()
+            currentL2Block =
+              await this.state.db.getLatestUnconfirmedTransaction()
             highestL2BlockNumber =
               (await this.state.db.getHighestSyncedUnconfirmedBlock()) - 1
             break
@@ -472,11 +478,12 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           }
         }
 
-        const transactions = await this.state.db.getFullTransactionsByIndexRange(
-          BigNumber.from(batch.prevTotalElements).toNumber(),
-          BigNumber.from(batch.prevTotalElements).toNumber() +
-            BigNumber.from(batch.size).toNumber()
-        )
+        const transactions =
+          await this.state.db.getFullTransactionsByIndexRange(
+            BigNumber.from(batch.prevTotalElements).toNumber(),
+            BigNumber.from(batch.prevTotalElements).toNumber() +
+              BigNumber.from(batch.size).toNumber()
+          )
 
         return {
           batch,
@@ -500,11 +507,12 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           }
         }
 
-        const transactions = await this.state.db.getFullTransactionsByIndexRange(
-          BigNumber.from(batch.prevTotalElements).toNumber(),
-          BigNumber.from(batch.prevTotalElements).toNumber() +
-            BigNumber.from(batch.size).toNumber()
-        )
+        const transactions =
+          await this.state.db.getFullTransactionsByIndexRange(
+            BigNumber.from(batch.prevTotalElements).toNumber(),
+            BigNumber.from(batch.prevTotalElements).toNumber() +
+              BigNumber.from(batch.size).toNumber()
+          )
 
         return {
           batch,

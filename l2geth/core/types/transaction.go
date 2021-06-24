@@ -36,6 +36,15 @@ var (
 	ErrInvalidSig = errors.New("invalid transaction v, r, s values")
 )
 
+// TODO(mark): migrate from sighash type to type
+type SignatureHashType uint8
+
+const (
+	SighashEIP155  SignatureHashType = 0
+	SighashEthSign SignatureHashType = 1
+	CreateEOA      SignatureHashType = 2
+)
+
 type Transaction struct {
 	data txdata
 	meta TransactionMeta
@@ -77,6 +86,7 @@ func NewTransaction(nonce uint64, to common.Address, amount *big.Int, gasLimit u
 	return newTransaction(nonce, &to, amount, gasLimit, gasPrice, data)
 }
 
+// TODO: cannot deploy contracts with SighashEthSign right until SighashEIP155 is no longer hardcoded
 func NewContractCreation(nonce uint64, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte) *Transaction {
 	return newTransaction(nonce, nil, amount, gasLimit, gasPrice, data)
 }
@@ -86,7 +96,7 @@ func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit 
 		data = common.CopyBytes(data)
 	}
 
-	meta := NewTransactionMeta(nil, 0, nil, QueueOriginSequencer, nil, nil, nil)
+	meta := NewTransactionMeta(nil, 0, nil, SighashEIP155, QueueOriginSequencer, nil, nil, nil)
 
 	d := txdata{
 		AccountNonce: nonce,
@@ -187,12 +197,12 @@ func (tx *Transaction) DecodeRLP(s *rlp.Stream) error {
 
 // MarshalJSON encodes the web3 RPC transaction format.
 func (tx *Transaction) MarshalJSON() ([]byte, error) {
-	return tx.data.MarshalJSON()
+	return tx.data.TransactionMarshalJSON()
 }
 
 // UnmarshalJSON decodes the web3 RPC transaction format.
 func (tx *Transaction) UnmarshalJSON(input []byte) error {
-	err := tx.data.UnmarshalJSON(input)
+	err := tx.data.TransactionUnmarshalJSON(input)
 	if err != nil {
 		return err
 	}
@@ -222,7 +232,14 @@ func (tx *Transaction) Value() *big.Int    { return new(big.Int).Set(tx.data.Amo
 func (tx *Transaction) Nonce() uint64      { return tx.data.AccountNonce }
 func (tx *Transaction) CheckNonce() bool   { return true }
 
-func (tx *Transaction) SetNonce(nonce uint64) { tx.data.AccountNonce = nonce }
+func (tx *Transaction) SetNonce(nonce uint64)                { tx.data.AccountNonce = nonce }
+func (tx *Transaction) SignatureHashType() SignatureHashType { return tx.meta.SignatureHashType }
+func (tx *Transaction) SetSignatureHashType(sighashType SignatureHashType) {
+	tx.meta.SignatureHashType = sighashType
+}
+func (tx *Transaction) IsEthSignSighash() bool {
+	return tx.SignatureHashType() == SighashEthSign
+}
 
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.
@@ -254,9 +271,13 @@ func (tx *Transaction) L1BlockNumber() *big.Int {
 	return &l1BlockNumber
 }
 
-// QueueOrigin returns the Queue Origin of the transaction
-func (tx *Transaction) QueueOrigin() QueueOrigin {
-	return tx.meta.QueueOrigin
+// QueueOrigin returns the Queue Origin of the transaction if it exists.
+func (tx *Transaction) QueueOrigin() *big.Int {
+	if tx.meta.QueueOrigin == nil {
+		return nil
+	}
+	queueOrigin := *tx.meta.QueueOrigin
+	return &queueOrigin
 }
 
 // Hash hashes the RLP encoding of tx.
@@ -298,9 +319,10 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 		data:       tx.data.Payload,
 		checkNonce: true,
 
-		l1MessageSender: tx.meta.L1MessageSender,
-		l1BlockNumber:   tx.meta.L1BlockNumber,
-		queueOrigin:     tx.meta.QueueOrigin,
+		l1MessageSender:   tx.meta.L1MessageSender,
+		l1BlockNumber:     tx.meta.L1BlockNumber,
+		signatureHashType: tx.meta.SignatureHashType,
+		queueOrigin:       tx.meta.QueueOrigin,
 	}
 
 	var err error
@@ -513,12 +535,13 @@ type Message struct {
 	data       []byte
 	checkNonce bool
 
-	l1MessageSender *common.Address
-	l1BlockNumber   *big.Int
-	queueOrigin     QueueOrigin
+	l1MessageSender   *common.Address
+	l1BlockNumber     *big.Int
+	signatureHashType SignatureHashType
+	queueOrigin       *big.Int
 }
 
-func NewMessage(from common.Address, to *common.Address, nonce uint64, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, checkNonce bool, l1MessageSender *common.Address, l1BlockNumber *big.Int, queueOrigin QueueOrigin) Message {
+func NewMessage(from common.Address, to *common.Address, nonce uint64, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte, checkNonce bool, l1MessageSender *common.Address, l1BlockNumber *big.Int, queueOrigin QueueOrigin, signatureHashType SignatureHashType) Message {
 	return Message{
 		from:       from,
 		to:         to,
@@ -529,9 +552,10 @@ func NewMessage(from common.Address, to *common.Address, nonce uint64, amount *b
 		data:       data,
 		checkNonce: checkNonce,
 
-		l1BlockNumber:   l1BlockNumber,
-		l1MessageSender: l1MessageSender,
-		queueOrigin:     queueOrigin,
+		l1BlockNumber:     l1BlockNumber,
+		l1MessageSender:   l1MessageSender,
+		signatureHashType: signatureHashType,
+		queueOrigin:       big.NewInt(int64(queueOrigin)),
 	}
 }
 
@@ -544,6 +568,7 @@ func (m Message) Nonce() uint64        { return m.nonce }
 func (m Message) Data() []byte         { return m.data }
 func (m Message) CheckNonce() bool     { return m.checkNonce }
 
-func (m Message) L1MessageSender() *common.Address { return m.l1MessageSender }
-func (m Message) L1BlockNumber() *big.Int          { return m.l1BlockNumber }
-func (m Message) QueueOrigin() QueueOrigin         { return m.queueOrigin }
+func (m Message) L1MessageSender() *common.Address     { return m.l1MessageSender }
+func (m Message) L1BlockNumber() *big.Int              { return m.l1BlockNumber }
+func (m Message) SignatureHashType() SignatureHashType { return m.signatureHashType }
+func (m Message) QueueOrigin() *big.Int                { return m.queueOrigin }

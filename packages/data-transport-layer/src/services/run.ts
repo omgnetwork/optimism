@@ -49,6 +49,7 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
       useSentry: config.bool('use-sentry', false),
       sentryDsn: config.str('sentry-dsn'),
       sentryTraceRate: config.ufloat('sentry-trace-rate', 0.05),
+      enableMetrics: config.bool('enable-metrics', false),
     })
 
     await service.start()

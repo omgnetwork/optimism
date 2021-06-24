@@ -3,17 +3,18 @@ pragma solidity >0.5.0 <0.8.0;
 pragma experimental ABIEncoderV2;
 
 /* Library Imports */
-import { Lib_AddressResolver } from "../../../libraries/resolver/Lib_AddressResolver.sol";
 import { Lib_OVMCodec } from "../../../libraries/codec/Lib_OVMCodec.sol";
+import { Lib_AddressResolver } from "../../../libraries/resolver/Lib_AddressResolver.sol";
 import { Lib_AddressManager } from "../../../libraries/resolver/Lib_AddressManager.sol";
 import { Lib_SecureMerkleTrie } from "../../../libraries/trie/Lib_SecureMerkleTrie.sol";
-import { Lib_PredeployAddresses } from "../../../libraries/constants/Lib_PredeployAddresses.sol";
-import { Lib_CrossDomainUtils } from "../../../libraries/bridge/Lib_CrossDomainUtils.sol";
 
 /* Interface Imports */
 import { iOVM_L1CrossDomainMessenger } from "../../../iOVM/bridge/messaging/iOVM_L1CrossDomainMessenger.sol";
 import { iOVM_CanonicalTransactionChain } from "../../../iOVM/chain/iOVM_CanonicalTransactionChain.sol";
 import { iOVM_StateCommitmentChain } from "../../../iOVM/chain/iOVM_StateCommitmentChain.sol";
+
+/* Contract Imports */
+import { Abs_BaseCrossDomainMessenger } from "./Abs_BaseCrossDomainMessenger.sol";
 
 /* External Imports */
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -31,6 +32,7 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
  */
 contract OVM_L1CrossDomainMessenger is
         iOVM_L1CrossDomainMessenger,
+        Abs_BaseCrossDomainMessenger,
         Lib_AddressResolver,
         OwnableUpgradeable,
         PausableUpgradeable,
@@ -49,24 +51,11 @@ contract OVM_L1CrossDomainMessenger is
         bytes32 indexed _xDomainCalldataHash
     );
 
-    /*************
-     * Constants *
-     *************/
-
-    // The default x-domain message sender being set to a non-zero value makes
-    // deployment a bit more expensive, but in exchange the refund on every call to
-    // `relayMessage` by the L1 and L2 messengers will be higher.
-    address internal constant DEFAULT_XDOMAIN_SENDER = 0x000000000000000000000000000000000000dEaD;
-
     /**********************
      * Contract Variables *
      **********************/
 
     mapping (bytes32 => bool) public blockedMessages;
-    mapping (bytes32 => bool) public relayedMessages;
-    mapping (bytes32 => bool) public successfulMessages;
-
-    address internal xDomainMsgSender = DEFAULT_XDOMAIN_SENDER;
 
     /***************
      * Constructor *
@@ -166,48 +155,6 @@ contract OVM_L1CrossDomainMessenger is
         emit MessageAllowed(_xDomainCalldataHash);
     }
 
-    function xDomainMessageSender()
-        public
-        override
-        view
-        returns (
-            address
-        )
-    {
-        require(xDomainMsgSender != DEFAULT_XDOMAIN_SENDER, "xDomainMessageSender is not set");
-        return xDomainMsgSender;
-    }
-
-    /**
-     * Sends a cross domain message to the target messenger.
-     * @param _target Target contract address.
-     * @param _message Message to send to the target.
-     * @param _gasLimit Gas limit for the provided message.
-     */
-    function sendMessage(
-        address _target,
-        bytes memory _message,
-        uint32 _gasLimit
-    )
-        override
-        public
-    {
-        address ovmCanonicalTransactionChain = resolve("OVM_CanonicalTransactionChain");
-        // Use the CTC queue length as nonce
-        uint40 nonce = iOVM_CanonicalTransactionChain(ovmCanonicalTransactionChain).getQueueLength();
-
-        bytes memory xDomainCalldata = Lib_CrossDomainUtils.encodeXDomainCalldata(
-            _target,
-            msg.sender,
-            _message,
-            nonce
-        );
-
-        address l2CrossDomainMessenger = resolve("OVM_L2CrossDomainMessenger");
-        _sendXDomainMessage(ovmCanonicalTransactionChain, l2CrossDomainMessenger, xDomainCalldata, _gasLimit);
-        emit SentMessage(xDomainCalldata);
-    }
-
     /**
      * Relays a cross domain message to a contract.
      * @inheritdoc iOVM_L1CrossDomainMessenger
@@ -225,7 +172,7 @@ contract OVM_L1CrossDomainMessenger is
         onlyRelayer
         whenNotPaused
     {
-        bytes memory xDomainCalldata = Lib_CrossDomainUtils.encodeXDomainCalldata(
+        bytes memory xDomainCalldata = _getXDomainCalldata(
             _target,
             _sender,
             _message,
@@ -285,40 +232,25 @@ contract OVM_L1CrossDomainMessenger is
         address _target,
         address _sender,
         bytes memory _message,
-        uint256 _queueIndex,
+        uint256 _messageNonce,
         uint32 _gasLimit
     )
         override
         public
     {
-        // Verify that the message is in the queue:
-        address canonicalTransactionChain = resolve("OVM_CanonicalTransactionChain");
-        Lib_OVMCodec.QueueElement memory element = iOVM_CanonicalTransactionChain(canonicalTransactionChain).getQueueElement(_queueIndex);
-
-        address l2CrossDomainMessenger = resolve("OVM_L2CrossDomainMessenger");
-        // Compute the transactionHash
-        bytes32 transactionHash = keccak256(
-            abi.encode(
-                address(this),
-                l2CrossDomainMessenger,
-                _gasLimit,
-                _message
-            )
-        );
-
-        require(
-            transactionHash == element.transactionHash,
-            "Provided message has not been enqueued."
-        );
-
-        bytes memory xDomainCalldata = Lib_CrossDomainUtils.encodeXDomainCalldata(
+        bytes memory xDomainCalldata = _getXDomainCalldata(
             _target,
             _sender,
             _message,
-            _queueIndex
+            _messageNonce
         );
 
-        _sendXDomainMessage(canonicalTransactionChain, l2CrossDomainMessenger, xDomainCalldata, _gasLimit);
+        require(
+            sentMessages[keccak256(xDomainCalldata)] == true,
+            "Provided message has not already been sent."
+        );
+
+        _sendXDomainMessage(xDomainCalldata, _gasLimit);
     }
 
 
@@ -408,7 +340,7 @@ contract OVM_L1CrossDomainMessenger is
             bool exists,
             bytes memory encodedMessagePassingAccount
         ) = Lib_SecureMerkleTrie.get(
-            abi.encodePacked(Lib_PredeployAddresses.L2_TO_L1_MESSAGE_PASSER),
+            abi.encodePacked(0x4200000000000000000000000000000000000000),
             _proof.stateTrieWitness,
             _proof.stateRoot
         );
@@ -432,21 +364,18 @@ contract OVM_L1CrossDomainMessenger is
 
     /**
      * Sends a cross domain message.
-     * @param _canonicalTransactionChain Address of the OVM_CanonicalTransactionChain instance.
-     * @param _l2CrossDomainMessenger Address of the OVM_L2CrossDomainMessenger instance.
      * @param _message Message to send.
      * @param _gasLimit OVM gas limit for the message.
      */
     function _sendXDomainMessage(
-        address _canonicalTransactionChain,
-        address _l2CrossDomainMessenger,
         bytes memory _message,
         uint256 _gasLimit
     )
+        override
         internal
     {
-        iOVM_CanonicalTransactionChain(_canonicalTransactionChain).enqueue(
-            _l2CrossDomainMessenger,
+        iOVM_CanonicalTransactionChain(resolve("OVM_CanonicalTransactionChain")).enqueue(
+            resolve("OVM_L2CrossDomainMessenger"),
             _gasLimit,
             _message
         );

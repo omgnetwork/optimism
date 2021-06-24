@@ -11,7 +11,6 @@ export type ContextOpcode =
   | 'ovmGASLIMIT'
   | 'ovmCHAINID'
   | 'ovmGETNONCE'
-  | 'ovmCALLVALUE'
 
 type CallOpcode = 'ovmCALL' | 'ovmSTATICCALL' | 'ovmDELEGATECALL'
 
@@ -69,15 +68,6 @@ interface TestStep_EXTCODECOPY {
   expectedReturnValue: string | RevertFlagError
 }
 
-interface TestStep_BALANCE {
-  functionName: 'ovmBALANCE'
-  functionParams: {
-    address: string
-  }
-  expectedReturnStatus: boolean
-  expectedReturnValue: number | RevertFlagError
-}
-
 interface TestStep_SSTORE {
   functionName: 'ovmSSTORE'
   functionParams: {
@@ -103,12 +93,11 @@ interface TestStep_INCREMENTNONCE {
   expectedReturnValue?: RevertFlagError
 }
 
-export interface TestStep_CALLType {
+export interface TestStep_CALL {
   functionName: CallOpcode
   functionParams: {
     gasLimit: number | BigNumber
     target: string
-    value?: number | BigNumber
     calldata?: string
     subSteps?: TestStep[]
   }
@@ -185,14 +174,13 @@ export type TestStep =
   | TestStep_SSTORE
   | TestStep_SLOAD
   | TestStep_INCREMENTNONCE
-  | TestStep_CALLType
+  | TestStep_CALL
   | TestStep_CREATE
   | TestStep_CREATE2
   | TestStep_CREATEEOA
   | TestStep_EXTCODESIZE
   | TestStep_EXTCODEHASH
   | TestStep_EXTCODECOPY
-  | TestStep_BALANCE
   | TestStep_REVERT
   | TestStep_evm
 
@@ -231,7 +219,6 @@ export const isTestStep_Context = (
     'ovmCHAINID',
     'ovmL1QUEUEORIGIN',
     'ovmGETNONCE',
-    'ovmCALLVALUE',
   ].includes(step.functionName)
 }
 
@@ -267,26 +254,14 @@ export const isTestStep_EXTCODECOPY = (
   return step.functionName === 'ovmEXTCODECOPY'
 }
 
-export const isTestStep_BALANCE = (
-  step: TestStep
-): step is TestStep_BALANCE => {
-  return step.functionName === 'ovmBALANCE'
-}
-
 export const isTestStep_REVERT = (step: TestStep): step is TestStep_REVERT => {
   return step.functionName === 'ovmREVERT'
 }
 
-export const isTestStep_CALLType = (
-  step: TestStep
-): step is TestStep_CALLType => {
+export const isTestStep_CALL = (step: TestStep): step is TestStep_CALL => {
   return ['ovmCALL', 'ovmSTATICCALL', 'ovmDELEGATECALL'].includes(
     step.functionName
   )
-}
-
-export const isTestStep_CALL = (step: TestStep): boolean => {
-  return step.functionName === 'ovmCALL'
 }
 
 export const isTestStep_CREATE = (step: TestStep): step is TestStep_CREATE => {

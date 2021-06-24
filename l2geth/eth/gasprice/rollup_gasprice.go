@@ -17,12 +17,10 @@ type RollupOracle struct {
 }
 
 // NewRollupOracle returns an initialized RollupOracle
-func NewRollupOracle() *RollupOracle {
+func NewRollupOracle(l1GasPrice *big.Int, l2GasPrice *big.Int) *RollupOracle {
 	return &RollupOracle{
-		l1GasPrice:     new(big.Int),
-		l2GasPrice:     new(big.Int),
-		l1GasPriceLock: sync.RWMutex{},
-		l2GasPriceLock: sync.RWMutex{},
+		l1GasPrice: l1GasPrice,
+		l2GasPrice: l2GasPrice,
 	}
 }
 
