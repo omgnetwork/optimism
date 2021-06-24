@@ -18,9 +18,9 @@ The Optimism team continues to move rapidly, whilst producing very high quality 
 
 ## 2. Production / webscale
 
-* Under the hood, much effort has been devoted to web-scale production deployment of rollups - you can follow along here: https://github.com/omgnetwork/optimism/pull/46. The production rinkeby testnet currently runs on AWS EC2, which is stable but less scalable. A major next step will be to flip the switch, and transition to the AWS ECS Cloudformation system and all its associated CI/CD infrastructure and real time health monitoring. If response times start to degrade, e.g. when users are transferring funds across the chains, then we need to know about that within
+* Under the hood, much effort has been devoted to web-scale production deployment of rollups - you can follow along here: https://github.com/omgnetwork/optimism/pull/46. The production rinkeby testnet currently runs on AWS EC2, which is stable but less scalable. A major next step will be to flip the switch, and transition to the AWS ECS Cloudformation system and all its associated CI/CD infrastructure and real time health monitoring. If response times start to degrade, e.g. when users are transferring funds across the chains, then we need to know about that within a few seconds, ideally. 
 
-* On a more basid level, our major goal is to have a system that (1) gracefully responds to restart of one or more subservices, without getting confused, and (2) that can recover to last-known-good state automatically after 
+* On a more basic level, our major goal is to have a system that (1) gracefully responds to restart of one or more subservices, without getting confused, and (2) that can recover to last-known-good state automatically after unexpected failure of one of more subservices. 
 
 ## 3. User experience / front end
 
@@ -29,6 +29,8 @@ The Optimism team continues to move rapidly, whilst producing very high quality 
 * Closely related to the UI, is our solution for fast on/off, which consists of deploying liquidity pools across the chains - i.e. we represent moving funds to L2 as a swap, where a person swaps L1 ETH for L2 wETH, where ETH and wETH never actually move across the chain boundaries. It's just like Uniswap, except that the two liquidity pools are not in one contract, but in two contracts, on on the L1 and the other on the L2. This feature is live, and you can already earn Rinkeby ETH by staking, which provides liquidity for easy swap on/off: https://webwallet.rinkeby.omgx.network - click *Farm* on the top tab. note that contract improvements are pending, and that the contracts have not yet been audited. 
 
 * Blockexplorer. A blockexplorer is vital, and there is a simple one you can look at here: https://blockexplorer.rinkeby.omgx.network/?network=OmgX. However, we will soon transition to an industry-leading blockexplorer, so you have all the functions you expect and we do not have to maintain our own blockexplorer. Related to the blockexplorer is a feature everyone expects - reliable transaction history, so they can easily see their transactions and get reliable updates about their deposits and withdrawals.
+
+* Hardware wallet support. One of the gaping holes in the current webwallet/gateway is the complete lack of support for webwallets - our first step will be to add Ledger Nano support. 
 
 ## 4. Security
 
