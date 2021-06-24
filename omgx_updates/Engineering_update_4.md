@@ -10,7 +10,7 @@
 
 Thu June 24
 
-Greeting from your engineering team. We have been heads' down the last few weeks, to get many basic pieces for OMGX into place and stable. The most visible parts of this are an increasingly stable rinkeby testnet (https://rinkeby.omgx.network) and a working webwallet (aka gateway) with swap on/off and farming at https://webwallet.rinkeby.omgx.network. 
+Greetings from your engineering team. We have been heads' down the last few weeks, to get many basic pieces for OMGX into place and stable. The most visible parts of this are an increasingly stable rinkeby testnet (https://rinkeby.omgx.network) and a working webwallet (aka gateway) with swap on/off and farming at https://webwallet.rinkeby.omgx.network. 
 
 ## 1. Optimism Platform/Foundation
 
@@ -30,7 +30,7 @@ The Optimism team continues to move rapidly, whilst producing very high quality 
 
 * Blockexplorer. A blockexplorer is vital, and there is a simple one you can look at here: https://blockexplorer.rinkeby.omgx.network/?network=OmgX. However, we will soon transition to an industry-leading blockexplorer, so you have all the functions you expect and we do not have to maintain our own blockexplorer. Related to the blockexplorer is a feature everyone expects - reliable transaction history, so they can easily see their transactions and get reliable updates about their deposits and withdrawals.
 
-* Hardware wallet support. One of the gaping holes in the current webwallet/gateway is the complete lack of support for webwallets - our first step will be to add Ledger Nano support. 
+* Hardware wallet support. One of the gaping holes in the current webwallet/gateway is the complete lack of support for webwallets - our first step will be to add Ledger Nano support (https://github.com/omgnetwork/optimism/issues/117). 
 
 ## 4. Security
 
