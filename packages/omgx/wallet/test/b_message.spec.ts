@@ -2,7 +2,6 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
 import { Contract, ContractFactory, utils } from 'ethers'
-import chalk from 'chalk';
 
 import { Direction } from './shared/watcher-utils'
 
@@ -40,7 +39,7 @@ describe('Messenge Relayer Test', async () => {
     )
 
   })
-  
+
   it('should send message from L2 to L1', async () => {
     await env.waitForXFastDomainTransaction(
       L2Message.sendMessageL2ToL1({ gasLimit: 800000, gasPrice: 0 }),

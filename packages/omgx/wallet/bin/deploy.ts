@@ -39,6 +39,7 @@ const main = async () => {
     l2provider: l2Provider,
     deployer_l1: deployer_1,
     deployer_l2: deployer_2,
+    addressManager: addressManager,
     noCompile: process.env.NO_COMPILE ? true : false,
   })
 
