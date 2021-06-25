@@ -42,11 +42,16 @@ jobs:
         env:
           BUILD: 1
           DAEMON: 1
-        run: ./up_local.sh && ./scripts/wait-for-sequencer.sh
+        run: ./up_local.sh
+
+      - name: Wait for sequencer
+        working-directory: ./ops
+        run: ./scripts/wait-for-sequencer.sh
 
       - name: Run the sync tests
         working-directory: ./integration-tests
         run: |
+          sleep 60s
           yarn
           yarn test:sync
 
