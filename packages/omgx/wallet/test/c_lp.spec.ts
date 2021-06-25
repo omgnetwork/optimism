@@ -345,7 +345,7 @@ describe('Liquidity Pool Test', async () => {
       Direction.L2ToL1
     )
 
-    const poolInfo = await L2LiquidityPool.poolInfo(L2DepositedERC20.address)
+    const poolInfo = await L1LiquidityPool.poolInfo(L1ERC20.address)
 
     expect(poolInfo.accOwnerReward).to.deep.eq(fastExitAmount.mul(15).div(1000))
     expect(poolInfo.accUserReward).to.deep.eq(fastExitAmount.mul(35).div(1000))
