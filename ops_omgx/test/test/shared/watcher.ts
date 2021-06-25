@@ -15,7 +15,7 @@ export interface WatcherOptions {
 export class Watcher {
 
   public NUM_BLOCKS_TO_FETCH: number = 10000
-  
+
   public l1: Layer
   public l2: Layer
 
@@ -36,7 +36,7 @@ export class Watcher {
     l2ToL1MsgHash: string,
     pollForPending: boolean = true
   ): Promise<TransactionReceipt> {
-    //console.log(' Calling getL1TransactionReceipt')
+    console.log(' Calling getL1TransactionReceipt')
     return this.getTransactionReceipt(this.l1, l2ToL1MsgHash, pollForPending)
   }
 
@@ -44,7 +44,7 @@ export class Watcher {
     l1ToL2MsgHash: string,
     pollForPending: boolean = true
   ): Promise<TransactionReceipt> {
-    //console.log(' Calling getL2TransactionReceipt')
+    console.log(' Calling getL2TransactionReceipt')
     return this.getTransactionReceipt(this.l2, l1ToL2MsgHash, pollForPending)
   }
 
@@ -54,7 +54,7 @@ export class Watcher {
   ): Promise<string[]> {
 
     const receipt = await layer.provider.getTransactionReceipt(txHash)
-    
+
     if (!receipt) {
       return []
     }
@@ -81,31 +81,31 @@ export class Watcher {
     msgHash: string,
     pollForPending: boolean = true
   ): Promise<TransactionReceipt> {
-    
-    //console.log(" Watcher::getTransactionReceipt")
-    
+
+    console.log(" Watcher::getTransactionReceipt")
+
     const blockNumber = await layer.provider.getBlockNumber()
     const startingBlock = Math.max(blockNumber - this.NUM_BLOCKS_TO_FETCH, 0)
 
 
-    //console.log("Layer:", layer)
+    console.log("Layer:", layer)
 
-    //console.log("Address:", layer.messengerAddress)
-    //console.log("topic:", ethers.utils.id(`RelayedMessage(bytes32)`))
-    //console.log("fromBlock:", startingBlock)
+    console.log("Address:", layer.messengerAddress)
+    console.log("topic:", ethers.utils.id(`RelayedMessage(bytes32)`))
+    console.log("fromBlock:", startingBlock)
 
     const filter = {
       address: layer.messengerAddress,
       topics: [ethers.utils.id(`RelayedMessage(bytes32)`)],
       fromBlock: startingBlock,
     }
-    
+
     const logs = await layer.provider.getLogs(filter)
-    //console.log("Looking for:", msgHash)
-    //console.log("Current logs:", logs)
+    console.log("Looking for:", msgHash)
+    console.log("Current logs:", logs)
 
     const matches = logs.filter((log: any) => log.data === msgHash)
-        
+
     // Message was relayed in the past
     if (matches.length > 0) {
       if (matches.length > 1) {
@@ -115,17 +115,17 @@ export class Watcher {
       }
       return layer.provider.getTransactionReceipt(matches[0].transactionHash)
     }
- 
+
     if (!pollForPending) {
       return Promise.resolve(undefined)
     }
 
     // Message has yet to be relayed, poll until it is found
     return new Promise(async (resolve, reject) => {
-      //console.log(" Watcher polling::layer.provider.getTransactionReceipt pre filter")
+      console.log(" Watcher polling::layer.provider.getTransactionReceipt pre filter")
       //listener that triggers on filter event
       layer.provider.on(filter, async (log: any) => {
-        //console.log(" Watcher polling::layer.provider.getTransactionReceipt post filter")
+        console.log(" Watcher polling::layer.provider.getTransactionReceipt post filter")
         //console.log(log)
         if (log.data === msgHash) {
           try {
