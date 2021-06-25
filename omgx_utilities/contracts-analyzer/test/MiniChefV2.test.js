@@ -5,6 +5,7 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const { bob, alice, carol, dev, minter } = require('./utilities/wallet');
 const { deploy, getBigNumber, createSLP } = require('./utilities/index');
+const dotenv = require('dotenv');
 
 const ERC20MockJSON = require('../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.ovm.json');
 const brokenRewarderJSON = require('../artifacts/contracts/mocks/RewarderBrokenMock.sol/RewarderBrokenMock.ovm.json');
@@ -15,6 +16,14 @@ const RewarderMockJSON = require('../artifacts/contracts/mocks/RewarderMock.sol/
 /******************************************************************/
 /******************** evm_mint is not supported *******************/
 /******************************************************************/
+
+// Configuration for local test
+dotenv.config();
+const env = process.env;
+var overrides = {}; //{ gasLimit: 800000, gasPrice: 0 }
+if(env.L2_NETWORK == 'local'){
+  overrides = { gasLimit: 800000, gasPrice: 0 };
+}
 
 describe("MiniChefV2", function () {
   before(async function () {
@@ -36,40 +45,40 @@ describe("MiniChefV2", function () {
       ["r", ERC20MockJSON, ["Reward", "RewardT", getBigNumber(100000)]],
     ])
 
-    await deploy(this, [["rewarder", RewarderMockJSON, [getBigNumber(1), this.r.address, this.chef.address]]])
+    await deploy(this, [["rewarder", RewarderMockJSON, [getBigNumber(1), this.r.address, this.chef.address]]], overrides)
 
-    const mintTX = await this.sushi.mint(this.chef.address, getBigNumber(10000))
+    const mintTX = await this.sushi.mint(this.chef.address, getBigNumber(10000), overrides)
     await mintTX.wait()
-    const approveTX = await this.lp.approve(this.chef.address, getBigNumber(10))
+    const approveTX = await this.lp.approve(this.chef.address, getBigNumber(10), overrides)
     await approveTX.wait()
-    const setupTX = await this.chef.setSushiPerSecond("10000000000000000")
+    const setupTX = await this.chef.setSushiPerSecond("10000000000000000", overrides)
     await setupTX.wait()
-    const transferTX = await this.rlp.transfer(alice.address, getBigNumber(1))
+    const transferTX = await this.rlp.transfer(alice.address, getBigNumber(1), overrides)
     await transferTX.wait()
   })
 
   describe("PoolLength", function () {
     it("PoolLength should execute", async function () {
-      const addTX = await this.chef.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef.add(10, this.rlp.address, this.rewarder.address, overrides)
       await addTX.wait()
-      expect((await this.chef.poolLength())).to.be.equal(1);
+      expect((await this.chef.poolLength(overrides))).to.be.equal(1);
     })
   })
 
   describe("Set", function() {
     it("Should emit event LogSetPool", async function () {
-      const addTX = await this.chef.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef.add(10, this.rlp.address, this.rewarder.address, overrides)
       await addTX.wait()
-      await expect(this.chef.set(0, 10, this.dummy.address, false))
+      await expect(this.chef.set(0, 10, this.dummy.address, false, overrides))
             .to.emit(this.chef, "LogSetPool")
             .withArgs(0, 10, this.rewarder.address, false)
-      await expect(this.chef.set(0, 10, this.dummy.address, true))
+      await expect(this.chef.set(0, 10, this.dummy.address, true, overrides))
             .to.emit(this.chef, "LogSetPool")
             .withArgs(0, 10, this.dummy.address, true)
       })
 
     it("Should revert if invalid pool", async function () {
-      const setTX = await this.chef.set(0, 10, this.rewarder.address, false)
+      const setTX = await this.chef.set(0, 10, this.rewarder.address, false, overrides)
       await expect(setTX.wait()).to.be.eventually.rejected;
     })
   })
@@ -129,7 +138,7 @@ describe("MiniChefV2", function () {
 
   describe("Add", function () {
     it("Should add pool with reward token multiplier", async function () {
-      await expect(this.chef.add(10, this.rlp.address, this.rewarder.address))
+      await expect(this.chef.add(10, this.rlp.address, this.rewarder.address, overrides))
             .to.emit(this.chef, "LogPoolAddition")
             .withArgs(0, 10, this.rlp.address, this.rewarder.address)
       })
@@ -165,26 +174,26 @@ describe("MiniChefV2", function () {
 
   describe("Deposit", function () {
     it("Depositing 0 amount", async function () {
-      const addTX = await this.chef.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef.add(10, this.rlp.address, this.rewarder.address, overrides)
       await addTX.wait()
-      const approveTX = await this.rlp.approve(this.chef.address, getBigNumber(10))
+      const approveTX = await this.rlp.approve(this.chef.address, getBigNumber(10), overrides)
       await approveTX.wait()
-      await expect(this.chef.deposit(0, getBigNumber(0), bob.address))
+      await expect(this.chef.deposit(0, getBigNumber(0), bob.address, overrides))
             .to.emit(this.chef, "Deposit")
             .withArgs(bob.address, 0, 0, bob.address)
     })
 
     it("Depositing into non-existent pool should fail", async function () {
-      const depositTX = await this.chef.deposit(1001, getBigNumber(0), bob.address)
+      const depositTX = await this.chef.deposit(1001, getBigNumber(0), bob.address, overrides)
       await expect(depositTX.wait()).to.be.eventually.rejected;
     })
   })
 
   describe("Withdraw", function () {
     it("Withdraw 0 amount", async function () {
-      const addTX = await this.chef.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef.add(10, this.rlp.address, this.rewarder.address, overrides)
       await addTX.wait()
-      await expect(this.chef.withdraw(0, getBigNumber(0), bob.address))
+      await expect(this.chef.withdraw(0, getBigNumber(0), bob.address, overrides))
             .to.emit(this.chef, "Withdraw")
             .withArgs(bob.address, 0, 0, bob.address)
     })
@@ -233,16 +242,16 @@ describe("MiniChefV2", function () {
 
   describe("EmergencyWithdraw", function() {
     it("Should emit event EmergencyWithdraw", async function () {
-      const transferTX = await this.r.transfer(this.rewarder.address, getBigNumber(100000))
+      const transferTX = await this.r.transfer(this.rewarder.address, getBigNumber(100000), overrides)
       await transferTX.wait()
-      const addTX = await this.chef.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef.add(10, this.rlp.address, this.rewarder.address, overrides)
       await addTX.wait()
-      const approveTX = await this.rlp.approve(this.chef.address, getBigNumber(10))
+      const approveTX = await this.rlp.approve(this.chef.address, getBigNumber(10), overrides)
       await approveTX.wait()
-      const depositTX = await this.chef.deposit(0, getBigNumber(1), alice.address)
+      const depositTX = await this.chef.deposit(0, getBigNumber(1), alice.address, overrides)
       await depositTX.wait()
       //await this.chef.emergencyWithdraw(0, this.alice.address)
-      await expect(this.chef.connect(alice).emergencyWithdraw(0, alice.address))
+      await expect(this.chef.connect(alice).emergencyWithdraw(0, alice.address, overrides))
       .to.emit(this.chef, "EmergencyWithdraw")
       .withArgs(alice.address, 0, getBigNumber(1), alice.address)
     })

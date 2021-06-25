@@ -5,6 +5,7 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const { bob, alice, carol, dev, minter } = require('./utilities/wallet');
 const { deploy, getBigNumber, createSLP } = require('./utilities/index');
+const dotenv = require('dotenv');
 
 const ERC20MockJSON = require('../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.ovm.json');
 const brokenRewarderJSON = require('../artifacts/contracts/mocks/RewarderBrokenMock.sol/RewarderBrokenMock.ovm.json');
@@ -16,6 +17,17 @@ const RewarderMockJSON = require('../artifacts/contracts/mocks/RewarderMock.sol/
 /******************************************************************/
 /******************** evm_mint is not supported *******************/
 /******************************************************************/
+
+
+
+// Properly setting gas parameters
+dotenv.config();
+const env = process.env;
+if(env.L2_NETWORK == 'local'){
+  var overrides = { gasLimit: 800000, gasPrice: 0 };
+} else{
+  var overrides = {};
+}
 
 describe("MasterChefV2", function () {
   before(async function () {
@@ -33,63 +45,63 @@ describe("MasterChefV2", function () {
       [["lp", ERC20MockJSON, ["LP Token", "LPT", getBigNumber(10)]],
       ["dummy", ERC20MockJSON, ["Dummy", "DummyT", getBigNumber(10)]],
       ['chef', MasterChefJSON, [this.sushi.address, alice.address, getBigNumber(100), "0", "0"]]
-    ])
+    ], overrides)
 
     let transferTX, addTX, approveTX, depositTX, initTX
-    transferTX = await this.sushi.transferOwnership(this.chef.address)
+    transferTX = await this.sushi.transferOwnership(this.chef.address, overrides)
     await transferTX.wait()
-    addTX = await this.chef.add(100, this.lp.address, true)
+    addTX = await this.chef.add(100, this.lp.address, true, overrides)
     await addTX.wait()
-    addTX = await this.chef.add(100, this.dummy.address, true)
+    addTX = await this.chef.add(100, this.dummy.address, true, overrides)
     await addTX.wait()
-    approveTX = await this.lp.approve(this.chef.address, getBigNumber(10))
+    approveTX = await this.lp.approve(this.chef.address, getBigNumber(10), overrides)
     await approveTX.wait()
-    depositTX = await this.chef.deposit(0, getBigNumber(10))
+    depositTX = await this.chef.deposit(0, getBigNumber(10), overrides)
     await depositTX.wait()
 
     await deploy(this, [
         ['chef2', MasterChefV2JSON, [this.chef.address, this.sushi.address, 1]],
         ["rlp", ERC20MockJSON, ["LP", "rLPT", getBigNumber(10)]],
         ["r", ERC20MockJSON, ["Reward", "RewardT", getBigNumber(100000)]],
-    ])
-    await deploy(this, [["rewarder", RewarderMockJSON, [getBigNumber(1), this.r.address, this.chef2.address]]])
-    approveTX = await this.dummy.approve(this.chef2.address, getBigNumber(10))
+    ], overrides)
+    await deploy(this, [["rewarder", RewarderMockJSON, [getBigNumber(1), this.r.address, this.chef2.address]]], overrides)
+    approveTX = await this.dummy.approve(this.chef2.address, getBigNumber(10), overrides)
     await approveTX.wait()
-    initTX = await this.chef2.init(this.dummy.address)
+    initTX = await this.chef2.init(this.dummy.address, overrides)
     await initTX.wait()
-    transferTX = await this.rlp.transfer(alice.address, getBigNumber(1))
+    transferTX = await this.rlp.transfer(alice.address, getBigNumber(1), overrides)
     await transferTX.wait()
   })
 
   describe("Init", function () {
     it("Balance of dummyToken should be 0 after init(), repeated execution should fail", async function () {
-      const initTX = await this.chef2.init(this.dummy.address)
+      const initTX = await this.chef2.init(this.dummy.address, overrides)
       await expect(initTX.wait()).to.be.eventually.rejected;
     })
   })
 
   describe("PoolLength", function () {
     it("PoolLength should execute", async function () {
-      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address, overrides)
       await addTX.wait()
-      expect((await this.chef2.poolLength())).to.be.equal(1);
+      expect((await this.chef2.poolLength(overrides))).to.be.equal(1);
     })
   })
 
   describe("Set", function() {
     it("Should emit event LogSetPool", async function () {
-      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address, overrides)
       await addTX.wait()
-      await expect(this.chef2.set(0, 10, this.dummy.address, false))
+      await expect(this.chef2.set(0, 10, this.dummy.address, false, overrides))
             .to.emit(this.chef2, "LogSetPool")
             .withArgs(0, 10, this.rewarder.address, false)
-      await expect(this.chef2.set(0, 10, this.dummy.address, true))
+      await expect(this.chef2.set(0, 10, this.dummy.address, true, overrides))
             .to.emit(this.chef2, "LogSetPool")
             .withArgs(0, 10, this.dummy.address, true)
       })
 
     it("Should revert if invalid pool", async function () {
-      const setTX = await this.chef2.set(0, 10, this.rewarder.address, false)
+      const setTX = await this.chef2.set(0, 10, this.rewarder.address, false, overrides)
       await expect(setTX.wait()).to.be.eventually.rejected;
     })
   })
@@ -124,9 +136,9 @@ describe("MasterChefV2", function () {
 
   describe("MassUpdatePools", function () {
     it("Should call updatePool", async function () {
-      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address, overrides)
       await addTX.wait()
-      const massUpdatePoolsTX = await this.chef2.massUpdatePools([0])
+      const massUpdatePoolsTX = await this.chef2.massUpdatePools([0], overrides)
       await massUpdatePoolsTX.wait()
       //expect('updatePool').to.be.calledOnContract(); //not suported by heardhat
       //expect('updatePool').to.be.calledOnContractWith(0); //not suported by heardhat
@@ -134,14 +146,14 @@ describe("MasterChefV2", function () {
     })
 
     it("Updating invalid pools should fail", async function () {
-      const massUpdatePoolsTX = await this.chef2.set(0, 10, this.rewarder.address, false)
+      const massUpdatePoolsTX = await this.chef2.set(0, 10, this.rewarder.address, false, overrides)
       await expect(massUpdatePoolsTX.wait()).to.be.eventually.rejected;
     })
 })
 
   describe("Add", function () {
     it("Should add pool with reward token multiplier", async function () {
-      await expect(this.chef2.add(10, this.rlp.address, this.rewarder.address))
+      await expect(this.chef2.add(10, this.rlp.address, this.rewarder.address, overrides))
             .to.emit(this.chef2, "LogPoolAddition")
             .withArgs(0, 10, this.rlp.address, this.rewarder.address)
       })
@@ -179,26 +191,26 @@ describe("MasterChefV2", function () {
 
   describe("Deposit", function () {
     it("Depositing 0 amount", async function () {
-      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address, overrides)
       await addTX.wait()
-      const approveTX = await this.rlp.approve(this.chef2.address, getBigNumber(10))
+      const approveTX = await this.rlp.approve(this.chef2.address, getBigNumber(10), overrides)
       await approveTX.wait()
-      await expect(this.chef2.deposit(0, getBigNumber(0), bob.address))
+      await expect(this.chef2.deposit(0, getBigNumber(0), bob.address, overrides))
             .to.emit(this.chef2, "Deposit")
             .withArgs(bob.address, 0, 0, bob.address)
     })
 
     it("Depositing into non-existent pool should fail", async function () {
-        const depositTX = await this.chef2.deposit(1001, getBigNumber(0), alice.address)
+        const depositTX = await this.chef2.deposit(1001, getBigNumber(0), alice.address, overrides)
         await expect(depositTX.wait()).to.be.eventually.rejected;
     })
   })
 
   describe("Withdraw", function () {
     it("Withdraw 0 amount", async function () {
-      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address, overrides)
       await addTX.wait()
-      await expect(this.chef2.withdraw(0, getBigNumber(0), bob.address))
+      await expect(this.chef2.withdraw(0, getBigNumber(0), bob.address, overrides))
             .to.emit(this.chef2, "Withdraw")
             .withArgs(bob.address, 0, 0, bob.address)
     })
@@ -245,16 +257,16 @@ describe("MasterChefV2", function () {
   describe("EmergencyWithdraw", function() {
     it("Should emit event EmergencyWithdraw", async function () {
       let transferTX, addTX, approveTX, depositTX
-      transferTX = await this.r.transfer(this.rewarder.address, getBigNumber(100000))
+      transferTX = await this.r.transfer(this.rewarder.address, getBigNumber(100000), overrides)
       await transferTX.wait()
-      addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
+      addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address, overrides)
       await addTX.wait()
-      approveTX = await this.rlp.approve(this.chef2.address, getBigNumber(10))
+      approveTX = await this.rlp.approve(this.chef2.address, getBigNumber(10), overrides)
       await approveTX.wait()
-      depositTX = await this.chef2.deposit(0, getBigNumber(1), alice.address)
+      depositTX = await this.chef2.deposit(0, getBigNumber(1), alice.address, overrides)
       await depositTX.wait()
       //await this.chef2.emergencyWithdraw(0, this.alice.address)
-      await expect(this.chef2.connect(alice).emergencyWithdraw(0, alice.address))
+      await expect(this.chef2.connect(alice).emergencyWithdraw(0, alice.addres, overrides))
       .to.emit(this.chef2, "EmergencyWithdraw")
       .withArgs(alice.address, 0, getBigNumber(1), alice.address)
     })
