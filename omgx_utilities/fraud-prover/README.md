@@ -2,17 +2,15 @@
 
 Contains an executable fraud prover. This repo allows you to:
 
-1. Generate a fraud prover Docker
-2. Run that docker and the associated L2 in Verifier mode, pointed at a local OMGX.
-3. Inject fraudulant state roots to debug the currently non-operational fraud-prover.
+1. Generate a `fraud-prover` docker image
+2. Run that docker and the associated L2 in Verifier mode, pointed at a local system.
+3. Inject fraudulant state roots to debug/improve the `fraud-prover`.
 
 ## 1. FIRST TERMINAL WINDOW: Building & Running a local system with Verifier and Fraud Prover
 
-Make sure dependencies are installed and everything is built - just run `yarn` and `yarn build` in the top directory  (/optimsm). Then spin up the entire system with the L2, the Verifier, and the Fraud Prover:
+**Open a terminal window** and make sure dependencies are installed and everything is built - just run `yarn` and `yarn build` in the top directory (`/optimsm`). Then spin up the entire system:
 
 ```bash
-# the V clears various volumes so you start in a defined state
-# docker-compose up --scale verifier=1 --build -V
 
 cd ops
 
@@ -20,13 +18,13 @@ cd ops
 docker-compose -f docker-compose-fraud.yml build
 
 # this configures the Verifier and DTL to focus on L1, and also, sets the fraud_address
-docker-compose -f docker-compose-fraud.yml up
+docker-compose -f docker-compose-fraud.yml up -V
+
+# FYI - Need to re-init volumes so that the system comes up cleanly - this is what the `-V` does. 
 
 ```
 
-Need to delete containers so the sequencer and verifier come up cleanly 
-
-At this point you will have the *L1*, *L2*, the *Verifier*, the *data_transport_layer*, the *batch_submitter*, *the *message_relayer*, the *deployer*, and the *fraud_prover* all running and talking to one another. So far so good. 
+At this point you will have the *L1*, *L2*, the *Verifier*, the *data_transport_layer*, the *batch_submitter*, the *message_relayer*, the *deployer*, and the *fraud_prover* all running and talking to one another. So far so good. 
 
 ## 2. SECOND TERMINAL WINDOW: Injecting Fraudulant State Roots
 
@@ -34,15 +32,15 @@ At this point you will have the *L1*, *L2*, the *Verifier*, the *data_transport_
 
 ```bash
 
+
+cd omgx_utilities
+yarn
 yarn build:fraud
 yarn deploy 
 
 ```
 
-You will see a few contracts get deployed, and you will see *Mr. Fraud* transferring some funds to Alice. Running `yarn deploy` **does** trigger the batch submitter to inject a bad state root, but then, the system reverts, proably due to indexing and other issues. Note that hardhat needs a `.env` for the deploy - see the `example.env` for working settings.
-
-
-The `docker-compose-fraud.yaml` sets:
+You will see a contract compile for OVM and get deployed on the OVM. Running `yarn deploy` triggers the batch submitter to inject a bad state root - this takes place when *Mr. Fraud* transfers some funds to Alice. This is all set up via the `docker-compose-fraud.yaml`, which sets:
 
 ```bash
 
@@ -51,137 +49,24 @@ FRAUD_SUBMISSION_ADDRESS="0xbda5747bfd65f08deb54cb465eb87d40e51b197e"
 
 ```
 
-dtl_1                | {"level":30,"time":1623719431459,"method":"GET","url":"/eth/context/latest","elapsed":11,"msg":"Served HTTP Request"}
-l2geth_1             | DEBUG[06-15|01:10:31.460] Served eth_getBlockByNumber              conn=172.26.0.5:45548 reqid=469  t=123.337µs
-l2geth_1             | DEBUG[06-15|01:10:31.460] Served eth_getBlockByNumber              conn=172.26.0.5:45550 reqid=470  t=77.428µs
-l2geth_1             | DEBUG[06-15|01:10:31.460] Served eth_getBlockByNumber              conn=172.26.0.5:45546 reqid=468  t=210.339µs
-l2geth_1             | DEBUG[06-15|01:10:31.460] Served eth_getBlockByNumber              conn=172.26.0.5:45544 reqid=467  t=126.194µs
-batch_submitter_1    | {"level":40,"time":1623719431461,"name":"oe:batch_submitter:state_chain","txHash":"0xd6c33f7d39c9669647c547e101986d48463a02a31da19ec3533c2a02d2733742","fraudSubmissionAddress":"0xbda5747bfd65f08deb54cb465eb87d40e51b197e","msg":"Found transaction from fraud submission address"}
-batch_submitter_1    | {"level":40,"time":1623719431461,"name":"oe:batch_submitter:state_chain","txHash":"0xd6c33f7d39c9669647c547e101986d48463a02a31da19ec3533c2a02d2733742","fraudSubmissionAddress":"0xbda5747bfd65f08deb54cb465eb87d40e51b197e","msg":"Found transaction from fraud submission address"}
-batch_submitter_1    | {"level":40,"time":1623719431461,"name":"oe:batch_submitter:state_chain","txHash":"0x8b334259b12eeae20c3d4e72cfc5a1c5e93aa2318b31007b8488ae0b12370712","fraudSubmissionAddress":"no fraud","msg":"Found transaction from fraud submission address"}
-batch_submitter_1    | {"level":40,"time":1623719431462,"name":"oe:batch_submitter:state_chain","txHash":"0xeb752af6bccf284f6113a2401283a25933811fc12b71d1df5e4401bbd258a0c4","fraudSubmissionAddress":"no fraud","msg":"Found transaction from fraud submission address"}
-batch_submitter_1    | {"level":40,"time":1623719431462,"name":"oe:batch_submitter:state_chain","txHash":"0x76e59771ae287718bc662fee77644c707c6601a4a7442c5aabb033ec5b2761ca","fraudSubmissionAddress":"no fraud","msg":"Found transaction from fraud submission address"}
-batch_submitter_1    | {"level":30,"time":1623719431463,"name":"oe:batch_submitter:state_chain","batch":["0xc7d43d4ff9b361007772187bae8dc1f4ff4e467a82627a28d7f2b4d7fe02e8c9","0x713e6613035adf2503d9e2d52cbd8ad9669d05b898ceaf0364af57bbdb048fd5","0xed85b24ab978b118471baad8afd4d114d761f7a46bdf789e774d7b3c11ef08ba","0xbad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1"],"msg":"Generated state commitment batch"}
-batch_submitter_1    | {"level":30,"time":1623719431463,"name":"oe:batch_submitter:state_chain","batchSizeInBytes":228,"lastBatchSubmissionTimestamp":1623719428203,"currentTimestamp":1623719431463,"msg":"Sufficient batch size, proceeding with batch submission."}
-l1_chain_1           | eth_chainId
-l1_chain_1           | eth_getTransactionCount
-l1_chain_1           | eth_chainId
-l1_chain_1           | eth_gasPrice
-batch_submitter_1    | {"level":30,"time":1623719431472,"name":"oe:batch_submitter:state_chain","gasPrice":8000000000,"nonce":7,"contractAddr":"0x9A676e781A523b5d0C0e43731313A708CB607508","msg":"Submitting appendStateBatch transaction"}
-
-
-/*
-
-# HARDHAT ACCOUNTS:
-
-Standard usage - careful re. duplication
-
-# DEPLOYER_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-# SEQUENCER_PRIVATE_KEY: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
-# RELAYER_PRIVATE_KEY: "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
-
-# # a funded hardhat account used for the relayer - duplicates the one used for the Relayer.... 
-# L1_WALLET_KEY: "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
-
-Accounts used for the wallet, typically - should hcange those?
-
-# ETH1_ADDRESS_RESOLVER_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
-# TEST_PRIVATE_KEY_1=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-# TEST_PRIVATE_KEY_2=0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-# TEST_PRIVATE_KEY_3=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
-
-Acconut used to submit fraudulent state roots
-
-# Account #17: 0xbda5747bfd65f08deb54cb465eb87d40e51b197e (10000 ETH)
-# Private Key: 0x689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd
-
-yarn run v1.22.5
-$ hardhat node
-Started HTTP and WebSocket JSON-RPC server at http://0.0.0.0:8545/
-Accounts
-========
-Account #0: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (10000 ETH)
-Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-Account #1: 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 (10000 ETH)
-Private Key: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-Account #2: 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc (10000 ETH)
-Private Key: 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
-Account #3: 0x90f79bf6eb2c4f870365e785982e1f101e93b906 (10000 ETH)
-Private Key: 0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6
-Account #4: 0x15d34aaf54267db7d7c367839aaf71a00a2c6a65 (10000 ETH)
-Private Key: 0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a
-Account #5: 0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc (10000 ETH)
-Private Key: 0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba
-Account #6: 0x976ea74026e726554db657fa54763abd0c3a0aa9 (10000 ETH)
-Private Key: 0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e
-Account #7: 0x14dc79964da2c08b23698b3d3cc7ca32193d9955 (10000 ETH)
-Private Key: 0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356
-Account #8: 0x23618e81e3f5cdf7f54c3d65f7fbc0abf5b21e8f (10000 ETH)
-Private Key: 0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97
-Account #9: 0xa0ee7a142d267c1f36714e4a8f75612f20a79720 (10000 ETH)
-Private Key: 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
-Account #10: 0xbcd4042de499d14e55001ccbb24a551f3b954096 (10000 ETH)
-Private Key: 0xf214f2b2cd398c806f84e317254e0f0b801d0643303237d97a22a48e01628897
-Account #11: 0x71be63f3384f5fb98995898a86b02fb2426c5788 (10000 ETH)
-Private Key: 0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82
-Account #12: 0xfabb0ac9d68b0b445fb7357272ff202c5651694a (10000 ETH)
-Private Key: 0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1
-Account #13: 0x1cbd3b2770909d4e10f157cabc84c7264073c9ec (10000 ETH)
-Private Key: 0x47c99abed3324a2707c28affff1267e45918ec8c3f20b8aa892e8b065d2942dd
-Account #14: 0xdf3e18d64bc6a983f673ab319ccae4f1a57c7097 (10000 ETH)
-Private Key: 0xc526ee95bf44d8fc405a158bb884d9d1238d99f0612e9f33d006bb0789009aaa
-Account #15: 0xcd3b766ccdd6ae721141f452c550ca635964ce71 (10000 ETH)
-Private Key: 0x8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61
-Account #16: 0x2546bcd3c84621e976d8185a91a922ae77ecec30 (10000 ETH)
-Private Key: 0xea6c44ac03bff858b476bba40716402b03e41b8e97e276d1baec7c37d42484a0
-
-**Account #17: 0xbda5747bfd65f08deb54cb465eb87d40e51b197e (10000 ETH)
-Private Key: 0x689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd**
-
-Account #18: 0xdd2fd4581271e230360230f9337d5c0430bf44c0 (10000 ETH)
-
-*/
-
-
-
-Any transactions fron this wallet will cause the `batch_submitter` to submit a bad state root (`0xbad1bad1......`) instead of the correct state root. Normnally, the batch submitter only does this once, but we patched the batch submitter to allow many fraudulant transaction to be submitted. **Open a second terminal** and then:
+Any transactions from the `Fraud` wallet will cause the `batch_submitter` to submit a bad state root (`0xbad1bad1......`) instead of the correct state root.
 
 ```bash
-
-yarn build:fraud
-yarn deploy 
-
-```
-
-You will see a few contracts get deployed, and you will see *Mr. Fraud* transferring some funds to Alice. Running `yarn deploy` **does** trigger the batch submitter to inject a bad state root, but then, the system reverts, proably due to indexing and other issues. Note that hardhat needs a `.env` for the deploy - see the `example.env` for working settings.
-
-```bash
-#expected terminal output
-
-  System setup
-L1ERC20 deployed to: 0x196A1b2750D9d39ECcC7667455DdF1b8d5D65696
-L2DepositedERC20 deployed to: 0x3e4CFaa8730092552d9425575E49bB542e329981
-L1ERC20Gateway deployed to: 0x60ba97F7cE0CD19Df71bAd0C3BE9400541f6548E
-L2 ERC20 initialized: 0x2b4793dfe3a8241d776cacd604904c30601f7a895debc59ff66bef1b187d3899
- Bob Depositing L1 ERC20 to L2...
- On L1, Bob has: BigNumber { _hex: '0x204fce5e3e25026110000000', _isBigNumber: true }
- On L2, Bob has: BigNumber { _hex: '0x00', _isBigNumber: true }
- On L1, Bob now has: BigNumber { _hex: '0x204fce561c79f51cfb680000', _isBigNumber: true }
- On L2, Bob now has: BigNumber { _hex: '0x0821ab0d4414980000', _isBigNumber: true }
-    ✓ Bob Approve and Deposit ERC20 from L1 to L2 (5233ms)
-    ✓ should transfer ERC20 token to Alice and Fraud (4166ms)
- On L2, Alice has: 10000000000000000000
- On L2, Fraud has: 10000000000000000000
- On L2, Alice now has: 7000000000000000000
- On L2, Fraud now has: 13000000000000000000
-    ✓ should transfer ERC20 token from Alice to Fraud (4119ms)
- On L2, Bob has: 130000000000000000000
- On L2, Fraud has: 13000000000000000000
- On L2, Bob now has: 131000000000000000000
- On L2, Fraud now has: 12000000000000000000
-    ✓ should transfer ERC20 token from Fraud to Bob and commit fraud (4123ms)
-
-```
+batch_submitter_1    | 
+{"level":40,"time":1624654055526,"name":"oe:batch_submitter:state_chain",
+"from":"0xbDA5747bFD65F08deb54cb465eB87D40e51B197E",
+"fraudSubmissionAddress":"0xbda5747bfd65f08deb54cb465eb87d40e51b197e",
+"msg":"Found transaction; FSA set to"}
+batch_submitter_1    | 
+{"level":40,"time":1624654055526,"name":"oe:batch_submitter:state_chain",
+"txHash":"0xe4c19a37b005c18a9d70a47d79a5fb5e5c26b5de0cde34ce355a6ba693964e12",
+"fraudSubmissionAddress":"0xbda5747bfd65f08deb54cb465eb87d40e51b197e",
+"msg":"Found transaction from fraud submission address"}
+batch_submitter_1    | 
+{"level":40,"time":1624654055528,"name":"oe:batch_submitter:state_chain",
+"from":"0xFABB0ac9d68B0B445fB7357272Ff202C5651694a",
+"fraudSubmissionAddress":"no fraud","msg":"Found transaction; FSA set to"}
+````
 
 ## 3. THIRD TERMINAL WINDOW: Running a local Fraud Prover for rapid debugging purposes
 
@@ -466,3 +351,79 @@ RUN ln -s /opt/fraud-prover/exec/run.js /usr/local/bin/
 ENTRYPOINT ["/opt/wait-for-l1-and-l2.sh", "run.js"]
 
 ```
+
+
+
+
+
+/*
+
+# HARDHAT ACCOUNTS:
+
+Standard usage - careful re. duplication
+
+# DEPLOYER_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+# SEQUENCER_PRIVATE_KEY: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+# RELAYER_PRIVATE_KEY: "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
+
+# # a funded hardhat account used for the relayer - duplicates the one used for the Relayer.... 
+# L1_WALLET_KEY: "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
+
+Accounts used for the wallet, typically - should hcange those?
+
+# ETH1_ADDRESS_RESOLVER_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
+# TEST_PRIVATE_KEY_1=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+# TEST_PRIVATE_KEY_2=0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+# TEST_PRIVATE_KEY_3=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
+
+Acconut used to submit fraudulent state roots
+
+# Account #17: 0xbda5747bfd65f08deb54cb465eb87d40e51b197e (10000 ETH)
+# Private Key: 0x689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd
+
+yarn run v1.22.5
+$ hardhat node
+Started HTTP and WebSocket JSON-RPC server at http://0.0.0.0:8545/
+Accounts
+========
+Account #0: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (10000 ETH)
+Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+Account #1: 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 (10000 ETH)
+Private Key: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+Account #2: 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc (10000 ETH)
+Private Key: 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
+Account #3: 0x90f79bf6eb2c4f870365e785982e1f101e93b906 (10000 ETH)
+Private Key: 0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6
+Account #4: 0x15d34aaf54267db7d7c367839aaf71a00a2c6a65 (10000 ETH)
+Private Key: 0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a
+Account #5: 0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc (10000 ETH)
+Private Key: 0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba
+Account #6: 0x976ea74026e726554db657fa54763abd0c3a0aa9 (10000 ETH)
+Private Key: 0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e
+Account #7: 0x14dc79964da2c08b23698b3d3cc7ca32193d9955 (10000 ETH)
+Private Key: 0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356
+Account #8: 0x23618e81e3f5cdf7f54c3d65f7fbc0abf5b21e8f (10000 ETH)
+Private Key: 0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97
+Account #9: 0xa0ee7a142d267c1f36714e4a8f75612f20a79720 (10000 ETH)
+Private Key: 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
+Account #10: 0xbcd4042de499d14e55001ccbb24a551f3b954096 (10000 ETH)
+Private Key: 0xf214f2b2cd398c806f84e317254e0f0b801d0643303237d97a22a48e01628897
+Account #11: 0x71be63f3384f5fb98995898a86b02fb2426c5788 (10000 ETH)
+Private Key: 0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82
+Account #12: 0xfabb0ac9d68b0b445fb7357272ff202c5651694a (10000 ETH)
+Private Key: 0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1
+Account #13: 0x1cbd3b2770909d4e10f157cabc84c7264073c9ec (10000 ETH)
+Private Key: 0x47c99abed3324a2707c28affff1267e45918ec8c3f20b8aa892e8b065d2942dd
+Account #14: 0xdf3e18d64bc6a983f673ab319ccae4f1a57c7097 (10000 ETH)
+Private Key: 0xc526ee95bf44d8fc405a158bb884d9d1238d99f0612e9f33d006bb0789009aaa
+Account #15: 0xcd3b766ccdd6ae721141f452c550ca635964ce71 (10000 ETH)
+Private Key: 0x8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61
+Account #16: 0x2546bcd3c84621e976d8185a91a922ae77ecec30 (10000 ETH)
+Private Key: 0xea6c44ac03bff858b476bba40716402b03e41b8e97e276d1baec7c37d42484a0
+
+**Account #17: 0xbda5747bfd65f08deb54cb465eb87d40e51b197e (10000 ETH)
+Private Key: 0x689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd**
+
+Account #18: 0xdd2fd4581271e230360230f9337d5c0430bf44c0 (10000 ETH)
+
+*/
