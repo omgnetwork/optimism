@@ -1,89 +1,74 @@
-/* eslint @typescript-eslint/no-var-requires: 0 */
+// /* eslint @typescript-eslint/no-var-requires: 0 */
 
-import { injectL2Context } from '@eth-optimism/core-utils'
-import {
-  getContractInterface,
-  getContractFactory,
-} from '@eth-optimism/contracts'
-import { Contract, Wallet, constants, providers, BigNumber } from 'ethers'
+// import { injectL2Context } from '@eth-optimism/core-utils'
 
-require('dotenv').config()
+// import {
+//   getContractInterface,
+//   getContractFactory,
+// } from '@eth-optimism/contracts'
 
-export const GWEI = BigNumber.from(0)
+// import { Contract, Wallet, constants, providers, BigNumber } from 'ethers'
 
-// The hardhat instance
-//const l1HttpPort = 9545
-export const l1Provider = new providers.JsonRpcProvider(
-  process.env.L1_NODE_WEB3_URL
-)
-export const l2Provider = new providers.JsonRpcProvider(
-  process.env.L2_NODE_WEB3_URL
-)
-// export const l2Provider = injectL2Context(l2P)
+// import { ethers, network } from 'hardhat'
 
-// An account for testing which is funded on L1
-export const bobl1Wallet = new Wallet(
-  process.env.TEST_PRIVATE_KEY_1,
-  l1Provider
-)
-export const bobl2Wallet = bobl1Wallet.connect(l2Provider)
+// require('dotenv').config()
 
-// Another test user with some eth
-export const alicel1Wallet = new Wallet(process.env.TEST_PRIVATE_KEY_2).connect(
-  l1Provider
-)
-export const alicel2Wallet = new Wallet(process.env.TEST_PRIVATE_KEY_2).connect(
-  l2Provider
-)
+// export const GWEI = BigNumber.from(0)
 
-// Any transactions from this wallet will trigger a fake state root
-export const fraudl1Wallet = new Wallet(process.env.FRAUD_PRIVATE_KEY).connect(
-  l1Provider
-)
-export const fraudl2Wallet = new Wallet(process.env.FRAUD_PRIVATE_KEY).connect(
-  l2Provider
-)
+// // The hardhat instance
+// //const l1HttpPort = 9545
+// export const l1Provider = new providers.JsonRpcProvider(process.env.L1_NODE_WEB3_URL)
+// export const l2Provider = new providers.JsonRpcProvider(process.env.L2_NODE_WEB3_URL)
+// // export const l2Provider = injectL2Context(l2P)
 
-// Predeploys
-export const PROXY_SEQUENCER_ENTRYPOINT_ADDRESS =
-  '0x4200000000000000000000000000000000000004'
-export const OVM_ETH_ADDRESS = '0x4200000000000000000000000000000000000006'
-export const Proxy__OVM_L2CrossDomainMessenger =
-  '0x4200000000000000000000000000000000000007'
-export const addressManagerAddress = process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
+// export const bobl2Wallet   = new Wallet("0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", l2Provider)
+// export const alicel2Wallet = new Wallet("0x47c99abed3324a2707c28affff1267e45918ec8c3f20b8aa892e8b065d2942dd", l2Provider)
+// export const fraudl2Wallet = new Wallet("0x689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd", l2Provider)
 
-export const getAddressManager = (provider: any) => {
-  return getContractFactory('Lib_AddressManager')
-    .connect(provider)
-    .attach(addressManagerAddress) as any
-}
+// // Predeploys
+// export const PROXY_SEQUENCER_ENTRYPOINT_ADDRESS =
+//   '0x4200000000000000000000000000000000000004'
 
-// Gets the gateway using the proxy if available
-export const getL1ETHGateway = async (
-  wallet: Wallet,
-  AddressManager: Contract
-) => {
-  const l1GatewayInterface = getContractInterface('OVM_L1ETHGateway')
-  const ProxyGatewayAddress = await AddressManager.getAddress(
-    'Proxy__OVM_L1ETHGateway'
-  )
+// export const OVM_ETH_ADDRESS = 
+//   '0x4200000000000000000000000000000000000006'
 
-  const L1ETHGateway = new Contract(
-    ProxyGatewayAddress,
-    l1GatewayInterface as any,
-    wallet
-  )
+// export const Proxy__OVM_L2CrossDomainMessenger =
+//   '0x4200000000000000000000000000000000000007'
 
-  return L1ETHGateway
-}
+// export const addressManagerAddress = process.env.ADDRESS_MANAGER_ADDRESS
 
-export const getL2ETHGateway = (wallet: Wallet) => {
-  const OVM_ETH = new Contract(
-    OVM_ETH_ADDRESS,
-    getContractInterface('OVM_ETH') as any,
-    wallet
-  )
-  return OVM_ETH
-}
+// export const getAddressManager = (provider: any) => {
+//   return getContractFactory('Lib_AddressManager')
+//     .connect(provider)
+//     .attach(addressManagerAddress) as any
+// }
 
-export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+// // // Gets the gateway using the proxy if available
+// // export const getL1ETHGateway = async (
+// //   wallet: Wallet,
+// //   AddressManager: Contract
+// // ) => {
+// //   const l1GatewayInterface = getContractInterface('OVM_L1ETHGateway')
+// //   const ProxyGatewayAddress = await AddressManager.getAddress(
+// //     'Proxy__OVM_L1ETHGateway'
+// //   )
+
+// //   const L1ETHGateway = new Contract(
+// //     ProxyGatewayAddress,
+// //     l1GatewayInterface as any,
+// //     wallet
+// //   )
+
+// //   return L1ETHGateway
+// // }
+
+// // export const getL2ETHGateway = (wallet: Wallet) => {
+// //   const OVM_ETH = new Contract(
+// //     OVM_ETH_ADDRESS,
+// //     getContractInterface('OVM_ETH') as any,
+// //     wallet
+// //   )
+// //   return OVM_ETH
+// // }
+
+// export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))

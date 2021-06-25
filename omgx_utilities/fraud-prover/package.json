@@ -1,6 +1,6 @@
 {
   "name": "@omgx/fraud-prover",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "Fraud Prover Service",
   "main": "dist/index",
@@ -15,10 +15,9 @@
     "lint": "yarn lint:fix && yarn lint:check",
     "lint:fix": "prettier --config .prettierrc.json --write \"{src,exec,test}/**/*.ts\"",
     "lint:check": "tslint --format stylish --project .",
-    "build:contracts": "hardhat compile",
     "build:contracts:ovm": "hardhat compile --network omgx",
-    "build:fraud": "yarn build:contracts && yarn build:contracts:ovm",
-    "deploy": "yarn build:contracts && yarn build:contracts:ovm && hardhat --network omgx test"
+    "build:fraud": "yarn build:contracts:ovm",
+    "deploy": "yarn build:contracts:ovm && hardhat --network omgx test"
   },
   "keywords": [
     "optimism",
@@ -33,25 +32,26 @@
     "url": "https://github.com/ethereum-optimism/optimism.git"
   },
   "dependencies": {
-    "@eth-optimism/common-ts": "^0.1.2",
-    "@eth-optimism/contracts": "^0.3.4",
-    "@eth-optimism/core-utils": "^0.4.4",
+    "@eth-optimism/common-ts": "^0.1.4",
+    "@eth-optimism/contracts": "^0.4.1",
+    "@eth-optimism/core-utils": "^0.4.6",
     "@eth-optimism/hardhat-ovm": "^0.2.2",
     "bcfg": "^0.1.6",
     "dotenv": "^8.2.0",
+    "hardhat": "^2.2.1",
+    "merkle-patricia-tree": "^4.2.0",
     "merkletreejs": "^0.2.18",
     "rlp": "^2.2.6",
-    "hardhat": "^2.2.1"
+    "sqlite3": "^5.0.2",
+    "typescript": "^4.3.2"
   },
   "devDependencies": {
-    "prettier": "^2.2.1",
-    "tslint": "^6.1.3",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-no-focused-test": "^0.5.0",
-    "tslint-plugin-prettier": "^2.3.0",
-    "merkle-patricia-tree": "^4.0.0",
+    "@ethersproject/abstract-provider": "^5.0.9",
+    "@ethersproject/providers": "^5.0.21",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "chai": "^4.3.0",
     "ethereumjs-util": "^7.0.5",
-    "chai": "^4.2.0"
+    "ethers": "^5.0.31",
+    "mocha": "^8.3.0"
   }
 }
