@@ -373,8 +373,7 @@ export const run = async () => {
   )
 
   const stateBatchSubmitter = new StateBatchSubmitter(
-    sequencerSigner,
-    //proposerSigner,
+    proposerSigner,
     l2Provider,
     requiredEnvVars.MIN_L1_TX_SIZE,
     requiredEnvVars.MAX_L1_TX_SIZE,
