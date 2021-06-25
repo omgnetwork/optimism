@@ -11,19 +11,38 @@ Contains an executable fraud prover. This repo allows you to:
 Make sure dependencies are installed and everything is built - just run `yarn` and `yarn build` in the top directory  (/optimsm). Then spin up the entire system with the L2, the Verifier, and the Fraud Prover:
 
 ```bash
-
 # the V clears various volumes so you start in a defined state
-docker-compose up --scale verifier=1 --build -V
+# docker-compose up --scale verifier=1 --build -V
+
+cd ops
+
+# build all the needed services
+docker-compose -f docker-compose-fraud.yml build
+
+# this configures the Verifier and DTL to focus on L1, and also, sets the fraud_address
+docker-compose -f docker-compose-fraud.yml up
 
 ```
 
-need to delete containers so the sequencer and verifier come up cleanly 
+Need to delete containers so the sequencer and verifier come up cleanly 
 
 At this point you will have the *L1*, *L2*, the *Verifier*, the *data_transport_layer*, the *batch_submitter*, *the *message_relayer*, the *deployer*, and the *fraud_prover* all running and talking to one another. So far so good. 
 
 ## 2. SECOND TERMINAL WINDOW: Injecting Fraudulant State Roots
 
-The `docker-compose.yaml` sets:
+**Open a second terminal** and then:
+
+```bash
+
+yarn build:fraud
+yarn deploy 
+
+```
+
+You will see a few contracts get deployed, and you will see *Mr. Fraud* transferring some funds to Alice. Running `yarn deploy` **does** trigger the batch submitter to inject a bad state root, but then, the system reverts, proably due to indexing and other issues. Note that hardhat needs a `.env` for the deploy - see the `example.env` for working settings.
+
+
+The `docker-compose-fraud.yaml` sets:
 
 ```bash
 
