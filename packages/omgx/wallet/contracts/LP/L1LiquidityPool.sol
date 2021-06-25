@@ -105,15 +105,15 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
     event ClientDepositL1(
         address sender,
         uint256 receivedAmount,
-        uint256 userRewardFee,
-        uint256 ownerRewardFee,
-        uint256 totalFee,
         address tokenAddress
     );
 
     event ClientPayL1(
         address sender,
         uint256 amount,
+        uint256 userRewardFee,
+        uint256 ownerRewardFee,
+        uint256 totalFee,
         address tokenAddress
     );
 
@@ -200,7 +200,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
         onlyOwner()
     {
         // use with caution, can register only once
-        PoolInfo storage pool = poolInfo[_l2TokenAddress];
+        PoolInfo storage pool = poolInfo[_l1TokenAddress];
         // l2 token address equal to zero, then pair is not registered.
         require(pool.l2TokenAddress == address(0), "Token Address Already Registered");
         poolInfo[_l1TokenAddress] =
@@ -329,25 +329,16 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
 
         require(pool.l2TokenAddress != address(0), "Token Address Not Register");
 
-        //Augment the pool size for this ERC20
-        uint256 userRewardFee = (_amount.mul(userRewardFeeRate)).div(1000);
-        uint256 ownerRewardFee = (_amount.mul(ownerRewardFeeRate)).div(1000);
-        uint256 totalFee = userRewardFee.add(ownerRewardFee);
-        uint256 receivedAmount = _amount.sub(totalFee);
-
         // transfer funds if users deposit ERC20
         if (_tokenAddress != address(0)) {
             IERC20(_tokenAddress).safeTransferFrom(msg.sender, address(this), _amount);
         }
 
-        pool.accUserReward = pool.accUserReward.add(userRewardFee);
-        pool.accOwnerReward = pool.accOwnerReward.add(ownerRewardFee);
-
         // Construct calldata for L1LiquidityPool.depositToFinalize(_to, receivedAmount)
         bytes memory data = abi.encodeWithSelector(
             iL2LiquidityPool.clientPayL2.selector,
             msg.sender,
-            receivedAmount,
+            _amount,
             pool.l2TokenAddress
         );
 
@@ -360,10 +351,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
 
         emit ClientDepositL1(
             msg.sender,
-            receivedAmount,
-            userRewardFee,
-            ownerRewardFee,
-            totalFee,
+            _amount,
             _tokenAddress
         );
     }
@@ -514,13 +502,21 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
         onlyFromCrossDomainAccount(address(L2LiquidityPoolAddress))
     {   
         bool replyNeeded = false;
-        
+
+        PoolInfo storage pool = poolInfo[_tokenAddress];
+        uint256 userRewardFee = (_amount.mul(userRewardFeeRate)).div(1000);
+        uint256 ownerRewardFee = (_amount.mul(ownerRewardFeeRate)).div(1000);
+        uint256 totalFee = userRewardFee.add(ownerRewardFee);
+        uint256 receivedAmount = _amount.sub(totalFee);
+
         if (_tokenAddress != address(0)) {
             //IERC20(_tokenAddress).safeTransfer(_to, _amount);
-            if (_amount > IERC20(_tokenAddress).balanceOf(address(this))) {
+            if (receivedAmount > IERC20(_tokenAddress).balanceOf(address(this))) {
                 replyNeeded = true;
             } else {
-                IERC20(_tokenAddress).safeTransfer(_to, _amount);
+                pool.accUserReward = pool.accUserReward.add(userRewardFee);
+                pool.accOwnerReward = pool.accOwnerReward.add(ownerRewardFee);
+                IERC20(_tokenAddress).safeTransfer(_to, receivedAmount);
             }
         } else {
             // //this is ETH
@@ -528,13 +524,15 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
             // //_to.transfer(_amount); UNSAFE
             // (bool sent,) = _to.call{gas: SAFE_GAS_STIPEND, value: _amount}("");
             // require(sent, "Failed to send Ether");
-            if (_amount > address(this).balance) {
+            if (receivedAmount > address(this).balance) {
                  replyNeeded = true;
              } else {
+                pool.accUserReward = pool.accUserReward.add(userRewardFee);
+                pool.accOwnerReward = pool.accOwnerReward.add(ownerRewardFee);
                  //this is ETH
                  // balances[address(0)] = balances[address(0)].sub(_amount);
                  //_to.transfer(_amount); UNSAFE
-                 (bool sent,) = _to.call{gas: SAFE_GAS_STIPEND, value: _amount}("");
+                 (bool sent,) = _to.call{gas: SAFE_GAS_STIPEND, value: receivedAmount}("");
                  require(sent, "Failed to send Ether");
              }
          }
@@ -556,7 +554,10 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
          } else {
              emit ClientPayL1(
              _to,
-             _amount,
+             receivedAmount,
+             userRewardFee,
+             ownerRewardFee,
+             totalFee,
              _tokenAddress
              );
          }
