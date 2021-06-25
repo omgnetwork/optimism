@@ -2,10 +2,14 @@ FROM ethereumoptimism/builder:latest
 
 WORKDIR /optimism
 COPY packages/omgx/wallet/package.json ./packages/omgx/wallet/package.json
+COPY packages/omgx/message-relayer-fast/package.json ./packages/omgx/message-relayer-fast/package.json
 COPY ./packages/omgx ./packages/omgx
 
 COPY ./patches ./patches
 RUN yarn
+
+WORKDIR /optimism/packages/omgx/message-relayer-fast
+RUN yarn build
 
 WORKDIR /optimism/packages/omgx/wallet
 RUN yarn build

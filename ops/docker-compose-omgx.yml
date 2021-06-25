@@ -17,7 +17,6 @@ services:
     ports:
       # expose the service to the host for integration testing
       - ${L1CHAIN_HTTP_PORT:-9545}:8545
-
   deployer:
     depends_on:
       - l1_chain
@@ -40,7 +39,6 @@ services:
     ports:
       # expose the service to the host for getting the contract addrs
       - ${DEPLOYER_PORT:-8080}:8081
-
   dtl:
     depends_on:
       - l1_chain
@@ -66,7 +64,6 @@ services:
       DATA_TRANSPORT_LAYER__SYNC_FROM_L2: 'true'
     ports:
       - ${DTL_PORT:-7878}:7878
-
   l2geth:
     depends_on:
       - l1_chain
@@ -92,7 +89,6 @@ services:
     ports:
       - ${L2GETH_HTTP_PORT:-8545}:8545
       - ${L2GETH_WS_PORT:-8546}:8546
-
   relayer:
     depends_on:
       - l1_chain
@@ -107,9 +103,9 @@ services:
       L1_NODE_WEB3_URL: http://l1_chain:8545
       L2_NODE_WEB3_URL: http://l2geth:8545
       URL: http://deployer:8081/addresses.json
-      WHITELIST_ENDPOINT: https://api-message-relayer.rinkeby.omgx.network/get.whitelist
+      WHITELIST_ENDPOINT: http://bl-wl:9000/whitelist.json
       # a funded hardhat account
-      L1_WALLET_KEY: "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
+      L1_WALLET_KEY: "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
       RETRIES: 60
       POLLING_INTERVAL: 1500
       GET_LOGS_INTERVAL: 500
@@ -130,7 +126,7 @@ services:
       L2_NODE_WEB3_URL: http://l2geth:8545
       URL: http://deployer:8081/addresses.json
       SEQUENCER_PRIVATE_KEY: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
-
+      PROPOSER_PRIVATE_KEY: "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
   verifier:
     depends_on:
       - l1_chain
@@ -161,7 +157,6 @@ services:
     ports:
       - ${VERIFIER_HTTP_PORT:-8547}:8545
       - ${VERIFIER_WS_PORT:-8548}:8546
-
   integration_tests:
     image: omgx/integration-tests:latest
     deploy:
