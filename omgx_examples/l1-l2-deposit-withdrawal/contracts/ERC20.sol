@@ -48,7 +48,6 @@ contract ERC20 {
         uint256 _initialSupply,
         string memory _name
     )
-        public
     {
         balances[msg.sender] = _initialSupply;
         totalSupply = _initialSupply;

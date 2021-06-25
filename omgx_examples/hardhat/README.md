@@ -7,8 +7,14 @@ First, spin up a local system as usual:
 ```bash
 $ cd optimism
 $ yarn clean
+$ yarn
 $ yarn build
 $ cd ops
+```
+Make sure you have the docker app running!
+
+
+```
 $ docker-compose down -v
 $ docker-compose build
 $ docker-compose up
@@ -17,19 +23,34 @@ $ docker-compose up
 Second, run:
 
 ```bash
+$ yarn compile
 $ yarn compile:ovm
 ```
 
-This will compile the contract
+This will compile the contracts
 
 ```
-Compiling 1 file with 0.7.6
-contracts/ERC20.sol:47:5: Warning: Visibility for constructor is ignored. If you want the contract to be non-deployable, making it "abstract" is sufficient.
-    constructor(
-    ^ (Relevant source part starts here and spans across multiple lines).
+yarn run v1.22.10
+$ hardhat compile
+Compiling 7 files with 0.7.6
+contracts/L2DepositedERC20.sol:44:9: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+        address _to,
+        ^---------^
 
 Compilation finished successfully
-✨  Done in 8.90s.
+✨  Done in 3.58s.
+```
+
+```
+yarn run v1.22.10
+$ hardhat compile --network optimism
+Compiling 7 files with 0.7.6
+contracts/L2DepositedERC20.sol:44:9: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+        address _to,
+        ^---------^
+
+Compilation finished successfully
+✨  Done in 6.26s.
 
 ```
 
@@ -44,27 +65,30 @@ yarn run v1.22.10
 $ hardhat test --network optimism
 
 
-  ERC20
-    ✓ should have a name
-    ✓ should have a total supply equal to the initial supply (42ms)
-    ✓ should give the initial supply to the creator's address
-    transfer(...)
-      ✓ should revert when the sender does not have enough balance (96ms)
-      ✓ should succeed when the sender has enough balance (235ms)
-    transferFrom(...)
-      ✓ should revert when the sender does not have enough of an allowance (38ms)
-      ✓ should succeed when the owner has enough balance and the sender has a large enough allowance (181ms)
+  L1 <> L2 Deposit and Withdrawal
+    Initialization and initial balances
+      ✓ should initialize L2 ERC20 (128ms)
+      ✓ should have initial L1 balance of 1234 and initial L2 balance of 0 (44ms)
+    L1 to L2 deposit
+      ✓ should approve 1234 tokens for ERC20 gateway (150ms)
+      ✓ should deposit 1234 tokens into L2 ERC20 (1747ms)
+      ✓ should relay deposit message to L2 (4081ms)
+      ✓ should have changed L1 balance to 0 and L2 balance to 1234 (38ms)
+    L2 to L1 withdrawal
+      ✓ should withdraw tokens back to L1 ERC20 and relay the message (273ms)
+      ✓ should relay withdrawal message to L1 (8074ms)
+      ✓ should have changed L1 balance back to 1234 and L2 balance back to 0
 
 
-  7 passing (3s)
+  9 passing (15s)
 
-✨  Done in 5.48s.
+✨  Done in 17.82s.
 ```
 
 Finally, deploy the contract, 
 
 ```
-$ deploy:ovm
+$ yarn deploy:ovm
 ```
 
 ```bash
@@ -139,7 +163,7 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 Finally, deploy the contract, 
 
 ```
-$ deploy:ovm
+$ yarn deploy:omgx
 ```
 
 ```bash
