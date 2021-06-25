@@ -338,7 +338,6 @@ export const run = async () => {
 
   const sequencerAddress = await sequencerSigner.getAddress()
   const proposerAddress = await proposerSigner.getAddress()
-  
   // If the sequencer & proposer are the same, use a single wallet
   if (sequencerAddress === proposerAddress) {
     proposerSigner = sequencerSigner
