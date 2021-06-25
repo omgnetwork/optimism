@@ -21,17 +21,6 @@ export class DockerComposeNetwork {
   constructor(private readonly services: ServiceNames[] = DEFAULT_SERVICES) {}
 
   async up(options?: compose.IDockerComposeOptions) {
-    // we need this bit to determine if omgx stack is running or optimism!
-    // start
-    const ps = await compose.ps({ cwd: OPS_DIRECTORY, config: ['docker-compose-omgx.yml', 'docker-compose-omgx-services.yml'] } )
-    ps.data.services.forEach(function (service) {
-      if(service.name.includes('wallet_deployer')) {
-        console.log("OMGX detected, attaching configs.")
-        options = {...options, ...{ config: ['docker-compose-omgx.yml', 'docker-compose-omgx-services.yml'] } }
-      }
-    })
-    // end
-    
     const out = await compose.upMany(this.services, {
       cwd: OPS_DIRECTORY,
       ...options,
