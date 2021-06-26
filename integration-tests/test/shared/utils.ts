@@ -7,7 +7,9 @@ import {
   getContractInterface,
   predeploys,
 } from '@eth-optimism/contracts'
+
 import { injectL2Context, remove0x, Watcher } from '@eth-optimism/core-utils'
+
 import {
   Contract,
   Wallet,
@@ -17,6 +19,7 @@ import {
   BigNumber,
   utils,
 } from 'ethers'
+
 import { cleanEnv, str, num } from 'envalid'
 
 export const GWEI = BigNumber.from(1e9)

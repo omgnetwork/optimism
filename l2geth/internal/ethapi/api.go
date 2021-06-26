@@ -572,29 +572,48 @@ type HeaderMeta struct {
 }
 
 func (s *PublicBlockChainAPI) GetStateDiff(ctx context.Context, blockNrOrHash rpc.BlockNumberOrHash) (diffdb.Diff, error) {
+	
 	_, header, err := s.b.StateAndHeaderByNumberOrHash(ctx, blockNrOrHash)
+	
+    log.Debug("GetStateDiff Inside", "header", header, "err", err)
+
 	if err != nil {
 		return nil, err
 	}
-	return s.b.GetDiff(new(big.Int).Add(header.Number, big.NewInt(1)))
+    
+    //Why are we adding one to the header.Number?
+    //it's wrong anyway? Data are indexed by L1 block, not L2 header.Number
+	return s.b.GetDiff( new(big.Int).Add(header.Number, big.NewInt(1)) )
 }
 
 // GetStateDiffProof returns the Merkle-proofs corresponding to all the accounts and
 // storage slots which were touched for a given block number or hash.
-func (s *PublicBlockChainAPI) GetStateDiffProof(ctx context.Context, blockNrOrHash rpc.BlockNumberOrHash) (*StateDiffProof, error) {
+func (s *PublicBlockChainAPI) GetStateDiffProofCT(ctx context.Context, blockNrOrHash rpc.BlockNumberOrHash, blockNr int64) (*StateDiffProof, error) {
+	
 	state, header, err := s.b.StateAndHeaderByNumberOrHash(ctx, blockNrOrHash)
+	
+	log.Debug("GetStateDiffProofCP", "state", state, "header", header, "err", err, "blockNr", blockNr)
+
 	if state == nil || header == nil || err != nil {
+		log.Debug("GetStateDiff - returning early ", "err", err)
 		return nil, err
 	}
 
+    //log.Debug("trying to get GetStateDiff", "blockNrOrHash", blockNrOrHash)
+	
 	// get the changed accounts for this block
-	diffs, err := s.GetStateDiff(ctx, blockNrOrHash)
+	//diffs, err := s.GetStateDiff(ctx, blockNrOrHash)
+    diffs, err := s.b.GetDiff( big.NewInt(blockNr) )
+
+	log.Debug("GetStateDiff", "blockNrOrHash", blockNrOrHash, "diffs", diffs, "err", err)
+	
 	if err != nil {
 		return nil, err
 	}
 
 	// for each changed account, get their proof
 	var accounts []AccountResult
+	
 	for address, keys := range diffs {
 		// need to convert the hashes to strings, we could maybe refactor getProof
 		// alternatively
@@ -603,6 +622,114 @@ func (s *PublicBlockChainAPI) GetStateDiffProof(ctx context.Context, blockNrOrHa
 			keyStrings[i] = key.Key.String()
 		}
 
+        log.Debug("range diffs", "address", address, "keyStrings", keyStrings, "blockNrOrHash", blockNrOrHash)
+		
+		// get the proofs
+		res, err := s.GetProof(ctx, address, keyStrings, blockNrOrHash)
+		if err != nil {
+			return nil, err
+		}
+
+		accounts = append(accounts, *res)
+	}
+
+	// add some metadata
+	stateDiffProof := &StateDiffProof{
+		Header: &HeaderMeta{
+			Number:    header.Number,
+			Hash:      header.Hash(),
+			StateRoot: header.Root,
+			Timestamp: header.Time,
+		},
+		Accounts: accounts,
+	}
+
+	return stateDiffProof, state.Error()
+}
+
+
+// GetStateDiffProof returns the Merkle-proofs corresponding to all the accounts and
+// storage slots which were touched for a given block number or hash.
+func (s *PublicBlockChainAPI) GetStateDiffProof(ctx context.Context, blockNrOrHash rpc.BlockNumberOrHash) (*StateDiffProof, error) {
+	
+	state, header, err := s.b.StateAndHeaderByNumberOrHash(ctx, blockNrOrHash)
+	
+	log.Debug("GetStateDiffProof", "state", state, "header", header, "err", err)
+
+// l2geth_1             | DEBUG[06-15|03:11:28.137] GetStateDiffProof                        
+ //  state="&{
+	// db:0xc0004febc0 
+	// trie:0xc0040262d0 
+	// diffdb:0xc000621f50 
+	// stateObjects:map[] 
+	// stateObjectsPending:map[] 
+	// stateObjectsDirty:map[] 
+	// dbErr:<nil> 
+	// refund:0 
+	// thash:[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] 
+	// bhash:[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] 
+	// txIndex:0 
+	// logs:map[] 
+	// logSize:0 
+	// preimages:map[] 
+	// journal:0xc00383ad00 
+	// validRevisions:[] 
+	// nextRevisionId:0 
+	// AccountReads:0s 
+	// AccountHashes:0s 
+	// AccountUpdates:0s 
+	// AccountCommits:0s 
+	// StorageReads:0s 
+	// StorageHashes:0s 
+	// StorageUpdates:0s 
+	// StorageCommits:0s}" 
+ //  header="&{
+ //  	ParentHash:[49 241 235 130 244 54 173 215 246 148 108 159 0 250 76 200 201 148 17 10 159 150 255 230 177 130 54 234 198 213 172 171] 
+ //     UncleHash:[29 204 77 232 222 199 93 122 171 133 181 103 182 204 212 26 211 18 69 27 148 138 116 19 240 161 66 253 64 212 147 71] 
+ //     Coinbase:[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] 
+ //     Root:[80 20 133 164 141 35 40 255 92 248 89 114 62 26 60 164 133 124 0 178 46 26 79 3 248 51 120 44 103 135 35 139] 
+ //     TxHash:[110 169 88 113 16 161 104 52 41 89 229 63 116 72 249 99 242 7 191 1 149 127 227 58 3 5 94 46 70 40 63 117] 
+ //     ReceiptHash:[68 167 48 233 96 112 194 136 91 87 60 164 34 203 52 191 92 209 210 185 79 163 155 235 215 139 38 33 74 178 72 236] 
+ //     Bloom:[0 0 0 0 0 0 0 0 0 4 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 16 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 8 128 0 0 0 0 0 0 0 16 0 0 0 0 0 0 0 0 0 0 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 128 0 0 128 0 0 0 0 0 0 0 0 0 16 0 0 0 0 0 0 0 0 64 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 32 0 0 0 0 0 0 0 0 0 0 0 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 32 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 64 0 0 0] 
+ //     Difficulty:+2 
+ //     Number:+7 
+ //     GasLimit:9000000 
+ //     GasUsed:960445 
+ //     Time:1623726690 
+ //     Extra:[217 131 1 9 10 132 103 101 116 104 137 103 111 49 46 49 53 46 49 51 133 108 105 110 117 120 0 0 0 0 0 0 200 176 92 171 136 27 78 21 239 155 89 120 53 190 166 94 91 85 197 211 1 100 182 194 50 152 243 27 64 180 8 220 55 234 7 160 85 70 9 140 152 214 216 67 36 92 163 52 29 127 30 142 99 96 226 148 15 237 65 33 120 160 249 135 1] 
+ //  	MixDigest:[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] 
+ //  	Nonce:[0 0 0 0 0 0 0 0]}" 
+ //  err=nil
+
+	if state == nil || header == nil || err != nil {
+		//log.Debug("GetStateDiff - returning early ", "err", err)
+		return nil, err
+	}
+
+    //log.Debug("trying to get GetStateDiff", "blockNrOrHash", blockNrOrHash)
+	
+	// get the changed accounts for this block
+	diffs, err := s.GetStateDiff(ctx, blockNrOrHash)
+
+	//log.Debug("GetStateDiff", "blockNrOrHash", blockNrOrHash, "diffs", diffs, "err", err)
+	
+	if err != nil {
+		return nil, err
+	}
+
+	// for each changed account, get their proof
+	var accounts []AccountResult
+	
+	for address, keys := range diffs {
+		// need to convert the hashes to strings, we could maybe refactor getProof
+		// alternatively
+		keyStrings := make([]string, len(keys))
+		for i, key := range keys {
+			keyStrings[i] = key.Key.String()
+		}
+
+        //log.Debug("range diffs", "address", address, "keyStrings", keyStrings, "blockNrOrHash", blockNrOrHash)
+		
 		// get the proofs
 		res, err := s.GetProof(ctx, address, keyStrings, blockNrOrHash)
 		if err != nil {
@@ -2219,3 +2346,4 @@ func (s *PublicNetAPI) PeerCount() hexutil.Uint {
 func (s *PublicNetAPI) Version() string {
 	return fmt.Sprintf("%d", s.networkVersion)
 }
+

@@ -19,7 +19,6 @@ docker-compose -f docker-compose-fraud.yml build
 
 # this configures the Verifier and DTL to focus on L1, and also, sets the fraud_address
 docker-compose -f docker-compose-fraud.yml up -V
-
 # FYI - Need to re-init volumes so that the system comes up cleanly - this is what the `-V` does. 
 
 ```
@@ -79,35 +78,24 @@ yarn start
 
 ```
 
-## CURRENTLY BROKEN AT One of three places - Lib_MerkleTree.sol, OVM_FraudVerifier.sol, or "makeStateTrie for this proof"
+## CURRENTLY BROKEN AT 
 
-If you do all of the above, while using the standard contracts, you will get stuck at *EITHER*:
-
-```bash
-# this is in Lib_MerkleTree.sol
-
-require(
-  _siblings.length == _ceilLog2(_totalLeaves),
-  "Lib_MerkleTree: Total siblings does not correctly correspond to total leaves."
-);
-
-```
-
-*OR* you will get through that but then revert at `VM Exception while processing transaction: revert Pre-state root global index must equal to the transaction root global index`:
+If you do all of the above, while using the standard contracts, you will get stuck at:
 
 ```bash
-# this is in OVM_FraudVerifier.sol
 
-line 134
-
-require (
-    _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index,
-    "Pre-state root global index must equal to the transaction root global index."
-);
+{"level":30,"time":1624664781920,"stateTransitionerAddress":"0x4F57F9239eFCBf43e5920f579D03B3849C588396","msg":"State transitioner"}
+{"level":30,"time":1624664781920,"msg":"Loading the corresponding state manager..."}
+{"level":30,"time":1624664781930,"stateManagerAddress":"0xf0D7de80A1C242fA3C738b083C422d65c6c7ABF1","msg":"stateManagerAddress..."}
+{"level":30,"time":1624664781964,"stateManagerAddress":"0xf0D7de80A1C242fA3C738b083C422d65c6c7ABF1","msg":"State manager"}
+{"level":30,"time":1624664781974,"msg":"Fraud proof is now in the PRE_EXECUTION phase."}
+{"level":30,"time":1624664781974,"msg":"PEP: Proving account states..."}
+{"level":30,"time":1624664781974,"address":"0x4200000000000000000000000000000000000005","msg":"Attempting to prove account state"}
+{"level":30,"time":1624664781990,"msg":"Need to deploy a copy of the account first..."}
+{"level":30,"time":1624664782049,"msg":"Deployed a copy of the account, attempting proof..."}
+{"level":30,"time":1624664782049,"msg":"OVM_StateTransitioner.proveContractState..."}
 
 ```
-
-*OR* you will get stuck at `_makeStateTrie for this proof`. There are also assorted and sundy other ways for this to fail, mostly relating to out of bounds access to various arrays, most notably, in the transactions.
 
 ## 4. Generating the Fraud Prover Docker 
 

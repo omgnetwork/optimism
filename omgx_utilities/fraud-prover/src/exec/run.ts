@@ -18,9 +18,7 @@ const main = async () => {
   const env = process.env
 
   const L1_NODE_WEB3_URL = config.str('l1-node-web3-url', env.L1_NODE_WEB3_URL)
-  const L2_NODE_WEB3_URL = config.str('l2-node-web3-url', env.L2_NODE_WEB3_URL)
   const VERIFIER_WEB3_URL = config.str('verifier-web3-url', env.VERIFIER_WEB3_URL)
-  const REPLICA_WEB3_URL = config.str('replica-web3-url', env.REPLICA_WEB3_URL)
 
   const ADDRESS_MANAGER_ADDRESS = config.str(
     'address-manager-address',
@@ -42,10 +40,6 @@ const main = async () => {
     'get-logs-interval',
     parseInt(env.GET_LOGS_INTERVAL, 10) || 2000
   )
-  const L2_BLOCK_OFFSET = config.uint(
-    'l2-start-offset',
-    parseInt(env.L2_BLOCK_OFFSET  || '1', 10)
-  )
   const L1_START_OFFSET = config.uint(
     'l1-start-offset',
     parseInt(env.L1_START_OFFSET  || '1', 10)
@@ -62,26 +56,17 @@ const main = async () => {
     'l1-block-finality',
     parseInt(env.L1_BLOCK_FINALITY, 10) || 0
   )
-
   if (!ADDRESS_MANAGER_ADDRESS) {
     throw new Error('Must pass ADDRESS_MANAGER_ADDRESS')
   }
   if (!L1_NODE_WEB3_URL) {
     throw new Error('Must pass L1_NODE_WEB3_URL')
   }
-  if (!L2_NODE_WEB3_URL) {
-    throw new Error('Must pass L2_NODE_WEB3_URL')
-  }
   if (!VERIFIER_WEB3_URL) {
     throw new Error('Must pass VERIFIER_WEB3_URL')
   }
 
-  console.log('The L2 block offset is:', L2_BLOCK_OFFSET)
-
-  const l2SProvider = new providers.JsonRpcProvider(L2_NODE_WEB3_URL)
-  const l2VProvider = new providers.JsonRpcProvider(VERIFIER_WEB3_URL)
-  const l2RProvider = new providers.JsonRpcProvider(REPLICA_WEB3_URL)
-  
+  const l2Provider = new providers.JsonRpcProvider(VERIFIER_WEB3_URL)  
   const l1Provider  = new providers.JsonRpcProvider(L1_NODE_WEB3_URL)
 
   let wallet: Wallet
@@ -96,16 +81,13 @@ const main = async () => {
 
   const service = new FraudProverService({
     l1RpcProvider: l1Provider,
-    l2SRpcProvider: l2SProvider,
-    l2VRpcProvider: l2VProvider,
-    l2RRpcProvider: l2RProvider,
+    l2RpcProvider: l2Provider,
     addressManagerAddress: ADDRESS_MANAGER_ADDRESS,
     l1Wallet: wallet,
     deployGasLimit: RELAY_GAS_LIMIT, //should reconcile naming
     runGasLimit: RUN_GAS_LIMIT, //should reconcile naming
     fromL2TransactionIndex: FROM_L2_TRANSACTION_INDEX,
     pollingInterval: POLLING_INTERVAL,
-    l2BlockOffset: L2_BLOCK_OFFSET,
     l1StartOffset: L1_START_OFFSET,
     l1BlockFinality: L1_BLOCK_FINALITY,
     //getLogsInterval: GET_LOGS_INTERVAL,

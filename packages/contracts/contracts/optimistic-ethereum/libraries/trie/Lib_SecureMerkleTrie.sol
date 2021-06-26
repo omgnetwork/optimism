@@ -33,7 +33,8 @@ library Lib_SecureMerkleTrie {
         bytes32 _root
     )
         internal
-        pure
+        view
+        //pure
         returns (
             bool _verified
         )
@@ -60,7 +61,8 @@ library Lib_SecureMerkleTrie {
         bytes32 _root
     )
         internal
-        pure
+        view
+        //pure
         returns (
             bytes32 _updatedRoot
         )
@@ -83,7 +85,8 @@ library Lib_SecureMerkleTrie {
         bytes32 _root
     )
         internal
-        pure
+        view
+        //pure
         returns (
             bool _exists,
             bytes memory _value
@@ -104,7 +107,8 @@ library Lib_SecureMerkleTrie {
         bytes memory _value
     )
         internal
-        pure
+        view
+        //pure
         returns (
             bytes32 _updatedRoot
         )
@@ -127,7 +131,8 @@ library Lib_SecureMerkleTrie {
         bytes memory _key
     )
         private
-        pure
+        view
+        //pure
         returns (
             bytes memory _secureKey
         )

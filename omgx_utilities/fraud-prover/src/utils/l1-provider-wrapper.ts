@@ -74,7 +74,6 @@ export class L1ProviderWrapper {
     index: number
   ): Promise<StateRootBatchHeader> {
     
-    //console.log('STEP0:1:1 getStateRootBatchHeader for index', index)
     console.log("Step 2: getStateRootBatchHeader for ", index)
 
     const event = await this._getStateRootBatchEvent(index)
@@ -84,7 +83,7 @@ export class L1ProviderWrapper {
       return
     }
 
-    console.log('STEP0:1:3 All good - we have an event')
+    console.log('Step 7: All good - we have an event')
 
     return {
       batchIndex: event.args._batchIndex,
@@ -316,7 +315,6 @@ export class L1ProviderWrapper {
       console.log('Generating element:', i)
       if (i < transactions.length) {
         // TODO: FIX - more info would have been great
-        // fix what???
         const tx = transactions[i]
         elements.push(
           `0x01${BigNumber.from(tx.transaction.timestamp)
@@ -347,7 +345,7 @@ export class L1ProviderWrapper {
     const tree = new MerkleTree(leaves, hash)
 
     //this seems to be off by one sometimes?????
-    const batchIndex = index - batchHeader.prevTotalElements.toNumber()// - 1 //I HAVE NO IDEA WHY - 1 IS NEEDED HERE? JTL
+    const batchIndex = index - batchHeader.prevTotalElements.toNumber() - 1 //I HAVE NO IDEA WHY - 1 IS NEEDED HERE? JTL
 
     console.log('leaves:', leaves)
     console.log('leaves batchindex?:', leaves[batchIndex])
