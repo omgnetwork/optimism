@@ -3,6 +3,11 @@ if ! [ -x "$(command -v yq)" ]; then
   echo 'Error: yq is not installed. brew install yq' >&2
   exit 1
 fi
+
+# Build dependencies
+yarn
+yarn build
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 ORIGINAL_DOCKERFILE="docker-compose.yml"
 DOCKERFILE=docker-compose-omgx.yml
@@ -24,8 +29,6 @@ if [[ $BUILD == 1 ]]; then
     docker image tag ethereumoptimism/message-relayer omgx/message-relayer:latest
     docker image tag ethereumoptimism/batch-submitter omgx/batch-submitter:latest
     docker image tag ethereumoptimism/integration-tests omgx/integration-tests:latest
-    yarn
-    yarn build
     docker build ../ --file $DIR/docker/Dockerfile.omgx_monorepo --tag omgx/wallet_builder:latest
     docker build ../ --file $DIR/docker/Dockerfile.wallet_deployer --tag omgx/wallet_deployer:latest
 else
