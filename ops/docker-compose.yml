@@ -90,6 +90,9 @@ services:
       # connecting to the DTL
       ROLLUP_CLIENT_HTTP: http://dtl:7878
       ETH1_CTC_DEPLOYMENT_HEIGHT: 8
+      # chain ID
+      CHAIN_ID: 28
+      NETWORK_ID: 28
       RETRIES: 60
     ports:
       - ${L2GETH_HTTP_PORT:-8545}:8545
