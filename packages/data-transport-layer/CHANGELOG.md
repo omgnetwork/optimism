@@ -1,11 +1,5 @@
 # data transport layer
 
-## 0.4.2
-
-### Patch Changes
-
-- 70b8ae84: Attach correct TransportDB object to method handler
-
 ## 0.4.1
 
 ### Patch Changes

@@ -59,13 +59,13 @@ services:
     # set the rest of the env vars for the network whcih do not
     # depend on the docker-compose setup
     environment:
-        # used for setting the address manager address
-        URL: http://deployer:8081/addresses.json
-        # connect to the 2 layers
-        DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT: http://l1_chain:8545
-        DATA_TRANSPORT_LAYER__L2_RPC_ENDPOINT: http://l2geth:8545
-        DATA_TRANSPORT_LAYER__SYNC_FROM_L2: 'true'
-        DATA_TRANSPORT_LAYER__L2_CHAIN_ID: 28
+      # used for setting the address manager address
+      URL: http://deployer:8081/addresses.json
+      # connect to the 2 layers
+      DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT: http://l1_chain:8545
+      DATA_TRANSPORT_LAYER__L2_RPC_ENDPOINT: http://l2geth:8545
+      DATA_TRANSPORT_LAYER__SYNC_FROM_L2: 'true'
+      DATA_TRANSPORT_LAYER__L2_CHAIN_ID: 28
     ports:
       - ${DTL_PORT:-7878}:7878
 
