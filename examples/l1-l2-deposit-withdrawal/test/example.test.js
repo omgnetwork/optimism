@@ -110,7 +110,7 @@ describe(`L1 <> L2 Deposit and Withdrawal`, () => {
         L2_ERC20.address,
         1234,
         L2GasLimit,
-        ethers.utils.formatBytes32String('0'),
+        ethers.utils.formatBytes32String('0')
         { gasPrice: 0 }
       )
       await l1Tx1.wait()
