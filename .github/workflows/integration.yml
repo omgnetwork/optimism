@@ -36,9 +36,9 @@ jobs:
         working-directory: ./ops
         run: ./scripts/build-ci.sh
 
-      # - name: Bring the stack up
-      #   working-directory: ./ops
-      #   run: docker-compose -f docker-compose.yml up -d
+      - name: Bring the stack up
+        working-directory: ./ops
+        run: docker-compose up -d
 
       - name: Run the integration tests
         working-directory: ./ops

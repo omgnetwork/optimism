@@ -9,10 +9,7 @@ function build_dependencies() {
     yarn build
 }
 
-build_dependencies &&
-build_images &&
-
-docker-compose \
-up --no-build --detach
+build_images &
+build_dependencies &
 
 wait
