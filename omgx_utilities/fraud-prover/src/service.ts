@@ -66,11 +66,6 @@ interface FraudProverOptions {
   // Interval in seconds to wait between loops.
   pollingInterval?: number
 
-  // Number of blocks that L2 is "ahead" of transaction indices. Can happen if blocks are created
-  // on L2 after the genesis but before the first state commitment is published.
-  // l2BlockOffset?: number
-  // replaced by L2_GENESIS_BLOCK
-
   // L1 block to start querying events from. Recommended to set to the StateCommitmentChain deploy height
   l1StartOffset?: number
 
@@ -86,13 +81,13 @@ const optionSettings = {
   deployGasLimit: { default: 4_000_000 },
   runGasLimit: { default: 9_500_000 },
   fromL2TransactionIndex: { default: 0 },
-  //l2BlockOffset: { default: 1 },
   l1StartOffset: { default: 0 },
   l1BlockFinality: { default: 0 },
   getLogsInterval: { default: 2000 },
 }
 
 export class FraudProverService extends BaseService<FraudProverOptions> {
+  
   constructor(options: FraudProverOptions) {
     super('Fraud_Prover', options, optionSettings)
   }
@@ -105,9 +100,6 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     eventCache: ethers.Event[]
     Lib_AddressManager: Contract
     OVM_StateCommitmentChain: Contract
-    //OVM_L1CrossDomainMessenger: Contract
-    //OVM_L2CrossDomainMessenger: Contract
-    //OVM_L2ToL1MessagePasser: Contract
     l1Provider: L1ProviderWrapper
     l2Provider: L2ProviderWrapper
     OVM_CanonicalTransactionChain: Contract
@@ -490,8 +482,6 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
   /**
    * Finds the index of the next fraudulent state root.
    * @return Index of the next fraudulent state root, if any.
-   * This is just a _discovery_ function 
-   * Nothing fancy going on here....
    */
   private async _findNextFraudulentStateRoot(): Promise<number | undefined> {
     
@@ -509,10 +499,10 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
       
       this.logger.info("We have a batch to inspect", { nextBatch })
 
-      const nextBatchStateRoots = nextBatch.stateRoots; //await this.state.l1Provider.getBatchStateRoots(this.state.nextUnverifiedStateRoot)
+      //const nextBatchStateRoots = nextBatch.stateRoots;
       
       //we now pull all of them right away, in one go
-      console.log("Here are the L1 nextBatchStateRoots for this header:", nextBatchStateRoots )
+      console.log("Here are the L1 nextBatchStateRoots for this header:", nextBatch.stateRoots )
 
       for (let i = 0; i < nextBatch.header.batchSize.toNumber(); i++) {
         
@@ -520,7 +510,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
 
         console.log('Checking state root for mismatch', index)
 
-        const l1StateRoot = nextBatchStateRoots[i]
+        const l1StateRoot = nextBatch.stateRoots[i]
 
         const l2VStateRoot = await this.state.l2Provider.getStateRoot(
          index + L2_GENESIS_BLOCK
@@ -576,9 +566,13 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     const stateDiffProof: StateDiffProof =
       await this.state.l2Provider.getStateDiffProof(
         transactionIndex,
-        transactionProof.transaction.blockNumber - L2_GENESIS_BLOCK
+        transactionProof.transaction.blockNumber// - L2_GENESIS_BLOCK
       )
     
+    /**********************************************************************/
+    /* There is jitter here - sometimes needs -1, other times it does not */
+    /**********************************************************************/
+
     const stateTrie = await this._makeStateTrie(stateDiffProof)
     const storageTries = await this._makeAccountTries(stateDiffProof)
     
@@ -647,7 +641,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
   private async _makeStateTrie(proof: StateDiffProof): Promise<BaseTrie> {
     
     if (proof.accountStateProofs === null) {
-      this.logger.info('_makeStateTrie proof.accountStateProofs === null')
+      this.logger.info('proof.accountStateProofs === null; l2Provider.getStateDiffProof() failed again...')
       return
     }
 
@@ -1158,12 +1152,6 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     let var1 = transactionProof.transactionBatchHeader.prevTotalElements;
     let var2 = transactionProof.transactionProof.index;
 
-    //the contract checks for
-        //     require (
-        //     _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index,
-        //     "Pre-state root global index must equal to the transaction root global index."
-        // );
-
     if((var3.toNumber() + var4 + 1) == (var1.toNumber() + var2)) {
       console.log("PASS PASS PASS FraudVerifier Check: _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index")
     } else {
@@ -1171,38 +1159,6 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
       console.log("Sum2:", var3.toNumber() + var4)
       console.log("FAIL FAIL FAIL: FraudVerifier Check: _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index")
     }
-
-/*
-// pads 00s from left until the hex string is bytes32
-const padded = ethers.utils.hexZeroPad(shortHexString, 32)
-
-// pads 00s from left until the hex string is bytes32
-const padded = ethers.utils.hexZeroPad(shortHexString, 32)
-
-":{"err":{"reason":"incorrect data length","code":"INVALID_ARGUMENT","argument":null,"value":"0x01000000
-
-        bytes32 _preStateRoot,
-        Lib_OVMCodec.ChainBatchHeader memory _preStateRootBatchHeader,
-        Lib_OVMCodec.ChainInclusionProof memory _preStateRootProof,
-        Lib_OVMCodec.Transaction memory _transaction,
-        Lib_OVMCodec.TransactionChainElement memory _txChainElement,
-        Lib_OVMCodec.ChainBatchHeader memory _transactionBatchHeader,
-        Lib_OVMCodec.ChainInclusionProof memory _transactionProof
-
-
-preStateRootProof.stateRoot: 
-0x3038af868afd8375444ff6f2735ffcee37db2da1928ac446c0787669e952bd28
-0x48656c6c6f20576f726c64210000000000000000000000000000000000000000
-61dc9186345e05cc2ae53dc72af880a3b66e2fa7983feaa6254d1518540de50a
-*/
-
-    console.log("preStateRootProof.stateRoot:", preStateRootProof.stateRoot)
-    console.log("preStateRootProof.stateRoot:", remove0x(preStateRootProof.stateRoot))
-//toHexString(code)
-//remove0x
-
-console.log(transactionProof.transactionProof)
-//the transaction proof is totally messed up
 
     try {
       await (

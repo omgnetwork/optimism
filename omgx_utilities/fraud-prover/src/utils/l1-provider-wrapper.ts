@@ -17,8 +17,6 @@ import {
   toRpcHexString,
 } from '@eth-optimism/core-utils'
 
-//import { fromHexString, toHexString } from './hex-utils'
-
 const NUM_L2_GENESIS_BLOCKS = 1;
 
 export class L1ProviderWrapper {
@@ -82,7 +80,7 @@ export class L1ProviderWrapper {
   }
 
   public async getStateBatch(
-    height: number
+    index: number
   ): Promise<
     | {
         header: StateRootBatchHeader
@@ -91,10 +89,10 @@ export class L1ProviderWrapper {
     | undefined
   > {
     
-    console.log("Step 2: L1PW _getStateBatchHeader for height:", height)
+    //console.log("L1PW _getStateBatchHeader for height:", height)
     
     //the batch event for this state root
-    const event = await this.getStateBatchAppendedEventForIndex(height)
+    const event = await this.getStateBatchAppendedEventForIndex(index)
 
     if (event === undefined) {
       return undefined
@@ -155,68 +153,17 @@ export class L1ProviderWrapper {
     )
 
     const proof = tree.getProof(bufLeaves[index], index).map((element: any) => {
-      return toHexString(element.data)
+      return element.data//toHexString(element.data)
     })
 
     return proof
   }
 
-  private async _getStateRootBatchEvent(index: number): Promise<Event> {
-    const events = await this.findAllEvents(
-      this.OVM_StateCommitmentChain,
-      this.OVM_StateCommitmentChain.filters.StateBatchAppended()
-    )
-
-    if (events.length === 0) {
-      return
-    }
-
-    const matching = events.filter((event) => {
-      return (
-        event.args._prevTotalElements.toNumber() <= index &&
-        event.args._prevTotalElements.toNumber() +
-          event.args._batchSize.toNumber() >
-          index
-      )
-    })
-
-    const deletions = await this.findAllEvents(
-      this.OVM_StateCommitmentChain,
-      this.OVM_StateCommitmentChain.filters.StateBatchDeleted()
-    )
-
-    const results: ethers.Event[] = []
-    for (const event of matching) {
-      const wasDeleted = deletions.some((deletion) => {
-        return (
-          deletion.blockNumber > event.blockNumber &&
-          deletion.args._batchIndex.toNumber() ===
-            event.args._batchIndex.toNumber()
-        )
-      })
-
-      if (!wasDeleted) {
-        results.push(event)
-      }
-    }
-
-    if (results.length === 0) {
-      return
-    }
-
-    if (results.length > 2) {
-      throw new Error(
-        `Found more than one batch header for the same state root, this shouldn't happen.`
-      )
-    }
-
-    return results[results.length - 1]
-  }
-
   public async getStateRootBatchHeader(
     index: number
   ): Promise<StateRootBatchHeader> {
-    const event = await this._getStateRootBatchEvent(index)
+    
+    const event = await this.getStateBatchAppendedEventForIndex(index)
 
     if (!event) {
       return
@@ -231,8 +178,11 @@ export class L1ProviderWrapper {
     }
   }
 
-  public async getBatchStateRoots(index: number): Promise<string[]> {
-    const event = await this._getStateRootBatchEvent(index)
+  public async getBatchStateRoots(
+    index: number
+  ): Promise<string[]> {
+    
+    const event = await this.getStateBatchAppendedEventForIndex(index)
 
     if (!event) {
       return
@@ -255,38 +205,12 @@ export class L1ProviderWrapper {
   public async getStateRootBatchProof(
     index: number
   ): Promise<StateRootBatchProof> {
+
     const batchHeader = await this.getStateRootBatchHeader(index)
     const stateRoots = await this.getBatchStateRoots(index)
 
-    const elements = []
-    for (
-      let i = 0;
-      i < Math.pow(2, Math.ceil(Math.log2(stateRoots.length)));
-      i++
-    ) {
-      if (i < stateRoots.length) {
-        elements.push(stateRoots[i])
-      } else {
-        elements.push(ethers.utils.keccak256('0x' + '00'.repeat(32)))
-      }
-    }
-
-    const hash = (el: Buffer | string): Buffer => {
-      return Buffer.from(ethers.utils.keccak256(el).slice(2), 'hex')
-    }
-
-    // State roots aren't hashed since they're already bytes32
-    const leaves = elements.map((element) => {
-      return fromHexString(element)
-    })
-
-    const tree = new MerkleTree(leaves, hash)
     const batchIndex = index - batchHeader.prevTotalElements.toNumber()
-    const treeProof = tree
-      .getProof(leaves[batchIndex], batchIndex)
-      .map((element) => {
-        return element.data
-      })
+    const treeProof = this.getMerkleTreeProof(stateRoots,batchIndex)
 
     return {
       stateRoot: stateRoots[batchIndex],
@@ -335,60 +259,6 @@ export class L1ProviderWrapper {
     const transaction = await this.provider.getTransaction(
       event.transactionHash
     )
-
-/*
-export const decodeAppendSequencerBatch = (
-  b: string
-): AppendSequencerBatchParams => {
-  b = remove0x(b)
-
-  const shouldStartAtElement = b.slice(0, 10)
-  const totalElementsToAppend = b.slice(10, 16)
-  const contextHeader = b.slice(16, 22)
-  const contextCount = parseInt(contextHeader, 16)
-
-  let offset = 22
-  const contexts = []
-  for (let i = 0; i < contextCount; i++) {
-    const numSequencedTransactions = b.slice(offset, offset + 6)
-    offset += 6
-    const numSubsequentQueueTransactions = b.slice(offset, offset + 6)
-    offset += 6
-    const timestamp = b.slice(offset, offset + 10)
-    offset += 10
-    const blockNumber = b.slice(offset, offset + 10)
-    offset += 10
-    contexts.push({
-      numSequencedTransactions: parseInt(numSequencedTransactions, 16),
-      numSubsequentQueueTransactions: parseInt(
-        numSubsequentQueueTransactions,
-        16
-      ),
-      timestamp: parseInt(timestamp, 16),
-      blockNumber: parseInt(blockNumber, 16),
-    })
-  }
-
-  const transactions = []
-  for (const context of contexts) {
-    for (let i = 0; i < context.numSequencedTransactions; i++) {
-      const size = b.slice(offset, offset + 6)
-      offset += 6
-      const raw = b.slice(offset, offset + parseInt(size, 16) * 2)
-      transactions.push(add0x(raw))
-      offset += raw.length
-    }
-  }
-
-  return {
-    shouldStartAtElement: parseInt(shouldStartAtElement, 16),
-    totalElementsToAppend: parseInt(totalElementsToAppend, 16),
-    contexts,
-    transactions,
-  }
-}
-*/
-
 
     if ((event as any).isSequencerBatch) {
       
@@ -462,18 +332,14 @@ export const decodeAppendSequencerBatch = (
   public async getTransactionBatchProof(
     index: number
   ): Promise<TransactionBatchProof> {
+
     const batchHeader = await this.getTransactionBatchHeader(index)
     const transactions = await this.getBatchTransactions(index)
 
     const elements = []
-    for (
-      let i = 0;
-      i < Math.pow(2, Math.ceil(Math.log2(transactions.length)));
-      i++
-    ) {
-      if (i < transactions.length) {
-        // TODO: FIX
-        const tx = transactions[i]
+    for (let i = 0;i < transactions.length;i++)
+    {
+      const tx = transactions[i]
         elements.push(
           `0x01${BigNumber.from(tx.transaction.timestamp)
             .toHexString()
@@ -483,26 +349,10 @@ export const decodeAppendSequencerBatch = (
             .slice(2)
             .padStart(64, '0')}${tx.transaction.data.slice(2)}`
         )
-      } else {
-        elements.push('0x' + '00'.repeat(32))
-      }
     }
 
-    const hash = (el: Buffer | string): Buffer => {
-      return Buffer.from(ethers.utils.keccak256(el).slice(2), 'hex')
-    }
-
-    const leaves = elements.map((element) => {
-      return hash(element)
-    })
-
-    const tree = new MerkleTree(leaves, hash)
     const batchIndex = index - batchHeader.prevTotalElements.toNumber()
-    const treeProof = tree
-      .getProof(leaves[batchIndex], batchIndex)
-      .map((element) => {
-        return element.data
-      })
+    const treeProof = this.getMerkleTreeProof(elements,batchIndex)
 
     return {
       transaction: transactions[batchIndex].transaction,
@@ -518,6 +368,7 @@ export const decodeAppendSequencerBatch = (
   public async getStateRoot(index: number): Promise<string> {
     
     const stateRootBatchHeader = await this.getStateRootBatchHeader(index)
+    
     if (stateRootBatchHeader === undefined) {
       return
     }
@@ -531,37 +382,30 @@ export const decodeAppendSequencerBatch = (
 
   private async getStateBatchAppendedEventForIndex(index: number): Promise<Event> {
     
-    console.log("Step 3: L1PW getStateBatchAppendedEventForIndex for index:", index)
+    //console.log("L1PW getStateBatchAppendedEventForIndex for index:", index)
 
     const events = await this.findAllEvents(
       this.OVM_StateCommitmentChain,
       this.OVM_StateCommitmentChain.filters.StateBatchAppended()
     )
 
-    //a listing of everything with the StateBatchAppended events
-    //console.log('Step 4: L1PW all blocks in the OVM_StateCommitmentChain:', events)
-    //console.log('Number of blocks:', events.length)
-
     if (events.length === 0) {
-      console.log('Step 5: L1PW OVM_StateCommitmentChain is empty - returning')
+      console.log('L1PW OVM_StateCommitmentChain is empty - returning')
       return
     }
 
     //Great - we have some StateBatchAppended events
-    //so now, let's filter by index
     const matching = events.filter((event) => {
       //for each of the events, determine if it's relevant for this index
       const prevTotalElements = event.args._prevTotalElements.toNumber()
       const batchSize = event.args._batchSize.toNumber()
-      console.log("Range: min, max, index:", prevTotalElements, prevTotalElements + batchSize, index)  
-      //let's pick out the relevant ones
+      //console.log("Range: min, max, index:", prevTotalElements, prevTotalElements + batchSize, index)  
+      //pick out the relevant ones
       return (
           index >= prevTotalElements && 
           index < prevTotalElements + batchSize
       )
     })
-
-    //console.log('Step 6: L1PW candidate matching events:', matching)
 
     // at this point, we have the events matching OVM_StateCommitmentChain.filters.StateBatchAppended()
     // were some of those deleted? let's check

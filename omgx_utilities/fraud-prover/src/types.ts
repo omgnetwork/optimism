@@ -107,7 +107,7 @@ export interface FraudProofData {
   transactionProof: TransactionBatchProof
   preStateRootProof: StateRootBatchProof
   postStateRootProof: StateRootBatchProof
-
+  
   stateTrie: BaseTrie
   storageTries: {
     [address: string]: BaseTrie

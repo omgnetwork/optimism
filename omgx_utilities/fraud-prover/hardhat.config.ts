@@ -19,7 +19,7 @@ const config: HardhatUserConfig = {
         "0x689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd"
         //this last one evaluates to 
         //0xbDA5747bFD65F08deb54cb465eB87D40e51B197E
-        //which is set in the docer-compose as the fraud_submitter
+        //which is set in the docker-compose as the fraud_submitter
       ],
       // This sets the gas price to 0 for all transactions on L2. We do this
       // because account balances are not automatically initiated with an ETH
