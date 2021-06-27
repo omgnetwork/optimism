@@ -41,6 +41,41 @@ describe('Fraud Prover Testing System Setup', async () => {
       expect(balance.toString()).to.equal(INITIAL_SUPPLY.toString())
     })
 
+    it(`should transfer from Bob to Alice, triggering the batch submitter to submit a batch`, async () => {
+      //assuming it's configured correctly, of course. 
+
+      let transfer = await ERC20.transfer(
+        alice.address,
+        utils.parseEther('8'),
+        { gasLimit: 800000, gasPrice: 0 }
+      )
+      let receipt = await transfer.wait()
+
+      let balanceA = await ERC20.balanceOf(await alice.getAddress())      
+      expect(balanceA.toString()).to.equal(utils.parseEther('8').toString())
+
+      transfer = await ERC20.transfer(
+        alice.address,
+        utils.parseEther('8'),
+        { gasLimit: 800000, gasPrice: 0 }
+      )
+      receipt = await transfer.wait()
+
+      balanceA = await ERC20.balanceOf(await alice.getAddress())      
+      expect(balanceA.toString()).to.equal(utils.parseEther('16').toString())
+
+      transfer = await ERC20.transfer(
+        alice.address,
+        utils.parseEther('8'),
+        { gasLimit: 800000, gasPrice: 0 }
+      )
+      receipt = await transfer.wait()
+
+      balanceA = await ERC20.balanceOf(await alice.getAddress())      
+      expect(balanceA.toString()).to.equal(utils.parseEther('24').toString())
+
+    })
+
     it(`should transfer from Bob to Fraud, and from Fraud to Alice`, async () => {
       
       const transfer = await ERC20.transfer(

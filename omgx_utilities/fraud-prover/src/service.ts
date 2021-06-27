@@ -2,8 +2,10 @@
 import { Contract, Signer, ethers, Wallet, BigNumber, providers } from 'ethers'
 import * as rlp from 'rlp'
 import { MerkleTree } from 'merkletreejs'
+
 import { BaseTrie } from 'merkle-patricia-tree'
 import { BaseService } from '@eth-optimism/common-ts'
+
 import { loadContract, loadContractFromManager } from '@eth-optimism/contracts'
 
 const L2_GENESIS_BLOCK = 1
@@ -19,10 +21,16 @@ import {
   shuffle,
   toStrippedHexString,
   toBytes32,
-  toHexString,
-  fromHexString,
   sleep,
 } from './utils'
+
+//gradually move everything to core-utils
+import {
+  fromHexString,
+  remove0x,
+  toHexString,
+  toRpcHexString,
+} from '@eth-optimism/core-utils'
 
 import {
   StateDiffProof,
@@ -85,7 +93,6 @@ const optionSettings = {
 }
 
 export class FraudProverService extends BaseService<FraudProverOptions> {
-  
   constructor(options: FraudProverOptions) {
     super('Fraud_Prover', options, optionSettings)
   }
@@ -98,9 +105,9 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     eventCache: ethers.Event[]
     Lib_AddressManager: Contract
     OVM_StateCommitmentChain: Contract
-    OVM_L1CrossDomainMessenger: Contract
-    OVM_L2CrossDomainMessenger: Contract
-    OVM_L2ToL1MessagePasser: Contract
+    //OVM_L1CrossDomainMessenger: Contract
+    //OVM_L2CrossDomainMessenger: Contract
+    //OVM_L2ToL1MessagePasser: Contract
     l1Provider: L1ProviderWrapper
     l2Provider: L2ProviderWrapper
     OVM_CanonicalTransactionChain: Contract
@@ -165,7 +172,6 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
       this.options.addressManagerAddress,
       this.options.l1RpcProvider
     )
-
     this.logger.info('Connected to Lib_AddressManager', {
       address: this.state.Lib_AddressManager.address,
     })
@@ -266,8 +272,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
 
       try {
         
-        console.log("\nStep 0: Let's verify this state root:", this.state.nextUnverifiedStateRoot)
-        //this.logger.info('STEP 0: Looking for mismatched state roots...')
+        this.logger.info('Verifing state root:', {nextUnverifiedStateRoot: this.state.nextUnverifiedStateRoot})
 
         const fraudulentStateRootIndex = await this._findNextFraudulentStateRoot()
 
@@ -278,21 +283,15 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
           continue
         }
 
-        this.logger.info('Found a mismatched state root: index', {
-          index: fraudulentStateRootIndex,
+        this.logger.info('Found a mismatched state root', {
+          fraudulentStateRootIndex,
         })
 
-        this.logger.info('Pulling fraud proof data for this index...')
-
+        this.logger.info('Getting fraud proof data for this index')
         const proof = await this._getFraudProofData(fraudulentStateRootIndex)
 
-        this.logger.info('Initializing the fraud verification process...')
-        
-        // this.logger.info('The proof:', {
-        //   pre: proof.preStateRootProof,
-        //   tra: proof.transactionProof,
-        // })
-
+        this.logger.info('Step M4: Initializing fraud verification')
+       
         try {
           await this._initializeFraudVerification(
             proof.preStateRootProof,
@@ -309,11 +308,8 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         }
 
         this.logger.info('Loading fraud proof contracts...')
-
         const { OVM_StateTransitioner, OVM_StateManager } =
-          
           await this._getFraudProofContracts(
-            //await this.state.l1Provider.getStateRoot(fraudulentStateRootIndex),
             proof.preStateRootProof.stateRoot,
             proof.transactionProof.transaction
           )
@@ -335,52 +331,52 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
               fraudulentStateRootIndex
             )
 
-            // this.logger.info('PEP: Proving storage slot states...')
-            // await this._proveContractStorageStates(
-            //   OVM_StateTransitioner,
-            //   OVM_StateManager,
-            //   proof.stateDiffProof.accountStateProofs
-            // )
+            this.logger.info('PEP: Proving storage slot states...')
+            await this._proveContractStorageStates(
+              OVM_StateTransitioner,
+              OVM_StateManager,
+              proof.stateDiffProof.accountStateProofs
+            )
 
-          //   this.logger.info('Executing transaction...')
-          //   try {
-          //     await (
-          //       await OVM_StateTransitioner.applyTransaction(
-          //         proof.transactionProof.transaction,
-          //         {
-          //           gasLimit: this.options.runGasLimit,
-          //         }
-          //       )
-          //     ).wait()
-          //   } catch (err) {
-          //     await OVM_StateTransitioner.callStatic.applyTransaction(
-          //       proof.transactionProof.transaction,
-          //       {
-          //         gasLimit: this.options.runGasLimit,
-          //       }
-          //     )
-          //   }
+            this.logger.info('Executing transaction...')
+            try {
+              await (
+                await OVM_StateTransitioner.applyTransaction(
+                  proof.transactionProof.transaction,
+                  {
+                    gasLimit: this.options.runGasLimit,
+                  }
+                )
+              ).wait()
+            } catch (err) {
+              await OVM_StateTransitioner.callStatic.applyTransaction(
+                proof.transactionProof.transaction,
+                {
+                  gasLimit: this.options.runGasLimit,
+                }
+              )
+            }
 
-            this.logger.info('TEMP: Transaction successfully executed.')
+            this.logger.info('Transaction successfully executed.')
           } catch (err) {
-          //   if (
-          //     err
-          //       .toString()
-          //       .includes(
-          //         'Function must be called during the correct phase.'
-          //       ) ||
-          //     err
-          //       .toString()
-          //       .includes(
-          //         '46756e6374696f6e206d7573742062652063616c6c656420647572696e672074686520636f72726563742070686173652e'
-          //       )
-          //   ) {
-          //     this.logger.info(
-          //       'Phase was completed by someone else, moving on.'
-          //     )
-          //   } else {
-          //     throw err
-          //   }
+            if (
+              err
+                .toString()
+                .includes(
+                  'Function must be called during the correct phase.'
+                ) ||
+              err
+                .toString()
+                .includes(
+                  '46756e6374696f6e206d7573742062652063616c6c656420647572696e672074686520636f72726563742070686173652e'
+                )
+            ) {
+              this.logger.info(
+                'Phase was completed by someone else, moving on.'
+              )
+            } else {
+              throw err
+            }
           }
         }
 
@@ -391,62 +387,62 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         ) {
           this.logger.info('Fraud proof is now in the POST_EXECUTION phase.')
 
-          // try {
+          try {
 
-          //   this.logger.info('Committing storage slot state updates...')
-          //   await this._updateContractStorageStates(
-          //     OVM_StateTransitioner,
-          //     OVM_StateManager,
-          //     proof.stateDiffProof.accountStateProofs,
-          //     proof.storageTries
-          //   )
+            this.logger.info('Committing storage slot state updates...')
+            await this._updateContractStorageStates(
+              OVM_StateTransitioner,
+              OVM_StateManager,
+              proof.stateDiffProof.accountStateProofs,
+              proof.storageTries
+            )
 
-          //   this.logger.info('Committing account state updates...')
-          //   await this._updateAccountStates(
-          //     OVM_StateTransitioner,
-          //     OVM_StateManager,
-          //     proof.stateDiffProof.accountStateProofs,
-          //     proof.stateTrie
-          //   )
+            this.logger.info('Committing account state updates...')
+            await this._updateAccountStates(
+              OVM_StateTransitioner,
+              OVM_StateManager,
+              proof.stateDiffProof.accountStateProofs,
+              proof.stateTrie
+            )
 
-          //   this.logger.info('Completing the state transition...')
-          //   try {
-          //     await (await OVM_StateTransitioner.completeTransition()).wait()
-          //   } catch (err) {
-          //     try {
-          //       await OVM_StateTransitioner.callStatic.completeTransition()
-          //     } catch (err) {
-          //       if (err.toString().includes('Reverted 0x')) {
-          //         this.logger.info(
-          //           'State transition was completed by someone else, moving on.'
-          //         )
-          //       } else {
-          //         throw err
-          //       }
-          //     }
-          //   }
+            this.logger.info('Completing the state transition...')
+            try {
+              await (await OVM_StateTransitioner.completeTransition()).wait()
+            } catch (err) {
+              try {
+                await OVM_StateTransitioner.callStatic.completeTransition()
+              } catch (err) {
+                if (err.toString().includes('Reverted 0x')) {
+                  this.logger.info(
+                    'State transition was completed by someone else, moving on.'
+                  )
+                } else {
+                  throw err
+                }
+              }
+            }
 
-          //   this.logger.info('State transition completed.')
-          // } catch (err) {
-          //   if (
-          //     err
-          //       .toString()
-          //       .includes(
-          //         'Function must be called during the correct phase.'
-          //       ) ||
-          //     err
-          //       .toString()
-          //       .includes(
-          //         '46756e6374696f6e206d7573742062652063616c6c656420647572696e672074686520636f72726563742070686173652e'
-          //       )
-          //   ) {
-          //     this.logger.info(
-          //       'Phase was completed by someone else, moving on.'
-          //     )
-          //   } else {
-          //     throw err
-          //   }
-          // }
+            this.logger.info('State transition completed.')
+          } catch (err) {
+            if (
+              err
+                .toString()
+                .includes(
+                  'Function must be called during the correct phase.'
+                ) ||
+              err
+                .toString()
+                .includes(
+                  '46756e6374696f6e206d7573742062652063616c6c656420647572696e672074686520636f72726563742070686173652e'
+                )
+            ) {
+              this.logger.info(
+                'Phase was completed by someone else, moving on.'
+              )
+            } else {
+              throw err
+            }
+          }
         }
 
         // COMPLETE phase.
@@ -456,28 +452,28 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         ) {
           this.logger.info('Fraud proof is now in the COMPLETE phase.')
 
-          // try {
+          try {
 
-          //   this.logger.info('Attempting to finalize the fraud proof...')
+            this.logger.info('Attempting to finalize the fraud proof...')
 
-          //   await this._finalizeFraudVerification(
-          //     proof.preStateRootProof,
-          //     proof.postStateRootProof,
-          //     proof.transactionProof.transaction
-          //   )
+            await this._finalizeFraudVerification(
+              proof.preStateRootProof,
+              proof.postStateRootProof,
+              proof.transactionProof.transaction
+            )
 
-          //   this.logger.info('Fraud proof finalized! Congrats.')
-          // } catch (err) {
-          //   if (
-          //     err.toString().includes('Invalid batch header.') ||
-          //     err.toString().includes('Index out of bounds.') ||
-          //     err.toString().includes('Reverted 0x')
-          //   ) {
-          //     this.logger.info('Fraud proof was finalized by someone else.')
-          //   } else {
-          //     throw err
-          //   }
-          // }
+            this.logger.info('Fraud proof finalized! Congrats.')
+          } catch (err) {
+            if (
+              err.toString().includes('Invalid batch header.') ||
+              err.toString().includes('Index out of bounds.') ||
+              err.toString().includes('Reverted 0x')
+            ) {
+              this.logger.info('Fraud proof was finalized by someone else.')
+            } else {
+              throw err
+            }
+          }
         }
 
         this.state.nextUnverifiedStateRoot =
@@ -499,59 +495,53 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
    */
   private async _findNextFraudulentStateRoot(): Promise<number | undefined> {
     
-    console.log("Step 1: getStateRootBatchHeader for the nextUnverifiedStateRoot:", this.state.nextUnverifiedStateRoot)
+    console.log("Step 1: _getStateBatchHeader for the nextUnverifiedStateRoot:", this.state.nextUnverifiedStateRoot)
 
-    // this.logger.info('STEP0:1 getStateRootBatchHeader for the nextUnverifiedStateRoot', {
-    //   nextUnverifiedStateRoot: this.state.nextUnverifiedStateRoot,
-    // })
-
-    let nextBatchHeader = await this.state.l1Provider.getStateRootBatchHeader(
+    let nextBatch = await this.state.l1Provider.getStateBatch(
       this.state.nextUnverifiedStateRoot
     )
 
-    console.log('Step 7: _findNextFraudulentStateRoot(): nextBatchHeader data from the l1: ', nextBatchHeader)
-
-    while (nextBatchHeader !== undefined) {
+    if(nextBatch === undefined) {
+      console.log('no batch headers to check - waiting for batches')
+    }
+    
+    while (nextBatch !== undefined) {
       
-      this.logger.info("STEP0:3 ok, let's have a look, and get the L1 BatchStateRoots for this header", { nextBatchHeader })
+      this.logger.info("We have a batch to inspect", { nextBatch })
 
-      const nextBatchStateRoots = await this.state.l1Provider.getBatchStateRoots(this.state.nextUnverifiedStateRoot)
+      const nextBatchStateRoots = nextBatch.stateRoots; //await this.state.l1Provider.getBatchStateRoots(this.state.nextUnverifiedStateRoot)
+      
+      //we now pull all of them right away, in one go
+      console.log("Here are the L1 nextBatchStateRoots for this header:", nextBatchStateRoots )
 
-      console.log("STEP0:4 ok here are the L1 nextBatchStateRoots for this header:", nextBatchStateRoots )
-
-      for (let i = 0; i < nextBatchHeader.batchSize.toNumber(); i++) {
+      for (let i = 0; i < nextBatch.header.batchSize.toNumber(); i++) {
         
-        const index = i + nextBatchHeader.prevTotalElements.toNumber()
+        const index = i + nextBatch.header.prevTotalElements.toNumber()
 
-        console.log('STEP0:5 Checking state root for mismatch', index)
+        console.log('Checking state root for mismatch', index)
 
         const l1StateRoot = nextBatchStateRoots[i]
-
-        console.log('STEP0:6 l1StateRoot', l1StateRoot)
 
         const l2VStateRoot = await this.state.l2Provider.getStateRoot(
          index + L2_GENESIS_BLOCK
         )
-        console.log('STEP0:7 l2_VERIFIER_StateRoot:', l2VStateRoot)
-
-        const l2StateRoot = l2VStateRoot; //for now
         
-        if (l1StateRoot !== l2StateRoot) {
-          this.logger.info('STEP0:8 State root MISMATCH')
+        if (l1StateRoot !== l2VStateRoot) {
+          this.logger.info('State root MISMATCH')
           this.logger.info('L1 State Root', { l1StateRoot })
-          this.logger.info('L2 State Root', { l2StateRoot })
+          this.logger.info('L2 State Root', { l2VStateRoot })
           this.logger.info('Returning index of the mismatch', { index })
           return index
         } else {
-          this.logger.info('STEP0:8 State root MATCH - all good ✓')
+          this.logger.info('State root MATCH - all good ✓')
         }
       }
 
       this.state.nextUnverifiedStateRoot =
-        nextBatchHeader.prevTotalElements.toNumber() +
-        nextBatchHeader.batchSize.toNumber()
+        nextBatch.header.prevTotalElements.toNumber() +
+        nextBatch.header.batchSize.toNumber()
 
-      nextBatchHeader = await this.state.l1Provider.getStateRootBatchHeader(
+      nextBatch = await this.state.l1Provider.getStateBatch(
         this.state.nextUnverifiedStateRoot
       )
     }
@@ -566,34 +556,12 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
   private async _getFraudProofData(
     transactionIndex: number
   ): Promise<FraudProofData> {
-    
-    this.logger.info('Getting pre-state root inclusion proof for index:', { 
-      preIndex: transactionIndex - 1 
-      //because we care about the _pre-state root_ inclusion proof
-      //this has been checked - looks good
-    })
-    
-    //this breaks at the edge case where there is fraud in the first block?
-    //if( transactionIndex - 1 < 0 ) {
-    //  this.logger.error('FRAUD IN BLOCK ZERO - EDGE CASE - NO PREVIOUS TRANSACTION', { 
-    //    preIndex: transactionIndex - 1
-    //  })
-    //}
-
+        
     const preStateRootProof =
       await this.state.l1Provider.getStateRootBatchProof(transactionIndex - 1)
 
-    //console.log("STEP:4:0 preStateRootProof:",preStateRootProof)
-
-    this.logger.info('Getting post-state root inclusion proof for index:', {
-      postIndex: transactionIndex
-    })
-
     const postStateRootProof =
       await this.state.l1Provider.getStateRootBatchProof(transactionIndex)
-
-    // console.log("STEP:4:1 preStateRootProof:",postStateRootProof)
-    // this.logger.info('Getting transaction inclusion proof...')
     
     const transactionProof =
       await this.state.l1Provider.getTransactionBatchProof(transactionIndex)
@@ -602,16 +570,15 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
 
     // l2geth stores account state diffs in the DB with the L1 block number as the key, 
     // but uses the L2 block number as a key when looking them up
+    console.log("L1 blocknumber",transactionProof.transaction.blockNumber)
+    console.log("L2 transactionIndex",transactionIndex)
 
     const stateDiffProof: StateDiffProof =
       await this.state.l2Provider.getStateDiffProof(
-        transactionIndex + L2_GENESIS_BLOCK,
-        transactionProof.transaction.blockNumber //this at least gives us some sort of non-null response
+        transactionIndex,
+        transactionProof.transaction.blockNumber - L2_GENESIS_BLOCK
       )
     
-    //here is where the bug is - this should be the corresponding L1 index, not the L2 index
-    //tried to address by passing the transactionProof.transaction.blockNumber
-
     const stateTrie = await this._makeStateTrie(stateDiffProof)
     const storageTries = await this._makeAccountTries(stateDiffProof)
     
@@ -654,8 +621,6 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
 
     this.logger.info('State transitioner', { stateTransitionerAddress })
 
-    this.logger.info('Loading the corresponding state manager...')
-
     const stateManagerAddress = await OVM_StateTransitioner.ovmStateManager()
 
     this.logger.info('stateManagerAddress...', { stateManagerAddress })
@@ -681,10 +646,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
    */
   private async _makeStateTrie(proof: StateDiffProof): Promise<BaseTrie> {
     
-    this.logger.info('_makeStateTrie for this proof:', { proof })
-
     if (proof.accountStateProofs === null) {
-      //not sure why this is happening
       this.logger.info('_makeStateTrie proof.accountStateProofs === null')
       return
     }
@@ -1180,6 +1142,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     preStateRootProof: StateRootBatchProof,
     transactionProof: TransactionBatchProof
   ): Promise<void> {
+    
     const stateTransitionerAddress = await this._getStateTransitioner(
       preStateRootProof.stateRoot,
       transactionProof.transaction
@@ -1189,13 +1152,57 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
       return
     }
 
-    let var1 = transactionProof.transactionBatchHeader.prevTotalElements;
-    let var2 = transactionProof.transactionProof.index;
-    console.log("Sum1:", var1.toNumber() + var2)
-
     let var3 = preStateRootProof.stateRootBatchHeader.prevTotalElements;
     let var4 = preStateRootProof.stateRootProof.index;
-    console.log("Sum2:", var3.toNumber() + var4)
+
+    let var1 = transactionProof.transactionBatchHeader.prevTotalElements;
+    let var2 = transactionProof.transactionProof.index;
+
+    //the contract checks for
+        //     require (
+        //     _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index,
+        //     "Pre-state root global index must equal to the transaction root global index."
+        // );
+
+    if((var3.toNumber() + var4 + 1) == (var1.toNumber() + var2)) {
+      console.log("PASS PASS PASS FraudVerifier Check: _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index")
+    } else {
+      console.log("Sum1:", var1.toNumber() + var2)
+      console.log("Sum2:", var3.toNumber() + var4)
+      console.log("FAIL FAIL FAIL: FraudVerifier Check: _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index")
+    }
+
+/*
+// pads 00s from left until the hex string is bytes32
+const padded = ethers.utils.hexZeroPad(shortHexString, 32)
+
+// pads 00s from left until the hex string is bytes32
+const padded = ethers.utils.hexZeroPad(shortHexString, 32)
+
+":{"err":{"reason":"incorrect data length","code":"INVALID_ARGUMENT","argument":null,"value":"0x01000000
+
+        bytes32 _preStateRoot,
+        Lib_OVMCodec.ChainBatchHeader memory _preStateRootBatchHeader,
+        Lib_OVMCodec.ChainInclusionProof memory _preStateRootProof,
+        Lib_OVMCodec.Transaction memory _transaction,
+        Lib_OVMCodec.TransactionChainElement memory _txChainElement,
+        Lib_OVMCodec.ChainBatchHeader memory _transactionBatchHeader,
+        Lib_OVMCodec.ChainInclusionProof memory _transactionProof
+
+
+preStateRootProof.stateRoot: 
+0x3038af868afd8375444ff6f2735ffcee37db2da1928ac446c0787669e952bd28
+0x48656c6c6f20576f726c64210000000000000000000000000000000000000000
+61dc9186345e05cc2ae53dc72af880a3b66e2fa7983feaa6254d1518540de50a
+*/
+
+    console.log("preStateRootProof.stateRoot:", preStateRootProof.stateRoot)
+    console.log("preStateRootProof.stateRoot:", remove0x(preStateRootProof.stateRoot))
+//toHexString(code)
+//remove0x
+
+console.log(transactionProof.transactionProof)
+//the transaction proof is totally messed up
 
     try {
       await (

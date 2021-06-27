@@ -24,13 +24,18 @@ const main = async () => {
     'address-manager-address',
     env.ADDRESS_MANAGER_ADDRESS
   )
+
   const L1_WALLET_KEY = config.str('l1-wallet-key', env.L1_WALLET_KEY)
   const MNEMONIC = config.str('mnemonic', env.MNEMONIC)
   const HD_PATH = config.str('hd-path', env.HD_PATH)
   
-  const RELAY_GAS_LIMIT = config.uint(
-    'relay-gas-limit',
-    parseInt(env.RELAY_GAS_LIMIT, 10) || 4000000
+  const DEPLOY_GAS_LIMIT = config.uint(
+    'deploy-gas-limit',
+    parseInt(env.DEPLOY_GAS_LIMIT, 10) || 4000000
+  )
+  const RUN_GAS_LIMIT = config.uint(
+    'run-gas-limit',
+    parseInt(env.RUN_GAS_LIMIT, 10) || 95000000
   )
   const POLLING_INTERVAL = config.uint(
     'polling-interval',
@@ -47,10 +52,6 @@ const main = async () => {
   const FROM_L2_TRANSACTION_INDEX = config.uint(
     'from-l2-transaction-index',
     parseInt(env.FROM_L2_TRANSACTION_INDEX, 10) || 0
-  )
-  const RUN_GAS_LIMIT = config.uint(
-    'run-gas-limit',
-    parseInt(env.RUN_GAS_LIMIT, 10) || 95000000
   )
   const L1_BLOCK_FINALITY = config.uint(
     'l1-block-finality',
@@ -84,13 +85,13 @@ const main = async () => {
     l2RpcProvider: l2Provider,
     addressManagerAddress: ADDRESS_MANAGER_ADDRESS,
     l1Wallet: wallet,
-    deployGasLimit: RELAY_GAS_LIMIT, //should reconcile naming
-    runGasLimit: RUN_GAS_LIMIT, //should reconcile naming
+    deployGasLimit: DEPLOY_GAS_LIMIT,
+    runGasLimit: RUN_GAS_LIMIT,
     fromL2TransactionIndex: FROM_L2_TRANSACTION_INDEX,
     pollingInterval: POLLING_INTERVAL,
     l1StartOffset: L1_START_OFFSET,
     l1BlockFinality: L1_BLOCK_FINALITY,
-    //getLogsInterval: GET_LOGS_INTERVAL,
+    getLogsInterval: GET_LOGS_INTERVAL,
   })
 
   await service.start()

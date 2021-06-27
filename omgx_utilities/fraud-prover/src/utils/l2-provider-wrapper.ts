@@ -1,3 +1,7 @@
+/*
+The Verifier is the ground truth
+*/
+
 //import { JsonRpcProvider } from '@ethersproject/providers'
 
 import { providers } from 'ethers'
@@ -22,11 +26,6 @@ export class L2ProviderWrapper {
 
     }
     else {
-      //console.log("getStateRoot full L2 block:",block)
-      //console.log("getStateRoot transactions:",block.transactions[0])
-      //console.log("getStateRoot extra:",block.extraData)
-      //console.log("getStateRoot number:",block.number.toString())
-      //console.log("getStateRoot stateroot:",block.stateRoot)
       return block.stateRoot
     }
   }
@@ -54,20 +53,12 @@ export class L2ProviderWrapper {
     ])
   }
 
-/*
-{"level":30,"time":1621976500683,"l1StateRoot":"0xbad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1","msg":"L1 State Root"}
-{"level":30,"time":1621976500683,"l2StateRoot":"0x701a046ebe69e7a2745a7aeccaa3c7f3d1148cca6c8cbca445736b27f06326ca","msg":"L2 State Root"}
-*/
-
   public async getStateDiffProof(index: number, indexL1: number): Promise<StateDiffProof> {
     
     let proof = await this.provider.send('eth_getStateDiffProofCT', [
       toUnpaddedHexString(index),
       indexL1,
     ])
-
-    //console.log('If the next line is null, there is a major problem:')
-    //console.log('Proof:', proof.accounts)
 
     return {
       header: proof.header,

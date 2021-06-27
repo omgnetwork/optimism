@@ -19,7 +19,8 @@ docker-compose -f docker-compose-fraud.yml build
 
 # this configures the Verifier and DTL to focus on L1, and also, sets the fraud_address
 docker-compose -f docker-compose-fraud.yml up -V
-# FYI - Need to re-init volumes so that the system comes up cleanly - this is what the `-V` does. 
+# FYI - Need to re-init volumes so that the system comes up cleanly - this is what the `-V` does.
+# Otherwise the batch-submitter will get confused 
 
 ```
 
