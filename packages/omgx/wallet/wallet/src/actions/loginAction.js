@@ -57,17 +57,8 @@ export const providePassword = (FHEseed) => (dispatch) => {
 export const verifyInvitationCode = (invitationCode) => (dispatch) => {
   dispatch(verifyInvitationCodeBegin())
 
-  // fetch(SERVICE_OPTIMISM_API_URL + 'invitation.code', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({ invitationCode }),
-  // })
-
   serviceAxiosInstance
-    .post('invitation.code', { invitationCode })
+    .post('invitation.code', JSON.stringify({ invitationCode }))
     .then((res) => {
       if (res.status === 201) {
         dispatch(verifyInvitationCodeSuccess())

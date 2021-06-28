@@ -22,7 +22,6 @@ import networkService from 'services/networkService'
 
 import { openError } from './uiAction'
 
-import { BUYER_OPTIMISM_API_URL } from '../Settings'
 import buyerAxiosInstance from 'api/buyerAxios'
 
 const startBuyTaskBegin = (bidID) => ({
@@ -88,20 +87,13 @@ const uploadBidFailure = (bidID, error) => ({
 export const downloadNextItem = (bidID) => (dispatch) => {
   dispatch(downloadNextItemBegin(bidID))
 
-  // return fetch(BUYER_OPTIMISM_API_URL + 'download.item.ciphertext', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     bidID,
-  //   }),
-  // })
   return buyerAxiosInstance
-    .post('download.item.ciphertext', {
-      bidID,
-    })
+    .post(
+      'download.item.ciphertext',
+      JSON.stringify({
+        bidID,
+      })
+    )
     .then((res) => {
       if (res.status === 201 && res.data !== '') {
         const { data } = res
@@ -113,17 +105,6 @@ export const downloadNextItem = (bidID) => (dispatch) => {
         return ''
       }
     })
-
-  // .then((data) => {
-  //   if (data !== '') {
-  //     if (data.status !== 201) {
-  //       dispatch(downloadNextItemFailure(bidID, data.status))
-  //     } else {
-  //       dispatch(downloadNextItemSuccess(bidID, data))
-  //     }
-  //   }
-  //   return { status: data.status, data }
-  // })
 }
 
 const uploadBid = (bidID, itemID, ciphertext) => (dispatch) => {
@@ -131,26 +112,16 @@ const uploadBid = (bidID, itemID, ciphertext) => (dispatch) => {
   // Generate hashed address
   const address = networkService.account
 
-  // return fetch(BUYER_OPTIMISM_API_URL + 'upload.bid.seller', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     bidID,
-  //     itemID,
-  //     ciphertext,
-  //     address,
-  //   }),
-  // })
   return buyerAxiosInstance
-    .post('upload.bid.seller', {
-      bidID,
-      itemID,
-      ciphertext,
-      address,
-    })
+    .post(
+      'upload.bid.seller',
+      JSON.stringify({
+        bidID,
+        itemID,
+        ciphertext,
+        address,
+      })
+    )
     .then((res) => {
       if (res.status === 201) {
         // return res.json()
@@ -163,33 +134,9 @@ const uploadBid = (bidID, itemID, ciphertext) => (dispatch) => {
         return ''
       }
     })
-  // .then((data) => {
-  //   if (data !== '') {
-  //     //this controls e.g. run | stop
-  //     /*
-  //     taskStatus: 'stop', // run || stop
-  //     taskStatusLoad: {[action.payload.bidID]: false},
-  //     taskStatusError: {[action.payload.bidID]: false},
-  //   */
-  //     dispatch(startBuyTaskSuccess(bidID))
-
-  //     //this controls
-  //     /*
-  //       case 'UPLOAD_BID_SUCCESS':
-  //   return {
-  //     ...state,
-  //     uploadBidLoad: {[action.payload.bidID]: false},
-  //     uploadBidError: {[action.payload.bidID]: false},
-  //   */
-  //     dispatch(uploadBidSuccess(bidID))
-  //   }
-  //   return { status: data.status }
-  // })
 }
 
 export const startBuyTask = (bid, bidID) => (dispatch) => {
-  //console.log(`running task bidID: ${bidID}`);
-
   dispatch(startBuyTaskBegin(bidID))
 
   dispatch(downloadNextItem(bidID)).then((res) => {
