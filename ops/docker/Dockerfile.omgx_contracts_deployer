@@ -1,5 +1,5 @@
 FROM ethereumoptimism/builder AS builder
-FROM omgx/wallet_builder AS wallet_builder
+FROM omgx/monorepo_builder AS omgx_monorepo_builder
 FROM node:14-alpine
 
 RUN apk add --no-cache git curl python bash jq
@@ -34,21 +34,21 @@ COPY packages/contracts/test/helpers/constants.ts ./test/helpers/constants.ts
 COPY packages/contracts/scripts ./scripts
 
 # get the needed built artifacts
-WORKDIR /opt/optimism/packages/omgx/wallet
-COPY --from=wallet_builder /optimism/packages/omgx/wallet/tsconfig.json ./tsconfig.json
-COPY --from=wallet_builder /optimism/packages/omgx/wallet/package-lock.json ./package-lock.json
-COPY --from=wallet_builder /optimism/packages/omgx/wallet/package.json ./package.json
-COPY --from=wallet_builder /optimism/packages/omgx/wallet/node_modules ./node_modules
-COPY --from=wallet_builder /optimism/packages/omgx/wallet/artifacts ./artifacts
-COPY --from=wallet_builder /optimism/packages/omgx/wallet/artifacts-ovm ./artifacts-ovm
+WORKDIR /opt/optimism/packages/omgx/contracts
+COPY --from=omgx_monorepo_builder /optimism/packages/omgx/contracts/tsconfig.json ./tsconfig.json
+COPY --from=omgx_monorepo_builder /optimism/packages/omgx/contracts/package-lock.json ./package-lock.json
+COPY --from=omgx_monorepo_builder /optimism/packages/omgx/contracts/package.json ./package.json
+COPY --from=omgx_monorepo_builder /optimism/packages/omgx/contracts/node_modules ./node_modules
+COPY --from=omgx_monorepo_builder /optimism/packages/omgx/contracts/artifacts ./artifacts
+COPY --from=omgx_monorepo_builder /optimism/packages/omgx/contracts/artifacts-ovm ./artifacts-ovm
 
 
 # get non-build artifacts from the host
-COPY packages/omgx/wallet/bin ./bin
-COPY packages/omgx/wallet/contracts ./contracts
-COPY packages/omgx/wallet/hardhat.config.ts ./
-COPY packages/omgx/wallet/deploy ./deploy
-COPY packages/omgx/wallet/tasks ./tasks
-COPY packages/omgx/wallet/scripts ./scripts
+COPY packages/omgx/contracts/bin ./bin
+COPY packages/omgx/contracts/contracts ./contracts
+COPY packages/omgx/contracts/hardhat.config.ts ./
+COPY packages/omgx/contracts/deploy ./deploy
+COPY packages/omgx/contracts/tasks ./tasks
+COPY packages/omgx/contracts/scripts ./scripts
 
 ENTRYPOINT ["./scripts/wait-for-l1-and-l2.sh", "./scripts/deployer.sh"]

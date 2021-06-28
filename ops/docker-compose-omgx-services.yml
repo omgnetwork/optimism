@@ -4,21 +4,21 @@ version: "3"
 
 services:
   # base service builder
-  omgx_wallet_builder:
-    image: omgx/wallet_builder
+  omgx_monorepo_builder:
+    image: omgx/monorepo_builder
     build:
       context: ..
-      dockerfile: ./ops/docker/Dockerfile.omgx_monorepo
+      dockerfile: ./ops/docker/Dockerfile.omgx_monorepo_builder
 
-  wallet_deployer:
+  omgx_contracts_deployer:
     depends_on:
       - l1_chain
       - deployer
       - l2geth
-    image: omgx/wallet_deployer
+    image: omgx/contracts_deployer
     build:
       context: ..
-      dockerfile: ./ops/docker/Dockerfile.wallet_deployer
+      dockerfile: ./ops/docker/Dockerfile.omgx_contracts_deployer
     environment:
         TEST: 1
         L1_NODE_WEB3_URL: http://l1_chain:8545
@@ -35,14 +35,14 @@ services:
     depends_on:
       - l1_chain
       - deployer
-      - wallet_deployer
+      - omgx_contracts_deployer
       - l2geth
     image: omgx/bl-wl
     build:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.bl-wl
     environment:
-        WALLET_URL: http://wallet_deployer:8079/addresses.json
+        WALLET_URL: http://omgx_contracts_deployer:8079/addresses.json
         BL_WL_PORT: 9000
     ports:
       - 9000:9000
@@ -51,7 +51,7 @@ services:
     depends_on:
       - l1_chain
       - deployer
-      - wallet_deployer
+      - omgx_contracts_deployer
       - l2geth
       - bl-wl
     image: omgx/message-relayer-fast
@@ -63,29 +63,29 @@ services:
         L2_NODE_WEB3_URL: http://l2geth:8545
         L1_WALLET_KEY: "0xde9be858da4a475276426320d5e9262ecfc3ba460bfac56360bfa6c4c28b4ee0"
         URL: http://deployer:8081/addresses.json
-        WALLET_URL: http://wallet_deployer:8079/addresses.json
+        WALLET_URL: http://omgx_contracts_deployer:8079/addresses.json
         POLLING_INTERVAL: 1500
         GET_LOGS_INTERVAL: 500
         WHITELIST_ENDPOINT: http://bl-wl:9000/whitelist.json
 
   omgx_integration_tests:
-    image: omgx/wallet_builder
+    image: omgx/monorepo_builder
     deploy:
        replicas: 0
     build:
       context: ..
-      dockerfile: ./ops/docker/Dockerfile.omgx_monorepo
+      dockerfile: ./ops/docker/Dockerfile.omgx_monorepo_builder
     entrypoint:
         - "/bin/sh"
         - -ecx
         - |
-            cd /optimism/packages/omgx/wallet
+            cd /optimism/packages/omgx/contracts
             yarn test:integration
     environment:
       L1_NODE_WEB3_URL: http://l1_chain:8545
       L2_NODE_WEB3_URL: http://l2geth:8545
       URL: http://deployer:8081/addresses.json
-      WALLET_URL: http://wallet_deployer:8079/addresses.json
+      WALLET_URL: http://omgx_contracts_deployer:8079/addresses.json
       TEST_PRIVATE_KEY_1: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       TEST_PRIVATE_KEY_2: "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba"
       TEST_PRIVATE_KEY_3: "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e"
