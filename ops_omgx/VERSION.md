@@ -56,3 +56,57 @@ Images:
 
 # Production
 
+## V1
+
+Accounts:
+
+```javascript
+{
+  "Deployer": "0x122816e7A7AeB40601d0aC0DCAA8402F7aa4cDfA",
+  "Sequencer": "0xE48E5b731FAAb955d147FA954cba19d93Dc03529",
+  "Proposer": "0x7f3cDbe9906Fd57373e8d18AaA159Fc713f379b0",
+  "Relayer": "0x494Ae1fCd178e0DBA5a3B32D9324C90e47D88AA8",
+  "FastRelayer": "0x81922840527936c3453c99a81dBd4b13d7363722"
+}
+```
+
+Regenesis:
+
+```javascript
+{
+  "AddressManager": "0x93A96D6A5beb1F661cf052722A1424CDDA3e9418",
+  "OVM_CanonicalTransactionChain": "0xdc8A2730E167bFe5A96E0d713D95D399D070dF60",
+  "OVM_ChainStorageContainer-CTC-batches": "0xF4A6Bb0744fb75D009AB184184856d5f6edcB6ba",
+  "OVM_ChainStorageContainer-CTC-queue": "0x46FC9c5301A4FB5DaE830Aca7BD98Ef328c96c4a",
+  "OVM_ChainStorageContainer-SCC-batches": "0x8B7D233E9cD4a2f950dd82A4F71D2C833d710b52",
+  "OVM_ExecutionManager": "0xf431c82fA505A6B081A5f80FCD6c018972D60D8B",
+  "OVM_FraudVerifier": "0xFEFf7EfcbF79dD688A616BCb1F511B1b8cE0068A",
+  "OVM_L1CrossDomainMessenger": "0x8109f1Af0e8A74e393703Ca5447C5414E1946500",
+  "OVM_L1CrossDomainMessengerFast": "0x4238A43A1B03a5284438342AeB742a81894DAbac",
+  "OVM_L1MultiMessageRelayer": "0x5881EE5ef1c0BC1d9bB78788e1Bb8737398545D7",
+  "OVM_SafetyChecker": "0xa10eAe6538C515e82F16D2C95c0936A4452BB117",
+  "OVM_StateCommitmentChain": "0x1ba99640444B81f3928e4F174CFB4FF426B4FFAE",
+  "OVM_StateManagerFactory": "0xc4E3E4F9631220f2B1Ada9ee1164E30640c56c94",
+  "OVM_StateTransitionerFactory": "0xAC82f9F03f51c8fFef9Ff0362973e89C0dA4aa40",
+  "Proxy__OVM_L1CrossDomainMessenger": "0xF10EEfC14eB5b7885Ea9F7A631a21c7a82cf5D76",
+  "Proxy__OVM_L1StandardBridge": "0xDe085C82536A06b40D20654c2AbA342F2abD7077",
+  "OVM_BondManager": "0x2Ba9F9a6D6D7F604E9e2ca2Ea5f8C9Fa75E13835",
+  "OVM_Sequencer": "0xE48E5b731FAAb955d147FA954cba19d93Dc03529",
+  "Deployer": "0x122816e7A7AeB40601d0aC0DCAA8402F7aa4cDfA"
+}
+```
+
+Images:
+
+```javascript
+{
+  "deployer": "omgx/deployer-rinkeby:production-v1",
+  "data_transport_layer": "omgx/data-transport-layer:production-v1",
+  "geth_l2": "omgx/l2geth:production-v1",
+  "batch_submitter": "omgx/batch-submitter:production-v1",
+  "message_relayer": "omgx/message-relayer:production-v1",
+  "message_relayer_fast": "omgx/message-relayer-fast:production-v1"
+}
+```
+
+# 
