@@ -16,7 +16,7 @@ const config = {
       // because account balances are not automatically initiated with an ETH
       // balance.
       gasPrice: 0,
-      ovm: true,
+      ovm: true
     },
   },
   solidity: {
