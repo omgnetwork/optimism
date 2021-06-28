@@ -26,5 +26,12 @@ packages/omgx/wallet/wallet/build
 # vim
 *.swp
 
+# env
 .env
+env.yml
+
+# log
 *.log
+
+# serverless
+.serverless/
