@@ -1,6 +1,6 @@
 /*
   Varna - A Privacy-Preserving Marketplace
-  Varna uses Fully Homomorphic Encryption to make markets fair. 
+  Varna uses Fully Homomorphic Encryption to make markets fair.
   Copyright (C) 2021 Enya Inc. Palo Alto, CA
 
   This program is free software: you can redistribute it and/or modify
@@ -17,12 +17,13 @@
   along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import cryptoWorker from 'workerize-loader!../cryptoWorker/cryptoWorker'; // eslint-disable-line import/no-webpack-loader-syntax
-import networkService from 'services/networkService';
+import cryptoWorker from 'workerize-loader!../cryptoWorker/cryptoWorker' // eslint-disable-line import/no-webpack-loader-syntax
+import networkService from 'services/networkService'
 
-import { openError } from './uiAction';
+import { openError } from './uiAction'
 
-import { BUYER_OPTIMISM_API_URL } from '../Settings';
+import { BUYER_OPTIMISM_API_URL } from '../Settings'
+import buyerAxiosInstance from 'api/buyerAxios'
 
 const startBuyTaskBegin = (bidID) => ({
   type: 'START_BUY_TASK',
@@ -41,7 +42,7 @@ const startBuyTaskFailure = (bidID, error) => ({
 
 const downloadNextItemBegin = (bidID) => ({
   type: 'DOWNLOAD_NEXT_ITEM',
-  payload: { bidID }
+  payload: { bidID },
 })
 
 const downloadNextItemSuccess = (bidID, files) => ({
@@ -61,12 +62,12 @@ const generateOfferBegin = (bidID) => ({
 
 const generateOfferSuccess = (bidID, ciphertext) => ({
   type: 'GENERATE_OFFER_SUCCESS',
-  payload: { bidID, ciphertext }
+  payload: { bidID, ciphertext },
 })
 
 const generateOfferFailure = (bidID, error) => ({
   type: 'GENERATE_OFFER_FAILURE',
-  payload: { bidID, error }
+  payload: { bidID, error },
 })
 
 const uploadBidBegin = (bidID) => ({
@@ -85,121 +86,141 @@ const uploadBidFailure = (bidID, error) => ({
 })
 
 export const downloadNextItem = (bidID) => (dispatch) => {
+  dispatch(downloadNextItemBegin(bidID))
 
-  dispatch(downloadNextItemBegin(bidID));
-
-  return fetch(BUYER_OPTIMISM_API_URL + "download.item.ciphertext", {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      bidID
-    }),
-  }).then(res => {
-    if (res.status === 201) {
-      return res.json()
-    } else {
-      //getting lots of 400 errors here
-      dispatch(downloadNextItemFailure(bidID, res.status));
-      return ""
-    }
-  }).then(data => {
-    if (data !== "") {
-      if (data.status !== 201) {
-        dispatch(downloadNextItemFailure(bidID, data.status));
+  // return fetch(BUYER_OPTIMISM_API_URL + 'download.item.ciphertext', {
+  //   method: 'POST',
+  //   headers: {
+  //     Accept: 'application/json',
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({
+  //     bidID,
+  //   }),
+  // })
+  return buyerAxiosInstance
+    .post('download.item.ciphertext', {
+      bidID,
+    })
+    .then((res) => {
+      if (res.status === 201 && res.data !== '') {
+        const { data } = res
+        dispatch(downloadNextItemSuccess(bidID, data))
+        return { status: data.status, data }
       } else {
-        dispatch(downloadNextItemSuccess(bidID, data));
+        //getting lots of 400 errors here
+        dispatch(downloadNextItemFailure(bidID, res.status))
+        return ''
       }
-    }
-    return { status: data.status, data }
-  })
+    })
+
+  // .then((data) => {
+  //   if (data !== '') {
+  //     if (data.status !== 201) {
+  //       dispatch(downloadNextItemFailure(bidID, data.status))
+  //     } else {
+  //       dispatch(downloadNextItemSuccess(bidID, data))
+  //     }
+  //   }
+  //   return { status: data.status, data }
+  // })
 }
 
 const uploadBid = (bidID, itemID, ciphertext) => (dispatch) => {
-
-  dispatch(uploadBidBegin(bidID));
+  dispatch(uploadBidBegin(bidID))
   // Generate hashed address
-  const address = networkService.account;
+  const address = networkService.account
 
-  return fetch(BUYER_OPTIMISM_API_URL + "upload.bid.seller", {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      bidID, itemID, ciphertext, address,
-    }),
-  }).then(res => {
-    if (res.status === 201) {
-      return res.json()
-    } else {
-      dispatch(uploadBidFailure(bidID, res.status));
-      dispatch(startBuyTaskFailure(bidID, 500));
-      return ""
-    }
-  }).then(data => {
-    if (data !== "") {
+  // return fetch(BUYER_OPTIMISM_API_URL + 'upload.bid.seller', {
+  //   method: 'POST',
+  //   headers: {
+  //     Accept: 'application/json',
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({
+  //     bidID,
+  //     itemID,
+  //     ciphertext,
+  //     address,
+  //   }),
+  // })
+  return buyerAxiosInstance
+    .post('upload.bid.seller', {
+      bidID,
+      itemID,
+      ciphertext,
+      address,
+    })
+    .then((res) => {
+      if (res.status === 201) {
+        // return res.json()
+        dispatch(startBuyTaskSuccess(bidID))
+        dispatch(uploadBidSuccess(bidID))
+        return { status: res.data.status }
+      } else {
+        dispatch(uploadBidFailure(bidID, res.status))
+        dispatch(startBuyTaskFailure(bidID, 500))
+        return ''
+      }
+    })
+  // .then((data) => {
+  //   if (data !== '') {
+  //     //this controls e.g. run | stop
+  //     /*
+  //     taskStatus: 'stop', // run || stop
+  //     taskStatusLoad: {[action.payload.bidID]: false},
+  //     taskStatusError: {[action.payload.bidID]: false},
+  //   */
+  //     dispatch(startBuyTaskSuccess(bidID))
 
-      //this controls e.g. run | stop
-      /*
-        taskStatus: 'stop', // run || stop
-        taskStatusLoad: {[action.payload.bidID]: false},
-        taskStatusError: {[action.payload.bidID]: false},
-      */
-      dispatch(startBuyTaskSuccess(bidID));
-
-      //this controls
-      /*
-          case 'UPLOAD_BID_SUCCESS':
-      return {
-        ...state,
-        uploadBidLoad: {[action.payload.bidID]: false},
-        uploadBidError: {[action.payload.bidID]: false},
-      */
-      dispatch(uploadBidSuccess(bidID));
-    }
-    return { status: data.status }
-  })
+  //     //this controls
+  //     /*
+  //       case 'UPLOAD_BID_SUCCESS':
+  //   return {
+  //     ...state,
+  //     uploadBidLoad: {[action.payload.bidID]: false},
+  //     uploadBidError: {[action.payload.bidID]: false},
+  //   */
+  //     dispatch(uploadBidSuccess(bidID))
+  //   }
+  //   return { status: data.status }
+  // })
 }
 
 export const startBuyTask = (bid, bidID) => (dispatch) => {
-
   //console.log(`running task bidID: ${bidID}`);
 
-  dispatch(startBuyTaskBegin(bidID));
+  dispatch(startBuyTaskBegin(bidID))
 
-  dispatch(downloadNextItem(bidID)).then(res => {
+  dispatch(downloadNextItem(bidID)).then((res) => {
     if (res.status !== 201) {
-      dispatch(startBuyTaskFailure(bidID, res.status));
+      dispatch(startBuyTaskFailure(bidID, res.status))
     } else {
-      dispatch(generateOffer(bid, bidID, res.data.itemID, res.data.publicKey));
+      dispatch(generateOffer(bid, bidID, res.data.itemID, res.data.publicKey))
     }
   })
 }
 
 const generateOffer = (bid, bidID, itemID, publicKey) => (dispatch) => {
-  
-  dispatch(generateOfferBegin(bidID));
+  dispatch(generateOfferBegin(bidID))
 
   // Web worker
-  const workerInstance = cryptoWorker();
+  const workerInstance = cryptoWorker()
 
-  workerInstance.generateOffer(bid, bidID, publicKey);
+  workerInstance.generateOffer(bid, bidID, publicKey)
 
   workerInstance.addEventListener('message', (message) => {
-    if (message.data.status === "success" && 
-        message.data.type === "generateOffer" && 
-        message.data.bidID === bidID
+    if (
+      message.data.status === 'success' &&
+      message.data.type === 'generateOffer' &&
+      message.data.bidID === bidID
     ) {
-      dispatch(generateOfferSuccess(bidID, message.data.bidCiphertext));
-      dispatch(uploadBid(bidID, itemID, message.data.bidCiphertext));
-    } else if (message.data.status === "failure") {
-      dispatch(generateOfferFailure(bidID, 404));
-      dispatch(openError("Failed to encrypt your offer"));
-      dispatch(startBuyTaskFailure(bidID, 500));
+      dispatch(generateOfferSuccess(bidID, message.data.bidCiphertext))
+      dispatch(uploadBid(bidID, itemID, message.data.bidCiphertext))
+    } else if (message.data.status === 'failure') {
+      dispatch(generateOfferFailure(bidID, 404))
+      dispatch(openError('Failed to encrypt your offer'))
+      dispatch(startBuyTaskFailure(bidID, 500))
     }
-  });
+  })
 }
