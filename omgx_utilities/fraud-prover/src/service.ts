@@ -282,10 +282,13 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         this.logger.info('Getting fraud proof data for this index')
         const proof = await this._getFraudProofData(fraudulentStateRootIndex)
 
-        console.log("Proof:",proof)
+        //console.log("Proof:",proof)
 
-        this.logger.info('Step M4: Initializing fraud verification')
+        this.logger.info('Initializing fraud verification')
        
+        //console.log("proof.preStateRootProof",proof.preStateRootProof)
+        //console.log("proof.transactionProof",proof.transactionProof)
+
         try {
           await this._initializeFraudVerification(
             proof.preStateRootProof,
@@ -374,101 +377,107 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
           }
         }
 
-        // POST_EXECUTION phase.
-        if (
-          (await OVM_StateTransitioner.phase()) ===
-          StateTransitionPhase.POST_EXECUTION
-        ) {
-          this.logger.info('Fraud proof is now in the POST_EXECUTION phase.')
+/*
 
-          try {
+Still to do
 
-            this.logger.info('Committing storage slot state updates...')
-            await this._updateContractStorageStates(
-              OVM_StateTransitioner,
-              OVM_StateManager,
-              proof.stateDiffProof.accountStateProofs,
-              proof.storageTries
-            )
+*/
 
-            this.logger.info('Committing account state updates...')
-            await this._updateAccountStates(
-              OVM_StateTransitioner,
-              OVM_StateManager,
-              proof.stateDiffProof.accountStateProofs,
-              proof.stateTrie
-            )
+        // // POST_EXECUTION phase.
+        // if (
+        //   (await OVM_StateTransitioner.phase()) ===
+        //   StateTransitionPhase.POST_EXECUTION
+        // ) {
+        //   this.logger.info('Fraud proof is now in the POST_EXECUTION phase.')
 
-            this.logger.info('Completing the state transition...')
-            try {
-              await (await OVM_StateTransitioner.completeTransition()).wait()
-            } catch (err) {
-              try {
-                await OVM_StateTransitioner.callStatic.completeTransition()
-              } catch (err) {
-                if (err.toString().includes('Reverted 0x')) {
-                  this.logger.info(
-                    'State transition was completed by someone else, moving on.'
-                  )
-                } else {
-                  throw err
-                }
-              }
-            }
+        //   try {
 
-            this.logger.info('State transition completed.')
-          } catch (err) {
-            if (
-              err
-                .toString()
-                .includes(
-                  'Function must be called during the correct phase.'
-                ) ||
-              err
-                .toString()
-                .includes(
-                  '46756e6374696f6e206d7573742062652063616c6c656420647572696e672074686520636f72726563742070686173652e'
-                )
-            ) {
-              this.logger.info(
-                'Phase was completed by someone else, moving on.'
-              )
-            } else {
-              throw err
-            }
-          }
-        }
+        //     this.logger.info('Committing storage slot state updates...')
+        //     await this._updateContractStorageStates(
+        //       OVM_StateTransitioner,
+        //       OVM_StateManager,
+        //       proof.stateDiffProof.accountStateProofs,
+        //       proof.storageTries
+        //     )
 
-        // COMPLETE phase.
-        if (
-          (await OVM_StateTransitioner.phase()) ===
-          StateTransitionPhase.COMPLETE
-        ) {
-          this.logger.info('Fraud proof is now in the COMPLETE phase.')
+        //     this.logger.info('Committing account state updates...')
+        //     await this._updateAccountStates(
+        //       OVM_StateTransitioner,
+        //       OVM_StateManager,
+        //       proof.stateDiffProof.accountStateProofs,
+        //       proof.stateTrie
+        //     )
 
-          try {
+        //     this.logger.info('Completing the state transition...')
+        //     try {
+        //       await (await OVM_StateTransitioner.completeTransition()).wait()
+        //     } catch (err) {
+        //       try {
+        //         await OVM_StateTransitioner.callStatic.completeTransition()
+        //       } catch (err) {
+        //         if (err.toString().includes('Reverted 0x')) {
+        //           this.logger.info(
+        //             'State transition was completed by someone else, moving on.'
+        //           )
+        //         } else {
+        //           throw err
+        //         }
+        //       }
+        //     }
 
-            this.logger.info('Attempting to finalize the fraud proof...')
+        //     this.logger.info('State transition completed.')
+        //   } catch (err) {
+        //     if (
+        //       err
+        //         .toString()
+        //         .includes(
+        //           'Function must be called during the correct phase.'
+        //         ) ||
+        //       err
+        //         .toString()
+        //         .includes(
+        //           '46756e6374696f6e206d7573742062652063616c6c656420647572696e672074686520636f72726563742070686173652e'
+        //         )
+        //     ) {
+        //       this.logger.info(
+        //         'Phase was completed by someone else, moving on.'
+        //       )
+        //     } else {
+        //       throw err
+        //     }
+        //   }
+        // }
 
-            await this._finalizeFraudVerification(
-              proof.preStateRootProof,
-              proof.postStateRootProof,
-              proof.transactionProof.transaction
-            )
+        // // COMPLETE phase.
+        // if (
+        //   (await OVM_StateTransitioner.phase()) ===
+        //   StateTransitionPhase.COMPLETE
+        // ) {
+        //   this.logger.info('Fraud proof is now in the COMPLETE phase.')
 
-            this.logger.info('Fraud proof finalized! Congrats.')
-          } catch (err) {
-            if (
-              err.toString().includes('Invalid batch header.') ||
-              err.toString().includes('Index out of bounds.') ||
-              err.toString().includes('Reverted 0x')
-            ) {
-              this.logger.info('Fraud proof was finalized by someone else.')
-            } else {
-              throw err
-            }
-          }
-        }
+        //   try {
+
+        //     this.logger.info('Attempting to finalize the fraud proof...')
+
+        //     await this._finalizeFraudVerification(
+        //       proof.preStateRootProof,
+        //       proof.postStateRootProof,
+        //       proof.transactionProof.transaction
+        //     )
+
+        //     this.logger.info('Fraud proof finalized! Congrats.')
+        //   } catch (err) {
+        //     if (
+        //       err.toString().includes('Invalid batch header.') ||
+        //       err.toString().includes('Index out of bounds.') ||
+        //       err.toString().includes('Reverted 0x')
+        //     ) {
+        //       this.logger.info('Fraud proof was finalized by someone else.')
+        //     } else {
+        //       throw err
+        //     }
+        //   }
+        // }
 
         this.state.nextUnverifiedStateRoot =
           proof.preStateRootProof.stateRootBatchHeader.prevTotalElements.toNumber()
@@ -548,35 +557,37 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
   private async _getFraudProofData(
     transactionIndex: number
   ): Promise<FraudProofData> {
+    
     this.logger.info('Getting pre-state root inclusion proof...')
     const preStateRootProof = await this.state.l1Provider.getStateRootBatchProof(
       transactionIndex - 1
     )
+    console.log("preStateRootProof",preStateRootProof)
 
     this.logger.info('Getting post-state root inclusion proof...')
     const postStateRootProof = await this.state.l1Provider.getStateRootBatchProof(
       transactionIndex
     )
+    console.log("postStateRootProof",postStateRootProof)
 
     this.logger.info('Getting transaction inclusion proof...')
     const transactionProof = await this.state.l1Provider.getTransactionBatchProof(
       transactionIndex
     )
-
-    this.logger.info('Getting state diff proof...')
     
     // l2geth stores account state diffs in the DB with the L1 block number as the key, 
     // but uses the L2 block number as a key when looking them up
     console.log("L1 blocknumber",transactionProof.transaction.blockNumber)
     console.log("L2 transactionIndex",transactionIndex)
-
+    
+    this.logger.info('Getting state diff proof...')
     const stateDiffProof: StateDiffProof = await this.state.l2Provider.getStateDiffProof(
       transactionIndex,
-      transactionProof.transaction.blockNumber// - GENESIS BLOCK
+      /* There is jitter here sometimes need -1, sometimes, -2 */
+      transactionProof.transaction.blockNumber - 2// - GENESIS BLOCK
+      /* What's the best way to reliably get the right StateDiffProofs from the l2Geth, 
+      without needing to provide the L1 blocknumber */
     )
-
-    //for debugging the state diff proof 
-    console.log("SDP:", stateDiffProof)
 
     const stateTrie = await this._makeStateTrie(stateDiffProof)
     const storageTries = await this._makeAccountTries(stateDiffProof)
@@ -646,7 +657,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
   private async _makeStateTrie(proof: StateDiffProof): Promise<BaseTrie> {
     
     if (proof.accountStateProofs === null) {
-      this.logger.info('proof.accountStateProofs === null; l2Provider.getStateDiffProof() failed again...')
+      this.logger.info('proof.accountStateProofs === null; l2Provider.getStateDiffProof() did not give sensible outputs...')
       return
     }
 
@@ -655,6 +666,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         return accountStateProof.accountProof
       })
     )
+
   }
 
   /**
@@ -1160,11 +1172,11 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     if((var3.toNumber() + var4 + 1) == (var1.toNumber() + var2)) {
       console.log("Sum1:", var1.toNumber() + var2)
       console.log("Sum2:", var3.toNumber() + var4)
-      console.log("PASS PASS PASS FraudVerifier Check: _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index")
+      console.log("PASS FraudVerifier Check: _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index")
     } else {
       console.log("Sum1:", var1.toNumber() + var2)
       console.log("Sum2:", var3.toNumber() + var4)
-      console.log("FAIL FAIL FAIL: FraudVerifier Check: _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index")
+      console.log("FAIL FraudVerifier Check: _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index")
     }
 
     try {

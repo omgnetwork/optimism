@@ -40,7 +40,19 @@ yarn deploy
 
 ```
 
-You will see a contract compile for OVM and get deployed on the OVM. Running `yarn deploy` triggers the batch submitter to inject a bad state root - this takes place when *Mr. Fraud* transfers some funds to Alice. This is all set up via the `docker-compose-fraud.yaml`, which sets:
+```bash
+
+  Fraud Prover Testing System Setup
+    ✓ should give the initial supply to the creator's address
+    ✓ should transfer from Bob to Alice, triggering the batch submitter to submit a batch (185ms)
+    ✓ should transfer from Bob to Fraud, and from Fraud to Alice (140ms)
+
+
+  3 passing (980ms)
+
+```
+
+To avoid complications, please don't `yarn deploy` twice. You will see a contract compile for OVM and get deployed on the OVM. Running `yarn deploy` triggers the batch submitter to inject a bad state root - this takes place when *Mr. Fraud* transfers some funds to Alice. This is all set up via the `docker-compose-fraud.yaml`, which sets:
 
 ```bash
 
@@ -68,9 +80,7 @@ batch_submitter_1    |
 "fraudSubmissionAddress":"no fraud","msg":"Found transaction; FSA set to"}
 ````
 
-## 3. THIRD TERMINAL WINDOW: Running a local Fraud Prover for rapid debugging purposes
-
-First, *terminate the dockerized fraud-prover service* and then `yarn build` and `yarn start` a fraud-prover from your command line - this makes it much easier and faster to debug, since you get better debug and console.log output, and its easier to make code changes and see what happens. This fraud-prover will also use whatever you set in the .env (which should match of couse with what all the dockerized services are getting from the `docker-compose-local.env.yaml`)
+At this point, you are all set to run the `fraud-prover`:
 
 ```bash
 
@@ -79,340 +89,70 @@ yarn start
 
 ```
 
-## CURRENTLY BROKEN AT 
+The fraud prover will find the fraudulent state root: 
 
-If you do all of the above, while using the standard contracts, you will get stuck at:
+```
+
+Here are the L1 nextBatchStateRoots for this header: [
+  '0x30ecc50be31488b9550d4c07933e6eba5d9ae7a183833b79e049075c28b9bc3c',
+  '0xa706919acb4420c74434ec13247b4a7f480c038a7b7a09a1ef4a7b589f9670ba',
+  '0xa3fa402184ae96c20b3ff9230d3bc5f24150145b63534446852a14b3e1e217ce',
+  '0x6b02de3dd168224a0f0d10ca1150b44bdbdb5c7854ca79b959bb7190778e38c2',
+  '0x69cb6f1a956f2807bcc9e4f0f474e020cae1ae17f0493bfc1535bfc5a3aee4b3',
+  '0x806a9975643621374122145a114a12ac2d6e69dbdb1e2a1f0aa2ca65b1d24a40',
+  '0xbad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1'
+]
+Checking state root for mismatch 21
+{"level":30,"time":1624910071611,"msg":"State root MATCH - all good ✓"}
+Checking state root for mismatch 22
+{"level":30,"time":1624910071613,"msg":"State root MATCH - all good ✓"}
+Checking state root for mismatch 23
+{"level":30,"time":1624910071616,"msg":"State root MATCH - all good ✓"}
+Checking state root for mismatch 24
+{"level":30,"time":1624910071619,"msg":"State root MATCH - all good ✓"}
+Checking state root for mismatch 25
+{"level":30,"time":1624910071622,"msg":"State root MATCH - all good ✓"}
+Checking state root for mismatch 26
+{"level":30,"time":1624910071624,"msg":"State root MATCH - all good ✓"}
+Checking state root for mismatch 27
+{"level":30,"time":1624910071626,"msg":"State root MISMATCH"}
+{"level":30,"time":1624910071626,"l1StateRoot":"0xbad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1bad1","msg":"L1 State Root"}
+{"level":30,"time":1624910071626,"l2VStateRoot":"0x56f5a6479269667ef1f9ae4e05f519b00c58516e99ab351a88b7e6a47f4d4e9c","msg":"L2 State Root"}
+{"level":30,"time":1624910071626,"index":27,"msg":"Returning index of the mismatch"}
+{"level":30,"time":1624910071627,"fraudulentStateRootIndex":27,"msg":"Found a mismatched state root"}
+{"level":30,"time":1624910071627,"msg":"Getting fraud proof data for this index"}
+{"level":30,"time":1624910071627,"msg":"Getting pre-state root inclusion proof..."}
+
+```
+
+and then, prove account states and slots (condensed log):
 
 ```bash
 
-{"level":30,"time":1624664781920,"stateTransitionerAddress":"0x4F57F9239eFCBf43e5920f579D03B3849C588396","msg":"State transitioner"}
-{"level":30,"time":1624664781920,"msg":"Loading the corresponding state manager..."}
-{"level":30,"time":1624664781930,"stateManagerAddress":"0xf0D7de80A1C242fA3C738b083C422d65c6c7ABF1","msg":"stateManagerAddress..."}
-{"level":30,"time":1624664781964,"stateManagerAddress":"0xf0D7de80A1C242fA3C738b083C422d65c6c7ABF1","msg":"State manager"}
-{"level":30,"time":1624664781974,"msg":"Fraud proof is now in the PRE_EXECUTION phase."}
-{"level":30,"time":1624664781974,"msg":"PEP: Proving account states..."}
-{"level":30,"time":1624664781974,"address":"0x4200000000000000000000000000000000000005","msg":"Attempting to prove account state"}
-{"level":30,"time":1624664781990,"msg":"Need to deploy a copy of the account first..."}
-{"level":30,"time":1624664782049,"msg":"Deployed a copy of the account, attempting proof..."}
-{"level":30,"time":1624664782049,"msg":"OVM_StateTransitioner.proveContractState..."}
+{"level":30,"time":1624910072332,"msg":"Loading fraud proof contracts..."}
+{"level":30,"time":1624910072332,"msg":"Loading the state transitioner..."}
+{"level":30,"time":1624910072383,"stateTransitionerAddress":"0x4F57F9239eFCBf43e5920f579D03B3849C588396","msg":"State transitioner"}
+{"level":30,"time":1624910072393,"stateManagerAddress":"0xf0D7de80A1C242fA3C738b083C422d65c6c7ABF1","msg":"stateManagerAddress..."}
+{"level":30,"time":1624910072425,"stateManagerAddress":"0xf0D7de80A1C242fA3C738b083C422d65c6c7ABF1","msg":"State manager"}
+{"level":30,"time":1624910072436,"msg":"Fraud proof is now in the PRE_EXECUTION phase."}
+{"level":30,"time":1624910072436,"msg":"PEP: Proving account states..."}
+{"level":30,"time":1624910072436,"address":"0x4200000000000000000000000000000000000007","msg":"Attempting to prove account state"}
+{"level":30,"time":1624910072451,"msg":"Need to deploy a copy of the account first..."}
+{"level":30,"time":1624910072512,"msg":"Deployed a copy of the account, attempting proof..."}
+{"level":30,"time":1624910072512,"msg":"OVM_StateTransitioner.proveContractState..."}
+{"level":30,"time":1624910072916,"msg":"Account state proven."}
+
+...
+
+{"level":30,"time":1624910074719,"msg":"PEP: Proving storage slot states..."}
+{"level":30,"time":1624910074719,"address":"0x4200000000000000000000000000000000000008","key":"0xde24ca96c4b0b6ed2c73bb46c1053b6edd9470cda80c625493502cc81a3ccfa7","value":"0x4200000000000000000000000000000000000000","msg":"Attempting to prove slot."}
+{"level":30,"time":1624910075002,"msg":"Slot value proven."}
+
+...
+
+{"level":30,"time":1624910080439,"msg":"Executing transaction..."}
+{"level":30,"time":1624910080513,"msg":"Transaction successfully executed."}
 
 ```
 
-## 4. Generating the Fraud Prover Docker 
-
-To build the Docker:
-
-```bash
-
-docker build . --file Dockerfile.fraud-prover --tag omgx/fraud-prover:latest
-docker push omgx/fraud-prover:latest
-
-```
-
-## NOT UPDATED 5. Configuration
-
-All configuration is done via environment variables. See below for more information.
-
-## NOT UPDATED 6. Testing & linting
-
-- See lint errors with `yarn lint`; auto-fix with `yarn lint --fix`
-
-## NOT UPDATED 7. Envs (Need to reconcile with the below - ToDo)
-
-| Environment Variable   | Required? | Default Value         | Description            |
-| -----------            | --------- | -------------         | -----------           |
-| `L1_WALLET_KEY`        | Yes       | N/A                   | Private key for an account on Layer 1 (Ethereum) to be used to submit fraud proof transactions. |
-| `L2_NODE_WEB3_URL`     | No        | http://localhost:9545 | HTTP endpoint for a Layer 2 (Optimism) Verifier node.  |
-| `L1_NODE_WEB3_URL`     | No        | http://localhost:8545 | HTTP endpoint for a Layer 1 (Ethereum) node.      |
-| `RELAY_GAS_LIMIT`      | No        | 9,000,000             | Maximum amount of gas to provide to fraud proof transactions (except for the "transaction execution" step). |
-| `RUN_GAS_LIMIT`        | No        | 9,000,000             | Maximum amount of gas to provide to the "transaction execution" step. |
-| `POLLING_INTERVAL`     | No        | 5,000                 | Time (in milliseconds) to wait while polling for new transactions. |
-| `L2_BLOCK_OFFSET`      | No        | 1                     | Offset between the `CanonicalTransactionChain` contract on Layer 1 and the blocks on Layer 2. Currently defaults to 1, but will likely be removed as soon as possible. |
-| `L1_BLOCK_FINALITY`    | No        | 0                     | Number of Layer 1 blocks to wait before considering a given event. |
-| `L1_START_OFFSET`      | No        | 0                     | Layer 1 block number to start scanning for transactions from. |
-| `FROM_L2_TRANSACTION_INDEX` | No        | 0                     | Layer 2 block number to start scanning for transactions from. |
-
-## NOT UPDATED 8. Local testing
-
-The fraud prover will first connect to the relevant chains and then look for mismatched state roots. Note that the *Fraud Prover* does not connect to the *Sequencer*, rather, it connects to the *Verifier*, and the Verifier in turn is looking at the L1. Assuming _your sequencer is not fraudulant_, the standard Fraud Prover output looks like this:
-
-```
-
-{"level":30,"time":1619122304289,"msg":"Looking for mismatched state roots..."}
-{"level":30,"time":1619122304295,"nextAttemptInS":5,"msg":"Did not find any mismatched state roots"}
-{"level":30,"time":1619122309301,"msg":"Looking for mismatched state roots..."}
-{"level":30,"time":1619122309306,"nextAttemptInS":5,"msg":"Did not find any mismatched state roots"}
-{"level":30,"time":1619122314311,"msg":"Looking for mismatched state roots..."}
-
-```
-
-When you spin up your local test system some small changes to the generic `local.env.yaml` and `local.yaml` may be needed. Also, you will have to provide two extra files, `wait-for-l1-and-l2.sh`. For your testing conveniance, there is also a `Dockerfile.fraud_prover`.
-
-### local.yaml Settings
-
-Add to your `local.yaml`
-```bash
-#all the usual things here (L2, Batch submitter, Message Relay, Hardhat, Deployer), but then...
-
-  verifier:
-    image: omgx/go-ethereum
-    volumes:
-      - verifier:/root/.ethereum:rw
-    ports:
-      - 8045:8045
-      - 8046:8046
-
-  fraud_prover:
-    image: omgx/fraud-prover:latest
-
-volumes:
-
-  geth:
-
-  verifier:
-```
-
-### local.env.yaml Settings
-
-Add to your `local.env.yaml`
-
-```bash
-
-x-var: &L1_NODE_WEB3_URL
-  L1_NODE_WEB3_URL=http://l1_chain:9545
-
-x-var: &DEPLOYER_HTTP
-  DEPLOYER_HTTP=http://deployer:8080
-
-x-var: &ADDRESS_MANAGER_ADDRESS
-  ADDRESS_MANAGER_ADDRESS=0xYOUR_ADDRESS_MANAGER_HERE
-
-services:
-
-#all the usual things here (L2, Batch submitter, Message Relay, Hardhat, Deployer), but then...
-
-  verifier:
-    environment:
-      - *DEPLOYER_HTTP
-      - *L1_NODE_WEB3_URL
-      - ROLLUP_VERIFIER_ENABLE=true
-      - ETH1_SYNC_SERVICE_ENABLE=true
-      - ETH1_CTC_DEPLOYMENT_HEIGHT=8
-      - ETH1_CONFIRMATION_DEPTH=0
-      - ROLLUP_CLIENT_HTTP=http://data_transport_layer:7878
-      - ROLLUP_POLL_INTERVAL_FLAG=3s
-      - USING_OVM=true
-      - CHAIN_ID=420
-      - NETWORK_ID=420
-      - DEV=true
-      - DATADIR=/root/.ethereum
-      - RPC_ENABLE=true
-      - RPC_ADDR=verifier
-      - RPC_CORS_DOMAIN=*
-      - RPC_VHOSTS=*
-      - RPC_PORT=8045
-      - WS=true
-      - WS_ADDR=0.0.0.0
-      - IPC_DISABLE=true
-      - TARGET_GAS_LIMIT=9000000
-      - RPC_API=eth,net,rollup,web3
-      - WS_API=eth,net,rollup,web3
-      - WS_ORIGINS=*
-      - GASPRICE=0
-      - NO_USB=true
-      - GCMODE=archive
-      - NO_DISCOVER=true
-      - ROLLUP_STATE_DUMP_PATH=http://deployer:8080/state-dump.latest.json
-      - RETRIES=60
-
-  fraud_prover:
-    environment:
-      - NO_TIMEOUT=true
-      - *L1_NODE_WEB3_URL
-      - *ADDRESS_MANAGER_ADDRESS
-      - L2_NODE_WEB3_URL=http://verifier:8045
-      - L1_WALLET_KEY=0xYOUR_FP_WALLET_KEY_HERE
-      - POLLING_INTERVAL=5000
-      - RUN_GAS_LIMIT=8999999
-      - RELAY_GAS_LIMIT=8999999
-      - FROM_L2_TRANSACTION_INDEX=0
-      - L2_BLOCK_OFFSET=1
-      - L1_START_OFFSET=8
-      - RETRIES=60
-
-```
-
-### Fraud Prover spinup wait-for-l1-and-l2.sh
-
-```bash
-
-#!/bin/bash
-
-# Copyright Optimism PBC 2020
-# MIT License
-# github.com/ethereum-optimism
-
-cmd="$@"
-JSON='{"jsonrpc":"2.0","id":0,"method":"net_version","params":[]}'
-
-RETRIES=${RETRIES:-50}
-until $(curl --silent --fail \
-    --output /dev/null \
-    -H "Content-Type: application/json" \
-    --data "$JSON" "$L1_NODE_WEB3_URL"); do
-  sleep 1
-  echo "Will wait $((RETRIES--)) more times for $L1_NODE_WEB3_URL to be up..."
-
-  if [ "$RETRIES" -lt 0 ]; then
-    echo "Timeout waiting for layer one node at $L1_NODE_WEB3_URL"
-    exit 1
-  fi
-done
-echo "Connected to L1 Node at $L1_NODE_WEB3_URL"
-
-RETRIES=${RETRIES:-50}
-until $(curl --silent --fail \
-    --output /dev/null \
-    -H "Content-Type: application/json" \
-    --data "$JSON" "$L2_NODE_WEB3_URL"); do
-  sleep 1
-  echo "Will wait $((RETRIES--)) more times for $L2_NODE_WEB3_URL to be up..."
-
-  if [ "$RETRIES" -lt 0 ]; then
-    echo "Timeout waiting for layer two node at $L2_NODE_WEB3_URL"
-    exit 1
-  fi
-done
-echo "Connected to L2 Verifier Node at $L2_NODE_WEB3_URL"
-
-if [ ! -z "$DEPLOYER_HTTP" ]; then
-    RETRIES=${RETRIES:-50}
-    until $(curl --silent --fail \
-        --output /dev/null \
-        "$DEPLOYER_HTTP/addresses.json"); do
-      sleep 1
-      echo "Will wait $((RETRIES--)) more times for $DEPLOYER_HTTP to be up..."
-
-      if [ "$RETRIES" -lt 0 ]; then
-        echo "Timeout waiting for contract deployment"
-        exit 1
-      fi
-    done
-    echo "Contracts are deployed"
-    ADDRESS_MANAGER_ADDRESS=$(curl --silent $DEPLOYER_HTTP/addresses.json | jq -r .AddressManager)
-    exec env \
-        ADDRESS_MANAGER_ADDRESS=$ADDRESS_MANAGER_ADDRESS \
-        L1_BLOCK_OFFSET=$L1_BLOCK_OFFSET \
-        $cmd
-else
-    exec $cmd
-fi
-
-```
-
-### Fraud Prover Dockerfile.fraud_prover
-
-```
-
-FROM node:14-buster as base
-
-RUN apt-get update && apt-get install -y bash curl jq
-
-FROM base as build
-
-RUN apt-get update && apt-get install -y bash git python build-essential
-
-ADD . /opt/fraud-prover
-
-RUN cd /opt/fraud-prover yarn install yarn build
-
-FROM base
-
-RUN apt-get update && apt-get install -y bash curl jq
-
-COPY --from=build /opt/fraud-prover /opt/fraud-prover
-
-COPY wait-for-l1-and-l2.sh /opt/
-RUN chmod +x /opt/wait-for-l1-and-l2.sh
-RUN chmod +x /opt/fraud-prover/exec/run.js
-RUN ln -s /opt/fraud-prover/exec/run.js /usr/local/bin/
-
-ENTRYPOINT ["/opt/wait-for-l1-and-l2.sh", "run.js"]
-
-```
-
-
-
-
-
-/*
-
-# HARDHAT ACCOUNTS:
-
-Standard usage - careful re. duplication
-
-# DEPLOYER_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-# SEQUENCER_PRIVATE_KEY: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
-# RELAYER_PRIVATE_KEY: "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
-
-# # a funded hardhat account used for the relayer - duplicates the one used for the Relayer.... 
-# L1_WALLET_KEY: "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
-
-Accounts used for the wallet, typically - should hcange those?
-
-# ETH1_ADDRESS_RESOLVER_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
-# TEST_PRIVATE_KEY_1=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-# TEST_PRIVATE_KEY_2=0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-# TEST_PRIVATE_KEY_3=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
-
-Acconut used to submit fraudulent state roots
-
-# Account #17: 0xbda5747bfd65f08deb54cb465eb87d40e51b197e (10000 ETH)
-# Private Key: 0x689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd
-
-yarn run v1.22.5
-$ hardhat node
-Started HTTP and WebSocket JSON-RPC server at http://0.0.0.0:8545/
-Accounts
-========
-Account #0: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (10000 ETH)
-Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-Account #1: 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 (10000 ETH)
-Private Key: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-Account #2: 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc (10000 ETH)
-Private Key: 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
-Account #3: 0x90f79bf6eb2c4f870365e785982e1f101e93b906 (10000 ETH)
-Private Key: 0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6
-Account #4: 0x15d34aaf54267db7d7c367839aaf71a00a2c6a65 (10000 ETH)
-Private Key: 0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a
-Account #5: 0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc (10000 ETH)
-Private Key: 0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba
-Account #6: 0x976ea74026e726554db657fa54763abd0c3a0aa9 (10000 ETH)
-Private Key: 0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e
-Account #7: 0x14dc79964da2c08b23698b3d3cc7ca32193d9955 (10000 ETH)
-Private Key: 0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356
-Account #8: 0x23618e81e3f5cdf7f54c3d65f7fbc0abf5b21e8f (10000 ETH)
-Private Key: 0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97
-Account #9: 0xa0ee7a142d267c1f36714e4a8f75612f20a79720 (10000 ETH)
-Private Key: 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
-Account #10: 0xbcd4042de499d14e55001ccbb24a551f3b954096 (10000 ETH)
-Private Key: 0xf214f2b2cd398c806f84e317254e0f0b801d0643303237d97a22a48e01628897
-Account #11: 0x71be63f3384f5fb98995898a86b02fb2426c5788 (10000 ETH)
-Private Key: 0x701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82
-Account #12: 0xfabb0ac9d68b0b445fb7357272ff202c5651694a (10000 ETH)
-Private Key: 0xa267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1
-Account #13: 0x1cbd3b2770909d4e10f157cabc84c7264073c9ec (10000 ETH)
-Private Key: 0x47c99abed3324a2707c28affff1267e45918ec8c3f20b8aa892e8b065d2942dd
-Account #14: 0xdf3e18d64bc6a983f673ab319ccae4f1a57c7097 (10000 ETH)
-Private Key: 0xc526ee95bf44d8fc405a158bb884d9d1238d99f0612e9f33d006bb0789009aaa
-Account #15: 0xcd3b766ccdd6ae721141f452c550ca635964ce71 (10000 ETH)
-Private Key: 0x8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61
-Account #16: 0x2546bcd3c84621e976d8185a91a922ae77ecec30 (10000 ETH)
-Private Key: 0xea6c44ac03bff858b476bba40716402b03e41b8e97e276d1baec7c37d42484a0
-
-**Account #17: 0xbda5747bfd65f08deb54cb465eb87d40e51b197e (10000 ETH)
-Private Key: 0x689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd**
-
-Account #18: 0xdd2fd4581271e230360230f9337d5c0430bf44c0 (10000 ETH)
-
-*/
+at this point, the `PRE-EXECUTION` phase should be complete. This is as far as we have gotten - occasionally there are gas related issues, which lead to things like `VM Exception while processing transaction: revert Not enough gas to execute transaction deterministically`. The run-gas-limit is set in the `.env` at `RUN_GAS_LIMIT=95000000`.

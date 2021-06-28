@@ -334,14 +334,20 @@ export class L1ProviderWrapper {
   public async getTransactionBatchProof(
     index: number
   ): Promise<TransactionBatchProof> {
-
+    
     const batchHeader = await this.getTransactionBatchHeader(index)
     const transactions = await this.getBatchTransactions(index)
+    const batchIndex = index - batchHeader.prevTotalElements.toNumber()
 
+    // Our specific Merkle tree implementation requires that the number of leaves is a power of 2.
+    // If the number of given leaves is less than a power of 2, we need to round up to the next
+    // available power of 2. We fill the remaining space with the hash of bytes32(0).
+    const correctedTreeSize = Math.pow(2, Math.ceil(Math.log2(transactions.length)))
     const elements = []
-    for (let i = 0;i < transactions.length;i++)
-    {
-      const tx = transactions[i]
+    for ( let i = 0; i < correctedTreeSize; i++ ) {
+      if (i < transactions.length) {
+        // TODO: FIX
+        const tx = transactions[i]
         elements.push(
           `0x01${BigNumber.from(tx.transaction.timestamp)
             .toHexString()
@@ -351,10 +357,26 @@ export class L1ProviderWrapper {
             .slice(2)
             .padStart(64, '0')}${tx.transaction.data.slice(2)}`
         )
+      } else {
+        elements.push('0x' + '00'.repeat(32))
+      }
     }
 
-    const batchIndex = index - batchHeader.prevTotalElements.toNumber()
-    const treeProof = this.getMerkleTreeProof(elements,batchIndex)
+    const hash = (el: Buffer | string): Buffer => {
+      return Buffer.from(ethers.utils.keccak256(el).slice(2), 'hex')
+    }
+
+    const leaves = elements.map((element) => {
+      return hash(element)
+    })
+
+    const tree = new MerkleTree(leaves, hash)
+    
+    const treeProof = tree
+      .getProof(leaves[batchIndex], batchIndex)
+      .map((element) => {
+        return element.data
+      })
 
     return {
       transaction: transactions[batchIndex].transaction,
@@ -366,6 +388,43 @@ export class L1ProviderWrapper {
       },
     }
   }
+
+  // public async getTransactionBatchProof(
+  //   index: number
+  // ): Promise<TransactionBatchProof> {
+
+  //   const batchHeader = await this.getTransactionBatchHeader(index)
+  //   const transactions = await this.getBatchTransactions(index)
+  //   const batchIndex = index - batchHeader.prevTotalElements.toNumber()
+
+  //   // const elements = []
+  //   // for (let i = 0;i < transactions.length;i++)
+  //   // {
+  //   //   const tx = transactions[i]
+  //   //     elements.push(
+  //   //       `0x01${BigNumber.from(tx.transaction.timestamp)
+  //   //         .toHexString()
+  //   //         .slice(2)
+  //   //         .padStart(64, '0')}${BigNumber.from(tx.transaction.blockNumber)
+  //   //         .toHexString()
+  //   //         .slice(2)
+  //   //         .padStart(64, '0')}${tx.transaction.data.slice(2)}`
+  //   //     )
+  //   // }
+
+  //
+  //   // const treeProof = this.getMerkleTreeProof(elements,batchIndex)
+
+  //   return {
+  //     transaction: transactions[batchIndex].transaction,
+  //     transactionChainElement: transactions[batchIndex].transactionChainElement,
+  //     transactionBatchHeader: batchHeader,
+  //     transactionProof: {
+  //       index: batchIndex,
+  //       siblings: treeProof,
+  //     },
+  //   }
+  // }
   
   public async getStateRoot(index: number): Promise<string> {
     
@@ -452,6 +511,7 @@ export class L1ProviderWrapper {
   private async _getTransactionBatchEvent(
     index: number
   ): Promise<Event & { isSequencerBatch: boolean }> {
+    
     const events = await this.findAllEvents(
       this.OVM_CanonicalTransactionChain,
       this.OVM_CanonicalTransactionChain.filters.TransactionBatchAppended()

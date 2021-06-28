@@ -40,8 +40,8 @@
     "dotenv": "^8.2.0",
     "hardhat": "^2.2.1",
     "hardhat-deploy": "^0.7.5",
-    "merkle-patricia-tree": "^4.2.0",
-    "merkletreejs": "^0.2.18",
+    "merkle-patricia-tree": "4.0.0",
+    "merkletreejs": "^0.2.10",
     "rlp": "^2.2.6",
     "sqlite3": "^5.0.2",
     "typescript": "^4.3.2"
