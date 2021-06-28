@@ -24,8 +24,6 @@ import md5 from 'md5'
 
 import { openAlert, openError } from './uiAction'
 
-import { BUYER_OPTIMISM_API_URL } from '../Settings'
-
 import buyerAxiosInstance from '../api/buyerAxios'
 
 const get_number_of_items_on_varnaBegin = () => ({
@@ -174,30 +172,16 @@ const getBidAcceptDataFailure = (data) => ({
 export const get_number_of_items_on_varna = () => (dispatch) => {
   dispatch(get_number_of_items_on_varnaBegin())
 
-  // fetch(BUYER_OPTIMISM_API_URL + 'item.count', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({}),
-  // })
+  const payload = JSON.stringify({})
 
-  buyerAxiosInstance
-    .post('item.count', {})
-    .then((res) => {
-      if (res.status === 201) {
-        return res.data
-      } else {
-        dispatch(get_number_of_items_on_varnaFailure(res.status))
-        return ''
-      }
-    })
-    .then((data) => {
-      if (data !== '') {
-        dispatch(get_number_of_items_on_varnaSuccess(data))
-      }
-    })
+  buyerAxiosInstance.post('item.count', payload).then((res) => {
+    if (res.status === 201 && res.data !== '') {
+      dispatch(get_number_of_items_on_varnaSuccess(res.data))
+    } else {
+      dispatch(get_number_of_items_on_varnaFailure(res.status))
+      return ''
+    }
+  })
 }
 
 /* Upload buyer original bid */
@@ -210,7 +194,7 @@ const uploadBuyerBidAndStatus = (
 ) => (dispatch) => {
   dispatch(uploadBuyerBidAndStatusBegin())
 
-  const body = JSON.stringify({
+  const payload = JSON.stringify({
     bidID,
     ciphertext,
     symbolA: itemToReceive.symbol,
@@ -218,16 +202,7 @@ const uploadBuyerBidAndStatus = (
     address,
   })
 
-  // return fetch(BUYER_OPTIMISM_API_URL + 'upload.bid.buyer', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body,
-  // })
-
-  return buyerAxiosInstance.post('upload.bid.buyer', body).then((res) => {
+  return buyerAxiosInstance.post('upload.bid.buyer', payload).then((res) => {
     if (res.status === 201) {
       dispatch(uploadBuyerBidAndStatusSuccess())
       return { status: 201 }
@@ -244,18 +219,11 @@ export const isBidOpenOrClosed = () => (dispatch) => {
 
   dispatch(isBidOpenOrClosedBegin())
 
-  // fetch(BUYER_OPTIMISM_API_URL + 'download.bid.status', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     address,
-  //   }),
-  // })
+  const payload = JSON.stringify({
+    address,
+  })
 
-  buyerAxiosInstance.post('download.bid.status', { address }).then((res) => {
+  buyerAxiosInstance.post('download.bid.status', payload).then((res) => {
     if (res.status === 201) {
       return dispatch(isBidOpenOrClosedSuccess(res.data.data))
     } else {
@@ -263,12 +231,6 @@ export const isBidOpenOrClosed = () => (dispatch) => {
       return ''
     }
   })
-
-  // .then((data) => {
-  //   if (data !== '') {
-  //     dispatch(isBidOpenOrClosedSuccess(data.data))
-  //   }
-  // })
 }
 
 export const getBidMakingTasks = (rescanPlasma = false) => (dispatch) => {
@@ -276,22 +238,13 @@ export const getBidMakingTasks = (rescanPlasma = false) => (dispatch) => {
 
   // Generate hashed address
   const address = md5(networkService.account)
-  // let url = BUYER_OPTIMISM_API_URL + 'scan.light'
 
-  // if (rescanPlasma) url = BUYER_OPTIMISM_API_URL + 'scan.full'
+  const payload = JSON.stringify({
+    address,
+  })
 
-  // fetch(url, {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     address,
-  //   }),
-  // })
   buyerAxiosInstance
-    .post(`scan.${rescanPlasma ? 'full' : 'light'}`, { address })
+    .post(`scan.${rescanPlasma ? 'full' : 'light'}`, payload)
     .then((res) => {
       if (res.status === 201) {
         if (res.data) {
@@ -310,92 +263,49 @@ export const getBidMakingTasks = (rescanPlasma = false) => (dispatch) => {
         return ''
       }
     })
-
-  // .then((data) => {
-  //   if (data !== '') {
-  //     if (rescanPlasma) {
-  //       console.log('getBidMakingTasksRefreshed:', data)
-  //       dispatch(getBidMakingTasksSuccess(data))
-  //     } else {
-  //       // console.log("getBidMakingTasks:", data.bidOfferStatus);
-  //       dispatch(getBidMakingTasksSuccess(data.bidOfferStatus))
-  //     }
-  //   }
-  // })
 }
 
 export const closeBid = (bidID) => (dispatch) => {
   // Generate hashed address
   const address = md5(networkService.account)
 
-  // fetch(BUYER_OPTIMISM_API_URL + 'delete.bid', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     bidID,
-  //     address,
-  //   }),
-  // })
-  buyerAxiosInstance
-    .post('delete.bid', {
-      bidID,
-      address,
-    })
-    .then((res) => {
-      if (res.status === 201) {
-        dispatch(closeBidSuccess(bidID))
-      } else {
-        dispatch(closeBidFailure(bidID, res.status))
-      }
-    })
+  const payload = JSON.stringify({
+    bidID,
+    address,
+  })
+  buyerAxiosInstance.post('delete.bid', payload).then((res) => {
+    if (res.status === 201) {
+      dispatch(closeBidSuccess(bidID))
+    } else {
+      dispatch(closeBidFailure(bidID, res.status))
+    }
+  })
 }
 
 export const getBidBuyer = (bidID, password) => (dispatch) => {
   dispatch(getBidBuyerBegin(bidID))
 
-  // return fetch(BUYER_OPTIMISM_API_URL + 'download.bid.ciphertext', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     bidID,
-  //   }),
-  // })
-  buyerAxiosInstance
-    .post('download.bid.ciphertext', {
-      bidID,
-    })
-    .then((res) => {
-      if (res.status === 201) {
-        // return res.json()
-        const { data } = res
-        if (Object.keys(data.ciphertext).length !== 0) {
-          dispatch(decryptBidForBuyer(bidID, data.ciphertext, password))
-          dispatch(getBidBuyerSuccess(bidID, [])) //plaintext is pending - can't fill in yet
-        } else {
-          dispatch(getBidBuyerFailure(bidID, 400))
-        }
-        return data
+  const payload = JSON.stringify({
+    bidID,
+  })
+
+  buyerAxiosInstance.post('download.bid.ciphertext', payload).then((res) => {
+    if (res.status === 201) {
+      // return res.json()
+      const { data } = res
+      if (Object.keys(data.ciphertext).length !== 0) {
+        dispatch(decryptBidForBuyer(bidID, data.ciphertext, password))
+        dispatch(getBidBuyerSuccess(bidID, [])) //plaintext is pending - can't fill in yet
       } else {
-        // dispatch(getBidBuyerFailure(bidID, res.json()))
-        dispatch(getBidBuyerFailure(bidID, res.data))
-        return ''
+        dispatch(getBidBuyerFailure(bidID, 400))
       }
-    })
-  // .then((data) => {
-  //   if (Object.keys(data.ciphertext).length !== 0) {
-  //     dispatch(decryptBidForBuyer(bidID, data.ciphertext, password))
-  //     dispatch(getBidBuyerSuccess(bidID, [])) //plaintext is pending - can't fill in yet
-  //   } else {
-  //     dispatch(getBidBuyerFailure(bidID, 400))
-  //   }
-  //   return data
-  // })
+      return data
+    } else {
+      // dispatch(getBidBuyerFailure(bidID, res.json()))
+      dispatch(getBidBuyerFailure(bidID, res.data))
+      return ''
+    }
+  })
 }
 
 const decryptBidForBuyer = (bidID, ciphertext, password) => (dispatch) => {
@@ -549,51 +459,24 @@ export const listBid = (
 export const getBidAcceptData = (bidIDList) => (dispatch) => {
   dispatch(getBidAcceptDataBegin())
 
-  // return fetch(BUYER_OPTIMISM_API_URL + 'download.agreement', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     bidIDList,
-  //     address: networkService.account,
-  //   }),
-  // })
-  return buyerAxiosInstance
-    .post('download.agreement', {
-      bidIDList,
-      address: networkService.account,
-    })
-    .then((res) => {
-      if (res.status === 201 && res.data !== '') {
-        dispatch(getBidAcceptDataSuccess(res.data))
-      } else {
-        dispatch(getBidAcceptDataFailure(res.status))
-        return ''
-      }
-    })
-
-  // .then((data) => {
-  //   if (data !== '') {
-  //     dispatch(getBidAcceptDataSuccess(data))
-  //   }
-  // })
+  const payload = JSON.stringify({
+    bidIDList,
+    address: networkService.account,
+  })
+  return buyerAxiosInstance.post('download.agreement', payload).then((res) => {
+    if (res.status === 201 && res.data !== '') {
+      dispatch(getBidAcceptDataSuccess(res.data))
+    } else {
+      dispatch(getBidAcceptDataFailure(res.status))
+      return ''
+    }
+  })
 }
 
 const closeBidOffer = (UUID) => {
-  buyerAxiosInstance.post('close.agreement', { UUID }).then((res) => {
-    return res.status
-  })
-
-  // fetch(BUYER_OPTIMISM_API_URL + 'close.agreement', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({ UUID }),
-  // }).then((res) => {
-  //   return res.status
-  // })
+  buyerAxiosInstance
+    .post('close.agreement', JSON.stringify({ UUID }))
+    .then((res) => {
+      return res.status
+    })
 }

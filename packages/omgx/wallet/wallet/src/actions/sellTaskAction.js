@@ -26,7 +26,6 @@ import { accDiv, accMul } from 'util/calculation'
 import { arrayToCoin } from 'util/coinConvert'
 import { AESEncrypt, AESDecrypt } from 'cryptoWorker/cryptoWorker'
 
-import { SELLER_OPTIMISM_API_URL } from '../Settings'
 import sellerAxiosInstance from 'api/sellerAxios'
 
 /****************************/
@@ -123,18 +122,6 @@ const downloadBidOffer = (bidDecryptionWaitingList) => (dispatch) => {
   dispatch(getBidOfferBegin(bidID, itemID))
   dispatch(downloadBidOfferBegin(bidID))
 
-  // return fetch(SELLER_OPTIMISM_API_URL + 'download.bid.ciphertext', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     itemID,
-  //     bidID,
-  //   }),
-  // })
-
   const payload = JSON.stringify({
     itemID,
     bidID,
@@ -164,19 +151,6 @@ const downloadBidOffer = (bidDecryptionWaitingList) => (dispatch) => {
         return ''
       }
     })
-
-  // .then((data) => {
-  //   if (data !== '') {
-  //     if (data.status === 201) {
-  //       dispatch(downloadBidOfferSuccess(bidID, data.ciphertext))
-  //       return { ciphertext: data.ciphertext, address: data.address, bidID }
-  //     } else {
-  //       return ''
-  //     }
-  //   } else {
-  //     return ''
-  //   }
-  // })
 }
 
 const decryptBidOffer = (

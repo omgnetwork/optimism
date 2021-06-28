@@ -33,7 +33,6 @@ import { accSub, accMul } from 'util/calculation'
 
 import networkService from 'services/networkService'
 
-import { SELLER_OPTIMISM_API_URL } from 'Settings'
 import sellerAxiosInstance from 'api/sellerAxios'
 
 const encryptItemForSellerBegin = () => ({
@@ -199,23 +198,6 @@ const uploadItemFiles = (
 ) => (dispatch) => {
   dispatch(uploadItemFilesBegin())
 
-  // return fetch(SELLER_OPTIMISM_API_URL + 'list.item', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     publicKey: message.data.fhePublicKey,
-  //     multiKey: message.data.fheMultiKey,
-  //     rotaKey: message.data.fheRotaKey,
-  //     ciphertext: message.data.fheCiphertext,
-  //     itemID: itemID,
-  //     symbolA: itemToSend.symbol,
-  //     symbolB: itemToReceive.symbol,
-  //     address,
-  //   }),
-  // })
   const payload = JSON.stringify({
     publicKey: message.data.fhePublicKey,
     multiKey: message.data.fheMultiKey,
@@ -281,7 +263,6 @@ export const listItem = (
   sellerExchangeRate,
   FHEseed
 ) => (dispatch) => {
-  console.log('listBid: Starting the item listing process')
   var cryptoWorkerThreadID = crypto
     .getRandomValues(new Uint32Array(1))
     .toString(16)
@@ -338,54 +319,23 @@ export const isItemOpenOrClosed = () => (dispatch) => {
   // Generate hashed address
   const address = md5(networkService.account)
 
-  // return fetch(SELLER_OPTIMISM_API_URL + 'download.item.status', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({ address }),
-  // })
-
   const payload = JSON.stringify({ address })
 
   return sellerAxiosInstance
     .post('download.item.status', payload)
     .then((res) => {
-      if (res.status === 201) {
-        // return res.data
-        if (res.data !== '') {
-          dispatch(isItemOpenOrClosedSuccess(res.data.data))
-          return res.data.data
-        }
-        return ''
+      if (res.status === 201 && res.data !== '') {
+        dispatch(isItemOpenOrClosedSuccess(res.data.data))
+        return res.data.data
       } else {
         dispatch(isItemOpenOrClosedFailure(res.status))
         return ''
       }
     })
-  // .then((data) => {
-  //   if (data !== '') {
-  //     dispatch(isItemOpenOrClosedSuccess(data.data))
-  //     return data.data
-  //   }
-  //   return ''
-  // })
 }
 
 export const downloadItemCiphertext = (itemID) => (dispatch) => {
   dispatch(downloadItemCiphertextBegin(itemID))
-
-  // return fetch(SELLER_OPTIMISM_API_URL + 'download.item.ciphertext', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     itemID,
-  //   }),
-  // })
 
   const payload = JSON.stringify({
     itemID,
@@ -394,27 +344,14 @@ export const downloadItemCiphertext = (itemID) => (dispatch) => {
   return sellerAxiosInstance
     .post('download.item.ciphertext', payload)
     .then((res) => {
-      if (res.status === 201) {
-        // return res.json()
-        if (res.data !== '') {
-          dispatch(downloadItemCiphertextSuccess(itemID, res.data.ciphertext))
-          return res.data.ciphertext
-        } else {
-          return ''
-        }
+      if (res.status === 201 && res.data !== '') {
+        dispatch(downloadItemCiphertextSuccess(itemID, res.data.ciphertext))
+        return res.data.ciphertext
       } else {
         dispatch(downloadItemCiphertextFailure(itemID, res.status))
         return ''
       }
     })
-  // .then((data) => {
-  //   if (data !== '') {
-  //     dispatch(downloadItemCiphertextSuccess(itemID, data.ciphertext))
-  //     return data.ciphertext
-  //   } else {
-  //     return ''
-  //   }
-  // })
 }
 
 export const decryptItem = (itemID, FHEseed, AESKey, ciphertext) => (
@@ -517,18 +454,6 @@ export const deleteItem = (itemID) => (dispatch) => {
 
   // Generate hashed address
   const address = md5(networkService.account)
-
-  // return fetch(SELLER_OPTIMISM_API_URL + 'delete.item', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     itemID,
-  //     address,
-  //   }),
-  // })
 
   const payload = JSON.stringify({
     itemID,
@@ -755,53 +680,24 @@ export const decryptItemCache = (
 export const getSellerAcceptBidData = (itemIDList) => (dispatch) => {
   dispatch(getSellerAcceptBidDataBegin())
 
-  // return fetch(SELLER_OPTIMISM_API_URL + 'download.agreement', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     itemIDList,
-  //     address: networkService.account,
-  //   }),
-  // })
-
   let payload = JSON.stringify({
     itemIDList,
     address: networkService.account,
   })
   return sellerAxiosInstance.post('download.agreement', payload).then((res) => {
-    if (res.status === 201) {
-      // return res.json()
-      if (res.data !== '') {
-        dispatch(getSellerAcceptBidDataSuccess(res.data))
-      }
+    if (res.status === 201 && res.data !== '') {
+      dispatch(getSellerAcceptBidDataSuccess(res.data))
     } else {
       dispatch(getSellerAcceptBidDataFailure(res.status))
       return ''
     }
   })
-
-  // .then((data) => {
-  //   if (data !== '') {
-  //     dispatch(getSellerAcceptBidDataSuccess(data))
-  //   }
-  // })
 }
 
 const uploadSellerAcceptBidData = (cMD) => {
-  // return fetch(SELLER_OPTIMISM_API_URL + 'upload.agreement', {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify(cMD),
-  // })
-
-  const payload = JSON.stringify(cMD)
-  return sellerAxiosInstance.post('upload.agreement', payload).then((res) => {
-    return res.status
-  })
+  return sellerAxiosInstance
+    .post('upload.agreement', JSON.stringify(cMD))
+    .then((res) => {
+      return res.status
+    })
 }
