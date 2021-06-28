@@ -282,6 +282,8 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         this.logger.info('Getting fraud proof data for this index')
         const proof = await this._getFraudProofData(fraudulentStateRootIndex)
 
+        console.log("Proof:",proof)
+
         this.logger.info('Step M4: Initializing fraud verification')
        
         try {
@@ -546,36 +548,39 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
   private async _getFraudProofData(
     transactionIndex: number
   ): Promise<FraudProofData> {
-        
-    const preStateRootProof =
-      await this.state.l1Provider.getStateRootBatchProof(transactionIndex - 1)
+    this.logger.info('Getting pre-state root inclusion proof...')
+    const preStateRootProof = await this.state.l1Provider.getStateRootBatchProof(
+      transactionIndex - 1
+    )
 
-    const postStateRootProof =
-      await this.state.l1Provider.getStateRootBatchProof(transactionIndex)
-    
-    const transactionProof =
-      await this.state.l1Provider.getTransactionBatchProof(transactionIndex)
-    
+    this.logger.info('Getting post-state root inclusion proof...')
+    const postStateRootProof = await this.state.l1Provider.getStateRootBatchProof(
+      transactionIndex
+    )
+
+    this.logger.info('Getting transaction inclusion proof...')
+    const transactionProof = await this.state.l1Provider.getTransactionBatchProof(
+      transactionIndex
+    )
+
     this.logger.info('Getting state diff proof...')
-
+    
     // l2geth stores account state diffs in the DB with the L1 block number as the key, 
     // but uses the L2 block number as a key when looking them up
     console.log("L1 blocknumber",transactionProof.transaction.blockNumber)
     console.log("L2 transactionIndex",transactionIndex)
 
-    const stateDiffProof: StateDiffProof =
-      await this.state.l2Provider.getStateDiffProof(
-        transactionIndex,
-        transactionProof.transaction.blockNumber// - L2_GENESIS_BLOCK
-      )
-    
-    /**********************************************************************/
-    /* There is jitter here - sometimes needs -1, other times it does not */
-    /**********************************************************************/
+    const stateDiffProof: StateDiffProof = await this.state.l2Provider.getStateDiffProof(
+      transactionIndex,
+      transactionProof.transaction.blockNumber// - GENESIS BLOCK
+    )
+
+    //for debugging the state diff proof 
+    console.log("SDP:", stateDiffProof)
 
     const stateTrie = await this._makeStateTrie(stateDiffProof)
     const storageTries = await this._makeAccountTries(stateDiffProof)
-    
+
     return {
       stateDiffProof,
       transactionProof,
@@ -1153,6 +1158,8 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     let var2 = transactionProof.transactionProof.index;
 
     if((var3.toNumber() + var4 + 1) == (var1.toNumber() + var2)) {
+      console.log("Sum1:", var1.toNumber() + var2)
+      console.log("Sum2:", var3.toNumber() + var4)
       console.log("PASS PASS PASS FraudVerifier Check: _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index")
     } else {
       console.log("Sum1:", var1.toNumber() + var2)

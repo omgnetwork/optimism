@@ -231,6 +231,8 @@ export class L1ProviderWrapper {
     if (!event) {
       return
     }
+    
+    console.log("event",event)
 
     return {
       batchIndex: event.args._batchIndex,

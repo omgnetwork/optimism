@@ -130,19 +130,11 @@ contract OVM_FraudVerifier is Lib_AddressResolver, Abs_FraudContributor, iOVM_Fr
             "Invalid transaction inclusion proof."
         );
 
-        //based on upstream code, the pre-state root global index IS equal to the transaction root global index
-        //but this require actually tests for something else, namely, 
-        //_preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index,
-        // require (
-        //     _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index,
-        //     "Pre-state root global index must equal to the transaction root global index."
-        // );
-         
         require (
-            _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index == _transactionBatchHeader.prevTotalElements + _transactionProof.index,
-            "Pre-state root global index must be equal to the transaction root global index."
+            _preStateRootBatchHeader.prevTotalElements + _preStateRootProof.index + 1 == _transactionBatchHeader.prevTotalElements + _transactionProof.index,
+            "Pre-state root global index must equal to the transaction root global index."
         );
-
+         
         _deployTransitioner(_preStateRoot, _txHash, _preStateRootProof.index);
 
         emit FraudProofInitialized(
