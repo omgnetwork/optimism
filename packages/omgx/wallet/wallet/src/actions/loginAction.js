@@ -1,6 +1,6 @@
 /*
   Varna - A Privacy-Preserving Marketplace
-  Varna uses Fully Homomorphic Encryption to make markets fair. 
+  Varna uses Fully Homomorphic Encryption to make markets fair.
   Copyright (C) 2021 Enya Inc. Palo Alto, CA
 
   This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,9 @@
   along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { generateAESKey } from 'cryptoWorker/cryptoWorker';
+import { generateAESKey } from 'cryptoWorker/cryptoWorker'
 
-import { SERVICE_OPTIMISM_API_URL } from 'Settings';
+import serviceAxiosInstance from '../api/serviceAxios'
 
 const updatedPassword = (FHEseed, AESKey) => ({
   type: 'PROVIDE_PASSWORD',
@@ -49,26 +49,21 @@ const verifyInvitationCodeFailure = (data) => ({
 })
 
 export const providePassword = (FHEseed) => (dispatch) => {
-  generateAESKey(FHEseed).then(AESKey => {
-    dispatch(updatedPassword(FHEseed, AESKey));
+  generateAESKey(FHEseed).then((AESKey) => {
+    dispatch(updatedPassword(FHEseed, AESKey))
   })
 }
 
 export const verifyInvitationCode = (invitationCode) => (dispatch) => {
-  dispatch(verifyInvitationCodeBegin());
+  dispatch(verifyInvitationCodeBegin())
 
-  fetch(SERVICE_OPTIMISM_API_URL + 'invitation.code', {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ invitationCode })
-  }).then(res => {
-    if (res.status === 201) {
-      dispatch(verifyInvitationCodeSuccess());
-    } else {
-      dispatch(verifyInvitationCodeFailure(res.status));
-    }
-  })
+  serviceAxiosInstance
+    .post('invitation.code', JSON.stringify({ invitationCode }))
+    .then((res) => {
+      if (res.status === 201) {
+        dispatch(verifyInvitationCodeSuccess())
+      } else {
+        dispatch(verifyInvitationCodeFailure(res.status))
+      }
+    })
 }
