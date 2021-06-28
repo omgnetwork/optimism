@@ -4,6 +4,16 @@ const chalk = require("chalk");
 const { l2ethers } = require("hardhat");
 const { utils } = require("ethers");
 const R = require("ramda");
+const dotenv = require('dotenv');
+
+// Properly setting gas parameters
+dotenv.config();
+const env = process.env;
+if(env.L2_NETWORK == 'local'){
+  var local_overrides = { gasLimit: 800000, gasPrice: 0 };
+} else{
+  var local_overrides = {};
+}
 
 async function deploy({
   rpcUrl, 
@@ -29,7 +39,7 @@ async function deploy({
   }
   
   const nonce = await signerProvider.getTransactionCount()
-  const deployed = await contractArtifacts.deploy(...contractArgs, { nonce, ...overrides, gasPrice: 0, gasLimit: 800000 });
+  const deployed = await contractArtifacts.deploy(...contractArgs, { nonce, ...overrides, ...local_overrides});
   await deployed.deployTransaction.wait()
 
   const checkCode = async (_address) => {

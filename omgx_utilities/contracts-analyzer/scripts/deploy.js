@@ -4,11 +4,22 @@ const bre = require("hardhat");
 const { utils } = require('ethers');
 dotenv.config();
 const { deploy } = require('./utils');
+const dotenv = require('dotenv');
 
 const env = process.env;
 const deployPrivateKey = env.DEPLOYER_PRIVATE_KEY;
 const l2RpcUrl = env.L2_NODE_WEB3_URL;
 const l2ETHAddress = "0x4200000000000000000000000000000000000006";
+
+// Properly setting gas parameters
+dotenv.config();
+const env = process.env;
+if(env.L2_NETWORK == 'local'){
+  var local_overrides = { gasLimit: 800000, gasPrice: 0 };
+} else{
+  var local_overrides = {};
+}
+
 
 function writeFileSyncRecursive(filename, content, charset) {
   const folders = filename.split('/').slice(0, -1)
@@ -65,13 +76,13 @@ const main = async () => {
   if (await SushiToken.owner() !== MasterChef.address) {
     // Transfer Sushi Ownership to Chef
     console.log(" 🔑 Transfer Sushi Ownership to Chef")
-    await (await SushiToken.transferOwnership(MasterChef.address, { gasLimit: 800000, gasPrice: 0 })).wait()
+    await (await SushiToken.transferOwnership(MasterChef.address, local_overrides)).wait()
   }
 
   if (await MasterChef.owner() !== deployAddress) {
     // Transfer ownership of MasterChef to Dev
     console.log(" 🔑 Transfer ownership of MasterChef to Dev")
-    await (await MasterChef.transferOwnership(deployAddress, { gasLimit: 800000, gasPrice: 0 })).wait()
+    await (await MasterChef.transferOwnership(deployAddress, local_overrides)).wait()
   }
 
   const UniswapV2Factory = await deploy({

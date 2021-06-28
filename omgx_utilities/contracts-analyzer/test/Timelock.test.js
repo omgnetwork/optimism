@@ -6,16 +6,26 @@ const { Contract, Wallet, ContractFactory, BigNumber, providers } = require('eth
 const { encodeParameters } = require('./utilities/index');
 const { latest, duration, increase } = require('./utilities/time');
 const { bob, alice, carol, dev, minter } = require('./utilities/wallet');
+const dotenv = require('dotenv');
 
 const MasterChefJSON = require('../artifacts/contracts/MasterChef.sol/MasterChef.ovm.json');
 const SushiTokenJSON = require('../artifacts/contracts/SushiToken.sol/SushiToken.ovm.json');
 const ERC20MockJSON = require('../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.ovm.json');
 const TimelockJSON = require('../artifacts/contracts/governance/Timelock.sol/Timelock.ovm.json');
 
+// Configuration for local test
+dotenv.config();
+const env = process.env;
+var overrides = {}; //{ gasLimit: 800000, gasPrice: 0 }
+if(env.L2_NETWORK == 'local'){
+  overrides = { gasLimit: 800000, gasPrice: 0 };
+}
+
 /******************************************************************/
 /*************   evm_increaseTime is not supported ****************/
 /**** this could be something Optimism adds in the near future! ***/
 /******************************************************************/
+
 
 describe("Timelock", function () {
   before(async function () {
@@ -45,21 +55,21 @@ describe("Timelock", function () {
   })
 
   beforeEach(async function () {
-    this.sushi = await this.Factory__SushiToken.deploy()
+    this.sushi = await this.Factory__SushiToken.deploy(overrides)
     await this.sushi.deployTransaction.wait()
-    this.timelock = await this.Factory__Timelock.deploy(bob.address, "259200")
+    this.timelock = await this.Factory__Timelock.deploy(bob.address, "259200", overrides)
     await this.timelock.deployTransaction.wait()
   })
 
   it("should not allow non-owner to do operation", async function () {
     let transferOwnership
-    transferOwnership = await this.sushi.transferOwnership(this.timelock.address);
+    transferOwnership = await this.sushi.transferOwnership(this.timelock.address, overrides);
     await transferOwnership.wait()
 
-    transferOwnership = await this.sushi.transferOwnership(carol.address);
+    transferOwnership = await this.sushi.transferOwnership(carol.address, overrides);
     await expect(transferOwnership.wait()).to.be.eventually.rejected;
 
-    transferOwnership = await this.sushi.connect(alice).transferOwnership(carol.address);
+    transferOwnership = await this.sushi.connect(alice).transferOwnership(carol.address, overrides);
     await expect(transferOwnership.wait()).to.be.eventually.rejected;
 
     const timelock = await this.timelock.connect(alice).queueTransaction(
@@ -67,7 +77,8 @@ describe("Timelock", function () {
       "0",
       "transferOwnership(address)",
       encodeParameters(["address"], [carol.address]),
-      (await latest()).add(duration.days(4))
+      (await latest()).add(duration.days(4)),
+      overrides
     )
     await expect(timelock.wait()).to.be.eventually.rejected;
   })
