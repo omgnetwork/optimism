@@ -26,17 +26,16 @@ curl http://127.0.0.1:8080/addresses.json | jq
 
 **ALERT - the old testing system and the documention below are currently broken, but are being fixed.**
 
+# Working Steps for local setup.
 ## 1. Set up the repo
 
 At the top level (`/optimism`), run `yarn` and `yarn build`.
 
 ```bash
-
 $ git clone git@github.com:omgnetwork/optimism.git
 $ cd optimism
 $ yarn
 $ yarn build
-
 ```
 
 ## 2. Spin up OMGX
@@ -47,32 +46,46 @@ $ cd /ops
 $ DAEMON=0 BUILD=1 ./up_local.sh
 
 ```
-or if you want to pull the latest `develop` containers, simply run:
+
+ Or, Spin up the test system and deploy all the right wallet contracts:
+
+```bash
+
+$ cd ops
+$ docker-compose -f docker-compose.yml -f docker-compose-omgx-services.yml up
+
 ```
-DAEMON=0 BUILD=0 ./up_local.sh
-```
+
 ## 3. Basic Setup and Configuration - Contracts
 
 Next, open a *second* terminal window and navigate to the wallet folder:
 
 ```bash
-
 $ cd /optimism/packages/omgx/wallet
-
 ```
 
-Export the variables below:
+Create a `.env` file in the root directory `/optimism/packages/omgx/wallet` of this wallet project. 
+Add environment-specific variables on new lines in the form of `NAME=VALUE`.
+Examples are given in the `.env.example` file. 
+Just pick which net you want to work on and copy either the "Rinkeby" _or_ the "Local" envs to your `.env`.
+Or, use below env params. Now, build and deploy all the needed contracts from wallet:
 
 ```bash
 
+$ yarn build
+$ yarn deploy
+
+=======
 # Local
-L1_NODE_WEB3_URL=http://127.0.0.1:9545
-L2_NODE_WEB3_URL=http://127.0.0.1:8545
-URL=http://127.0.0.1:8080/addresses.json
-WALLET_URL=http://127.0.0.1:8078/addresses.json
-TEST_PRIVATE_KEY_1="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-TEST_PRIVATE_KEY_2="0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba"
-TEST_PRIVATE_KEY_3="0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e"
+NODE_ENV=local
+L1_NODE_WEB3_URL=http://localhost:9545
+L2_NODE_WEB3_URL=http://localhost:8545
+ETH1_ADDRESS_RESOLVER_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
+TEST_PRIVATE_KEY_1=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+TEST_PRIVATE_KEY_2=0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+TEST_PRIVATE_KEY_3=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
+TARGET_GAS_LIMIT=9000000000
+CHAIN_ID=28
 
 ```
 
@@ -88,33 +101,39 @@ cd ops/
 docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml run omgx_integration_tests
 ```
 
-or if you set the above environemnt variables, `yarn test:integration` works too.
+or if you set the above environment variables, `yarn test:integration` works too.
 
 ## 4. Firing up the wallet
 
-The web wallet is a react front end that makes it easy to see your balances, transfer funds, and build on for your own uses. The code is deliberately basic, to make it easy for you to repurpose it for your own needs. It's a work in progress - for example, we are adding some basic support for NFTs and and an interface for people to contribute to the conjoined liquidity pools that live on the L1 and L2.
+The web wallet is a react front end that makes it easy to see your balances, transfer funds, and build on for your own uses. The code is deliberately basic, to make it easy for you to repurpose it for your own needs. 
+It's a work in progress - for example, we are adding some basic support for NFTs and an interface for people to contribute to the conjoined liquidity pools that live on the L1 and L2.
 
-First, create a `.env` in `/wallets` and provide your Infura and Etherscan keys:
+Now navigate to child wallet folder
 
 ```bash
+$ cd /optimism/packages/omgx/wallet/wallet
+```
 
+First create `.env` file and provide your Infura and Etherscan keys: along with below environment parameters
+
+```bash
 REACT_APP_INFURA_ID=
 REACT_APP_ETHERSCAN_API=
-
+REACT_APP_POLL_INTERVAL=20000
+SKIP_PREFLIGHT_CHECK=true
 ```
 
 Then,
 
 ```bash
-
-$ cd wallet
 $ yarn start
-
 ```
 
 At that point, the wallet will start when you run `$ yarn start`. You can interact with the wallet at `http://localhost:3000.`
 
-### Common Wallet Setup Problems
+Install metamask by following the instruction on login page connect it with metamask so you can access the wallet.
+
+# Common Wallet Setup Problems
 
 **Wallet does not show balances** Did you set the correct ChainIDs in the custom RPC in MetaMask? Please make sure the ChainIDs are correct (Rinkeby = 4, OMGX L2 = 28, local hardhat L1 = 31337).
 
@@ -122,7 +141,7 @@ At that point, the wallet will start when you run `$ yarn start`. You can intera
 
 ### Integration Tests
 
-Note that the integration tests also set up parts of the system that the web wallet will need to work, such as bridge contracts.
+Note that the integration tests also set up parts of the system that the web wallet will need to work, such as liquidity pools and bridge contracts.
 
 ```bash
 
@@ -132,7 +151,8 @@ $ yarn deploy #if needed. this will test/deploy the contracts and write their ad
 
 ```
 
-The information generated during the deploy (e.g the `/deployment/local/addresses.json`) is used by the web wallet to set things up correctly. **The full test suite includes some very slow transactions such as withdrawals, which can take 100 seconds to complete. Please be patient.**
+The information generated during the deploy (e.g the `/deployment/local/addresses.json`) is used by the web wallet to set things up correctly. 
+**The full test suite includes some very slow transactions such as withdrawals, which can take 100 seconds to complete. Please be patient.**
 
 ### 3. Wallet Specific Smart Contracts
 
