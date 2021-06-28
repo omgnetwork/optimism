@@ -2,10 +2,10 @@
 pragma solidity >0.5.0;
 
 /* Library Imports */
-import "@eth-optimism/contracts/contracts/optimistic-ethereum/libraries/bridge/OVM_CrossDomainEnabled.sol";
+import "../libraries/OVM_CrossDomainEnabledFast.sol";
 import { L2Message } from "./L2Message.sol";
 
-contract L1Message is OVM_CrossDomainEnabled {
+contract L1Message is OVM_CrossDomainEnabledFast {
 
     address L2MessageAddress;
     string crossDomainMessage;
@@ -16,17 +16,21 @@ contract L1Message is OVM_CrossDomainEnabled {
 
     /********************
      *    Constructor   *
-     ********************/    
+     ********************/
     constructor (
-        address _l1CrossDomainMessenger
+        address _l1CrossDomainMessenger,
+        address _l1CrossDomainMessengerFast
     )
-        OVM_CrossDomainEnabled(_l1CrossDomainMessenger)
+        OVM_CrossDomainEnabledFast(
+            _l1CrossDomainMessenger,
+            _l1CrossDomainMessengerFast
+        )
     {}
 
     function init (
        address _L2MessageAddress
-    ) 
-       public 
+    )
+       public
     {
        L2MessageAddress = _L2MessageAddress;
     }
@@ -40,8 +44,8 @@ contract L1Message is OVM_CrossDomainEnabled {
         // Send calldata into L1
         sendCrossDomainMessage(
             address(L2MessageAddress),
-            data,
-            1200000
+            1200000,
+            data
         );
     }
 
@@ -58,7 +62,7 @@ contract L1Message is OVM_CrossDomainEnabled {
     )
         external
         onlyFromCrossDomainAccount(address(L2MessageAddress))
-    {   
+    {
         crossDomainMessage = _message;
         emit ReceiveL2Message(_message);
     }

@@ -27,10 +27,4 @@ packages/omgx/wallet/wallet/build
 *.swp
 
 .env
-env.js
-env.yml
-env.js
-
-.serverless
-packages/omgx/wallet/deployment/local/addresses.json
-packages/omgx/wallet/wallet/src/deployment/local/addresses.json
+*.log

@@ -2,6 +2,7 @@
 import { Contract, ethers, Wallet, BigNumber, providers } from 'ethers'
 import * as rlp from 'rlp'
 import { MerkleTree } from 'merkletreejs'
+import fetch from 'node-fetch';
 
 /* Imports: Internal */
 import { fromHexString, sleep } from '@eth-optimism/core-utils'
@@ -19,7 +20,7 @@ interface MessageRelayerOptions {
   // within this service.
   addressManagerAddress: string
 
-  l1Target: string
+  l1MessengerFast: string
 
   // Wallet instance, used to sign and send the L1 relay transactions.
   l1Wallet: Wallet
@@ -42,6 +43,11 @@ interface MessageRelayerOptions {
 
   // Number of blocks within each getLogs query - max is 2000
   getLogsInterval?: number
+
+  // whitelist
+  whitelistEndpoint?: string
+  
+  whitelistPollingInterval?: number
 }
 
 const optionSettings = {
@@ -51,6 +57,7 @@ const optionSettings = {
   l2BlockOffset: { default: 1 },
   l1StartOffset: { default: 0 },
   getLogsInterval: { default: 2000 },
+  whitelistPollingInterval: { default: 60000 }
 }
 
 export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
@@ -68,6 +75,8 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     OVM_L1CrossDomainMessenger: Contract
     OVM_L2CrossDomainMessenger: Contract
     OVM_L2ToL1MessagePasser: Contract
+    whitelist: Array<any>
+    lastWhitelistPollingTimestamp: number
   }
 
   protected async _init(): Promise<void> {
@@ -77,6 +86,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       pollingInterval: this.options.pollingInterval,
       l2BlockOffset: this.options.l2BlockOffset,
       getLogsInterval: this.options.getLogsInterval,
+      whitelistPollingInterval: this.options.whitelistPollingInterval,
     })
     // Need to improve this, sorry.
     this.state = {} as any
@@ -101,8 +111,8 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     })
 
     this.logger.info('Connecting to OVM_L1CrossDomainMessenger...')
-    const l1MessengerAddress = await this.state.Lib_AddressManager.getAddress(
-      'OVM_L1CustomCrossDomainMessenger'
+    const l1MessengerAddress = this.options.l1MessengerFast || await this.state.Lib_AddressManager.getAddress(
+      'OVM_L1CrossDomainMessengerFast'
     )
     this.state.OVM_L1CrossDomainMessenger = loadContract(
       'OVM_L1CrossDomainMessenger',
@@ -141,11 +151,13 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     this.state.lastFinalizedTxHeight = this.options.fromL2TransactionIndex || 0
     this.state.nextUnfinalizedTxHeight =
       this.options.fromL2TransactionIndex || 0
+    this.state.lastWhitelistPollingTimestamp = 0
   }
 
   protected async _start(): Promise<void> {
     while (this.running) {
       await sleep(this.options.pollingInterval)
+      await this._getWhitelist();
 
       try {
         // Check that the correct address is set in the address manager
@@ -187,6 +199,17 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
             { batchSize: size }
           )
           this.state.nextUnfinalizedTxHeight += size
+
+          // Only deal with ~1000 transactions at a time so we can limit the amount of stuff we
+          // need to keep in memory. We operate on full batches at a time so the actual amount
+          // depends on the size of the batches we're processing.
+          const numTransactionsToProcess =
+            this.state.nextUnfinalizedTxHeight -
+            this.state.lastFinalizedTxHeight
+
+          if (numTransactionsToProcess > 1000) {
+            break
+          }
         }
 
         this.logger.info('Found finalized transactions', {
@@ -200,12 +223,6 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           this.state.nextUnfinalizedTxHeight
         )
 
-        if (messages.length === 0) {
-          this.logger.info('Did not find any L2->L1 messages', {
-            retryAgainInS: Math.floor(this.options.pollingInterval / 1000),
-          })
-        }
-
         for (const message of messages) {
           this.logger.info('Found a message sent during transaction', {
             index: message.parentTransactionIndex,
@@ -215,11 +232,9 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
             continue
           }
 
-          if (this.options.l1Target !== message.target) {
-            if (this.options.l1Target !== '0x0') {
-              this.logger.info('Message not intended for target, skipping.')
-              continue
-            }
+          if (!this.state.whitelist.includes(message.target)) {
+            this.logger.info('Message not intended for target, skipping.')
+            continue
           }
 
           this.logger.info(
@@ -231,6 +246,27 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           )
 
           await this._relayMessageToL1(message, proof)
+        }
+
+        if (messages.length === 0) {
+          this.logger.info('Did not find any L2->L1 messages', {
+            retryAgainInS: Math.floor(this.options.pollingInterval / 1000),
+          })
+        } else {
+          // Clear the event cache to avoid keeping every single event in memory and eventually
+          // getting OOM killed. Messages are already sorted in ascending order so the last message
+          // will have the highest batch index.
+          const lastMessage = messages[messages.length - 1]
+
+          // Find the batch corresponding to the last processed message.
+          const lastProcessedBatch = await this._getStateBatchHeader(
+            lastMessage.parentTransactionIndex
+          )
+
+          // Remove any events from the cache for batches that should've been processed by now.
+          this.state.eventCache = this.state.eventCache.filter((event) => {
+            return event.args._batchIndex > lastProcessedBatch.batch.batchIndex
+          })
         }
 
         this.logger.info(
@@ -256,8 +292,20 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       }
     | undefined
   > {
-    const filter =
-      this.state.OVM_StateCommitmentChain.filters.StateBatchAppended()
+    const getStateBatchAppendedEventForIndex = (
+      txIndex: number
+    ): ethers.Event => {
+      return this.state.eventCache.find((cachedEvent) => {
+        const prevTotalElements = cachedEvent.args._prevTotalElements.toNumber()
+        const batchSize = cachedEvent.args._batchSize.toNumber()
+
+        // Height should be within the bounds of the batch.
+        return (
+          txIndex >= prevTotalElements &&
+          txIndex < prevTotalElements + batchSize
+        )
+      })
+    }
 
     let startingBlock = this.state.lastQueriedL1Block
     while (
@@ -269,50 +317,48 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         endBlock: startingBlock + this.options.getLogsInterval,
       })
 
-      const events: ethers.Event[] =
-        await this.state.OVM_StateCommitmentChain.queryFilter(
-          filter,
-          startingBlock,
-          startingBlock + this.options.getLogsInterval
-        )
+      const events: ethers.Event[] = await this.state.OVM_StateCommitmentChain.queryFilter(
+        this.state.OVM_StateCommitmentChain.filters.StateBatchAppended(),
+        startingBlock,
+        startingBlock + this.options.getLogsInterval
+      )
 
       this.state.eventCache = this.state.eventCache.concat(events)
       startingBlock += this.options.getLogsInterval
-    }
 
-    // tslint:disable-next-line
-    const event = this.state.eventCache.find((event) => {
-      return (
-        event.args._prevTotalElements.toNumber() <= height &&
-        event.args._prevTotalElements.toNumber() +
-          event.args._batchSize.toNumber() >
-          height
-      )
-    })
-
-    if (event) {
-      const transaction = await this.options.l1RpcProvider.getTransaction(
-        event.transactionHash
-      )
-      const [stateRoots] =
-        this.state.OVM_StateCommitmentChain.interface.decodeFunctionData(
-          'appendStateBatch',
-          transaction.data
-        )
-
-      return {
-        batch: {
-          batchIndex: event.args._batchIndex,
-          batchRoot: event.args._batchRoot,
-          batchSize: event.args._batchSize,
-          prevTotalElements: event.args._prevTotalElements,
-          extraData: event.args._extraData,
-        },
-        stateRoots,
+      // We need to stop syncing early once we find the event we're looking for to avoid putting
+      // *all* events into memory at the same time. Otherwise we'll get OOM killed.
+      if (getStateBatchAppendedEventForIndex(height) !== undefined) {
+        break
       }
     }
 
-    return
+    const event = getStateBatchAppendedEventForIndex(height)
+    if (event === undefined) {
+      return undefined
+    }
+
+    const transaction = await this.options.l1RpcProvider.getTransaction(
+      event.transactionHash
+    )
+
+    const [
+      stateRoots,
+    ] = this.state.OVM_StateCommitmentChain.interface.decodeFunctionData(
+      'appendStateBatch',
+      transaction.data
+    )
+
+    return {
+      batch: {
+        batchIndex: event.args._batchIndex,
+        batchRoot: event.args._batchRoot,
+        batchSize: event.args._batchSize,
+        prevTotalElements: event.args._prevTotalElements,
+        extraData: event.args._extraData,
+      },
+      stateRoots,
+    }
   }
 
   private async _isTransactionFinalized(height: number): Promise<boolean> {
@@ -334,6 +380,14 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     return true
   }
 
+  /**
+   * Returns all sent message events between some start height (inclusive) and an end height
+   * (exclusive).
+   * @param startHeight Start height to start finding messages from.
+   * @param endHeight End height to finish finding messages at.
+   * @returns All sent messages between start and end height, sorted by transaction index in
+   * ascending order.
+   */
   private async _getSentMessages(
     startHeight: number,
     endHeight: number
@@ -345,13 +399,12 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       endHeight + this.options.l2BlockOffset - 1
     )
 
-    return events.map((event) => {
+    const messages = events.map((event) => {
       const message = event.args.message
-      const decoded =
-        this.state.OVM_L2CrossDomainMessenger.interface.decodeFunctionData(
-          'relayMessage',
-          message
-        )
+      const decoded = this.state.OVM_L2CrossDomainMessenger.interface.decodeFunctionData(
+        'relayMessage',
+        message
+      )
 
       return {
         target: decoded._target,
@@ -363,6 +416,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         parentTransactionIndex: event.blockNumber - this.options.l2BlockOffset,
         parentTransactionHash: event.transactionHash,
       }
+    })
+
+    // Sort in ascending order based on tx index and return.
+    return messages.sort((a, b) => {
+      return a.parentTransactionIndex - b.parentTransactionIndex
     })
   }
 
@@ -506,5 +564,26 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       return
     }
     this.logger.info('Message successfully relayed to Layer 1!')
+  }
+
+  private async _getWhitelist(): Promise<void> {
+    try {
+      if (this.options.whitelistEndpoint) {
+        if (this.state.lastWhitelistPollingTimestamp === 0 || 
+          new Date().getTime() > this.state.lastWhitelistPollingTimestamp + this.options.whitelistPollingInterval
+        ) {
+          const response = await fetch(this.options.whitelistEndpoint);
+          const whitelist = await response.json();
+          this.state.lastWhitelistPollingTimestamp = new Date().getTime();
+          this.state.whitelist = whitelist;
+          this.logger.info('Found the whitelist', { whitelist: whitelist })
+        }
+      } else {
+        this.state.whitelist = [];
+      }
+    } catch {
+      this.logger.info('Failed to fetch the whitelist')
+      this.state.whitelist = [];
+    }
   }
 }

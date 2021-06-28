@@ -8,6 +8,7 @@ type ServiceNames =
   | 'l2geth'
   | 'relayer'
   | 'verifier'
+  | 'replica'
 
 const OPS_DIRECTORY = path.join(process.cwd(), '../ops')
 const DEFAULT_SERVICES: ServiceNames[] = [
@@ -37,9 +38,9 @@ export class DockerComposeNetwork {
 
     if (err.includes('Creating')) {
       console.info(
-        '🐳 Tests required starting containers. Waiting for sequencer to ready.'
+        '🐳 Tests required starting containers. Waiting for Verifier to be ready.'
       )
-      shell.exec(`${OPS_DIRECTORY}/scripts/wait-for-sequencer.sh`, {
+      shell.exec(`${OPS_DIRECTORY}/scripts/wait-for-verifier.sh`, {
         cwd: OPS_DIRECTORY,
       })
     }
