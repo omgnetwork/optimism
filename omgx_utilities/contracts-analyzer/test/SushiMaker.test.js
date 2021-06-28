@@ -5,6 +5,7 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const { bob, alice, carol, dev, minter } = require('./utilities/wallet');
 const { deploy, getBigNumber, createSLP } = require('./utilities/index');
+const dotenv = require('dotenv');
 
 const ERC20MockJSON = require('../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.ovm.json');
 const UniswapV2FactoryJSON = require('../artifacts/contracts/uniswapv2/UniswapV2Factory.sol/UniswapV2Factory.ovm.json');
@@ -12,6 +13,14 @@ const UniswapV2PairJSON = require('../artifacts/contracts/uniswapv2/UniswapV2Pai
 const SushiMakerExploitMockJSON = require('../artifacts/contracts/mocks/SushiMakerExploitMock.sol/SushiMakerExploitMock.ovm.json')
 const SushiMakerJSON = require('../artifacts/contracts/SushiMaker.sol/SushiMaker.ovm.json');
 const SushiBarJSON = require('../artifacts/contracts/SushiBar.sol/SushiBar.ovm.json');
+
+// Configuration for local test
+dotenv.config();
+const env = process.env;
+var overrides = {}; //{ gasLimit: 800000, gasPrice: 0 }
+if(env.L2_NETWORK == 'local'){
+  overrides = { gasLimit: 800000, gasPrice: 0 };
+}
 
 describe("SushiMaker", function () {
   before(async function () {
@@ -45,22 +54,22 @@ describe("SushiMaker", function () {
   })
   describe("setBridge", function () {
     it("does not allow to set bridge for Sushi", async function () {
-      const setBridgeTX = await this.sushiMaker.setBridge(this.sushi.address, this.weth.address)
+      const setBridgeTX = await this.sushiMaker.setBridge(this.sushi.address, this.weth.address, overrides)
       await expect(setBridgeTX.wait()).to.be.eventually.rejected;
     })
 
     it("does not allow to set bridge for WETH", async function () {
-      const setBridgeTX = await this.sushiMaker.setBridge(this.weth.address, this.sushi.address)
+      const setBridgeTX = await this.sushiMaker.setBridge(this.weth.address, this.sushi.address, overrides)
       await expect(setBridgeTX.wait()).to.be.eventually.rejected;
     })
 
     it("does not allow to set bridge to itself", async function () {
-      const setBridgeTX = await this.sushiMaker.setBridge(this.dai.address, this.dai.address)
+      const setBridgeTX = await this.sushiMaker.setBridge(this.dai.address, this.dai.address, overrides)
       await expect(setBridgeTX.wait()).to.be.eventually.rejected;
     })
 
     it("emits correct event on bridge", async function () {
-      await expect(this.sushiMaker.setBridge(this.dai.address, this.sushi.address))
+      await expect(this.sushiMaker.setBridge(this.dai.address, this.sushi.address, overrides))
         .to.emit(this.sushiMaker, "LogBridgeSet")
         .withArgs(this.dai.address, this.sushi.address)
     })
@@ -68,9 +77,9 @@ describe("SushiMaker", function () {
   describe("convert", function () {
     it("should convert SUSHI - ETH", async function () {
       let transferTX, convertTX
-      transferTX = await this.sushiEth.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.sushiEth.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      convertTX = await this.sushiMaker.convert(this.sushi.address, this.weth.address)
+      convertTX = await this.sushiMaker.convert(this.sushi.address, this.weth.address, overrides)
       await convertTX.wait()
       expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
       expect(await this.sushiEth.balanceOf(this.sushiMaker.address)).to.equal(0)
@@ -79,9 +88,9 @@ describe("SushiMaker", function () {
 
     it("should convert USDC - ETH", async function () {
       let transferTX, convertTX
-      transferTX = await this.usdcEth.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.usdcEth.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      convertTX = await this.sushiMaker.convert(this.usdc.address, this.weth.address)
+      convertTX = await this.sushiMaker.convert(this.usdc.address, this.weth.address, overrides)
       await convertTX.wait()
       expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
       expect(await this.usdcEth.balanceOf(this.sushiMaker.address)).to.equal(0)
@@ -90,9 +99,9 @@ describe("SushiMaker", function () {
 
     it("should convert $TRDL - ETH", async function () {
       let transferTX, convertTX
-      transferTX = await this.strudelEth.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.strudelEth.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      convertTX = await this.sushiMaker.convert(this.strudel.address, this.weth.address)
+      convertTX = await this.sushiMaker.convert(this.strudel.address, this.weth.address, overrides)
       await convertTX.wait()
       expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
       expect(await this.strudelEth.balanceOf(this.sushiMaker.address)).to.equal(0)
@@ -101,9 +110,9 @@ describe("SushiMaker", function () {
 
     it("should convert USDC - SUSHI", async function () {
       let transferTX, convertTX
-      transferTX = await this.sushiUSDC.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.sushiUSDC.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      convertTX = await this.sushiMaker.convert(this.usdc.address, this.sushi.address)
+      convertTX = await this.sushiMaker.convert(this.usdc.address, this.sushi.address, overrides)
       await convertTX.wait()
       expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
       expect(await this.sushiUSDC.balanceOf(this.sushiMaker.address)).to.equal(0)
@@ -112,9 +121,9 @@ describe("SushiMaker", function () {
 
     it("should convert using standard ETH path", async function () {
       let transferTX, convertTX
-      transferTX = await this.daiEth.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.daiEth.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      convertTX = await this.sushiMaker.convert(this.dai.address, this.weth.address)
+      convertTX = await this.sushiMaker.convert(this.dai.address, this.weth.address, overrides)
       await convertTX.wait()
       expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
       expect(await this.daiEth.balanceOf(this.sushiMaker.address)).to.equal(0)
@@ -123,13 +132,13 @@ describe("SushiMaker", function () {
 
     it("converts MIC/USDC using more complex path", async function () {
       let transferTX, setBridgeTX, convertTX
-      transferTX = await this.micUSDC.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.micUSDC.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      setBridgeTX = await this.sushiMaker.setBridge(this.usdc.address, this.sushi.address)
+      setBridgeTX = await this.sushiMaker.setBridge(this.usdc.address, this.sushi.address, overrides)
       await setBridgeTX.wait()
-      setBridgeTX = await this.sushiMaker.setBridge(this.mic.address, this.usdc.address)
+      setBridgeTX = await this.sushiMaker.setBridge(this.mic.address, this.usdc.address, overrides)
       await setBridgeTX.wait()
-      convertTX = await this.sushiMaker.convert(this.mic.address, this.usdc.address)
+      convertTX = await this.sushiMaker.convert(this.mic.address, this.usdc.address, overrides)
       await convertTX.wait()
       expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
       expect(await this.micUSDC.balanceOf(this.sushiMaker.address)).to.equal(0)
@@ -138,13 +147,13 @@ describe("SushiMaker", function () {
 
     it("converts DAI/USDC using more complex path", async function () {
       let transferTX, setBridgeTX, convertTX
-      transferTX = await this.daiUSDC.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.daiUSDC.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      setBridgeTX = await this.sushiMaker.setBridge(this.usdc.address, this.sushi.address)
+      setBridgeTX = await this.sushiMaker.setBridge(this.usdc.address, this.sushi.address, overrides)
       await setBridgeTX.wait()
-      setBridgeTX = await this.sushiMaker.setBridge(this.dai.address, this.usdc.address)
+      setBridgeTX = await this.sushiMaker.setBridge(this.dai.address, this.usdc.address, overrides)
       await setBridgeTX.wait()
-      convertTX = await this.sushiMaker.convert(this.dai.address, this.usdc.address)
+      convertTX = await this.sushiMaker.convert(this.dai.address, this.usdc.address, overrides)
       await convertTX.wait()
       expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
       expect(await this.daiUSDC.balanceOf(this.sushiMaker.address)).to.equal(0)
@@ -153,13 +162,13 @@ describe("SushiMaker", function () {
 
     it("converts DAI/MIC using two step path", async function () {
       let transferTX, setBridgeTX, convertTX
-      transferTX = await this.daiMIC.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.daiMIC.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      setBridgeTX = await this.sushiMaker.setBridge(this.dai.address, this.usdc.address)
+      setBridgeTX = await this.sushiMaker.setBridge(this.dai.address, this.usdc.address, overrides)
       await setBridgeTX.wait()
-      setBridgeTX = await this.sushiMaker.setBridge(this.mic.address, this.dai.address)
+      setBridgeTX = await this.sushiMaker.setBridge(this.mic.address, this.dai.address, overrides)
       await setBridgeTX.wait()
-      convertTX = await this.sushiMaker.convert(this.dai.address, this.mic.address)
+      convertTX = await this.sushiMaker.convert(this.dai.address, this.mic.address, overrides)
       await convertTX.wait()
       expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
       expect(await this.daiMIC.balanceOf(this.sushiMaker.address)).to.equal(0)
@@ -168,35 +177,35 @@ describe("SushiMaker", function () {
 
     it("reverts if it loops back", async function () {
       let transferTX, setBridgeTX, convertTX
-      transferTX = await this.daiMIC.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.daiMIC.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      setBridgeTX = await this.sushiMaker.setBridge(this.dai.address, this.mic.address)
+      setBridgeTX = await this.sushiMaker.setBridge(this.dai.address, this.mic.address, overrides)
       await setBridgeTX.wait()
-      setBridgeTX = await this.sushiMaker.setBridge(this.mic.address, this.dai.address)
+      setBridgeTX = await this.sushiMaker.setBridge(this.mic.address, this.dai.address, overrides)
       await setBridgeTX.wait()
-      convertTX = await this.sushiMaker.convert(this.dai.address, this.mic.address)
+      convertTX = await this.sushiMaker.convert(this.dai.address, this.mic.address, overrides)
       await expect(convertTX.wait()).to.be.eventually.rejected;
     })
 
     it("reverts if caller is not EOA", async function () {
       let transferTX, convertTX
-      transferTX = await this.sushiEth.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.sushiEth.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      convertTX = await this.exploiter.convert(this.sushi.address, this.weth.address)
+      convertTX = await this.exploiter.convert(this.sushi.address, this.weth.address, overrides)
       await expect(convertTX.wait()).to.be.eventually.rejected;
     })
 
     it("reverts if pair does not exist", async function () {
       let convertTX
-      convertTX = await this.sushiMaker.convert(this.mic.address, this.micUSDC.address)
+      convertTX = await this.sushiMaker.convert(this.mic.address, this.micUSDC.address, overrides)
       await expect(convertTX.wait()).to.be.eventually.rejected;
     })
 
     it("reverts if no path is available", async function () {
       let transferTX, convertTX
-      transferTX = await this.micUSDC.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.micUSDC.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      convertTX = await this.sushiMaker.convert(this.mic.address, this.usdc.address)
+      convertTX = await this.sushiMaker.convert(this.mic.address, this.usdc.address, overrides)
       await expect(convertTX.wait()).to.be.eventually.rejected;
       expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
       expect(await this.micUSDC.balanceOf(this.sushiMaker.address)).to.equal(getBigNumber(1))
@@ -207,11 +216,11 @@ describe("SushiMaker", function () {
   describe("convertMultiple", function () {
     it("should allow to convert multiple", async function () {
       let transferTX, convertTX
-      transferTX = await this.daiEth.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.daiEth.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      transferTX = await this.sushiEth.transfer(this.sushiMaker.address, getBigNumber(1))
+      transferTX = await this.sushiEth.transfer(this.sushiMaker.address, getBigNumber(1), overrides)
       await transferTX.wait()
-      convertTX = await this.sushiMaker.convertMultiple([this.dai.address, this.sushi.address], [this.weth.address, this.weth.address])
+      convertTX = await this.sushiMaker.convertMultiple([this.dai.address, this.sushi.address], [this.weth.address, this.weth.address], overrides)
       await convertTX.wait()
       expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
       expect(await this.daiEth.balanceOf(this.sushiMaker.address)).to.equal(0)

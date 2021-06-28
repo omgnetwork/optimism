@@ -1,5 +1,15 @@
 const { Contract, Wallet, ContractFactory, BigNumber, providers } = require('ethers');
 const { bob } = require('./wallet');
+const dotenv = require('dotenv');
+
+// Configuration for local test
+dotenv.config();
+dotenv.config();
+const env = process.env;
+var overrides = {}; //{ gasLimit: 800000, gasPrice: 0 }
+if(env.L2_NETWORK == 'local'){
+  overrides = { gasLimit: 800000, gasPrice: 0 };
+}
 
 const BASE_TEN = 10
 const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000"
@@ -18,7 +28,7 @@ async function deploy(thisObject, contracts) {
       contract[1].bytecode,
       bob,
     )
-    thisObject[contract[0]] = await Factory__contract.deploy(...(contract[2] || []))
+    thisObject[contract[0]] = await Factory__contract.deploy(...(contract[2] || []),  overrides)
     await thisObject[contract[0]].deployTransaction.wait()
   }
 }
@@ -26,19 +36,19 @@ async function deploy(thisObject, contracts) {
 async function createSLP(thisObject, name, tokenA, tokenB, amount) {
   let transfer, mint
   // console.log(`Creating SLP ${name}...`)
-  const createPairTx = await thisObject.factory.createPair(tokenA.address, tokenB.address)
+  const createPairTx = await thisObject.factory.createPair(tokenA.address, tokenB.address, overrides)
   const pairTX = await createPairTx.wait()
   
   const _pair = pairTX.events[1].args.pair
 
-  thisObject[name] = await thisObject.Factory__UniswapV2Pair.attach(_pair)
+  thisObject[name] = await thisObject.Factory__UniswapV2Pair.attach(_pair, overrides)
 
-  transfer = await tokenA.transfer(thisObject[name].address, amount)
+  transfer = await tokenA.transfer(thisObject[name].address, amount, overrides)
   await transfer.wait()
-  transfer = await tokenB.transfer(thisObject[name].address, amount)
+  transfer = await tokenB.transfer(thisObject[name].address, amount, overrides)
   await transfer.wait()
 
-  mint = await thisObject[name].mint(bob.address)
+  mint = await thisObject[name].mint(bob.address, overrides)
   await mint.wait()
 }
 
