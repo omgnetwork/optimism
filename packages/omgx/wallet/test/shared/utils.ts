@@ -1,9 +1,8 @@
-import { injectL2Context } from '@eth-optimism/core-utils'
+import * as request from "request-promise-native";
 import { getContractInterface, getContractFactory } from '@eth-optimism/contracts'
 import {
   Contract,
   Wallet,
-  constants,
   providers,
   BigNumber,
 } from 'ethers'
@@ -31,20 +30,50 @@ export const katel2Wallet = new Wallet(process.env.TEST_PRIVATE_KEY_3).connect(l
 export const PROXY_SEQUENCER_ENTRYPOINT_ADDRESS = '0x4200000000000000000000000000000000000004'
 export const OVM_ETH_ADDRESS = '0x4200000000000000000000000000000000000006'
 export const Proxy__OVM_L2CrossDomainMessenger = '0x4200000000000000000000000000000000000007'
-export const addressManagerAddress = process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
+export let addressManagerAddress = process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
+export const DEPLOYER = process.env.URL
+export const WALLET_DEPLOYER = process.env.WALLET_URL
 
-export const getAddressManager = (provider: any) => {
-  return getContractFactory('Lib_AddressManager')
+export const getAddressManager = async (provider: any) => {
+  console.log(addressManagerAddress)
+  if (addressManagerAddress){
+    console.log(`ETH1_ADDRESS_RESOLVER_ADDRESS var was set`)
+    return getContractFactory('Lib_AddressManager')
     .connect(provider)
     .attach(addressManagerAddress) as any
+  }else{
+    console.log(`ETH1_ADDRESS_RESOLVER_ADDRESS var was left unset. Using {$DEPLOYER} response`)
+    addressManagerAddress = (await getDeployerAddresses()).AddressManager
+    return getContractFactory('Lib_AddressManager')
+    .connect(provider)
+    .attach(addressManagerAddress) as any
+  }
+}
+
+export const getDeployerAddresses = async () => {
+  var options = {
+      uri: DEPLOYER,
+  };
+
+  const result = await request.get(options);
+  return JSON.parse(result)
+}
+
+export const getWalletDeployerAddresses = async () => {
+  var options = {
+      uri: WALLET_DEPLOYER,
+  };
+
+  const result = await request.get(options);
+  return JSON.parse(result)
 }
 
 // Gets the gateway using the proxy if available
 export const getL1ETHGateway = async (wallet: Wallet, AddressManager: Contract) => {
-  
+
   const l1GatewayInterface = getContractInterface('OVM_L1ETHGateway')
   const ProxyGatewayAddress = await AddressManager.getAddress('Proxy__OVM_L1ETHGateway')
-  
+
   const L1ETHGateway = new Contract(
     ProxyGatewayAddress,
     l1GatewayInterface as any,
