@@ -1,12 +1,11 @@
 let token
 
 const ERC20 = artifacts.require('ERC20')
-
 contract('ERC20', (accounts) => {
   const tokenName = 'My Optimistic Coin'
   const tokenSymbol = 'OPT'
   const tokenDecimals = 1
-
+ 
   beforeEach(async () => {
     token = await ERC20.new(10000, tokenName, tokenDecimals, tokenSymbol, { from: accounts[ 0 ], gasPrice: 0 })
   })
