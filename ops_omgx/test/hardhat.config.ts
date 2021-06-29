@@ -5,11 +5,11 @@ import '@eth-optimism/hardhat-ovm'
 
 const config: HardhatUserConfig = {
   mocha: {
-    timeout: 60000,
+    timeout: 600000,
   },
   networks: {
     omgx: {
-      url: 'http://localhost:8545',
+      url: 'https://integration.omgx.network',
       // This sets the gas price to 0 for all transactions on L2. We do this
       // because account balances are not automatically initiated with an ETH
       // balance.
