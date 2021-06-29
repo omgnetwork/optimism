@@ -7,7 +7,7 @@
 cmd="$@"
 JSON='{"jsonrpc":"2.0","id":0,"method":"net_version","params":[]}'
 
-RETRIES=${RETRIES:-50}
+RETRIES=${RETRIES:-150}
 until $(curl --silent --fail \
     --output /dev/null \
     -H "Content-Type: application/json" \
@@ -22,7 +22,7 @@ until $(curl --silent --fail \
 done
 echo "Connected to L1 Node at $L1_NODE_WEB3_URL"
 
-RETRIES=${RETRIES:-50}
+RETRIES=${RETRIES:-150}
 until $(curl --silent --fail \
     --output /dev/null \
     -H "Content-Type: application/json" \
@@ -38,7 +38,7 @@ done
 echo "Connected to L2 Verifier Node at $L2_NODE_WEB3_URL"
 
 if [ ! -z "$URL" ]; then
-    RETRIES=${RETRIES:-50}
+    RETRIES=${RETRIES:-150}
     until $(curl --silent --fail \
         --output /dev/null \
         "$URL"); do
