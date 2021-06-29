@@ -1,24 +1,46 @@
-FROM node:14-buster as base
+FROM ethereumoptimism/builder AS builder
+FROM omgx/omgx_builder AS omgx_builder
+FROM node:14-alpine
 
-RUN apt-get update && apt-get install -y bash curl jq
+RUN apk add --no-cache git curl python bash jq
+WORKDIR /opt/optimism/
 
-FROM base as build
+COPY --from=builder /optimism/*.json /optimism/yarn.lock ./
+COPY --from=builder /optimism/node_modules ./node_modules
 
-RUN apt-get update && apt-get install -y bash git python build-essential
+# copy deps (would have been nice if docker followed the symlinks required)
+COPY --from=builder /optimism/packages/core-utils/package.json ./packages/core-utils/package.json
+COPY --from=builder /optimism/packages/core-utils/dist ./packages/core-utils/dist
 
-ADD . /opt/optimism-message-relayer-fast
-RUN cd /opt/optimism-message-relayer-fast && yarn install && yarn build
+COPY --from=builder /optimism/packages/hardhat-ovm/package.json ./packages/hardhat-ovm/package.json
+COPY --from=builder /optimism/packages/hardhat-ovm/dist ./packages/hardhat-ovm/dist
 
-FROM base
+# get the needed built artifacts
+WORKDIR /opt/optimism/packages/contracts
+COPY --from=builder /optimism/packages/contracts/dist ./dist
+COPY --from=builder /optimism/packages/contracts/*.json ./
+COPY --from=builder /optimism/packages/contracts/node_modules ./node_modules
+COPY --from=builder /optimism/packages/contracts/artifacts ./artifacts
+COPY --from=builder /optimism/packages/contracts/artifacts-ovm ./artifacts-ovm
+COPY --from=builder /optimism/packages/contracts/deployments ./deployments
 
-RUN apt-get update && apt-get install -y bash curl jq
+# get non-build artifacts from the host
+COPY packages/contracts/bin ./bin
+COPY packages/contracts/contracts ./contracts
+COPY packages/contracts/hardhat.config.ts ./
+COPY packages/contracts/deploy ./deploy
+COPY packages/contracts/tasks ./tasks
+COPY packages/contracts/src ./src
+COPY packages/contracts/test/helpers/constants.ts ./test/helpers/constants.ts
+COPY packages/contracts/scripts ./scripts
 
-COPY --from=build /opt/optimism-message-relayer-fast /opt/optimism-message-relayer-fast
+# copy the service
+WORKDIR /opt/optimism/packages/omgx/message-relayer-fast
+COPY --from=omgx_builder /optimism/packages/omgx/message-relayer-fast/dist ./dist
+COPY --from=omgx_builder /optimism/packages/omgx/message-relayer-fast/package.json .
+COPY --from=omgx_builder /optimism/packages/omgx/message-relayer-fast/exec ./exec
+COPY --from=omgx_builder /optimism/packages/omgx/message-relayer-fast/node_modules ./node_modules
 
-COPY wait-for-l1-and-l2.sh /opt/
-RUN chmod +x /opt/wait-for-l1-and-l2.sh
-
-RUN ln -s /opt/optimism-message-relayer-fast/exec/run-message-relayer-fast.js /usr/local/bin/
-RUN chmod +x /usr/local/bin/run-message-relayer-fast.js
-
-ENTRYPOINT ["/opt/wait-for-l1-and-l2.sh", "run-message-relayer-fast.js"]
+# copy this over in case you want to run alongside other services
+COPY ./ops/scripts/relayer-fast.sh .
+ENTRYPOINT ["npm", "run", "start"]

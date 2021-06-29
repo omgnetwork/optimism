@@ -55,26 +55,27 @@ services:
 # a second relay system for messages that need to get to L1 quickly
 # NOTE - all withdrawal messenges use the standard relayer with its 7 day window
 
-#   omgx_message-relayer-fast:
-#     depends_on:
-#       - l1_chain
-#       - deployer
-#       - omgx_deployer
-#       - l2geth
-#       - omgx_bl-wl
-#     image: omgx/omgx_message-relayer-fast
-#     build:
-#       context: ..
-#       dockerfile: ./ops/docker/Dockerfile.omgx_message-relayer-fast
-#     environment:
-#         L1_NODE_WEB3_URL: http://l1_chain:8545
-#         L2_NODE_WEB3_URL: http://l2geth:8545
-#         L1_WALLET_KEY: "0xde9be858da4a475276426320d5e9262ecfc3ba460bfac56360bfa6c4c28b4ee0"
-#         URL: http://deployer:8081/addresses.json
-#         WALLET_URL: http://wallet_deployer:8079/addresses.json
-#         POLLING_INTERVAL: 1500
-#         GET_LOGS_INTERVAL: 500
-#         WHITELIST_ENDPOINT: http://bl-wl:9000/whitelist.json
+  omgx_message-relayer-fast:
+    depends_on:
+      - l1_chain
+      - deployer
+      - omgx_deployer
+      - l2geth
+      - omgx_bl-wl
+    image: omgx/omgx_message-relayer-fast
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.omgx_message-relayer-fast
+    entrypoint: ./relayer-fast.sh
+    environment:
+        L1_NODE_WEB3_URL: http://l1_chain:8545
+        L2_NODE_WEB3_URL: http://l2geth:8545
+        L1_WALLET_KEY: "0xde9be858da4a475276426320d5e9262ecfc3ba460bfac56360bfa6c4c28b4ee0"
+        URL: http://deployer:8081/addresses.json
+        WALLET_URL: http://wallet_deployer:8079/addresses.json
+        POLLING_INTERVAL: 1500
+        GET_LOGS_INTERVAL: 500
+        WHITELIST_ENDPOINT: http://bl-wl:9000/whitelist.json
 
 # # and, tests for all the OMGX-specific services
 

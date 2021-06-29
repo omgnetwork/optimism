@@ -6,7 +6,6 @@ console.log('Deploying ...')
 
 const factory__L1_Messenger = await ethers.getContractFactory('OVM_L1CrossDomainMessengerFast')
 
-
 const L1_Messenger= await factory__L1_Messenger.deploy()
 
 console.log('Deployed the L1_CrossDomainMessenger_Fast to ' + L1_Messenger.address)
