@@ -3,28 +3,34 @@
 
 ## 0. Fully Automatic contract deployment and serving
 
+This spins up the entire stack, with all contracts deployed, and all the right things needed for the wallet to function, and for development work on the wallet.
+
 ```bash
+
 $ cd ops 
 $ ./up_local.sh
+
 ```
 
-NOTE - the `up_local.sh` taps into `ethereumoptimism` dockers. 
+**Note - please provide syntax for setting the .env variables (BUILD: 1, DAEMON: 1)**
 
 To get the contract addresses:
 
 ```bash
+
 curl http://127.0.0.1:8078/addresses.json | jq
 curl http://127.0.0.1:8080/addresses.json | jq
+
 ```
 
 ## 2. Manual Deployment and Testing
 
-* Spin up the test system:
+* Spin up the base local L1/L2:
 
 ```
 
 $ cd ops
-$ docker-compose -f docker-compose.yml -f docker-compose-omgx-services.yml up -V
+$ docker-compose up -V
 
 ```
 

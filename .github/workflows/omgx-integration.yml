@@ -50,47 +50,47 @@ jobs:
         working-directory: ./ops
         run: docker-compose run integration_tests
 
-      # Examples Tests
-      - name: Test & deploy hardhat-example on Ethereum (regression)
-        working-directory: ./examples/hardhat
-        run: |
-          yarn
-          yarn deploy
-          yarn test:integration
+      # # Examples Tests
+      # - name: Test & deploy hardhat-example on Ethereum (regression)
+      #   working-directory: ./examples/hardhat
+      #   run: |
+      #     yarn
+      #     yarn deploy
+      #     yarn test:integration
 
-      - name: Test & deploy hardhat-example on Optimistic Ethereum
-        working-directory: ./examples/hardhat
-        run: |
-          yarn deploy:ovm
-          yarn test:integration:ovm
+      # - name: Test & deploy hardhat-example on Optimistic Ethereum
+      #   working-directory: ./examples/hardhat
+      #   run: |
+      #     yarn deploy:ovm
+      #     yarn test:integration:ovm
 
-      - name: Test & deploy waffle-example on Ethereum (regression)
-        working-directory: ./examples/waffle
-        run: |
-          yarn
-          yarn compile
-          yarn test:integration
+      # - name: Test & deploy waffle-example on Ethereum (regression)
+      #   working-directory: ./examples/waffle
+      #   run: |
+      #     yarn
+      #     yarn compile
+      #     yarn test:integration
 
-      - name: Test & deploy waffle-example on Optimistic Ethereum
-        working-directory: ./examples/waffle
-        run: |
-          yarn compile:ovm
-          yarn test:integration:ovm
+      # - name: Test & deploy waffle-example on Optimistic Ethereum
+      #   working-directory: ./examples/waffle
+      #   run: |
+      #     yarn compile:ovm
+      #     yarn test:integration:ovm
 
-      - name: Test & deploy truffle-example on Ethereum (regression)
-        working-directory: ./examples/truffle
-        run: |
-          yarn
-          yarn compile
-          yarn test:integration
-          yarn deploy
+      # - name: Test & deploy truffle-example on Ethereum (regression)
+      #   working-directory: ./examples/truffle
+      #   run: |
+      #     yarn
+      #     yarn compile
+      #     yarn test:integration
+      #     yarn deploy
 
-      - name: Test & deploy truffle-example on Optimistic Ethereum
-        working-directory: ./examples/truffle
-        run: |
-          yarn compile:ovm
-          yarn test:integration:ovm
-          yarn deploy:ovm
+      # - name: Test & deploy truffle-example on Optimistic Ethereum
+      #   working-directory: ./examples/truffle
+      #   run: |
+      #     yarn compile:ovm
+      #     yarn test:integration:ovm
+      #     yarn deploy:ovm
 
       - name: Test serving Wallet contracts
         working-directory: ./
@@ -127,20 +127,20 @@ jobs:
         if: failure()
         run: docker images
 
-      - name: Collect docker logs on failure
-        if: failure()
-        uses: jwalton/gh-docker-logs@v1
-        with:
-          images: 'omgx/builder,omgx/hardhat,omgx/deployer,omgx/data-transport-layer,omgx/l2geth,omgx/message-relayer,omgx/batch-submitter,omgx/l2geth,omgx/integration-tests,omgx/wallet_builder,omgx/wallet_deployer'
-          dest: './logs'
+      # - name: Collect docker logs on failure
+      #   if: failure()
+      #   uses: jwalton/gh-docker-logs@v1
+      #   with:
+      #     images: 'omgx/builder,omgx/hardhat,omgx/deployer,omgx/data-transport-layer,omgx/l2geth,omgx/message-relayer,omgx/batch-submitter,omgx/l2geth,omgx/integration-tests,omgx/wallet_builder,omgx/wallet_deployer'
+      #     dest: './logs'
 
-      - name: Tar logs
-        if: failure()
-        run: tar cvzf ./logs.tgz ./logs
+      # - name: Tar logs
+      #   if: failure()
+      #   run: tar cvzf ./logs.tgz ./logs
 
-      - name: Upload logs to GitHub
-        if: failure()
-        uses: actions/upload-artifact@master
-        with:
-          name: logs.tgz
-          path: ./logs.tgz
+      # - name: Upload logs to GitHub
+      #   if: failure()
+      #   uses: actions/upload-artifact@master
+      #   with:
+      #     name: logs.tgz
+      #     path: ./logs.tgz
