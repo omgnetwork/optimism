@@ -2,11 +2,11 @@
 
 <img width="1243" alt="LP" src="https://user-images.githubusercontent.com/46272347/119060612-6455cc00-b987-11eb-9f8c-dfadfa029951.png">
 
-The L2 liquidity pool is the main pool. It provides the ways to deposit and withdraw tokens for liquidity providers. Swap users can deposit ETH or ERC20 tokens to fastly exit the L2.
+The L2 liquidity pool is the main pool. It provides a way to deposit and withdraw tokens for liquidity providers. Swap users can deposit ETH or ERC20 tokens to fastly exit the L2.
 
-The L1 liquidity pool is the sub pool. Swap users can do fast onramp. When swap users do fast exit on the L2 liquidity pool, it sends funds to the swap users.
+The L1 liquidity pool is the sub pool. Swap users can do fast onramp. When swap users do a fast exit via the L2 liquidity pool, it sends funds to the swap users.
 
-> For OMGX, there is no delays for users to move funds from L1 to L2. From my understanding, the liquidity pool is only used to help users fastly exist L2.
+For OMGX, there are no delays for users to move funds from L1 to L2. The liquidity pool is used to help users quickly exit L2.
 
 ## Calculation
 
