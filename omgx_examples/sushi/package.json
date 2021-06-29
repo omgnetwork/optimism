@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "clean": "rimraf ./cache-ovm ./cache ./artifacts-ovm ./artifacts ./deployments",
     "build": "TARGET=ovm hardhat compile --network omgx ",
     "deploy": "TARGET=ovm hardhat --network omgx run scripts/deploy.js",
     "analyze": "TARGET=ovm hardhat run scripts/analyze.js",
-    "test:contracts": "hardhat test"
+    "test:contracts": "hardhat test",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@eth-optimism/ethereumjs-vm": "^4.2.0-alpha.3",
