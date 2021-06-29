@@ -111,7 +111,7 @@ It's a work in progress - for example, we are adding some basic support for NFTs
 Now navigate to child wallet folder
 
 ```bash
-$ cd /optimism/packages/omgx/wallet/wallet
+$ cd /optimism/packages/omgx/contracts/wallet
 ```
 
 First create `.env` file and provide your Infura and Etherscan keys: along with below environment parameters

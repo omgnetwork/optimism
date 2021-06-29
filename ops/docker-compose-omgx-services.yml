@@ -79,7 +79,7 @@ services:
         - "/bin/sh"
         - -ecx
         - |
-            cd /optimism/packages/omgx/wallet
+            cd /optimism/packages/omgx/contracts
             yarn test:integration
     environment:
       L1_NODE_WEB3_URL: http://l1_chain:8545

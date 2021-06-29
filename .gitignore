@@ -20,7 +20,7 @@ packages/contracts/hardhat*
 
 packages/data-transport-layer/db
 
-packages/omgx/wallet/wallet/build
+packages/omgx/contracts/wallet/build
 
 # vim
 *.swp
@@ -31,5 +31,5 @@ env.yml
 env.js
 
 .serverless
-packages/omgx/wallet/deployment/local/addresses.json
-packages/omgx/wallet/wallet/src/deployment/local/addresses.json
+packages/omgx/contracts/deployment/local/addresses.json
+packages/omgx/contracts/wallet/src/deployment/local/addresses.json
