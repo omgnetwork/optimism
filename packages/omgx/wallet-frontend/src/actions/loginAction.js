@@ -1,6 +1,6 @@
 /*
   Varna - A Privacy-Preserving Marketplace
-  Varna uses Fully Homomorphic Encryption to make markets fair. 
+  Varna uses Fully Homomorphic Encryption to make markets fair.
   Copyright (C) 2021 Enya Inc. Palo Alto, CA
 
   This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 
 import { generateAESKey } from 'cryptoWorker/cryptoWorker';
 
-import { SERVICE_OPTIMISM_API_URL } from 'Settings';
+import serviceAxiosInstance from '../api/serviceAxios';
 
 const updatedPassword = (FHEseed, AESKey) => ({
   type: 'PROVIDE_PASSWORD',
@@ -56,15 +56,8 @@ export const providePassword = (FHEseed) => (dispatch) => {
 
 export const verifyInvitationCode = (invitationCode) => (dispatch) => {
   dispatch(verifyInvitationCodeBegin());
-
-  fetch(SERVICE_OPTIMISM_API_URL + 'invitation.code', {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ invitationCode })
-  }).then(res => {
+  serviceAxiosInstance.post(`invitation.code`, {invitationCode})
+  .then(res => {
     if (res.status === 201) {
       dispatch(verifyInvitationCodeSuccess());
     } else {

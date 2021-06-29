@@ -44,6 +44,8 @@ import { accDiv, accMul } from 'util/calculation';
 import { getAllNetworks } from 'util/networkName';
 
 import { ETHERSCAN_URL, OMGX_WATCHER_URL } from "Settings";
+import etherScanInstance from 'api/etherScanAxios';
+import omgxWatcherAxiosInstance from 'api/omgxWatcherAxios';
 
 //All the current addresses
 const localAddresses = require(`../deployment/local/addresses.json`);
@@ -365,52 +367,46 @@ class NetworkService {
   async getTransactions() {
     //rinkeby L1
     if (this.chainID === 4) {
-      const response = await fetch(`${ETHERSCAN_URL}&address=${this.account}`);
+      const response = await etherScanInstance.get(`&address=${this.account}`)
       if (response.status === 200) {
-        const transactions = await response.json();
+        const transactions = await response.data
         if (transactions.status === '1') {
-          return transactions.result;
+          return transactions.result
         }
       }
     }
     //rinkeby L2
     if (this.chainID === 28) {
-      const response = await fetch( OMGX_WATCHER_URL + 'get.transaction',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            address: this.account,
-            fromRange: 0,
-            toRange: 100,
-          })
-        }
-      );
+      const response = await omgxWatcherAxiosInstance.post('get.transaction', {
+        address: this.account,
+        fromRange: 0,
+        toRange: 100,
+      })
+
       if (response.status === 201) {
-        const transactions = await response.json();
-        return transactions;
+        return response.data
       }
     }
   }
 
   async getExits() {
     if (this.chainID === 28 || this.chainID === 4) {
-      const response = await fetch( OMGX_WATCHER_URL + 'get.transaction',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            address: this.account,
-            fromRange: 0,
-            toRange: 100,
-          })
-        }
-      );
+      const response = await omgxWatcherAxiosInstance.post('get.transaction', {
+        address: this.account,
+        fromRange: 0,
+        toRange: 100,
+      })
       if (response.status === 201) {
-        const transactions = await response.json();
-        const filteredTransactions = transactions.filter(i =>
-          [this.L2LPAddress.toLowerCase(), this.L2ERC20Address.toLowerCase(), this.L2ETHAddress.toLowerCase()]
-          .includes(i.to ? i.to.toLowerCase(): null) && i.crossDomainMessage
+        const transactions = response.data
+        const filteredTransactions = transactions.filter(
+          (i) =>
+            [
+              this.L2LPAddress.toLowerCase(),
+              this.L2ERC20Address.toLowerCase(),
+              this.L2ETHAddress.toLowerCase(),
+            ].includes(i.to ? i.to.toLowerCase() : null) && i.crossDomainMessage
         )
-        return { exited: filteredTransactions};
+        return { exited: filteredTransactions }
       }
     }
   }

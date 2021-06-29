@@ -1,6 +1,6 @@
 /*
   Varna - A Privacy-Preserving Marketplace
-  Varna uses Fully Homomorphic Encryption to make markets fair. 
+  Varna uses Fully Homomorphic Encryption to make markets fair.
   Copyright (C) 2021 Enya Inc. Palo Alto, CA
 
   This program is free software: you can redistribute it and/or modify
@@ -34,6 +34,7 @@ import { accSub, accMul } from 'util/calculation';
 import networkService from 'services/networkService';
 
 import { SELLER_OPTIMISM_API_URL } from 'Settings';
+import sellerAxiosInstance from 'api/sellerAxios';
 
 const encryptItemForSellerBegin = () => ({
   type: 'ENCRYPT_ITEM'
@@ -191,14 +192,8 @@ const getSellerAcceptBidDataFailure = (error) => ({
 
 const uploadItemFiles = (message, itemID, itemToSend, itemToReceive, address) => (dispatch) => {
   dispatch(uploadItemFilesBegin());
-      
-  return fetch(SELLER_OPTIMISM_API_URL + "list.item", {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+
+  const payload = JSON.stringify({
       publicKey: message.data.fhePublicKey,
       multiKey: message.data.fheMultiKey,
       rotaKey: message.data.fheRotaKey,
@@ -208,7 +203,7 @@ const uploadItemFiles = (message, itemID, itemToSend, itemToReceive, address) =>
       symbolB: itemToReceive.symbol,
       address,
     }),
-  }).then(res => {
+  return sellerAxiosInstance.post('list.item', payload).then((res) => {
     if (res.status === 201) {
       dispatch(uploadItemFilesSuccess());
       return { status: 201 }
@@ -248,32 +243,32 @@ const configureItemToOMGX = (itemID, itemToSend, itemToReceive, address) => asyn
 
 /* List an item */
 export const listItem = (
-  itemToSend, 
-  itemToSendAmount, 
-  itemToReceive, 
-  sellerExchangeRate, 
-  FHEseed, 
+  itemToSend,
+  itemToSendAmount,
+  itemToReceive,
+  sellerExchangeRate,
+  FHEseed,
   ) => (dispatch) => {
   console.log("listBid: Starting the item listing process")
   var cryptoWorkerThreadID = crypto.getRandomValues(new Uint32Array(1)).toString(16);
-  
+
   dispatch(encryptItemForSellerBegin());
 
   const workerInstance = cryptoWorker();
 
   workerInstance.generateItem(
-    itemToSend, 
-    itemToSendAmount, 
+    itemToSend,
+    itemToSendAmount,
     itemToSendAmount,/*this is not a bug - needed to update remaining amount */
-    itemToReceive, 
-    sellerExchangeRate, 
-    FHEseed, 
+    itemToReceive,
+    sellerExchangeRate,
+    FHEseed,
     cryptoWorkerThreadID
   );
 
   workerInstance.addEventListener('message', (message) => {
-    if (message.data.status === "success" && 
-        message.data.type === "listItem" && 
+    if (message.data.status === "success" &&
+        message.data.type === "listItem" &&
         message.data.cryptoWorkerThreadID === cryptoWorkerThreadID
     ) {
       dispatch(encryptItemForSellerSuccess());
@@ -306,57 +301,40 @@ export const isItemOpenOrClosed = () => (dispatch) => {
   // Generate hashed address
   const address = md5(networkService.account);
 
-  return fetch(SELLER_OPTIMISM_API_URL + "download.item.status", {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ address }),
-  }).then(res => {
-    if (res.status === 201) {
-      return res.json()
-    } else {
-      dispatch(isItemOpenOrClosedFailure(res.status));
-      return ""
-    }
-  }).then(data => {
-    if (data !== "") {
-      dispatch(isItemOpenOrClosedSuccess(data.data));
-      return data.data;
-    }
-    return "";
-  })
+  const payload = JSON.stringify({ address })
+
+  return sellerAxiosInstance
+    .post('download.item.status', payload)
+    .then((res) => {
+      if (res.status === 201 && res.data !== '') {
+        dispatch(isItemOpenOrClosedSuccess(res.data.data))
+        return res.data.data
+      } else {
+        dispatch(isItemOpenOrClosedFailure(res.status))
+        return ''
+      }
+    })
 }
 
 export const downloadItemCiphertext = (itemID) => (dispatch) => {
 
   dispatch(downloadItemCiphertextBegin(itemID));
 
-  return fetch(SELLER_OPTIMISM_API_URL + "download.item.ciphertext", {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      itemID
-    }),
-  }).then(res => {
-    if (res.status === 201) {
-      return res.json()
-    } else {
-      dispatch(downloadItemCiphertextFailure(itemID, res.status));
-      return ""
-    }
-  }).then(data => {
-    if (data !== "") {
-      dispatch(downloadItemCiphertextSuccess(itemID, data.ciphertext));
-      return data.ciphertext;
-    } else {
-      return ""
-    }
+  const payload = JSON.stringify({
+    itemID,
   })
+
+  return sellerAxiosInstance
+    .post('download.item.ciphertext', payload)
+    .then((res) => {
+      if (res.status === 201 && res.data !== '') {
+        dispatch(downloadItemCiphertextSuccess(itemID, res.data.ciphertext))
+        return res.data.ciphertext
+      } else {
+        dispatch(downloadItemCiphertextFailure(itemID, res.status))
+        return ''
+      }
+    })
 }
 
 export const decryptItem = (itemID, FHEseed, AESKey, ciphertext) => (dispatch) => {
@@ -366,7 +344,7 @@ export const decryptItem = (itemID, FHEseed, AESKey, ciphertext) => (dispatch) =
   workerInstance.decryptItem(itemID, ciphertext, FHEseed);
 
   workerInstance.addEventListener('message', (message) => {
-    if (message.data.status === "success" && 
+    if (message.data.status === "success" &&
         message.data.type === "decryptAsk" &&
         message.data.itemID === itemID
     ) {
@@ -396,7 +374,7 @@ export const decryptItem = (itemID, FHEseed, AESKey, ciphertext) => (dispatch) =
           localStorage.setItem("decryptedItem", JSON.stringify(decryptedItem));
         })
     } else if (
-      message.data.status === "failure" && 
+      message.data.status === "failure" &&
       message.data.type === "decryptAsk" &&
       message.data.itemID === itemID
     ) {
@@ -450,22 +428,17 @@ export const deleteItem = (itemID) => (dispatch) => {
   // Generate hashed address
   const address = md5(networkService.account);
 
-  return fetch(SELLER_OPTIMISM_API_URL + "delete.item", {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      itemID, address
-    }),
-  }).then(res => {
+  const payload = JSON.stringify({
+    itemID,
+    address,
+  })
+  return sellerAxiosInstance.post('delete.item', payload).then((res) => {
     if (res.status === 201) {
-      dispatch(openAlert("Your item listing was deleted"));
-      dispatch(deleteItemSuccess(itemID));
+      dispatch(openAlert('Your item listing was deleted'))
+      dispatch(deleteItemSuccess(itemID))
     } else {
-      dispatch(openError("Failed to delete your item"));
-      dispatch(deleteItemFailure(itemID, res.status));
+      dispatch(openError('Failed to delete your item'))
+      dispatch(deleteItemFailure(itemID, res.status))
     }
   })
 }
@@ -473,17 +446,17 @@ export const deleteItem = (itemID) => (dispatch) => {
 export const acceptBid = ( cMD ) => async (dispatch) => {
 
   /*
-    itemID, 
-    bidID, 
-    address, 
+    itemID,
+    bidID,
+    address,
     sellerItemToSend,
     sellerItemToReceive,
-    sellerItemToSendAmount, 
+    sellerItemToSendAmount,
     sellerItemToSendAmountRemain,
     sellerExchangeRate,
-    agreeAmount, 
-    agreeExchangeRate, 
-    FHEseed, 
+    agreeAmount,
+    agreeExchangeRate,
+    FHEseed,
   */
 
   const state = store.getState();
@@ -515,33 +488,33 @@ export const acceptBid = ( cMD ) => async (dispatch) => {
 
     let cryptoWorkerThreadID = "";
     while (cryptoWorkerThreadID.length < 20) cryptoWorkerThreadID += Math.random().toString(36).substr(2);
-  
+
     // Web worker
     const workerInstance = cryptoWorker();
     workerInstance.generateItem(
-      cMD.sellerItemToSend, 
-      cMD.sellerItemToSendAmount, 
-      sellerItemToSendAmountRemainUpdated, 
-      cMD.sellerItemToReceive, 
+      cMD.sellerItemToSend,
+      cMD.sellerItemToSendAmount,
+      sellerItemToSendAmountRemainUpdated,
+      cMD.sellerItemToReceive,
       cMD.sellerExchangeRate,
-      cMD.FHEseed, 
+      cMD.FHEseed,
       cryptoWorkerThreadID,
     );
-      
+
     workerInstance.addEventListener('message', async (message) => {
-      if (message.data.status === "success" && 
-          message.data.type === "listItem" && 
+      if (message.data.status === "success" &&
+          message.data.type === "listItem" &&
           message.data.cryptoWorkerThreadID === cryptoWorkerThreadID
       ) {
         // upload the updated ciphertext to S3
         const uploadFilesStatus = await dispatch(uploadItemFiles(
-          message, 
-          cMD.itemID, 
-          cMD.sellerItemToSend, 
+          message,
+          cMD.itemID,
+          cMD.sellerItemToSend,
           cMD.sellerItemToReceive,
           md5(networkService.account)
         ));
-        
+
         if (uploadFilesStatus.status === 201) {
           // update the data in cache
           dispatch(decryptItem(cMD.itemID, cMD.FHEseed, cMD.AESKey, message.data.fheCiphertext));
@@ -554,7 +527,7 @@ export const acceptBid = ( cMD ) => async (dispatch) => {
             const closeValue = sellerItemToReceiveAmount;
             const closeTrader = cMD.address;
             const closeContractAddress = cMD.sellerItemToReceive.currency;
-            
+
             const swapStatus = await networkService.AtomicSwapContract.open(
               swapID,
               openValue,
@@ -564,7 +537,7 @@ export const acceptBid = ( cMD ) => async (dispatch) => {
               closeContractAddress,
             );
             const swapRes = await swapStatus.wait();
-            
+
             if (swapRes) {
               const uploadSwapBody = await uploadSellerAcceptBidData({
                 UUID,
@@ -579,7 +552,7 @@ export const acceptBid = ( cMD ) => async (dispatch) => {
                 symbolA: cMD.sellerItemToSend.symbol,
                 symbolB: cMD.sellerItemToReceive.symbol
               })
-  
+
               if (uploadSwapBody === 201) {
                 dispatch(acceptBidSuccess(cMD.itemID, cMD.bidID));
                 dispatch(openAlert("Swap was sent"));
@@ -647,38 +620,24 @@ export const decryptItemCache = (decryptedItem, decryptedItemCache, decryptedIte
 export const getSellerAcceptBidData = (itemIDList) => (dispatch) => {
   dispatch(getSellerAcceptBidDataBegin());
 
-  return fetch(SELLER_OPTIMISM_API_URL + "download.agreement", {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      itemIDList, address: networkService.account,
-    }),
-  }).then(res => {
-    if (res.status === 201) {
-      return res.json()
+  let payload = JSON.stringify({
+    itemIDList,
+    address: networkService.account,
+  })
+  return sellerAxiosInstance.post('download.agreement', payload).then((res) => {
+    if (res.status === 201 && res.data !== '') {
+      dispatch(getSellerAcceptBidDataSuccess(res.data))
     } else {
-      dispatch(getSellerAcceptBidDataFailure(res.status));
-      return ""
-    }
-  }).then(data => {
-    if (data !== "") {
-      dispatch(getSellerAcceptBidDataSuccess(data));
+      dispatch(getSellerAcceptBidDataFailure(res.status))
+      return ''
     }
   })
 }
 
 const uploadSellerAcceptBidData = (cMD) => {
-  return fetch(SELLER_OPTIMISM_API_URL + "upload.agreement", {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(cMD),
-  }).then(res => {
-    return res.status
-  })
+  return sellerAxiosInstance
+    .post('upload.agreement', JSON.stringify(cMD))
+    .then((res) => {
+      return res.status
+    })
 }

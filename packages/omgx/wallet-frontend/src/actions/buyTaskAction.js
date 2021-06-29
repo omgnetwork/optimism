@@ -1,6 +1,6 @@
 /*
   Varna - A Privacy-Preserving Marketplace
-  Varna uses Fully Homomorphic Encryption to make markets fair. 
+  Varna uses Fully Homomorphic Encryption to make markets fair.
   Copyright (C) 2021 Enya Inc. Palo Alto, CA
 
   This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ import networkService from 'services/networkService';
 
 import { openError } from './uiAction';
 
-import { BUYER_OPTIMISM_API_URL } from '../Settings';
+import buyerAxiosInstance from 'api/buyerAxios'
 
 const startBuyTaskBegin = (bidID) => ({
   type: 'START_BUY_TASK',
@@ -88,33 +88,24 @@ export const downloadNextItem = (bidID) => (dispatch) => {
 
   dispatch(downloadNextItemBegin(bidID));
 
-  return fetch(BUYER_OPTIMISM_API_URL + "download.item.ciphertext", {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      bidID
-    }),
-  }).then(res => {
-    if (res.status === 201) {
-      return res.json()
-    } else {
-      //getting lots of 400 errors here
-      dispatch(downloadNextItemFailure(bidID, res.status));
-      return ""
-    }
-  }).then(data => {
-    if (data !== "") {
-      if (data.status !== 201) {
-        dispatch(downloadNextItemFailure(bidID, data.status));
+  return buyerAxiosInstance
+    .post(
+      'download.item.ciphertext',
+      JSON.stringify({
+        bidID,
+      })
+    )
+    .then((res) => {
+      if (res.status === 201 && res.data !== '') {
+        const { data } = res
+        dispatch(downloadNextItemSuccess(bidID, data))
+        return { status: data.status, data }
       } else {
-        dispatch(downloadNextItemSuccess(bidID, data));
+        //getting lots of 400 errors here
+        dispatch(downloadNextItemFailure(bidID, res.status))
+        return ''
       }
-    }
-    return { status: data.status, data }
-  })
+    })
 }
 
 const uploadBid = (bidID, itemID, ciphertext) => (dispatch) => {
@@ -123,46 +114,28 @@ const uploadBid = (bidID, itemID, ciphertext) => (dispatch) => {
   // Generate hashed address
   const address = networkService.account;
 
-  return fetch(BUYER_OPTIMISM_API_URL + "upload.bid.seller", {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      bidID, itemID, ciphertext, address,
-    }),
-  }).then(res => {
-    if (res.status === 201) {
-      return res.json()
-    } else {
-      dispatch(uploadBidFailure(bidID, res.status));
-      dispatch(startBuyTaskFailure(bidID, 500));
-      return ""
-    }
-  }).then(data => {
-    if (data !== "") {
-
-      //this controls e.g. run | stop
-      /*
-        taskStatus: 'stop', // run || stop
-        taskStatusLoad: {[action.payload.bidID]: false},
-        taskStatusError: {[action.payload.bidID]: false},
-      */
-      dispatch(startBuyTaskSuccess(bidID));
-
-      //this controls
-      /*
-          case 'UPLOAD_BID_SUCCESS':
-      return {
-        ...state,
-        uploadBidLoad: {[action.payload.bidID]: false},
-        uploadBidError: {[action.payload.bidID]: false},
-      */
-      dispatch(uploadBidSuccess(bidID));
-    }
-    return { status: data.status }
-  })
+  return buyerAxiosInstance
+    .post(
+      'upload.bid.seller',
+      JSON.stringify({
+        bidID,
+        itemID,
+        ciphertext,
+        address,
+      })
+    )
+    .then((res) => {
+      if (res.status === 201) {
+        // return res.json()
+        dispatch(startBuyTaskSuccess(bidID))
+        dispatch(uploadBidSuccess(bidID))
+        return { status: res.data.status }
+      } else {
+        dispatch(uploadBidFailure(bidID, res.status))
+        dispatch(startBuyTaskFailure(bidID, 500))
+        return ''
+      }
+    })
 }
 
 export const startBuyTask = (bid, bidID) => (dispatch) => {
@@ -181,7 +154,7 @@ export const startBuyTask = (bid, bidID) => (dispatch) => {
 }
 
 const generateOffer = (bid, bidID, itemID, publicKey) => (dispatch) => {
-  
+
   dispatch(generateOfferBegin(bidID));
 
   // Web worker
@@ -190,8 +163,8 @@ const generateOffer = (bid, bidID, itemID, publicKey) => (dispatch) => {
   workerInstance.generateOffer(bid, bidID, publicKey);
 
   workerInstance.addEventListener('message', (message) => {
-    if (message.data.status === "success" && 
-        message.data.type === "generateOffer" && 
+    if (message.data.status === "success" &&
+        message.data.type === "generateOffer" &&
         message.data.bidID === bidID
     ) {
       dispatch(generateOfferSuccess(bidID, message.data.bidCiphertext));

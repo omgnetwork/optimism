@@ -1,6 +1,6 @@
 /*
   Varna - A Privacy-Preserving Marketplace
-  Varna uses Fully Homomorphic Encryption to make markets fair. 
+  Varna uses Fully Homomorphic Encryption to make markets fair.
   Copyright (C) 2021 Enya Inc. Palo Alto, CA
 
   This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ import { accDiv, accMul } from 'util/calculation';
 import { arrayToCoin } from 'util/coinConvert';
 import { AESEncrypt, AESDecrypt } from 'cryptoWorker/cryptoWorker';
 
-import { SELLER_OPTIMISM_API_URL } from '../Settings';
+import sellerAxiosInstance from 'api/sellerAxios';
 
 /****************************/
 /* Decrypt ask by using FHE */
@@ -118,35 +118,35 @@ const downloadBidOffer = (bidDecryptionWaitingList) => (dispatch) => {
   dispatch(getBidOfferBegin(bidID, itemID));
   dispatch(downloadBidOfferBegin(bidID));
 
-  return fetch(SELLER_OPTIMISM_API_URL + "download.bid.ciphertext", {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      itemID, bidID
-    }),
-  }).then(res => {
-    if (res.status === 201) {
-      return res.json()
-    } else {
-      dispatch(downloadBidOfferFailure(bidID, res.status));
-      dispatch(getBidOfferFailure(bidID, itemID, res.status));
-      return ""
-    }
-  }).then(data => {
-    if (data !== "") {
-      if (data.status === 201) {
-        dispatch(downloadBidOfferSuccess(bidID, data.ciphertext));
-        return { ciphertext: data.ciphertext, address: data.address, bidID }
-      } else {
-        return ""
-      }
-    } else {
-      return ""
-    }
+  const payload = JSON.stringify({
+    itemID,
+    bidID,
   })
+  return sellerAxiosInstance
+    .post('download.bid.ciphertext', payload)
+    .then((res) => {
+      if (res.status === 201) {
+        // return res.json()
+        if (res.data !== '') {
+          if (res.data.status === 201) {
+            dispatch(downloadBidOfferSuccess(bidID, res.data.ciphertext))
+            return {
+              ciphertext: res.data.ciphertext,
+              address: res.data.address,
+              bidID,
+            }
+          } else {
+            return ''
+          }
+        } else {
+          return ''
+        }
+      } else {
+        dispatch(downloadBidOfferFailure(bidID, res.status))
+        dispatch(getBidOfferFailure(bidID, itemID, res.status))
+        return ''
+      }
+    })
 }
 
 const decryptBidOffer = (itemID, bidID, ciphertext, FHEseed, AESKey, address) => (dispatch) => {
@@ -157,9 +157,9 @@ const decryptBidOffer = (itemID, bidID, ciphertext, FHEseed, AESKey, address) =>
   const workerInstance = cryptoWorker();
 
   workerInstance.decryptBid(ciphertext, FHEseed, bidID);
-  
+
   workerInstance.addEventListener('message', (message) => {
-    if (message.data.status === "success" && 
+    if (message.data.status === "success" &&
         message.data.type === "decryptBid" &&
         message.data.bidID === bidID
     ) {
@@ -170,7 +170,7 @@ const decryptBidOffer = (itemID, bidID, ciphertext, FHEseed, AESKey, address) =>
         const buyerItemToReceiveAmount = accDiv(bidCleartext[8], Math.pow(10, 5));
         const buyerExchangeRate = accDiv(bidCleartext[9], Math.pow(10, 5));
         dispatch(getBidOfferSuccess(
-          bidID, itemID, 
+          bidID, itemID,
           // data
           { address, buyerItemToReceiveAmount, buyerExchangeRate }
         ));
@@ -181,7 +181,7 @@ const decryptBidOffer = (itemID, bidID, ciphertext, FHEseed, AESKey, address) =>
         const cleartext = { address, buyerItemToReceiveAmount, buyerExchangeRate };
 
         AESEncrypt(JSON.stringify(cleartext), AESKey).then(ciphertext => {
-          
+
           const bufferCiphertext = ciphertext.ciphertext;
           const bufferIV = ciphertext.iv;
           const base64Ciphertext = {
@@ -208,7 +208,7 @@ const decryptBidOffer = (itemID, bidID, ciphertext, FHEseed, AESKey, address) =>
               },
             }
           }
-  
+
           localStorage.setItem("bidOfferData", JSON.stringify(bidOfferDataCache));
         })
 
@@ -236,11 +236,11 @@ export const getBidOffer = (bidDecryptionWaitingList, FHEseed, AESKey) => (dispa
   dispatch(downloadBidOffer(bidDecryptionWaitingList)).then(data => {
     if (data !== "") {
       dispatch(decryptBidOffer(
-        bidDecryptionWaitingList[0].itemID, 
-        data.bidID, 
-        data.ciphertext, 
-        FHEseed, 
-        AESKey, 
+        bidDecryptionWaitingList[0].itemID,
+        data.bidID,
+        data.ciphertext,
+        FHEseed,
+        AESKey,
         data.address,
       ));
     }
