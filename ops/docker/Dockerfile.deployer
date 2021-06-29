@@ -34,7 +34,7 @@ COPY packages/contracts/tasks ./tasks
 COPY packages/contracts/src ./src
 COPY packages/contracts/test/helpers/constants.ts ./test/helpers/constants.ts
 COPY packages/contracts/scripts ./scripts
-# COPY packages/contracts/dist ./dist
+COPY packages/contracts/dist ./dist
 
 COPY ./ops/scripts/deployer.sh .
 ENTRYPOINT yarn run deploy

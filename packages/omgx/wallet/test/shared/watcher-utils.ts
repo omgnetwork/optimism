@@ -5,14 +5,13 @@ import {
 } from '@ethersproject/providers'
 import { Watcher } from './watcher'
 import { Contract, Transaction } from 'ethers'
-import { loadContract, loadContractFromManager } from '@eth-optimism/contracts'
 
 export const initWatcher = async (
   l1Provider: JsonRpcProvider,
   l2Provider: JsonRpcProvider,
   AddressManager: Contract
 ) => {
-  
+
   const l1MessengerAddress = await AddressManager.getAddress('Proxy__OVM_L1CrossDomainMessenger')
   console.log("l1MessengerAddress:",l1MessengerAddress)
 
@@ -35,11 +34,9 @@ export const initWatcherFast = async (
   AddressManager: Contract,
 ) => {
 
-  /* ALERT - this code will need to be changed once the new message-relayer-fast is autodeployed */
-  //const l1MessengerAddress = await AddressManager.getAddress('OVM_L1CrossDomainMessengerFast')
-  const l1MessengerAddress = await AddressManager.getAddress('Proxy__OVM_L1CrossDomainMessenger')
+  const l1MessengerAddress = await AddressManager.getAddress('OVM_L1CrossDomainMessengerFast')
   console.log("l1FastMessengerAddress:",l1MessengerAddress)
-  
+
   return new Watcher({
     l1: {
       provider: l1Provider,
@@ -71,7 +68,7 @@ export const waitForXDomainTransaction = async (
 
   // await it if needed
   tx = await tx
-  
+
   // get the receipt and the full transaction
   const receipt = await tx.wait()
 

@@ -56,6 +56,36 @@ OVM_L1CrossDomainMessenger:
  - https://rinkeby.etherscan.io/address/0x8109f1Af0e8A74e393703Ca5447C5414E1946500)
 -->
 ---
+## RINKEBY-INTEGRATION
+
+Network : __rinkeby (chain id: 4)__
+
+|Contract|Address|
+|--|--|
+|Lib_AddressManager|[0xd58781Cdb5FC05CB94c579D9a84A0e0F5242b5ad](https://rinkeby.etherscan.io/address/0xd58781Cdb5FC05CB94c579D9a84A0e0F5242b5ad)|
+|OVM_CanonicalTransactionChain|[0xb7945b1C99Ed3D5093a2cA4ee6454B8911e4861A](https://rinkeby.etherscan.io/address/0xb7945b1C99Ed3D5093a2cA4ee6454B8911e4861A)|
+|OVM_ChainStorageContainer-CTC-batches|[0x1889Adb3678E41b47496c5a7882337039C6ebBe1](https://rinkeby.etherscan.io/address/0x1889Adb3678E41b47496c5a7882337039C6ebBe1)|
+|OVM_ChainStorageContainer-CTC-queue|[0xd016AE4Ca2B482fC83817345A32dD60F5E9DFdb8](https://rinkeby.etherscan.io/address/0xd016AE4Ca2B482fC83817345A32dD60F5E9DFdb8)|
+|OVM_ChainStorageContainer-SCC-batches|[0x1D8EEc9c2157B6fB0b28201185475d091CD4Cb89](https://rinkeby.etherscan.io/address/0x1D8EEc9c2157B6fB0b28201185475d091CD4Cb89)|
+|OVM_ExecutionManager|[0x9970eF0D48bFf67846f487554762A81Cb6D65ADa](https://rinkeby.etherscan.io/address/0x9970eF0D48bFf67846f487554762A81Cb6D65ADa)|
+|OVM_FraudVerifier|[0x2384494f19CF08442B37aCD63A46947118C5d5bd](https://rinkeby.etherscan.io/address/0x2384494f19CF08442B37aCD63A46947118C5d5bd)|
+|OVM_L1MultiMessageRelayer|[0x5C621BE82C4E9a73d8428AA6fF01ec48FFf48174](https://rinkeby.etherscan.io/address/0x5C621BE82C4E9a73d8428AA6fF01ec48FFf48174)|
+|OVM_SafetyChecker|[0xEb6C6071C518e44251aC76E8CcE0A57fCA672675](https://rinkeby.etherscan.io/address/0xEb6C6071C518e44251aC76E8CcE0A57fCA672675)|
+|OVM_StateCommitmentChain|[0x59A5662186928742C6F37f25BCf057D387C33408](https://rinkeby.etherscan.io/address/0x59A5662186928742C6F37f25BCf057D387C33408)|
+|OVM_StateManagerFactory|[0x8c6652F82E114C8D3FaA7113B1408ae6364f1D11](https://rinkeby.etherscan.io/address/0x8c6652F82E114C8D3FaA7113B1408ae6364f1D11)|
+|OVM_StateTransitionerFactory|[0xb6046496DeDAFb0E416c8C816Fa25Ffaf25c309f](https://rinkeby.etherscan.io/address/0xb6046496DeDAFb0E416c8C816Fa25Ffaf25c309f)|
+|Proxy__OVM_L1CrossDomainMessenger|[0x0C1E0c73A48e7624DB86bc5234E7E3188cb7b47e](https://rinkeby.etherscan.io/address/0x0C1E0c73A48e7624DB86bc5234E7E3188cb7b47e)|
+|Proxy__OVM_L1StandardBridge|[0x95c3b9448A9B5F563e7DC47Ac3e4D6fF0F9Fad93](https://rinkeby.etherscan.io/address/0x95c3b9448A9B5F563e7DC47Ac3e4D6fF0F9Fad93)|
+|mockOVM_BondManager|[0xF66591BD3f660b39407AC2A0343b593F651dd0A2](https://rinkeby.etherscan.io/address/0xF66591BD3f660b39407AC2A0343b593F651dd0A2)|
+<!--
+Implementation addresses. DO NOT use these addresses directly.
+Use their proxied counterparts seen above.
+
+OVM_L1CrossDomainMessenger: 
+ - 0x4B669b500f39B5746D5E5293Bbc2Ac739C430aF9
+ - https://rinkeby.etherscan.io/address/0x4B669b500f39B5746D5E5293Bbc2Ac739C430aF9)
+-->
+---
 ## OPTIMISTIC-KOVAN
 
 Network : __undefined (chain id: 69)__

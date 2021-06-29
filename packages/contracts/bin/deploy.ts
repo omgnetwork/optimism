@@ -2,69 +2,70 @@ import { Wallet } from 'ethers'
 import path from 'path'
 import dirtree from 'directory-tree'
 import fs from 'fs'
+require('dotenv').config()
 
 // Ensures that all relevant environment vars are properly set. These lines *must* come before the
 // hardhat import because importing will load the config (which relies on these vars). Necessary
 // because CI currently uses different var names than the ones we've chosen here.
 // TODO: Update CI so that we don't have to do this anymore.
-process.env.HARDHAT_NETWORK = 'custom' // "custom" here is an arbitrary name. only used for CI.
-process.env.CONTRACTS_TARGET_NETWORK = 'custom'
+process.env.HARDHAT_NETWORK = 'rinkeby-integration' // "custom" here is an arbitrary name. only used for CI.
+process.env.CONTRACTS_TARGET_NETWORK = 'rinkeby-integration'
 process.env.CONTRACTS_DEPLOYER_KEY = process.env.DEPLOYER_PRIVATE_KEY
 process.env.CONTRACTS_RPC_URL =
   process.env.L1_NODE_WEB3_URL || 'http://127.0.0.1:8545'
 
-import hre from 'hardhat'
+// import hre from 'hardhat'
 
 const sequencer = new Wallet(process.env.SEQUENCER_PRIVATE_KEY)
-const proposer = new Wallet(process.env.PROPOSER_PRIVATE_KEY)
+// const proposer = new Wallet(process.env.PROPOSER_PRIVATE_KEY)
 const deployer = new Wallet(process.env.DEPLOYER_PRIVATE_KEY)
-const relayer = new Wallet(process.env.RELAYER_PRIVATE_KEY)
+// const relayer = new Wallet(process.env.RELAYER_PRIVATE_KEY)
 
-const parseEnv = () => {
-  const ensure = (env, type) => {
-    if (typeof process.env[env] === 'undefined') {
-      return undefined
-    }
-    if (type === 'number') {
-      return parseInt(process.env[env], 10)
-    }
-    return process.env[env]
-  }
+// const parseEnv = () => {
+//   const ensure = (env, type) => {
+//     if (typeof process.env[env] === 'undefined') {
+//       return undefined
+//     }
+//     if (type === 'number') {
+//       return parseInt(process.env[env], 10)
+//     }
+//     return process.env[env]
+//   }
 
-  return {
-    l1BlockTimeSeconds: ensure('BLOCK_TIME_SECONDS', 'number'),
-    ctcForceInclusionPeriodSeconds: ensure('FORCE_INCLUSION_PERIOD_SECONDS', 'number'),
-    ctcMaxTransactionGasLimit: ensure('MAX_TRANSACTION_GAS_LIMIT', 'number'),
-    emMinTransactionGasLimit: ensure('MIN_TRANSACTION_GAS_LIMIT', 'number'),
-    emMaxtransactionGasLimit: ensure('MAX_TRANSACTION_GAS_LIMIT', 'number'),
-    emMaxGasPerQueuePerEpoch: ensure('MAX_GAS_PER_QUEUE_PER_EPOCH', 'number'),
-    emSecondsPerEpoch: ensure('ECONDS_PER_EPOCH', 'number'),
-    emOvmChainId: ensure('CHAIN_ID', 'number'),
-    sccFraudProofWindow: ensure('FRAUD_PROOF_WINDOW_SECONDS', 'number'),
-    sccSequencerPublishWindow: ensure('SEQUENCER_PUBLISH_WINDOW_SECONDS', 'number'),
-  }
-}
+//   return {
+//     l1BlockTimeSeconds: ensure('BLOCK_TIME_SECONDS', 'number'),
+//     ctcForceInclusionPeriodSeconds: ensure('FORCE_INCLUSION_PERIOD_SECONDS', 'number'),
+//     ctcMaxTransactionGasLimit: ensure('MAX_TRANSACTION_GAS_LIMIT', 'number'),
+//     emMinTransactionGasLimit: ensure('MIN_TRANSACTION_GAS_LIMIT', 'number'),
+//     emMaxtransactionGasLimit: ensure('MAX_TRANSACTION_GAS_LIMIT', 'number'),
+//     emMaxGasPerQueuePerEpoch: ensure('MAX_GAS_PER_QUEUE_PER_EPOCH', 'number'),
+//     emSecondsPerEpoch: ensure('ECONDS_PER_EPOCH', 'number'),
+//     emOvmChainId: ensure('CHAIN_ID', 'number'),
+//     sccFraudProofWindow: ensure('FRAUD_PROOF_WINDOW_SECONDS', 'number'),
+//     sccSequencerPublishWindow: ensure('SEQUENCER_PUBLISH_WINDOW_SECONDS', 'number'),
+//   }
+// }
 
 const main = async () => {
-  const config = parseEnv()
+  // const config = parseEnv()
 
-  await hre.run('deploy', {
-    l1BlockTimeSeconds: config.l1BlockTimeSeconds,
-    ctcForceInclusionPeriodSeconds: config.ctcForceInclusionPeriodSeconds,
-    ctcMaxTransactionGasLimit: config.ctcMaxTransactionGasLimit,
-    emMinTransactionGasLimit: config.emMinTransactionGasLimit,
-    emMaxtransactionGasLimit: config.emMaxtransactionGasLimit,
-    emMaxGasPerQueuePerEpoch: config.emMaxGasPerQueuePerEpoch,
-    emSecondsPerEpoch: config.emSecondsPerEpoch,
-    emOvmChainId: config.emOvmChainId,
-    sccFraudProofWindow: config.sccFraudProofWindow,
-    sccSequencerPublishWindow: config.sccFraudProofWindow,
-    ovmSequencerAddress: sequencer.address,
-    ovmProposerAddress: proposer.address,
-    ovmRelayerAddress: relayer.address,
-    ovmAddressManagerOwner: deployer.address,
-    noCompile: process.env.NO_COMPILE ? true : false,
-  })
+  // await hre.run('deploy', {
+  //   l1BlockTimeSeconds: config.l1BlockTimeSeconds,
+  //   ctcForceInclusionPeriodSeconds: config.ctcForceInclusionPeriodSeconds,
+  //   ctcMaxTransactionGasLimit: config.ctcMaxTransactionGasLimit,
+  //   emMinTransactionGasLimit: config.emMinTransactionGasLimit,
+  //   emMaxtransactionGasLimit: config.emMaxtransactionGasLimit,
+  //   emMaxGasPerQueuePerEpoch: config.emMaxGasPerQueuePerEpoch,
+  //   emSecondsPerEpoch: config.emSecondsPerEpoch,
+  //   emOvmChainId: config.emOvmChainId,
+  //   sccFraudProofWindow: config.sccFraudProofWindow,
+  //   sccSequencerPublishWindow: config.sccFraudProofWindow,
+  //   ovmSequencerAddress: sequencer.address,
+  //   ovmProposerAddress: proposer.address,
+  //   ovmRelayerAddress: relayer.address,
+  //   ovmAddressManagerOwner: deployer.address,
+  //   noCompile: process.env.NO_COMPILE ? true : false,
+  // })
 
   // Stuff below this line is currently required for CI to work properly. We probably want to
   // update our CI so this is no longer necessary. But I'm adding it for backwards compat so we can
@@ -75,13 +76,13 @@ const main = async () => {
   }
 
   const contracts: any = dirtree(
-    path.resolve(__dirname, `../deployments/custom`)
+    path.resolve(__dirname, `../deployments/rinkeby-integration`)
   ).children.filter((child) => {
     return child.extension === '.json'
   }).reduce((contractsAccumulator, child) => {
     const contractName = child.name.replace('.json', '')
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const artifact = require(path.resolve(__dirname, `../deployments/custom/${child.name}`))
+    const artifact = require(path.resolve(__dirname, `../deployments/rinkeby-integration/${child.name}`))
     contractsAccumulator[nicknames[contractName] || contractName] = artifact.address
     return contractsAccumulator
   }, {})

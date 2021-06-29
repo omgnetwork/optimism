@@ -45,14 +45,69 @@ Images:
 
 ```javascript
 {
-  "deployer": "omgx/deployer-rinkeby:integration-v1.0.0",
-  "data_transport_layer": "omgx/data-transport-layer:integration-v1.0.0",
-  "geth_l2": "omgx/l2geth:integration-v1.0.0",
-  "batch_submitter": "omgx/batch-submitter:integration-v1.0.0",
-  "message_relayer": "omgx/message-relayer:integration-v1.0.0",
-  "message_relayer_fast": "omgx/message-relayer-fast:integration-v1.0.0"
+  "deployer": "omgx/deployer-rinkeby:integration-v1",
+  "data_transport_layer": "omgx/data-transport-layer:integration-v1",
+  "geth_l2": "omgx/l2geth:integration-v1",
+  "batch_submitter": "omgx/batch-submitter:integration-v1",
+  "message_relayer": "omgx/message-relayer:integration-v1",
+  "message_relayer_fast": "omgx/message-relayer-fast:integration-v1"
 }
 ```
+
+## V2
+
+Accounts:
+
+```javascript
+{
+  "Deployer": "0x2A2D5e9D1A0f3485f3D5c3fd983028E0f226FeD6",
+  "Sequencer": "0xE50faB5E5F46BB3E3e412d6DFbA73491a2D97695",
+  "Proposer": "0xfA20335C1Dbb08F67B0362CC07F707187CF378f7",
+  "Relayer": "0x3C8b7FdbF1e5B2519B00A8c9317C4BA51d6a4f9d",
+  "FastRelayer": "0xFA8077f292976ecB6B407c92C048983bDfDff428"
+}
+```
+
+Regenesis:
+
+```javascript
+{
+ "AddressManager": "0xd58781Cdb5FC05CB94c579D9a84A0e0F5242b5ad",
+  "OVM_CanonicalTransactionChain": "0xb7945b1C99Ed3D5093a2cA4ee6454B8911e4861A",
+  "OVM_ChainStorageContainer-CTC-batches": "0x1889Adb3678E41b47496c5a7882337039C6ebBe1",
+  "OVM_ChainStorageContainer-CTC-queue": "0xd016AE4Ca2B482fC83817345A32dD60F5E9DFdb8",
+  "OVM_ChainStorageContainer-SCC-batches": "0x1D8EEc9c2157B6fB0b28201185475d091CD4Cb89",
+  "OVM_ExecutionManager": "0x9970eF0D48bFf67846f487554762A81Cb6D65ADa",
+  "OVM_FraudVerifier": "0x2384494f19CF08442B37aCD63A46947118C5d5bd",
+  "OVM_L1CrossDomainMessenger": "0x4B669b500f39B5746D5E5293Bbc2Ac739C430aF9",
+  "OVM_L1CrossDomainMessengerFast": "0x704b3410533EEe40EcE4242Cf0d480DBb0225896",
+  "OVM_L1MultiMessageRelayer": "0x5C621BE82C4E9a73d8428AA6fF01ec48FFf48174",
+  "OVM_SafetyChecker": "0xEb6C6071C518e44251aC76E8CcE0A57fCA672675",
+  "OVM_StateCommitmentChain": "0x59A5662186928742C6F37f25BCf057D387C33408",
+  "OVM_StateManagerFactory": "0x8c6652F82E114C8D3FaA7113B1408ae6364f1D11",
+  "OVM_StateTransitionerFactory": "0xb6046496DeDAFb0E416c8C816Fa25Ffaf25c309f",
+  "Proxy__OVM_L1CrossDomainMessenger": "0x0C1E0c73A48e7624DB86bc5234E7E3188cb7b47e",
+  "Proxy__OVM_L1StandardBridge": "0x95c3b9448A9B5F563e7DC47Ac3e4D6fF0F9Fad93",
+  "OVM_BondManager": "0xF66591BD3f660b39407AC2A0343b593F651dd0A2",
+  "OVM_Sequencer": "0xE50faB5E5F46BB3E3e412d6DFbA73491a2D97695",
+  "Deployer": "0x2A2D5e9D1A0f3485f3D5c3fd983028E0f226FeD6"
+}
+```
+
+Images:
+
+```javascript
+{
+  "deployer": "omgx/deployer-rinkeby:integration-v2",
+  "data_transport_layer": "omgx/data-transport-layer:integration-v2",
+  "geth_l2": "omgx/l2geth:integration-v2",
+  "batch_submitter": "omgx/batch-submitter:integration-v2",
+  "message_relayer": "omgx/message-relayer:integration-v2",
+  "message_relayer_fast": "omgx/message-relayer-fast:integration-v2"
+}
+```
+
+## 
 
 # Production
 
