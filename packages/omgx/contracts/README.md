@@ -1,7 +1,7 @@
 # OMGX Smart Contracts
 
 
-## 0. Fully Automatic contract deployment and serving
+## 1. Automatic contract deployment and serving
 
 This spins up the entire stack, with all contracts deployed, and all the right things needed for the wallet to function, and for development work on the wallet.
 
@@ -14,18 +14,18 @@ $ ./up_local.sh
 
 **Note - please provide syntax for setting the .env variables (BUILD: 1, DAEMON: 1)**
 
-To get the contract addresses:
+To get the contract addresses for the basic stack, and the OMGX-specific contracts:
 
 ```bash
 
-curl http://127.0.0.1:8078/addresses.json | jq
-curl http://127.0.0.1:8080/addresses.json | jq
+curl http://127.0.0.1:8078/addresses.json | jq #basic stack
+curl http://127.0.0.1:8080/addresses.json | jq #OMGX-specific contracts
 
 ```
 
 ## 2. Manual Deployment and Testing
 
-* Spin up the base local L1/L2:
+Spin up the base local L1/L2:
 
 ```
 
@@ -48,10 +48,11 @@ TEST_PRIVATE_KEY_2=0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b7
 TEST_PRIVATE_KEY_3=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
 TARGET_GAS_LIMIT=9000000000
 CHAIN_ID=28
+TEST=1 #This deploys the ERC20 test token
 
 ```
 
-Now, build and deploy all the needed contracts:
+Build and deploy all the needed contracts:
 
 ```bash
 
@@ -64,25 +65,30 @@ You will now see this, if everything worked correctly:
 
 ```bash
 
-% yarn deploy
+ % yarn deploy
 yarn run v1.22.10
 $ ts-node "./bin/deploy.ts"
-Starting wallet deploy...
+Starting OMGX core contracts deployment...
 ADDRESS_MANAGER_ADDRESS was set to 0x5FbDB2315678afecb367f032d93F642f64180aa3
 Nothing to compile
 Deploying...
-🌕 L2LiquidityPool deployed to: 0xbdEd0D2bf404bdcBa897a74E6657f1f12e5C6fb6
-🌕 L1LiquidityPool deployed to: 0x2910E325cf29dd912E3476B61ef12F49cb931096
-⭐️ L1 LP initialized: 0x38b958f812d3c039a4516d504f4158288157e20288e2035d5bfa22676785de31
-⭐️ L2 LP initialized: 0x0eb0870b2b03415da4b3d8d52085b4db8c3435e43660ba98e7dbe33005edde32
+🌕 L2LiquidityPool deployed to: 0x7A9Ec1d04904907De0ED7b6839CcdD59c3716AC9
+🌕 L1LiquidityPool deployed to: 0xe8D2A1E88c91DCd5433208d4152Cc4F399a7e91d
+⭐️ L1 LP initialized: 0x511a3000131b6d3ac16a22d12707dc4121a62c198679300a081cfa9586b32d89
+⭐️ L2 LP initialized: 0x0797a3c93960e62a84c59f7f49c91916e430488b08afd38519ef9ac057eabec6
 L1 and L2 pools have registered ETH and OETH
-🌕 L2TokenPool deployed to: 0x93C7a6D00849c44Ef3E92E95DCEFfccd447909Ae
-!!! L2TokenPool was not registered because L2ERC20 was not deployed
-🌕 AtomicSwap deployed to: 0x71a9d115E322467147391c4a71D85F8e1cA623EF
-🌕 L1 Message deployed to: 0x71a9d115E322467147391c4a71D85F8e1cA623EF
-🌕 L2 Message deployed to: 0x78e6B135B2A7f63b281C80e2ff639Eed32E2a81b
-⭐️ L1 Message initialized: 0xfa1a5083bebaeb39c41390a75181a27467516ba0c92788fbdf85b0710c45004f
-⭐️ L2 Message initialized: 0x16cbfe8b4c095b15c13173346896c8a15f5c100195181f8dcd96e3b544f8dd87
-✨ Done in 5.10s.
+🌕 L1ERC20 deployed to: 0x4b6aB5F819A515382B0dEB6935D793817bB4af28
+🌕 L2ERC20 deployed to: 0x86A2EE8FAf9A840F7a2c64CA3d51209F9A02081D
+🌕 L2TokenPool deployed to: 0xA4899D35897033b927acFCf422bc745916139776
+⭐️ L2TokenPool registered: 0x43f4d7adec84555ef5548adf41a75c8bdf45798a993cf4d5e42e2b31ab140d01
+🌕 L1_CrossDomainMessenger_Fast deployed to: 0xCace1b78160AE76398F486c8a18044da0d66d86D
+⭐️ Fast L1 Messager initialized: 0x6480f00ca7f65d207bbbf4831074a71fb7ca4b6d999aeb78fbb5fb3841938362
+⭐️ Fast L1 Messager initialized: 0xc44a3f18a3e6c10ceb6da3cebd4b23ee491ef6947ab3bf05574260e3c7f8c206
+🌕 AtomicSwap deployed to: 0xAA292E8611aDF267e563f334Ee42320aC96D0463
+🌕 L1 Message deployed to: 0xc0F115A19107322cFBf1cDBC7ea011C19EbDB4F8
+🌕 L2 Message deployed to: 0x5c74c94173F05dA1720953407cbb920F3DF9f887
+⭐️ L1 Message initialized: 0x37fbbe3ef0ed3f1f4ae6c94fcd1f1825ea6c425091b038c4d4541c8760ea2c53
+⭐️ L2 Message initialized: 0xa736724e36f8098f70f737ac0c643490732a9ff350bd0fc9629a6face73178a8
+✨  Done in 10.84s.
 
 ```

@@ -18,8 +18,9 @@ const tokenName = 'JLKN'
 const tokenSymbol = 'JLKN'
 
 const deployFn: DeployFunction = async (hre) => {
-    // If TEST env var is not undefined we deploy these test contractgs
-    if (process.env.TEST) {
+    
+    // If TEST env var is set to 1 we deploy these test contracts
+    if (process.env.TEST == '1') {
       Factory__L1ERC20 = new ContractFactory(
         L1ERC20Json.abi,
         L1ERC20Json.bytecode,

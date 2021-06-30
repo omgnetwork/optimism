@@ -93,7 +93,7 @@ services:
         - -ecx
         - |
             cd /optimism/packages/omgx/contracts
-            yarn test:integration
+            yarn test
     environment:
       L1_NODE_WEB3_URL: http://l1_chain:8545
       L2_NODE_WEB3_URL: http://l2geth:8545
