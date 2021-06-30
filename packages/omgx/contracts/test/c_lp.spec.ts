@@ -88,7 +88,7 @@ describe('Liquidity Pool Test', async () => {
         L1ERC20.address,
         L2ERC20.address,
         depositL2ERC20Amount,
-        9999999, // L2 Gas -- No idea what will happen if gas is not enough
+        9999999,
         ethers.utils.formatBytes32String((new Date().getTime()).toString()),
         {gasLimit: 800000, gasPrice: 0}
       ),
