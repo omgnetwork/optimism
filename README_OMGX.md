@@ -1,5 +1,15 @@
 # Please see the main README.MD for the basics. 
 
+- [Development Quick Start](#development-quick-start)
+  * [Dependencies](#dependencies)
+  * [Setup](#setup)
+  * [Building the TypeScript packages](#building-the-typescript-packages)
+  * [Building the rest of the system](#building-the-rest-of-the-system)
+    + [Viewing docker container logs](#viewing-docker-container-logs)
+  * [Running Tests](#running-tests)
+    + [Running unit tests](#running-unit-tests)
+    + [Running integration tests](#running-integration-tests)
+
 ## Development Quick Start
 
 ### Dependencies
@@ -47,25 +57,13 @@ docker-compose build
 docker-compose -f docker-compose-omgx.yml up -V
 ```
 
-To build individual OMGX services
+To build individual OMGX services:
 
 ```bash
 docker-compose -f "docker-compose-omgx-services.yml" build -- omgx_message-relayer-fast
 ```
 
-But first will have to comment out various dependencies in the docker-compose.
-
-
-This will build the following containers:
-* [`builder`](https://hub.docker.com/r/ethereumoptimism/builder): used to build the TypeScript packages
-* [`l1_chain`](https://hub.docker.com/r/ethereumoptimism/hardhat): simulated L1 chain using hardhat-evm as a backend
-* [`deployer`](https://hub.docker.com/r/ethereumoptimism/deployer): process that deploys L1 smart contracts to the L1 chain
-* [`dtl`](https://hub.docker.com/r/ethereumoptimism/data-transport-layer): service that indexes transaction data from the L1 chain
-* [`l2geth`](https://hub.docker.com/r/ethereumoptimism/l2geth): L2 geth node running in Sequencer mode
-* [`verifier`](https://hub.docker.com/r/ethereumoptimism/go-ethereum): L2 geth node running in Verifier mode
-* [`relayer`](https://hub.docker.com/r/ethereumoptimism/message-relayer): helper process that relays messages between L1 and L2
-* [`batch_submitter`](https://hub.docker.com/r/ethereumoptimism/batch-submitter): service that submits batches of Sequencer transactions to the L1 chain
-* [`integration_tests`](https://hub.docker.com/r/ethereumoptimism/integration-tests): integration tests in a box
+Note: First you will have to comment out various dependencies in the `docker-compose-omgx-services.yml`.
 
 If you want to make a change to a container, you'll need to take it down and rebuild it.
 For example, if you make a change in l2geth:
@@ -116,6 +114,7 @@ docker-compose run integration_tests
 ```
 
 #### Viewing docker container logs
+
 By default, the `docker-compose up` command will show logs from all services, and that
 can be hard to filter through. In order to view the logs from a specific service, you can run:
 
@@ -123,7 +122,7 @@ can be hard to filter through. In order to view the logs from a specific service
 docker-compose logs --follow <service name>
 ```
 
-### Running tests
+### Running Tests
 
 Before running tests: **follow the above instructions to get everything built.**
 
