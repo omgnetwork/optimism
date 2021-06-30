@@ -1,15 +1,31 @@
 #!/bin/bash
+
 if ! [ -x "$(command -v yq)" ]; then
   echo 'Error: yq is not installed. brew install yq' >&2
   exit 1
 fi
 
-# Build dependencies in the root folder
+if [[ $BUILD == 1 ]]; then
+  echo 'You set BUILD to 1, which means that all your dockers will be built'
+fi
+
+if [[ $BUILD == 0 ]]; then
+  echo 'You set BUILD to 0, which means that you want to use existing Dcoker images'
+fi
+
+if [[ $DAEMON == 1 ]]; then
+  echo 'You set DAEMON to 1, which means that your local L1/L2 will run in the background'
+fi
+
+if [[ $DAEMON == 0 ]]; then
+  echo 'You set DAEMON to 0, which means that your local L1/L2 will run in the front and you will see all the debug log information'
+fi
+
+# # Build dependencies, if needed
+# if [[ $BUILD == 1 ]]; then
 yarn
 yarn build
-
-BUILD=1
-DAEMON=0
+# fi
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 # ORIGINAL_DOCKERFILE="docker-compose.yml"
@@ -52,5 +68,3 @@ else
     -f $DIR/$OMGX_DOCKERFILE \
     up --no-build -V
 fi
-
-

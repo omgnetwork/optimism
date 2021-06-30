@@ -122,12 +122,12 @@ describe('Liquidity Pool Test', async () => {
     )
     await tranferToAliceTX.wait()
 
-    const tranferToKateTX = await L2ERC20.transfer(
+    const transferToKateTX = await L2ERC20.transfer(
       env.katel2Wallet.address,
       transferL2ERC20Amount,
       {gasLimit: 800000, gasPrice: 0}
     )
-    await tranferToKateTX.wait()
+    await transferToKateTX.wait()
 
     const postBobL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
     const postAliceL2ERC20Balance = await L2ERC20.balanceOf(env.alicel2Wallet.address)
@@ -332,7 +332,7 @@ describe('Liquidity Pool Test', async () => {
     )
     await approveKateL2TX.wait()
 
-    await env.waitForXFastDomainTransaction(
+    await env.waitForXDomainTransactionFast(
       L2LiquidityPool.connect(env.katel2Wallet).clientDepositL2(
         fastExitAmount,
         L2ERC20.address,
@@ -509,7 +509,7 @@ describe('Liquidity Pool Test', async () => {
      )
      await approveBobL2TX.wait()
 
-     await env.waitForRevertXFastDomainTransaction(
+     await env.waitForRevertXDomainTransactionFast(
        L2LiquidityPool.connect(env.bobl2Wallet).clientDepositL2(
          fastExitAmount,
          L2ERC20.address,
