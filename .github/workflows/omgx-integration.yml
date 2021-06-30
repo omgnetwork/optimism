@@ -7,6 +7,8 @@ on:
       - 'develop'
       - '*rc'
       - 'regenesis/*'
+      - 'bugfixes'
+      - 'bugfixes-integration-tests'
   pull_request:
   workflow_dispatch:
 
