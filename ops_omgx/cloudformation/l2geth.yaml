@@ -189,7 +189,7 @@ Resources:
             - Name: RPC_ADDR
               Value: "0.0.0.0"
           EntryPoint:
-            - "/bin/wait-for-l1.sh"
+            - "/geth.sh"
           MountPoints:
             - ContainerPath: "/root/.ethereum"
               SourceVolume: l2-node

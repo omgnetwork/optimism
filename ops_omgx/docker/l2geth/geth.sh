@@ -29,56 +29,39 @@ export WS_ADDR=`/opt/secret2env -name $SECRETNAME|grep -w WS_ADDR|sed 's/WS_ADDR
 export WS_API=`/opt/secret2env -name $SECRETNAME|grep -w WS_API|sed 's/WS_API=//g'`
 export WS_ORIGINS=`/opt/secret2env -name $SECRETNAME|grep -w WS_ORIGINS|sed 's/WS_ORIGINS=//g'`
 
-cmd="geth --verbosity=6"
+RETRIES=${RETRIES:-40}
+VERBOSITY=${VERBOSITY:-6}
 
+if [[ ! -z "$URL" ]]; then
+    # get the addrs from the URL provided
+    ADDRESSES=$(curl --fail --show-error --silent --retry-connrefused --retry $RETRIES --retry-delay 5 $URL)
 
-if [ -z "$ROLLUP_CLIENT_HTTP" ]; then
-    echo "Missing ROLLUP_CLIENT_HTTP env var"
-fi
+    function envSet() {
+        VAR=$1
+        export $VAR=$(echo $ADDRESSES | jq -r ".$2")
+    }
 
-RETRIES=${RETRIES:-120}
-until $(curl --silent --fail \
-    --output /dev/null \
-    "$ROLLUP_CLIENT_HTTP/eth/syncing"); do
-  sleep 5
-  echo "Will wait $((RETRIES--)) more times for $ROLLUP_CLIENT_HTTP to be up..."
+    # set all the necessary env vars
+    envSet ETH1_ADDRESS_RESOLVER_ADDRESS  AddressManager
+    envSet ETH1_L1_CROSS_DOMAIN_MESSENGER_ADDRESS Proxy__OVM_L1CrossDomainMessenger
+    envSet ROLLUP_ADDRESS_MANAGER_OWNER_ADDRESS Deployer
 
-  if [ "$RETRIES" -lt 0 ]; then
-    echo "Timeout waiting for layer one node at $ROLLUP_CLIENT_HTTP"
-    exit 1
-  fi
-done
-
-if [ ! -z "$DEPLOYER_HTTP" ]; then
-    RETRIES=${RETRIES:-20}
-    until $(curl --silent --fail \
-        --output /dev/null \
-        "$DEPLOYER_HTTP/addresses.json"); do
-      sleep 5
-      echo "Will wait $((RETRIES--)) more times for $DEPLOYER_HTTP to be up..."
-
-      if [ "$RETRIES" -lt 0 ]; then
-        echo "Timeout waiting for address list from $DEPLOYER_HTTP"
-        exit 1
-      fi
-    done
-    echo "Received address list from $DEPLOYER_HTTP"
-
-    ETH1_ADDRESS_RESOLVER_ADDRESS=$(curl --silent $DEPLOYER_HTTP/addresses.json | jq -r .AddressManager)
-    ETH1_L1_CROSS_DOMAIN_MESSENGER_ADDRESS=$(curl --silent \
-        $DEPLOYER_HTTP/addresses.json | jq -r .Proxy__OVM_L1CrossDomainMessenger)
-    ETH1_L1_ETH_GATEWAY_ADDRESS=$(curl --silent $DEPLOYER_HTTP/addresses.json | jq -r .Proxy__OVM_L1ETHGateway)
-    if [ "$ETH1_L1_ETH_GATEWAY_ADDRESS" == null ]; then
-        ETH1_L1_ETH_GATEWAY_ADDRESS=$(curl --silent $DEPLOYER_HTTP/addresses.json | jq -r .OVM_L1ETHGateway)
+    # set the address to the proxy gateway if possible
+    envSet ETH1_L1_ETH_GATEWAY_ADDRESS Proxy__OVM_L1ETHGateway
+    if [ $ETH1_L1_ETH_GATEWAY_ADDRESS == null ]; then
+        envSet ETH1_L1_ETH_GATEWAY_ADDRESS OVM_L1ETHGateway
     fi
-    ROLLUP_ADDRESS_MANAGER_OWNER_ADDRESS=$(curl --silent $DEPLOYER_HTTP/addresses.json | jq -r .Deployer)
-
-    exec env \
-        ETH1_ADDRESS_RESOLVER_ADDRESS=$ETH1_ADDRESS_RESOLVER_ADDRESS \
-        ETH1_L1_CROSS_DOMAIN_MESSENGER_ADDRESS=$ETH1_L1_CROSS_DOMAIN_MESSENGER_ADDRESS \
-        ETH1_L1_ETH_GATEWAY_ADDRESS=$ETH1_L1_ETH_GATEWAY_ADDRESS \
-        ROLLUP_ADDRESS_MANAGER_OWNER_ADDRESS=$ROLLUP_ADDRESS_MANAGER_OWNER_ADDRESS \
-        $cmd
-else
-    exec $cmd
 fi
+
+# wait for the dtl to be up, else geth will crash if it cannot connect
+curl \
+    --fail \
+    --show-error \
+    --silent \
+    --output /dev/null \
+    --retry-connrefused \
+    --retry $RETRIES \
+    --retry-delay 1 \
+    $ROLLUP_CLIENT_HTTP
+
+exec geth --verbosity="$VERBOSITY" "$@"
