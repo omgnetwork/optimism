@@ -49,8 +49,8 @@ function Deposits ({ searchHistory, transactions }) {
   const _deposits = transactions.filter(i => {
     return i.hash.includes(searchHistory) && (
       i.to !== null && (
-      i.to.toLowerCase() === networkService.L1LPAddress.toLowerCase() || 
-      i.to.toLowerCase() === networkService.l1ETHGatewayAddress.toLowerCase()));
+      i.to.toLowerCase() === networkService.L1LPAddress.toLowerCase() ||
+      i.to.toLowerCase() === networkService.L1ETHAddress.toLowerCase()));
   });
 
   const startingIndex = page === 1 ? 0 : ((page - 1) * PER_PAGE);
@@ -82,10 +82,10 @@ function Deposits ({ searchHistory, transactions }) {
           return (
             <Transaction
               key={index}
-              link={ 
-                networkService.chainID === 4 ? 
+              link={
+                networkService.chainID === 4 ?
                   `https://rinkeby.etherscan.io/tx/${i.hash}`:
-                  networkService.chainID === 28 ? 
+                  networkService.chainID === 28 ?
                   `https://blockexplorer.rinkeby.omgx.network/tx/${i.hash}`:
                   undefined
               }

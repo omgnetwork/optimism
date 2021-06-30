@@ -78,8 +78,7 @@ describe('Liquidity Pool Test', async () => {
 
     const approveL1ERC20TX = await L1ERC20.approve(
       L1StandardBridge.address,
-      depositL2ERC20Amount,
-      {gasLimit: 800000, gasPrice: 0}
+      depositL2ERC20Amount
     )
     await approveL1ERC20TX.wait()
 
@@ -89,8 +88,7 @@ describe('Liquidity Pool Test', async () => {
         L2ERC20.address,
         depositL2ERC20Amount,
         9999999,
-        ethers.utils.formatBytes32String((new Date().getTime()).toString()),
-        {gasLimit: 800000, gasPrice: 0}
+        ethers.utils.formatBytes32String((new Date().getTime()).toString())
       ),
       Direction.L1ToL2
     )

@@ -125,7 +125,6 @@ describe('System setup', async () => {
       /* userRewardFeeRate 3.5% */ 35,
       /* ownerRewardFeeRate 1.5% */ 15,
       L2LiquidityPool.address,
-      {gasLimit: 800000, gasPrice: 0}
     )
     await L1LiquidityPoolTX.wait()
     console.log(`⭐️ ${chalk.blue('L1 LP initialized:')} ${chalk.green(L1LiquidityPoolTX.hash)}`)
