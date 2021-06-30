@@ -1,5 +1,5 @@
 # This workflow will builds all docker images to run in AWS
-name: build and push to AWS ECR
+name: Deploy to integration-AWS
 
 on:
   workflow_dispatch:
