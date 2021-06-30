@@ -226,7 +226,7 @@ Resources:
             - geth_l2
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
-      Family: !Sub "L2Geth-${ImageTag}-${EnvironmentName}"
+      Family: !Sub "L2Geth-${EnvironmentName}"
   ECSService:
     Type: AWS::ECS::Service
     DependsOn: GoEthereumLBListenerRule
@@ -243,5 +243,5 @@ Resources:
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: !Sub "L2Geth-${ImageTag}-${EnvironmentName}"
+      ServiceName: !Sub "L2Geth-${EnvironmentName}"
       TaskDefinition: !Ref TaskDefinition

@@ -107,7 +107,7 @@ Resources:
           Memory: "512"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
-      Family: !Sub "BatchSubmitter-${ImageTag}-${EnvironmentName}"
+      Family: !Sub "BatchSubmitter-${EnvironmentName}"
   ECSService:
     Type: AWS::ECS::Service
     Properties:
@@ -116,5 +116,5 @@ Resources:
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: !Sub "BatchSubmitter-${ImageTag}-${EnvironmentName}"
+      ServiceName: !Sub "BatchSubmitter-${EnvironmentName}"
       TaskDefinition: !Ref TaskDefinition

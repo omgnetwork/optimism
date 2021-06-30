@@ -100,7 +100,7 @@ Resources:
           Memory: "512"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
-      Family: !Sub "MessageRelayer-${ImageTag}-${EnvironmentName}"
+      Family: !Sub "MessageRelayer-${EnvironmentName}"
   ECSService:
     Type: AWS::ECS::Service
     Properties:
@@ -109,5 +109,5 @@ Resources:
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: !Sub "MessageRelayer-${ImageTag}-${EnvironmentName}"
+      ServiceName: !Sub "MessageRelayer-${EnvironmentName}"
       TaskDefinition: !Ref TaskDefinition

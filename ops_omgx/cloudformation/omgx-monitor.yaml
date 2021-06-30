@@ -88,7 +88,7 @@ Resources:
           Memory: "512"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
-      Family: !Sub "OmgxMonitor-${ImageTag}-${EnvironmentName}"
+      Family: !Sub "OmgxMonitor-${EnvironmentName}"
   ECSService:
     Type: AWS::ECS::Service
     Properties:
@@ -97,5 +97,5 @@ Resources:
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: !Sub "OmgxMonitor-${ImageTag}-${EnvironmentName}"
+      ServiceName: !Sub "OmgxMonitor-${EnvironmentName}"
       TaskDefinition: !Ref TaskDefinition

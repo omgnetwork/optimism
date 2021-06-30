@@ -128,7 +128,7 @@ Resources:
           Memory: "512"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
-      Family: !Sub "Deployer-${ImageTag}-${EnvironmentName}"
+      Family: !Sub "Deployer-${EnvironmentName}"
   ECSService:
     Type: AWS::ECS::Service
     DependsOn: DeployerLBListenerRule
@@ -142,5 +142,5 @@ Resources:
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: !Sub "Deployer-${ImageTag}-${EnvironmentName}"
+      ServiceName: !Sub "Deployer-${EnvironmentName}"
       TaskDefinition: !Ref TaskDefinition

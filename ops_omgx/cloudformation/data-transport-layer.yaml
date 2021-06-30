@@ -177,7 +177,7 @@ Resources:
             - data_transport_layer
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
-      Family: !Sub "DataTransportLayer-${ImageTag}-${EnvironmentName}"
+      Family: !Sub "DataTransportLayer-${EnvironmentName}"
   ECSService:
     Type: AWS::ECS::Service
     DependsOn: DataTransportLayerListenerRule
@@ -191,5 +191,5 @@ Resources:
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: !Sub "DataTransportLayer-${ImageTag}-${EnvironmentName}"
+      ServiceName: !Sub "DataTransportLayer-${EnvironmentName}"
       TaskDefinition: !Ref TaskDefinition

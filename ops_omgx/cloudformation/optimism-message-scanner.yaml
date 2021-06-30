@@ -93,7 +93,7 @@ Resources:
           Memory: "512"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
-      Family: !Sub "MessageScanner-${ImageTag}-${EnvironmentName}"
+      Family: !Sub "MessageScanner-${EnvironmentName}"
   ECSService:
     Type: AWS::ECS::Service
     Properties:
@@ -102,5 +102,5 @@ Resources:
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: !Sub "MessageScanner-${ImageTag}-${EnvironmentName}"
+      ServiceName: !Sub "MessageScanner-${EnvironmentName}"
       TaskDefinition: !Ref TaskDefinition

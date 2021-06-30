@@ -91,12 +91,12 @@ Resources:
         ToPort: 80
         CidrIp: 0.0.0.0/0
       - IpProtocol: tcp
-        FromPort: 8080
-        ToPort: 8080
+        FromPort: 8081
+        ToPort: 8081
         CidrIp: 0.0.0.0/0
       - IpProtocol: tcp
-        FromPort: 8080
-        ToPort: 8080
+        FromPort: 8081
+        ToPort: 8081
         CidrIpv6: ::/0
       - IpProtocol: tcp
         FromPort: 80
@@ -177,7 +177,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       LoadBalancerArn: !Ref LoadBalancerInt
-      Port: 8080
+      Port: 8081
       Protocol: HTTP
       DefaultActions:
       - Type: fixed-response
