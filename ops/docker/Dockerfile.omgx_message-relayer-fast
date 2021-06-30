@@ -1,5 +1,4 @@
 FROM ethereumoptimism/builder AS builder
-FROM omgx/omgx_builder AS omgx_builder
 FROM node:14-alpine
 
 RUN apk add --no-cache git curl python bash jq

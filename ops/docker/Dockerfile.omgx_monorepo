@@ -3,8 +3,8 @@ FROM ethereumoptimism/builder:latest
 WORKDIR /optimism
 COPY packages/omgx/contracts/package.json ./packages/omgx/contracts/package.json
 COPY ./packages/omgx ./packages/omgx
-
 COPY ./patches ./patches
+
 RUN yarn
 
 WORKDIR /optimism/packages/omgx/contracts
