@@ -13,7 +13,7 @@ import { OptimismEnv } from './shared/env'
 
 import * as fs from 'fs'
 
-describe('Messenge Relayer Test', async () => {
+describe('Default Messenge Relayer Test', async () => {
 
   let L1Message: Contract
   let L2Message: Contract
