@@ -19,7 +19,7 @@ export DATA_TRANSPORT_LAYER__TRANSACTIONS_PER_POLLING_INTERVAL=`/opt/secret2env 
 export L1_NODE_WEB3_URL=`/opt/secret2env -name $SECRETNAME|grep -w L1_NODE_WEB3_URL|sed 's/L1_NODE_WEB3_URL=//g'`
 
 rm -rf /db/LOCK
-cmd="yarn start"
+cmd="node /opt/optimism/packages/data-transport-layer/dist/src/services/run.js"
 
 JSON='{"jsonrpc":"2.0","id":0,"method":"eth_chainId","params":[]}'
 L1_NODE_WEB3_URL=$DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT
