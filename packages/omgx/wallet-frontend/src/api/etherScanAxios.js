@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const _etherScanInstance = axios.create({
-  baseURL: `${process.env.REACT_APP_ETHERSCAN_URL}${process.env.REACT_APP_INFURA_ID}`,
+  baseURL: `${process.env.REACT_APP_ETHERSCAN_URL}${process.env.REACT_APP_ETHERSCAN_API}`,
 })
 
 _etherScanInstance.interceptors.request.use((config) => {

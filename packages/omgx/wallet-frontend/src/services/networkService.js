@@ -30,11 +30,11 @@ import { openAlert, openError } from 'actions/uiAction';
 import { WebWalletError } from 'services/errorService';
 
 import L1StandardBridgeJson from '../deployment/artifacts/contracts/optimistic-ethereum/OVM/bridge/tokens/OVM_L1StandardBridge.sol/OVM_L1StandardBridge.json'
-import L2StandardBridgeJson from '../deployment/artifacts/contracts/optimistic-ethereum/OVM/bridge/tokens/OVM_L2StandardBridge.sol/OVM_L2StandardBridge.json'
+import L2StandardBridgeJson from '../deployment/artifacts-ovm/contracts/optimistic-ethereum/OVM/bridge/tokens/OVM_L2StandardBridge.sol/OVM_L2StandardBridge.json'
 import L1LPJson from '../deployment/artifacts/contracts/LP/L1LiquidityPool.sol/L1LiquidityPool.json'
 import L2LPJson from '../deployment/artifacts-ovm/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
 import L1ERC20Json from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.json'
-import L2ERC20Json from '../deployment/artifacts/contracts/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
+import L2ERC20Json from '../deployment/artifacts-ovm/contracts/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
 import ERC721Json from '../deployment/artifacts-ovm/contracts/ERC721Mock.sol/ERC721Mock.json'
 import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol/TokenPool.json'
 import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
@@ -141,7 +141,8 @@ class NetworkService {
       .connect(this.provider.getSigner())
       .mintNFT(
         receiverAddress,
-        meta
+        meta,
+        { gasPrice: 0 },
       )
 
       await nft.wait()
@@ -149,6 +150,7 @@ class NetworkService {
       return true;
     }
     catch (error) {
+      console.log(error);
       return false;
     }
   }
@@ -281,12 +283,6 @@ class NetworkService {
         this.provider.getSigner(),
       );
 
-      this.L2TokenPoolContract = new ethers.Contract(
-        this.L2TokenPoolAddress,
-        L2TokenPoolJson.abi,
-        this.provider.getSigner(),
-      );
-
       this.AtomicSwapContract = new ethers.Contract(
         this.AtomicSwapAddress,
         AtomicSwapJson.abi,
@@ -382,7 +378,6 @@ class NetworkService {
         fromRange: 0,
         toRange: 100,
       })
-
       if (response.status === 201) {
         return response.data
       }
@@ -579,12 +574,17 @@ class NetworkService {
   }
 
   async transfer(address, value, currency) {
-    const tx = await this.L2ERC20Contract.attach(currency).transfer(
-      address,
-      parseEther(value.toString()),
-    )
-    await tx.wait();
-    return tx;
+    try {
+      const tx = await this.L2ERC20Contract.attach(currency).transfer(
+        address,
+        parseEther(value.toString()),
+        { gasPrice: 0 },
+      )
+      await tx.wait();
+      return tx;
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   confirmLayer = (layerToConfirm) => async (dispatch) =>{
@@ -639,6 +639,7 @@ class NetworkService {
       const approveStatus = await ERC20Contract.approve(
         approveContractAddress,
         value,
+        this.L1orL2 === 'L1' ? {} : { gasPrice: 0 }
       );
       await approveStatus.wait();
 
@@ -725,6 +726,7 @@ class NetworkService {
       parseEther(value),
       this.L1GasLimit,
       utils.formatBytes32String((new Date().getTime()).toString()),
+      { gasPrice: 0 }
     )
     await tx.wait();
 
@@ -853,11 +855,13 @@ class NetworkService {
 
     try {
       // Deposit
-    const addLiquidityTX = await (L1orL2Pool === 'L1LP' ? this.L1LPContract : this.L2LPContract).addLiquidity(
+      const addLiquidityTX = await (L1orL2Pool === 'L1LP' ? this.L1LPContract : this.L2LPContract).addLiquidity(
         depositAmount,
         currency,
         // deposit ETH or not
-        currency === this.L1ETHAddress ? { value: depositAmount } : {},
+        currency === this.L1ETHAddress ?
+          { value: depositAmount } :
+          L1orL2Pool === 'L1LP' ? {} : { gasPrice: 0 },
       );
       await addLiquidityTX.wait();
       return true;
@@ -877,7 +881,8 @@ class NetworkService {
       const withdrawRewardTX = await this.L2LPContract.withdrawReward(
         value,
         currency,
-        this.account
+        this.account,
+        { gasPrice: 0 }
       );
       await withdrawRewardTX.wait();
 
@@ -899,7 +904,8 @@ class NetworkService {
       const withdrawLiquidityTX = await await (L1orL2Pool === 'L1LP' ? this.L1LPContract : this.L2LPContract).withdrawLiquidity(
         withdrawAmount,
         currency,
-        this.account
+        this.account,
+        L1orL2Pool === 'L1LP' ? {} : { gasPrice: 0 }
       );
       await withdrawLiquidityTX.wait();
       return true
@@ -955,6 +961,7 @@ class NetworkService {
       const approveStatus = await L2ERC20Contract.approve(
         this.L2LPAddress,
         depositAmount.toString(),
+        { gasPrice: 0}
       );
       await approveStatus.wait();
     }
@@ -962,6 +969,7 @@ class NetworkService {
     const depositTX = await this.L2LPContract.clientDepositL2(
       depositAmount.toString(),
       currency,
+      { gasPrice: 0}
     );
 
     await depositTX.wait();
@@ -991,11 +999,12 @@ class NetworkService {
 
   async getTestToken() {
     try {
-      const getTokenTX = await this.L2TokenPoolContract.requestToken();
+      const getTokenTX = await this.L2TokenPoolContract.requestToken({ gasPrice: 0 });
       await getTokenTX.wait();
       //console.log(getTokenTX)
       return true;
-    }catch {
+    }catch (error) {
+      console.log(error);
       return false;
     }
   }
