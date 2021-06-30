@@ -9,12 +9,16 @@ process.env.CONTRACTS_RPC_URL =
 import hre from 'hardhat'
 
 const main = async () => {
-  console.log('Starting wallet deploy...')
+  
+  console.log('Starting OMGX core contracts deployment...')
+  
   const config = parseEnv()
+
   const l1Provider = new providers.JsonRpcProvider(process.env.L1_NODE_WEB3_URL)
   const l2Provider = new providers.JsonRpcProvider(process.env.L2_NODE_WEB3_URL)
-  const deployer_1 = new Wallet(process.env.DEPLOYER_PRIVATE_KEY, l1Provider)
-  const deployer_2 = new Wallet(process.env.DEPLOYER_PRIVATE_KEY, l2Provider)
+
+  const deployer_l1 = new Wallet(process.env.DEPLOYER_PRIVATE_KEY, l1Provider)
+  const deployer_l2 = new Wallet(process.env.DEPLOYER_PRIVATE_KEY, l2Provider)
 
   const getAddressManager = (provider: any, addressManagerAddress: any) => {
     return getContractFactory('Lib_AddressManager')
@@ -23,7 +27,7 @@ const main = async () => {
   }
 
   console.log(`ADDRESS_MANAGER_ADDRESS was set to ${process.env.ADDRESS_MANAGER_ADDRESS}`)
-  const addressManager = getAddressManager(deployer_1, process.env.ADDRESS_MANAGER_ADDRESS);
+  const addressManager = getAddressManager(deployer_l1, process.env.ADDRESS_MANAGER_ADDRESS);
 
   const l1MessengerAddress = await addressManager.getAddress(
     'Proxy__OVM_L1CrossDomainMessenger'
@@ -36,19 +40,20 @@ const main = async () => {
     'Proxy__OVM_L1StandardBridge'
   )
   const L1StandardBridge = getContractFactory('OVM_L1StandardBridge')
-    .connect(deployer_1)
+    .connect(deployer_l1)
     .attach(L1StandardBridgeAddress)
+
   const L2StandardBridgeAddress = await L1StandardBridge.l2TokenBridge()
 
   await hre.run('deploy', {
-    l1MessengerAddress: l1MessengerAddress,
-    l2MessengerAddress: l2MessengerAddress,
-    L1StandardBridgeAddress: L1StandardBridgeAddress,
-    L2StandardBridgeAddress: L2StandardBridgeAddress,
-    l1provider: l1Provider,
-    l2provider: l2Provider,
-    deployer_l1: deployer_1,
-    deployer_l2: deployer_2,
+    l1MessengerAddress,
+    l2MessengerAddress,
+    L1StandardBridgeAddress,
+    L2StandardBridgeAddress,
+    l1Provider,
+    l2Provider,
+    deployer_l1,
+    deployer_l2,
     noCompile: process.env.NO_COMPILE ? true : false,
   })
 

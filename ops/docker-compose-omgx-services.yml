@@ -31,7 +31,7 @@ services:
         NO_COMPILE: 1
     ports:
         # expose the service to the host for getting the contract addrs
-      - ${WALLET_DEPLOYER_PORT:-8078}:8079
+      - ${OMGX_DEPLOYER_PORT:-8078}:8079
 
 # serves data needed for the main message-relayer not to double-relay, saving gas
 # this assumes the deployer has come up correctly, and has deployed the right contracts
@@ -47,7 +47,7 @@ services:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.omgx_bl-wl
     environment:
-        WALLET_URL: http://wallet_deployer:8079/addresses.json
+        OMGX_URL: http://omgx_deployer:8079/addresses.json
         BL_WL_PORT: 9000
     ports:
       - 9000:9000
@@ -71,7 +71,7 @@ services:
         L2_NODE_WEB3_URL: http://l2geth:8545
         L1_WALLET_KEY: "0xde9be858da4a475276426320d5e9262ecfc3ba460bfac56360bfa6c4c28b4ee0"
         URL: http://deployer:8081/addresses.json
-        WALLET_URL: http://wallet_deployer:8079/addresses.json
+        OMGX_URL: http://omgx_deployer:8079/addresses.json
         POLLING_INTERVAL: 1500
         GET_LOGS_INTERVAL: 500
         WHITELIST_ENDPOINT: http://bl-wl:9000/whitelist.json
@@ -95,7 +95,7 @@ services:
       L1_NODE_WEB3_URL: http://l1_chain:8545
       L2_NODE_WEB3_URL: http://l2geth:8545
       URL: http://deployer:8081/addresses.json
-      WALLET_URL: http://wallet_deployer:8079/addresses.json
+      OMGX_URL: http://omgx_deployer:8079/addresses.json
       TEST_PRIVATE_KEY_1: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       TEST_PRIVATE_KEY_2: "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba"
       TEST_PRIVATE_KEY_3: "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e"

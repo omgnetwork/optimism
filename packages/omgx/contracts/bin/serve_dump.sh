@@ -10,7 +10,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 
 PYTHON=${PYTHON:-python}
 HOST=${HOST:-0.0.0.0}
-PORT=${WALLET_DEPLOYER_PORT:-8079}
+PORT=${OMGX_DEPLOYER_PORT:-8079}
 DIRECTORY=$DIR/../dist/dumps
 
 if [ ! command -v $PYTHON&>/dev/null ]; then

@@ -44,7 +44,7 @@ jobs:
 
       - name: Background logs
         working-directory: ./ops
-        run: docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml logs --follow &
+        run: docker-compose -f docker-compose.yml -f docker-compose-omgx-services.yml logs --follow &
 
       - name: Run the integration tests
         working-directory: ./ops
@@ -92,7 +92,7 @@ jobs:
       #     yarn test:integration:ovm
       #     yarn deploy:ovm
 
-      - name: Test serving Wallet contracts
+      - name: Test serving OMGX contracts
         working-directory: ./
         run: |
           RETRIES=60
@@ -106,7 +106,7 @@ jobs:
               exit 1
             fi
           done
-          echo "Wallet contracts are deployed"
+          echo "OMGX contracts are deployed"
           L2LIQUIDITY_POOL=$(curl --silent $URL | jq -r .L2LiquidityPool)
           echo $L2LIQUIDITY_POOL
           if [[ $L2LIQUIDITY_POOL =~ "0x" ]]; then
@@ -123,9 +123,9 @@ jobs:
           yarn compile:ovm
           yarn test:integration:ovm
 
-      - name: List all built images
-        if: failure()
-        run: docker images
+      # - name: List all built images
+      #   if: failure()
+      #   run: docker images
 
       # - name: Collect docker logs on failure
       #   if: failure()
