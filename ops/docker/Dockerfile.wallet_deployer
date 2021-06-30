@@ -50,5 +50,6 @@ COPY packages/omgx/wallet/hardhat.config.ts ./
 COPY packages/omgx/wallet/deploy ./deploy
 COPY packages/omgx/wallet/tasks ./tasks
 COPY packages/omgx/wallet/scripts ./scripts
+COPY packages/omgx/wallet/preSupportedTokens.json ./
 
 ENTRYPOINT ["./scripts/wait-for-l1-and-l2.sh", "./scripts/deployer.sh"]
