@@ -15,10 +15,10 @@
     "build": "tsc -p ./tsconfig.build.json",
     "clean": "rimraf  dist/ ./tsconfig.build.tsbuildinfo",
     "lint": "yarn lint:fix && yarn lint:check",
-    "lint:fix": "prettier --config .prettierrc.json --write \"{src,exec,test}/**/*.ts\"",
-    "lint:check": "eslint -c .eslintrc.js --ext .ts --format stylish .",
-    "test": "hardhat test --show-stack-traces",
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "lint:fix": "yarn lint:check --fix",
+    "lint:check": "eslint .",
+    "test": "hardhat test --show-stack-traces"
   },
   "keywords": [
     "optimism",
@@ -41,7 +41,8 @@
     "dotenv": "^8.2.0",
     "ethers": "^5.1.0",
     "merkletreejs": "^0.2.18",
-    "rlp": "^2.2.6"
+    "rlp": "^2.2.6",
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "@eth-optimism/smock": "^1.1.6",
@@ -54,6 +55,7 @@
     "@typescript-eslint/parser": "^4.26.0",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
+    "eslint-plugin-prettier": "^3.4.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-ban": "^1.5.2",
     "eslint-plugin-import": "^2.23.4",
@@ -65,8 +67,10 @@
     "hardhat": "^2.3.0",
     "lodash": "^4.17.21",
     "mocha": "^8.4.0",
+    "babel-eslint": "^10.1.0",
     "eslint": "^7.27.0",
+    "lint-staged": "11.0.0",
     "prettier": "^2.2.1",
-    "lint-staged": "11.0.0"
+    "typescript": "^4.2.3"
   }
 }
