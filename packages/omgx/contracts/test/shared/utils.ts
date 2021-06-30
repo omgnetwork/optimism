@@ -10,7 +10,7 @@ import {
 
 require('dotenv').config()
 
-console.log("Here are all the .envs i'm seeting:",process.env)
+console.log("Here are all the .envs I'm seeing:",process.env)
 
 export const GWEI = BigNumber.from(0)
 

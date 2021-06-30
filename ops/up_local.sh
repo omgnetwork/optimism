@@ -5,9 +5,8 @@ if ! [ -x "$(command -v yq)" ]; then
 fi
 
 # Build dependencies in the root folder
-# Shouls make sure people are only 
-#yarn
-#yarn build
+yarn
+yarn build
 
 BUILD=1
 DAEMON=0
