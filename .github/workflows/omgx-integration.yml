@@ -118,7 +118,7 @@ jobs:
 
       - name: Function test the OMGX contracts
         working-directory: ./packages/omgx/contracts
-        run: yarn test
+        run: yarn test:integration
         
       # This tests duplicates the standard test in the optimism `integration.yml`
       # - name: Test l1-l2-deposit-withdrawal example on Optimistic Ethereum with cross-domain message passing
