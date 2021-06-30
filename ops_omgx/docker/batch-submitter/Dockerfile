@@ -7,5 +7,4 @@ COPY secret2env /opt/secret2env
 COPY wait-for-l1-and-l2.sh /opt/
 RUN chmod +x /opt/wait-for-l1-and-l2.sh && \
     chmod +x /opt/secret2env && \
-    apt-get update && \
-    apt-get install -y musl musl-dev musl-tools
+    apk add --no-cache musl-dev

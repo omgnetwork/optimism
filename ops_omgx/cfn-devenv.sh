@@ -15,7 +15,7 @@ SUBCMD=
 FORCE=no
 AWS_ECR="942431445534.dkr.ecr.${REGION}.amazonaws.com"
 SKIPSERVICE=
-DOCKER_IMAGES_LIST=`ls ${PATH_TO_CFN}|egrep -v '^0|^datadog'|sed 's/.yaml//g'`
+DOCKER_IMAGES_LIST=`ls ${PATH_TO_CFN}|egrep -v '^0|^datadog|^omgx-monitor|^optimism'|sed 's/.yaml//g'`
 ENV_PREFIX=
 FORCE=no
 
