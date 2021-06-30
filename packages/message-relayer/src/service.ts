@@ -2,6 +2,7 @@
 import { Contract, ethers, Wallet, BigNumber, providers } from 'ethers'
 import * as rlp from 'rlp'
 import { MerkleTree } from 'merkletreejs'
+import fetch from 'node-fetch';
 
 /* Imports: Internal */
 import { fromHexString, sleep } from '@eth-optimism/core-utils'
@@ -49,7 +50,7 @@ interface MessageRelayerOptions {
 
   // blacklist
   blacklistEndpoint?: string
-  
+
   blacklistPollingInterval?: number
 }
 
@@ -152,7 +153,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     this.state.lastFinalizedTxHeight = this.options.fromL2TransactionIndex || 0
     this.state.nextUnfinalizedTxHeight =
       this.options.fromL2TransactionIndex || 0
-    this.state.lastBlacklistPollingTimestamp = 0  
+    this.state.lastBlacklistPollingTimestamp = 0
   }
 
   protected async _start(): Promise<void> {
@@ -286,9 +287,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     }
   }
 
-  private async _getStateBatchHeader(
-    height: number
-  ): Promise<
+  private async _getStateBatchHeader(height: number): Promise<
     | {
         batch: StateRootBatchHeader
         stateRoots: string[]
@@ -320,11 +319,12 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         endBlock: startingBlock + this.options.getLogsInterval,
       })
 
-      const events: ethers.Event[] = await this.state.OVM_StateCommitmentChain.queryFilter(
-        this.state.OVM_StateCommitmentChain.filters.StateBatchAppended(),
-        startingBlock,
-        startingBlock + this.options.getLogsInterval
-      )
+      const events: ethers.Event[] =
+        await this.state.OVM_StateCommitmentChain.queryFilter(
+          this.state.OVM_StateCommitmentChain.filters.StateBatchAppended(),
+          startingBlock,
+          startingBlock + this.options.getLogsInterval
+        )
 
       this.state.eventCache = this.state.eventCache.concat(events)
       startingBlock += this.options.getLogsInterval
@@ -345,12 +345,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       event.transactionHash
     )
 
-    const [
-      stateRoots,
-    ] = this.state.OVM_StateCommitmentChain.interface.decodeFunctionData(
-      'appendStateBatch',
-      transaction.data
-    )
+    const [stateRoots] =
+      this.state.OVM_StateCommitmentChain.interface.decodeFunctionData(
+        'appendStateBatch',
+        transaction.data
+      )
 
     return {
       batch: {
@@ -402,10 +401,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
 
     const messages = events.map((event) => {
       const message = event.args.message
-      const decoded = this.state.OVM_L2CrossDomainMessenger.interface.decodeFunctionData(
-        'relayMessage',
-        message
-      )
+      const decoded =
+        this.state.OVM_L2CrossDomainMessenger.interface.decodeFunctionData(
+          'relayMessage',
+          message
+        )
 
       return {
         target: decoded._target,
@@ -570,7 +570,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   private async _getBlacklist(): Promise<void> {
     try {
       if (this.options.blacklistEndpoint) {
-        if (this.state.lastBlacklistPollingTimestamp === 0 || 
+        if (this.state.lastBlacklistPollingTimestamp === 0 ||
           new Date().getTime() > this.state.lastBlacklistPollingTimestamp + this.options.blacklistPollingInterval
         ) {
           const response = await fetch(this.options.blacklistEndpoint);
