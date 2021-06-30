@@ -119,7 +119,7 @@ Resources:
             - Name: SECRETNAME
               Value: !Ref SecretName
           EntryPoint:
-            - "/wait-for-l1.sh"
+            - "/opt/optimism/packages/contracts/deployer.sh"
           DockerLabels:
             com.datadoghq.ad.check_names: '["deployer"]'
             com.datadoghq.ad.init_configs: '[{}]'

@@ -4,9 +4,8 @@ ARG BUILD_IMAGE_VERSION=""
 FROM ${BUILD_IMAGE}:${BUILD_IMAGE_VERSION} as builder
 
 COPY secret2env /opt/secret2env
-COPY wait-for-l1.sh /wait-for-l1.sh
+COPY deployer.sh /opt/optimism/packages/contracts/deployer.sh
 
-RUN chmod +x /wait-for-l1.sh && \
+RUN chmod +x /opt/optimism/packages/contracts/deployer.sh && \
     chmod +x /opt/secret2env && \
-    apt-get update && \
-    apt-get install -y musl musl-dev musl-tools
+    apk add --no-cache musl-dev
