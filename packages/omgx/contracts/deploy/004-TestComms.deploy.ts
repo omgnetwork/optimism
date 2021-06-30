@@ -3,27 +3,16 @@ import { DeployFunction, DeploymentSubmission } from 'hardhat-deploy/dist/types'
 import { Contract, ContractFactory} from 'ethers'
 import chalk from 'chalk';
 
-import AtomicSwapJson from '../artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json';
-
 import L1MessageJson from '../artifacts/contracts/Message/L1Message.sol/L1Message.json'
 import L2MessageJson from '../artifacts-ovm/contracts/Message/L2Message.sol/L2Message.json'
 
-let Factory__AtomicSwap: ContractFactory
 let Factory__L1Message: ContractFactory
 let Factory__L2Message: ContractFactory
 
-let AtomicSwap: Contract
 let L1Message: Contract
 let L2Message: Contract
 
-
 const deployFn: DeployFunction = async (hre) => {
-
-    Factory__AtomicSwap = new ContractFactory(
-      AtomicSwapJson.abi,
-      AtomicSwapJson.bytecode,
-      (hre as any).deployConfig.deployer_l2
-    )
 
     Factory__L1Message = new ContractFactory(
       L1MessageJson.abi,
@@ -36,18 +25,7 @@ const deployFn: DeployFunction = async (hre) => {
       L2MessageJson.bytecode,
       (hre as any).deployConfig.deployer_l2
     )
-    // Deploy atomic swap
-    AtomicSwap = await Factory__AtomicSwap.deploy({gasLimit: 1500000, gasPrice: 0})
-    await AtomicSwap.deployTransaction.wait()
-    const AtomicSwapDeploymentSubmission: DeploymentSubmission = {
-      ...AtomicSwap,
-      receipt: AtomicSwap.receipt,
-      address: AtomicSwap.address,
-      abi: AtomicSwapJson.abi,
-    };
-    await hre.deployments.save('AtomicSwap', AtomicSwapDeploymentSubmission)
-    console.log(`🌕 ${chalk.red('AtomicSwap deployed to:')} ${chalk.green(AtomicSwap.address)}`)
-
+    
     L1Message = await Factory__L1Message.deploy(
       (hre as any).deployConfig.l1MessengerAddress,
       /* ALERT - this code will need to be changed once the new message-relayer-fast is autodeployed */
@@ -95,6 +73,6 @@ const deployFn: DeployFunction = async (hre) => {
 
 }
 
-deployFn.tags = ['AtomicSwap', 'L1Message', 'L2Message', 'required']
+deployFn.tags = ['L1Message', 'L2Message', 'required']
 
 export default deployFn
