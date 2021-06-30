@@ -28,8 +28,8 @@ contract L2Message is OVM_CrossDomainEnabled {
 
     function init (
        address _L1MessageAddress
-    ) 
-       public 
+    )
+       public
     {
        L1MessageAddress = _L1MessageAddress;
     }
@@ -48,12 +48,6 @@ contract L2Message is OVM_CrossDomainEnabled {
         );
     }
 
-    /*
-            address _crossDomainTarget,
-        uint32 _gasLimit,
-        bytes memory _message
-        */
-
     /*************************
      * Cross-chain Functions *
      *************************/
@@ -67,7 +61,7 @@ contract L2Message is OVM_CrossDomainEnabled {
     )
         external
         onlyFromCrossDomainAccount(address(L1MessageAddress))
-    {   
+    {
         crossDomainMessage = _message;
         emit ReceiveL1Message(_message);
     }

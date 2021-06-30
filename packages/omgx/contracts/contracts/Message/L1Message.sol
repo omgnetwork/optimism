@@ -21,10 +21,7 @@ contract L1Message is OVM_CrossDomainEnabledFast {
         address _l1CrossDomainMessenger,
         address _l1CrossDomainMessengerFast
     )
-        OVM_CrossDomainEnabledFast(
-            _l1CrossDomainMessenger,
-            _l1CrossDomainMessengerFast
-        )
+        OVM_CrossDomainEnabledFast(_l1CrossDomainMessenger, _l1CrossDomainMessengerFast)
     {}
 
     function init (
