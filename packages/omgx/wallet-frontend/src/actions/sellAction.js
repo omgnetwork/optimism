@@ -194,15 +194,15 @@ const uploadItemFiles = (message, itemID, itemToSend, itemToReceive, address) =>
   dispatch(uploadItemFilesBegin());
 
   const payload = JSON.stringify({
-      publicKey: message.data.fhePublicKey,
-      multiKey: message.data.fheMultiKey,
-      rotaKey: message.data.fheRotaKey,
-      ciphertext: message.data.fheCiphertext,
-      itemID: itemID,
-      symbolA: itemToSend.symbol,
-      symbolB: itemToReceive.symbol,
-      address,
-    }),
+    publicKey: message.data.fhePublicKey,
+    multiKey: message.data.fheMultiKey,
+    rotaKey: message.data.fheRotaKey,
+    ciphertext: message.data.fheCiphertext,
+    itemID: itemID,
+    symbolA: itemToSend.symbol,
+    symbolB: itemToReceive.symbol,
+    address,
+  });
   return sellerAxiosInstance.post('list.item', payload).then((res) => {
     if (res.status === 201) {
       dispatch(uploadItemFilesSuccess());
