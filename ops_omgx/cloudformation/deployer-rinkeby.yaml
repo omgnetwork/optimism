@@ -113,7 +113,7 @@ Resources:
         - Image: !Sub "${ECRRegistry}/${DockerPrefix}/${DeployerImage}:${ImageTag}"
           Name: deployer
           PortMappings:
-            - ContainerPort: 8080
+            - ContainerPort: 8081
               HostPort: 0
           Environment:
             - Name: SECRETNAME
@@ -137,7 +137,7 @@ Resources:
         Fn::ImportValue: !Sub "${InfrastructureStackName}:EcsCluster"
       LoadBalancers:
         - ContainerName: deployer
-          ContainerPort: 8080
+          ContainerPort: 8081
           TargetGroupArn: !Ref DeployerLBTargetGroup
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
