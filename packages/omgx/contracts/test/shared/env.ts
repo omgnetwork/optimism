@@ -161,7 +161,7 @@ export class OptimismEnv {
     tx: Promise<TransactionResponse> | TransactionResponse,
     direction: Direction
   ) {
-    const {remoteReceipt} = await waitForXDomainTransactionFast(this.watcherFast, tx, direction)
+    const {remoteReceipt} = await waitForXDomainTransaction(this.watcherFast, tx, direction)
     const [xDomainMsgHash] = await this.watcher.getMessageHashesFromL1Tx(remoteReceipt.transactionHash)
     await this.watcher.getL2TransactionReceipt(xDomainMsgHash)
   }
