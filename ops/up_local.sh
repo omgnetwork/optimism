@@ -4,7 +4,8 @@ if ! [ -x "$(command -v yq)" ]; then
   exit 1
 fi
 
-# Build dependencies
+# Build dependencies in the root folder
+# Shouls make sure people are only 
 #yarn
 #yarn build
 
@@ -35,6 +36,8 @@ if [[ $BUILD == 1 ]]; then
     # docker image tag ethereumoptimism/integration-tests omgx/integration-tests:latest
     docker build ../ --file $DIR/docker/Dockerfile.omgx_monorepo --tag omgx/omgx_builder:latest
     docker build ../ --file $DIR/docker/Dockerfile.omgx_deployer --tag omgx/omgx_deployer:latest
+    docker build ../ --file $DIR/docker/Dockerfile.omgx_message-relayer-fast --tag omgx/omgx_message-relayer-fast:latest
+    docker build ../ --file $DIR/docker/Dockerfile.omgx_bl-wl --tag omgx/omgx_bl-wl:latest
 else
     docker-compose -f $DIR/$DOCKERFILE -f $DIR/$OMGX_DOCKERFILE pull
 fi
@@ -43,12 +46,12 @@ if [[ $DAEMON == 1 ]]; then
     docker-compose \
     -f $DIR/$DOCKERFILE \
     -f $DIR/$OMGX_DOCKERFILE \
-    up --no-build --detach
+    up --no-build --detach -V
 else
     docker-compose \
     -f $DIR/$DOCKERFILE \
     -f $DIR/$OMGX_DOCKERFILE \
-    up --no-build
+    up --no-build -V
 fi
 
 

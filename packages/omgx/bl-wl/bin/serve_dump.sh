@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# Run this script to serve the latest state dump from
-# an http server. This is useful to serve the state dump
-# to a local instance of the sequencer/verifier during
-# development. The state dump can be found at
-# `GET /state-dump.latest.json`
+# Run this script to serve the whitelisting addresses file from
+# an http server.
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 

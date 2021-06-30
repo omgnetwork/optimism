@@ -1,7 +1,7 @@
 {
   "name": "@omgx/contracts",
   "version": "0.0.1",
-  "description": "OMGX Smart Contracts",
+  "description": "OMGX Smart Contracts and Deployer HTTP Server",
   "private": true,
   "author": "OMG",
   "license": "MIT",
@@ -15,7 +15,7 @@
     "postinstall": "patch-package",
     "clean": "rm -rf ./dist ./artifacts ./artifacts-ovm ./cache ./cache-ovm ./tsconfig.build.tsbuildinfo",
     "deploy": "ts-node \"./bin/deploy.ts\"",
-    "deploy:test": "./scripts/build.sh && hardhat test && ./scripts/copy.sh"
+    "deploy:test": "./scripts/build.sh && hardhat test"
   },
   "devDependencies": {
     "@eth-optimism/core-utils": "^0.4.2",

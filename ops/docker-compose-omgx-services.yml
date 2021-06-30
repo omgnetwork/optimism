@@ -23,12 +23,13 @@ services:
       dockerfile: ./ops/docker/Dockerfile.omgx_deployer
     environment:
         TEST: 1
+        NO_COMPILE: 1
         L1_NODE_WEB3_URL: http://l1_chain:8545
         L2_NODE_WEB3_URL: http://l2geth:8545
         URL: http://deployer:8081/addresses.json
         # these keys are hardhat's first 3 accounts, DO NOT use in production
         DEPLOYER_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-        NO_COMPILE: 1
+        RETRIES: 70
     ports:
         # expose the service to the host for getting the contract addrs
       - ${OMGX_DEPLOYER_PORT:-8078}:8079
@@ -49,6 +50,7 @@ services:
     environment:
         OMGX_URL: http://omgx_deployer:8079/addresses.json
         BL_WL_PORT: 9000
+        RETRIES: 70
     ports:
       - 9000:9000
 
@@ -75,6 +77,7 @@ services:
         POLLING_INTERVAL: 1500
         GET_LOGS_INTERVAL: 500
         WHITELIST_ENDPOINT: http://bl-wl:9000/whitelist.json
+        RETRIES: 70
 
 # and, tests for all the OMGX-specific services
 
