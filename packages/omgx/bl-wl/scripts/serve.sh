@@ -8,7 +8,7 @@ set -e
 RETRIES=${RETRIES:-60}
 
 # get the addrs from the URL provided
-ADDRESSES=$(curl --fail --show-error --silent --retry-connrefused --retry $RETRIES --retry-delay 5 $WALLET_URL)
+ADDRESSES=$(curl --fail --show-error --silent --retry-connrefused --retry $RETRIES --retry-delay 5 $OMGX_URL)
 # set the env
 export L1LIQPOOL=$(echo $ADDRESSES | jq -r '.L1LiquidityPool')
 export L1M=$(echo $ADDRESSES | jq -r '.L1Message')
