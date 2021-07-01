@@ -121,11 +121,10 @@ jobs:
             exit 1
           fi
 
-      - name: Function test the OMGX contracts
-        working-directory: ./packages/omgx/contracts
-        run: |
-          yarn test:integration
-        
+      - name: Wallet integration tests
+        working-directory: ./ops
+        run: docker-compose -f docker-compose.yml -f docker-compose-omgx-services.yml run omgx_integration_tests
+
       # This test duplicates the standard test in the optimism `integration.yml`
       # - name: Test l1-l2-deposit-withdrawal example on Optimistic Ethereum with cross-domain message passing
       #   working-directory: ./examples/l1-l2-deposit-withdrawal
