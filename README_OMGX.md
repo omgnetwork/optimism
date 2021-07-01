@@ -154,7 +154,6 @@ $ BUILD=1 DAEMON=1 ./up_local.sh
 Typically, you will only have to build everything once, and after that, you can save time by setting `BUILD` to `0`:
 
 ```
-$ cd ops
 $ BUILD=0 DAEMON=1 ./up_local.sh
 ```
 
