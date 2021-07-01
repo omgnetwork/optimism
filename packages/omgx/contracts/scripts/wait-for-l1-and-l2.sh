@@ -35,7 +35,7 @@ until $(curl --silent --fail \
     exit 1
   fi
 done
-echo "Connected to L2 Verifier Node at $L2_NODE_WEB3_URL"
+echo "Connected to L2 Node at $L2_NODE_WEB3_URL"
 
 if [ ! -z "$URL" ]; then
     RETRIES=${RETRIES:-50}

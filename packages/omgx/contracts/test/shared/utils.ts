@@ -10,13 +10,6 @@ import {
 
 require('dotenv').config()
 
-//FIX FIX 
-//Need to fix this so that this file gets the right .env variavles from yhe `docker-compose-omgx-services.yml`
-
-process.env.TEST_PRIVATE_KEY_1 = process.env.TEST_PRIVATE_KEY_1 || '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-process.env.TEST_PRIVATE_KEY_2 = process.env.TEST_PRIVATE_KEY_2 || '0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba'
-process.env.TEST_PRIVATE_KEY_3 = process.env.TEST_PRIVATE_KEY_3 || '0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e'
-
 export const GWEI = BigNumber.from(0)
 
 // The hardhat instance
@@ -39,6 +32,7 @@ export const katel2Wallet = new Wallet(process.env.TEST_PRIVATE_KEY_3).connect(l
 export const PROXY_SEQUENCER_ENTRYPOINT_ADDRESS = '0x4200000000000000000000000000000000000004'
 export const OVM_ETH_ADDRESS = '0x4200000000000000000000000000000000000006'
 export const Proxy__OVM_L2CrossDomainMessenger = '0x4200000000000000000000000000000000000007'
+
 export const addressManagerAddress = process.env.ADDRESS_MANAGER_ADDRESS
 
 export const getAddressManager = (provider: any) => {

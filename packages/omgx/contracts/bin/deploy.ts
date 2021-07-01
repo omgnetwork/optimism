@@ -1,10 +1,7 @@
 import { Wallet, providers } from 'ethers'
 import { getContractFactory } from '@eth-optimism/contracts'
-require('dotenv').config()
 
-process.env.CONTRACTS_DEPLOYER_KEY = process.env.DEPLOYER_PRIVATE_KEY
-process.env.CONTRACTS_RPC_URL =
-  process.env.L1_NODE_WEB3_URL || 'http://127.0.0.1:8545'
+require('dotenv').config()
 
 import hre from 'hardhat'
 
@@ -12,7 +9,8 @@ const main = async () => {
   
   console.log('Starting OMGX core contracts deployment...')
   
-  const config = parseEnv()
+  //const config = parseEnv()
+  //not clear if the output is used anywhere?
 
   const l1Provider = new providers.JsonRpcProvider(process.env.L1_NODE_WEB3_URL)
   const l2Provider = new providers.JsonRpcProvider(process.env.L2_NODE_WEB3_URL)
@@ -68,19 +66,21 @@ main()
     process.exit(1)
   })
 
-function parseEnv() {
-  function ensure(env, type) {
-    if (typeof process.env[env] === 'undefined')
-      return undefined
-    if (type === 'number')
-      return parseInt(process.env[env], 10)
-    return process.env[env]
-  }
+//Based on the code, does not seem to be used?
+// function parseEnv() {
 
-  return {
-    l1provider: ensure('L1_NODE_WEB3_URL', 'string'),
-    l2provider: ensure('L2_NODE_WEB3_URL', 'string'),
-    deployer: ensure('DEPLOYER_PRIVATE_KEY', 'string'),
-    emOvmChainId: ensure('CHAIN_ID', 'number'),
-  }
-}
+//   function ensure(env, type) {
+//     if (typeof process.env[env] === 'undefined')
+//       return undefined
+//     if (type === 'number')
+//       return parseInt(process.env[env], 10)
+//     return process.env[env]
+//   }
+
+//   return {
+//     l1provider: ensure('L1_NODE_WEB3_URL', 'string'),
+//     l2provider: ensure('L2_NODE_WEB3_URL', 'string'),
+//     deployer: ensure('DEPLOYER_PRIVATE_KEY', 'string'),
+//     emOvmChainId: ensure('CHAIN_ID', 'number'),
+//   }
+// }

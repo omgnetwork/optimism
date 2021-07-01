@@ -6,15 +6,14 @@
  import * as fs from 'fs'
  import path from 'path'
 
-
  let Factory__L2ERC20: ContractFactory
 
  let L2ERC20: Contract
 
-
  const deployFn: DeployFunction = async (hre) => {
 
      const supportList = path.resolve(__dirname, "../preSupportedTokens.json")
+     
      if (fs.existsSync(supportList)) {
          const supportedTokenData = fs.readFileSync(supportList, 'utf8')
          const supportedTokensArray = JSON.parse(supportedTokenData).supportedTokens
@@ -50,6 +49,6 @@
      }
  }
 
- deployFn.tags = ['L2StandardERC20', 'optional']
+ deployFn.tags = ['ERC20Tokens', 'optional']
 
  export default deployFn 

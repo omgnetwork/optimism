@@ -4,21 +4,15 @@ import { Watcher } from './watcher'
 
 import {
   getAddressManager,
-
   OVM_ETH_ADDRESS,
-
   l1Provider,
   l2Provider,
-
   bobl1Wallet,
   bobl2Wallet,
-
   alicel1Wallet,
   alicel2Wallet,
-
   katel1Wallet,
   katel2Wallet,
-
 } from './utils'
 
 import {
@@ -101,6 +95,7 @@ export class OptimismEnv {
     const L1StandardBridge = getContractFactory('OVM_L1StandardBridge')
       .connect(bobl1Wallet)
       .attach(L1StandardBridgeAddress)
+    
     const L2StandardBridgeAddress = await L1StandardBridge.l2TokenBridge()
     const L2StandardBridge = getContractFactory('OVM_L2StandardBridge')
       .connect(bobl2Wallet)
