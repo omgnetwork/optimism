@@ -2,25 +2,22 @@
   Varna - A Privacy-Preserving Marketplace
   Varna uses Fully Homomorphic Encryption to make markets fair.
   Copyright (C) 2021 Enya Inc. Palo Alto, CA
-
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-
   You should have received a copy of the GNU General Public License
   along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import cryptoWorker from 'workerize-loader!../cryptoWorker/cryptoWorker'; // eslint-disable-line import/no-webpack-loader-syntax
-import networkService from 'services/networkService';
+import cryptoWorker from 'workerize-loader!../cryptoWorker/cryptoWorker' // eslint-disable-line import/no-webpack-loader-syntax
+import networkService from 'services/networkService'
 
-import { openError } from './uiAction';
+import { openError } from './uiAction'
 
 import buyerAxiosInstance from 'api/buyerAxios'
 
@@ -41,7 +38,7 @@ const startBuyTaskFailure = (bidID, error) => ({
 
 const downloadNextItemBegin = (bidID) => ({
   type: 'DOWNLOAD_NEXT_ITEM',
-  payload: { bidID }
+  payload: { bidID },
 })
 
 const downloadNextItemSuccess = (bidID, files) => ({
@@ -61,12 +58,12 @@ const generateOfferBegin = (bidID) => ({
 
 const generateOfferSuccess = (bidID, ciphertext) => ({
   type: 'GENERATE_OFFER_SUCCESS',
-  payload: { bidID, ciphertext }
+  payload: { bidID, ciphertext },
 })
 
 const generateOfferFailure = (bidID, error) => ({
   type: 'GENERATE_OFFER_FAILURE',
-  payload: { bidID, error }
+  payload: { bidID, error },
 })
 
 const uploadBidBegin = (bidID) => ({
@@ -85,8 +82,7 @@ const uploadBidFailure = (bidID, error) => ({
 })
 
 export const downloadNextItem = (bidID) => (dispatch) => {
-
-  dispatch(downloadNextItemBegin(bidID));
+  dispatch(downloadNextItemBegin(bidID))
 
   return buyerAxiosInstance
     .post(
@@ -109,10 +105,9 @@ export const downloadNextItem = (bidID) => (dispatch) => {
 }
 
 const uploadBid = (bidID, itemID, ciphertext) => (dispatch) => {
-
-  dispatch(uploadBidBegin(bidID));
+  dispatch(uploadBidBegin(bidID))
   // Generate hashed address
-  const address = networkService.account;
+  const address = networkService.account
 
   return buyerAxiosInstance
     .post(
@@ -139,40 +134,37 @@ const uploadBid = (bidID, itemID, ciphertext) => (dispatch) => {
 }
 
 export const startBuyTask = (bid, bidID) => (dispatch) => {
+  dispatch(startBuyTaskBegin(bidID))
 
-  //console.log(`running task bidID: ${bidID}`);
-
-  dispatch(startBuyTaskBegin(bidID));
-
-  dispatch(downloadNextItem(bidID)).then(res => {
+  dispatch(downloadNextItem(bidID)).then((res) => {
     if (res.status !== 201) {
-      dispatch(startBuyTaskFailure(bidID, res.status));
+      dispatch(startBuyTaskFailure(bidID, res.status))
     } else {
-      dispatch(generateOffer(bid, bidID, res.data.itemID, res.data.publicKey));
+      dispatch(generateOffer(bid, bidID, res.data.itemID, res.data.publicKey))
     }
   })
 }
 
 const generateOffer = (bid, bidID, itemID, publicKey) => (dispatch) => {
-
-  dispatch(generateOfferBegin(bidID));
+  dispatch(generateOfferBegin(bidID))
 
   // Web worker
-  const workerInstance = cryptoWorker();
+  const workerInstance = cryptoWorker()
 
-  workerInstance.generateOffer(bid, bidID, publicKey);
+  workerInstance.generateOffer(bid, bidID, publicKey)
 
   workerInstance.addEventListener('message', (message) => {
-    if (message.data.status === "success" &&
-        message.data.type === "generateOffer" &&
-        message.data.bidID === bidID
+    if (
+      message.data.status === 'success' &&
+      message.data.type === 'generateOffer' &&
+      message.data.bidID === bidID
     ) {
-      dispatch(generateOfferSuccess(bidID, message.data.bidCiphertext));
-      dispatch(uploadBid(bidID, itemID, message.data.bidCiphertext));
-    } else if (message.data.status === "failure") {
-      dispatch(generateOfferFailure(bidID, 404));
-      dispatch(openError("Failed to encrypt your offer"));
-      dispatch(startBuyTaskFailure(bidID, 500));
+      dispatch(generateOfferSuccess(bidID, message.data.bidCiphertext))
+      dispatch(uploadBid(bidID, itemID, message.data.bidCiphertext))
+    } else if (message.data.status === 'failure') {
+      dispatch(generateOfferFailure(bidID, 404))
+      dispatch(openError('Failed to encrypt your offer'))
+      dispatch(startBuyTaskFailure(bidID, 500))
     }
-  });
+  })
 }

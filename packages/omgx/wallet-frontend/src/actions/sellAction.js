@@ -2,46 +2,42 @@
   Varna - A Privacy-Preserving Marketplace
   Varna uses Fully Homomorphic Encryption to make markets fair.
   Copyright (C) 2021 Enya Inc. Palo Alto, CA
-
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-
   You should have received a copy of the GNU General Public License
   along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import cryptoWorker from 'workerize-loader!../cryptoWorker/cryptoWorker'; // eslint-disable-line import/no-webpack-loader-syntax
-import { encode, decode } from 'base64-arraybuffer';
-import { ethers } from 'ethers';
-import md5 from 'md5';
-import BN from 'bn.js';
-import store from 'store';
-import { v4 as uuidv4 } from 'uuid';
+import cryptoWorker from 'workerize-loader!../cryptoWorker/cryptoWorker' // eslint-disable-line import/no-webpack-loader-syntax
+import { encode, decode } from 'base64-arraybuffer'
+import { ethers } from 'ethers'
+import md5 from 'md5'
+import BN from 'bn.js'
+import store from 'store'
+import { v4 as uuidv4 } from 'uuid'
 
-import { openAlert, openError } from './uiAction';
-import { AESEncrypt, AESDecrypt } from 'cryptoWorker/cryptoWorker';
+import { openAlert, openError } from './uiAction'
+import { AESEncrypt, AESDecrypt } from 'cryptoWorker/cryptoWorker'
 
-import { powAmount } from 'util/amountConvert';
-import { accSub, accMul } from 'util/calculation';
+import { powAmount } from 'util/amountConvert'
+import { accSub, accMul } from 'util/calculation'
 
-import networkService from 'services/networkService';
+import networkService from 'services/networkService'
 
-import { SELLER_OPTIMISM_API_URL } from 'Settings';
-import sellerAxiosInstance from 'api/sellerAxios';
+import sellerAxiosInstance from 'api/sellerAxios'
 
 const encryptItemForSellerBegin = () => ({
-  type: 'ENCRYPT_ITEM'
+  type: 'ENCRYPT_ITEM',
 })
 
 const encryptItemForSellerSuccess = () => ({
-  type: 'ENCRYPT_ITEM_SUCCESS'
+  type: 'ENCRYPT_ITEM_SUCCESS',
 })
 
 const encryptItemForSellerFailure = (data) => ({
@@ -50,33 +46,33 @@ const encryptItemForSellerFailure = (data) => ({
 })
 
 const uploadItemFilesBegin = () => ({
-  type: "UPLOAD_ITEM_FILES",
+  type: 'UPLOAD_ITEM_FILES',
 })
 
 const uploadItemFilesSuccess = () => ({
-  type: "UPLOAD_ITEM_FILES_SUCCESS",
+  type: 'UPLOAD_ITEM_FILES_SUCCESS',
 })
 
 const uploadItemFilesFailure = (data) => ({
-  type: "UPLOAD_ITEM_FILES_FAILURE",
+  type: 'UPLOAD_ITEM_FILES_FAILURE',
   payload: data,
 })
 
 const configureItemToOMGXBegin = () => ({
-  type: "CONFIGURE_ITEM_TO_PLASMA",
+  type: 'CONFIGURE_ITEM_TO_PLASMA',
 })
 
 const configureItemToOMGXSuccess = () => ({
-  type: "CONFIGURE_ITEM_TO_PLASMA_SUCCESS",
+  type: 'CONFIGURE_ITEM_TO_PLASMA_SUCCESS',
 })
 
 const configureItemToOMGXFailure = (data) => ({
-  type: "CONFIGURE_ITEM_TO_PLASMA_FAILURE",
+  type: 'CONFIGURE_ITEM_TO_PLASMA_FAILURE',
   payload: data,
 })
 
 const isItemOpenOrClosedBegin = () => ({
-  type: 'ITEM_OPEN_OR_CLOSED'
+  type: 'ITEM_OPEN_OR_CLOSED',
 })
 
 const isItemOpenOrClosedSuccess = (data) => ({
@@ -114,12 +110,12 @@ const decryptItemBegin = (itemID) => ({
 
 const decryptItemSuccess = (itemID, cleartext) => ({
   type: 'DECRYPT_ITEM_SUCCESS',
-  payload: { itemID, cleartext }
+  payload: { itemID, cleartext },
 })
 
 const decryptItemFailure = (itemID, error) => ({
   type: 'DECRYPT_ITEM_FAILURE',
-  payload: { itemID, error }
+  payload: { itemID, error },
 })
 /****************************/
 
@@ -133,12 +129,12 @@ const decryptItemCacheBegin = (itemID) => ({
 
 const decryptItemCacheSuccess = (itemID, cleartext) => ({
   type: 'DECRYPT_ITEM_CACHE_SUCCESS',
-  payload: { itemID, cleartext }
+  payload: { itemID, cleartext },
 })
 
 const decryptItemCacheFailure = (itemID, error) => ({
   type: 'DECRYPT_ITEM_CACHE_FAILURE',
-  payload: { itemID, error }
+  payload: { itemID, error },
 })
 /****************************/
 
@@ -149,7 +145,7 @@ const deleteItemBegin = (itemID) => ({
 
 const deleteItemSuccess = (itemID) => ({
   type: 'DELETE_ITEM_SUCCESS',
-  payload: { itemID }
+  payload: { itemID },
 })
 
 const deleteItemFailure = (itemID, error) => ({
@@ -164,7 +160,7 @@ const acceptBidBegin = (itemID, bidID) => ({
 
 const acceptBidSuccess = (itemID, bidID) => ({
   type: 'ACCEPT_BID_SUCCESS',
-  payload: { itemID, bidID }
+  payload: { itemID, bidID },
 })
 
 const acceptBidFailure = (itemID, bidID, error) => ({
@@ -190,8 +186,14 @@ const getSellerAcceptBidDataFailure = (error) => ({
 })
 /****************************/
 
-const uploadItemFiles = (message, itemID, itemToSend, itemToReceive, address) => (dispatch) => {
-  dispatch(uploadItemFilesBegin());
+const uploadItemFiles = (
+  message,
+  itemID,
+  itemToSend,
+  itemToReceive,
+  address
+) => (dispatch) => {
+  dispatch(uploadItemFilesBegin())
 
   const payload = JSON.stringify({
     publicKey: message.data.fhePublicKey,
@@ -202,20 +204,25 @@ const uploadItemFiles = (message, itemID, itemToSend, itemToReceive, address) =>
     symbolA: itemToSend.symbol,
     symbolB: itemToReceive.symbol,
     address,
-  });
+  })
   return sellerAxiosInstance.post('list.item', payload).then((res) => {
     if (res.status === 201) {
-      dispatch(uploadItemFilesSuccess());
+      dispatch(uploadItemFilesSuccess())
       return { status: 201 }
     } else {
-      dispatch(uploadItemFilesFailure(res.status));
+      dispatch(uploadItemFilesFailure(res.status))
       return { status: res.status }
     }
   })
 }
 
-const configureItemToOMGX = (itemID, itemToSend, itemToReceive, address) => async (dispatch) => {
-  dispatch(configureItemToOMGXBegin());
+const configureItemToOMGX = (
+  itemID,
+  itemToSend,
+  itemToReceive,
+  address
+) => async (dispatch) => {
+  dispatch(configureItemToOMGXBegin())
   /************************************************/
   /*********  Removed the smart contract **********/
   /************************************************/
@@ -229,15 +236,19 @@ const configureItemToOMGX = (itemID, itemToSend, itemToReceive, address) => asyn
     // );
 
     // if (tx) {
-      dispatch(configureItemToOMGXSuccess());
-      dispatch(openAlert("Item was successfully encrypted and dispatched. Now writing to the smart contract"));
+    dispatch(configureItemToOMGXSuccess())
+    dispatch(
+      openAlert(
+        'Item was successfully encrypted and dispatched. Now writing to the smart contract'
+      )
+    )
     // } else {
     //   dispatch(openError("Failed to write to Plasma"));
     //   dispatch(configureItemToOMGXFailure(404));
     // }
-  } catch(error) {
-    dispatch(openError("Unknown error"));
-    dispatch(configureItemToOMGXFailure(404));
+  } catch (error) {
+    dispatch(openError('Unknown error'))
+    dispatch(configureItemToOMGXFailure(404))
   }
 }
 
@@ -247,59 +258,63 @@ export const listItem = (
   itemToSendAmount,
   itemToReceive,
   sellerExchangeRate,
-  FHEseed,
-  ) => (dispatch) => {
-  console.log("listBid: Starting the item listing process")
-  var cryptoWorkerThreadID = crypto.getRandomValues(new Uint32Array(1)).toString(16);
+  FHEseed
+) => (dispatch) => {
+  var cryptoWorkerThreadID = crypto
+    .getRandomValues(new Uint32Array(1))
+    .toString(16)
 
-  dispatch(encryptItemForSellerBegin());
+  dispatch(encryptItemForSellerBegin())
 
-  const workerInstance = cryptoWorker();
+  const workerInstance = cryptoWorker()
 
   workerInstance.generateItem(
     itemToSend,
     itemToSendAmount,
-    itemToSendAmount,/*this is not a bug - needed to update remaining amount */
+    itemToSendAmount /*this is not a bug - needed to update remaining amount */,
     itemToReceive,
     sellerExchangeRate,
     FHEseed,
     cryptoWorkerThreadID
-  );
+  )
 
   workerInstance.addEventListener('message', (message) => {
-    if (message.data.status === "success" &&
-        message.data.type === "listItem" &&
-        message.data.cryptoWorkerThreadID === cryptoWorkerThreadID
+    if (
+      message.data.status === 'success' &&
+      message.data.type === 'listItem' &&
+      message.data.cryptoWorkerThreadID === cryptoWorkerThreadID
     ) {
-      dispatch(encryptItemForSellerSuccess());
+      dispatch(encryptItemForSellerSuccess())
 
       // Generate hashed itemID
-      const itemID = md5(JSON.stringify(message.data.fheCiphertext));
+      const itemID = md5(JSON.stringify(message.data.fheCiphertext))
       // Generate hashed address
-      const address = md5(networkService.account);
+      const address = md5(networkService.account)
 
-      dispatch(uploadItemFiles(message, itemID, itemToSend, itemToReceive, address)).then(statusCode => {
+      dispatch(
+        uploadItemFiles(message, itemID, itemToSend, itemToReceive, address)
+      ).then((statusCode) => {
         if (statusCode.status === 201) {
-          dispatch(configureItemToOMGX(itemID, itemToSend, itemToReceive, address));
+          dispatch(
+            configureItemToOMGX(itemID, itemToSend, itemToReceive, address)
+          )
         } else {
-          dispatch(uploadItemFilesFailure(statusCode.status));
-          dispatch(openError("Failed to broadcast your listing"));
+          dispatch(uploadItemFilesFailure(statusCode.status))
+          dispatch(openError('Failed to broadcast your listing'))
         }
       })
-
-    } else if (message.data.status === "failure") {
-      dispatch(encryptItemForSellerFailure(404));
-      dispatch(openError("Failed to encrypt your item"));
+    } else if (message.data.status === 'failure') {
+      dispatch(encryptItemForSellerFailure(404))
+      dispatch(openError('Failed to encrypt your item'))
     }
-  });
+  })
 }
 
 export const isItemOpenOrClosed = () => (dispatch) => {
-
-  dispatch(isItemOpenOrClosedBegin());
+  dispatch(isItemOpenOrClosedBegin())
 
   // Generate hashed address
-  const address = md5(networkService.account);
+  const address = md5(networkService.account)
 
   const payload = JSON.stringify({ address })
 
@@ -317,8 +332,7 @@ export const isItemOpenOrClosed = () => (dispatch) => {
 }
 
 export const downloadItemCiphertext = (itemID) => (dispatch) => {
-
-  dispatch(downloadItemCiphertextBegin(itemID));
+  dispatch(downloadItemCiphertextBegin(itemID))
 
   const payload = JSON.stringify({
     itemID,
@@ -337,96 +351,106 @@ export const downloadItemCiphertext = (itemID) => (dispatch) => {
     })
 }
 
-export const decryptItem = (itemID, FHEseed, AESKey, ciphertext) => (dispatch) => {
-  dispatch(decryptItemBegin(itemID));
+export const decryptItem = (itemID, FHEseed, AESKey, ciphertext) => (
+  dispatch
+) => {
+  dispatch(decryptItemBegin(itemID))
 
-  const workerInstance = cryptoWorker();
-  workerInstance.decryptItem(itemID, ciphertext, FHEseed);
+  const workerInstance = cryptoWorker()
+  workerInstance.decryptItem(itemID, ciphertext, FHEseed)
 
   workerInstance.addEventListener('message', (message) => {
-    if (message.data.status === "success" &&
-        message.data.type === "decryptAsk" &&
-        message.data.itemID === itemID
-    ) {
-        const itemCleartext = message.data.itemCleartext.slice(0, 11);
-        //console.log({itemCleartext});
-        dispatch(decryptItemSuccess(itemID, itemCleartext));
-        // AES encrypt data
-        AESEncrypt(JSON.stringify(itemCleartext), AESKey).then(ciphertext => {
-          const bufferCiphertext = ciphertext.ciphertext;
-          const bufferIV = ciphertext.iv;
-          const base64Ciphertext = {
-            ciphertext: encode(bufferCiphertext),
-            iv: encode(bufferIV),
-          }
-
-          // store ciphertext
-          let decryptedItem = localStorage.getItem("decryptedItem");
-          if (!decryptedItem) {
-            decryptedItem = {[itemID]: base64Ciphertext}
-          } else {
-            decryptedItem = JSON.parse(decryptedItem);
-            decryptedItem = {
-              ...decryptedItem,
-              [itemID]: base64Ciphertext,
-            }
-          }
-          localStorage.setItem("decryptedItem", JSON.stringify(decryptedItem));
-        })
-    } else if (
-      message.data.status === "failure" &&
-      message.data.type === "decryptAsk" &&
+    if (
+      message.data.status === 'success' &&
+      message.data.type === 'decryptAsk' &&
       message.data.itemID === itemID
     ) {
-      dispatch(decryptItemFailure(itemID, 404));
+      const itemCleartext = message.data.itemCleartext.slice(0, 11)
+      //console.log({itemCleartext});
+      dispatch(decryptItemSuccess(itemID, itemCleartext))
+      // AES encrypt data
+      AESEncrypt(JSON.stringify(itemCleartext), AESKey).then((ciphertext) => {
+        const bufferCiphertext = ciphertext.ciphertext
+        const bufferIV = ciphertext.iv
+        const base64Ciphertext = {
+          ciphertext: encode(bufferCiphertext),
+          iv: encode(bufferIV),
+        }
+
+        // store ciphertext
+        let decryptedItem = localStorage.getItem('decryptedItem')
+        if (!decryptedItem) {
+          decryptedItem = { [itemID]: base64Ciphertext }
+        } else {
+          decryptedItem = JSON.parse(decryptedItem)
+          decryptedItem = {
+            ...decryptedItem,
+            [itemID]: base64Ciphertext,
+          }
+        }
+        localStorage.setItem('decryptedItem', JSON.stringify(decryptedItem))
+      })
+    } else if (
+      message.data.status === 'failure' &&
+      message.data.type === 'decryptAsk' &&
+      message.data.itemID === itemID
+    ) {
+      dispatch(decryptItemFailure(itemID, 404))
     }
-  });
-
-}
-
-export const loadItem = (itemID, FHEseed, AESKey) => (dispatch) => {
-  dispatch(downloadItemCiphertext(itemID)).then(ciphertext => {
-    dispatch(decryptItem(itemID, FHEseed, AESKey, ciphertext));
   })
 }
 
-export const findNextDecryptBiditemIDIndex = (itemOpenList, latestOpenitemID) => {
+export const loadItem = (itemID, FHEseed, AESKey) => (dispatch) => {
+  dispatch(downloadItemCiphertext(itemID)).then((ciphertext) => {
+    dispatch(decryptItem(itemID, FHEseed, AESKey, ciphertext))
+  })
+}
 
-  let decryptedItemCache = localStorage.getItem("decryptedItem");
+export const findNextDecryptBiditemIDIndex = (
+  itemOpenList,
+  latestOpenitemID
+) => {
+  let decryptedItemCache = localStorage.getItem('decryptedItem')
 
-  let decrypteditemIDCache = null;
+  let decrypteditemIDCache = null
 
   if (decryptedItemCache) {
-    decrypteditemIDCache = Object.keys(JSON.parse(decryptedItemCache));
+    decrypteditemIDCache = Object.keys(JSON.parse(decryptedItemCache))
   }
 
-  let nextDecryptBiditemIDIndex = itemOpenList.indexOf(latestOpenitemID) < itemOpenList.length - 1 ? itemOpenList.indexOf(latestOpenitemID) : null;
+  let nextDecryptBiditemIDIndex =
+    itemOpenList.indexOf(latestOpenitemID) < itemOpenList.length - 1
+      ? itemOpenList.indexOf(latestOpenitemID)
+      : null
 
   // check if the cache has the ask data
-  while (nextDecryptBiditemIDIndex < itemOpenList.length && nextDecryptBiditemIDIndex !== null) {
+  while (
+    nextDecryptBiditemIDIndex < itemOpenList.length &&
+    nextDecryptBiditemIDIndex !== null
+  ) {
     if (decrypteditemIDCache) {
-      if (decrypteditemIDCache.includes(itemOpenList[nextDecryptBiditemIDIndex])) {
-        nextDecryptBiditemIDIndex += 1;
+      if (
+        decrypteditemIDCache.includes(itemOpenList[nextDecryptBiditemIDIndex])
+      ) {
+        nextDecryptBiditemIDIndex += 1
       } else {
-        nextDecryptBiditemIDIndex += 1;
-        break;
+        nextDecryptBiditemIDIndex += 1
+        break
       }
     } else {
-      nextDecryptBiditemIDIndex += 1;
-      break;
+      nextDecryptBiditemIDIndex += 1
+      break
     }
   }
 
-  return nextDecryptBiditemIDIndex;
+  return nextDecryptBiditemIDIndex
 }
 
-
 export const deleteItem = (itemID) => (dispatch) => {
-
-  dispatch(deleteItemBegin(itemID));
+  dispatch(deleteItemBegin(itemID))
 
   // Generate hashed address
-  const address = md5(networkService.account);
+  const address = md5(networkService.account)
 
   const payload = JSON.stringify({
     itemID,
@@ -443,8 +467,7 @@ export const deleteItem = (itemID) => (dispatch) => {
   })
 }
 
-export const acceptBid = ( cMD ) => async (dispatch) => {
-
+export const acceptBid = (cMD) => async (dispatch) => {
   /*
     itemID,
     bidID,
@@ -459,38 +482,56 @@ export const acceptBid = ( cMD ) => async (dispatch) => {
     FHEseed,
   */
 
-  const state = store.getState();
-  const balance = state.balance;
-  const itemOpenList = state.sell.itemOpenList;
+  const state = store.getState()
+  const balance = state.balance
+  const itemOpenList = state.sell.itemOpenList
 
-  const availableBalanceArray = balance.childchain.filter(i => i.currency === cMD.sellerItemToSend.currency);
-  let availableBalance = 0;
+  const availableBalanceArray = balance.childchain.filter(
+    (i) => i.currency === cMD.sellerItemToSend.currency
+  )
+  let availableBalance = 0
   if (availableBalanceArray.length) {
-    availableBalance = availableBalanceArray[0].amount;
+    availableBalance = availableBalanceArray[0].amount
   }
 
-  const tokenList = state.tokenList;
+  const tokenList = state.tokenList
   // Security issue!!
-  const sellerItemToSendDecimals = tokenList[cMD.sellerItemToSend.currency.toLowerCase()].decimals;
-  const sellerItemToSendAgreeAmount = powAmount(cMD.agreeAmount, sellerItemToSendDecimals);
+  const sellerItemToSendDecimals =
+    tokenList[cMD.sellerItemToSend.currency.toLowerCase()].decimals
+  const sellerItemToSendAgreeAmount = powAmount(
+    cMD.agreeAmount,
+    sellerItemToSendDecimals
+  )
   // Security issue!!
-  const sellerItemToReceiveDecimals = tokenList[cMD.sellerItemToReceive.currency.toLowerCase()].decimals;
-  const sellerItemToReceiveAmount = powAmount(accMul(cMD.agreeAmount, cMD.agreeExchangeRate), sellerItemToReceiveDecimals);
+  const sellerItemToReceiveDecimals =
+    tokenList[cMD.sellerItemToReceive.currency.toLowerCase()].decimals
+  const sellerItemToReceiveAmount = powAmount(
+    accMul(cMD.agreeAmount, cMD.agreeExchangeRate),
+    sellerItemToReceiveDecimals
+  )
 
   if (availableBalance.lt(new BN(sellerItemToSendAgreeAmount))) {
-    dispatch(openError(`You don't have enough ${cMD.sellerItemToSend.symbol} to cover the amount you want to send.`));
-    dispatch(acceptBidFailure(cMD.itemID, cMD.bidID, 404));
+    dispatch(
+      openError(
+        `You don't have enough ${cMD.sellerItemToSend.symbol} to cover the amount you want to send.`
+      )
+    )
+    dispatch(acceptBidFailure(cMD.itemID, cMD.bidID, 404))
   } else {
     // The remaining amount of items that seller wants to send
-    const sellerItemToSendAmountRemainUpdated = accSub(cMD.sellerItemToSendAmountRemain, cMD.agreeAmount);
+    const sellerItemToSendAmountRemainUpdated = accSub(
+      cMD.sellerItemToSendAmountRemain,
+      cMD.agreeAmount
+    )
 
-    dispatch(acceptBidBegin(cMD.itemID, cMD.bidID));
+    dispatch(acceptBidBegin(cMD.itemID, cMD.bidID))
 
-    let cryptoWorkerThreadID = "";
-    while (cryptoWorkerThreadID.length < 20) cryptoWorkerThreadID += Math.random().toString(36).substr(2);
+    let cryptoWorkerThreadID = ''
+    while (cryptoWorkerThreadID.length < 20)
+      cryptoWorkerThreadID += Math.random().toString(36).substr(2)
 
     // Web worker
-    const workerInstance = cryptoWorker();
+    const workerInstance = cryptoWorker()
     workerInstance.generateItem(
       cMD.sellerItemToSend,
       cMD.sellerItemToSendAmount,
@@ -498,35 +539,45 @@ export const acceptBid = ( cMD ) => async (dispatch) => {
       cMD.sellerItemToReceive,
       cMD.sellerExchangeRate,
       cMD.FHEseed,
-      cryptoWorkerThreadID,
-    );
+      cryptoWorkerThreadID
+    )
 
     workerInstance.addEventListener('message', async (message) => {
-      if (message.data.status === "success" &&
-          message.data.type === "listItem" &&
-          message.data.cryptoWorkerThreadID === cryptoWorkerThreadID
+      if (
+        message.data.status === 'success' &&
+        message.data.type === 'listItem' &&
+        message.data.cryptoWorkerThreadID === cryptoWorkerThreadID
       ) {
         // upload the updated ciphertext to S3
-        const uploadFilesStatus = await dispatch(uploadItemFiles(
-          message,
-          cMD.itemID,
-          cMD.sellerItemToSend,
-          cMD.sellerItemToReceive,
-          md5(networkService.account)
-        ));
+        const uploadFilesStatus = await dispatch(
+          uploadItemFiles(
+            message,
+            cMD.itemID,
+            cMD.sellerItemToSend,
+            cMD.sellerItemToReceive,
+            md5(networkService.account)
+          )
+        )
 
         if (uploadFilesStatus.status === 201) {
           // update the data in cache
-          dispatch(decryptItem(cMD.itemID, cMD.FHEseed, cMD.AESKey, message.data.fheCiphertext));
+          dispatch(
+            decryptItem(
+              cMD.itemID,
+              cMD.FHEseed,
+              cMD.AESKey,
+              message.data.fheCiphertext
+            )
+          )
 
           try {
-            const UUID = uuidv4();
-            const swapID = ethers.utils.soliditySha3(UUID);
-            const openValue = sellerItemToSendAgreeAmount;
-            const openContractAddress = cMD.sellerItemToSend.currency;
-            const closeValue = sellerItemToReceiveAmount;
-            const closeTrader = cMD.address;
-            const closeContractAddress = cMD.sellerItemToReceive.currency;
+            const UUID = uuidv4()
+            const swapID = ethers.utils.soliditySha3(UUID)
+            const openValue = sellerItemToSendAgreeAmount
+            const openContractAddress = cMD.sellerItemToSend.currency
+            const closeValue = sellerItemToReceiveAmount
+            const closeTrader = cMD.address
+            const closeContractAddress = cMD.sellerItemToReceive.currency
 
             const swapStatus = await networkService.AtomicSwapContract.open(
               swapID,
@@ -534,9 +585,9 @@ export const acceptBid = ( cMD ) => async (dispatch) => {
               openContractAddress,
               closeValue,
               closeTrader,
-              closeContractAddress,
-            );
-            const swapRes = await swapStatus.wait();
+              closeContractAddress
+            )
+            const swapRes = await swapStatus.wait()
 
             if (swapRes) {
               const uploadSwapBody = await uploadSellerAcceptBidData({
@@ -550,75 +601,81 @@ export const acceptBid = ( cMD ) => async (dispatch) => {
                 currencyA: cMD.sellerItemToSend.currency,
                 currencyB: cMD.sellerItemToReceive.currency,
                 symbolA: cMD.sellerItemToSend.symbol,
-                symbolB: cMD.sellerItemToReceive.symbol
+                symbolB: cMD.sellerItemToReceive.symbol,
               })
 
               if (uploadSwapBody === 201) {
-                dispatch(acceptBidSuccess(cMD.itemID, cMD.bidID));
-                dispatch(openAlert("Swap was sent"));
-                dispatch(getSellerAcceptBidData(itemOpenList));
+                dispatch(acceptBidSuccess(cMD.itemID, cMD.bidID))
+                dispatch(openAlert('Swap was sent'))
+                dispatch(getSellerAcceptBidData(itemOpenList))
               } else {
-                dispatch(acceptBidFailure(cMD.itemID, cMD.bidID, 404));
-                dispatch(openError("Unknown error"));
+                dispatch(acceptBidFailure(cMD.itemID, cMD.bidID, 404))
+                dispatch(openError('Unknown error'))
               }
             } else {
-              dispatch(acceptBidFailure(cMD.itemID, cMD.bidID, 404));
-              dispatch(openAlert("Failed to swap"));
+              dispatch(acceptBidFailure(cMD.itemID, cMD.bidID, 404))
+              dispatch(openAlert('Failed to swap'))
             }
-
-          } catch(error) {
-            if (error.message.includes("User denied message signature.")) {
-              dispatch(acceptBidFailure(cMD.itemID, cMD.bidID, 404));
-              dispatch(openAlert("Cancelled the signature"));
+          } catch (error) {
+            if (error.message.includes('User denied message signature.')) {
+              dispatch(acceptBidFailure(cMD.itemID, cMD.bidID, 404))
+              dispatch(openAlert('Cancelled the signature'))
             } else {
-              dispatch(acceptBidFailure(cMD.itemID, cMD.bidID, 404));
-              dispatch(openError("Could not sign the transaction. Please try again."));
+              dispatch(acceptBidFailure(cMD.itemID, cMD.bidID, 404))
+              dispatch(
+                openError('Could not sign the transaction. Please try again.')
+              )
             }
           }
-
         } else {
-          dispatch(acceptBidFailure(cMD.itemID, cMD.bidID, 404));
-          dispatch(openError("Failed to upload your file"));
+          dispatch(acceptBidFailure(cMD.itemID, cMD.bidID, 404))
+          dispatch(openError('Failed to upload your file'))
         }
-
       }
     })
-
   }
 }
 
-export const decryptItemCache = (decryptedItem, decryptedItemCache, decryptedItemCacheError, itemOpenList, AESKey) => async (dispatch) => {
+export const decryptItemCache = (
+  decryptedItem,
+  decryptedItemCache,
+  decryptedItemCacheError,
+  itemOpenList,
+  AESKey
+) => async (dispatch) => {
   for (let eachitemID of itemOpenList) {
     // check whether itemID is decrypted  check whether itemID is in cache      check whether cached ask is decrypted
-    if (!decryptedItem[eachitemID] && decryptedItemCache[eachitemID] && typeof decryptedItemCacheError[eachitemID] === 'undefined') {
-      dispatch(decryptItemCacheBegin(eachitemID));
+    if (
+      !decryptedItem[eachitemID] &&
+      decryptedItemCache[eachitemID] &&
+      typeof decryptedItemCacheError[eachitemID] === 'undefined'
+    ) {
+      dispatch(decryptItemCacheBegin(eachitemID))
 
-      const base64Ciphertext = decryptedItemCache[eachitemID].ciphertext;
-      const base64IV = decryptedItemCache[eachitemID].iv;
+      const base64Ciphertext = decryptedItemCache[eachitemID].ciphertext
+      const base64IV = decryptedItemCache[eachitemID].iv
       const ciphertText = {
         ciphertext: decode(base64Ciphertext),
         iv: decode(base64IV),
       }
 
-      try{
-        const cleartextString = await AESDecrypt(ciphertText, AESKey);
-        const cleartext = JSON.parse(cleartextString);
+      try {
+        const cleartextString = await AESDecrypt(ciphertText, AESKey)
+        const cleartext = JSON.parse(cleartextString)
         if (Array.isArray(cleartext)) {
-          dispatch(decryptItemCacheSuccess(eachitemID, cleartext));
+          dispatch(decryptItemCacheSuccess(eachitemID, cleartext))
         } else {
-          dispatch(decryptItemCacheFailure(eachitemID, 'Error'));
+          dispatch(decryptItemCacheFailure(eachitemID, 'Error'))
         }
       } catch (error) {
-        dispatch(decryptItemCacheFailure(eachitemID, 'Error'));
+        dispatch(decryptItemCacheFailure(eachitemID, 'Error'))
       }
-
     }
   }
-
 }
 
 export const getSellerAcceptBidData = (itemIDList) => (dispatch) => {
-  dispatch(getSellerAcceptBidDataBegin());
+  dispatch(getSellerAcceptBidDataBegin())
 
   let payload = JSON.stringify({
     itemIDList,
