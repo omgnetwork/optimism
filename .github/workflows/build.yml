@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  omgx_integration:
+  build:
     runs-on: ubuntu-latest
     env:
         DOCKER_BUILDKIT: 1
@@ -46,7 +46,7 @@ jobs:
         run: |
           set -xe
           mkdir ~/docker/
-          for i in $(docker images --format "{{.Repository}}:{{.Tag}}"); do
+          for i in $(docker images --format "{{.Repository}}:{{.Tag}}" | grep -E '(ethereumoptimism|omgx)'); do
             NAME=$(echo $i | sed 's,/,_,g' | sed 's,:,_,g')
             EXPORT_PATH="~/docker/"$NAME".tar"
             EXPORT_PATH=${EXPORT_PATH/\~/$HOME}

@@ -37,6 +37,29 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
+      - name: Create container folder
+        run: |
+          IMPORT_PATH="~/docker/"
+          IMPORT_PATH=${IMPORT_PATH/\~/$HOME}
+          mkdir -p "$(dirname "$IMPORT_PATH")"
+
+      - name: Download containers
+        uses: actions/download-artifact@v2
+        with:
+          name: rollup-containers
+
+      - name: Import docker images from archive
+        run: |
+          set -xe
+          IMPORT_PATH="~/docker/"
+          IMPORT_PATH=${IMPORT_PATH/\~/$HOME}
+          for file in "$IMPORT_PATH"/*.tar; do
+            if [ -f "$file" ]; then
+              printf "\033[0;33mImporting %s to Docker...\033[0;0m\\n" "$file"
+              docker load -i "$file"
+            fi
+          done
+
       - name: Install yq
         run: sudo snap install yq
 
@@ -125,7 +148,7 @@ jobs:
         working-directory: ./packages/omgx/contracts
         run: |
           yarn test:integration
-        
+
       # This test duplicates the standard test in the optimism `integration.yml`
       # - name: Test l1-l2-deposit-withdrawal example on Optimistic Ethereum with cross-domain message passing
       #   working-directory: ./examples/l1-l2-deposit-withdrawal
