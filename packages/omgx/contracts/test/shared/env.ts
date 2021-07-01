@@ -4,15 +4,21 @@ import { Watcher } from './watcher'
 
 import {
   getAddressManager,
-  OVM_ETH_ADDRESS,
+
   l1Provider,
   l2Provider,
+
   bobl1Wallet,
   bobl2Wallet,
+
   alicel1Wallet,
   alicel2Wallet,
+
   katel1Wallet,
   katel2Wallet,
+
+  getL2ETHGateway,
+  getL1ETHGateway,
 } from './utils'
 
 import {
@@ -23,23 +29,24 @@ import {
   waitForXDomainTransaction,
 } from './watcher-utils'
 
+
 import { TransactionResponse } from '@ethersproject/providers'
 
 /// Helper class for instantiating a test environment with a funded account
 export class OptimismEnv {
   // L1 Contracts
   addressManager: Contract
-
-  l2ETHAddress: String
-
+  L1ETHGateway: Contract
   l1Messenger: Contract
+  l1MessengerAddress: String
+  ctc: Contract
+
+  l1Provider
+  l2Provider
+
+  // L2 Contracts
+  L2ETHGateway: Contract
   l2Messenger: Contract
-
-  L1StandardBridge: Contract
-  L2StandardBridge: Contract
-
-  l1Provider: any
-  l2Provider: any
 
   // The L1 <> L2 State watcher
   watcher: Watcher
@@ -57,11 +64,11 @@ export class OptimismEnv {
 
   constructor(args: any) {
     this.addressManager = args.addressManager
-    this.l2ETHAddress = args.l2ETHAddress
+    this.L1ETHGateway = args.L1ETHGateway
     this.l1Messenger = args.l1Messenger
+    this.l1MessengerAddress = args.l1MessengerAddress
+    this.L2ETHGateway = args.L2ETHGateway
     this.l2Messenger = args.l2Messenger
-    this.L1StandardBridge = args.L1StandardBridge,
-    this.L2StandardBridge = args.L2StandardBridge,
     this.watcher = args.watcher
     this.watcherFast = args.watcherFast
     this.bobl1Wallet = args.bobl1Wallet
@@ -72,45 +79,44 @@ export class OptimismEnv {
     this.katel2Wallet = args.katel2Wallet
     this.l1Provider = args.l1Provider
     this.l2Provider = args.l2Provider
+    this.ctc = args.ctc
   }
 
   static async new(): Promise<OptimismEnv> {
 
-    const addressManager = getAddressManager(bobl1Wallet)
-
-    const l2ETHAddress = OVM_ETH_ADDRESS;
+    const addressManager = await getAddressManager(bobl1Wallet)
 
     const watcher = await initWatcher(l1Provider, l2Provider, addressManager)
     const watcherFast = await initWatcherFast(l1Provider, l2Provider, addressManager)
+
+    const L1ETHGateway = await getL1ETHGateway(bobl1Wallet, addressManager)
+    const L2ETHGateway = getL2ETHGateway(bobl2Wallet)
 
     const l1Messenger = getContractFactory('iOVM_L1CrossDomainMessenger')
       .connect(bobl1Wallet)
       .attach(watcher.l1.messengerAddress)
 
+    const l1MessengerAddress = l1Messenger.address;
+
     const l2Messenger = getContractFactory('iOVM_L2CrossDomainMessenger')
       .connect(bobl2Wallet)
       .attach(watcher.l2.messengerAddress)
 
-    const L1StandardBridgeAddress = await addressManager.getAddress('Proxy__OVM_L1StandardBridge')
-    const L1StandardBridge = getContractFactory('OVM_L1StandardBridge')
+    const ctcAddress = await addressManager.getAddress(
+      'OVM_CanonicalTransactionChain'
+    )
+    const ctc = getContractFactory('OVM_CanonicalTransactionChain')
       .connect(bobl1Wallet)
-      .attach(L1StandardBridgeAddress)
-    
-    const L2StandardBridgeAddress = await L1StandardBridge.l2TokenBridge()
-    const L2StandardBridge = getContractFactory('OVM_L2StandardBridge')
-      .connect(bobl2Wallet)
-      .attach(L2StandardBridgeAddress)
+      .attach(ctcAddress)
 
     return new OptimismEnv({
       addressManager,
-
-      l2ETHAddress,
-
+      L1ETHGateway,
+      ctc,
       l1Messenger,
+      l1MessengerAddress,
+      L2ETHGateway,
       l2Messenger,
-
-      L1StandardBridge,
-      L2StandardBridge,
 
       watcher,
       watcherFast,
@@ -136,7 +142,7 @@ export class OptimismEnv {
     return waitForXDomainTransaction(this.watcher, tx, direction)
   }
 
-  async waitForXDomainTransactionFast(
+  async waitForXFastDomainTransaction(
     tx: Promise<TransactionResponse> | TransactionResponse,
     direction: Direction
   ): Promise<CrossDomainMessagePair> {
@@ -152,7 +158,7 @@ export class OptimismEnv {
      await this.watcher.getL2TransactionReceipt(xDomainMsgHash)
    }
 
-   async waitForRevertXDomainTransactionFast(
+   async waitForRevertXFastDomainTransaction(
     tx: Promise<TransactionResponse> | TransactionResponse,
     direction: Direction
   ) {
