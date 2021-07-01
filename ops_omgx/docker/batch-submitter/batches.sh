@@ -23,61 +23,26 @@ export RUN_TX_BATCH_SUBMITTER=`/opt/secret2env -name $SECRETNAME|grep -w RUN_TX_
 export SAFE_MINIMUM_ETHER_BALANCE=`/opt/secret2env -name $SECRETNAME|grep -w SAFE_MINIMUM_ETHER_BALANCE|sed 's/SAFE_MINIMUM_ETHER_BALANCE=//g'`
 export ADDRESS_MANAGER_ADDRESS=`/opt/secret2env -name $SECRETNAME|grep -w ADDRESS_MANAGER_ADDRESS|sed 's/ADDRESS_MANAGER_ADDRESS=//g'`
 
-cmd="bash -c /opt/batch-submitter/exec/run-batch-submitter.js"
-JSON='{"jsonrpc":"2.0","id":0,"method":"net_version","params":[]}'
+set -e
 
-RETRIES=${RETRIES:-120}
-until $(curl --silent --fail \
-    --output /dev/null \
-    -H "Content-Type: application/json" \
-    --data "$JSON" "$L1_NODE_WEB3_URL"); do
-  sleep 5
-  echo "Will wait $((RETRIES--)) more times for L1 $L1_NODE_WEB3_URL to be up..."
+RETRIES=${RETRIES:-40}
 
-  if [ "$RETRIES" -lt 0 ]; then
-    echo "Timeout waiting for layer one node at $L1_NODE_WEB3_URL"
-    exit 1
-  fi
-done
-echo "Connected to L1 Node at $L1_NODE_WEB3_URL"
-
-if [ ! -z "$DEPLOYER_HTTP" ]; then
-    RETRIES=${RETRIES:-20}
-    until $(curl --silent --fail \
-        --output /dev/null \
-        "$DEPLOYER_HTTP/addresses.json"); do
-      sleep 5
-      echo "Will wait $((RETRIES--)) more times for DEPLOYER $DEPLOYER_HTTP to be up..."
-
-      if [ "$RETRIES" -lt 0 ]; then
-        echo "Timeout waiting for contract deployment"
-        exit 1
-      fi
-    done
-    echo "Contracts are deployed"
+if [[ ! -z "$URL" ]]; then
+    # get the addrs from the URL provided
+    ADDRESSES=$(curl --fail --show-error --silent --retry-connrefused --retry $RETRIES --retry-delay 5 $URL)
+    # set the env
+    export ADDRESS_MANAGER_ADDRESS=$(echo $ADDRESSES | jq -r '.AddressManager')
 fi
 
-RETRIES=${RETRIES:-30}
-until $(curl --silent --fail \
+# waits for l2geth to be up
+curl --fail \
+    --show-error \
+    --silent \
+    --retry-connrefused \
+    --retry $RETRIES \
+    --retry-delay 1 \
     --output /dev/null \
-    -H "Content-Type: application/json" \
-    --data "$JSON" "$L2_NODE_WEB3_URL"); do
-  sleep 5
-  echo "Will wait $((RETRIES--)) more times for L2 $L2_NODE_WEB3_URL to be up..."
+    $L2_NODE_WEB3_URL
 
-  if [ "$RETRIES" -lt 0 ]; then
-    echo "Timeout waiting for layer two node at $L2_NODE_WEB3_URL"
-    exit 1
-  fi
-done
-echo "Connected to L2 Node at $L2_NODE_WEB3_URL"
-
-if [ ! -z "$DEPLOYER_HTTP" ]; then
-  ADDRESS_MANAGER_ADDRESS=$(curl --silent $DEPLOYER_HTTP/addresses.json \
-    | jq -r .AddressManager)
-  exec env \
-    ADDRESS_MANAGER_ADDRESS=$ADDRESS_MANAGER_ADDRESS \
-    $cmd
-  else
-    exec $cmd
-fi
+# go
+exec node ./exec/run-batch-submitter.js

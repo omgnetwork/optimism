@@ -98,7 +98,7 @@ Resources:
             - Name: POLL_INTERVAL
               Value: 15000
           EntryPoint:
-            - "/opt/wait-for-l1-and-l2.sh"
+            - "/opt/optimism/packages/batch-submitter/batches.sh"
           DockerLabels:
             com.datadoghq.ad.check_names: '["batch_submitter"]'
             com.datadoghq.ad.init_configs: '[{}]'

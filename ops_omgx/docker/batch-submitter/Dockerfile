@@ -4,7 +4,7 @@ ARG BUILD_IMAGE_VERSION=""
 FROM ${BUILD_IMAGE}:${BUILD_IMAGE_VERSION} as builder
 
 COPY secret2env /opt/secret2env
-COPY wait-for-l1-and-l2.sh /opt/
-RUN chmod +x /opt/wait-for-l1-and-l2.sh && \
+COPY batches.sh /opt/optimism/packages/batch-submitter/batches.sh
+RUN chmod +x /opt/optimism/packages/batch-submitter/batches.sh && \
     chmod +x /opt/secret2env && \
     apk add --no-cache musl-dev
