@@ -18,7 +18,6 @@ import {
 
 import {
   initWatcher,
-  initWatcherFast,
   CrossDomainMessagePair,
   Direction,
   waitForXDomainTransaction,
@@ -66,7 +65,6 @@ export class OptimismEnv {
     this.L1StandardBridge = args.L1StandardBridge,
     this.L2StandardBridge = args.L2StandardBridge,
     this.watcher = args.watcher
-    this.watcherFast = args.watcherFast
     this.bobl1Wallet = args.bobl1Wallet
     this.bobl2Wallet = args.bobl2Wallet
     this.alicel1Wallet = args.alicel1Wallet
@@ -86,7 +84,6 @@ export class OptimismEnv {
     const l2ETHAddress = OVM_ETH_ADDRESS;
 
     const watcher = await initWatcher(l1Provider, l2Provider, addressManager)
-    const watcherFast = await initWatcherFast(l1Provider, l2Provider, addressManager)
 
     const l1Messenger = getContractFactory('iOVM_L1CrossDomainMessenger')
       .connect(bobl1Wallet)
@@ -119,7 +116,6 @@ export class OptimismEnv {
       L2StandardBridge,
 
       watcher,
-      watcherFast,
 
       bobl1Wallet,
       bobl2Wallet,
@@ -142,13 +138,6 @@ export class OptimismEnv {
     return waitForXDomainTransaction(this.watcher, tx, direction)
   }
 
-  async waitForXDomainTransactionFast(
-    tx: Promise<TransactionResponse> | TransactionResponse,
-    direction: Direction
-  ): Promise<CrossDomainMessagePair> {
-    return waitForXDomainTransaction(this.watcherFast, tx, direction)
-  }
-
   async waitForRevertXDomainTransaction(
      tx: Promise<TransactionResponse> | TransactionResponse,
      direction: Direction
@@ -158,12 +147,4 @@ export class OptimismEnv {
      await this.watcher.getL2TransactionReceipt(xDomainMsgHash)
    }
 
-   async waitForRevertXDomainTransactionFast(
-    tx: Promise<TransactionResponse> | TransactionResponse,
-    direction: Direction
-  ) {
-    const {remoteReceipt} = await waitForXDomainTransaction(this.watcherFast, tx, direction)
-    const [xDomainMsgHash] = await this.watcher.getMessageHashesFromL1Tx(remoteReceipt.transactionHash)
-    await this.watcher.getL2TransactionReceipt(xDomainMsgHash)
-  }
 }

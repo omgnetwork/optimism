@@ -12,8 +12,6 @@ import * as request from "request-promise-native";
 
 require('dotenv').config()
 
-//console.log(process.env)
-
 export const GWEI = BigNumber.from(0)
 
 // The hardhat instance
@@ -37,11 +35,13 @@ export const PROXY_SEQUENCER_ENTRYPOINT_ADDRESS = '0x420000000000000000000000000
 export const OVM_ETH_ADDRESS = '0x4200000000000000000000000000000000000006'
 export const Proxy__OVM_L2CrossDomainMessenger = '0x4200000000000000000000000000000000000007'
 
-//export const addressManagerAddress = process.env.ADDRESS_MANAGER_ADDRESS
-
-export let addressManagerAddress = process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
+process.env.URL = process.env.URL || 'http://127.0.0.1:8081/addresses.json'
+process.env.OMGX_URL = process.env.OMGX_URL || 'http://127.0.0.1:8078/addresses.json'
 export const DEPLOYER = process.env.URL
 export const OMGX_URL = process.env.OMGX_URL
+
+//export const addressManagerAddress = process.env.ADDRESS_MANAGER_ADDRESS
+export let addressManagerAddress = process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
 
 export const getAddressManager = async (provider: any) => {
    //console.log(addressManagerAddress)

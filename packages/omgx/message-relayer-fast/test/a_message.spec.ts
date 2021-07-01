@@ -40,8 +40,9 @@ describe('Fast Messenge Relayer Test', async () => {
 
     L1Message = await Factory__L1Message.deploy(
       env.l1Messenger.address,
-      env.l1MessengerFast.address
+      env.l1MessengerFast.address, /*THIS LINW IS CRITICAL*/
     )
+
     await L1Message.deployTransaction.wait()
     console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
 
@@ -66,21 +67,20 @@ describe('Fast Messenge Relayer Test', async () => {
     )
     await L2MessageTX.wait()
     console.log(`⭐️ ${chalk.blue('L2 Message initialized:')} ${chalk.green(L2MessageTX.hash)}`)
+  })
 
-    })
-
-    it('should send message from L1 to L2', async () => {
-      await env.waitForXDomainTransaction(
-        L1Message.sendMessageL1ToL2(),
-        Direction.L1ToL2
-      )
-    })
+  it('should send message from L1 to L2', async () => {
+    await env.waitForXDomainTransaction(
+      L1Message.sendMessageL1ToL2(),
+      Direction.L1ToL2
+    )
+  })
     
-    it('should QUICKLY send message from L2 to L1 using the fast relayer', async () => {
-    //   await env.waitForXDomainTransactionFast(
-    //     L2Message.sendMessageL2ToL1({ gasLimit: 800000, gasPrice: 0 }),
-    //     Direction.L2ToL1
-    //   )
-    })
+  it('should QUICKLY send message from L2 to L1 using the fast relayer', async () => {
+    // await env.waitForXDomainTransactionFast(
+    //   L2Message.sendMessageL2ToL1({ gasLimit: 800000, gasPrice: 0 }),
+    //   Direction.L2ToL1
+    // )
+  })
 
 })

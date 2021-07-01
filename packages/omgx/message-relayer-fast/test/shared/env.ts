@@ -45,6 +45,7 @@ export class OptimismEnv {
 
   constructor(args: any) {
     this.addressManager = args.addressManager
+    this.addressesOMGX = args.addressesOMGX
     this.l1Messenger = args.l1Messenger
     this.l1MessengerFast = args.l1MessengerFast
     this.l2Messenger = args.l2Messenger
@@ -80,11 +81,13 @@ export class OptimismEnv {
 
     return new OptimismEnv({
       addressManager,
+      addressesOMGX,
 
       l2ETHAddress,
 
       l1Messenger,
       l1MessengerFast,
+      
       l2Messenger,
 
       watcher,
