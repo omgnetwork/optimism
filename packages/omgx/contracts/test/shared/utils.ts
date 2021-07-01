@@ -1,11 +1,11 @@
 import * as request from "request-promise-native";
-import { getContractInterface, getContractFactory } from '@eth-optimism/contracts'
+import { getContractFactory } from './contract-defs';
 import {
-  Contract,
   Wallet,
   providers,
   BigNumber,
 } from 'ethers'
+
 require('dotenv').config()
 
 export const GWEI = BigNumber.from(0)
@@ -30,9 +30,10 @@ export const katel2Wallet = new Wallet(process.env.TEST_PRIVATE_KEY_3).connect(l
 export const PROXY_SEQUENCER_ENTRYPOINT_ADDRESS = '0x4200000000000000000000000000000000000004'
 export const OVM_ETH_ADDRESS = '0x4200000000000000000000000000000000000006'
 export const Proxy__OVM_L2CrossDomainMessenger = '0x4200000000000000000000000000000000000007'
+
 export let addressManagerAddress = process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
 export const DEPLOYER = process.env.URL
-export const WALLET_DEPLOYER = process.env.WALLET_URL
+export const OMGX_URL = process.env.OMGX_URL
 
 export const getAddressManager = async (provider: any) => {
   console.log(addressManagerAddress)
@@ -61,36 +62,11 @@ export const getDeployerAddresses = async () => {
 
 export const getWalletDeployerAddresses = async () => {
   var options = {
-      uri: WALLET_DEPLOYER,
+      uri: OMGX_URL,
   };
 
   const result = await request.get(options);
   return JSON.parse(result)
 }
-
-// Gets the gateway using the proxy if available
-export const getL1ETHGateway = async (wallet: Wallet, AddressManager: Contract) => {
-
-  const l1GatewayInterface = getContractInterface('OVM_L1ETHGateway')
-  const ProxyGatewayAddress = await AddressManager.getAddress('Proxy__OVM_L1ETHGateway')
-
-  const L1ETHGateway = new Contract(
-    ProxyGatewayAddress,
-    l1GatewayInterface as any,
-    wallet
-  )
-
-  return L1ETHGateway
-}
-
-export const getL2ETHGateway = (wallet: Wallet) => {
-  const OVM_ETH = new Contract(
-    OVM_ETH_ADDRESS,
-    getContractInterface('OVM_ETH') as any,
-    wallet
-  )
-  return OVM_ETH
-}
-
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))

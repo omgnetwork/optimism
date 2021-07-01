@@ -2,6 +2,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
 import { Contract, ContractFactory, utils } from 'ethers'
+import chalk from 'chalk';
 
 import { Direction } from './shared/watcher-utils'
 
@@ -12,7 +13,7 @@ import { OptimismEnv } from './shared/env'
 
 import * as fs from 'fs'
 
-describe('Messenge Relayer Test', async () => {
+describe('Default Messenge Relayer Test', async () => {
 
   let L1Message: Contract
   let L2Message: Contract
@@ -39,9 +40,9 @@ describe('Messenge Relayer Test', async () => {
     )
 
   })
-
+  
   it('should send message from L2 to L1', async () => {
-    await env.waitForXFastDomainTransaction(
+    await env.waitForXDomainTransactionFast(
       L2Message.sendMessageL2ToL1({ gasLimit: 800000, gasPrice: 0 }),
       Direction.L2ToL1
     )

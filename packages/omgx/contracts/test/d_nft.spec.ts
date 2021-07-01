@@ -127,7 +127,6 @@ describe('NFT Test\n', async () => {
 
     //it('returns the amount of tokens owned by the given address', async function () {
     expect(await L2ERC721.balanceOf(owner)).to.deep.eq(BigNumber.from(String(0)));
-    //});
 
     // Token 1 should be owned by recipient
     expect(await L2ERC721.ownerOf(BigNumber.from(String(1)))).to.deep.eq(recipient);
