@@ -4,6 +4,7 @@ import { Watcher } from './watcher'
 
 import {
   getAddressManager,
+  getOMGXDeployerAddresses,
   OVM_ETH_ADDRESS,
   l1Provider,
   l2Provider,
@@ -25,6 +26,7 @@ export class OptimismEnv {
   
   // L1 Contracts
   addressManager: Contract
+  addressesOMGX
 
   l1Messenger: Contract
   l1MessengerFast: Contract
@@ -56,7 +58,8 @@ export class OptimismEnv {
 
   static async new(): Promise<OptimismEnv> {
 
-    const addressManager = getAddressManager(bobl1Wallet)
+    const addressManager = await getAddressManager(bobl1Wallet)
+    const addressesOMGX = await getOMGXDeployerAddresses()
 
     const l2ETHAddress = OVM_ETH_ADDRESS;
 

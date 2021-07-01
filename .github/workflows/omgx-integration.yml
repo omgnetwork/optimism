@@ -98,6 +98,8 @@ jobs:
       #     yarn test:integration:ovm
       #     yarn deploy:ovm
 
+      # http://omgx_deployer:8079/addresses.json
+
       - name: Test serving OMGX contracts
         working-directory: ./
         run: |
@@ -121,8 +123,13 @@ jobs:
             exit 1
           fi
 
-      - name: Function test the OMGX contracts
+      - name: Test the base OMGX contracts
         working-directory: ./packages/omgx/contracts
+        run: |
+          yarn test:integration
+
+      - name: Test the message-relayer-fast
+        working-directory: ./packages/omgx/message-relayer-fast
         run: |
           yarn test:integration
 

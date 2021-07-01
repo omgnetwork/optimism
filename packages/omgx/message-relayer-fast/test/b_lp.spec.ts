@@ -6,13 +6,12 @@ import { Contract, BigNumber, utils, ethers } from 'ethers'
 import { Direction } from './shared/watcher-utils'
 import { getContractFactory } from '@eth-optimism/contracts';
 
+/*
 import L1ERC20Json from '../artifacts/contracts/L1ERC20.sol/L1ERC20.json'
-
 import L1LiquidityPoolJson from '../artifacts/contracts/LP/L1LiquidityPool.sol/L1LiquidityPool.json'
 import L2LiquidityPoolJson from '../artifacts-ovm/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
-
 import L2TokenPoolJson from '../artifacts-ovm/contracts/TokenPool.sol/TokenPool.json'
-
+*/
 import { OptimismEnv } from './shared/env'
 
 import * as fs from 'fs'
@@ -37,39 +36,39 @@ describe('Liquidity Pool Test', async () => {
     //const addressArray = await getOMGXDeployerAddresses();
     env = await OptimismEnv.new()
 
-    console.log(env.addressesOMGX)
+    // console.log(env.addressesOMGX)
 
-    L1LiquidityPool = new Contract(
-      env.addressesOMGX.L1LiquidityPool,
-      L1LiquidityPoolJson.abi,
-      env.bobl1Wallet
-    )
+    // L1LiquidityPool = new Contract(
+    //   env.addressesOMGX.L1LiquidityPool,
+    //   L1LiquidityPoolJson.abi,
+    //   env.bobl1Wallet
+    // )
 
-    L2LiquidityPool = new Contract(
-      env.addressesOMGX.L2LiquidityPool,
-      L2LiquidityPoolJson.abi,
-      env.bobl2Wallet
-    )
+    // L2LiquidityPool = new Contract(
+    //   env.addressesOMGX.L2LiquidityPool,
+    //   L2LiquidityPoolJson.abi,
+    //   env.bobl2Wallet
+    // )
 
-    L1ERC20 = new Contract(
-      env.addressesOMGX.L1ERC20,
-      L1ERC20Json.abi,
-      env.bobl1Wallet
-    )
+    // L1ERC20 = new Contract(
+    //   env.addressesOMGX.L1ERC20,
+    //   L1ERC20Json.abi,
+    //   env.bobl1Wallet
+    // )
 
-    L2ERC20 = getContractFactory(
-      "L2StandardERC20",
-      env.bobl2Wallet,
-      true,
-    ).attach(env.addressesOMGX.L2ERC20)
+    // L2ERC20 = getContractFactory(
+    //   "L2StandardERC20",
+    //   env.bobl2Wallet,
+    //   true,
+    // ).attach(env.addressesOMGX.L2ERC20)
 
-    L1StandardBridge = env.L1StandardBridge
+    // L1StandardBridge = env.L1StandardBridge
 
-    L2TokenPool = new Contract(
-      env.addressesOMGX.L2TokenPool,
-      L2TokenPoolJson.abi,
-      env.bobl2Wallet,
-    )
+    // L2TokenPool = new Contract(
+    //   env.addressesOMGX.L2TokenPool,
+    //   L2TokenPoolJson.abi,
+    //   env.bobl2Wallet,
+    // )
   })
 
   it('should deposit ERC20 token to L2', async () => {
