@@ -45,12 +45,21 @@ jobs:
           BUILD_DEPS: 0
         run: |
           set -xe
-          for i in $(docker images --format "{{.Repository}}:{{.Tag}}" | grep omgx); do
+          mkdir ~/docker/
+          for i in $(docker images --format "{{.Repository}}:{{.Tag}}"); do
             NAME=$(echo $i | sed 's,/,_,g' | sed 's,:,_,g')
             EXPORT_PATH="~/docker/"$NAME".tar"
             EXPORT_PATH=${EXPORT_PATH/\~/$HOME}
             echo $EXPORT_PATH
-            docker save -o $EXPORT_PATH $i
+            docker save -o $EXPORT_PATH $i &
+            pids[index]=$!
+            ((index=index+1))
+            echo $!
+          done
+          # wait for all pids
+          for pid in ${pids[*]}; do
+            wait $pid
+            echo 'Done waiting for '$pid
           done
 
       - name: Upload built containers
