@@ -61,7 +61,7 @@ export const getAddressManager = async (provider: any) => {
 
 export const getDeployerAddresses = async () => {
    var options = {
-       uri: DEPLOYER,
+       uri: 'http://127.0.0.1:8081/addresses.json' //DEPLOYER,
    }
    const result = await request.get(options)
    return JSON.parse(result)
@@ -69,7 +69,7 @@ export const getDeployerAddresses = async () => {
 
  export const getOMGXDeployerAddresses = async () => {
    var options = {
-       uri: OMGX_URL,
+       uri: 'http://127.0.0.1:8078/addresses.json' //OMGX_URL,
    }
    const result = await request.get(options)
    return JSON.parse(result)

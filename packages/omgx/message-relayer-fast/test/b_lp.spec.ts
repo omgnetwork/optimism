@@ -30,10 +30,6 @@ describe('Liquidity Pool Test', async () => {
   /************* BOB owns all the pools, and ALICE mints a new token ***********/
   before(async () => {
 
-    //const addressData = fs.readFileSync('./deployment/local/addresses.json', 'utf8')
-    //const addressArray = JSON.parse(addressData)
-
-    //const addressArray = await getOMGXDeployerAddresses();
     env = await OptimismEnv.new()
 
     // console.log(env.addressesOMGX)
