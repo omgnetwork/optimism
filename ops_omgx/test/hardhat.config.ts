@@ -1,6 +1,5 @@
 import { HardhatUserConfig } from 'hardhat/types'
 import '@nomiclabs/hardhat-ethers'
-import '@nomiclabs/hardhat-waffle'
 import '@eth-optimism/hardhat-ovm'
 
 const config: HardhatUserConfig = {

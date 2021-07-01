@@ -2,10 +2,10 @@
 pragma solidity >0.5.0;
 
 /* Library Imports */
-import "../libraries/OVM_FastCrossDomainEnabled.sol";
+import "../libraries/OVM_CrossDomainEnabledFast.sol";
 import { L2Message } from "./L2Message.sol";
 
-contract L1Message is OVM_FastCrossDomainEnabled {
+contract L1Message is OVM_CrossDomainEnabledFast {
 
     address L2MessageAddress;
     string crossDomainMessage;
@@ -16,21 +16,21 @@ contract L1Message is OVM_FastCrossDomainEnabled {
 
     /********************
      *    Constructor   *
-     ********************/    
+     ********************/
     constructor (
         address _l1CrossDomainMessenger,
         address _l1CustomCrossDomainMessenger
     )
-        OVM_FastCrossDomainEnabled(
-            _l1CrossDomainMessenger, 
+        OVM_CrossDomainEnabledFast(
+            _l1CrossDomainMessenger,
             _l1CustomCrossDomainMessenger
         )
     {}
 
     function init (
        address _L2MessageAddress
-    ) 
-       public 
+    )
+       public
     {
        L2MessageAddress = _L2MessageAddress;
     }
@@ -44,8 +44,8 @@ contract L1Message is OVM_FastCrossDomainEnabled {
         // Send calldata into L1
         sendCrossDomainMessage(
             address(L2MessageAddress),
-            data,
-            1200000
+            1200000,
+            data
         );
     }
 
@@ -62,7 +62,7 @@ contract L1Message is OVM_FastCrossDomainEnabled {
     )
         external
         onlyFromCrossDomainAccount(address(L2MessageAddress))
-    {   
+    {
         crossDomainMessage = _message;
         emit ReceiveL2Message(_message);
     }

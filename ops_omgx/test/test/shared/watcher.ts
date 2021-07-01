@@ -88,11 +88,11 @@ export class Watcher {
     const startingBlock = Math.max(blockNumber - this.NUM_BLOCKS_TO_FETCH, 0)
 
 
-    console.log("Layer:", layer)
+    // console.log("Layer:", layer)
 
-    console.log("Address:", layer.messengerAddress)
-    console.log("topic:", ethers.utils.id(`RelayedMessage(bytes32)`))
-    console.log("fromBlock:", startingBlock)
+    // console.log("Address:", layer.messengerAddress)
+    // console.log("topic:", ethers.utils.id(`RelayedMessage(bytes32)`))
+    // console.log("fromBlock:", startingBlock)
 
     const filter = {
       address: layer.messengerAddress,
@@ -101,8 +101,8 @@ export class Watcher {
     }
 
     const logs = await layer.provider.getLogs(filter)
-    console.log("Looking for:", msgHash)
-    console.log("Current logs:", logs)
+    // console.log("Looking for:", msgHash)
+    // console.log("Current logs:", logs)
 
     const matches = logs.filter((log: any) => log.data === msgHash)
 
