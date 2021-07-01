@@ -26,6 +26,7 @@ export ADDRESS_MANAGER_ADDRESS=`/opt/secret2env -name $SECRETNAME|grep -w ADDRES
 set -e
 
 RETRIES=${RETRIES:-40}
+JSON='{"jsonrpc":"2.0","id":0,"method":"net_version","params":[]}'
 
 if [[ ! -z "$URL" ]]; then
     # get the addrs from the URL provided
@@ -35,14 +36,13 @@ if [[ ! -z "$URL" ]]; then
 fi
 
 # waits for l2geth to be up
-curl --fail \
-    --show-error \
-    --silent \
-    --retry-connrefused \
+curl --silent --fail \
+    --output /dev/null \
+    -retry-connrefused \
     --retry $RETRIES \
     --retry-delay 1 \
-    --output /dev/null \
-    $L2_NODE_WEB3_URL
+    -H "Content-Type: application/json" \
+    --data "$JSON" "$L2_NODE_WEB3_URL"
 
 # go
 exec node ./exec/run-batch-submitter.js
