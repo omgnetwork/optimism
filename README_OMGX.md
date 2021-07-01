@@ -7,30 +7,7 @@
     + [Running unit tests](#running-unit-tests)
     + [Running integration tests](#running-integration-tests)
 
-# Starting a local basic Optimism L1/L2 with OMGX contracts and services
-
-You can change the BUILD and DAEMON values to control if everything is rebuilt (`BUILD=1`, very slow), and if you want to see all the debug information (`DAEMON=0`)
-
-```
-$ cd ops
-$ BUILD=1 DAEMON=0 ./up_local.sh
-```
-
-## Starting a local basic Optimism L1/L2
-
-You can change the BUILD and DAEMON values to control if everything is rebuilt (`BUILD=1`, very slow), and if you want to see all the debug information (`DAEMON=0`)
-
-```bash
-cd ops
-export COMPOSE_DOCKER_CLI_BUILD=1 # these environment variables significantly speed up build time
-export DOCKER_BUILDKIT=1
-docker-compose build 
-docker-compose up -V
-```
-
-The `-V` setting is critical, since otherwise your Docker images may have stale information in them from previous runs, which will confuse the `data-transport-layer`, among other things. 
-
-### Overall Setup
+# Overall Setup
 
 Clone the repository, open it, and install nodejs packages with `yarn`:
 
@@ -41,8 +18,29 @@ yarn clean
 yarn install
 yarn build
 ```
+With all this done we can move on to actually spinning up a local version of the Optimism L1/L2.
+  
+**NOTE: You should recompile all packages whenever you move from one  branch to another.**  
+Use the below commands to recompile the packages.
 
-Packages compiled when on one branch may not be compatible with packages on a different branch. **You should recompile all packages whenever you move from one branch to another.** Use the below commands to recompile the packages.
+## Starting a local basic Optimism L1/L2
+
+You can change the BUILD and DAEMON values to control if everything is rebuilt (`BUILD=1`, very slow), and if you want to see all the debug information (`DAEMON=0`)
+
+**Before running any Docker related commands make sure you have Docker up and running.**
+
+
+```bash
+cd ops
+export COMPOSE_DOCKER_CLI_BUILD=1 # these environment variables significantly speed up build time
+export DOCKER_BUILDKIT=1
+docker-compose build 
+docker-compose up -V
+```
+
+If you run into issues errors when running `docker-compose build` restart Docker before trying anything else. 
+
+The `-V` setting is critical, since otherwise your Docker images may have stale information in them from previous runs, which will confuse the `data-transport-layer`, among other things. 
 
 ## (Re)Building the entire system or parts of the base L1/L2
 
@@ -106,7 +104,7 @@ To build individual OMGX services:
 docker-compose -f "docker-compose-omgx-services.yml" build -- omgx_message-relayer-fast
 ```
 
-Note: First you will have to comment out various dependencies in the `docker-compose-omgx-services.yml`.
+**Note: First you will have to comment out various dependencies in the `docker-compose-omgx-services.yml`.**
 
 #### Viewing docker container logs
 
@@ -181,7 +179,3 @@ REACT_APP_SELLER_OPTIMISM_API_URL=https://pm7f0dp9ud.execute-api.us-west-1.amazo
 REACT_APP_SERVICE_OPTIMISM_API_URL=https://zlba6djrv6.execute-api.us-west-1.amazonaws.com/prod/
 REACT_APP_WEBSOCKET_API_URL=wss://d1cj5xnal2.execute-api.us-west-1.amazonaws.com/prod
 ```
-
-
-
-
