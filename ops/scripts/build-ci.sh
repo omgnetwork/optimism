@@ -10,6 +10,10 @@ function build_dependencies() {
 }
 
 build_images &
-build_dependencies &
+if [[ $BUILD_DEPS == 0 ]]; then
+  echo 'Skipping building deps'
+else
+  build_dependencies &
+fi
 
 wait
