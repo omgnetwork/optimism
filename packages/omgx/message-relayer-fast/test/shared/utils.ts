@@ -27,10 +27,12 @@ export const PROXY_SEQUENCER_ENTRYPOINT_ADDRESS = '0x420000000000000000000000000
 export const OVM_ETH_ADDRESS = '0x4200000000000000000000000000000000000006'
 export const Proxy__OVM_L2CrossDomainMessenger = '0x4200000000000000000000000000000000000007'
 
-export let addressManagerAddress = process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
+process.env.URL = process.env.URL || 'http://127.0.0.1:8081/addresses.json'
+process.env.OMGX_URL = process.env.OMGX_URL || 'http://127.0.0.1:8078/addresses.json'
 export const DEPLOYER = process.env.URL
 export const OMGX_URL = process.env.OMGX_URL
 
+export let addressManagerAddress = process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
 export const getAddressManager = async (provider: any) => {
    //console.log(addressManagerAddress)
    if (addressManagerAddress){
@@ -49,7 +51,7 @@ export const getAddressManager = async (provider: any) => {
 
 export const getDeployerAddresses = async () => {
    var options = {
-       uri: DEPLOYER,
+       uri: 'http://127.0.0.1:8081/addresses.json' //DEPLOYER,
    }
    const result = await request.get(options)
    return JSON.parse(result)
@@ -57,7 +59,7 @@ export const getDeployerAddresses = async () => {
 
  export const getOMGXDeployerAddresses = async () => {
    var options = {
-       uri: OMGX_URL,
+       uri: 'http://127.0.0.1:8078/addresses.json' //OMGX_URL,
    }
    const result = await request.get(options)
    return JSON.parse(result)
