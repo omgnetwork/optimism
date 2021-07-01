@@ -8,6 +8,8 @@ import {
   BigNumber,
 } from 'ethers'
 
+import * as request from "request-promise-native";
+
 require('dotenv').config()
 
 //console.log(process.env)
@@ -35,12 +37,42 @@ export const PROXY_SEQUENCER_ENTRYPOINT_ADDRESS = '0x420000000000000000000000000
 export const OVM_ETH_ADDRESS = '0x4200000000000000000000000000000000000006'
 export const Proxy__OVM_L2CrossDomainMessenger = '0x4200000000000000000000000000000000000007'
 
-export const addressManagerAddress = process.env.ADDRESS_MANAGER_ADDRESS
+//export const addressManagerAddress = process.env.ADDRESS_MANAGER_ADDRESS
 
-export const getAddressManager = (provider: any) => {
-  return getContractFactory('Lib_AddressManager')
+export let addressManagerAddress = process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
+export const DEPLOYER = process.env.URL
+export const OMGX_URL = process.env.OMGX_URL
+
+export const getAddressManager = async (provider: any) => {
+   //console.log(addressManagerAddress)
+   if (addressManagerAddress){
+     console.log(`ETH1_ADDRESS_RESOLVER_ADDRESS var was set`)
+     return getContractFactory('Lib_AddressManager')
     .connect(provider)
     .attach(addressManagerAddress) as any
+   } else {
+     console.log(`ETH1_ADDRESS_RESOLVER_ADDRESS var was left unset. Using {$DEPLOYER} response`)
+     addressManagerAddress = (await getDeployerAddresses()).AddressManager
+     return getContractFactory('Lib_AddressManager')
+     .connect(provider)
+     .attach(addressManagerAddress) as any
+  }
+}
+
+export const getDeployerAddresses = async () => {
+   var options = {
+       uri: DEPLOYER,
+   }
+   const result = await request.get(options)
+   return JSON.parse(result)
+ }
+
+ export const getOMGXDeployerAddresses = async () => {
+   var options = {
+       uri: OMGX_URL,
+   }
+   const result = await request.get(options)
+   return JSON.parse(result)
 }
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))

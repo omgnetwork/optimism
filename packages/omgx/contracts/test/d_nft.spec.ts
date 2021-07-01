@@ -12,72 +12,7 @@ import * as fs from 'fs'
 
 describe('NFT Test\n', async () => {
 
-  // let Factory__L2ERC721: ContractFactory
-  // let L2ERC721: Contract
-
-  // let env: OptimismEnv
-
-  // const nftName = 'TestNFT'
-  // const nftSymbol = 'TST'
-
-  // ************ BOB owns all the pools, and ALICE Mints a new token **********
-  // before(async () => {
-
-  //   env = await OptimismEnv.new()
-
-  //   Factory__L2ERC721 = new ContractFactory(
-  //     L2ERC721Json.abi,
-  //     L2ERC721Json.bytecode,
-  //     env.bobl2Wallet
-  //   )
-
-  })
-
-  before(async () => {
-
-    // // Mint a new NFT on L2
-    // // [nftSymbol, nftName]
-    // // this is owned by bobl1Wallet
-    // L2ERC721 = await Factory__L2ERC721.deploy(
-    //   nftSymbol,
-    //   nftName,
-    //   BigNumber.from(String(0)), //starting index for the tokenIDs
-    //   "", //the base URI is empty in this case
-    //   {gasLimit: 800000, gasPrice: 0}
-    // )
-    // await L2ERC721.deployTransaction.wait()
-    // console.log(` 🌕 ${chalk.red('NFT L2ERC721 deployed to:')} ${chalk.green(L2ERC721.address)}`)
-
-    // let owner = await L2ERC721.owner()
-    // console.log(` 🔒 ${chalk.red('ERC721 owner:')} ${chalk.green(owner)}`)
-  })
-
-  before(async () => {
-
-    // fs.readFile('./deployment/local/addresses.json', 'utf8' , (err, data) => {
-
-    //   if (err) {
-    //     console.error(err)
-    //     return
-    //   }
-
-    //   const addressArray = JSON.parse(data);
-
-    //   //this will either update or overwrite, depending, but either is fine
-    //   addressArray['L2ERC721'] = L2ERC721.address;
-
-    //   fs.writeFile('./deployment/local/addresses.json', JSON.stringify(addressArray, null, 2), err => {
-    //     if (err) {
-    //       console.log(` 🚨 ${chalk.red(`Error adding NFT address to file: ${err}`)}`)
-    //     } else {
-    //       console.log(` 📬 ${chalk.red('Successfully added NFT address to file')}`)
-    //     }
-    //   })
-    // })
-
-  })
-
-  it('should mint a new ERC721 and transfer it from Bob to Alice', async () => {
+  it('should mint an ERC721 and transfer it from Bob to Alice', async () => {
 
   //   const owner = env.bobl2Wallet.address;
   //   const recipient = env.alicel2Wallet.address;
@@ -133,6 +68,6 @@ describe('NFT Test\n', async () => {
 
   //   //And Token 50 should not exist (at this point)
   //   expect(L2ERC721.ownerOf(BigNumber.from(String(50)))).to.be.eventually.rejectedWith("ERC721: owner query for nonexistent token");
-  // })
+  })
 
 })

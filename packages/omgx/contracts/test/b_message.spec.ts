@@ -13,7 +13,7 @@ import { OptimismEnv } from './shared/env'
 
 import * as fs from 'fs'
 
-describe('Default Messenge Relayer Test', async () => {
+describe('Default Message Relayer Test', async () => {
 
   let Factory__L1Message: ContractFactory
   let Factory__L2Message: ContractFactory
@@ -24,9 +24,6 @@ describe('Default Messenge Relayer Test', async () => {
   let env: OptimismEnv
 
   before(async () => {
-
-    //const addressData = fs.readFileSync('./deployment/local/addresses.json', 'utf8')
-    //const addressArray = JSON.parse(addressData)
 
     env = await OptimismEnv.new()
 

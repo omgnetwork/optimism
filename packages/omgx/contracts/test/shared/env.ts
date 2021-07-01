@@ -4,6 +4,7 @@ import { Watcher } from './watcher'
 
 import {
   getAddressManager,
+  getOMGXDeployerAddresses,
   OVM_ETH_ADDRESS,
   l1Provider,
   l2Provider,
@@ -29,6 +30,7 @@ import { TransactionResponse } from '@ethersproject/providers'
 export class OptimismEnv {
   // L1 Contracts
   addressManager: Contract
+  addressesOMGX
 
   l2ETHAddress: String
 
@@ -57,6 +59,7 @@ export class OptimismEnv {
 
   constructor(args: any) {
     this.addressManager = args.addressManager
+    this.addressesOMGX = args.addressesOMGX
     this.l2ETHAddress = args.l2ETHAddress
     this.l1Messenger = args.l1Messenger
     this.l2Messenger = args.l2Messenger
@@ -76,7 +79,9 @@ export class OptimismEnv {
 
   static async new(): Promise<OptimismEnv> {
 
-    const addressManager = getAddressManager(bobl1Wallet)
+    const addressManager = await getAddressManager(bobl1Wallet)
+
+    const addressesOMGX = await getOMGXDeployerAddresses()
 
     const l2ETHAddress = OVM_ETH_ADDRESS;
 
@@ -103,6 +108,7 @@ export class OptimismEnv {
 
     return new OptimismEnv({
       addressManager,
+      addressesOMGX,
 
       l2ETHAddress,
 

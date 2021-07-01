@@ -31,25 +31,28 @@ describe('Liquidity Pool Test', async () => {
   /************* BOB owns all the pools, and ALICE mints a new token ***********/
   before(async () => {
 
-    const addressData = fs.readFileSync('./deployment/local/addresses.json', 'utf8')
-    const addressArray = JSON.parse(addressData)
+    //const addressData = fs.readFileSync('./deployment/local/addresses.json', 'utf8')
+    //const addressArray = JSON.parse(addressData)
 
+    //const addressArray = await getOMGXDeployerAddresses();
     env = await OptimismEnv.new()
 
+    console.log(env.addressesOMGX)
+
     L1LiquidityPool = new Contract(
-      addressArray.L1LiquidityPool,
+      env.addressesOMGX.L1LiquidityPool,
       L1LiquidityPoolJson.abi,
       env.bobl1Wallet
     )
 
     L2LiquidityPool = new Contract(
-      addressArray.L2LiquidityPool,
+      env.addressesOMGX.L2LiquidityPool,
       L2LiquidityPoolJson.abi,
       env.bobl2Wallet
     )
 
     L1ERC20 = new Contract(
-      addressArray.L1ERC20,
+      env.addressesOMGX.L1ERC20,
       L1ERC20Json.abi,
       env.bobl1Wallet
     )
@@ -58,18 +61,18 @@ describe('Liquidity Pool Test', async () => {
       "L2StandardERC20",
       env.bobl2Wallet,
       true,
-    ).attach(addressArray.L2ERC20)
+    ).attach(env.addressesOMGX.L2ERC20)
 
     L1StandardBridge = env.L1StandardBridge
 
     L2TokenPool = new Contract(
-      addressArray.L2TokenPool,
+      env.addressesOMGX.L2TokenPool,
       L2TokenPoolJson.abi,
       env.bobl2Wallet,
     )
   })
 
-  // it('should deposit ERC20 token to L2', async () => {
+  it('should deposit ERC20 token to L2', async () => {
 
   //   const depositL2ERC20Amount = utils.parseEther("10000");
 
@@ -103,9 +106,9 @@ describe('Liquidity Pool Test', async () => {
   //   expect(preL2ERC20Balance).to.deep.eq(
   //     postL2ERC20Balance.sub(depositL2ERC20Amount)
   //   )
-  // })
+  })
 
-  // it('should transfer ERC20 token to Alice and Kate', async () => {
+  it('should transfer ERC20 token to Alice and Kate', async () => {
 
   //   const transferL2ERC20Amount = utils.parseEther("150")
 
@@ -142,9 +145,9 @@ describe('Liquidity Pool Test', async () => {
   //   expect(preKateL2ERC20Balance).to.deep.eq(
   //     postKateL2ERC20Balance.sub(transferL2ERC20Amount)
   //   )
-  // })
+  })
 
-  // it('should add ERC20 token to token pool', async () => {
+  it('should add ERC20 token to token pool', async () => {
 
   //   const addL2TPAmount = utils.parseEther("1000")
 
@@ -165,9 +168,9 @@ describe('Liquidity Pool Test', async () => {
   //   const L2TPBalance = await L2ERC20.balanceOf(L2TokenPool.address)
 
   //   expect(L2TPBalance).to.deep.eq(addL2TPAmount)
-  // })
+  })
 
-  // it('should register L1 the pool', async () => {
+  it('should register L1 the pool', async () => {
 
   //   const registerPoolERC20TX = await L1LiquidityPool.registerPool(
   //     L1ERC20.address,
@@ -190,9 +193,9 @@ describe('Liquidity Pool Test', async () => {
 
   //   expect(poolETHInfo.l1TokenAddress).to.deep.eq("0x0000000000000000000000000000000000000000")
   //   expect(poolETHInfo.l2TokenAddress).to.deep.eq(env.l2ETHAddress)
-  // })
+  })
 
-  // it('should register L2 the pool', async () => {
+  it('should register L2 the pool', async () => {
 
   //   const registerPoolERC20TX = await L2LiquidityPool.registerPool(
   //     L1ERC20.address,
@@ -217,18 +220,18 @@ describe('Liquidity Pool Test', async () => {
 
   //   expect(poolETHInfo.l1TokenAddress).to.deep.eq("0x0000000000000000000000000000000000000000")
   //   expect(poolETHInfo.l2TokenAddress).to.deep.eq(env.l2ETHAddress)
-  // })
+  })
 
-  // it('shouldn\'t update the pool', async () => {
+  it('shouldn\'t update the pool', async () => {
   //   const registerPoolTX = await L2LiquidityPool.registerPool(
   //     L1ERC20.address,
   //     L2ERC20.address,
   //     {gasLimit: 800000, gasPrice: 0}
   //   )
   //   await expect(registerPoolTX.wait()).to.be.eventually.rejected;
-  // })
+  })
 
-  // it('should add L1 liquidity', async () => {
+  it('should add L1 liquidity', async () => {
   //   const addLiquidityAmount = utils.parseEther("100")
 
   //   const preBobL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
@@ -256,9 +259,9 @@ describe('Liquidity Pool Test', async () => {
   //   const L1LPERC20Balance = await L1ERC20.balanceOf(L1LiquidityPool.address)
 
   //   expect(L1LPERC20Balance).to.deep.eq(addLiquidityAmount)
-  // })
+  })
 
-  // it('should add L2 liquidity', async () => {
+  it('should add L2 liquidity', async () => {
 
   //   const addLiquidityAmount = utils.parseEther("100")
 
@@ -315,9 +318,9 @@ describe('Liquidity Pool Test', async () => {
   //   const L2LPERC20Balance = await L2ERC20.balanceOf(L2LiquidityPool.address)
 
   //   expect(L2LPERC20Balance).to.deep.eq(addLiquidityAmount.mul(2))
-  // })
+  })
 
-  // it("should fast exit L2", async () => {
+  it("should fast exit L2", async () => {
 
   //   const fastExitAmount = utils.parseEther("10")
 
@@ -373,9 +376,9 @@ describe('Liquidity Pool Test', async () => {
   //   expect(updatedPoolInfo.accUserRewardPerShare).to.deep.eq(
   //     (fastExitAmount.mul(35).div(1000)).mul(BigNumber.from(10).pow(12)).div(poolInfo.userDepositAmount)
   //   )
-  // })
+  })
 
-  // it("should withdraw liquidity", async () => {
+  it("should withdraw liquidity", async () => {
 
   //   const withdrawAmount = utils.parseEther("10")
 
@@ -406,9 +409,9 @@ describe('Liquidity Pool Test', async () => {
   //   expect(postBobUserInfo.pendingReward).to.deep.eq(
   //     preBobUserInfo.amount.mul(poolInfo.accUserRewardPerShare).div(BigNumber.from(10).pow(12))
   //   )
-  // })
+  })
 
-  // it("shouldn't withdraw liquidity", async () => {
+  it("shouldn't withdraw liquidity", async () => {
   //   const withdrawAmount = utils.parseEther("100")
 
   //   const withdrawTX = await L2LiquidityPool.withdrawLiquidity(
@@ -418,9 +421,9 @@ describe('Liquidity Pool Test', async () => {
   //     {gasLimit: 800000, gasPrice: 0}
   //   )
   //   await expect(withdrawTX.wait()).to.be.eventually.rejected;
-  // })
+  })
 
-  // it("should withdraw reward", async () => {
+  it("should withdraw reward", async () => {
   //   const preL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
   //   const preBobUserInfo = await L2LiquidityPool.userInfo(L2ERC20.address, env.bobl2Wallet.address)
   //   const pendingReward = BigNumber.from(preBobUserInfo.pendingReward).div(2)
@@ -442,9 +445,9 @@ describe('Liquidity Pool Test', async () => {
 
   //   expect(postBobUserInfo.pendingReward).to.deep.eq(preBobUserInfo.pendingReward.sub(pendingReward))
   //   expect(preL2ERC20Balance).to.deep.eq(postL2ERC20Balance.sub(pendingReward))
-  // })
+  })
 
-  // it("shouldn't withdraw reward", async () => {
+  it("shouldn't withdraw reward", async () => {
   //   const withdrawRewardAmount = utils.parseEther("100")
 
   //   const withdrawRewardTX = await L2LiquidityPool.withdrawReward(
@@ -454,9 +457,9 @@ describe('Liquidity Pool Test', async () => {
   //     {gasLimit: 800000, gasPrice: 0}
   //   )
   //   await expect(withdrawRewardTX.wait()).to.be.eventually.rejected;
-  // })
+  })
 
-  // it("should fast onramp", async () => {
+  it("should fast onramp", async () => {
   //   const depositAmount = utils.parseEther("10")
 
   //   const preL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
@@ -492,9 +495,9 @@ describe('Liquidity Pool Test', async () => {
   //   expect(prePoolInfo.accOwnerReward).to.deep.eq(
   //     postPoolInfo.accOwnerReward.sub(depositAmount.mul(15).div(1000))
   //   )
-  // })
+  })
 
-  // it("should revert unfulfillable swaps", async () => {
+  it("should revert unfulfillable swaps", async () => {
 
   //    const preBobL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
   //    const preBobL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
@@ -525,5 +528,5 @@ describe('Liquidity Pool Test', async () => {
 
   //    const exitFees = fastExitAmount.mul(50).div(1000)
   //    expect(postBobL2ERC20Balance).to.deep.eq(preBobL2ERC20Balance.sub(exitFees))
-  //  })
+   })
 })
