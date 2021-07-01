@@ -10,6 +10,8 @@ import {
 
 require('dotenv').config()
 
+//console.log(process.env)
+
 export const GWEI = BigNumber.from(0)
 
 // The hardhat instance

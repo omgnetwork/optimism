@@ -15,6 +15,9 @@ import * as fs from 'fs'
 
 describe('Default Messenge Relayer Test', async () => {
 
+  let Factory__L1Message: ContractFactory
+  let Factory__L2Message: ContractFactory
+
   let L1Message: Contract
   let L2Message: Contract
 
@@ -22,19 +25,61 @@ describe('Default Messenge Relayer Test', async () => {
 
   before(async () => {
 
-    const addressData = fs.readFileSync('./deployment/local/addresses.json', 'utf8')
-    const addressArray = JSON.parse(addressData)
+    //const addressData = fs.readFileSync('./deployment/local/addresses.json', 'utf8')
+    //const addressArray = JSON.parse(addressData)
 
     env = await OptimismEnv.new()
 
+    Factory__L1Message = new ContractFactory(
+      L1MessageJson.abi,
+      L1MessageJson.bytecode,
+      env.bobl1Wallet
+    )
+
+    Factory__L2Message = new ContractFactory(
+      L2MessageJson.abi,
+      L2MessageJson.bytecode,
+      env.bobl2Wallet
+    )
+
+    L1Message = await Factory__L1Message.deploy(
+      env.watcher.l1.messengerAddress,
+      env.watcher.l1.messengerAddress,
+    )
+    await L1Message.deployTransaction.wait()
+    console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
+
+    L2Message = await Factory__L2Message.deploy(
+      env.watcher.l2.messengerAddress,
+      {gasLimit: 800000, gasPrice: 0}
+    )
+    await L2Message.deployTransaction.wait()
+    console.log(`🌕 ${chalk.red('L2 Message deployed to:')} ${chalk.green(L2Message.address)}`)
+
+    // Initialize L1 message
+    const L1MessageTX = await L1Message.init(
+      L2Message.address
+    )
+    await L1MessageTX.wait()
+    console.log(`⭐️ ${chalk.blue('L1 Message initialized:')} ${chalk.green(L1MessageTX.hash)}`)
+
+    // Initialize L2 message
+    const L2MessageTX = await L2Message.init(
+      L1Message.address,
+      {gasLimit: 800000, gasPrice: 0}
+    )
+    await L2MessageTX.wait()
+    console.log(`⭐️ ${chalk.blue('L2 Message initialized:')} ${chalk.green(L2MessageTX.hash)}`)
+
+    
     L1Message = new Contract(
-      addressArray.L1Message,
+      L1Message.address,
       L1MessageJson.abi,
       env.bobl1Wallet
     )
 
     L2Message = new Contract(
-      addressArray.L2Message,
+      L2Message.address,
       L2MessageJson.abi,
       env.bobl2Wallet
     )
@@ -42,7 +87,7 @@ describe('Default Messenge Relayer Test', async () => {
   })
   
   it('should send message from L2 to L1', async () => {
-    await env.waitForXDomainTransactionFast(
+    await env.waitForXDomainTransaction(
       L2Message.sendMessageL2ToL1({ gasLimit: 800000, gasPrice: 0 }),
       Direction.L2ToL1
     )
