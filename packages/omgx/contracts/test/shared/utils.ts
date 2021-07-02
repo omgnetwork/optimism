@@ -14,9 +14,29 @@ require('dotenv').config()
 
 export const GWEI = BigNumber.from(0)
 
+http://localhost:9545
+
+if(!process.env.L1_NODE_WEB3_URL) {
+  console.log(`!!You did not set process.env.L1_NODE_WEB3_URL!!`)
+  console.log(`Setting to default value of http://localhost:9545`)
+} else {
+  console.log(`process.env.L1_NODE_WEB3_URL set to:`,process.env.L1_NODE_WEB3_URL)
+}
+
+export const L1_NODE_WEB3_URL = process.env.L1_NODE_WEB3_URL || 'http://localhost:9545'
+
+if(!process.env.L2_NODE_WEB3_URL) {
+  console.log(`!!You did not set process.env.L2_NODE_WEB3_URL!!`)
+  console.log(`Setting to default value of http://localhost:8545`)
+} else {
+  console.log(`process.env.L2_NODE_WEB3_URL set to:`,process.env.L2_NODE_WEB3_URL)
+}
+
+export const L2_NODE_WEB3_URL = process.env.L2_NODE_WEB3_URL || 'http://localhost:8545'
+
 // The hardhat instance
-export const l1Provider = new providers.JsonRpcProvider(process.env.L1_NODE_WEB3_URL)
-export const l2Provider = new providers.JsonRpcProvider(process.env.L2_NODE_WEB3_URL)
+export const l1Provider = new providers.JsonRpcProvider(L1_NODE_WEB3_URL)
+export const l2Provider = new providers.JsonRpcProvider(L2_NODE_WEB3_URL)
 
 // An account for testing which is funded on L1
 export const bobl1Wallet = new Wallet(process.env.TEST_PRIVATE_KEY_1,l1Provider)
