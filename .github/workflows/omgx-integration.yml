@@ -23,6 +23,8 @@ jobs:
         URL: http://127.0.0.1:8081/addresses.json
         OMGX_URL: http://127.0.0.1:8079/addresses.json
 
+# which one of these are right? 81 or 80
+#
     steps:
       # Monorepo tests
       - uses: actions/checkout@v2
@@ -42,7 +44,7 @@ jobs:
       - name: Install yq
         run: sudo snap install yq
 
-      - name: Bring the stack up + OMGX services
+      - name: Build the services, bring the stack up + OMGX services
         working-directory: ./ops
         env:
           BUILD: 1
@@ -55,6 +57,7 @@ jobs:
         run: docker-compose -f docker-compose.yml -f docker-compose-omgx-services.yml logs --follow &
 
       # - name: Test serving OMGX contracts
+      # this test jitters - in any case, later tests will fail if the OMGX_deployer does not come up
       #   working-directory: ./
       #   run: |
       #     RETRIES=60

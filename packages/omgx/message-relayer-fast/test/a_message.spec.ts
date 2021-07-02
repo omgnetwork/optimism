@@ -40,7 +40,7 @@ describe('Fast Messenge Relayer Test', async () => {
 
     L1Message = await Factory__L1Message.deploy(
       env.l1Messenger.address,
-      env.l1MessengerFast.address, /*THIS LINW IS CRITICAL*/
+      env.l1MessengerFast.address, /*THIS LINE IS CRITICAL*/
     )
 
     await L1Message.deployTransaction.wait()
