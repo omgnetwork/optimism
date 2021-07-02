@@ -40,10 +40,10 @@ describe('Messenge Relayer Test', async () => {
     )
 
   })
-  
+
   it('should send message from L2 to L1', async () => {
     await env.waitForXFastDomainTransaction(
-      L2Message.sendMessageL2ToL1({gasLimit: 999999, gasPrice: 0}),
+      L2Message.sendMessageL2ToL1({gasPrice: 0}),
       Direction.L2ToL1
     )
   })
