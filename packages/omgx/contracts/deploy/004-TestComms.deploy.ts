@@ -14,67 +14,63 @@ let L2Message: Contract
 
 const deployFn: DeployFunction = async (hre) => {
 
-/*
-This makes little sense here
-makes more sense in the context of the message-relayer-fast
-*/
 
-    // Factory__L1Message = new ContractFactory(
-    //   L1MessageJson.abi,
-    //   L1MessageJson.bytecode,
-    //   (hre as any).deployConfig.deployer_l1
-    // )
+    Factory__L1Message = new ContractFactory(
+      L1MessageJson.abi,
+      L1MessageJson.bytecode,
+      (hre as any).deployConfig.deployer_l1
+    )
 
-    // Factory__L2Message = new ContractFactory(
-    //   L2MessageJson.abi,
-    //   L2MessageJson.bytecode,
-    //   (hre as any).deployConfig.deployer_l2
-    // )
-    
-    // L1Message = await Factory__L1Message.deploy(
-    //   (hre as any).deployConfig.l1MessengerAddress,
-    //   /* ALERT - this code will need to be changed once the new message-relayer-fast is autodeployed */
-    //   /*Specifically, the second line will need to be replaced with (hre as any).deployConfig.l1MessengerFastAddress*/
-    //   (hre as any).deployConfig.l1MessengerAddress
-    // )
-    // await L1Message.deployTransaction.wait()
-    // const L1MessageDeploymentSubmission: DeploymentSubmission = {
-    //   ...L1Message,
-    //   receipt: L1Message.receipt,
-    //   address: L1Message.address,
-    //   abi: L1MessageJson.abi,
-    // };
-    // await hre.deployments.save('L1Message', L1MessageDeploymentSubmission)
-    // console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
+    Factory__L2Message = new ContractFactory(
+      L2MessageJson.abi,
+      L2MessageJson.bytecode,
+      (hre as any).deployConfig.deployer_l2
+    )
 
-    // L2Message = await Factory__L2Message.deploy(
-    //   (hre as any).deployConfig.l2MessengerAddress,
-    //   {gasLimit: 800000, gasPrice: 0}
-    // )
-    // await L2Message.deployTransaction.wait()
-    // const L2MessageDeploymentSubmission: DeploymentSubmission = {
-    //   ...L2Message,
-    //   receipt: L2Message.receipt,
-    //   address: L2Message.address,
-    //   abi: L2MessageJson.abi,
-    // };
-    // await hre.deployments.save('L2Message', L2MessageDeploymentSubmission)
-    // console.log(`🌕 ${chalk.red('L2 Message deployed to:')} ${chalk.green(L2Message.address)}`)
+    L1Message = await Factory__L1Message.deploy(
+      (hre as any).deployConfig.l1MessengerAddress,
+      /* ALERT - this code will need to be changed once the new message-relayer-fast is autodeployed */
+      /*Specifically, the second line will need to be replaced with (hre as any).deployConfig.l1MessengerFastAddress*/
+      (hre as any).deployConfig.l1MessengerAddress
+    )
+    await L1Message.deployTransaction.wait()
+    const L1MessageDeploymentSubmission: DeploymentSubmission = {
+      ...L1Message,
+      receipt: L1Message.receipt,
+      address: L1Message.address,
+      abi: L1MessageJson.abi,
+    };
+    await hre.deployments.save('L1Message', L1MessageDeploymentSubmission)
+    console.log(`🌕 ${chalk.red('L1 Message deployed to:')} ${chalk.green(L1Message.address)}`)
 
-    // // Initialize L1 message
-    // const L1MessageTX = await L1Message.init(
-    //   L2Message.address
-    // )
-    // await L1MessageTX.wait()
-    // console.log(`⭐️ ${chalk.blue('L1 Message initialized:')} ${chalk.green(L1MessageTX.hash)}`)
+    L2Message = await Factory__L2Message.deploy(
+      (hre as any).deployConfig.l2MessengerAddress,
+      {gasLimit: 800000, gasPrice: 0}
+    )
+    await L2Message.deployTransaction.wait()
+    const L2MessageDeploymentSubmission: DeploymentSubmission = {
+      ...L2Message,
+      receipt: L2Message.receipt,
+      address: L2Message.address,
+      abi: L2MessageJson.abi,
+    };
+    await hre.deployments.save('L2Message', L2MessageDeploymentSubmission)
+    console.log(`🌕 ${chalk.red('L2 Message deployed to:')} ${chalk.green(L2Message.address)}`)
 
-    // // Initialize L2 message
-    // const L2MessageTX = await L2Message.init(
-    //   L1Message.address,
-    //   {gasLimit: 800000, gasPrice: 0}
-    // )
-    // await L2MessageTX.wait()
-    // console.log(`⭐️ ${chalk.blue('L2 Message initialized:')} ${chalk.green(L2MessageTX.hash)}`)
+    // Initialize L1 message
+    const L1MessageTX = await L1Message.init(
+      L2Message.address
+    )
+    await L1MessageTX.wait()
+    console.log(`⭐️ ${chalk.blue('L1 Message initialized:')} ${chalk.green(L1MessageTX.hash)}`)
+
+    // Initialize L2 message
+    const L2MessageTX = await L2Message.init(
+      L1Message.address,
+      {gasLimit: 800000, gasPrice: 0}
+    )
+    await L2MessageTX.wait()
+    console.log(`⭐️ ${chalk.blue('L2 Message initialized:')} ${chalk.green(L2MessageTX.hash)}`)
 
 }
 
