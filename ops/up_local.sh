@@ -56,7 +56,6 @@ if [[ $BUILD == 1 ]]; then
     docker build ../ --file $DIR/docker/Dockerfile.omgx_monorepo --tag omgx/omgx_builder:latest
     docker build ../ --file $DIR/docker/Dockerfile.omgx_deployer --tag omgx/omgx_deployer:latest
     docker build ../ --file $DIR/docker/Dockerfile.omgx_message-relayer-fast --tag omgx/omgx_message-relayer-fast:latest
-    docker build ../ --file $DIR/docker/Dockerfile.omgx_bl-wl --tag omgx/omgx_bl-wl:latest
 else
     docker-compose -f $DIR/$DOCKERFILE -f $DIR/$OMGX_DOCKERFILE pull
 fi
