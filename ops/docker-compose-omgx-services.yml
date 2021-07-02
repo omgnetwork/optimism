@@ -63,7 +63,6 @@ services:
       - deployer
       - omgx_deployer
       - l2geth
-      - omgx_bl-wl
     image: omgx/omgx_message-relayer-fast
     build:
       context: ..
