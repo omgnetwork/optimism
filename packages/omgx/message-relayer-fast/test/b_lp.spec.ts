@@ -32,6 +32,19 @@ describe('Liquidity Pool Test', async () => {
 
     env = await OptimismEnv.new()
 
+    /****************************
+    //  * THIS NEEDS TO BE CHANGED/UPDATED TO TEST THE DEPLOYED CONTRACTS
+    //  * The addresses are at 
+
+    //  export const getOMGXDeployerAddresses = async () => {
+    //    var options = {
+    //        uri: OMGX_URL,
+    //    }
+    //    const result = await request.get(options)
+    //    return JSON.parse(result)
+    // }
+    *****************************/
+
     // console.log(env.addressesOMGX)
 
     // L1LiquidityPool = new Contract(

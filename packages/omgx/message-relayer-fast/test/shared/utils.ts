@@ -80,19 +80,19 @@ export const getAddressManager = async (provider: any) => {
 }
 
 export const getDeployerAddresses = async () => {
-   var options = {
-       uri: DEPLOYER,
-   }
-   const result = await request.get(options)
-   return JSON.parse(result)
+  var options = {
+    uri: DEPLOYER,
+  }
+  const result = await request.get(options)
+  return JSON.parse(result)
  }
 
- export const getOMGXDeployerAddresses = async () => {
-   var options = {
-       uri: OMGX_URL,
-   }
-   const result = await request.get(options)
-   return JSON.parse(result)
+export const getOMGXDeployerAddresses = async () => {
+  var options = {
+    uri: OMGX_URL,
+  }
+  const result = await request.get(options)
+  return JSON.parse(result)
 }
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
