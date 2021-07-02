@@ -99,6 +99,7 @@ const logBalance = (provider: WebSocketProvider, blockNumber: number, networkNam
         networkName: OMGXNetwork.L1,
         key: 'balance',
         data: {
+          poolAddress: l1PoolAddress,
           poolBalance: l1PoolBalance,
           relayerBalance: l1RelayerBalance,
           sequencerBalance: l1SequencerBalance,
@@ -112,6 +113,7 @@ const logBalance = (provider: WebSocketProvider, blockNumber: number, networkNam
         networkName: OMGXNetwork.L2,
         key: 'balance',
         data: {
+          poolAddress: l2PoolAddress,
           poolBalance: l2PoolBalance,
           gasPrice: l2GasPrice,
           blockNumber: l2BlockNumber,

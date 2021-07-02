@@ -10,7 +10,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-COPY entrypoint.sh /usr/local/bin/
+COPY ./dummy-transaction/entrypoint.sh /usr/local/bin/
 
 RUN chmod 755 /usr/src/app
 RUN chmod 755 /usr/local/bin/entrypoint.sh

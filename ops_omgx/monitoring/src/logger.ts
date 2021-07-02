@@ -1,4 +1,5 @@
 import { createLogger, format, transports } from 'winston'
+import _ from 'lodash'
 
 const colorizer = format.colorize()
 const alignColorsAndTime = format.combine(
@@ -11,8 +12,11 @@ const alignColorsAndTime = format.combine(
   format.metadata({ fillExcept: ['message', 'level', 'timestamp', 'label'] }),
   format.printf((info) => {
     const timestamp = colorizer.colorize(info.level, `[${info.level.toUpperCase()}] ${info.timestamp}:`)
-    const metadata = colorizer.colorize(info.level, info.metadata)
-    return `${timestamp} ${info.message}\n${metadata}`
+    if (!_.isEmpty(info.metadata)) {
+      const metadata = colorizer.colorize(info.level, info.metadata)
+      return `${timestamp} ${info.message}\n${metadata}`
+    }
+    return `${timestamp} ${info.message}`
   })
 )
 const production = format.combine(
