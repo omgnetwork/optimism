@@ -116,6 +116,8 @@ services:
       RETRIES: 60
       POLLING_INTERVAL: 500
       GET_LOGS_INTERVAL: 500
+      FILTER_ENDPOINT: http://omgx_deployer:8079/addresses.json #this will fail early, but then start to work when the omgx_deployer comes up
+      FILTER_POLLING_INTERVAL: 30000
 
   batch_submitter:
     depends_on:
