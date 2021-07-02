@@ -23,6 +23,16 @@ With all this done we can move on to actually spinning up a local version of the
 **NOTE: You should recompile all packages whenever you move from one  branch to another.**  
 Use the below commands to recompile the packages.
 
+<!-- Normally, after you have built the docker images once, all you have to do is to run:
+
+```bash
+$ BUILD=0 DAEMON=0 ./up_local.sh
+```
+
+and your computer will use the docker images you built earlier.  -->
+
+Note: _Running out of space on your Docker, or having other having hard to debug issues_? Try running `docker system prune -a --volumes` and then rebuild the images. 
+
 ## Starting a local basic Optimism L1/L2
 
 You can change the BUILD and DAEMON values to control if everything is rebuilt (`BUILD=1`, very slow), and if you want to see all the debug information (`DAEMON=0`)
@@ -142,19 +152,21 @@ yarn test:integration
 
 ## Front End Development
 
-Start a local L1/L2. You can change the BUILD and DAEMON values to control if everything is rebuilt (`BUILD=1`, very slow), and if you want to see all the debug information (`DAEMON=0`)
+Start a local L1/L2. 
+
+<!-- You can change the BUILD and DAEMON values to control if everything is rebuilt (`BUILD=1`, very slow), and if you want to see all the debug information (`DAEMON=0`) -->
 
 ```
 $ cd ops
-$ BUILD=1 DAEMON=1 ./up_local.sh
+$ BUILD=1 DAEMON=0 ./up_local.sh
 ```
 
-Typically, you will only have to build everything once, and after that, you can save time by setting `BUILD` to `0`:
+<!-- Typically, you will only have to build everything once, and after that, you can save time by setting `BUILD` to `0`:
 
 ```
 $ cd ops
 $ BUILD=0 DAEMON=1 ./up_local.sh
-```
+``` -->
 
 Then, open a second terminal window and navigate to `packages/omgx/wallet-frontend`, and run
 ```
