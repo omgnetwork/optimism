@@ -34,7 +34,7 @@ describe('Liquidity Pool Test', async () => {
 
     /****************************
     //  * THIS NEEDS TO BE CHANGED/UPDATED TO TEST THE DEPLOYED CONTRACTS
-    //  * The addresses are at 
+    //  * The addresses are at
 
     //  export const getOMGXDeployerAddresses = async () => {
     //    var options = {
@@ -351,32 +351,29 @@ describe('Liquidity Pool Test', async () => {
   //     Direction.L2ToL1
   //   )
 
-  //   const poolInfo = await L2LiquidityPool.poolInfo(L2ERC20.address)
+  //   const poolInfo = await L1LiquidityPool.poolInfo(L1ERC20.address)
 
   //   expect(poolInfo.accOwnerReward).to.deep.eq(fastExitAmount.mul(15).div(1000))
   //   expect(poolInfo.accUserReward).to.deep.eq(fastExitAmount.mul(35).div(1000))
-  //   expect(poolInfo.userDepositAmount).to.deep.eq(utils.parseEther("100").mul(2))
+  //   expect(poolInfo.userDepositAmount).to.deep.eq(utils.parseEther("100"))
 
   //   const postKateL1ERC20Balance = await L1ERC20.balanceOf(env.katel1Wallet.address)
 
   //   expect(postKateL1ERC20Balance).to.deep.eq(preKateL1ERC20Balance.add(fastExitAmount.mul(95).div(100)))
 
   //   // Update the user reward per share
-  //   const updateRewardPerShareTX = await L2LiquidityPool.updateUserRewardPerShare(
-  //     L2ERC20.address,
-  //     {gasLimit: 800000, gasPrice: 0}
+  //   const updateRewardPerShareTX = await L1LiquidityPool.updateUserRewardPerShare(
+  //     L1ERC20.address
   //   )
   //   await updateRewardPerShareTX.wait()
 
   //   // The user reward per share should be (10 * 0.035 / 200) * 10^12
-  //   const updateRewardPerShare = await L2LiquidityPool.updateUserRewardPerShare(
-  //     L2ERC20.address,
-  //     {gasLimit: 800000, gasPrice: 0}
+  //   const updateRewardPerShare = await L1LiquidityPool.updateUserRewardPerShare(
+  //     L1ERC20.address
   //   )
   //   await updateRewardPerShare.wait()
-  //   const updatedPoolInfo = await L2LiquidityPool.poolInfo(
-  //     L2ERC20.address,
-  //     {gasLimit: 800000, gasPrice: 0}
+  //   const updatedPoolInfo = await L1LiquidityPool.poolInfo(
+  //     L1ERC20.address
   //   )
 
   //   expect(updatedPoolInfo.lastAccUserReward).to.deep.eq(updatedPoolInfo.accUserReward)
@@ -472,7 +469,7 @@ describe('Liquidity Pool Test', async () => {
 
   //   const preL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
   //   const preL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
-  //   const prePoolInfo = await L1LiquidityPool.poolInfo(L1ERC20.address)
+  //   const prePoolInfo = await L2LiquidityPool.poolInfo(L2ERC20.address)
 
   //   const approveL1LPTX = await L1ERC20.approve(
   //     L1LiquidityPool.address,
@@ -490,7 +487,7 @@ describe('Liquidity Pool Test', async () => {
 
   //   const postL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
   //   const postL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
-  //   const postPoolInfo = await L1LiquidityPool.poolInfo(L1ERC20.address)
+  //   const postPoolInfo = await L2LiquidityPool.poolInfo(L2ERC20.address)
 
   //   expect(postL2ERC20Balance).to.deep.eq(preL2ERC20Balance.add(depositAmount.mul(95).div(100)))
 
