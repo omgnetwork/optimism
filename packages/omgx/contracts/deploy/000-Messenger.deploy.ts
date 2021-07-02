@@ -50,7 +50,7 @@ const deployFn: DeployFunction = async (hre) => {
       L1_Messenger.address,
       {gasLimit: 800000, gasPrice: 0}
     )
-    console.log(`⭐️ ${chalk.blue('Fast L1 Messager initialized:')} ${chalk.green(L1MessagerTXreg.hash)}`)
+    console.log(`⭐️ ${chalk.blue('Fast L1 Messager registered:')} ${chalk.green(L1MessagerTXreg.hash)}`)
 
 }
 
