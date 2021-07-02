@@ -13,7 +13,7 @@ const nftName = 'TestNFT'
 const nftSymbol = 'TST'
 
 const deployFn: DeployFunction = async (hre) => {
-    
+
     // If TEST env var is set to 1 we deploy these test contracts
     if (process.env.TEST == '1') {
 

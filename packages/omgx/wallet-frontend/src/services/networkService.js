@@ -51,9 +51,9 @@ import {
   _rinkebyAddressAxiosInstance as rinkebyAddressAxiosInstance,
 } from 'api/addressAxios'
 
-import L2ERC20Json from '../deployment/artifacts-ovm/contracts/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
-import L1StandardBridgeJson from '../../contracts/tokens/OVM_L1StandardBridge.sol/OVM_L1StandardBridge.json'
-import L2StandardBridgeJson from '../../contracts/tokens/OVM_L2StandardBridge.sol/OVM_L2StandardBridge.json'
+import L2ERC20Json from '../deployment/contracts/standards/L2StandardERC20.sol/L2StandardERC20.json'
+import L1StandardBridgeJson from '../deployment/contracts/tokens/OVM_L1StandardBridge.sol/OVM_L1StandardBridge.json'
+import L2StandardBridgeJson from '../deployment/contracts/tokens/OVM_L2StandardBridge.sol/OVM_L2StandardBridge.json'
 
 //All the current addresses
 const localAddresses = require(`../deployment/local/addresses.json`)
