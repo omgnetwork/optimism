@@ -54,10 +54,7 @@ The `-V` setting is critical, since otherwise your Docker images may have stale 
 
 ## (Re)Building the entire system or parts of the base L1/L2
 
-If you want to run an Optimistic Ethereum node OR **if you want to run the integration tests**, you'll need to build the rest of the system.
-
-If you want to make a change to a container, you'll need to take it down and rebuild it.
-For example, if you make a change in l2geth:
+If you want to run an Optimistic Ethereum node OR **if you want to run the integration tests**, you'll need to build the rest of the system. If you want to make a change to a container, you'll need to take it down and rebuild it. For example, if you make a change in l2geth:
 
 ```bash
 cd ops
@@ -66,8 +63,7 @@ docker-compose build -- l2geth
 docker-compose start l2geth
 ```
 
-For the typescript services, you'll need to rebuild the `builder` so that the compiled
-files are re-generated, and then your service, e.g. for the batch submitter
+For the typescript services, you'll need to rebuild the `builder` so that the compiled files are re-generated, and then your service, e.g. for the batch submitter:
 
 ```bash
 cd ops
@@ -76,8 +72,7 @@ docker-compose build -- builder batch_submitter
 docker-compose start batch_submitter
 ```
 
-Source code changes can have an impact on more than one container.
-**If you're unsure about which containers to rebuild, just rebuild them all**:
+Source code changes can have an impact on more than one container. **If you're unsure about which containers to rebuild, just rebuild them all**:
 
 ```bash
 cd ops

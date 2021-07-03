@@ -42,13 +42,16 @@ import { accDiv, accMul } from 'util/calculation'
 import { getAllNetworks } from 'util/networkName'
 
 import { ETHERSCAN_URL, OMGX_WATCHER_URL } from 'Settings'
+
 import etherScanInstance from 'api/etherScanAxios'
 import omgxWatcherAxiosInstance from 'api/omgxWatcherAxios'
 
 // TODO: Need to be making working with exact url data.
 import {
-  _localAddressAxiosInstance as localAddressAxiosInstance,
-  _rinkebyAddressAxiosInstance as rinkebyAddressAxiosInstance,
+  _addressLocalAxiosInstance as addressLocalAxiosInstance,
+  _addressLocalOMGXAxiosInstance as addressLocalOMGXAxiosInstance,
+  _addressRinkebyAxiosInstance as addressRinkebyAxiosInstance,
+  _addressRinkebyOMGXAxiosInstance as addressRinkebyOMGXAxiosInstance,
 } from 'api/addressAxios'
 
 import L2ERC20Json from '../deployment/contracts/standards/L2StandardERC20.sol/L2StandardERC20.json'
@@ -56,8 +59,57 @@ import L1StandardBridgeJson from '../deployment/contracts/tokens/OVM_L1StandardB
 import L2StandardBridgeJson from '../deployment/contracts/tokens/OVM_L2StandardBridge.sol/OVM_L2StandardBridge.json'
 
 //All the current addresses
-const localAddresses = require(`../deployment/local/addresses.json`)
-const rinkebyAddresses = require(`../deployment/rinkeby/addresses.json`)
+// const localAddresses = require(`../deployment/local/addresses.json`)
+// const rinkebyAddresses = require(`../deployment/rinkeby/addresses.json`)
+
+/*
+
+For
+
+L1MessengerAddress AKA Proxy__OVM_L1CrossDomainMessenger 
+L1StandardBridge AKA Proxy__OVM_L1StandardBridge
+
+Go here - note this is port 8080
+I already changed your addressAxiosInstance
+http://localhost:8080/addresses.json
+
+{  
+  ...
+  ...
+  "Proxy__OVM_L1CrossDomainMessenger": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+  "Proxy__OVM_L1StandardBridge": "0x851356ae760d987E095750cCeb3bC6014560891C",
+}
+
+
+*****************************************
+*****************************************
+
+For EVERYTHING ELSE, go here - note this is port 8078
+I already changed your addressOMGXAxiosInstance
+http://localhost:8078/addresses.json
+
+{
+  "OVM_L1CrossDomainMessengerFast": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
+  "L2LiquidityPool": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "L1LiquidityPool": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
+  "L1ERC20": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
+  "L2ERC20": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+  "L2TokenPool": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+  "L1Message": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
+  "L2Message": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+  "AtomicSwap": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+  "ERC721": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"
+}
+
+*****************************************
+*****************************************
+
+
+Note that the L2StandardBridge now has a fixed address, so can be hardcoded
+
+this.L2StandardBridgeAddress = '0x4200000000000000000000000000000000000010'
+
+*/
 
 class NetworkService {
   constructor() {
@@ -87,7 +139,7 @@ class NetworkService {
 
     // addresses
     this.L1StandardBridgeAddress = null
-    this.L2StandardBridgeAddress = null
+    this.L2StandardBridgeAddress = '0x4200000000000000000000000000000000000010'
     this.ERC721Address = null
     this.L1ERC20Address = null
     this.L2ERC20Address = null
@@ -308,6 +360,7 @@ class NetworkService {
         //console.log("Sorry, not the NFT owner")
         setMinter(false)
       }
+      
       //Fire up the new watcher
       //const addressManager = getAddressManager(bobl1Wallet)
       //const watcher = await initWatcher(L1Provider, this.L2Provider, addressManager)

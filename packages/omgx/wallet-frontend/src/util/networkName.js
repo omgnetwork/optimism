@@ -21,12 +21,16 @@ const NETWORKS = {
       name: "Local L1",
       chainId: 31337,
       rpcUrl: "http://" + window.location.hostname + ":9545",
+      addressUrl: "http://" + window.location.hostname + ":8080/addresses.json",
+      addressOMGXUrl: "http://" + window.location.hostname + ":8078/addresses.json",
       blockExplorer: "",
     },
     L2: {
       name: "Local L2",
       chainId: 28,
       rpcUrl: "http://" + window.location.hostname + ":8545",
+      addressUrl: "http://" + window.location.hostname + ":8080/addresses.json",
+      addressOMGXUrl: "http://" + window.location.hostname + ":8078/addresses.json",
       blockExplorer: "",
     },
   },
@@ -35,12 +39,16 @@ const NETWORKS = {
       name: "Rinkeby L1",
       chainId: 4,
       rpcUrl: `https://rinkeby.infura.io/v3/${INFURA_ID}`,
+      addressUrl: "https://rinkeby.omgx.network:8080/addresses.json",
+      addressOMGXUrl: "https://rinkeby.omgx.network:8078/addresses.json",
       blockExplorer: `https://rinkeby.etherscan.io/${INFURA_ID}`,
     },
     L2: {
       name: "Rinkeby L2",
       chainId: 28,
       rpcUrl: "https://rinkeby.omgx.network",
+      addressUrl: "https://rinkeby.omgx.network:8080/addresses.json",
+      addressOMGXUrl: "https://rinkeby.omgx.network:8078/addresses.json",
       blockExplorer: "",
     }
   }
