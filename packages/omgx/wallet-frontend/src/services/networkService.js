@@ -29,13 +29,13 @@ import { setMinter } from 'actions/setupAction'
 import { openAlert, openError } from 'actions/uiAction'
 import { WebWalletError } from 'services/errorService'
 
-import L1LPJson from '../deployment/artifacts/contracts/LP/L1LiquidityPool.sol/L1LiquidityPool.json'
-import L2LPJson from '../deployment/artifacts-ovm/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
-import L1ERC20Json from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.json'
+import L1LPJson from '../deployment/contracts/LP/L1LiquidityPool.sol/L1LiquidityPool.json'
+import L2LPJson from '../deployment/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
+import L1ERC20Json from '../deployment/contracts/L1ERC20.sol/L1ERC20.json'
 
-import ERC721Json from '../deployment/artifacts-ovm/contracts/ERC721Mock.sol/ERC721Mock.json'
-import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol/TokenPool.json'
-import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
+import ERC721Json from '../deployment/contracts/ERC721Mock.sol/ERC721Mock.json'
+import L2TokenPoolJson from '../deployment/contracts/TokenPool.sol/TokenPool.json'
+import AtomicSwapJson from '../deployment/contracts/AtomicSwap.sol/AtomicSwap.json'
 
 import { powAmount, logAmount } from 'util/amountConvert'
 import { accDiv, accMul } from 'util/calculation'
@@ -212,15 +212,25 @@ class NetworkService {
     try {
       let addresses
       if (networkName === 'local') {
+        
         console.log('loading - response -  local')
-        const res = await localAddressAxiosInstance.get('/addresses.json')
-        console.log('response -  local', res)
-        addresses = localAddresses
+        const resBase = await addressLocalAxiosInstance.get()
+        console.log('response -  local', resBase)
+
+        console.log('loading - response -  OMGX')
+        const resOMGX = await addressLocalOMGXAxiosInstance.get()
+        console.log('response -  local OMGX', resOMGX)
+        
+        let addresses = {
+          ...resBase,
+          ...resOMGX
+        }
+        //addresses = localAddresses
       } else {
         console.log('loading - response -  rinkeby')
-        const res = await rinkebyAddressAxiosInstance.get('/addresses.json')
+        const res = await addressRinkebyAxiosInstance.get('/addresses.json')
         console.log('response -  rinkeby', res)
-        addresses = rinkebyAddresses
+        //addresses = rinkebyAddresses
       }
 
       //at this point, the wallet should be connected
