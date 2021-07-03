@@ -213,18 +213,20 @@ class NetworkService {
       let addresses
       if (networkName === 'local') {
         
+        console.log('loading - response -  OMGX')
+        const resOMGX = await addressLocalOMGXAxiosInstance.get()
+        console.log('response -  local OMGX', resOMGX)
+
         console.log('loading - response -  local')
         const resBase = await addressLocalAxiosInstance.get()
         console.log('response -  local', resBase)
 
-        console.log('loading - response -  OMGX')
-        const resOMGX = await addressLocalOMGXAxiosInstance.get()
-        console.log('response -  local OMGX', resOMGX)
-        
         let addresses = {
           ...resBase,
           ...resOMGX
         }
+
+        console.log("Addresses:",addresses)
         //addresses = localAddresses
       } else {
         console.log('loading - response -  rinkeby')
