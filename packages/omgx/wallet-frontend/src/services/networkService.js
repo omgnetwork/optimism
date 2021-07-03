@@ -59,57 +59,9 @@ import L1StandardBridgeJson from '../deployment/contracts/tokens/OVM_L1StandardB
 import L2StandardBridgeJson from '../deployment/contracts/tokens/OVM_L2StandardBridge.sol/OVM_L2StandardBridge.json'
 
 //All the current addresses
-// const localAddresses = require(`../deployment/local/addresses.json`)
-// const rinkebyAddresses = require(`../deployment/rinkeby/addresses.json`)
-
-/*
-
-For
-
-L1MessengerAddress AKA Proxy__OVM_L1CrossDomainMessenger 
-L1StandardBridge AKA Proxy__OVM_L1StandardBridge
-
-Go here - note this is port 8080
-I already changed your addressAxiosInstance
-http://localhost:8080/addresses.json
-
-{  
-  ...
-  ...
-  "Proxy__OVM_L1CrossDomainMessenger": "0x59b670e9fA9D0A427751Af201D676719a970857b",
-  "Proxy__OVM_L1StandardBridge": "0x851356ae760d987E095750cCeb3bC6014560891C",
-}
-
-
-*****************************************
-*****************************************
-
-For EVERYTHING ELSE, go here - note this is port 8078
-I already changed your addressOMGXAxiosInstance
-http://localhost:8078/addresses.json
-
-{
-  "OVM_L1CrossDomainMessengerFast": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
-  "L2LiquidityPool": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  "L1LiquidityPool": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
-  "L1ERC20": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
-  "L2ERC20": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-  "L2TokenPool": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-  "L1Message": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
-  "L2Message": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
-  "AtomicSwap": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
-  "ERC721": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"
-}
-
-*****************************************
-*****************************************
-
-
-Note that the L2StandardBridge now has a fixed address, so can be hardcoded
-
-this.L2StandardBridgeAddress = '0x4200000000000000000000000000000000000010'
-
-*/
+//for fallback purposes only
+const localAddresses = require(`../deployment/local/addresses.json`)
+const rinkebyAddresses = require(`../deployment/rinkeby/addresses.json`)
 
 class NetworkService {
   constructor() {
@@ -210,29 +162,52 @@ class NetworkService {
     console.log('NS: initializeAccounts() for', networkName)
 
     try {
+      
       let addresses
+      
       if (networkName === 'local') {
         
-        console.log('loading - response -  OMGX')
+        console.log('Loading OMGX contract addresses')
         const resOMGX = await addressLocalOMGXAxiosInstance.get()
-        console.log('response -  local OMGX', resOMGX)
+        console.log('response -  Local OMGX', resOMGX)
 
-        console.log('loading - response -  local')
+        console.log('Loading Base contract addresses')
         const resBase = await addressLocalAxiosInstance.get()
-        console.log('response -  local', resBase)
+        console.log('response -  Local BASE', resBase)
 
-        let addresses = {
-          ...resBase,
-          ...resOMGX
+        addresses = {
+          ...resBase.data,
+          ...resOMGX.data
         }
 
-        console.log("Addresses:",addresses)
-        //addresses = localAddresses
+        console.log("Final Local Addresses:",addresses)
+        /* Sahil please write/check
+        if( the above did not work )
+          use the locally stored addresses
+          addresses = localAddresses
+        */
       } else {
-        console.log('loading - response -  rinkeby')
-        const res = await addressRinkebyAxiosInstance.get('/addresses.json')
-        console.log('response -  rinkeby', res)
-        //addresses = rinkebyAddresses
+
+        console.log('Loading Rinkeby OMGX contract addresses')
+        const resOMGX = await addressRinkebyOMGXAxiosInstance.get()
+        console.log('response -  Rinkeby OMGX', resOMGX)
+
+        console.log('Loading Rinkeby Base contract addresses')
+        const resBase = await addressRinkebyAxiosInstance.get()
+        console.log('response -  Rinkeby BASE', resBase)
+
+        addresses = {
+          ...resBase.data,
+          ...resOMGX.data
+        }
+
+        console.log("Final Rinkeby Addresses:",addresses)
+        /* Sahil please write/check
+        if( the above did not work )
+          use the locally stored rinkeby addresses
+          addresses = rinkebyAddresses
+        */
+
       }
 
       //at this point, the wallet should be connected
@@ -242,8 +217,8 @@ class NetworkService {
 
       this.chainID = network.chainId
       this.networkName = networkName
+
       console.log('NS: networkName:', this.networkName)
-      //console.log("NS: account:",this.account)
       console.log('NS: this.chainID:', this.chainID)
 
       //there are numerous possible chains we could be on
@@ -289,8 +264,10 @@ class NetworkService {
       this.L1MessengerAddress = addresses.L1MessengerAddress
       this.L1FastMessengerAddress = addresses.L1FastMessengerAddress
 
-      this.L1StandardBridgeAddress = addresses.L1StandardBridge
-      this.L2StandardBridgeAddress = addresses.L2StandardBridge
+      this.L1StandardBridgeAddress = addresses.Proxy__OVM_L1StandardBridge
+      
+      //this is now a predeploy
+      //this.L2StandardBridgeAddress = addresses.L2StandardBridge
 
       this.L1ERC20Address = addresses.L1ERC20
       this.L2ERC20Address = addresses.L2ERC20
@@ -298,9 +275,12 @@ class NetworkService {
       this.L1LPAddress = addresses.L1LiquidityPool
       this.L2LPAddress = addresses.L2LiquidityPool
 
-      this.ERC721Address = addresses.L2ERC721
+      this.ERC721Address = addresses.ERC721
       this.L2TokenPoolAddress = addresses.L2TokenPool
       this.AtomicSwapAddress = addresses.AtomicSwap
+
+      console.log(addresses)
+      console.log(this.L1StandardBridgeAddress)
 
       this.L1StandardBridgeContract = new ethers.Contract(
         this.L1StandardBridgeAddress,
