@@ -11,22 +11,22 @@ export default function etherScanInstance(masterSystemConfig, layer){
   } 
   else if (masterSystemConfig === 'rinkeby' && layer === 'L1') {
     axiosInstance = axios.create({
-      baseURL: nw.rinkeby.L1.blockexplorer,
+      baseURL: nw.rinkeby.L1.blockExplorer,
     })
   }
   else if (masterSystemConfig === 'rinkeby' && layer === 'L2') {
     axiosInstance = axios.create({
-      baseURL: nw.rinkeby.L2.blockexplorer,
+      baseURL: nw.rinkeby.L2.blockExplorer,
     })
   }
   else if (masterSystemConfig === 'mainnet' && layer === 'L1') {
     axiosInstance = axios.create({
-      baseURL: nw.mainnet.L1.blockexplorer,
+      baseURL: nw.mainnet.L1.blockExplorer,
     })
   }
   else if (masterSystemConfig === 'mainnet' && layer === 'L2') {
     axiosInstance = axios.create({
-      baseURL: nw.mainnet.L2.blockexplorer,
+      baseURL: nw.mainnet.L2.blockExplorer,
     })
   }
 

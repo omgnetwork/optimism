@@ -469,9 +469,10 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
   }
 
   async getTransactions() {
+    
     //rinkeby L1
-    if (this.masterSystemConfig === 'rinkeby' && this.chainID === 4) {
-      const response = await etherScanInstance(this.masterSystemConfig).get(`&address=${this.account}`)
+    if (this.masterSystemConfig === 'rinkeby' && this.chainID === 4) { 
+      const response = await etherScanInstance(this.masterSystemConfig, this.L1orL2).get(`&address=${this.account}`)
       if (response.status === 200) {
         const transactions = await response.data
         if (transactions.status === '1') {
