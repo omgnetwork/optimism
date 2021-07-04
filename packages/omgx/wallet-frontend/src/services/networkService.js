@@ -29,46 +29,34 @@ import { setMinter } from 'actions/setupAction'
 import { openAlert, openError } from 'actions/uiAction'
 import { WebWalletError } from 'services/errorService'
 
+//Base contracts
+import L1StandardBridgeJson from '../deployment/artifacts/optimistic-ethereum/OVM/bridge/tokens/OVM_L1StandardBridge.sol/OVM_L1StandardBridge.json'
+import L2StandardBridgeJson from '../deployment/artifacts-ovm/optimistic-ethereum/OVM/bridge/tokens/OVM_L2StandardBridge.sol/OVM_L2StandardBridge.json'
+import L2ERC20Json          from '../deployment/artifacts-ovm/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
 
-import L1StandardBridgeJson from '../deployment/artifacts/contracts/optimistic-ethereum/OVM/bridge/tokens/OVM_L1StandardBridge.sol/OVM_L1StandardBridge.json'
-import L2StandardBridgeJson from '../deployment/artifacts-ovm/contracts/optimistic-ethereum/OVM/bridge/tokens/OVM_L2StandardBridge.sol/OVM_L2StandardBridge.json'
-import L1LPJson from '../deployment/artifacts/contracts/LP/L1LiquidityPool.sol/L1LiquidityPool.json'
-import L2LPJson from '../deployment/artifacts-ovm/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
-import L1ERC20Json from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.json'
-import L2ERC20Json from '../deployment/artifacts-ovm/contracts/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
-import ERC721Json from '../deployment/artifacts-ovm/contracts/ERC721Mock.sol/ERC721Mock.json'
-import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol/TokenPool.json'
-import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
+//OMGX L1 Contracts
+import L1LPJson             from '../deployment/artifacts/contracts/LP/L1LiquidityPool.sol/L1LiquidityPool.json'
+import L1ERC20Json          from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.json'
 
-/*
-import L1LPJson from '../deployment/contracts/LP/L1LiquidityPool.sol/L1LiquidityPool.json'
-import L2LPJson from '../deployment/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
-import L1ERC20Json from '../deployment/contracts/L1ERC20.sol/L1ERC20.json'
-import ERC721Json from '../deployment/contracts/ERC721Mock.sol/ERC721Mock.json'
-import L2TokenPoolJson from '../deployment/contracts/TokenPool.sol/TokenPool.json'
-import AtomicSwapJson from '../deployment/contracts/AtomicSwap.sol/AtomicSwap.json'
-import L2ERC20Json from '../deployment/contracts/standards/L2StandardERC20.sol/L2StandardERC20.json'
-import L1StandardBridgeJson from '../deployment/contracts/tokens/OVM_L1StandardBridge.sol/OVM_L1StandardBridge.json'
-import L2StandardBridgeJson from '../deployment/contracts/tokens/OVM_L2StandardBridge.sol/OVM_L2StandardBridge.json'
-*/
+//OMGX L2 Contracts
+import L2LPJson             from '../deployment/artifacts-ovm/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
+import ERC721Json           from '../deployment/artifacts-ovm/contracts/ERC721Mock.sol/ERC721Mock.json'
+import L2TokenPoolJson      from '../deployment/artifacts-ovm/contracts/TokenPool.sol/TokenPool.json'
+import AtomicSwapJson       from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
 
 import { powAmount, logAmount } from 'util/amountConvert'
 import { accDiv, accMul } from 'util/calculation'
-import { getAllNetworks } from 'util/networkName'
 
-import { ETHERSCAN_URL, OMGX_WATCHER_URL } from 'Settings'
+import { getAllNetworks } from 'util/masterConfig'
 
 import etherScanInstance from 'api/etherScanAxios'
 import omgxWatcherAxiosInstance from 'api/omgxWatcherAxios'
-
-import {
-  _addressLocalAxiosInstance as addressLocalAxiosInstance,
-  _addressLocalOMGXAxiosInstance as addressLocalOMGXAxiosInstance,
-  _addressRinkebyAxiosInstance as addressRinkebyAxiosInstance,
-  _addressRinkebyOMGXAxiosInstance as addressRinkebyOMGXAxiosInstance,
-} from 'api/addressAxios'
+import addressAxiosInstance from 'api/addressAxios'
+import addressOMGXAxiosInstance from 'api/addressOMGXAxios'
 
 //All the current addresses for fallback purposes only
+//These may or may not be present
+//Generally, the wallet will get these from the two HTTP deployment servers
 const localAddresses = require(`../deployment/local/addresses.json`)
 const rinkebyAddresses = require(`../deployment/rinkeby/addresses.json`)
 
@@ -92,7 +80,7 @@ class NetworkService {
 
     // L1 or L2
     this.L1orL2 = null
-    this.networkName = null
+    this.masterSystemConfig = null
 
     // Watcher
     this.watcher = null
@@ -100,13 +88,15 @@ class NetworkService {
 
     // addresses
     this.L1StandardBridgeAddress = null
-    this.L2StandardBridgeAddress = '0x4200000000000000000000000000000000000010'
+
     this.ERC721Address = null
     this.L1ERC20Address = null
     this.L2ERC20Address = null
     this.L1MessengerAddress = null
     this.L1LPAddress = null
     this.L2LPAddress = null
+
+    this.L2StandardBridgeAddress = '0x4200000000000000000000000000000000000010'
     this.L1ETHAddress = '0x0000000000000000000000000000000000000000'
     this.L2ETHAddress = '0x4200000000000000000000000000000000000006'
     this.L2MessengerAddress = '0x4200000000000000000000000000000000000007'
@@ -167,57 +157,67 @@ class NetworkService {
     }
   }
 
-  async initializeAccounts(networkName) {
-    console.log('NS: initializeAccounts() for', networkName)
+  async initializeAccounts(masterSystemConfig) {
+    
+    console.log('NS: initializeAccounts() for', masterSystemConfig)
+
+    let resOMGX = null
+    let resBase = null
+    let addresses = null
 
     try {
       
-      let addresses
-      
-      if (networkName === 'local') {
+      console.log('Loading OMGX contract addresses')
+
+      if (masterSystemConfig === 'local') {
         
-        console.log('Loading OMGX contract addresses')
-        const resOMGX = await addressLocalOMGXAxiosInstance.get()
-        console.log('response -  Local OMGX', resOMGX)
+        try {
+          resOMGX = await addressOMGXAxiosInstance('local').get()
+        }
+        catch (error) {
+          console.log(error)
+        }
 
-        console.log('Loading Base contract addresses')
-        const resBase = await addressLocalAxiosInstance.get()
-        console.log('response -  Local BASE', resBase)
+        try {
+          resBase = await addressAxiosInstance('local').get()
+        }
+        catch (error) {
+          console.log(error)
+        }
 
-        addresses = {
-          ...resBase.data,
-          ...resOMGX.data
+        if ( resOMGX !== null && resBase !== null ) {
+          addresses = {...resBase.data, ...resOMGX.data }
+        } else {
+          addresses = localAddresses //emergency fallback
         }
 
         console.log("Final Local Addresses:",addresses)
-        /* Sahil please write/check
-        if( the above did not work )
-          use the locally stored addresses
-          addresses = localAddresses
-        */
-      } else {
+      } 
+      else if (masterSystemConfig === 'rinkeby') {
+        
+        /*these endpoints do not exist yet*/
+        // try {
+        //   resOMGX = await addressOMGXAxiosInstance('rinkeby').get()
+        // }
+        // catch (error) {
+        //   console.log(error)
+        // }
 
-        console.log('Loading Rinkeby OMGX contract addresses')
-        const resOMGX = await addressRinkebyOMGXAxiosInstance.get()
-        console.log('response -  Rinkeby OMGX', resOMGX)
+        // try {
+        //   resBase = await addressAxiosInstance('rinkeby').get()
+        // }
+        // catch (error) {
+        //   console.log(error)
+        // }
 
-        console.log('Loading Rinkeby Base contract addresses')
-        const resBase = await addressRinkebyAxiosInstance.get()
-        console.log('response -  Rinkeby BASE', resBase)
-
-        addresses = {
-          ...resBase.data,
-          ...resOMGX.data
-        }
+        // if ( resOMGX !== null && resBase !== null ) {
+        //   addresses = {...resBase.data, ...resOMGX.data }
+        // } else {
+          addresses = rinkebyAddresses //emergency fallback
+        // }
 
         console.log("Final Rinkeby Addresses:",addresses)
-        /* Sahil please write/check
-        if( the above did not work )
-          use the locally stored rinkeby addresses
-          addresses = rinkebyAddresses
-        */
-
-      }
+      } 
 
       //at this point, the wallet should be connected
       this.account = await this.provider.getSigner().getAddress()
@@ -225,9 +225,9 @@ class NetworkService {
       const network = await this.provider.getNetwork()
 
       this.chainID = network.chainId
-      this.networkName = networkName
+      this.masterSystemConfig = masterSystemConfig
 
-      console.log('NS: networkName:', this.networkName)
+      console.log('NS: masterConfig:', this.masterSystemConfig)
       console.log('NS: this.chainID:', this.chainID)
 
       //there are numerous possible chains we could be on
@@ -235,19 +235,19 @@ class NetworkService {
       //and then, also, either L1 or L2
 
       //at this point, we only know whether we want to be on local or rinkeby etc
-      if (networkName === 'local' && network.chainId === 28) {
+      if (masterSystemConfig === 'local' && network.chainId === 28) {
         //ok, that's reasonable
         //local deployment, L2
         this.L1orL2 = 'L2'
-      } else if (networkName === 'local' && network.chainId === 31337) {
+      } else if (masterSystemConfig === 'local' && network.chainId === 31337) {
         //ok, that's reasonable
         //local deployment, L1
         this.L1orL2 = 'L1'
-      } else if (networkName === 'rinkeby' && network.chainId === 4) {
+      } else if (masterSystemConfig === 'rinkeby' && network.chainId === 4) {
         //ok, that's reasonable
         //rinkeby, L1
         this.L1orL2 = 'L1'
-      } else if (networkName === 'rinkeby' && network.chainId === 28) {
+      } else if (masterSystemConfig === 'rinkeby' && network.chainId === 28) {
         //ok, that's reasonable
         //rinkeby, L2
         this.L1orL2 = 'L2'
@@ -263,20 +263,67 @@ class NetworkService {
       const nw = getAllNetworks()
 
       this.L1Provider = new ethers.providers.JsonRpcProvider(
-        nw[networkName]['L1']['rpcUrl']
+        nw[masterSystemConfig]['L1']['rpcUrl']
       )
       this.L2Provider = new ethers.providers.JsonRpcProvider(
-        nw[networkName]['L2']['rpcUrl']
+        nw[masterSystemConfig]['L2']['rpcUrl']
       )
+/*
+{
+"AddressManager": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+"AtomicSwap": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+"ERC721": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+"L1ERC20": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
+"L1LiquidityPool": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
+"L1Message": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
+"L2ERC20": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+"L2LiquidityPool": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+"L2Message": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+"L2TokenPool": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+"OVM_L1CrossDomainMessenger": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
+"OVM_L1CrossDomainMessengerFast": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
+"Proxy__OVM_L1CrossDomainMessenger": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+"Proxy__OVM_L1StandardBridge": "0x851356ae760d987E095750cCeb3bC6014560891C"
+}
+*/
+
+/*
+AtomicSwap: "0xfCc9525fDDbafbD3393821F7dAf96F68Bba93294"
+L1ERC20: "0xaB1e3377dEED7811beADf4b5773B59fB267089fb"
+L1FastMessengerAddress: "0xF296F4ca6A5725F55EdF1C67F80204871E65F87d"
+L1LiquidityPool: "0x2C12649A5A4FC61F146E0a3409f3e4c7FbeD15Dc"
+L1Message: "0x1E7C2Ed00FaaFeD62afC9DD630ACB8C8c6C16D52"
+L1MessengerAddress: "0xF10EEfC14eB5b7885Ea9F7A631a21c7a82cf5D76"
+L1StandardBridge: "0xDe085C82536A06b40D20654c2AbA342F2abD7077"
+L2ERC20: "0x0e52DEfc53ec6dCc52d630af949a9b6313455aDF"
+L2ERC721: "0xB08e122b98889321040AB251316887E59ee1d3Df"
+L2LiquidityPool: "0xEd3417AE90fA0BfE15Fab8b949a9a459F9f4ef26"
+L2Message: "0x8165E68dD175B4D6e913D1DF5aF456d8C04cA01e"
+L2StandardBridge: "0x4200000000000000000000000000000000000010"
+L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
+*/
 
       // addresses
-      this.L1MessengerAddress = addresses.L1MessengerAddress
-      this.L1FastMessengerAddress = addresses.L1FastMessengerAddress
 
-      this.L1StandardBridgeAddress = addresses.Proxy__OVM_L1StandardBridge
-      
-      //this is now a predeploy
-      //this.L2StandardBridgeAddress = addresses.L2StandardBridge
+      //this.L1MessengerAddress = addresses.Proxy__OVM_L1CrossDomainMessenger
+      //backwards compat
+      if( addresses.hasOwnProperty('Proxy__OVM_L1CrossDomainMessenger') )
+        this.L1MessengerAddress = addresses.Proxy__OVM_L1CrossDomainMessenger
+      else 
+        this.L1MessengerAddress = addresses.L1MessengerAddress
+
+      //this.L1FastMessengerAddress = addresses.OVM_L1CrossDomainMessengerFast
+      //backwards compat
+      if( addresses.hasOwnProperty('OVM_L1CrossDomainMessengerFast') )
+        this.L1FastMessengerAddress = addresses.OVM_L1CrossDomainMessengerFast
+      else 
+        this.L1FastMessengerAddress = addresses.L1FastMessengerAddress
+
+      //backwards compat
+      if( addresses.hasOwnProperty('Proxy__OVM_L1StandardBridge') )
+        this.L1StandardBridgeAddress = addresses.Proxy__OVM_L1StandardBridge
+      else 
+        this.L1StandardBridgeAddress = addresses.L1StandardBridge
 
       this.L1ERC20Address = addresses.L1ERC20
       this.L2ERC20Address = addresses.L2ERC20
@@ -284,12 +331,14 @@ class NetworkService {
       this.L1LPAddress = addresses.L1LiquidityPool
       this.L2LPAddress = addresses.L2LiquidityPool
 
-      this.ERC721Address = addresses.ERC721
+      //backwards compat
+      if( addresses.hasOwnProperty('L2ERC721') )
+        this.ERC721Address = addresses.L2ERC721
+      else 
+        this.ERC721Address = addresses.ERC721
+
       this.L2TokenPoolAddress = addresses.L2TokenPool
       this.AtomicSwapAddress = addresses.AtomicSwap
-
-      console.log(addresses)
-      console.log(this.L1StandardBridgeAddress)
 
       this.L1StandardBridgeContract = new ethers.Contract(
         this.L1StandardBridgeAddress,
@@ -421,8 +470,8 @@ class NetworkService {
 
   async getTransactions() {
     //rinkeby L1
-    if (this.chainID === 4) {
-      const response = await etherScanInstance.get(`&address=${this.account}`)
+    if (this.masterSystemConfig === 'rinkeby' && this.chainID === 4) {
+      const response = await etherScanInstance(this.masterSystemConfig).get(`&address=${this.account}`)
       if (response.status === 200) {
         const transactions = await response.data
         if (transactions.status === '1') {
@@ -431,8 +480,8 @@ class NetworkService {
       }
     }
     //rinkeby L2
-    if (this.chainID === 28) {
-      const response = await omgxWatcherAxiosInstance.post('get.transaction', {
+    if (this.masterSystemConfig === 'rinkeby' && this.chainID === 28) {
+      const response = await omgxWatcherAxiosInstance(this.masterSystemConfig).post('get.transaction', {
         address: this.account,
         fromRange: 0,
         toRange: 100,
@@ -444,8 +493,11 @@ class NetworkService {
   }
 
   async getExits() {
-    if (this.chainID === 28 || this.chainID === 4) {
-      const response = await omgxWatcherAxiosInstance.post('get.transaction', {
+
+    //this is NOT SUPPORTED on LOCAL
+    
+    if (this.masterSystemConfig === 'rinkeby') {
+      const response = await omgxWatcherAxiosInstance(this.masterSystemConfig).post('get.transaction', {
         address: this.account,
         fromRange: 0,
         toRange: 100,
@@ -623,7 +675,9 @@ class NetworkService {
   }
 
   depositETHL2 = async (value = '1') => {
+    
     try {
+      
       const depositTxStatus = await this.L1StandardBridgeContract.depositETH(
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString()),

@@ -1,21 +1,17 @@
 import axios from 'axios'
-
-import { getAllNetworks } from 'util/networkName'
-
+import { getAllNetworks } from 'util/masterConfig'
 const nw = getAllNetworks()
 
-export const _addressRinkebyAxiosInstance = axios.create({
-  baseURL: nw.rinkeby.addressUrl,
-})
+export default function addressAxiosInstance(masterSystemConfig){
+  
+  if(masterSystemConfig === 'local') {
+    return axios.create({baseURL: nw.local.addressUrl})
+  } 
+  else if (masterSystemConfig === 'rinkeby') {
+    return axios.create({baseURL: nw.rinkeby.addressUrl})
+  }
+  else if (masterSystemConfig === 'mainnet') {
+    return axios.create({baseURL: nw.mainnet.addressUrl})
+  }
 
-export const _addressRinkebyOMGXAxiosInstance = axios.create({
-  baseURL: nw.rinkeby.addressOMGXUrl,
-})
-
-export const _addressLocalAxiosInstance = axios.create({
-  baseURL: nw.local.addressUrl,
-})
-
-export const _addressLocalOMGXAxiosInstance = axios.create({
-  baseURL: nw.local.addressOMGXUrl,
-})
+}
