@@ -20,18 +20,27 @@ fi
 
 VERSION=$($PYTHON --version 2>&1 \
     | cut -d ' ' -f2 \
-    |  sed -Ee's#([^/]).([^/]).([^/])#\1#')
+    | sed -Ee's#([^/]).([^/]).([^/])#\1#')
 
+echo "Found Python version $VERSION"
 
-if [[ $VERSION == 3 ]]; then
-    $PYTHON -m http.server \
-        --bind $HOST $PORT \
-        --directory $DIRECTORY
-else
-    (
-        echo "Serving HTTP on $HOST port $PORT"
-        cd $DIRECTORY
-        $PYTHON -c \
-            'import BaseHTTPServer as bhs, SimpleHTTPServer as shs; bhs.HTTPServer(("'$HOST'", '"$PORT"'), shs.SimpleHTTPRequestHandler).serve_forever()'
-    )
-fi
+cd $DIR
+echo "Trying to serve HTTP on $HOST port $PORT"
+$PYTHON http_cors.py $PORT $HOST $DIRECTORY
+
+# if [[ $VERSION == 3 ]]; then
+#     # $PYTHON -m http.server \
+#     #     --bind $HOST $PORT \
+#     #     --directory $DIRECTORY
+#     echo "Yes, you have Python 3 - running the server"
+#     $PYTHON ./cors_server.py $HOST $PORT $DIRECTORY
+# else
+#     (
+#         echo "Serving HTTP on $HOST port $PORT"
+#         #cd $DIRECTORY
+#         ls -al
+#         $PYTHON http_cors.py $PORT
+#         #$PYTHON -c \
+#         #    'import BaseHTTPServer as bhs, SimpleHTTPServer as shs; bhs.HTTPServer(("'$HOST'", '"$PORT"'), shs.SimpleHTTPRequestHandler).serve_forever()'
+#     )
+# fi
