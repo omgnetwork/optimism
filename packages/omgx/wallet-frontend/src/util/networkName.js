@@ -17,6 +17,8 @@ import { INFURA_ID } from "Settings";
 
 const NETWORKS = {
   local: {
+    addressUrl: "http://" + window.location.hostname + ":8080/addresses.json",
+    addressOMGXUrl: "http://" + window.location.hostname + ":8078/addresses.json",
     L1: {
       name: "Local L1",
       chainId: 31337,
@@ -31,6 +33,8 @@ const NETWORKS = {
     },
   },
   rinkeby: {
+    addressUrl: "https://rinkeby.omgx.network:8080/addresses.json",
+    addressOMGXUrl: "https://rinkeby.omgx.network:8078/addresses.json",
     L1: {
       name: "Rinkeby L1",
       chainId: 4,
