@@ -46,12 +46,14 @@ if [[ $BUILD == 1 ]]; then
     docker-compose build --parallel -- deployer dtl batch_submitter relayer integration_tests
     docker image tag ethereumoptimism/builder omgx/builder:latest
     docker image tag ethereumoptimism/hardhat omgx/hardhat:latest
-    docker image tag ethereumoptimism/deployer omgx/deployer:latest
-    docker image tag ethereumoptimism/data-transport-layer omgx/data-transport-layer:latest
-    docker image tag ethereumoptimism/l2geth omgx/l2geth:latest
-    docker image tag ethereumoptimism/message-relayer omgx/message-relayer:latest
-    docker image tag ethereumoptimism/batch-submitter omgx/batch-submitter:latest
-    docker image tag ethereumoptimism/integration-tests omgx/integration-tests:latest
+    # comented out because this command does not seem to wait for completion of the parallel build in GH actions?
+    # see error in https://github.com/omgnetwork/optimism/pull/154/checks?check_run_id=2984030034
+    # docker image tag ethereumoptimism/deployer omgx/deployer:latest
+    # docker image tag ethereumoptimism/data-transport-layer omgx/data-transport-layer:latest
+    # docker image tag ethereumoptimism/l2geth omgx/l2geth:latest
+    # docker image tag ethereumoptimism/message-relayer omgx/message-relayer:latest
+    # docker image tag ethereumoptimism/batch-submitter omgx/batch-submitter:latest
+    # docker image tag ethereumoptimism/integration-tests omgx/integration-tests:latest
     docker build ../ --file $DIR/docker/Dockerfile.omgx_monorepo --tag omgx/omgx_builder:latest
     docker build ../ --file $DIR/docker/Dockerfile.omgx_deployer --tag omgx/omgx_deployer:latest
     docker build ../ --file $DIR/docker/Dockerfile.omgx_message-relayer-fast --tag omgx/omgx_message-relayer-fast:latest
