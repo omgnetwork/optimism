@@ -33,19 +33,20 @@ yarn build
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 ORIGINAL_DOCKERFILE="docker-compose.yml"
-DOCKERFILE="docker-compose-omgx.yml"
+# DOCKERFILE="docker-compose-omgx.yml"
+DOCKERFILE="docker-compose.yml"
 OMGX_DOCKERFILE=docker-compose-omgx-services.yml
 #replace all occurances of image: ethereumoptimism/ with image: omgx/
 #append :latest tag to all apps
-yq eval '(.services.[].image | select(. == "ethereumoptimism*")) |= sub("ethereumoptimism", "omgx")' ${ORIGINAL_DOCKERFILE} | \
-yq eval '(.services.[].image) += ":latest"' - \
-> ${DOCKERFILE}
+# yq eval '(.services.[].image | select(. == "ethereumoptimism*")) |= sub("ethereumoptimism", "omgx")' ${ORIGINAL_DOCKERFILE} | \
+# yq eval '(.services.[].image) += ":latest"' - \
+# > ${DOCKERFILE}
 
 if [[ $BUILD == 1 ]]; then
     docker-compose build --parallel -- builder l2geth l1_chain
     docker-compose build --parallel -- deployer dtl batch_submitter relayer integration_tests
-    docker image tag ethereumoptimism/builder omgx/builder:latest
-    docker image tag ethereumoptimism/hardhat omgx/hardhat:latest
+    # docker image tag ethereumoptimism/builder omgx/builder:latest
+    # docker image tag ethereumoptimism/hardhat omgx/hardhat:latest
     # comented out because this command does not seem to wait for completion of the parallel build in GH actions?
     # see error in https://github.com/omgnetwork/optimism/pull/154/checks?check_run_id=2984030034
     # docker image tag ethereumoptimism/deployer omgx/deployer:latest
