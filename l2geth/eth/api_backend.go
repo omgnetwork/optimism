@@ -66,9 +66,10 @@ func (b *EthAPIBackend) GasLimit() uint64 {
 }
 
 func (b *EthAPIBackend) GetEthContext() (uint64, uint64) {
-	bn := b.eth.syncService.GetLatestL1BlockNumber()
-	ts := b.eth.syncService.GetLatestL1Timestamp()
-	return bn, ts
+    ts, bn := b.eth.syncService.GetLatestL1SafeTimeBlock()
+	//bn := b.eth.syncService.GetLatestL1BlockNumber()
+	//ts := b.eth.syncService.GetLatestL1Timestamp()
+	return bn, ts //note flipped order - do not unflip, as tempting as it may be
 }
 
 func (b *EthAPIBackend) GetRollupContext() (uint64, uint64, uint64) {
@@ -126,9 +127,32 @@ func (b *EthAPIBackend) SetHead(number uint64) {
 		return
 	}
 
-	b.eth.syncService.SetLatestL1Timestamp(tx.L1Timestamp())
-	b.eth.syncService.SetLatestL1BlockNumber(blockNumber.Uint64())
+	//b.eth.syncService.SetLatestL1Timestamp(tx.L1Timestamp())
+	//b.eth.syncService.SetLatestL1BlockNumber(blockNumber.Uint64())
+	b.eth.syncService.SetLatestL1SafeTimeBlock(tx.L1Timestamp(),blockNumber.Uint64())
 }
+
+
+/*
+func (b *EthAPIBackend) GetEthContext() (uint64, uint64) {
+
+/*
+//GetLatestL1Timestamp returns the OVMContext timestamp
+func (s *SyncService) GetLatestL1SafeTimeBlock() tOVMContext {
+	return s.safeTimeBlock.Load().(tOVMContext)
+}
+
+//SetLatestL1Timestamp will set the OVMContext timestamp
+func (s *SyncService) SetLatestL1SafeTimeBlock(stb tOVMContext) {
+	s.safeTimeBlock.Store(stb)
+}
+*/
+//    stb := b.eth.syncService.GetLatestL1SafeTimeBlock()
+	//bn := b.eth.syncService.GetLatestL1BlockNumber()
+	//ts := b.eth.syncService.GetLatestL1Timestamp()
+//	return stb.blockNumber, stb.timestamp
+	//return bn, ts
+//}
 
 func (b *EthAPIBackend) IngestTransactions(txs []*types.Transaction) error {
 	for _, tx := range txs {

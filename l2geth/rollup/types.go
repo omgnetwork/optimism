@@ -15,6 +15,14 @@ type OVMContext struct {
 	timestamp   uint64
 }
 
+// OVMContext represents the blocknumber and timestamp
+// that exist during L2 execution
+// for testing
+type OVMContextT struct {
+	blockNumber uint64
+	timestamp   uint64
+}
+
 // Backend represents the type of transactions that are being synced.
 // The different types have different security models.
 type Backend uint

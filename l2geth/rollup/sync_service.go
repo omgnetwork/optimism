@@ -54,6 +54,7 @@ type SyncService struct {
 	syncing                   atomic.Value
 	chainHeadSub              event.Subscription
 	OVMContext                OVMContext
+	safeTimeBlock             atomic.Value
 	pollInterval              time.Duration
 	timestampRefreshThreshold time.Duration
 	chainHeadCh               chan core.ChainHeadEvent
@@ -81,6 +82,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		log.Info("Sanitizing poll interval to 15 seconds")
 		pollInterval = time.Second * 15
 	}
+	
 	timestampRefreshThreshold := cfg.TimestampRefreshThreshold
 	if timestampRefreshThreshold == 0 {
 		log.Info("Sanitizing timestamp refresh threshold to 3 minutes")
@@ -92,10 +94,12 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 	if chainID == nil {
 		return nil, errors.New("Must configure with chain id")
 	}
+
 	// Initialize the rollup client
 	client := NewClient(cfg.RollupClientHttp, chainID)
 	log.Info("Configured rollup client", "url", cfg.RollupClientHttp, "chain-id", chainID.Uint64(), "ctc-deploy-height", cfg.CanonicalTransactionChainDeployHeight)
 	log.Info("Enforce Fees", "set", cfg.EnforceFees)
+	
 	service := SyncService{
 		ctx:                       ctx,
 		cancel:                    cancel,
@@ -112,6 +116,7 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		timestampRefreshThreshold: timestampRefreshThreshold,
 		backend:                   cfg.Backend,
 		enforceFees:               cfg.EnforceFees,
+		safeTimeBlock:             atomic.Value{},
 	}
 
 	// The chainHeadSub is used to synchronize the SyncService with the chain.
@@ -166,17 +171,20 @@ func NewSyncService(ctx context.Context, cfg Config, txpool *core.TxPool, bc *co
 		}
 
 		// Log the OVMContext information on startup
-		bn := service.GetLatestL1BlockNumber()
-		ts := service.GetLatestL1Timestamp()
-		log.Info("Initialized Latest L1 Info", "blocknumber", bn, "timestamp", ts)
+		//bn := service.GetLatestL1BlockNumber()
+		//ts := service.GetLatestL1Timestamp()
+        stb := service.safeTimeBlock.Load().(OVMContextT)
+        log.Info("Initialized Latest L1 Info Safe", "stb.timestamp", stb.timestamp, "stb.blocknumber", stb.blockNumber)
 
 		index := service.GetLatestIndex()
 		queueIndex := service.GetLatestEnqueueIndex()
 		verifiedIndex := service.GetLatestVerifiedIndex()
 		block := service.bc.CurrentBlock()
+		
 		if block == nil {
 			block = types.NewBlock(&types.Header{}, nil, nil, nil)
 		}
+		
 		header := block.Header()
 		log.Info("Initial Rollup State", "state", header.Root.Hex(), "index", stringify(index), "queue-index", stringify(queueIndex), "verified-index", verifiedIndex)
 
@@ -244,8 +252,11 @@ func (s *SyncService) initializeLatestL1(ctcDeployHeight *big.Int) error {
 		if err != nil {
 			return fmt.Errorf("Cannot fetch ctc deploy block at height %d: %w", ctcDeployHeight.Uint64(), err)
 		}
-		s.SetLatestL1Timestamp(context.Timestamp)
-		s.SetLatestL1BlockNumber(context.BlockNumber)
+
+		//s.SetLatestL1Timestamp(context.Timestamp)
+		//s.SetLatestL1BlockNumber(context.BlockNumber)
+        s.safeTimeBlock.Store(OVMContextT{context.Timestamp,context.BlockNumber})
+
 	} else {
 		log.Info("Found latest index", "index", *index)
 		block := s.bc.GetBlockByNumber(*index + 1)
@@ -270,8 +281,11 @@ func (s *SyncService) initializeLatestL1(ctcDeployHeight *big.Int) error {
 			panic("Cannot recover OVM Context")
 		}
 		tx := txs[0]
-		s.SetLatestL1Timestamp(tx.L1Timestamp())
-		s.SetLatestL1BlockNumber(tx.L1BlockNumber().Uint64())
+
+		//s.SetLatestL1Timestamp(tx.L1Timestamp())
+		//s.SetLatestL1BlockNumber(tx.L1BlockNumber().Uint64())
+		s.safeTimeBlock.Store(OVMContextT{tx.L1Timestamp(),tx.L1BlockNumber().Uint64()})
+
 	}
 	queueIndex := s.GetLatestEnqueueIndex()
 	if queueIndex == nil {
@@ -461,37 +475,32 @@ func (s *SyncService) updateContext() error {
 	if err != nil {
 		return err
 	}
-	current := time.Unix(int64(s.GetLatestL1Timestamp()), 0)
+	
+    stb := s.safeTimeBlock.Load().(OVMContextT)
+    log.Info("updateContext safeTimeBlock", "stb.timestamp", stb.timestamp, "stb.blocknumber", stb.blockNumber)
+
+	current := time.Unix(int64(stb.timestamp), 0)
 	next := time.Unix(int64(context.Timestamp), 0)
+
 	if next.Sub(current) > s.timestampRefreshThreshold {
-		log.Info("Updating Eth Context", "timetamp", context.Timestamp, "blocknumber", context.BlockNumber)
-		s.SetLatestL1BlockNumber(context.BlockNumber)
-		s.SetLatestL1Timestamp(context.Timestamp)
+		log.Info("Updating Eth Context", "context.timestamp", context.Timestamp, "context.blocknumber", context.BlockNumber)
+		s.safeTimeBlock.Store(OVMContextT{context.Timestamp,context.BlockNumber})
 	}
 	return nil
 }
 
 // Methods for safely accessing and storing the latest
 // L1 blocknumber and timestamp. These are held in memory.
+// The safeTimeBlock variable is atomic.Value{}
 
-// GetLatestL1Timestamp returns the OVMContext timestamp
-func (s *SyncService) GetLatestL1Timestamp() uint64 {
-	return atomic.LoadUint64(&s.OVMContext.timestamp)
+//GetLatestL1SafeTimeBlock returns the OVMContext consiting of timestamp and blockNumber
+func (s *SyncService) GetLatestL1SafeTimeBlock() (uint64, uint64) {
+	stb := s.safeTimeBlock.Load().(OVMContextT)
+	return stb.timestamp, stb.blockNumber 
 }
 
-// GetLatestL1BlockNumber returns the OVMContext blocknumber
-func (s *SyncService) GetLatestL1BlockNumber() uint64 {
-	return atomic.LoadUint64(&s.OVMContext.blockNumber)
-}
-
-// SetLatestL1Timestamp will set the OVMContext timestamp
-func (s *SyncService) SetLatestL1Timestamp(ts uint64) {
-	atomic.StoreUint64(&s.OVMContext.timestamp, ts)
-}
-
-// SetLatestL1BlockNumber will set the OVMContext blocknumber
-func (s *SyncService) SetLatestL1BlockNumber(bn uint64) {
-	atomic.StoreUint64(&s.OVMContext.blockNumber, bn)
+func (s *SyncService) SetLatestL1SafeTimeBlock(timestamp uint64, blockNumber uint64) {
+    s.safeTimeBlock.Store(OVMContextT{timestamp,blockNumber})
 }
 
 // GetLatestEnqueueIndex reads the last queue index processed
@@ -661,22 +670,23 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 	// Note that Ethereum Layer one consensus rules dictate that the timestamp
 	// must be strictly increasing between blocks, so no need to check both the
 	// timestamp and the blocknumber.
+
+    stb := s.safeTimeBlock.Load().(OVMContextT)
+    log.Info("applyTransactionToTip safeTimeBlock", "stb.blocknumber", stb.blockNumber, "stb.timestamp", stb.timestamp)
+
 	if tx.L1Timestamp() == 0 {
-		ts := s.GetLatestL1Timestamp()
-		bn := s.GetLatestL1BlockNumber()
-		tx.SetL1Timestamp(ts)
-		tx.SetL1BlockNumber(bn)
-	} else if tx.L1Timestamp() > s.GetLatestL1Timestamp() {
+		tx.SetL1Timestamp(stb.timestamp)
+		tx.SetL1BlockNumber(stb.blockNumber)
+	} else if tx.L1Timestamp() > stb.timestamp {
 		// If the timestamp of the transaction is greater than the sync
 		// service's locally maintained timestamp, update the timestamp and
 		// blocknumber to equal that of the transaction's. This should happen
 		// with `enqueue` transactions.
 		ts := tx.L1Timestamp()
 		bn := tx.L1BlockNumber()
-		s.SetLatestL1Timestamp(ts)
-		s.SetLatestL1BlockNumber(bn.Uint64())
+		s.safeTimeBlock.Store(OVMContextT{ts,bn.Uint64()})
 		log.Debug("Updating OVM context based on new transaction", "timestamp", ts, "blocknumber", bn.Uint64(), "queue-origin", tx.QueueOrigin())
-	} else if tx.L1Timestamp() < s.GetLatestL1Timestamp() {
+	} else if tx.L1Timestamp() < stb.timestamp {
 		log.Error("Timestamp monotonicity violation", "hash", tx.Hash().Hex())
 	}
 
@@ -985,24 +995,6 @@ func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) e
 		if err = s.applyTransaction(tx); err != nil {
 			return fmt.Errorf("Cannot apply transaction: %w", err)
 		}
-	}
-	return nil
-}
-
-// updateEthContext will update the OVM execution context's
-// timestamp and blocknumber if enough time has passed since
-// it was last updated. This is a sequencer only function.
-func (s *SyncService) updateEthContext() error {
-	context, err := s.client.GetLatestEthContext()
-	if err != nil {
-		return fmt.Errorf("Cannot get eth context: %w", err)
-	}
-	current := time.Unix(int64(s.GetLatestL1Timestamp()), 0)
-	next := time.Unix(int64(context.Timestamp), 0)
-	if next.Sub(current) > s.timestampRefreshThreshold {
-		log.Info("Updating Eth Context", "timetamp", context.Timestamp, "blocknumber", context.BlockNumber)
-		s.SetLatestL1BlockNumber(context.BlockNumber)
-		s.SetLatestL1Timestamp(context.Timestamp)
 	}
 	return nil
 }
