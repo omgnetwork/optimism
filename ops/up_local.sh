@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 if ! [ -x "$(command -v yq)" ]; then
   echo 'Error: yq is not installed. brew install yq' >&2
   exit 1
@@ -38,9 +38,9 @@ DOCKERFILE="docker-compose-omgx.yml"
 OMGX_DOCKERFILE=docker-compose-omgx-services.yml
 #replace all occurances of image: ethereumoptimism/ with image: omgx/
 #append :latest tag to all apps
-yq eval '(.services.[].image | select(. == "ethereumoptimism*")) |= sub("ethereumoptimism", "omgx")' ${ORIGINAL_DOCKERFILE} | \
-yq eval '(.services.[].image) += ":latest"' - \
-> ${DOCKERFILE}
+#yq eval '(.services.[].image | select(. == "ethereumoptimism*")) |= sub("ethereumoptimism", "omgx")' ${ORIGINAL_DOCKERFILE} | \
+#yq eval '(.services.[].image) += ":latest"' - \
+#> ${DOCKERFILE}
 
 if [[ $BUILD == 1 ]]; then
     docker-compose build --parallel -- builder l2geth l1_chain
