@@ -249,7 +249,11 @@ func TestTransactionToTipTimestamps(t *testing.T) {
 			t.Fatalf("Mismatched index: got %d, expect %d", *conf.GetMeta().Index, nextIndex)
 		}
 		// The tx timestamp should be setting the services timestamp
-		if conf.L1Timestamp() != service.GetLatestL1Timestamp() {
+		// if conf.L1Timestamp() != service.GetLatestL1Timestamp() {
+		// 	t.Fatal("Mismatched timestamp")
+		// }
+		ts, _ := service.GetLatestL1SafeTimeBlock()
+		if conf.L1Timestamp() != ts {
 			t.Fatal("Mismatched timestamp")
 		}
 	}
@@ -257,7 +261,8 @@ func TestTransactionToTipTimestamps(t *testing.T) {
 	// Send a transaction with no timestamp and then let it be updated
 	// by the sync service. This will prevent monotonicity errors as well
 	// as give timestamps to queue origin sequencer transactions
-	ts := service.GetLatestL1Timestamp()
+	//ts := service.GetLatestL1Timestamp()
+	ts, _ := service.GetLatestL1SafeTimeBlock()
 	tx3 := setMockTxL1Timestamp(mockTx(), 0)
 	go func() {
 		err = service.applyTransactionToTip(tx3)
@@ -654,8 +659,10 @@ func TestInitializeL1ContextPostGenesis(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	latestL1Timestamp := service.GetLatestL1Timestamp()
-	latestL1BlockNumber := service.GetLatestL1BlockNumber()
+	//latestL1Timestamp := service.GetLatestL1Timestamp()
+	//latestL1BlockNumber := service.GetLatestL1BlockNumber()
+	latestL1Timestamp, latestL1BlockNumber := service.GetLatestL1SafeTimeBlock()
+
 	if number != latestL1BlockNumber {
 		t.Fatalf("number does not match, got %d, expected %d", latestL1BlockNumber, number)
 	}
