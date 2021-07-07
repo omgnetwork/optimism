@@ -36,6 +36,7 @@ function DepositModal({ open, omgOnly = false, fast = false }) {
     L2address: '',
   })
   const [currency, setCurrency] = useState(ETH0x)
+  const [currencyL2, setCurrencyL2] = useState(ETH0x)
   const [tokenInfo, setTokenInfo] = useState({})
   const [value, setValue] = useState('')
 
@@ -66,10 +67,12 @@ function DepositModal({ open, omgOnly = false, fast = false }) {
           onClose={handleClose}
           onNext={() => setStep('APPROVE_STEP')}
           currency={currency}
+          currencyL2={currencyL2}
           tokenInfo={tokenInfo}
           tokenAddresses={tokenAddresses}
           value={value}
           setCurrency={setCurrency}
+          setCurrencyL2={setCurrencyL2}
           setTokenAddresses={setTokenAddresses}
           setTokenInfo={setTokenInfo}
           setValue={setValue}
@@ -81,6 +84,7 @@ function DepositModal({ open, omgOnly = false, fast = false }) {
         <ApproveStep
           onClose={handleClose}
           currency={currency}
+          currencyL2={currencyL2}
           value={value}
           tokenInfo={tokenInfo}
           fast={fast}

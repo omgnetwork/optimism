@@ -1225,22 +1225,9 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
 
   async getTokens() {
     try {
-      return [
-        ...localTokens,
-        {
-          name: 'Other',
-          L1address: '',
-          L2address: '',
-        },
-      ]
+      return localTokens
     } catch (error) {
-      return [
-        {
-          name: 'Other',
-          L1address: '',
-          L2address: '',
-        },
-      ]
+      return error
     }
   }
 }

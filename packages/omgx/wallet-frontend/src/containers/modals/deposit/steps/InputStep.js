@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
-import { useDispatch, useSelector } from 'react-redux'
-
+import { depositETHL2, depositL1LP } from 'actions/networkAction'
+import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
 import Button from 'components/button/Button'
+import IconSelect from 'components/iconSelect/iconSelect'
 import Input from 'components/input/Input'
 import Tabs from 'components/tabs/Tabs'
-
-import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
-import networkService from 'services/networkService'
+import { ethers } from 'ethers'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { selectLoading } from 'selectors/loadingSelector'
-import { depositETHL2, depositL1LP } from 'actions/networkAction'
-
+import networkService from 'services/networkService'
 import * as styles from '../DepositModal.module.scss'
-import InputSelect from 'components/inputselect/InputSelect'
 
 const ETH0x = '0x0000000000000000000000000000000000000000'
 
@@ -20,31 +17,49 @@ function InputStep({
   onClose,
   onNext,
   currency,
+  currencyL2,
+  setCurrency,
+  setCurrencyL2,
   tokenInfo,
   value,
-  setCurrency,
-  setTokenInfo,
   setValue,
   fast,
-  tokenAddresses,
-  setTokenAddresses,
+  setTokenInfo,
 }) {
   const dispatch = useDispatch()
 
   let uSC = 'ETH'
 
   const [tokens, setTokens] = useState([])
+  const [selectedToken, setSelectedToken] = useState(null)
 
   const [activeTab1, setActiveTab1] = useState(uSC)
   const [LPBalance, setLPBalance] = useState(0)
   const [feeRate, setFeeRate] = useState(0)
-  const [paste, setPaste] = useState(true)
+
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
 
   function handleClose() {
     setActiveTab1('ETH')
     onClose()
   }
+
+  useEffect(() => {
+    setSelectedToken(null)
+  }, [])
+  useEffect(() => {
+    if (activeTab1 === 'ETH') setSelectedToken(null)
+  }, [activeTab1])
+
+  useEffect(() => {
+    if (selectedToken && selectedToken.title === 'manual') {
+      setCurrency('')
+      setCurrencyL2('')
+    } else if (!!selectedToken) {
+      setCurrency(selectedToken.L1address)
+      setCurrencyL2(selectedToken.L2address)
+    }
+  }, [selectedToken, setCurrency, setCurrencyL2])
 
   useEffect(() => {
     networkService
@@ -54,22 +69,14 @@ function InputStep({
           return {
             title: t.name,
             subTitle: t.symbol,
-            value: JSON.stringify({
-              L1address: t.L1address,
-              L2address: t.L2address,
-            }),
+            value: t.name,
+            ...t,
           }
         })
         setTokens(localTokens)
       })
-      .catch((res) => {
-        let localTokens = res.map((t) => {
-          return {
-            title: t.name,
-            subTitle: t.symbol,
-          }
-        })
-        setTokens(localTokens)
+      .catch((err) => {
+        console.log('error', err)
       })
   }, [])
 
@@ -101,23 +108,13 @@ function InputStep({
     }
   }
 
-  const disabledSubmit = () => {
-    if (activeTab1 === 'ERC20' && !fast) {
-      return (
-        value <= 0 ||
-        !tokenAddresses ||
-        !tokenAddresses.L1address ||
-        !tokenAddresses.L2address
-      )
-    } else {
-      return (
-        value <= 0 ||
-        !currency ||
-        !ethers.utils.isAddress(currency) ||
-        (fast && Number(value) > Number(LPBalance))
-      )
-    }
-  }
+  const disabledSubmit =
+    value <= 0 ||
+    !currency ||
+    !ethers.utils.isAddress(currency) ||
+    (!fast && !currencyL2) ||
+    (!fast && !ethers.utils.isAddress(currencyL2)) ||
+    (fast && Number(value) > Number(LPBalance))
 
   if (fast && Object.keys(tokenInfo).length && currency) {
     networkService.L2LPBalance(currency).then((LPBalance) => {
@@ -132,77 +129,59 @@ function InputStep({
     <>
       {fast && <h2>Fast swap onto OMGX</h2>}
 
-      {!fast && <h2>Traditional Deposit</h2>}
+      {!fast && (
+        <h2>{`Traditional Deposit : ${
+          selectedToken ? selectedToken.title : ''
+        }`}</h2>
+      )}
 
       <Tabs
         className={styles.tabs}
         onClick={(i) => {
-          i === 'ETH' ? setCurrency(ETH0x) : setCurrency('')
+          if (i === 'ETH') {
+            setCurrency(ETH0x)
+            setCurrencyL2('')
+          } else {
+            setCurrency('')
+            setCurrencyL2('')
+          }
           setActiveTab1(i)
         }}
         activeTab={activeTab1}
         tabs={['ETH', 'ERC20']}
       />
 
-      {activeTab1 === 'ERC20' ? (
-        !fast ? (
-          <>
-            <InputSelect
-              label="ERC20 Token Smart Contract Address."
-              placeholder={'0x'}
-              value={tokenAddresses.L1address}
-              paste={paste}
-              onChange={(i) => {
-                console.log('On change L1', i.target.value)
-                // setCurrency(i.target.value)
-              }}
-              type="text"
-              selectOptions={tokens}
-              onSelect={(i) => {
-                console.log('On select L2', i.target.value)
-                let value = JSON.parse(i.target.value)
-                if (!value.L1address) {
-                  setPaste(true)
-                } else {
-                  console.log('remove paste')
-                  setPaste(false)
-                }
-                setTokenAddresses(value)
-              }}
-              selectValue={JSON.stringify(tokenAddresses)}
-            />
-            <InputSelect
-              label="L2 Contract Address"
-              placeholder={'0x'}
-              value={tokenAddresses.L2address}
-              paste={paste}
-              onChange={(i) => {
-                console.log('On change L2', i.target.value)
-              }}
-              type="text"
-              selectOptions={tokens}
-              onSelect={(i) => {
-                let value = JSON.parse(i.target.value)
-                if (!value.L1address) {
-                  setPaste(true)
-                } else {
-                  setPaste(false)
-                }
-                setTokenAddresses(value)
-                // setCurrency(i.target.value)
-              }}
-              selectValue={JSON.stringify(tokenAddresses)}
-            />
-          </>
-        ) : (
+      {activeTab1 === 'ERC20' && !fast && !selectedToken ? (
+        <IconSelect selectOptions={tokens} onTokenSelect={setSelectedToken} />
+      ) : null}
+
+      {activeTab1 === 'ERC20' && !fast && selectedToken ? (
+        <>
           <Input
             label="ERC20 Token Smart Contract Address."
             placeholder="0x"
-            paste
             value={currency}
+            paste={selectedToken ? selectedToken.title === 'manual' : false}
             onChange={(i) => setCurrency(i.target.value.toLowerCase())} //because this is a user input!!
           />
-        )
+          <Input
+            label="L2 Contract Address"
+            placeholder="0x"
+            value={currencyL2}
+            paste={selectedToken ? selectedToken.title === 'manual' : false}
+            onChange={(i) => setCurrencyL2(i.target.value.toLowerCase())} //because this is a user input!!
+          />
+        </>
+      ) : null}
+
+      {activeTab1 === 'ERC20' && !!fast ? (
+        <Input
+          label="ERC20 Token Smart Contract Address."
+          placeholder="0x"
+          paste
+          value={currency}
+          onChange={(i) => setCurrency(i.target.value.toLowerCase())} //because this is a user input!!
+        />
       ) : null}
 
       <Input
@@ -267,7 +246,7 @@ function InputStep({
             style={{ flex: 0 }}
             loading={depositLoading}
             tooltip="Your deposit is still pending. Please wait for confirmation."
-            disabled={disabledSubmit()}
+            disabled={disabledSubmit}
           >
             DEPOSIT
           </Button>
@@ -277,7 +256,7 @@ function InputStep({
             onClick={onNext}
             type="primary"
             style={{ flex: 0 }}
-            disabled={disabledSubmit()}
+            disabled={disabledSubmit}
           >
             NEXT
           </Button>
