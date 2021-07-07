@@ -28,11 +28,7 @@ const tokenIcons = {
 }
 
 function IconSelect({
-  selected = {
-    title: 'chain',
-    subtitle: '',
-    value: 'test',
-  },
+  selected,
   onTokenSelect,
   selectOptions,
   disabledSelect = false,
@@ -53,6 +49,9 @@ function IconSelect({
         onChange={onSelect}
         disabled={disabledSelect}
       >
+        <option key={-1} value={-1}>
+          Select
+        </option>
         {selectOptions
           .filter((i) => !i.icon)
           .filter(Boolean)
