@@ -24,7 +24,6 @@ import { exitOMGX, depositL2LP, approveErc20 } from 'actions/networkAction'
 import { openAlert, openError } from 'actions/uiAction'
 import { selectLoading } from 'selectors/loadingSelector'
 
-import InputSelect from 'components/inputselect/InputSelect'
 import Button from 'components/button/Button'
 
 import { logAmount, powAmount } from 'util/amountConvert'
@@ -73,7 +72,8 @@ function DoExitStep({ handleClose, fast }) {
 
   const selectOptions = balances.map((i) => ({
     title: i.symbol,
-    value: i.currency,
+    value: i.symbol,
+    L2address: i.currency,
     subTitle: `Balance: ${logAmount(i.amount, i.decimals)}`,
   }))
 
@@ -195,7 +195,7 @@ function DoExitStep({ handleClose, fast }) {
             ...t,
           }
         })
-        setTokens(localTokens)
+        setTokens([...localTokens])
       })
       .catch((err) => {
         console.log('error', err)
@@ -212,7 +212,10 @@ function DoExitStep({ handleClose, fast }) {
       )}
 
       {!fast && !selectedToken ? (
-        <IconSelect selectOptions={tokens} onTokenSelect={setSelectedToken} />
+        <IconSelect
+          selectOptions={[...tokens, ...selectOptions]}
+          onTokenSelect={setSelectedToken}
+        />
       ) : null}
 
       {!fast && selectedToken ? (
@@ -227,16 +230,12 @@ function DoExitStep({ handleClose, fast }) {
         </>
       ) : null}
 
-      <InputSelect
+      <Input
         label="Amount to exit"
         placeholder={0}
         value={value}
         onChange={(i) => {
           setExitAmount(i.target.value)
-        }}
-        selectOptions={selectOptions}
-        onSelect={(i) => {
-          setCurrency(i.target.value)
         }}
         selectValue={currency}
         maxValue={getMaxTransferValue()}
