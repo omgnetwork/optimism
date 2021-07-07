@@ -838,6 +838,10 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
 
       console.log({ allowance: allowance.toString(), value })
 
+      if(currency == this.L1ERC20Address) {
+        currencyL2 = this.L2ERC20Address
+      }
+
       const depositTxStatus = await this.L1StandardBridgeContract.depositERC20(
         currency,
         currencyL2,
