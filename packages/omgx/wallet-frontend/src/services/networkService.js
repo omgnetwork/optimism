@@ -820,7 +820,7 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
     }
   }
 
-  async depositErc20(value, currency, gasPrice) {
+  async depositErc20(value, currency, gasPrice, currencyL2) {
     try {
       const L1ERC20Contract = this.L1ERC20Contract.attach(currency)
       const allowance = await L1ERC20Contract.allowance(
@@ -831,8 +831,8 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
       console.log({ allowance: allowance.toString(), value })
 
       const depositTxStatus = await this.L1StandardBridgeContract.depositERC20(
-        this.L1ERC20Address,
-        this.L2ERC20Address,
+        currency,
+        currencyL2,
         value,
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString())
@@ -868,10 +868,18 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
       currency,
       this.L2StandardBridgeAddress
     )
+    const L2ERC20Contract = new ethers.Contract(
+      currency,
+      L2ERC20Json.abi,
+      this.provider.getSigner()
+    )
+    const decimals = await L2ERC20Contract.decimals()
     // need the frontend updates
-    if (BigNumber.from(allowance).lt(parseEther(value))) {
+    if (BigNumber.from(allowance).lt(parseUnits(value, decimals))) {
       const res = await this.approveErc20(
-        parseEther(value),
+        // take caution while using parseEther() with erc20
+        // l2 erc20 can be customised to have non 18 decimals
+        parseUnits(value, decimals),
         currency,
         this.L2StandardBridgeAddress
       )
@@ -879,7 +887,7 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
     }
     const tx = await this.L2StandardBridgeContract.withdraw(
       currency,
-      parseEther(value),
+      parseUnits(value, decimals),
       this.L1GasLimit,
       utils.formatBytes32String(new Date().getTime().toString()),
       { gasPrice: 0 }
