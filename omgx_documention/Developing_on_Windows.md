@@ -1,6 +1,4 @@
-
-
-# Getting OMGX on Windows
+# Developing for OMGX on Windows
 
 ## Prequisites
 
@@ -12,7 +10,6 @@
 - [Docker](#docker)
 - [NVM](#nvm)
 - [Yarn](#yarn)
-
 
 ### Windows terminal
 
@@ -43,6 +40,7 @@ To verify installation, enter: `command -v nvm`. This should return 'nvm', if yo
 You can then use `nvm install [node-version]` to install whatever version of node you want. We recommend 14.17.3. Then use `nvm use [node-version]` to use that as your default. You can read more about NVM [here](https://github.com/nvm-sh/nvm). If you ran into any issues installing a lot of troubleshooting options can be found there as well.
 
 ### Yarn
+
 Installing yarn is super easy with all the infrastructure we have use:
 
 >`npm install --global yarn`
