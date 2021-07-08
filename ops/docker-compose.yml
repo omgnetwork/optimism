@@ -4,11 +4,11 @@ version: "3"
 
 services:
   # base service builder
-  # builder:
-  #   image: ethereumoptimism/builder
-  #   build:
-  #     context: ..
-  #     dockerfile: ./ops/docker/Dockerfile.monorepo
+  builder:
+    image: ethereumoptimism/builder
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.monorepo
 
   # this is a helper service used because there's no official hardhat image
   l1_chain:
