@@ -35,15 +35,15 @@ describe("MasterChef", function () {
   })
 
   beforeEach(async function () {
-    this.sushi = await this.Factory__SushiToken.deploy()
+    this.sushi = await this.Factory__SushiToken.deploy({gasPrice: 0, gasLimit: 800000})
     await this.sushi.deployTransaction.wait()
   })
 
   it("should set correct state variables", async function () {
-    this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "1000", "0", "1000")
+    this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "1000", "0", "1000", {gasPrice: 0, gasLimit: 800000})
     await this.chef.deployTransaction.wait()
 
-    const ownershipTX = await this.sushi.transferOwnership(this.chef.address)
+    const ownershipTX = await this.sushi.transferOwnership(this.chef.address, {gasPrice: 0, gasLimit: 800000})
     await ownershipTX.wait()
 
     const sushi = await this.chef.sushi()
@@ -56,7 +56,7 @@ describe("MasterChef", function () {
   })
 
   it("should allow dev and only dev to update dev", async function () {
-    this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "1000", "0", "1000")
+    this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "1000", "0", "1000", {gasPrice: 0, gasLimit: 800000})
     await this.chef.deployTransaction.wait()
 
     expect(await this.chef.devaddr()).to.equal(dev.address)
@@ -76,42 +76,42 @@ describe("MasterChef", function () {
 
   context("With ERC/LP token added to the field", function () {
     beforeEach(async function () {
-      this.lp = await this.Factory__ERC20Mock.deploy("LPToken", "LP", "10000000000")
+      this.lp = await this.Factory__ERC20Mock.deploy("LPToken", "LP", "10000000000", {gasPrice: 0, gasLimit: 800000})
 
       let tx
-      tx = await this.lp.transfer(alice.address, "1000")
+      tx = await this.lp.transfer(alice.address, "1000",{gasPrice: 0, gasLimit: 800000})
       await tx.wait()
 
-      tx = await this.lp.transfer(bob.address, "1000")
+      tx = await this.lp.transfer(bob.address, "1000",{gasPrice: 0, gasLimit: 800000})
       await tx.wait()
 
-      tx = await this.lp.transfer(carol.address, "1000")
+      tx = await this.lp.transfer(carol.address, "1000",{gasPrice: 0, gasLimit: 800000})
       await tx.wait()
 
-      this.lp2 = await this.Factory__ERC20Mock.deploy("LPToken2", "LP2", "10000000000")
+      this.lp2 = await this.Factory__ERC20Mock.deploy("LPToken2", "LP2", "10000000000", {gasPrice: 0, gasLimit: 800000})
 
-      tx = await this.lp2.transfer(alice.address, "1000")
+      tx = await this.lp2.transfer(alice.address, "1000",{gasPrice: 0, gasLimit: 800000})
       await tx.wait()
 
-      tx = await this.lp2.transfer(bob.address, "1000")
+      tx = await this.lp2.transfer(bob.address, "1000",{gasPrice: 0, gasLimit: 800000})
       await tx.wait()
 
-      tx = await this.lp2.transfer(carol.address, "1000")
+      tx = await this.lp2.transfer(carol.address, "1000",{gasPrice: 0, gasLimit: 800000})
       await tx.wait()
     })
 
     it("should allow emergency withdraw", async function () {
       // 100 per block farming rate starting at block 100 with bonus until block 1000
-      this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "100", "100", "1000")
+      this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "100", "100", "1000", {gasPrice: 0, gasLimit: 800000})
       await this.chef.deployTransaction.wait()
 
-      const addTX = await this.chef.add("100", this.lp.address, true)
+      const addTX = await this.chef.add("100", this.lp.address, true,{gasPrice: 0, gasLimit: 800000})
       await addTX.wait()
 
-      const approveTX = await this.lp.connect(bob).approve(this.chef.address, "1000")
+      const approveTX = await this.lp.connect(bob).approve(this.chef.address, "1000",{gasPrice: 0, gasLimit: 800000})
       await approveTX.wait()
 
-      const depositTX = await this.chef.connect(bob).deposit(0, "100")
+      const depositTX = await this.chef.connect(bob).deposit(0, "100",{gasPrice: 0, gasLimit: 800000})
       await depositTX.wait()
 
       expect(await this.lp.balanceOf(bob.address)).to.equal("900")
@@ -138,7 +138,7 @@ describe("MasterChef", function () {
 
     //   const approve = await this.lp.connect(bob).approve(this.chef.address, "1000")
     //   await approve.wait()
-      
+
     //   let deposit
     //   deposit = await this.chef.connect(bob).deposit(0, "100")
     //   await deposit.wait()
@@ -184,7 +184,7 @@ describe("MasterChef", function () {
     //   // 100 per block farming rate starting at block 200 with bonus until block 1000
     //   this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "100", "200", "1000")
     //   await this.chef.deployTransaction.wait()
-      
+
     //   const transferOwnershipTX = await this.sushi.transferOwnership(this.chef.address)
     //   await transferOwnershipTX.wait()
 
@@ -199,7 +199,7 @@ describe("MasterChef", function () {
     //   await advanceBlockTo("204")
     //   expect(await this.sushi.totalSupply()).to.equal("0")
     //   await advanceBlockTo("209")
-      
+
     //   const depositTX = await this.chef.connect(bob).deposit(0, "10") // block 210
     //   await depositTX.wait()
 

@@ -17,7 +17,7 @@ describe("SushiToken", function () {
   })
 
   beforeEach(async function () {
-    this.sushi = await this.Factory__SushiTokenPool.deploy()
+    this.sushi = await this.Factory__SushiTokenPool.deploy({gasPrice: 0, gasLimit: 800000})
     await this.sushi.deployTransaction.wait()
   })
 
@@ -31,13 +31,13 @@ describe("SushiToken", function () {
   })
 
   it("should only allow owner to mint token", async function () {
-    const bobMint = await this.sushi.mint(bob.address, "1000")
+    const bobMint = await this.sushi.mint(bob.address, "1000",{gasPrice: 0, gasLimit: 800000})
     await bobMint.wait()
-    const aliceMint = await this.sushi.mint(alice.address, "100")
+    const aliceMint = await this.sushi.mint(alice.address, "100",{gasPrice: 0, gasLimit: 800000})
     await aliceMint.wait()
 
     // not the owner
-    const carolMint = await this.sushi.connect(alice).mint(carol.address, "1000")
+    const carolMint = await this.sushi.connect(alice).mint(carol.address, "1000",{gasPrice: 0, gasLimit: 800000})
     await expect(carolMint.wait()).to.be.eventually.rejected;
 
     const totalSupply = await this.sushi.totalSupply()
@@ -51,11 +51,11 @@ describe("SushiToken", function () {
   })
 
   it("should supply token transfers properly", async function () {
-    const aliceMint = await this.sushi.mint(alice.address, "100")
+    const aliceMint = await this.sushi.mint(alice.address, "100",{gasPrice: 0, gasLimit: 800000})
     await aliceMint.wait()
-    const bobMint = await this.sushi.mint(bob.address, "1000")
+    const bobMint = await this.sushi.mint(bob.address, "1000",{gasPrice: 0, gasLimit: 800000})
     await bobMint.wait()
-    const carolTX = await this.sushi.transfer(carol.address, "10")
+    const carolTX = await this.sushi.transfer(carol.address, "10",{gasPrice: 0, gasLimit: 800000})
     await carolTX.wait()
     const bobTX = await this.sushi.connect(bob).transfer(carol.address, "100", {
       from: bob.address,
@@ -73,13 +73,13 @@ describe("SushiToken", function () {
   })
 
   it("should fail if you try to do bad transfers", async function () {
-    const aliceMint = await this.sushi.mint(alice.address, "100")
+    const aliceMint = await this.sushi.mint(alice.address, "100",{gasPrice: 0, gasLimit: 800000})
     await aliceMint.wait()
     //ERC20: transfer amount exceeds balance
-    const carolTX = await this.sushi.transfer(carol.address, "110");
+    const carolTX = await this.sushi.transfer(carol.address, "110",{gasPrice: 0, gasLimit: 800000});
     await expect(carolTX.wait()).to.be.eventually.rejected;
     //ERC20: transfer amount exceeds balance
-    const bobTX = await this.sushi.connect(bob).transfer(carol.address, "1", { from: bob.address });
+    const bobTX = await this.sushi.connect(bob).transfer(carol.address, "1", { from: bob.address },{gasPrice: 0, gasLimit: 800000});
     await expect(bobTX.wait()).to.be.eventually.rejected;
   })
 })

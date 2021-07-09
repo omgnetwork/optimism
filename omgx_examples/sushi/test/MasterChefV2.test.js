@@ -21,56 +21,56 @@ describe("MasterChefV2", function () {
   before(async function () {
     await deploy(this, [
       ["brokenRewarder", brokenRewarderJSON]
-    ])
+    ], {gasPrice: 0, gasLimit: 800000})
   })
 
   beforeEach(async function () {
     await deploy(this, [
       ["sushi", SushiTokenJSON],
-    ])
+    ], {gasPrice: 0, gasLimit: 800000})
 
     await deploy(this,
       [["lp", ERC20MockJSON, ["LP Token", "LPT", getBigNumber(10)]],
       ["dummy", ERC20MockJSON, ["Dummy", "DummyT", getBigNumber(10)]],
       ['chef', MasterChefJSON, [this.sushi.address, alice.address, getBigNumber(100), "0", "0"]]
-    ])
+    ],{gasPrice: 0, gasLimit: 800000})
 
     let transferTX, addTX, approveTX, depositTX, initTX
-    transferTX = await this.sushi.transferOwnership(this.chef.address)
+    transferTX = await this.sushi.transferOwnership(this.chef.address,{gasPrice: 0, gasLimit: 800000})
     await transferTX.wait()
-    addTX = await this.chef.add(100, this.lp.address, true)
+    addTX = await this.chef.add(100, this.lp.address, true,{gasPrice: 0, gasLimit: 800000})
     await addTX.wait()
-    addTX = await this.chef.add(100, this.dummy.address, true)
+    addTX = await this.chef.add(100, this.dummy.address, true,{gasPrice: 0, gasLimit: 800000})
     await addTX.wait()
-    approveTX = await this.lp.approve(this.chef.address, getBigNumber(10))
+    approveTX = await this.lp.approve(this.chef.address, getBigNumber(10),{gasPrice: 0, gasLimit: 800000})
     await approveTX.wait()
-    depositTX = await this.chef.deposit(0, getBigNumber(10))
+    depositTX = await this.chef.deposit(0, getBigNumber(10),{gasPrice: 0, gasLimit: 800000})
     await depositTX.wait()
 
     await deploy(this, [
         ['chef2', MasterChefV2JSON, [this.chef.address, this.sushi.address, 1]],
         ["rlp", ERC20MockJSON, ["LP", "rLPT", getBigNumber(10)]],
         ["r", ERC20MockJSON, ["Reward", "RewardT", getBigNumber(100000)]],
-    ])
-    await deploy(this, [["rewarder", RewarderMockJSON, [getBigNumber(1), this.r.address, this.chef2.address]]])
-    approveTX = await this.dummy.approve(this.chef2.address, getBigNumber(10))
+    ],{gasPrice: 0, gasLimit: 800000})
+    await deploy(this, [["rewarder", RewarderMockJSON, [getBigNumber(1), this.r.address, this.chef2.address]]],{gasPrice: 0, gasLimit: 800000})
+    approveTX = await this.dummy.approve(this.chef2.address, getBigNumber(10),{gasPrice: 0, gasLimit: 800000})
     await approveTX.wait()
-    initTX = await this.chef2.init(this.dummy.address)
+    initTX = await this.chef2.init(this.dummy.address,{gasPrice: 0, gasLimit: 800000})
     await initTX.wait()
-    transferTX = await this.rlp.transfer(alice.address, getBigNumber(1))
+    transferTX = await this.rlp.transfer(alice.address, getBigNumber(1),{gasPrice: 0, gasLimit: 800000})
     await transferTX.wait()
   })
 
   describe("Init", function () {
     it("Balance of dummyToken should be 0 after init(), repeated execution should fail", async function () {
-      const initTX = await this.chef2.init(this.dummy.address)
+      const initTX = await this.chef2.init(this.dummy.address,{gasPrice: 0, gasLimit: 800000})
       await expect(initTX.wait()).to.be.eventually.rejected;
     })
   })
 
   describe("PoolLength", function () {
     it("PoolLength should execute", async function () {
-      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address,{gasPrice: 0, gasLimit: 800000})
       await addTX.wait()
       expect((await this.chef2.poolLength())).to.be.equal(1);
     })
@@ -78,18 +78,18 @@ describe("MasterChefV2", function () {
 
   describe("Set", function() {
     it("Should emit event LogSetPool", async function () {
-      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address,{gasPrice: 0, gasLimit: 800000})
       await addTX.wait()
-      await expect(this.chef2.set(0, 10, this.dummy.address, false))
+      await expect(this.chef2.set(0, 10, this.dummy.address, false,{gasPrice: 0, gasLimit: 800000}))
             .to.emit(this.chef2, "LogSetPool")
             .withArgs(0, 10, this.rewarder.address, false)
-      await expect(this.chef2.set(0, 10, this.dummy.address, true))
+      await expect(this.chef2.set(0, 10, this.dummy.address, true,{gasPrice: 0, gasLimit: 800000}))
             .to.emit(this.chef2, "LogSetPool")
             .withArgs(0, 10, this.dummy.address, true)
       })
 
     it("Should revert if invalid pool", async function () {
-      const setTX = await this.chef2.set(0, 10, this.rewarder.address, false)
+      const setTX = await this.chef2.set(0, 10, this.rewarder.address, false,{gasPrice: 0, gasLimit: 800000})
       await expect(setTX.wait()).to.be.eventually.rejected;
     })
   })
@@ -124,7 +124,7 @@ describe("MasterChefV2", function () {
 
   describe("MassUpdatePools", function () {
     it("Should call updatePool", async function () {
-      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address,{gasPrice: 0, gasLimit: 800000})
       await addTX.wait()
       const massUpdatePoolsTX = await this.chef2.massUpdatePools([0])
       await massUpdatePoolsTX.wait()
@@ -134,7 +134,7 @@ describe("MasterChefV2", function () {
     })
 
     it("Updating invalid pools should fail", async function () {
-      const massUpdatePoolsTX = await this.chef2.set(0, 10, this.rewarder.address, false)
+      const massUpdatePoolsTX = await this.chef2.set(0, 10, this.rewarder.address, false,{gasPrice: 0, gasLimit: 800000})
       await expect(massUpdatePoolsTX.wait()).to.be.eventually.rejected;
     })
 })
@@ -179,26 +179,26 @@ describe("MasterChefV2", function () {
 
   describe("Deposit", function () {
     it("Depositing 0 amount", async function () {
-      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address,{gasPrice: 0, gasLimit: 800000})
       await addTX.wait()
-      const approveTX = await this.rlp.approve(this.chef2.address, getBigNumber(10))
+      const approveTX = await this.rlp.approve(this.chef2.address, getBigNumber(10),{gasPrice: 0, gasLimit: 800000})
       await approveTX.wait()
-      await expect(this.chef2.deposit(0, getBigNumber(0), bob.address))
-            .to.emit(this.chef2, "Deposit")
+      await expect(this.chef2.deposit(0, getBigNumber(0), bob.address,{gasPrice: 0, gasLimit: 800000}))
+            .to.emit(this.chef2, "Deposit",{gasPrice: 0, gasLimit: 800000})
             .withArgs(bob.address, 0, 0, bob.address)
     })
 
     it("Depositing into non-existent pool should fail", async function () {
-        const depositTX = await this.chef2.deposit(1001, getBigNumber(0), alice.address)
+        const depositTX = await this.chef2.deposit(1001, getBigNumber(0), alice.address,{gasPrice: 0, gasLimit: 800000})
         await expect(depositTX.wait()).to.be.eventually.rejected;
     })
   })
 
   describe("Withdraw", function () {
     it("Withdraw 0 amount", async function () {
-      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
+      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address,{gasPrice: 0, gasLimit: 800000})
       await addTX.wait()
-      await expect(this.chef2.withdraw(0, getBigNumber(0), bob.address))
+      await expect(this.chef2.withdraw(0, getBigNumber(0), bob.address,{gasPrice: 0, gasLimit: 800000}))
             .to.emit(this.chef2, "Withdraw")
             .withArgs(bob.address, 0, 0, bob.address)
     })
@@ -245,16 +245,16 @@ describe("MasterChefV2", function () {
   describe("EmergencyWithdraw", function() {
     it("Should emit event EmergencyWithdraw", async function () {
       let transferTX, addTX, approveTX, depositTX
-      transferTX = await this.r.transfer(this.rewarder.address, getBigNumber(100000))
+      transferTX = await this.r.transfer(this.rewarder.address, getBigNumber(100000),{gasPrice: 0, gasLimit: 800000})
       await transferTX.wait()
-      addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
+      addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address,{gasPrice: 0, gasLimit: 800000})
       await addTX.wait()
-      approveTX = await this.rlp.approve(this.chef2.address, getBigNumber(10))
+      approveTX = await this.rlp.approve(this.chef2.address, getBigNumber(10),{gasPrice: 0, gasLimit: 800000})
       await approveTX.wait()
-      depositTX = await this.chef2.deposit(0, getBigNumber(1), alice.address)
+      depositTX = await this.chef2.deposit(0, getBigNumber(1), alice.address,{gasPrice: 0, gasLimit: 800000})
       await depositTX.wait()
       //await this.chef2.emergencyWithdraw(0, this.alice.address)
-      await expect(this.chef2.connect(alice).emergencyWithdraw(0, alice.address))
+      await expect(this.chef2.connect(alice).emergencyWithdraw(0, alice.address,{gasPrice: 0, gasLimit: 800000}))
       .to.emit(this.chef2, "EmergencyWithdraw")
       .withArgs(alice.address, 0, getBigNumber(1), alice.address)
     })

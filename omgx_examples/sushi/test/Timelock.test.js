@@ -36,7 +36,7 @@ describe("Timelock", function () {
       ERC20MockJSON.bytecode,
       minter,
     )
-      
+
     this.Factory__Timelock = new ContractFactory(
       TimelockJSON.abi,
       TimelockJSON.bytecode,
@@ -45,29 +45,29 @@ describe("Timelock", function () {
   })
 
   beforeEach(async function () {
-    this.sushi = await this.Factory__SushiToken.deploy()
+    this.sushi = await this.Factory__SushiToken.deploy({gasPrice: 0, gasLimit: 800000})
     await this.sushi.deployTransaction.wait()
-    this.timelock = await this.Factory__Timelock.deploy(bob.address, "259200")
+    this.timelock = await this.Factory__Timelock.deploy(bob.address, "259200",{gasPrice: 0, gasLimit: 800000})
     await this.timelock.deployTransaction.wait()
   })
 
   it("should not allow non-owner to do operation", async function () {
     let transferOwnership
-    transferOwnership = await this.sushi.transferOwnership(this.timelock.address);
+    transferOwnership = await this.sushi.transferOwnership(this.timelock.address,{gasPrice: 0, gasLimit: 800000});
     await transferOwnership.wait()
 
-    transferOwnership = await this.sushi.transferOwnership(carol.address);
+    transferOwnership = await this.sushi.transferOwnership(carol.address,{gasPrice: 0, gasLimit: 800000});
     await expect(transferOwnership.wait()).to.be.eventually.rejected;
 
-    transferOwnership = await this.sushi.connect(alice).transferOwnership(carol.address);
+    transferOwnership = await this.sushi.connect(alice,{gasPrice: 0, gasLimit: 800000}).transferOwnership(carol.address,{gasPrice: 0, gasLimit: 800000});
     await expect(transferOwnership.wait()).to.be.eventually.rejected;
 
-    const timelock = await this.timelock.connect(alice).queueTransaction(
+    const timelock = await this.timelock.connect(alice,{gasPrice: 0, gasLimit: 800000}).queueTransaction(
       this.sushi.address,
       "0",
       "transferOwnership(address)",
       encodeParameters(["address"], [carol.address]),
-      (await latest()).add(duration.days(4))
+      (await latest()).add(duration.days(4)),{gasPrice: 0, gasLimit: 800000}
     )
     await expect(timelock.wait()).to.be.eventually.rejected;
   })

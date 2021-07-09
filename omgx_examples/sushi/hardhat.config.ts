@@ -15,8 +15,9 @@ const config = {
       // This sets the gas price to 0 for all transactions on L2. We do this
       // because account balances are not automatically initiated with an ETH
       // balance.
+      gasLimit: 800000,
       gasPrice: 0,
-      ovm: true,
+      ovm: true
     },
   },
   solidity: {
