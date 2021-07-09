@@ -7,4 +7,4 @@ COPY secret2env /opt/secret2env
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh && \
     chmod +x /opt/secret2env && \
-    apk add --no-cache jq
+    apk add --no-cache jq curl

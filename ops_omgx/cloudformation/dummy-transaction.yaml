@@ -68,7 +68,7 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       ContainerDefinitions:
-        - Image: !Sub "${ECRRegistry}/${DockerPrefix}/${OmgxMonitorImage}:dummy-${ImageTag}"
+        - Image: !Sub "${ECRRegistry}/${DockerPrefix}/${OmgxMonitorImage}:${ImageTag}"
           Name: dummy-transaction
           Environment:
             - Name: SECRETNAME
@@ -93,7 +93,7 @@ Resources:
           Memory: "256"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
-      Family: !Sub "OmgxMonitor-${EnvironmentName}"
+      Family: !Sub "DummyTransaction-${EnvironmentName}"
   ECSService:
     Type: AWS::ECS::Service
     Properties:
@@ -102,5 +102,5 @@ Resources:
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: !Sub "OmgxMonitor-${EnvironmentName}"
+      ServiceName: !Sub "DummyTransaction-${EnvironmentName}"
       TaskDefinition: !Ref TaskDefinition
