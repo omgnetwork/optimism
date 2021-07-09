@@ -1,0 +1,73 @@
+@import 'index.scss';
+
+.iconSelectContainer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 5px 10px;
+  .tokenIcon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    cursor: pointer;
+    p {
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+  }
+
+  .customOptionContainer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+}
+
+.tokenPicker {
+  display: flex;
+  justify-content: space-around;
+  flex: 1;
+}
+
+.selectContainer {
+  height: 46px;
+  margin: -10px -10px -10px 0;
+  position: relative;
+
+  .select {
+    border: none;
+    outline: none;
+    border-radius: 0;
+    padding-right: 10px;
+    -webkit-appearance: none;
+    -webkit-border-radius: 0px;
+    background-color: $gray3;
+    color: $gray3;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    opacity: 0;
+  }
+
+  .selected {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    height: 46px;
+    margin-right: 10px;
+
+    .details {
+      text-align: right;
+      margin-right: 10px;
+      font-size: 0.9em;
+      .subTitle {
+        font-size: 0.7em;
+        white-space: nowrap;
+      }
+    }
+  }
+}
