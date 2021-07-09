@@ -60,6 +60,7 @@ import addressOMGXAxiosInstance from 'api/addressOMGXAxios'
 const localAddresses = require(`../deployment/local/addresses.json`)
 const rinkebyAddresses = require(`../deployment/rinkeby/addresses.json`)
 const localTokens = require('../deployment/local/tokens.json')
+
 class NetworkService {
   constructor() {
     this.L1Provider = null
@@ -165,6 +166,7 @@ class NetworkService {
     let addresses = null
 
     try {
+
       console.log('Loading OMGX contract addresses')
 
       if (masterSystemConfig === 'local') {
@@ -187,6 +189,7 @@ class NetworkService {
         }
 
         console.log('Final Local Addresses:', addresses)
+
       } else if (masterSystemConfig === 'rinkeby') {
         /*these endpoints do not exist yet*/
         // try {
@@ -261,7 +264,8 @@ class NetworkService {
       this.L2Provider = new ethers.providers.JsonRpcProvider(
         nw[masterSystemConfig]['L2']['rpcUrl']
       )
-      /*
+
+/*
 {
 "AddressManager": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
 "AtomicSwap": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
@@ -280,7 +284,7 @@ class NetworkService {
 }
 */
 
-      /*
+/*
 AtomicSwap: "0xfCc9525fDDbafbD3393821F7dAf96F68Bba93294"
 L1ERC20: "0xaB1e3377dEED7811beADf4b5773B59fB267089fb"
 L1FastMessengerAddress: "0xF296F4ca6A5725F55EdF1C67F80204871E65F87d"
@@ -300,23 +304,33 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
 
       //this.L1MessengerAddress = addresses.Proxy__OVM_L1CrossDomainMessenger
       //backwards compat
-      if (addresses.hasOwnProperty('Proxy__OVM_L1CrossDomainMessenger'))
+      if (addresses.hasOwnProperty('Proxy__OVM_L1CrossDomainMessenger')) {
         this.L1MessengerAddress = addresses.Proxy__OVM_L1CrossDomainMessenger
-      else this.L1MessengerAddress = addresses.L1MessengerAddress
+        console.log("L1MessengerAddress set to:", this.L1MessengerAddress)
+      }
+      else {
+        this.L1MessengerAddress = addresses.L1MessengerAddress
+        console.log("LEGACY: L1MessengerAddress set to:", this.L1MessengerAddress)
+      }
 
       //this.L1FastMessengerAddress = addresses.OVM_L1CrossDomainMessengerFast
       //backwards compat
-      if (addresses.hasOwnProperty('OVM_L1CrossDomainMessengerFast'))
+      if (addresses.hasOwnProperty('OVM_L1CrossDomainMessengerFast')) {
         this.L1FastMessengerAddress = addresses.OVM_L1CrossDomainMessengerFast
-      else this.L1FastMessengerAddress = addresses.L1FastMessengerAddress
+        console.log("L1FastMessengerAddress set to:", this.L1FastMessengerAddress)
+      }
+      else {
+        this.L1FastMessengerAddress = addresses.L1FastMessengerAddress
+        console.log("LEGACY: L1FastMessengerAddress set to:", this.L1FastMessengerAddress)
+      }
 
       //backwards compat
       if (addresses.hasOwnProperty('Proxy__OVM_L1StandardBridge'))
         this.L1StandardBridgeAddress = addresses.Proxy__OVM_L1StandardBridge
       else this.L1StandardBridgeAddress = addresses.L1StandardBridge
 
-      this.L1ERC20Address = addresses.L1ERC20
-      this.L2ERC20Address = addresses.L2ERC20
+      this.L1ERC20Address = addresses.TOKENS.TEST.L1
+      this.L2ERC20Address = addresses.TOKENS.TEST.L2
 
       this.L1LPAddress = addresses.L1LiquidityPool
       this.L2LPAddress = addresses.L2LiquidityPool
@@ -324,7 +338,8 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
       //backwards compat
       if (addresses.hasOwnProperty('L2ERC721'))
         this.ERC721Address = addresses.L2ERC721
-      else this.ERC721Address = addresses.ERC721
+      else 
+        this.ERC721Address = addresses.ERC721
 
       this.L2TokenPoolAddress = addresses.L2TokenPool
       this.AtomicSwapAddress = addresses.AtomicSwap
@@ -334,30 +349,38 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
         L1StandardBridgeJson.abi,
         this.provider.getSigner()
       )
+      //console.log("L1StandardBridgeContract:", this.L1StandardBridgeContract.address)
 
       this.L2StandardBridgeContract = new ethers.Contract(
         this.L2StandardBridgeAddress,
         L2StandardBridgeJson.abi,
         this.provider.getSigner()
       )
+      //console.log("L2StandardBridgeContract:", this.L2StandardBridgeContract.address)
 
       this.L2ETHContract = new ethers.Contract(
         this.L2ETHAddress,
         L2ERC20Json.abi,
         this.provider.getSigner()
       )
+      //console.log("L2ETHContract:", this.L2ETHContract.address)
 
+      /*The test token?*/
       this.L1ERC20Contract = new ethers.Contract(
-        this.L1ERC20Address,
+        addresses.TOKENS.TEST.L1,
+        //this.L1ERC20Address,
         L1ERC20Json.abi,
         this.provider.getSigner()
       )
+      console.log("L1ERC20Contract:", this.L1ERC20Contract.address)
 
       this.L2ERC20Contract = new ethers.Contract(
-        this.L2ERC20Address,
+        addresses.TOKENS.TEST.L2,
+        //this.L2ERC20Address,
         L2ERC20Json.abi,
         this.provider.getSigner()
       )
+      console.log("L2ERC20Contract:", this.L2ERC20Contract.address)
 
       // Liquidity pools
       this.L1LPContract = new ethers.Contract(
@@ -487,6 +510,7 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
   }
 
   async getExits() {
+
     //this is NOT SUPPORTED on LOCAL
 
     if (this.masterSystemConfig === 'rinkeby') {
@@ -514,27 +538,36 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
 
   async getBalances() {
     try {
+      
       const rootChainBalance = await this.L1Provider.getBalance(this.account)
+      console.log("ETH balance on L1:", rootChainBalance.toString())
+
       const ERC20L1Balance = await this.L1ERC20Contract.connect(
         this.L1Provider
       ).balanceOf(this.account)
+      console.log("Balance of the test token on L1:", ERC20L1Balance.toString())
 
       const childChainBalance = await this.L2Provider.getBalance(this.account)
+      console.log("wETH balance on L2:", childChainBalance.toString())
+      
       const ERC20L2Balance = await this.L2ERC20Contract.connect(
         this.L2Provider
       ).balanceOf(this.account)
+      console.log("Balance of the test token on L2:", ERC20L2Balance.toString())
 
       // //how many NFTs do I own?
       const ERC721L2Balance = await this.ERC721Contract.connect(
         this.L2Provider
       ).balanceOf(this.account)
-      // console.log("ERC721L2Balance",ERC721L2Balance)
-      // console.log("this.account",this.account)
-      // console.log(this.ERC721Contract)
+      console.log("ERC721L2Balance",ERC721L2Balance)
+      //console.log("this.account",this.account)
+      console.log(this.ERC721Contract)
 
       //let see if we already know about them
       const myNFTS = getNFTs()
       const numberOfNFTS = Object.keys(myNFTS).length
+
+      console.log('Checking NFTs')
 
       if (Number(ERC721L2Balance.toString()) !== numberOfNFTS) {
         //oh - something just changed - either got one, or sent one
@@ -591,16 +624,23 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
         // console.log("No NFT changes")
         //all set - do nothing
       }
-
+      
       const ethToken = await getToken(this.L1ETHAddress)
+      console.log('Checking ethToken:',ethToken)
+
       let testToken = null
 
       //For testing - we always provide a test token
       if (this.L1orL2 === 'L1') {
+        //console.log('await getToken(this.L1ERC20Address):',this.L1ERC20Contract.address)
         testToken = await getToken(this.L1ERC20Address)
+        //console.log('getToken(this.L1ERC20Address):')
       } else {
+        //console.log('await getToken(this.L2ERC20Address):',this.L2ERC20Contract.address)
         testToken = await getToken(this.L2ERC20Address)
       }
+
+      console.log('testToken:',testToken)
 
       const rootchainEthBalance = [
         {
@@ -609,7 +649,7 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
         },
         {
           ...testToken,
-          currency: this.L1ETHAddress,
+          currency: this.L1ERC20Address,
           amount: new BN(ERC20L1Balance.toString()),
         },
       ]
@@ -627,6 +667,9 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
           amount: new BN(ERC20L2Balance.toString()),
         },
       ]
+
+      console.log("rootchainEthBalance:",rootchainEthBalance)
+      console.log("childchainEthBalance:",childchainEthBalance)
 
       return {
         rootchain: orderBy(rootchainEthBalance, (i) => i.currency),

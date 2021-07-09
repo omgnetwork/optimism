@@ -30,6 +30,8 @@ describe('System setup', async () => {
 
     env = await OptimismEnv.new()
 
+    console.log(env.addressesOMGX)
+
     Factory__L1ERC20 = new ContractFactory(
       L1ERC20Json.abi,
       L1ERC20Json.bytecode,

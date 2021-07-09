@@ -30,11 +30,15 @@ const deployFn: DeployFunction = async (hre) => {
     true,
   )
 
+  let tokenAddresses = {}; 
+
   for (let token of preSupportedTokens.supportedTokens) {
+    
     //Mint a new token on L1 and set up the L1 and L2 infrastructure
     // [initialSupply, name, symbol]
     // this is owned by bobl1Wallet
-    if ((hre as any).deployConfig.network === 'local' || token.symbol === 'JLKN') {
+    if ((hre as any).deployConfig.network === 'local' || token.symbol === 'TEST') {
+      //goal is not to deploy on testnets or mainnet, since those tokens will already exist
       L1ERC20 = await Factory__L1ERC20.deploy(
         initialSupply,
         token.name,
@@ -49,11 +53,11 @@ const deployFn: DeployFunction = async (hre) => {
         abi: L1ERC20Json.abi,
       };
 
-      await hre.deployments.save(`L1${token.symbol}`, L1ERC20DeploymentSubmission)
-      console.log(`🌕 ${chalk.red(`L1 ${token.name} deployed to`)} ${chalk.green(L1ERC20.address)}`)
+      await hre.deployments.save(`TK_L1${token.symbol}`, L1ERC20DeploymentSubmission)
+      console.log(`🌕 ${chalk.red(`L1 ${token.name} was newly deployed to`)} ${chalk.green(L1ERC20.address)}`)
     } else {
-      await hre.deployments.save(`L1${token.symbol}`, { abi: L1ERC20Json.abi, address: token.address })
-      console.log(`🌕 ${chalk.red(`L1 ${token.name} saved to`)} ${chalk.green(token.address)}`)
+      await hre.deployments.save(`TK_L1${token.symbol}`, { abi: L1ERC20Json.abi, address: token.address })
+      console.log(`🌕 ${chalk.red(`L1 ${token.name} is located at`)} ${chalk.green(token.address)}`)
     }
 
     //Set up things on L2 for this new token
@@ -73,9 +77,8 @@ const deployFn: DeployFunction = async (hre) => {
       address: L2ERC20.address,
       abi: L2ERC20.abi,
     };
-    await hre.deployments.save(`L2${token.symbol}`, L2ERC20DeploymentSubmission)
-    console.log(`🌕 ${chalk.red(`L2 ${token.name} deployed to`)} ${chalk.green(L2ERC20.address)}`)
-
+    await hre.deployments.save(`TK_L2${token.symbol}`, L2ERC20DeploymentSubmission)
+    console.log(`🌕 ${chalk.red(`L2 ${token.name} was deployed to`)} ${chalk.green(L2ERC20.address)}`)
   }
 }
 

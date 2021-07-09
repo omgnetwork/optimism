@@ -172,7 +172,6 @@ Then, open a second terminal window and navigate to `packages/omgx/wallet-fronte
 
 ```bash
 $ yarn get_artifacts #this will get all the contract artifacts - note that this will only work correctly if you ran `yarn build` at the top level per instructions
-$ yarn build
 $ yarn start
 ```
 

@@ -1,8 +1,8 @@
 {
    "supportedTokens": [
       {
-         "name": "JLKN Token",
-         "symbol": "JLKN"
+         "name": "TEST Token",
+         "symbol": "TEST"
       },
       {
          "name": "Tether USD",

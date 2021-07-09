@@ -53,7 +53,6 @@ Typically, you will only have to build everything once, and after that, you can 
 
 ```bash
 $ yarn get_artifacts #this will get all the contract artifacts - note that this will only work correctly if you ran `yarn build` at the top level per instructions
-$ yarn build
 $ yarn start
 ```
 

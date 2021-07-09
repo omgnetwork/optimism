@@ -32,6 +32,8 @@ export async function getToken ( tokenContractAddress ) {
   /*****************************************************************/
 
   const state = store.getState();
+  console.log(state)
+  console.log(_tokenContractAddress)
   if (state.tokenList[_tokenContractAddress]) {
     //console.log("tokenAction = token in list:",_tokenContractAddress)
     return state.tokenList[_tokenContractAddress];
