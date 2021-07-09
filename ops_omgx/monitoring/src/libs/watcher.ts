@@ -1,6 +1,7 @@
 /* External Imports */
 import { ethers } from 'ethers'
 import { Provider, TransactionReceipt } from '@ethersproject/abstract-provider'
+import * as configs from '../configs'
 import logger from '../logger'
 
 export interface Layer {
@@ -128,11 +129,10 @@ export class Watcher {
       logger.debug('Watcher polling::layer.provider.getTransactionReceipt pre filter')
 
       // check timeout
-      const timeout = parseInt(process.env.DUMMY_TIMEOUT_MINS, 10) || 5
-      let isFound = false
-      setTimeout(() => {
-        if (!isFound) reject(Error('Timeout'))
-      }, timeout * 60 * 1000)
+      const timeout = setTimeout(() => {
+        layer.provider.off(filter)
+        reject(Error('Timeout'))
+      }, configs.dummyWathcherTimeoutMins * 60 * 1000)
 
       // listener that triggers on filter event
       layer.provider.on(filter, async (log: any) => {
@@ -140,7 +140,7 @@ export class Watcher {
         logger.debug(log)
         if (log.data === msgHash) {
           logger.debug('FOUND')
-          isFound = true
+          clearTimeout(timeout)
           try {
             const txReceipt = await layer.provider.getTransactionReceipt(log.transactionHash)
             layer.provider.off(filter)

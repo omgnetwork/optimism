@@ -2,6 +2,9 @@
   "name": "omgx-liquidity-pool-utils",
   "version": "1.0.0",
   "main": "src/app.ts",
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "scripts": {
     "test": "jest --coverage",
     "start": "ts-node src/app.ts",
