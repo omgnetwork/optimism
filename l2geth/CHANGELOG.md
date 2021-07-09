@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.3
+
+### Patch Changes
+
+- 6e2074c5: Update the `RollupClient` transaction type to use `hexutil.Big`
+
+## 0.4.2
+
+### Patch Changes
+
+- 7e04137d: Handle errors correctly in the RollupClient and retry in the SyncService when initially attempting to connect to the DTL
+
 ## 0.4.1
 
 ### Patch Changes

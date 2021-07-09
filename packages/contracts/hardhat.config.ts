@@ -14,6 +14,7 @@ import 'hardhat-deploy'
 import '@typechain/hardhat'
 import '@eth-optimism/hardhat-ovm'
 import './tasks/deploy'
+import './tasks/l2-gasprice'
 import 'hardhat-gas-reporter'
 
 // Load environment variables from .env
@@ -45,6 +46,9 @@ const config: HardhatUserConfig = {
     version: '0.7.6',
     settings: {
       optimizer: { enabled: true, runs: 200 },
+      metadata: {
+        bytecodeHash: 'none',
+      },
       outputSelection: {
         '*': {
           '*': ['storageLayout'],

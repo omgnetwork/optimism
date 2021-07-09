@@ -1,5 +1,23 @@
 # @eth-optimism/integration-tests
 
+## 0.2.1
+
+### Patch Changes
+
+- f1dc8b77: Add various stress tests
+
+## 0.2.0
+
+### Minor Changes
+
+- aa6fad84: Various updates to integration tests so that they can be executed against production networks
+
+## 0.1.2
+
+### Patch Changes
+
+- b107a032: Make expectApprox more readable by passing optional args as an object with well named keys
+
 ## 0.1.1
 
 ### Patch Changes
