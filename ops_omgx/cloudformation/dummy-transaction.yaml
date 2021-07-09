@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Enya Message Relayer Application Deployment"
+Description: "Omgx Monitor Deployment"
 
 Parameters:
   EnvironmentName:
@@ -14,9 +14,9 @@ Parameters:
     Type: String
     Default: push2aws
 
-  MessageRelayerImage:
+  OmgxMonitorImage:
     Type: String
-    Default: message-relayer
+    Default: dummy-transaction
 
   DockerPrefix:
     Type: String
@@ -63,44 +63,37 @@ Resources:
                   - "secretsmanager:ListSecretVersionIds"
                 Resource:
                   - arn:aws:secretsmanager:us-east-1:942431445534:secret:*
-  MessageRelayerLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      RetentionInDays: 7
-      LogGroupName: !Sub "/omgx/${EnvironmentName}/message-relayer/${ImageTag}"
 
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
       ContainerDefinitions:
-        - Image: !Sub "${ECRRegistry}/${DockerPrefix}/${MessageRelayerImage}:${ImageTag}"
-          Name: message_relayer
+        - Image: !Sub "${ECRRegistry}/${DockerPrefix}/${OmgxMonitorImage}:dummy-${ImageTag}"
+          Name: dummy-transaction
           Environment:
             - Name: SECRETNAME
               Value: !Ref SecretName
-            - Name: DEPLOYER_HTTP
+            - Name: L2_NODE_WEB3_WS
               Value: !Sub
-                - "http://${EndpointAddress}:8081"
-                - EndpointAddress:
-                    Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerInt:DNSName"
-            - Name: L2_NODE_WEB3_URL
-              Value: !Sub
-                - "https://${EndpointAddress}"
+                - "wss://${EndpointAddress}/ws"
                 - EndpointAddress:
                     Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
-            - Name: RETRIES
-              Value: 3600
+            - Name: URL
+              Value: !Sub
+                - "http://${EndpointAddress}:8081/addresses.json"
+                - EndpointAddress:
+                    Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerInt:DNSName"
           EntryPoint:
-            - "/opt/wait-for-l1-and-l2.sh"
+            - "/usr/local/bin/entrypoint.sh"
           DockerLabels:
-            com.datadoghq.ad.check_names: '["message_relayer"]'
+            com.datadoghq.ad.check_names: '["dummy_transaction"]'
             com.datadoghq.ad.init_configs: '[{}]'
-            com.datadoghq.ad.logs: '[{"source": "message_relayer", "service": "message_relayer"}]'
+            com.datadoghq.ad.logs: '[{"source": "dummy_transaction", "service": "dummy_transaction", "log_processing_rules": [{ "type": "multi_line", "name": "log_start_with_message", "pattern" : "%{PROG}" }]}]'
           Essential: true
-          Memory: "1024"
+          Memory: "256"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
-      Family: !Sub "MessageRelayer-${EnvironmentName}"
+      Family: !Sub "OmgxMonitor-${EnvironmentName}"
   ECSService:
     Type: AWS::ECS::Service
     Properties:
@@ -109,5 +102,5 @@ Resources:
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: !Sub "MessageRelayer-${EnvironmentName}"
+      ServiceName: !Sub "OmgxMonitor-${EnvironmentName}"
       TaskDefinition: !Ref TaskDefinition
