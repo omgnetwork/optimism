@@ -38,7 +38,8 @@ const deployFn: DeployFunction = async (hre) => {
     // [initialSupply, name, symbol]
     // this is owned by bobl1Wallet
     if ((hre as any).deployConfig.network === 'local' || token.symbol === 'TEST') {
-      //goal is not to deploy on testnets or mainnet, since those tokens will already exist
+      //goal is not to deploy existing Tokens on testnets or mainnet
+      
       L1ERC20 = await Factory__L1ERC20.deploy(
         initialSupply,
         token.name,
@@ -64,8 +65,7 @@ const deployFn: DeployFunction = async (hre) => {
     // [L2StandardBridgeAddress, L1TokenAddress, tokenName, tokenSymbol]
     L2ERC20 = await Factory__L2ERC20.deploy(
       (hre as any).deployConfig.L2StandardBridgeAddress,
-      ((hre as any).deployConfig.network === 'local' || token.symbol === 'JLKN' ) ?
-        L1ERC20.address : token.address,
+      ((hre as any).deployConfig.network === 'local' || token.symbol === 'JLKN' ) ? L1ERC20.address : token.address,
       token.name,
       token.symbol,
       {gasLimit: 800000, gasPrice: 0}

@@ -6,7 +6,6 @@ import { Contract, ContractFactory, BigNumber, utils, ethers } from 'ethers'
 import { Direction } from './shared/watcher-utils'
 import { getContractFactory } from '@eth-optimism/contracts';
 
-
 import L1ERC20Json from '../contracts/L1ERC20.json'
 import L1LiquidityPoolJson from '../contracts/L1LiquidityPool.json'
 import L2LiquidityPoolJson from '../contracts/L2LiquidityPool.json'
@@ -65,6 +64,7 @@ describe('Liquidity Pool Test', async () => {
     *****************************/
 
     console.log(env.addressesOMGX)
+
     const L1StandardBridgeAddress = await env.addressManager.getAddress('Proxy__OVM_L1StandardBridge')
 
     L1LiquidityPool = new Contract(
@@ -86,8 +86,8 @@ describe('Liquidity Pool Test', async () => {
 
     const L2StandardBridgeAddress = await L1StandardBridge.l2TokenBridge()
 
-
     // we want to deploy new ERC20 for each test run
+    // No, we do not - we want to test thing using the standard TEST token minted by the deployer.
     L1ERC20 = await Factory__L1ERC20.deploy(
       initialSupply,
       tokenName,
