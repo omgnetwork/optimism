@@ -5,14 +5,14 @@ version: "3"
 services:
   # base service builder
   builder:
-    image: ethereumoptimism/builder
+    image: omgx/builder:latest
     build:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.monorepo
 
   # this is a helper service used because there's no official hardhat image
   l1_chain:
-    image: ethereumoptimism/hardhat
+    image: omgx/hardhat:latest
     build:
       context: ./docker/hardhat
       dockerfile: Dockerfile
@@ -23,7 +23,7 @@ services:
   deployer:
     depends_on:
       - l1_chain
-    image: ethereumoptimism/deployer
+    image: omgx/deployer:latest
     build:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.deployer
@@ -31,15 +31,15 @@ services:
     environment:
         FRAUD_PROOF_WINDOW_SECONDS: 0
         L1_NODE_WEB3_URL: http://l1_chain:8545
+        CHAIN_ID: 28
         # these keys are hardhat's first 2 accounts, DO NOT use in production
         DEPLOYER_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         SEQUENCER_PRIVATE_KEY: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+        PROPOSER_PRIVATE_KEY: "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
+        RELAYER_PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
         # skip compilation when run in docker-compose, since the contracts
         # were already compiled in the builder step
         NO_COMPILE: 1
-        CHAIN_ID: 28
-        PROPOSER_PRIVATE_KEY: '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a'
-        RELAYER_PRIVATE_KEY: '0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97'
     ports:
         # expose the service to the host for getting the contract addrs
       - ${DEPLOYER_PORT:-8080}:8081
@@ -49,7 +49,7 @@ services:
       - l1_chain
       - deployer
       - l2geth
-    image: ethereumoptimism/data-transport-layer
+    image: omgx/data-transport-layer:latest
     build:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.data-transport-layer
@@ -74,7 +74,7 @@ services:
     depends_on:
       - l1_chain
       - deployer
-    image: ethereumoptimism/l2geth
+    image: omgx/l2geth:latest
     build:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.geth
@@ -102,7 +102,7 @@ services:
       - l1_chain
       - deployer
       - l2geth
-    image: ethereumoptimism/message-relayer
+    image: omgx/message-relayer:latest
     build:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.message-relayer
@@ -124,7 +124,7 @@ services:
       - l1_chain
       - deployer
       - l2geth
-    image: ethereumoptimism/batch-submitter
+    image: omgx/batch-submitter:latest
     build:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.batch-submitter
@@ -136,14 +136,14 @@ services:
         L2_NODE_WEB3_URL: http://l2geth:8545
         URL: http://deployer:8081/addresses.json
         SEQUENCER_PRIVATE_KEY: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
-        PROPOSER_PRIVATE_KEY: '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a'
+        PROPOSER_PRIVATE_KEY: "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
 
   verifier:
     depends_on:
       - l1_chain
       - deployer
       - dtl
-    image: ethereumoptimism/l2geth
+    image: omgx/l2geth:latest
     deploy:
       replicas: 0
     build:
@@ -168,7 +168,7 @@ services:
   replica:
     depends_on:
       - dtl
-    image: ethereumoptimism/l2geth
+    image: omgx/l2geth:latest
     deploy:
       replicas: 0
     build:
@@ -191,7 +191,7 @@ services:
       - ${L2GETH_WS_PORT:-8550}:8546
 
   integration_tests:
-    image: ethereumoptimism/integration-tests
+    image: omgx/integration-tests:latest
     deploy:
        replicas: 0
     build:
@@ -204,7 +204,6 @@ services:
       URL: http://deployer:8081/addresses.json
       ENABLE_GAS_REPORT: 1
       NO_NETWORK: 1
-      L2_CHAINID: 28
 
   gas_oracle:
     image: ethereumoptimism/gas-oracle
