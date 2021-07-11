@@ -87,7 +87,7 @@ describe('Liquidity Pool Test', async () => {
     const L2StandardBridgeAddress = await L1StandardBridge.l2TokenBridge()
 
     // we want to deploy new ERC20 for each test run
-    // No, we do not - we want to test thing using the standard TEST token minted by the deployer.
+    // Perhaps, using the standard TEST token minted by the deployer?
     L1ERC20 = await Factory__L1ERC20.deploy(
       initialSupply,
       tokenName,

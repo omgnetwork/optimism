@@ -150,38 +150,3 @@ yarn build:integration
 yarn test:integration
 ```
 
-## Front End Development
-
-Start a local L1/L2. 
-
-You can change the BUILD and DAEMON values to control if everything is rebuilt (`BUILD=1`, very slow), and if you want to see all the debug information (`DAEMON=0`).
-
-```bash
-$ cd ops
-$ BUILD=1 DAEMON=0 ./up_local.sh
-```
-
-Typically, you will only have to build everything once, and after that, you can save time by setting `BUILD` to `2`. In that case, we'll use the docker images you built earlier.
-
-```bash
-$ cd ops
-$ BUILD=2 DAEMON=0 ./up_local.sh
-```
-
-Then, open a second terminal window and navigate to `packages/omgx/wallet-frontend`, and run
-
-```bash
-$ yarn get_artifacts #this will get all the contract artifacts - note that this will only work correctly if you ran `yarn build` at the top level per instructions
-$ yarn start
-```
-
-and the frontend should start up in a local browser. You can also develop on the Rinkeby testnet - in that case, you do not need to run a local L1/L2. If you would like to do that, just change the .env settings:
-
-```bash
-# This is for working on the wallet, pointed at the OMGX Rinkeby testnet
-REACT_APP_INFURA_ID=
-REACT_APP_ETHERSCAN_API=
-REACT_APP_POLL_INTERVAL=20000
-SKIP_PREFLIGHT_CHECK=true
-REACT_APP_WALLET_VERSION=1.0.10
-```

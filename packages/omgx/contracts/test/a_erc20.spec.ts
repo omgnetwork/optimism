@@ -65,7 +65,7 @@ describe('System setup', async () => {
     console.log(`🌕 ${chalk.red('L1ERC20 TEST token balance for Deployer PK:')} ${chalk.green(preL1ERC20Balance.toString())}`)
     console.log(`🌕 ${chalk.red('L2ERC20 TEST token balance for Deployer PK:')} ${chalk.green(preL2ERC20Balance.toString())}`)
 
-    const depositL2ERC20Amount = utils.parseEther("1234")
+    const depositL2ERC20Amount = utils.parseEther("12345")
 
     const approveL1ERC20TX = await L1ERC20.approve(
       L1StandardBridgeAddress,
@@ -122,7 +122,7 @@ describe('System setup', async () => {
 
   it('should transfer ERC20 TEST token to Alice', async () => {
 
-    const transferL2ERC20Amount = utils.parseEther("999")
+    const transferL2ERC20Amount = utils.parseEther("1111")
 
     let preDepL2ERC20Balance = await L2ERC20.balanceOf(env.deployerl2Wallet.address)
     const preAliceL2ERC20Balance = await L2ERC20.balanceOf(env.alicel2Wallet.address)
