@@ -10,8 +10,6 @@ import {
   l2Provider,
   bobl1Wallet,
   bobl2Wallet,
-  deployerl1Wallet,
-  deployerl2Wallet,
   alicel1Wallet,
   alicel2Wallet,
   katel1Wallet,
@@ -52,9 +50,6 @@ export class OptimismEnv {
   bobl1Wallet: Wallet
   bobl2Wallet: Wallet
 
-  deployerl1Wallet: Wallet
-  deployerl2Wallet: Wallet
-
   alicel1Wallet: Wallet
   alicel2Wallet: Wallet
 
@@ -72,8 +67,6 @@ export class OptimismEnv {
     this.watcher = args.watcher
     this.bobl1Wallet = args.bobl1Wallet
     this.bobl2Wallet = args.bobl2Wallet
-    this.deployerl1Wallet = args.deployerl1Wallet
-    this.deployerl2Wallet = args.deployerl2Wallet
     this.alicel1Wallet = args.alicel1Wallet
     this.alicel2Wallet = args.alicel2Wallet
     this.katel1Wallet = args.katel1Wallet
@@ -126,9 +119,6 @@ export class OptimismEnv {
 
       bobl1Wallet,
       bobl2Wallet,
-
-      deployerl1Wallet,
-      deployerl2Wallet,
 
       alicel1Wallet,
       alicel2Wallet,

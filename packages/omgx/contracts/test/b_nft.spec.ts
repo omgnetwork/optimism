@@ -23,14 +23,14 @@ describe('NFT Test\n', async () => {
 
     env = await OptimismEnv.new()
 
-    owner = env.deployerl2Wallet.address;
+    owner = env.bobl2Wallet.address;
 
     recipient = env.alicel2Wallet.address;
 
     L2ERC721 = new Contract(
       env.addressesOMGX.L2ERC721,
       L2ERC721Json.abi,
-      env.deployerl2Wallet
+      env.bobl2Wallet
     )
 
     console.log(` 🔒 ${chalk.red('ERC721 owner:')} ${chalk.green(owner)}`)

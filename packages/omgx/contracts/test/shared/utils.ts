@@ -36,9 +36,8 @@ export const L2_NODE_WEB3_URL = process.env.L2_NODE_WEB3_URL || 'http://localhos
 export const l1Provider = new providers.JsonRpcProvider(L1_NODE_WEB3_URL)
 export const l2Provider = new providers.JsonRpcProvider(L2_NODE_WEB3_URL)
 
-// Deployer account which owns the TEST token, among other things
-export const deployerl1Wallet = new Wallet(process.env.DEPLOYER_PRIVATE_KEY,l1Provider)
-export const deployerl2Wallet = deployerl1Wallet.connect(l2Provider)
+// Deployer account owns the TEST token, among other things
+// NOTE: TEST_PRIVATE_KEY_1 == DEPLOYER_PRIVATE_KEY
 
 // An account for testing which is funded on L1
 export const bobl1Wallet = new Wallet(process.env.TEST_PRIVATE_KEY_1,l1Provider)

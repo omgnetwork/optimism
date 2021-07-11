@@ -32,7 +32,7 @@ describe('System setup', async () => {
     
     L1StandardBridge = getContractFactory(
       "OVM_L1StandardBridge",
-      env.deployerl1Wallet
+      env.bobl1Wallet
     ).attach(L1StandardBridgeAddress)
         const L2StandardBridgeAddress = await L1StandardBridge.l2TokenBridge()
 
@@ -40,12 +40,12 @@ describe('System setup', async () => {
     L1ERC20 = new Contract(
       env.addressesOMGX.TOKENS.TEST.L1,
       L1ERC20Json.abi,
-      env.deployerl1Wallet
+      env.bobl1Wallet
     )
 
     Factory__L2ERC20 = getContractFactory(
       "L2StandardERC20",
-      env.deployerl2Wallet,
+      env.bobl2Wallet,
       true,
     )
 
@@ -53,14 +53,14 @@ describe('System setup', async () => {
     L2ERC20 = new Contract(
       env.addressesOMGX.TOKENS.TEST.L2,
       Factory__L2ERC20.interface,
-      env.deployerl2Wallet
+      env.bobl2Wallet
     )
   })
 
   it('should use the recently deployed ERC20 TEST token and send some from L1 to L2', async () => {
 
-    const preL1ERC20Balance = await L1ERC20.balanceOf(env.deployerl1Wallet.address)
-    const preL2ERC20Balance = await L2ERC20.balanceOf(env.deployerl2Wallet.address)
+    const preL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
+    const preL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
 
     console.log(`🌕 ${chalk.red('L1ERC20 TEST token balance for Deployer PK:')} ${chalk.green(preL1ERC20Balance.toString())}`)
     console.log(`🌕 ${chalk.red('L2ERC20 TEST token balance for Deployer PK:')} ${chalk.green(preL2ERC20Balance.toString())}`)
@@ -84,8 +84,8 @@ describe('System setup', async () => {
       Direction.L1ToL2
     )
 
-    const postL1ERC20Balance = await L1ERC20.balanceOf(env.deployerl1Wallet.address)
-    const postL2ERC20Balance = await L2ERC20.balanceOf(env.deployerl2Wallet.address)
+    const postL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
+    const postL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
 
     console.log(`🌕 ${chalk.red('L1ERC20 TEST token balance for Deployer PK now:')} ${chalk.green(postL1ERC20Balance.toString())}`)
     console.log(`🌕 ${chalk.red('L2ERC20 TEST token balance for Deployer PK now:')} ${chalk.green(postL2ERC20Balance.toString())}`)
@@ -124,7 +124,7 @@ describe('System setup', async () => {
 
     const transferL2ERC20Amount = utils.parseEther("1111")
 
-    let preDepL2ERC20Balance = await L2ERC20.balanceOf(env.deployerl2Wallet.address)
+    let preBobL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
     const preAliceL2ERC20Balance = await L2ERC20.balanceOf(env.alicel2Wallet.address)
 
     const tranferToAliceTX = await L2ERC20.transfer(
@@ -134,11 +134,11 @@ describe('System setup', async () => {
     )
     await tranferToAliceTX.wait()
 
-    let postDepL2ERC20Balance = await L2ERC20.balanceOf(env.deployerl2Wallet.address)
+    let postBobL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
     const postAliceL2ERC20Balance = await L2ERC20.balanceOf(env.alicel2Wallet.address)
 
-    expect(postDepL2ERC20Balance).to.deep.eq(
-      preDepL2ERC20Balance.sub(transferL2ERC20Amount)
+    expect(postBobL2ERC20Balance).to.deep.eq(
+      preBobL2ERC20Balance.sub(transferL2ERC20Amount)
     )
     
   })
