@@ -23,14 +23,6 @@ With all this done we can move on to actually spinning up a local version of the
 **NOTE: You should recompile all packages whenever you move from one  branch to another.**  
 Use the below commands to recompile the packages.
 
-<!-- Normally, after you have built the docker images once, all you have to do is to run:
-
-```bash
-$ BUILD=0 DAEMON=0 ./up_local.sh
-```
-
-and your computer will use the docker images you built earlier.  -->
-
 Note: _Running out of space on your Docker, or having other having hard to debug issues_? Try running `docker system prune -a --volumes` and then rebuild the images. 
 
 ## Starting a local basic Optimism L1/L2
@@ -38,7 +30,6 @@ Note: _Running out of space on your Docker, or having other having hard to debug
 You can change the BUILD and DAEMON values to control if everything is rebuilt (`BUILD=1`, very slow), and if you want to see all the debug information (`DAEMON=0`)
 
 **Before running any Docker related commands make sure you have Docker up and running.**
-
 
 ```bash
 cd ops
@@ -48,9 +39,6 @@ docker-compose build
 docker-compose up -V
 ```
 
-If you run into issues errors when running `docker-compose build` restart Docker before trying anything else. 
-
-The `-V` setting is critical, since otherwise your Docker images may have stale information in them from previous runs, which will confuse the `data-transport-layer`, among other things. 
 
 ## (Re)Building the entire system or parts of the base L1/L2
 

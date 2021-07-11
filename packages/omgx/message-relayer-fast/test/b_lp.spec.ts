@@ -29,43 +29,37 @@ describe('Liquidity Pool Test', async () => {
 
   let env: OptimismEnv
 
-  const initialSupply = utils.parseEther("10000000000")
-  const tokenName = 'JLKN'
-  const tokenSymbol = 'JLKN'
-
-  /************* BOB owns all the pools, and ALICE mints a new token ***********/
   before(async () => {
 
     env = await OptimismEnv.new()
 
-    Factory__L1ERC20 = new ContractFactory(
+    const L1StandardBridgeAddress = await env.addressManager.getAddress('Proxy__OVM_L1StandardBridge')
+
+    L1StandardBridge = getContractFactory(
+      "OVM_L1StandardBridge",
+      env.bobl1Wallet
+    ).attach(L1StandardBridgeAddress)
+    
+    const L2StandardBridgeAddress = await L1StandardBridge.l2TokenBridge()
+
+    //let's use the TEST token we minted when the omgx contracts were deployed
+    L1ERC20 = new Contract(
+      env.addressesOMGX.TOKENS.TEST.L1,
       L1ERC20Json.abi,
-      L1ERC20Json.bytecode,
       env.bobl1Wallet
     )
 
     Factory__L2ERC20 = getContractFactory(
       "L2StandardERC20",
       env.bobl2Wallet,
-      true
+      true,
     )
 
-    /****************************
-    //  * THIS NEEDS TO BE CHANGED/UPDATED TO TEST THE DEPLOYED CONTRACTS
-    //  * The addresses are at
-
-    //  export const getOMGXDeployerAddresses = async () => {
-    //    var options = {
-    //        uri: OMGX_URL,
-    //    }
-    //    const result = await request.get(options)
-    //    return JSON.parse(result)
-    // }
-    *****************************/
-
-    console.log(env.addressesOMGX)
-
-    const L1StandardBridgeAddress = await env.addressManager.getAddress('Proxy__OVM_L1StandardBridge')
+    L2ERC20 = new Contract(
+      env.addressesOMGX.TOKENS.TEST.L2,
+      Factory__L2ERC20.interface,
+      env.bobl2Wallet
+    )
 
     L1LiquidityPool = new Contract(
       env.addressesOMGX.L1LiquidityPool,
@@ -79,39 +73,15 @@ describe('Liquidity Pool Test', async () => {
       env.bobl2Wallet
     )
 
-    L1StandardBridge = getContractFactory(
-      "OVM_L1StandardBridge",
-      env.bobl1Wallet
-    ).attach(L1StandardBridgeAddress)
-
-    const L2StandardBridgeAddress = await L1StandardBridge.l2TokenBridge()
-
-    // we want to deploy new ERC20 for each test run
-    // Perhaps, using the standard TEST token minted by the deployer?
-    L1ERC20 = await Factory__L1ERC20.deploy(
-      initialSupply,
-      tokenName,
-      tokenSymbol
-    )
-    await L1ERC20.deployTransaction.wait()
-
-    L2ERC20 = await Factory__L2ERC20.deploy(
-      L2StandardBridgeAddress,
-      L1ERC20.address,
-      tokenName,
-      tokenSymbol,
-      {gasLimit: 800000, gasPrice: 0}
-    )
-    await L2ERC20.deployTransaction.wait()
-
     L2TokenPool = new Contract(
       env.addressesOMGX.L2TokenPool,
       L2TokenPoolJson.abi,
       env.bobl2Wallet
     )
+
   })
 
-  it('should deposit ERC20 token to L2', async () => {
+  it('should deposit 10000 TEST ERC20 token from L1 to L2', async () => {
 
     const depositL2ERC20Amount = utils.parseEther("10000");
 
@@ -147,7 +117,7 @@ describe('Liquidity Pool Test', async () => {
     )
   })
 
-  it('should transfer ERC20 token to Alice and Kate', async () => {
+  it('should transfer L2 ERC20 TEST token from Bob to Alice and Kate', async () => {
 
     const transferL2ERC20Amount = utils.parseEther("150")
 
@@ -186,7 +156,7 @@ describe('Liquidity Pool Test', async () => {
     )
   })
 
-  it('should add ERC20 token to token pool', async () => {
+  it('should add 1000 ERC20 TEST tokens to the L2 token pool', async () => {
 
     const addL2TPAmount = utils.parseEther("1000")
 

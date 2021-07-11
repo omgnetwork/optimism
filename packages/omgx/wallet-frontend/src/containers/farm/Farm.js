@@ -104,8 +104,8 @@ class Farm extends React.Component {
               <FarmList 
                 key={i}
                 logo={isETH ? ethLogo : JLKNLogo}
-                name={isETH ? "Ethereum" : "JLKN"}
-                shortName={isETH ? "ETH" : "JLKN"}
+                name={isETH ? "Ethereum" : "TEST"}
+                shortName={isETH ? "ETH" : "TEST"}
                 poolInfo={poolInfo.L1LP[v]}
                 userInfo={userInfo.L1LP[v]}
                 L1orL2Pool="L1LP"
@@ -121,8 +121,8 @@ class Farm extends React.Component {
               <FarmList 
                 key={i}
                 logo={isETH ? ethLogo : JLKNLogo}
-                name={isETH ? "Ethereum" : "JLKN"}
-                shortName={isETH ? "ETH" : "JLKN"}
+                name={isETH ? "Ethereum" : "TEST"}
+                shortName={isETH ? "ETH" : "TEST"}
                 poolInfo={poolInfo.L2LP[v]}
                 userInfo={userInfo.L2LP[v]}
                 L1orL2Pool="L2LP"

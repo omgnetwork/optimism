@@ -1,5 +1,7 @@
 ## Front End Development
 
+### Starting a local L1/L2
+
 Start a local L1/L2. You can change the BUILD and DAEMON values to control if everything is rebuilt (`BUILD=1`, very slow) and if you want to see all the debug information (`DAEMON=0`).
 
 ```bash
@@ -46,11 +48,20 @@ $ cd /packages/omgx/contracts
 $ yarn test:integration
 ```
 
-After runnnig this command, the acconut balances will change (changes in bold-face):
+After running this command, the account balances will change (changes in bold-face):
 
 Deployer (Bob, PK_1): **4999.7403** L1 ETH, **4999.9036** L2 oETH, **9999987655** L1 TEST, and **10235** L2 TEST
 Alice (PK_2):         4999.9967 L1 ETH, 5000.0000 L2 oETH, **1111** TEST on L2, **two** NFTs
 Kate: (PK_3):         4999.9967 L1 ETH, 5000.0000 L2 oETH, **999*** TEST on L2, zero NFTs
+
+### Test accounts for the swap on/off and the liquidity pools
+
+To work on the swap on/off and the liquidity pool UI, you should also pre-configure the pools. To do this, run:
+
+```bash
+$ cd /packages/omgx/message-relayer-fast
+$ yarn test:integration
+```
 
 ### Starting the react app
 
