@@ -1,9 +1,9 @@
-const { 
-  Contract, 
-  Wallet, 
-  ContractFactory, 
-  BigNumber, 
-  providers 
+const {
+  Contract,
+  Wallet,
+  ContractFactory,
+  BigNumber,
+  providers
 } = require('ethers');
 require('dotenv').config();
 
@@ -18,7 +18,7 @@ module.exports = {
   bob,
   alice,
   carol,
-  dev, 
+  dev,
   minter,
   Provider,
 }

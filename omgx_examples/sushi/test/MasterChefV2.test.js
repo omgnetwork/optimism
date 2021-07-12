@@ -46,11 +46,10 @@ describe("MasterChefV2", function () {
     await approveTX.wait()
     depositTX = await this.chef.deposit(0, getBigNumber(10))
     await depositTX.wait()
-
     await deploy(this, [
         ['chef2', MasterChefV2JSON, [this.chef.address, this.sushi.address, 1]],
         ["rlp", ERC20MockJSON, ["LP", "rLPT", getBigNumber(10)]],
-        ["r", ERC20MockJSON, ["Reward", "RewardT", getBigNumber(100000)]],
+        ["r", ERC20MockJSON, ["Reward", "RewardT", getBigNumber(100000)]]
     ])
     await deploy(this, [["rewarder", RewarderMockJSON, [getBigNumber(1), this.r.address, this.chef2.address]]])
     approveTX = await this.dummy.approve(this.chef2.address, getBigNumber(10))
@@ -186,7 +185,7 @@ describe("MasterChefV2", function () {
     })
 
     it("Depositing into non-existent pool should fail", async function () {
-      await expect(this.chef2.deposit(1001, getBigNumber(0), alice.address)).to.be.eventually.rejected;
+        await expect(this.chef2.deposit(1001, getBigNumber(0), alice.address)).to.be.eventually.rejected;
     })
   })
 
