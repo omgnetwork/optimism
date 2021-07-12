@@ -52,7 +52,7 @@ describe("MiniChefV2", function () {
     it("PoolLength should execute", async function () {
       const addTX = await this.chef.add(10, this.rlp.address, this.rewarder.address)
       await addTX.wait()
-      expect((await this.chef.poolLength())).to.be.equal(1);
+      expect((await this.chef.poolLength())).to.equal(1);
     })
   })
 
