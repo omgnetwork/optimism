@@ -23,6 +23,8 @@ import { getToken } from 'actions/tokenAction'
 import Modal from 'components/modal/Modal'
 
 import InputStep from './steps/InputStep'
+import InputStepFast from './steps/InputStepFast'
+
 import ApproveStep from './steps/ApproveStep'
 
 const ETH0x = '0x0000000000000000000000000000000000000000'
@@ -64,7 +66,24 @@ function DepositModal({ open, omgOnly = false, fast = false }) {
 
   return (
     <Modal open={open}>
-      {step === 'INPUT_STEP' && (
+      {!!fast && step === 'INPUT_STEP' && (
+        <InputStepFast
+          onClose={handleClose}
+          onNext={() => setStep('APPROVE_STEP')}
+          currency={currency}
+          currencyL2={currencyL2}
+          tokenInfo={tokenInfo}
+          tokenAddresses={tokenAddresses}
+          value={value}
+          setCurrency={setCurrency}
+          setCurrencyL2={setCurrencyL2}
+          setTokenAddresses={setTokenAddresses}
+          setTokenInfo={setTokenInfo}
+          setValue={setValue}
+          omgOnly={omgOnly}
+        />
+      )}
+      {!fast && step === 'INPUT_STEP' && (
         <InputStep
           onClose={handleClose}
           onNext={() => setStep('APPROVE_STEP')}
@@ -79,7 +98,6 @@ function DepositModal({ open, omgOnly = false, fast = false }) {
           setTokenInfo={setTokenInfo}
           setValue={setValue}
           omgOnly={omgOnly}
-          fast={fast}
         />
       )}
       {step === 'APPROVE_STEP' && (

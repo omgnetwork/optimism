@@ -18,6 +18,8 @@ import React from 'react'
 import Button from '../button/Button'
 import omgxIcon from '../../images/omg-icon-circle.png'
 import sushiIcon from '../../images/sushi-icon.png'
+import testIcon from '../../images/JLKN.svg'
+import usdtIcon from '../../images/usdt-icon.png'
 import etherIcon from '../../images/ether-icon.png'
 import * as styles from './iconSelect.module.scss'
 
@@ -25,6 +27,8 @@ const tokenIcons = {
   omgxIcon: omgxIcon,
   sushiIcon: sushiIcon,
   etherIcon: etherIcon,
+  usdtIcon: usdtIcon,
+  testIcon: testIcon,
 }
 
 function IconSelect({
@@ -111,7 +115,7 @@ function IconSelect({
             type="primary"
             style={{ flex: 0, whiteSpace: 'nowrap' }}
           >
-            Manual/Other
+            Other
           </Button>
         </div>
       }

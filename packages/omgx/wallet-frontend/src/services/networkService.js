@@ -61,6 +61,7 @@ const localAddresses = require(`../deployment/local/addresses.json`)
 const rinkebyAddresses = require(`../deployment/rinkeby/addresses.json`)
 const priorityTokens = require('../deployment/tokensPriority.json')
 const dropdownTokens = require('../deployment/tokensDropdown.json')
+const swapTokens = require('../deployment/tokensSwap.json')
 
 class NetworkService {
   constructor() {
@@ -1282,18 +1283,52 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
 
   async getPriorityTokens() {
     try {
-       let returnTokens = {}
+       let returnTokens = []
        //get the addresses from the address files
        priorityTokens.map((token) => {
-         const tN = token.symbol
-         returnTokens[tN] = {
+         let L1 = ''
+         let L2 = ''
+         if(token.symbol === 'ETH') {
+           L1 = 'ToDo'
+           L2 = 'ToDo'
+         } else {
+           L1 = this.tokenAddresses[token.symbol].L1
+           L2 = this.tokenAddresses[token.symbol].L2
+         }
+         let tokenF = {
+           symbol: token.symbol,
            icon: token.icon,
            name: token.name,
-           L1: this.tokenAddresses[tN].L1,
-           L2: this.tokenAddresses[tN].L2
+           L1,
+           L2
          }
+         returnTokens.push(tokenF)
        })
-      //console.log(returnTokens)
+      return returnTokens
+    } catch (error) {
+      return error
+    }
+  }
+
+  async getSwapTokens() {
+    try {
+       let returnTokens = []
+       //get the addresses from the address files
+       swapTokens.map((token) => {
+         let L1 = ''
+         if(token.symbol === 'ETH') {
+           L1 = 'ToDo'
+         } else {
+           L1 = this.tokenAddresses[token.symbol].L1
+         }
+         let tokenF = {
+           symbol: token.symbol,
+           icon: token.icon,
+           name: token.name,
+           L1
+         }
+         returnTokens.push(tokenF)
+       })
       return returnTokens
     } catch (error) {
       return error
