@@ -23,14 +23,12 @@ function InputStep({
   setValue,
   setTokenInfo,
 }) {
-
   const dispatch = useDispatch()
 
   const [tokens, setTokens] = useState([])
+  const [priorityTokens, setPriorityTokens] = useState([])
+  const [dropdownTokens, setDropDownTokens] = useState([])
   const [selectedToken, setSelectedToken] = useState(null)
-
-  const [LPBalance, setLPBalance] = useState(0)
-  const [feeRate, setFeeRate] = useState(0)
 
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
 
@@ -43,23 +41,35 @@ function InputStep({
   }, [])
 
   useEffect(() => {
-    if (selectedToken && selectedToken.title === 'manual') {
+    console.log(selectedToken)
+    if (selectedToken && selectedToken.label === 'manual') {
       setCurrency('')
       setCurrencyL2('')
-    } else if (!!selectedToken) {
-      setCurrency(selectedToken.L1)
-      setCurrencyL2(selectedToken.L2)
+    } else if (!!selectedToken && !!selectedToken.details) {
+      setCurrency(selectedToken.details.L1 || '')
+      setCurrencyL2(selectedToken.details.L2 || '')
     }
   }, [selectedToken, setCurrency, setCurrencyL2])
 
   useEffect(() => {
+    // load priority tokens
     networkService
       .getPriorityTokens()
       .then((res) => {
         setTokens(res)
+        setPriorityTokens(res)
       })
       .catch((err) => {
         console.log('error', err)
+      })
+    // load dropdown tokens
+    networkService
+      .getDropdownTokens()
+      .then((res) => {
+        setDropDownTokens(res)
+      })
+      .catch((err) => {
+        console.log('error dropdown tokens', err)
       })
   }, [])
 
@@ -81,21 +91,24 @@ function InputStep({
     value <= 0 ||
     !currency ||
     !ethers.utils.isAddress(currency) ||
-    (!currencyL2) ||
-    (!ethers.utils.isAddress(currencyL2))
+    !currencyL2 ||
+    !ethers.utils.isAddress(currencyL2)
 
   return (
     <>
-
       <h2>
-        {`Traditional Deposit ${ selectedToken ? selectedToken.symbol : ''}`}
+        {`Traditional Deposit ${
+          selectedToken && selectedToken.details
+            ? selectedToken.details.name
+            : ''
+        }`}
       </h2>
 
       {!selectedToken ? (
-        <IconSelect 
-          selectOptions={tokens} 
-          onTokenSelect={setSelectedToken} 
-          allOptions={true}
+        <IconSelect
+          priorityOptions={priorityTokens}
+          dropdownOptions={dropdownTokens}
+          onTokenSelect={setSelectedToken}
         />
       ) : null}
 
@@ -121,7 +134,7 @@ function InputStep({
       <Input
         label="Amount to deposit into OMGX"
         type="number"
-        unit={(tokenInfo && selectedToken) ? tokenInfo.symbol : ''}
+        unit={tokenInfo && selectedToken ? tokenInfo.symbol : ''}
         placeholder={0}
         value={value}
         onChange={(i) => setValue(i.target.value)}
@@ -135,7 +148,7 @@ function InputStep({
           <Button
             onClick={depositETH}
             type="primary"
-            style={{flex: 0}}
+            style={{ flex: 0 }}
             loading={depositLoading}
             tooltip="Your deposit is still pending. Please wait for confirmation."
             disabled={disabledSubmit}
@@ -147,7 +160,7 @@ function InputStep({
           <Button
             onClick={onNext}
             type="primary"
-            style={{flex: 0}}
+            style={{ flex: 0 }}
             disabled={disabledSubmit}
           >
             NEXT

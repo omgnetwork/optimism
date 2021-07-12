@@ -12,23 +12,14 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
-import React, { Component } from 'react'
+import React from 'react'
 import Select from 'react-select'
-import Button from '../button/Button'
+import etherIcon from '../../images/ether-icon.png'
+import testIcon from '../../images/JLKN.svg'
 import omgxIcon from '../../images/omg-icon-circle.png'
 import sushiIcon from '../../images/sushi-icon.png'
-import testIcon from '../../images/JLKN.svg'
 import usdtIcon from '../../images/usdt-icon.png'
-import etherIcon from '../../images/ether-icon.png'
 import * as styles from './iconSelect.module.scss'
-
-import { KeyboardArrowDown } from '@material-ui/icons'
-
-const options = [
-  { value: 'uni', label: 'UNI' },
-  { value: 'wbtx', label: 'WBTC' },
-  { value: 'manual', label: 'Other' }
-]
 
 const tokenIcons = {
   omgxIcon: omgxIcon,
@@ -39,101 +30,57 @@ const tokenIcons = {
 }
 
 function IconSelect({
-  selected,
   onTokenSelect,
-  selectOptions,
-  allOptions,
-  disabledSelect = false,
+  priorityOptions = [],
+  dropdownOptions = [],
 }) {
-  
-  const onSelect = (e) => {
-    let value = e.target.value
-    let selectedToken = selectOptions.find(
-      (t) => t.title.toLowerCase() === value.toLowerCase()
-    )
-    onTokenSelect(selectedToken)
-  }
-
-  const renderOptions = (
-    <div className={styles.selectContainer}>
-      <Select options={options} />
-      {/*<!--
-      <select
-        className={styles.select}
-        value={selectOptions[0]}
-        onChange={onSelect}
-        disabled={disabledSelect}
-      >
-        <option key={-1} value={-1}>
-          Select
-        </option>
-        {selectOptions
-          .filter((i) => !i.icon)
-          .filter(Boolean)
-          .map((i, index) => (
-            <option key={index} value={i.value}>
-              {i.title} - {i.subTitle}
-            </option>
-          ))}
-      </select>
-      <div className={styles.selected}>
-        <div className={styles.details}>
-          <div className={styles.title}>{selected ? selected.title : ''}</div>
-          <div className={styles.subTitle}>
-            {selected ? selected.subTitle : ''}
-          </div>
-        </div>
-        {disabledSelect ? <></> : <KeyboardArrowDown />}
-      </div>
-      -->*/}
-    </div>
-  )
-
   /* These are the Token Icons */
   const tokenPicker = (
     <div className={styles.tokenPicker}>
-      {selectOptions
-        .filter((i) => !!i.icon)
-        .filter(Boolean)
-        .map((t) => {
-          return (
-            <div
-              className={styles.tokenIcon}
-              onClick={() => {
-                onTokenSelect(t)
-              }}
-            >
-              <img src={tokenIcons[t.icon]} width="40px" alt={t.title} />
-              <p>{t.symbol}</p>
-            </div>
-          )
-        })}
+      {priorityOptions.map((t) => {
+        return (
+          <div
+            className={styles.tokenIcon}
+            onClick={() => {
+              onTokenSelect(t)
+            }}
+          >
+            <img src={tokenIcons[t.icon]} width="40px" alt={t.title} />
+            <p>{t.symbol}</p>
+          </div>
+        )
+      })}
     </div>
   )
 
-// /*
-// {allOptions &&
-//         <div className={styles.customOptionContainer}>
-//           {renderOptions}
-//           {<!--
-//             <Button
-//             onClick={()=>{onTokenSelect({title: 'manual'})}}
-//             type="primary"
-//             style={{ flex: 0, whiteSpace: 'nowrap' }}
-//           >
-//             Other
-//           </Button>
-//           -->}
-//         </div>
-//       }
-// */
+  const dropdownTokenPicker = (
+    <>
+      {dropdownOptions.length > 0 && (
+        <div className={styles.selectContainer}>
+          <Select
+            options={[
+              ...dropdownOptions,
+              {
+                value: 'manual',
+                label: 'Other',
+                details: {
+                  name: 'Manual',
+                },
+              },
+            ]}
+            onChange={(token) => {
+              onTokenSelect(token)
+            }}
+          />
+        </div>
+      )}
+    </>
+  )
 
   return (
     <div className={styles.iconSelectContainer}>
       {tokenPicker}
-      <div className={styles.selectContainer}>
-        <Select options={options} />
-      </div>
+      {dropdownTokenPicker}
     </div>
   )
 }
