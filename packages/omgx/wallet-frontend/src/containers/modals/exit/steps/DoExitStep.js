@@ -55,8 +55,8 @@ function DoExitStep({ handleClose, fast }) {
       setCurrency(balances[0].currency)
     }
     if (fast && currency) {
-      networkService.L1LPBalance(currency).then((LPBalance) => {
-        setLPBalance(LPBalance)
+      networkService.L1LPBalance(currency).then((res) => {
+        setLPBalance(Number(res).toFixed(1))
       })
       networkService.getTotalFeeRate().then((feeRate) => {
         setFeeRate(feeRate)
@@ -154,6 +154,7 @@ function DoExitStep({ handleClose, fast }) {
   }
 
   function setExitAmount(value) {
+    
     const transferingBalanceObject = balances.find(
       (i) => i.currency === currency
     )
