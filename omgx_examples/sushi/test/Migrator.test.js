@@ -52,111 +52,108 @@ describe("Migrator", function () {
   })
 
   beforeEach(async function () {
-    this.factory1 = await this.Factory__UniswapV2Factory.deploy(bob.address,{gasPrice: 0, gasLimit: 800000})
+    this.factory1 = await this.Factory__UniswapV2Factory.deploy(bob.address)
     await this.factory1.deployTransaction.wait()
 
-    this.factory2 = await this.Factory__UniswapV2Factory.deploy(bob.address,{gasPrice: 0, gasLimit: 800000})
+    this.factory2 = await this.Factory__UniswapV2Factory.deploy(bob.address)
     await this.factory2.deployTransaction.wait()
 
-    this.sushi = await this.Factory__SushiToken.deploy({gasPrice: 0, gasLimit: 800000})
+    this.sushi = await this.Factory__SushiToken.deploy()
     await this.sushi.deployTransaction.wait()
 
-    this.weth = await this.Factory__ERC20Mock.deploy("WETH", "WETH", "100000000",{gasPrice: 0, gasLimit: 800000})
+    this.weth = await this.Factory__ERC20Mock.deploy("WETH", "WETH", "100000000")
     await this.weth.deployTransaction.wait()
 
-    this.token = await this.Factory__ERC20Mock.deploy("TOKEN", "TOKEN", "100000000",{gasPrice: 0, gasLimit: 800000})
+    this.token = await this.Factory__ERC20Mock.deploy("TOKEN", "TOKEN", "100000000")
     await this.token.deployTransaction.wait()
 
-    const pair1 = await this.factory1.createPair(this.weth.address, this.token.address,{gasPrice: 0, gasLimit: 800000})
+    const pair1 = await this.factory1.createPair(this.weth.address, this.token.address)
     const pair1TX = await pair1.wait()
 
-    this.lp1 = await this.Factory__UniswapV2Pair.attach(pair1TX.events[1].args.pair,{gasPrice: 0, gasLimit: 800000})
+    this.lp1 = await this.Factory__UniswapV2Pair.attach(pair1TX.events[1].args.pair)
 
-    const pair2 = await this.factory2.createPair(this.weth.address, this.token.address,{gasPrice: 0, gasLimit: 800000})
+    const pair2 = await this.factory2.createPair(this.weth.address, this.token.address)
     const pair2TX = await pair2.wait()
 
-    this.lp2 = await this.Factory__UniswapV2Pair.attach(pair2TX.events[1].args.pair,{gasPrice: 0, gasLimit: 800000})
+    this.lp2 = await this.Factory__UniswapV2Pair.attach(pair2TX.events[1].args.pair)
 
-    this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "1000", "0", "100000",{gasPrice: 0, gasLimit: 800000})
+    this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "1000", "0", "100000")
     await this.chef.deployTransaction.wait()
 
-    this.migrator = await this.Factory__Migrator.deploy(this.chef.address, this.factory1.address, this.factory2.address, "0",{gasPrice: 0, gasLimit: 800000})
+    this.migrator = await this.Factory__Migrator.deploy(this.chef.address, this.factory1.address, this.factory2.address, "0")
     await this.migrator.deployTransaction.wait()
 
-    const transfer = await this.sushi.transferOwnership(this.chef.address,{gasPrice: 0, gasLimit: 800000})
+    const transfer = await this.sushi.transferOwnership(this.chef.address)
     await transfer.wait()
 
-    const add = await this.chef.add("100", this.lp1.address, true,{gasPrice: 0, gasLimit: 800000})
+    const add = await this.chef.add("100", this.lp1.address, true)
     await add.wait()
   })
 
   it("should do the migration successfully", async function () {
     let transfer
-    transfer = await this.token.transfer(this.lp1.address, "10000000",{gasPrice: 0, gasLimit: 800000})
+    transfer = await this.token.transfer(this.lp1.address, "10000000")
     await transfer.wait()
-    transfer = await this.weth.transfer(this.lp1.address, "500000",{gasPrice: 0, gasLimit: 800000})
+    transfer = await this.weth.transfer(this.lp1.address, "500000")
     await transfer.wait()
-    const mint = await this.lp1.mint(minter.address,{gasPrice: 0, gasLimit: 800000})
+    const mint = await this.lp1.mint(minter.address)
     await mint.wait()
     expect(await this.lp1.balanceOf(minter.address)).to.equal("2235067")
 
     // Add some fake revenue
-    transfer = await this.token.transfer(this.lp1.address, "100000",{gasPrice: 0, gasLimit: 800000})
+    transfer = await this.token.transfer(this.lp1.address, "100000")
     await transfer.wait()
-    transfer = await this.weth.transfer(this.lp1.address, "5000",{gasPrice: 0, gasLimit: 800000})
+    transfer = await this.weth.transfer(this.lp1.address, "5000")
     await transfer.wait()
     const sync = await this.lp1.sync()
     await sync.wait()
-    const approve = await this.lp1.connect(minter).approve(this.chef.address, "100000000000", { from: minter.address },{gasPrice: 0, gasLimit: 800000})
+    const approve = await this.lp1.connect(minter).approve(this.chef.address, "100000000000", { from: minter.address })
     await approve.wait()
-    const deposit = await this.chef.connect(minter).deposit("0", "2000000", { from: minter.address },{gasPrice: 0, gasLimit: 800000})
+    const deposit = await this.chef.connect(minter).deposit("0", "2000000", { from: minter.address })
     await deposit.wait()
     expect(await this.lp1.balanceOf(this.chef.address), "2000000")
     let migrate
-    migrate = await this.chef.migrate(0,{gasPrice: 0, gasLimit: 800000})
-    await expect(migrate.wait()).to.be.eventually.rejected;
+    await expect (this.chef.migrate(0)).to.be.eventually.rejected;
 
     let setMigrate
-    setMigrate = await this.chef.setMigrator(this.migrator.address,{gasPrice: 0, gasLimit: 800000})
+    setMigrate = await this.chef.setMigrator(this.migrator.address)
     await setMigrate.wait()
-    migrate = await this.chef.migrate(0,{gasPrice: 0, gasLimit: 800000})
-    await expect(migrate.wait()).to.be.eventually.rejected;
+    await expect (this.chef.migrate(0)).to.be.eventually.rejected;
 
-    setMigrate = await this.factory2.setMigrator(this.migrator.address,{gasPrice: 0, gasLimit: 800000})
+    setMigrate = await this.factory2.setMigrator(this.migrator.address)
     await setMigrate.wait()
-    migrate = await this.chef.migrate(0,{gasPrice: 0, gasLimit: 800000})
+    migrate = await this.chef.migrate(0)
     await migrate.wait()
     expect(await this.lp1.balanceOf(this.chef.address)).to.equal("0")
     expect(await this.lp2.balanceOf(this.chef.address)).to.equal("2000000")
 
-    const withdraw = await this.chef.connect(minter).withdraw("0", "2000000",{gasPrice: 0, gasLimit: 800000})
+    const withdraw = await this.chef.connect(minter).withdraw("0", "2000000")
     await withdraw.wait()
-    transfer = await this.lp2.connect(minter).transfer(this.lp2.address, "2000000",{gasPrice: 0, gasLimit: 800000})
+    transfer = await this.lp2.connect(minter).transfer(this.lp2.address, "2000000")
     await transfer.wait()
-    const burn = await this.lp2.burn(bob.address,{gasPrice: 0, gasLimit: 800000})
+    const burn = await this.lp2.burn(bob.address)
     await burn.wait()
     expect(await this.token.balanceOf(bob.address)).to.equal("9033718")
     expect(await this.weth.balanceOf(bob.address)).to.equal("451685")
   })
 
   it("should allow first minting from public only after migrator is gone", async function () {
-    const setMigrate = await this.factory2.setMigrator(this.migrator.address,{gasPrice: 0, gasLimit: 800000})
+    const setMigrate = await this.factory2.setMigrator(this.migrator.address)
     await setMigrate.wait()
 
-    this.tokenx = await this.Factory__ERC20Mock.deploy("TOKENX", "TOKENX", "100000000",{gasPrice: 0, gasLimit: 800000})
+    this.tokenx = await this.Factory__ERC20Mock.deploy("TOKENX", "TOKENX", "100000000")
     await this.tokenx.deployTransaction.wait()
 
-    const pair = await this.factory2.createPair(this.weth.address, this.tokenx.address,{gasPrice: 0, gasLimit: 800000})
+    const pair = await this.factory2.createPair(this.weth.address, this.tokenx.address)
     const pairTX = await pair.wait()
 
-    this.lpx = await this.Factory__UniswapV2Pair.attach(pairTX.events[1].args.pair,{gasPrice: 0, gasLimit: 800000})
+    this.lpx = await this.Factory__UniswapV2Pair.attach(pairTX.events[1].args.pair)
 
     let transfer
-    transfer = await this.weth.connect(minter).transfer(this.lpx.address, "10000000",{gasPrice: 0, gasLimit: 800000})
+    transfer = await this.weth.connect(minter).transfer(this.lpx.address, "10000000")
     await transfer.wait()
-    transfer = await this.tokenx.connect(minter).transfer(this.lpx.address, "500000",{gasPrice: 0, gasLimit: 800000})
+    transfer = await this.tokenx.connect(minter).transfer(this.lpx.address, "500000")
     await transfer.wait()
-    const mint = await this.lpx.mint(minter.address,{gasPrice: 0, gasLimit: 800000})
-    await expect(mint.wait()).to.be.eventually.rejected;
+    await expect (this.lpx.mint(minter.address)).to.be.eventually.rejected;
   })
 })

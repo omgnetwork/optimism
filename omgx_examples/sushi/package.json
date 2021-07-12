@@ -6,7 +6,8 @@
     "build": "TARGET=ovm hardhat compile --network omgx ",
     "deploy": "TARGET=ovm hardhat --network omgx run scripts/deploy.js",
     "analyze": "TARGET=ovm hardhat run scripts/analyze.js",
-    "test:contracts": "hardhat test --network omgx"
+    "test:contracts": "hardhat test --network omgx",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@eth-optimism/ethereumjs-vm": "^4.2.0-alpha.3",

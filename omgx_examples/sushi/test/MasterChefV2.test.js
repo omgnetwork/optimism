@@ -28,11 +28,13 @@ describe("MasterChefV2", function () {
     await deploy(this, [
       ["sushi", SushiTokenJSON],
     ])
+
     await deploy(this,
       [["lp", ERC20MockJSON, ["LP Token", "LPT", getBigNumber(10)]],
       ["dummy", ERC20MockJSON, ["Dummy", "DummyT", getBigNumber(10)]],
       ['chef', MasterChefJSON, [this.sushi.address, alice.address, getBigNumber(100), "0", "0"]]
     ])
+
     let transferTX, addTX, approveTX, depositTX, initTX
     transferTX = await this.sushi.transferOwnership(this.chef.address)
     await transferTX.wait()
@@ -85,7 +87,7 @@ describe("MasterChefV2", function () {
       })
 
     it("Should revert if invalid pool", async function () {
-      await expect(this.chef2.set(0, 10, this.rewarder.address, false,)).to.be.eventually.rejected;
+      await expect(this.chef2.set(0, 10, this.rewarder.address, false)).to.be.eventually.rejected;
     })
   })
 
@@ -173,7 +175,7 @@ describe("MasterChefV2", function () {
 
   describe("Deposit", function () {
     it("Depositing 0 amount", async function () {
-      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address,)
+      const addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
       await addTX.wait()
       const approveTX = await this.rlp.approve(this.chef2.address, getBigNumber(10))
       await approveTX.wait()
@@ -240,7 +242,7 @@ describe("MasterChefV2", function () {
       let transferTX, addTX, approveTX, depositTX
       transferTX = await this.r.transfer(this.rewarder.address, getBigNumber(100000))
       await transferTX.wait()
-      addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address,)
+      addTX = await this.chef2.add(10, this.rlp.address, this.rewarder.address)
       await addTX.wait()
       approveTX = await this.rlp.approve(this.chef2.address, getBigNumber(10))
       await approveTX.wait()
