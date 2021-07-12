@@ -57,9 +57,11 @@ $ yarn test:integration
 
 After running this command, the account balances will change (changes in bold-face):
 
-Deployer (Bob, PK_1):	**4999.7403** L1 ETH,	**4999.9036** L2 oETH,	**9999987655** L1 TEST,	**10235** L2 TEST  
+Deployer/Bob (PK_1):	**4999.7403** L1 ETH,	**4999.9036** L2 oETH,	**9999987655** L1 TEST,	**10235** L2 TEST  
 Alice (PK_2):	4999.9967 L1 ETH,	5000.0000 L2 oETH,	**1111** TEST on L2,	**two** NFTs  
-Kate: (PK_3):	4999.9967 L1 ETH,	5000.0000 L2 oETH,	**999*** TEST on L2,	zero NFTs  
+Kate: (PK_3):	4999.9967 L1 ETH,	5000.0000 L2 oETH,	**999** TEST on L2,	zero NFTs  
+
+**Note - To add these accounts to your MetaMask wallet, go to MetaMask, click on the round icon on the right top, and select "import acconut", and paste in private key #1. Then do this twice more, leaving you with three test accounts with different holdings.**
 
 ### 4. Test accounts for the swap on/off and the liquidity pools
 
