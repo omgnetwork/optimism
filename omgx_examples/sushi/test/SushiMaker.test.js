@@ -69,9 +69,9 @@ describe("SushiMaker", function () {
       await transferTX.wait()
       convertTX = await this.sushiMaker.convert(this.sushi.address, this.weth.address)
       await convertTX.wait()
-      await expect(this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.sushiEth.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.sushi.balanceOf(this.bar.address)).to.equal("1897569270781234370")
+      expect (await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.sushiEth.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect (await this.sushi.balanceOf(this.bar.address)).to.equal("1897569270781234370")
     })
 
     it("should convert USDC - ETH", async function () {
@@ -80,9 +80,9 @@ describe("SushiMaker", function () {
       await transferTX.wait()
       convertTX = await this.sushiMaker.convert(this.usdc.address, this.weth.address)
       await convertTX.wait()
-      await expect(this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.usdcEth.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.sushi.balanceOf(this.bar.address)).to.equal("1590898251382934275")
+      expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.usdcEth.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.sushi.balanceOf(this.bar.address)).to.equal("1590898251382934275")
     })
 
     it("should convert $TRDL - ETH", async function () {
@@ -91,9 +91,9 @@ describe("SushiMaker", function () {
       await transferTX.wait()
       convertTX = await this.sushiMaker.convert(this.strudel.address, this.weth.address)
       await convertTX.wait()
-      await expect(this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.strudelEth.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.sushi.balanceOf(this.bar.address)).to.equal("1590898251382934275")
+      expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.strudelEth.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.sushi.balanceOf(this.bar.address)).to.equal("1590898251382934275")
     })
 
     it("should convert USDC - SUSHI", async function () {
@@ -102,9 +102,9 @@ describe("SushiMaker", function () {
       await transferTX.wait()
       convertTX = await this.sushiMaker.convert(this.usdc.address, this.sushi.address)
       await convertTX.wait()
-      await expect(this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.sushiUSDC.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.sushi.balanceOf(this.bar.address)).to.equal("1897569270781234370")
+      expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.sushiUSDC.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.sushi.balanceOf(this.bar.address)).to.equal("1897569270781234370")
     })
 
     it("should convert using standard ETH path", async function () {
@@ -113,9 +113,9 @@ describe("SushiMaker", function () {
       await transferTX.wait()
       convertTX = await this.sushiMaker.convert(this.dai.address, this.weth.address)
       await convertTX.wait()
-      await expect(this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.daiEth.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.sushi.balanceOf(this.bar.address)).to.equal("1590898251382934275")
+      expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.daiEth.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.sushi.balanceOf(this.bar.address)).to.equal("1590898251382934275")
     })
 
     it("converts MIC/USDC using more complex path", async function () {
@@ -128,9 +128,9 @@ describe("SushiMaker", function () {
       await setBridgeTX.wait()
       convertTX = await this.sushiMaker.convert(this.mic.address, this.usdc.address)
       await convertTX.wait()
-      await expect(this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.micUSDC.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.sushi.balanceOf(this.bar.address)).to.equal("1590898251382934275")
+      expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.micUSDC.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.sushi.balanceOf(this.bar.address)).to.equal("1590898251382934275")
     })
 
     it("converts DAI/USDC using more complex path", async function () {
@@ -143,9 +143,9 @@ describe("SushiMaker", function () {
       await setBridgeTX.wait()
       convertTX = await this.sushiMaker.convert(this.dai.address, this.usdc.address)
       await convertTX.wait()
-      await expect(this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.daiUSDC.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.sushi.balanceOf(this.bar.address)).to.equal("1590898251382934275")
+      expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.daiUSDC.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.sushi.balanceOf(this.bar.address)).to.equal("1590898251382934275")
     })
 
     it("converts DAI/MIC using two step path", async function () {
@@ -158,9 +158,9 @@ describe("SushiMaker", function () {
       await setBridgeTX.wait()
       convertTX = await this.sushiMaker.convert(this.dai.address, this.mic.address)
       await convertTX.wait()
-      await expect(this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.daiMIC.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.sushi.balanceOf(this.bar.address)).to.equal("1200963016721363748")
+      expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.daiMIC.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.sushi.balanceOf(this.bar.address)).to.equal("1200963016721363748")
     })
 
     it("reverts if it loops back", async function () {
@@ -191,9 +191,9 @@ describe("SushiMaker", function () {
       transferTX = await this.micUSDC.transfer(this.sushiMaker.address, getBigNumber(1))
       await transferTX.wait()
       await expect(this.sushiMaker.convert(this.mic.address, this.usdc.address)).to.be.eventually.rejected;
-      await expect(this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.micUSDC.balanceOf(this.sushiMaker.address)).to.equal(getBigNumber(1))
-      await expect(this.sushi.balanceOf(this.bar.address)).to.equal(0)
+      expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.micUSDC.balanceOf(this.sushiMaker.address)).to.equal(getBigNumber(1))
+      expect(await this.sushi.balanceOf(this.bar.address)).to.equal(0)
     })
   })
 
@@ -206,9 +206,9 @@ describe("SushiMaker", function () {
       await transferTX.wait()
       convertTX = await this.sushiMaker.convertMultiple([this.dai.address, this.sushi.address], [this.weth.address, this.weth.address])
       await convertTX.wait()
-      await expect(this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.daiEth.balanceOf(this.sushiMaker.address)).to.equal(0)
-      await expect(this.sushi.balanceOf(this.bar.address)).to.equal("3186583558687783097")
+      expect(await this.sushi.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.daiEth.balanceOf(this.sushiMaker.address)).to.equal(0)
+      expect(await this.sushi.balanceOf(this.bar.address)).to.equal("3186583558687783097")
     })
   })
 })
