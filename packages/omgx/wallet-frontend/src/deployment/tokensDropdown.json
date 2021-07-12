@@ -1,4 +1,4 @@
 [
-  {"name": "UNI",       "symbol": "UNI",  "icon": "uniIcon"},
-  {"name": "USDT",       "symbol": "USDT",  "icon": "usdtIcon"}
+  {"name": "UNI",         "symbol": "UNI",  "icon":  "uniIcon"},
+  {"name": "Wrapped BTC", "symbol": "WBTC",  "icon": "wbtcIcon"}
 ]

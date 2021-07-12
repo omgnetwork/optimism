@@ -12,9 +12,8 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
-
-import { KeyboardArrowDown } from '@material-ui/icons'
-import React from 'react'
+import React, { Component } from 'react'
+import Select from 'react-select'
 import Button from '../button/Button'
 import omgxIcon from '../../images/omg-icon-circle.png'
 import sushiIcon from '../../images/sushi-icon.png'
@@ -22,6 +21,14 @@ import testIcon from '../../images/JLKN.svg'
 import usdtIcon from '../../images/usdt-icon.png'
 import etherIcon from '../../images/ether-icon.png'
 import * as styles from './iconSelect.module.scss'
+
+import { KeyboardArrowDown } from '@material-ui/icons'
+
+const options = [
+  { value: 'uni', label: 'UNI' },
+  { value: 'wbtx', label: 'WBTC' },
+  { value: 'manual', label: 'Other' }
+]
 
 const tokenIcons = {
   omgxIcon: omgxIcon,
@@ -49,6 +56,8 @@ function IconSelect({
 
   const renderOptions = (
     <div className={styles.selectContainer}>
+      <Select options={options} />
+      {/*<!--
       <select
         className={styles.select}
         value={selectOptions[0]}
@@ -76,9 +85,11 @@ function IconSelect({
         </div>
         {disabledSelect ? <></> : <KeyboardArrowDown />}
       </div>
+      -->*/}
     </div>
   )
 
+  /* These are the Token Icons */
   const tokenPicker = (
     <div className={styles.tokenPicker}>
       {selectOptions
@@ -100,25 +111,29 @@ function IconSelect({
     </div>
   )
 
+// /*
+// {allOptions &&
+//         <div className={styles.customOptionContainer}>
+//           {renderOptions}
+//           {<!--
+//             <Button
+//             onClick={()=>{onTokenSelect({title: 'manual'})}}
+//             type="primary"
+//             style={{ flex: 0, whiteSpace: 'nowrap' }}
+//           >
+//             Other
+//           </Button>
+//           -->}
+//         </div>
+//       }
+// */
+
   return (
     <div className={styles.iconSelectContainer}>
       {tokenPicker}
-      {allOptions &&
-        <div className={styles.customOptionContainer}>
-          {renderOptions}
-          <Button
-            onClick={() => {
-              onTokenSelect({
-                title: 'manual',
-              })
-            }}
-            type="primary"
-            style={{ flex: 0, whiteSpace: 'nowrap' }}
-          >
-            Other
-          </Button>
-        </div>
-      }
+      <div className={styles.selectContainer}>
+        <Select options={options} />
+      </div>
     </div>
   )
 }

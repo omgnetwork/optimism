@@ -5,6 +5,8 @@
   justify-content: space-around;
   align-items: center;
   padding: 5px 10px;
+  padding-top: 30px;
+  flex-direction: column;
   .tokenIcon {
     display: flex;
     flex-direction: column;
@@ -28,12 +30,17 @@
   display: flex;
   justify-content: space-around;
   flex: 1;
+  padding: 5px 10px;
+  width: 100%;
 }
 
 .selectContainer {
-  height: 46px;
-  margin: -10px -10px -10px 0;
-  position: relative;
+  width: 100%;
+  padding-bottom: 20px;
+  padding-top: 20px;
+  /*height: 46px;*/
+  /*margin: -10px -10px -10px 0;*/
+  /*position: relative;*/
 
   .select {
     border: none;
