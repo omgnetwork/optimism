@@ -30,15 +30,9 @@ import ApproveStep from './steps/ApproveStep'
 const ETH0x = '0x0000000000000000000000000000000000000000'
 
 function DepositModal({ open, omgOnly = false, fast = false }) {
-  
   const dispatch = useDispatch()
 
   const [step, setStep] = useState('INPUT_STEP')
-  const [tokenAddresses, setTokenAddresses] = useState({
-    L1address: '',
-    L2address: '',
-  })
-  
   const [currency, setCurrency] = useState(ETH0x)
   const [currencyL2, setCurrencyL2] = useState(ETH0x)
   const [tokenInfo, setTokenInfo] = useState({})
@@ -47,6 +41,7 @@ function DepositModal({ open, omgOnly = false, fast = false }) {
   useEffect(() => {
     async function getTokenInfo() {
       const _currency = currency.toLowerCase()
+      console.log('_currency', _currency)
       if (_currency && ethers.utils.isAddress(_currency)) {
         const tokenInfo = await getToken(_currency)
         setTokenInfo(tokenInfo)
@@ -73,11 +68,9 @@ function DepositModal({ open, omgOnly = false, fast = false }) {
           currency={currency}
           currencyL2={currencyL2}
           tokenInfo={tokenInfo}
-          tokenAddresses={tokenAddresses}
           value={value}
           setCurrency={setCurrency}
           setCurrencyL2={setCurrencyL2}
-          setTokenAddresses={setTokenAddresses}
           setTokenInfo={setTokenInfo}
           setValue={setValue}
           omgOnly={omgOnly}
@@ -90,11 +83,9 @@ function DepositModal({ open, omgOnly = false, fast = false }) {
           currency={currency}
           currencyL2={currencyL2}
           tokenInfo={tokenInfo}
-          tokenAddresses={tokenAddresses}
           value={value}
           setCurrency={setCurrency}
           setCurrencyL2={setCurrencyL2}
-          setTokenAddresses={setTokenAddresses}
           setTokenInfo={setTokenInfo}
           setValue={setValue}
           omgOnly={omgOnly}

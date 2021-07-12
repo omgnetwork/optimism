@@ -134,7 +134,13 @@ function InputStep({
       <Input
         label="Amount to deposit into OMGX"
         type="number"
-        unit={tokenInfo && selectedToken ? tokenInfo.symbol : ''}
+        unit={
+          selectedToken
+            ? selectedToken.details.name === 'manual'
+              ? tokenInfo.symbol
+              : selectedToken.details.symbol
+            : ''
+        }
         placeholder={0}
         value={value}
         onChange={(i) => setValue(i.target.value)}

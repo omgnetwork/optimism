@@ -42,8 +42,8 @@ function InputStepFast({
   }, [])
 
   useEffect(() => {
-    if (!!selectedToken && !!setSelectedToken.details) {
-      setCurrency(setSelectedToken.details.L1 || '')
+    if (!!selectedToken) {
+      setCurrency(selectedToken.L1 || '')
     }
   }, [selectedToken, setCurrency])
 
@@ -91,9 +91,7 @@ function InputStepFast({
 
   return (
     <>
-      <h2>
-        Fast Swap onto OMGX {setSelectedToken ? setSelectedToken.name : ''}
-      </h2>
+      <h2>Fast Swap onto OMGX</h2>
 
       {!selectedToken ? (
         <IconSelect priorityOptions={tokens} onTokenSelect={setSelectedToken} />

@@ -37,7 +37,8 @@ function DoExitStep({ handleClose, fast }) {
   const dispatch = useDispatch()
 
   const [currency, setCurrency] = useState('')
-  const [tokens, setTokens] = useState([])
+  const [priorityTokens, setPriorityTokens] = useState([])
+  const [dropdownTokens, setDropDownTokens] = useState([])
   const [selectedToken, setSelectedToken] = useState(null)
   const [value, setValue] = useState('')
   const [LPBalance, setLPBalance] = useState(0)
@@ -175,30 +176,31 @@ function DoExitStep({ handleClose, fast }) {
   }
 
   useEffect(() => {
-    if (selectedToken && selectedToken.title === 'manual') {
+    if (selectedToken && selectedToken.label === 'manual') {
       setCurrency('')
     } else if (!!selectedToken) {
-      setCurrency(selectedToken.L2address)
+      setCurrency(selectedToken.details.L2 || '')
     }
   }, [selectedToken, setCurrency])
 
   useEffect(() => {
     setSelectedToken(null)
     networkService
-      .getTokens()
+      .getPriorityTokens()
       .then((res) => {
-        let localTokens = res.map((t) => {
-          return {
-            title: t.name,
-            subTitle: t.symbol,
-            value: t.name,
-            ...t,
-          }
-        })
-        setTokens([...localTokens])
+        setPriorityTokens(res)
       })
       .catch((err) => {
         console.log('error', err)
+      })
+    // load dropdown tokens
+    networkService
+      .getDropdownTokens()
+      .then((res) => {
+        setDropDownTokens(res)
+      })
+      .catch((err) => {
+        console.log('error dropdown tokens', err)
       })
   }, [])
 
@@ -213,7 +215,8 @@ function DoExitStep({ handleClose, fast }) {
 
       {!fast && !selectedToken ? (
         <IconSelect
-          selectOptions={[...tokens, ...selectOptions]}
+          priorityOptions={priorityTokens}
+          dropdownOptions={dropdownTokens}
           onTokenSelect={setSelectedToken}
         />
       ) : null}
