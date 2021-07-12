@@ -23,7 +23,6 @@ function InputStepFast({
   setValue,
   setTokenInfo,
 }) {
-
   const dispatch = useDispatch()
 
   const [tokens, setTokens] = useState([])
@@ -43,8 +42,8 @@ function InputStepFast({
   }, [])
 
   useEffect(() => {
-    if (!!selectedToken) {
-      setCurrency(selectedToken.L1)
+    if (!!selectedToken && !!setSelectedToken.details) {
+      setCurrency(setSelectedToken.details.L1 || '')
     }
   }, [selectedToken, setCurrency])
 
@@ -65,9 +64,8 @@ function InputStepFast({
       if (res) {
         dispatch(setActiveHistoryTab1('Deposits'))
         dispatch(
-          openAlert(`ETH was deposited into the L1LP. You will receive 
-            ${(Number(value) * 0.97).toFixed(2)} oETH on L2`
-          )
+          openAlert(`ETH was deposited into the L1LP. You will receive
+            ${(Number(value) * 0.97).toFixed(2)} oETH on L2`)
         )
         handleClose()
       } else {
@@ -80,11 +78,11 @@ function InputStepFast({
     value <= 0 ||
     !currency ||
     !ethers.utils.isAddress(currency) ||
-    (Number(value) > Number(LPBalance))
+    Number(value) > Number(LPBalance)
 
   if (Object.keys(tokenInfo).length && currency) {
-    networkService.L2LPBalance(currency).then((LPBalance) => {
-      setLPBalance(LPBalance)
+    networkService.L2LPBalance(currency).then((res) => {
+      setLPBalance(Number(res).toFixed(1))
     })
     networkService.getTotalFeeRate().then((feeRate) => {
       setFeeRate(feeRate)
@@ -93,29 +91,27 @@ function InputStepFast({
 
   return (
     <>
-
       <h2>
-        Fast Swap onto OMGX
+        Fast Swap onto OMGX {setSelectedToken ? setSelectedToken.name : ''}
       </h2>
 
       {!selectedToken ? (
-        <IconSelect 
-          selectOptions={tokens} 
-          onTokenSelect={setSelectedToken} 
-          allOptions={false}
-        />
+        <IconSelect priorityOptions={tokens} onTokenSelect={setSelectedToken} />
       ) : null}
 
-      <Input
-        label="Amount to deposit into OMGX"
-        type="number"
-        unit={(tokenInfo && selectedToken) ? tokenInfo.symbol : ''}
-        placeholder={0}
-        value={value}
-        onChange={(i) => setValue(i.target.value)}
-      />
+      {!!selectedToken && (
+        <Input
+          label="Amount to deposit into OMGX"
+          type="number"
+          unit={tokenInfo && selectedToken ? tokenInfo.symbol : ''}
+          placeholder={0}
+          value={value}
+          onChange={(i) => setValue(i.target.value)}
+        />
+      )}
 
-      {selectedToken && selectedToken.symbol === 'ETH' &&
+      {selectedToken &&
+      selectedToken.symbol === 'ETH' &&
       Object.keys(tokenInfo).length &&
       currency ? (
         <>
@@ -123,15 +119,17 @@ function InputStepFast({
             The L2 liquidity pool has {LPBalance} oETH. The liquidity fee is{' '}
             {feeRate}%.{' '}
             {value &&
-              `You will receive ${(Number(value) * 0.97).toFixed(2)} oETH on L2.`
-            }
+              `You will receive ${(Number(value) * 0.97).toFixed(
+                2
+              )} oETH on L2.`}
           </h3>
         </>
       ) : (
         <></>
       )}
 
-      {selectedToken && selectedToken.symbol === 'TEST' &&
+      {selectedToken &&
+      selectedToken.symbol === 'TEST' &&
       Object.keys(tokenInfo).length &&
       currency ? (
         <>
@@ -150,7 +148,8 @@ function InputStepFast({
 
       {Number(LPBalance) < Number(value) && (
         <h3 style={{ color: 'red' }}>
-          The L2 liquidity pool balance is too low to cover your swap - please use the traditional deposit instead.
+          The L2 liquidity pool balance is too low to cover your swap - please
+          use the traditional deposit instead.
         </h3>
       )}
 
