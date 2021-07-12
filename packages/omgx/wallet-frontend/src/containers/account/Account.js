@@ -88,7 +88,7 @@ function Account () {
     if (res) {
       dispatch(openAlert('10 test tokens were sent to your wallet'));
     } else {
-      dispatch(openError('Your reached the limit'));
+      dispatch(openError('You reached the limit'));
     }
   }
 
@@ -268,7 +268,7 @@ function Account () {
                 className={[styles.transfer, networkLayer === 'L1' ? styles.disabled : ''].join(' ')}
               >
                 <Send />
-                <span>GET JLKN</span>
+                <span>GET TEST</span>
               </div>
               <div
                 onClick={()=>handleModalClick('transferModal')}
