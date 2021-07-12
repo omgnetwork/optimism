@@ -56,6 +56,10 @@ function Account () {
         const correctLayer = await dispatch(networkService.confirmLayer('L1'));
         if (!correctLayer) return 
       }
+      if (name === 'addAssetModal') {
+        //const correctLayer = await dispatch(networkService.confirmLayer('L1'));
+        //if (!correctLayer) return 
+      }
       dispatch(openModal(name, beginner, fast))
     }, [ dispatch ]
   );
@@ -150,6 +154,17 @@ function Account () {
           </div>
         </div>
       }
+
+      <div className={styles.buttons}>
+        <Button
+          onClick={() => handleModalClick('addNewTokenModal')}
+          type='primary'
+          disabled={!isSynced || criticalTransactionLoading}
+          style={{maxWidth: '150px', padding: '8px'}}
+        >
+          ADD ERC20 ASSETS
+        </Button>
+      </div>
 
       <div className={styles.balances} style={{marginTop: 30}}>
 

@@ -269,41 +269,6 @@ class NetworkService {
         nw[masterSystemConfig]['L2']['rpcUrl']
       )
 
-      /*
-{
-"AddressManager": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-"AtomicSwap": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
-"ERC721": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
-"L1ERC20": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
-"L1LiquidityPool": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
-"L1Message": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
-"L2ERC20": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-"L2LiquidityPool": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-"L2Message": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
-"L2TokenPool": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-"OVM_L1CrossDomainMessenger": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
-"OVM_L1CrossDomainMessengerFast": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
-"Proxy__OVM_L1CrossDomainMessenger": "0x59b670e9fA9D0A427751Af201D676719a970857b",
-"Proxy__OVM_L1StandardBridge": "0x851356ae760d987E095750cCeb3bC6014560891C"
-}
-*/
-
-      /*
-AtomicSwap: "0xfCc9525fDDbafbD3393821F7dAf96F68Bba93294"
-L1ERC20: "0xaB1e3377dEED7811beADf4b5773B59fB267089fb"
-L1FastMessengerAddress: "0xF296F4ca6A5725F55EdF1C67F80204871E65F87d"
-L1LiquidityPool: "0x2C12649A5A4FC61F146E0a3409f3e4c7FbeD15Dc"
-L1Message: "0x1E7C2Ed00FaaFeD62afC9DD630ACB8C8c6C16D52"
-L1MessengerAddress: "0xF10EEfC14eB5b7885Ea9F7A631a21c7a82cf5D76"
-L1StandardBridge: "0xDe085C82536A06b40D20654c2AbA342F2abD7077"
-L2ERC20: "0x0e52DEfc53ec6dCc52d630af949a9b6313455aDF"
-L2ERC721: "0xB08e122b98889321040AB251316887E59ee1d3Df"
-L2LiquidityPool: "0xEd3417AE90fA0BfE15Fab8b949a9a459F9f4ef26"
-L2Message: "0x8165E68dD175B4D6e913D1DF5aF456d8C04cA01e"
-L2StandardBridge: "0x4200000000000000000000000000000000000010"
-L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
-*/
-
       // addresses
 
       //this.L1MessengerAddress = addresses.Proxy__OVM_L1CrossDomainMessenger
@@ -490,6 +455,22 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
     this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
   }
 
+  async discoverERC20Assets() {
+    console.log(this.tokenAddresses)
+    //L1 = this.tokenAddresses[token.symbol].L1
+    //       L2 = this.tokenAddresses[token.symbol].L2
+    // const nw = getAllNetworks()
+    // const chainParam = {
+    //   chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
+    //   chainName: 'OMGX L2',
+    //   rpcUrls: [nw.rinkeby.L2.rpcUrl],
+    // }
+
+    // // connect to the wallet
+    // this.provider = new ethers.providers.Web3Provider(window.ethereum)
+    // this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
+  }
+
   async getTransactions() {
     //rinkeby L1
     if (this.masterSystemConfig === 'rinkeby' && this.chainID === 4) {
@@ -546,6 +527,7 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
   }
 
   async getBalances() {
+    
     try {
       const rootChainBalance = await this.L1Provider.getBalance(this.account)
       console.log('ETH balance on L1:', rootChainBalance.toString())
@@ -556,7 +538,8 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
       console.log('Balance of the test token on L1:', ERC20L1Balance.toString())
 
       const childChainBalance = await this.L2Provider.getBalance(this.account)
-      console.log('wETH balance on L2:', childChainBalance.toString())
+
+      console.log("oETH balance on L2:", childChainBalance.toString())
 
       const ERC20L2Balance = await this.L2ERC20Contract.connect(
         this.L2Provider
