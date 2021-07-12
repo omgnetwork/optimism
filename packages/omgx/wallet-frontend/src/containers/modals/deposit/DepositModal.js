@@ -28,6 +28,7 @@ import ApproveStep from './steps/ApproveStep'
 const ETH0x = '0x0000000000000000000000000000000000000000'
 
 function DepositModal({ open, omgOnly = false, fast = false }) {
+  
   const dispatch = useDispatch()
 
   const [step, setStep] = useState('INPUT_STEP')
@@ -35,6 +36,7 @@ function DepositModal({ open, omgOnly = false, fast = false }) {
     L1address: '',
     L2address: '',
   })
+  
   const [currency, setCurrency] = useState(ETH0x)
   const [currencyL2, setCurrencyL2] = useState(ETH0x)
   const [tokenInfo, setTokenInfo] = useState({})

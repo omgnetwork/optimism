@@ -31,8 +31,10 @@ function IconSelect({
   selected,
   onTokenSelect,
   selectOptions,
+  allOptions,
   disabledSelect = false,
 }) {
+  
   const onSelect = (e) => {
     let value = e.target.value
     let selectedToken = selectOptions.find(
@@ -97,20 +99,22 @@ function IconSelect({
   return (
     <div className={styles.iconSelectContainer}>
       {tokenPicker}
-      <div className={styles.customOptionContainer}>
-        {renderOptions}
-        <Button
-          onClick={() => {
-            onTokenSelect({
-              title: 'manual',
-            })
-          }}
-          type="primary"
-          style={{ flex: 0, whiteSpace: 'nowrap' }}
-        >
-          Manual/ Other
-        </Button>
-      </div>
+      {allOptions &&
+        <div className={styles.customOptionContainer}>
+          {renderOptions}
+          <Button
+            onClick={() => {
+              onTokenSelect({
+                title: 'manual',
+              })
+            }}
+            type="primary"
+            style={{ flex: 0, whiteSpace: 'nowrap' }}
+          >
+            Manual/Other
+          </Button>
+        </div>
+      }
     </div>
   )
 }

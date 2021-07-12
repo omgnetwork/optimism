@@ -59,7 +59,8 @@ import addressOMGXAxiosInstance from 'api/addressOMGXAxios'
 //Generally, the wallet will get these from the two HTTP deployment servers
 const localAddresses = require(`../deployment/local/addresses.json`)
 const rinkebyAddresses = require(`../deployment/rinkeby/addresses.json`)
-const localTokens = require('../deployment/local/tokens.json')
+const priorityTokens = require('../deployment/tokensPriority.json')
+const dropdownTokens = require('../deployment/tokensDropdown.json')
 
 class NetworkService {
   constructor() {
@@ -101,6 +102,8 @@ class NetworkService {
     this.L1ETHAddress = '0x0000000000000000000000000000000000000000'
     this.L2ETHAddress = '0x4200000000000000000000000000000000000006'
     this.L2MessengerAddress = '0x4200000000000000000000000000000000000007'
+
+    this.tokenAddresses = null
 
     // chain ID
     this.chainID = null
@@ -159,6 +162,7 @@ class NetworkService {
   }
 
   async initializeAccounts(masterSystemConfig) {
+    
     console.log('NS: initializeAccounts() for', masterSystemConfig)
 
     let resOMGX = null
@@ -222,6 +226,8 @@ class NetworkService {
 
       this.chainID = network.chainId
       this.masterSystemConfig = masterSystemConfig
+      
+      this.tokenAddresses = addresses.TOKENS
 
       console.log('NS: masterConfig:', this.masterSystemConfig)
       console.log('NS: this.chainID:', this.chainID)
@@ -1274,13 +1280,34 @@ L2TokenPool: "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD"
     }
   }
 
-  async getTokens() {
+  async getPriorityTokens() {
     try {
-      return localTokens
+       let returnTokens = {}
+       //get the addresses from the address files
+       priorityTokens.map((token) => {
+         const tN = token.symbol
+         returnTokens[tN] = {
+           icon: token.icon,
+           name: token.name,
+           L1: this.tokenAddresses[tN].L1,
+           L2: this.tokenAddresses[tN].L2
+         }
+       })
+      //console.log(returnTokens)
+      return returnTokens
     } catch (error) {
       return error
     }
   }
+
+  async getDropdownTokens() {
+    try {
+      return dropdownTokens
+    } catch (error) {
+      return error
+    }
+  }
+
 }
 
 const networkService = new NetworkService()

@@ -11,7 +11,7 @@ import { selectLoading } from 'selectors/loadingSelector'
 import networkService from 'services/networkService'
 import * as styles from '../DepositModal.module.scss'
 
-const ETH0x = '0x0000000000000000000000000000000000000000'
+//const ETH0x = '0x0000000000000000000000000000000000000000'
 
 function InputStep({
   onClose,
@@ -26,36 +26,31 @@ function InputStep({
   fast,
   setTokenInfo,
 }) {
-  const dispatch = useDispatch()
 
-  let uSC = 'ETH'
+  const dispatch = useDispatch()
 
   const [tokens, setTokens] = useState([])
   const [selectedToken, setSelectedToken] = useState(null)
 
-  const [activeTab1, setActiveTab1] = useState(uSC)
   const [LPBalance, setLPBalance] = useState(0)
   const [feeRate, setFeeRate] = useState(0)
 
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
 
   function handleClose() {
-    setActiveTab1('ETH')
     onClose()
   }
 
   useEffect(() => {
     setSelectedToken(null)
   }, [])
-  useEffect(() => {
-    if (activeTab1 === 'ETH') setSelectedToken(null)
-  }, [activeTab1])
 
   useEffect(() => {
     if (selectedToken && selectedToken.title === 'manual') {
       setCurrency('')
       setCurrencyL2('')
     } else if (!!selectedToken) {
+      console.log(selectedToken)
       setCurrency(selectedToken.L1address)
       setCurrencyL2(selectedToken.L2address)
     }
@@ -63,17 +58,18 @@ function InputStep({
 
   useEffect(() => {
     networkService
-      .getTokens()
+      .getPriorityTokens()
       .then((res) => {
-        let localTokens = res.map((t) => {
-          return {
-            title: t.name,
-            subTitle: t.symbol,
-            value: t.name,
-            ...t,
-          }
-        })
-        setTokens(localTokens)
+        console.log(res)
+        // let priorityTokens = res.map((t) => {
+        //   return {
+        //     title: t.name,
+        //     subTitle: t.symbol,
+        //     value: t.name,
+        //     ...t,
+        //   }
+        // })
+        setTokens(res)
       })
       .catch((err) => {
         console.log('error', err)
@@ -127,45 +123,38 @@ function InputStep({
 
   return (
     <>
-      {fast && <h2>Fast swap onto OMGX</h2>}
 
-      {!fast && (
-        <h2>{`Traditional Deposit : ${
-          selectedToken ? selectedToken.title : ''
-        }`}</h2>
+      {fast && (
+        <h2>
+          Fast Swap onto OMGX
+        </h2>
       )}
 
-      <Tabs
-        className={styles.tabs}
-        onClick={(i) => {
-          if (i === 'ETH') {
-            setCurrency(ETH0x)
-            setCurrencyL2('')
-          } else {
-            setCurrency('')
-            setCurrencyL2('')
-          }
-          setActiveTab1(i)
-        }}
-        activeTab={activeTab1}
-        tabs={['ETH', 'ERC20']}
-      />
+      {!fast && (
+        <h2>
+          {`Traditional Deposit ${ selectedToken ? selectedToken.title : ''}`}
+        </h2>
+      )}
 
-      {activeTab1 === 'ERC20' && !fast && !selectedToken ? (
-        <IconSelect selectOptions={tokens} onTokenSelect={setSelectedToken} />
+      {!selectedToken ? (
+        <IconSelect 
+          selectOptions={tokens} 
+          onTokenSelect={setSelectedToken} 
+          allOptions={fast ? false : true}
+        />
       ) : null}
 
-      {activeTab1 === 'ERC20' && !fast && selectedToken ? (
+      {!fast && selectedToken ? (
         <>
           <Input
-            label="ERC20 Token Smart Contract Address."
+            label="L1 Token Contract Address"
             placeholder="0x"
             value={currency}
             paste={selectedToken ? selectedToken.title === 'manual' : false}
             onChange={(i) => setCurrency(i.target.value.toLowerCase())} //because this is a user input!!
           />
           <Input
-            label="L2 Contract Address"
+            label="L2 Token Contract Address"
             placeholder="0x"
             value={currencyL2}
             paste={selectedToken ? selectedToken.title === 'manual' : false}
@@ -174,9 +163,9 @@ function InputStep({
         </>
       ) : null}
 
-      {activeTab1 === 'ERC20' && !!fast ? (
+      {!!fast ? (
         <Input
-          label="ERC20 Token Smart Contract Address."
+          label="L1 Token Contract Address"
           placeholder="0x"
           paste
           value={currency}
@@ -187,14 +176,13 @@ function InputStep({
       <Input
         label="Amount to deposit into OMGX"
         type="number"
-        unit={tokenInfo ? tokenInfo.symbol : ''}
+        unit={(tokenInfo && selectedToken) ? tokenInfo.symbol : ''}
         placeholder={0}
         value={value}
         onChange={(i) => setValue(i.target.value)}
       />
 
-      {fast &&
-      activeTab1 === 'ETH' &&
+      {fast && selectedToken === 'ETH' &&
       Object.keys(tokenInfo).length &&
       currency ? (
         <>
@@ -202,17 +190,15 @@ function InputStep({
             The L2 liquidity pool has {LPBalance} oETH. The liquidity fee is{' '}
             {feeRate}%.{' '}
             {value &&
-              `You will receive ${(Number(value) * 0.97).toFixed(
-                2
-              )} oETH on L2.`}
+              `You will receive ${(Number(value) * 0.97).toFixed(2)} oETH on L2.`
+            }
           </h3>
         </>
       ) : (
         <></>
       )}
 
-      {fast &&
-      activeTab1 === 'ERC20' &&
+      {fast && selectedToken !== 'ETH' &&
       Object.keys(tokenInfo).length &&
       currency ? (
         <>
@@ -231,7 +217,7 @@ function InputStep({
 
       {fast && Number(LPBalance) < Number(value) && (
         <h3 style={{ color: 'red' }}>
-          The L2 liquidity pool doesn't have enough balance to cover your swap.
+          The L2 liquidity pool balance is too low to cover your swap - please use the traditional deposit instead.
         </h3>
       )}
 
@@ -239,7 +225,7 @@ function InputStep({
         <Button onClick={handleClose} type="outline" style={{ flex: 0 }}>
           CANCEL
         </Button>
-        {activeTab1 === 'ETH' && (
+        {selectedToken === 'ETH' && (
           <Button
             onClick={depositETH}
             type="primary"
@@ -251,7 +237,7 @@ function InputStep({
             DEPOSIT
           </Button>
         )}
-        {activeTab1 === 'ERC20' && (
+        {selectedToken !== 'ERC20' && (
           <Button
             onClick={onNext}
             type="primary"

@@ -30,6 +30,8 @@ const deployFn: DeployFunction = async (hre) => {
     true,
   )
 
+  let tokenAddress = null;
+
   for (let token of preSupportedTokens.supportedTokens) {
     
     if ((hre as any).deployConfig.network === 'local' || token.symbol === 'TEST') {
@@ -43,6 +45,8 @@ const deployFn: DeployFunction = async (hre) => {
       )
       await L1ERC20.deployTransaction.wait()
 
+      tokenAddress = L1ERC20.address;
+
       const L1ERC20DeploymentSubmission: DeploymentSubmission = {
         ...L1ERC20,
         receipt: L1ERC20.receipt,
@@ -51,33 +55,22 @@ const deployFn: DeployFunction = async (hre) => {
       };
 
       await hre.deployments.save(`TK_L1${token.symbol}`, L1ERC20DeploymentSubmission)
-      console.log(`🌕 ${chalk.red(`L1 ${token.name} was newly deployed to`)} ${chalk.green(L1ERC20.address)}`)
+      console.log(`🌕 ${chalk.red(`L1 ${token.name} was newly deployed to`)} ${chalk.green(tokenAddress)}`)
     } else if ( (hre as any).deployConfig.network === 'rinkeby' ) {
-      await hre.deployments.save(`TK_L1${token.symbol}`, { abi: L1ERC20Json.abi, address: token.address.rinkeby })
-      console.log(`🌕 ${chalk.red(`L1 ${token.name} is located at`)} ${chalk.green(token.address.rinkeby)}`)
+      tokenAddress = token.address.rinkeby
+      await hre.deployments.save(`TK_L1${token.symbol}`, { abi: L1ERC20Json.abi, address: tokenAddress })
+      console.log(`🌕 ${chalk.red(`L1 ${token.name} is located at`)} ${chalk.green(tokenAddress)}`)
     } else if ( (hre as any).deployConfig.network === 'mainnet' ) {
-      await hre.deployments.save(`TK_L1${token.symbol}`, { abi: L1ERC20Json.abi, address: token.address.mainnet })
-      console.log(`🌕 ${chalk.red(`L1 ${token.name} is located at`)} ${chalk.green(token.address.mainnet)}`)
+      tokenAddress = token.address.mainnet
+      await hre.deployments.save(`TK_L1${token.symbol}`, { abi: L1ERC20Json.abi, address: tokenAddress })
+      console.log(`🌕 ${chalk.red(`L1 ${token.name} is located at`)} ${chalk.green(tokenAddress)}`)
     }
 
-    //Set up things on L2 for this new token
-    // [L2StandardBridgeAddress, L1TokenAddress, tokenName, tokenSymbol]
-
-    let address = null
-
-    console.log(token)
-
-    if ((hre as any).deployConfig.network === 'local' || token.symbol === 'TEST' ) {
-      address = L1ERC20.address
-    } else if ( (hre as any).deployConfig.network === 'rinkeby' ) {
-      address = token.address.rinkeby
-    } else if ( (hre as any).deployConfig.network === 'mainnet' ) {
-      address = token.address.mainnet
-    }
+    //Set up things on L2 for this token
 
     L2ERC20 = await Factory__L2ERC20.deploy(
       (hre as any).deployConfig.L2StandardBridgeAddress,
-      address,
+      tokenAddress,
       //((hre as any).deployConfig.network === 'local' || token.symbol === 'TEST' ) ? L1ERC20.address : token.address,
       token.name,
       token.symbol,

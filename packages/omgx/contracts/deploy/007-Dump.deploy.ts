@@ -7,6 +7,7 @@ import fs from 'fs'
 const deployFn: DeployFunction = async (hre) => {
 
     let contracts = {};
+    
     contracts['TOKENS'] = {};
     
     const deployments = await hre.deployments.all()
