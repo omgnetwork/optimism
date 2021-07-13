@@ -18,6 +18,7 @@ import { hexlify } from '@ethersproject/bytes'
 import { parseUnits, parseEther } from '@ethersproject/units'
 import { Watcher } from '@eth-optimism/watcher'
 import { ethers, BigNumber, utils } from 'ethers'
+import store from 'store';
 
 import { orderBy } from 'lodash'
 import BN from 'bn.js'
@@ -64,6 +65,7 @@ const dropdownTokens = require('../deployment/tokensDropdown.json')
 const swapTokens = require('../deployment/tokensSwap.json')
 
 class NetworkService {
+  
   constructor() {
     this.L1Provider = null
     this.L2Provider = null
@@ -165,6 +167,7 @@ class NetworkService {
   }
 
   async initializeAccounts(masterSystemConfig) {
+    
     console.log('NS: initializeAccounts() for', masterSystemConfig)
 
     let resOMGX = null
@@ -172,6 +175,7 @@ class NetworkService {
     let addresses = null
 
     try {
+      
       console.log('Loading OMGX contract addresses')
 
       if (masterSystemConfig === 'local') {
@@ -271,8 +275,6 @@ class NetworkService {
         nw[masterSystemConfig]['L2']['rpcUrl']
       )
 
-      // addresses
-
       //this.L1MessengerAddress = addresses.Proxy__OVM_L1CrossDomainMessenger
       //backwards compat
       if (addresses.hasOwnProperty('Proxy__OVM_L1CrossDomainMessenger')) {
@@ -345,7 +347,6 @@ class NetworkService {
       /*The test token*/
       this.L1ERC20Contract = new ethers.Contract(
         addresses.TOKENS.TEST.L1,
-        //this.L1ERC20Address,
         L1ERC20Json.abi,
         this.provider.getSigner()
       )
@@ -353,7 +354,6 @@ class NetworkService {
 
       this.L2ERC20Contract = new ethers.Contract(
         addresses.TOKENS.TEST.L2,
-        //this.L2ERC20Address,
         L2ERC20Json.abi,
         this.provider.getSigner()
       )
@@ -487,8 +487,8 @@ class NetworkService {
   }
 
   async getExits() {
+    
     //this is NOT SUPPORTED on LOCAL
-
     if (this.masterSystemConfig === 'rinkeby') {
       const response = await omgxWatcherAxiosInstance(
         this.masterSystemConfig
@@ -515,30 +515,101 @@ class NetworkService {
   async getBalances() {
     
     try {
+      
+      // Always check ETH and oETH
       const layer1Balance = await this.L1Provider.getBalance(this.account)
-      console.log('ETH balance on L1:', layer1Balance.toString())
-
-      const ERC20L1Balance = await this.L1ERC20Contract.connect(
-        this.L1Provider
-      ).balanceOf(this.account)
-      console.log('Balance of the test token on L1:', ERC20L1Balance.toString())
-
+      //console.log('ETH balance on L1:', layer1Balance.toString())
+      
       const layer2Balance = await this.L2Provider.getBalance(this.account)
+      //console.log("oETH balance on L2:", layer2Balance.toString())
 
-      console.log("oETH balance on L2:", layer2Balance.toString())
+      // Add the token to our master list, if we do not have it yet
+      Object.keys(this.tokenAddresses).map((token, i) => {  
+        getToken(this.tokenAddresses[token].L1)
+      })
 
-      const ERC20L2Balance = await this.L2ERC20Contract.connect(
-        this.L2Provider
-      ).balanceOf(this.account)
-      console.log('Balance of the test token on L2:', ERC20L2Balance.toString())
+      const ethToken = await getToken(this.L1ETHAddress)
+      //console.log('Checking ethToken:', ethToken)
+
+      const layer1Balances = [
+        {
+          ...ethToken,
+          symbol: 'ETH',
+          amount: new BN(layer1Balance.toString()),
+        }
+      ]
+
+      const layer2Balances = [
+        {
+          ...ethToken,
+          currency: this.L2ETHAddress,
+          symbol: 'oETH',
+          amount: new BN(layer2Balance.toString()),
+        }
+      ]
+
+      const state = store.getState()
+      const tA = Object.values(state.tokenList)
+
+      for (var i = 0; i < tA.length; i++) {
+        
+        let token = tA[i]
+
+        //ETH is special - will break things here
+        if(token.L1address === this.L1ETHAddress) continue
+        
+        const tokenC = new ethers.Contract(token.L1address,L1ERC20Json.abi,this.provider.getSigner())
+        const balance = await tokenC.connect(this.L1Provider).balanceOf(this.account)
+        
+        //Value is too small to show
+        if(Number(balance.toString()) < 0.1) continue
+        
+        layer1Balances.push({
+          currency: token.currency,
+          symbol: token.symbol,
+          decimals: token.decimals,
+          amount: new BN(balance.toString())
+        })
+      }
+
+      for (var i = 0; i < tA.length; i++) {
+        
+        let token = tA[i]
+
+        //oETH is special - will break things here
+        if(token.L2address === this.L2ETHAddress) continue
+        
+        const tokenC = new ethers.Contract(token.L2address,L2ERC20Json.abi,this.provider.getSigner())
+        const balance = await tokenC.connect(this.L2Provider).balanceOf(this.account)
+        
+        //Value is too small to show
+        if(Number(balance.toString()) < 0.1) continue
+        
+        layer2Balances.push({
+          currency: token.currency,
+          symbol: token.symbol,
+          decimals: token.decimals,
+          amount: new BN(balance.toString())
+        })
+      }
+
+      // const ERC20L1Balance = await this.L1ERC20Contract.connect(
+      //   this.L1Provider
+      // ).balanceOf(this.account)
+      // console.log('Balance of the test token on L1:', ERC20L1Balance.toString())
+
+      // const ERC20L2Balance = await this.L2ERC20Contract.connect(
+      //   this.L2Provider
+      // ).balanceOf(this.account)
+      // console.log('Balance of the test token on L2:', ERC20L2Balance.toString())
 
       // //how many NFTs do I own?
       const ERC721L2Balance = await this.ERC721Contract.connect(
         this.L2Provider
       ).balanceOf(this.account)
-      console.log('ERC721L2Balance', ERC721L2Balance)
+      //console.log('ERC721L2Balance', ERC721L2Balance)
       //console.log("this.account",this.account)
-      console.log(this.ERC721Contract)
+      //console.log(this.ERC721Contract)
 
       //let see if we already know about them
       const myNFTS = getNFTs()
@@ -598,60 +669,15 @@ class NetworkService {
           })
         }
       } else {
-        // console.log("No NFT changes")
+        //console.log("No NFT changes")
         //all set - do nothing
       }
-
-      const ethToken = await getToken(this.L1ETHAddress)
-      //console.log('Checking ethToken:', ethToken)
-
-      let testToken = null
-
-      //For testing - we always provide a test token
-      if (this.L1orL2 === 'L1') {
-        //console.log('await getToken(this.L1ERC20Address):',this.L1ERC20Contract.address)
-        testToken = await getToken(this.L1ERC20Address)
-        //console.log('getToken(this.L1ERC20Address):')
-      } else {
-        //console.log('await getToken(this.L2ERC20Address):',this.L2ERC20Contract.address)
-        testToken = await getToken(this.L2ERC20Address)
-      }
-
-      //console.log('testToken:', testToken)
-
-      const layer1Balances = [
-        {
-          ...ethToken,
-          amount: new BN(layer1Balance.toString()),
-        },
-        {
-          ...testToken,
-          currency: this.L1ERC20Address,
-          amount: new BN(ERC20L1Balance.toString()),
-        },
-      ]
-
-      const layer2Balances = [
-        {
-          ...ethToken,
-          currency: this.L2ETHAddress,
-          symbol: 'oETH',
-          amount: new BN(layer2Balance.toString()),
-        },
-        {
-          ...testToken,
-          currency: this.L2ERC20Address,
-          amount: new BN(ERC20L2Balance.toString()),
-        },
-      ]
-
-      console.log('layer1Balances:', layer1Balances)
-      console.log('layer2Balances:', layer2Balances)
 
       return {
         layer1: orderBy(layer1Balances, (i) => i.currency),
         layer2: orderBy(layer2Balances, (i) => i.currency),
       }
+
     } catch (error) {
       throw new WebWalletError({
         originalError: error,
@@ -923,7 +949,7 @@ class NetworkService {
   /***********************************************/
   /*****                  Fee                *****/
   /***********************************************/
-  // Total exist fee
+  // Total exit fee
   async getTotalFeeRate() {
     const L2LPContract = new ethers.Contract(
       this.L2LPAddress,
@@ -1202,6 +1228,7 @@ class NetworkService {
   }
 
   async depositL2LP(currency, value) {
+    
     const L2ERC20Contract = this.L2ERC20Contract.attach(currency)
 
     let allowance = await L2ERC20Contract.allowance(

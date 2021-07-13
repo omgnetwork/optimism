@@ -13,23 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-const ETH0x = '0x0000000000000000000000000000000000000000';
-const oETH = '0x4200000000000000000000000000000000000006';
+const ETH0x = '0x0000000000000000000000000000000000000000'
+const oETH  = '0x4200000000000000000000000000000000000006'
 
 const initialState = {
   [ETH0x]: {
     currency: ETH0x,
+    L1address: ETH0x,
+    L2address: oETH,
     decimals: 18,
     symbol: 'ETH',
-    name: 'Ethereum'
-  },
-  [oETH]: {
-    currency: oETH,
-    decimals: 18,
-    symbol: 'oETH',
     name: 'Ethereum',
+    redalert: false
   }
-};
+}
 
 function tokenReducer (state = initialState, action) {
   switch (action.type) {

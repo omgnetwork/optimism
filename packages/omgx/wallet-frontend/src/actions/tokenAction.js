@@ -30,21 +30,21 @@ EVERYTHING IS INDEXED BY L1 TOKEN ADDRESS
 const ETHL1 = '0x0000000000000000000000000000000000000000'
 const ETHL2 = '0x4200000000000000000000000000000000000006'
 
-export async function getToken ( tokenContractAddress ) {
+export async function getToken ( tokenContractAddressL1 ) {
 
   //this *might* be coming from a person, and or copy-paste from Etherscan
   //so need toLowerCase()
   /*****************************************************************/
-  const _tokenContractAddress = tokenContractAddress.toLowerCase();
+  const _tokenContractAddressL1 = tokenContractAddressL1.toLowerCase();
   /*****************************************************************/
 
   const state = store.getState()
   
-  if (state.tokenList[_tokenContractAddress]) {
-    return state.tokenList[_tokenContractAddress];
+  if (state.tokenList[_tokenContractAddressL1]) {
+    return state.tokenList[_tokenContractAddressL1];
   } else {
-    console.log("Adding new token:",_tokenContractAddress)
-    const tokenInfo = await addToken(_tokenContractAddress)
+    console.log("Adding new token:",_tokenContractAddressL1)
+    const tokenInfo = await addToken(_tokenContractAddressL1)
     return tokenInfo;
   }
 }
@@ -115,7 +115,7 @@ export async function addToken ( tokenContractAddressL1 ) {
       decimals,
       name,
       redalert: _decimals ? false : true 
-    };
+    }
 
     store.dispatch({
       type: 'TOKEN/GET/SUCCESS',
