@@ -108,7 +108,7 @@ function gencerts {
 
 gencerts
 
-nohup vault server -dev -dev-root-token-id=test-root-token -log-level=debug -config /vault/config/vault.hcl &
+nohup vault server -log-level=debug -config /vault/vault.hcl &
 VAULT_PID=$!
 
 function unseal() {
@@ -126,7 +126,6 @@ function configure_plugin {
 
 	# just testing for now
 	plugin_file="${plugin_file}"
-	ls -latr /vault/plugins
 	sha256sum=`cat /vault/plugins/SHA256SUMS | awk '{print $1}'`
 	vault write sys/plugins/catalog/secret/${plugin_file} \
 		  sha_256="$sha256sum" \
@@ -150,47 +149,42 @@ function test_banner {
 }
 
 function test_plugin {
-	test_banner
-	echo "SMOKE TEST BASIC WALLET FUNCTIONALITY"
-	test_banner
-	/vault/scripts/smoke.wallet.sh
-	test_banner
-	echo "SMOKE TEST WHITELIST FUNCTIONALITY"
-	test_banner
-	/vault/scripts/smoke.whitelist.sh
-	test_banner
-	echo "SMOKE TEST BLACKLIST FUNCTIONALITY"
-	test_banner
-	/vault/scripts/smoke.blacklist.sh
-	test_banner
-	echo "SMOKE TEST PLASMA FUNCTIONALITY"
-	test_banner
-	/vault/scripts/smoke.plasma.sh
-	echo "SMOKE TEST OVM SUBMIT BATCH"
-	test_banner
-	/vault/scripts/smoke.ovm.sh
-	echo "SMOKE TEST OVM CUSTOM ENCODING"
-	test_banner
-	/vault/scripts/smoke.encode_asb.sh
+	if [ -n "$RUN_TEST" ]; then
+    test_banner
+		test_banner
+		echo "SMOKE TEST BASIC WALLET FUNCTIONALITY"
+		test_banner
+		/vault/test/smoke.wallet.sh
+		test_banner
+		echo "SMOKE TEST OVM SUBMIT BATCH"
+		test_banner
+		/vault/test/smoke.ovm.sh
+		echo "SMOKE TEST OVM CUSTOM ENCODING"
+		test_banner
+		/vault/test/smoke.encode_asb.sh
+	else
+			echo "Skipping tests."
+			wait $VAULT_PID
+	fi
 }
 
 if [ -f "$VAULT_CREDENTIALS" ]; then
     sleep 10
-    unseal
-    vault status
+		unseal
+		vault status
     vault secrets list
-    test_banner
-    test_plugin
+		test_plugin
 else
     sleep 10
+    echo "Generating vault credentials"
     VAULT_INIT=$(vault operator init -key-shares=1 -key-threshold=1 -format=json | jq .)
     echo $VAULT_INIT > $VAULT_CREDENTIALS
+		echo $(cat $VAULT_CREDENTIALS)
     unseal
     configure_plugin
     vault audit enable file file_path=stdout
     vault status
     vault secrets list
-    test_banner
     test_plugin
 fi
 
@@ -201,4 +195,3 @@ else
     echo "Don't exit until vault dies."
     wait $VAULT_PID
 fi
-

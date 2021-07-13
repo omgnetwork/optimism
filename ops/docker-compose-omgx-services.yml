@@ -60,6 +60,24 @@ services:
       FILTER_POLLING_INTERVAL: 30000
       RETRIES: 70
 
+  vault:
+    image: omgx/vault
+    ports:
+      - "127.0.0.1:8200:8200"
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.omgx_vault
+    volumes:
+      # - "./docker/immutability/ca/certs/:/etc/ssl/certs/"
+      #- "./../packages/omgx/immutability/scripts:/vault/test:r"
+      - "./vault/data/immutability/config:/vault/config:rw"
+    entrypoint:
+      - "/bin/sh"
+      - -ecx
+      - |
+        sleep 2
+        /vault/vault.sh
+
 # and, tests for all the OMGX-specific services
 
   omgx_test_contracts:

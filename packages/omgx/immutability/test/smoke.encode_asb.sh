@@ -1,11 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
 
 function banner {
     echo "------------------------------------------------------------------------------------------------------------------------------------"
 }
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 
-source /vault/scripts/smoke.env.sh
+source $DIR/smoke.env.sh
 
 echo 'should work with more complex case'
 #response=$(curl -k -H X-Vault-Token:test-root-token -X PUT https://localhost:8200/v1/immutability-eth-plugin/encodeAppendSequencerBatch -d '{"should_start_at_element": 10, "total_elements_to_append": 1, "contexts": ["{\"num_sequenced_transactions\": 2, \"num_subsequent_queue_transactions\": 1, \"timestamp\": 100, \"block_number\": 200}"], "transactions": ["0x45423400000011", "0x45423400000012"]}' | jq .data)
