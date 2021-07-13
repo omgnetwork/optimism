@@ -1,10 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
 function banner {
     echo "------------------------------------------------------------------------------------------------------------------------------------"
 }
 
-source /vault/scripts/smoke.env.sh
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
+
+source $DIR/smoke.env.sh
 
 banner
 echo "CONFIGURE MOUNT"
@@ -73,16 +75,18 @@ banner
 echo "CREATE SECOND NEW ACCOUNT IN WALLET"
 echo "vault write -format=json immutability-eth-plugin/wallets/test-wallet-2/accounts"
 ACCOUNT1=$(vault write -f -field=address immutability-eth-plugin/wallets/test-wallet-2/accounts)
+check_result $? 0
 banner
 vault write  -output-curl-string -f immutability-eth-plugin/wallets/test-wallet-2/accounts
 
 banner
-echo "TRANSFER FUNDS FROM $ACCOUNT0 TO $ACCOUNT1" 
-echo "vault write -format=json immutability-eth-plugin/wallets/test-wallet-2/accounts/$ACCOUNT0/debit to=$ACCOUNT1 amount=$FUNDING_AMOUNT"
-vault write -format=json immutability-eth-plugin/wallets/test-wallet-2/accounts/$ACCOUNT0/debit to=$ACCOUNT1 amount=$FUNDING_AMOUNT
-check_result $? 0
-banner
-vault write  -output-curl-string immutability-eth-plugin/wallets/test-wallet-2/accounts/$ACCOUNT0/debit to=$ACCOUNT1 amount=$FUNDING_AMOUNT
+#TODO need to fund these accounts first
+# echo "TRANSFER FUNDS FROM $ACCOUNT0 TO $ACCOUNT1"
+# echo "vault write -format=json immutability-eth-plugin/wallets/test-wallet-2/accounts/$ACCOUNT0/debit to=$ACCOUNT1 amount=$FUNDING_AMOUNT"
+# vault write -format=json immutability-eth-plugin/wallets/test-wallet-2/accounts/$ACCOUNT0/debit to=$ACCOUNT1 amount=$FUNDING_AMOUNT
+# check_result $? 0
+# banner
+# vault write  -output-curl-string immutability-eth-plugin/wallets/test-wallet-2/accounts/$ACCOUNT0/debit to=$ACCOUNT1 amount=$FUNDING_AMOUNT
 
 banner
 echo "CREATE TEMPORARY NEW ACCOUNT IN WALLET"

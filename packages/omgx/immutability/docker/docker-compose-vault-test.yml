@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+
+  vault:
+    environment:
+      RUN_TEST: "true"
+      TEST: "true"
+    volumes:
+      # - "./docker/immutability/ca/certs/:/etc/ssl/certs/"
+      - "./../packages/omgx/immutability/test:/vault/test"
+      - "./vault/data/immutability/config:/vault/config:rw"

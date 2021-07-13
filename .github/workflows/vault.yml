@@ -1,0 +1,53 @@
+name: Vault tests
+
+
+on:
+  push:
+    paths:
+      - 'packages/omgx/immutability/**'
+    branches:
+      - 'master'
+      - 'develop'
+      - '*rc'
+      - 'regenesis/*'
+  pull_request:
+    paths:
+      - 'packages/omgx/immutability/**'
+    branches:
+      - 'master'
+      - 'develop'
+      - '*rc'
+      - 'regenesis/*'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ./ops
+
+jobs:
+
+  vault_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run vault and execute tests
+      working-directory: ./ops
+      env:
+        DATA_DIR: "vault/data/immutability/config"
+      run: |
+        mkdir -p $DATA_DIR
+        sudo chown -R 100:1000 $DATA_DIR && sudo chmod -R 777 $DATA_DIR
+        docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml up -d l1_chain vault
+    - name: Wait for Vault
+      working-directory: ./ops
+      run: |
+        while [ $(docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml logs | grep -c "Dying.") -ne 1 ];
+        do
+            sleep 1
+            echo "Waiting for Vault..."
+        done
+        echo "Vault has executed tests"
+    - name: Test validation
+      working-directory: ./ops
+      run: exit $(docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml logs | grep -c "DID NOT PASS THE REQUIRED TEST")
