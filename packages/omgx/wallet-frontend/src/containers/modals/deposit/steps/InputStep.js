@@ -4,12 +4,12 @@ import Button from 'components/button/Button'
 import IconSelect from 'components/iconSelect/iconSelect'
 import Input from 'components/input/Input'
 import { ethers } from 'ethers'
-import { isEqual, merge, keyBy, values } from 'lodash'
+import { isEqual, values } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   selectlayer1Balance,
-  selectlayer2Balance,
+  selectlayer2Balance
 } from 'selectors/balanceSelector'
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectTokens } from 'selectors/tokenSelector'
