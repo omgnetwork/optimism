@@ -85,6 +85,7 @@ function ApproveStep({
     } else {
       res = await dispatch(approveErc20(weiAmount, currencyL1Address))
     }
+
     if (res) {
       dispatch(openAlert('ERC20 approval submitted.'))
       checkAllowance()
@@ -112,7 +113,7 @@ function ApproveStep({
     
     if (fast) {
       res = await dispatch(depositL1LP(currencyL1Address, value))
-    } else 
+    } else {
       res = await dispatch(
         depositErc20(weiAmount, currencyL1Address, gasPrice, currencyL2Address)
       )
