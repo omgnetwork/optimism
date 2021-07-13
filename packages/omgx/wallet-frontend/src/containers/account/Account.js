@@ -181,7 +181,7 @@ function Account () {
 
           <div className={styles.header}>
             <div className={styles.title}>
-              <span>Balance on Rootchain</span>
+              <span>Balance on L1</span>
               <span>Ethereum Network</span>
             </div>
             {masterConfig === 'local' &&
@@ -275,7 +275,7 @@ function Account () {
         <div className={[styles.box, networkLayer === 'L1' ? styles.dim : styles.active].join(' ')}>
           <div className={styles.header}>
             <div className={styles.title}>
-              <span>Balance on Childchain</span>
+              <span>Balance on L2</span>
               <span>OMGX</span>
             </div>
               <div

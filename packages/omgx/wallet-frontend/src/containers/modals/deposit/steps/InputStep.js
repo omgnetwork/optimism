@@ -1,9 +1,8 @@
-import { depositETHL2, depositL1LP } from 'actions/networkAction'
+import { depositETHL2 } from 'actions/networkAction'
 import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
 import Button from 'components/button/Button'
 import IconSelect from 'components/iconSelect/iconSelect'
 import Input from 'components/input/Input'
-import Tabs from 'components/tabs/Tabs'
 import { ethers } from 'ethers'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -14,10 +13,10 @@ import * as styles from '../DepositModal.module.scss'
 function InputStep({
   onClose,
   onNext,
-  currency,
-  currencyL2,
-  setCurrency,
-  setCurrencyL2,
+  currencyL1Address,
+  currencyL2Address,
+  setCurrencyL1Address,
+  setCurrencyL2Address,
   tokenInfo,
   value,
   setValue,
@@ -41,31 +40,36 @@ function InputStep({
   }, [])
 
   useEffect(() => {
-    console.log(selectedToken)
     if (selectedToken && selectedToken.label === 'manual') {
-      setCurrency('')
-      setCurrencyL2('')
-    } else if (!!selectedToken && !!selectedToken.details) {
-      setCurrency(selectedToken.details.L1 || '')
-      setCurrencyL2(selectedToken.details.L2 || '')
+      setCurrencyL1Address('')
+      setCurrencyL2Address('')
+    } 
+    else if (selectedToken) {
+      setCurrencyL1Address(selectedToken.L1 || '')
+      setCurrencyL2Address(selectedToken.L2 || '')
     }
-  }, [selectedToken, setCurrency, setCurrencyL2])
+  }, [selectedToken, setCurrencyL1Address, setCurrencyL2Address])
 
   useEffect(() => {
+    let allTokens = {};
     // load priority tokens
     networkService
       .getPriorityTokens()
       .then((res) => {
-        setTokens(res)
+        allTokens = res;        
         setPriorityTokens(res)
       })
       .catch((err) => {
-        console.log('error', err)
+        console.log('error priority tokens', err)
       })
     // load dropdown tokens
     networkService
       .getDropdownTokens()
       .then((res) => {
+        //make sure that the token list is the superset of 
+        //the priorityTokens and the dropdownTokens
+        //console.log("All the tokens:", {...allTokens, ...res})
+        setTokens({...allTokens, ...res})
         setDropDownTokens(res)
       })
       .catch((err) => {
@@ -79,7 +83,7 @@ function InputStep({
       let res = await dispatch(depositETHL2(value))
       if (res) {
         dispatch(setActiveHistoryTab1('Deposits'))
-        dispatch(openAlert('ETH deposit submitted.'))
+        dispatch(openAlert('ETH deposit submitted'))
         handleClose()
       } else {
         dispatch(openError('Failed to deposit ETH'))
@@ -87,19 +91,18 @@ function InputStep({
     }
   }
 
-  const disabledSubmit =
-    value <= 0 ||
-    !currency ||
-    !ethers.utils.isAddress(currency) ||
-    !currencyL2 ||
-    !ethers.utils.isAddress(currencyL2)
+  const disabledSubmit = value <= 0 ||
+    !currencyL1Address ||
+    !ethers.utils.isAddress(currencyL1Address) ||
+    !currencyL2Address ||
+    !ethers.utils.isAddress(currencyL2Address)
 
   return (
     <>
       <h2>
         {`Traditional Deposit ${
-          selectedToken && selectedToken.details
-            ? selectedToken.details.name
+          selectedToken && selectedToken.name
+            ? selectedToken.name
             : ''
         }`}
       </h2>
@@ -117,16 +120,16 @@ function InputStep({
           <Input
             label="L1 Token Contract Address"
             placeholder="0x"
-            value={currency}
-            paste={selectedToken ? selectedToken.title === 'manual' : false}
-            onChange={(i) => setCurrency(i.target.value.toLowerCase())} //because this is a user input!!
+            value={currencyL1Address}
+            paste={true}
+            onChange={(i)=>setCurrencyL1Address(i.target.value.toLowerCase())} //because this is a user input!!
           />
           <Input
             label="L2 Token Contract Address"
             placeholder="0x"
-            value={currencyL2}
-            paste={selectedToken ? selectedToken.title === 'manual' : false}
-            onChange={(i) => setCurrencyL2(i.target.value.toLowerCase())} //because this is a user input!!
+            value={currencyL2Address}
+            paste={true}
+            onChange={(i)=>setCurrencyL2Address(i.target.value.toLowerCase())} //because this is a user input!!
           />
         </>
       ) : null}
@@ -134,27 +137,25 @@ function InputStep({
       <Input
         label="Amount to deposit into OMGX"
         type="number"
-        unit={
-          selectedToken
-            ? selectedToken.details.name === 'manual'
-              ? tokenInfo.symbol
-              : selectedToken.details.symbol
-            : ''
-        }
+        unit={selectedToken && selectedToken.symbol ? selectedToken.symbol : ''}
         placeholder={0}
         value={value}
-        onChange={(i) => setValue(i.target.value)}
+        onChange={(i)=>setValue(i.target.value)}
       />
 
       <div className={styles.buttons}>
-        <Button onClick={handleClose} type="outline" style={{ flex: 0 }}>
+        <Button 
+          onClick={handleClose} 
+          type="outline" 
+          style={{flex: 0}}
+        >
           CANCEL
         </Button>
         {selectedToken && selectedToken.symbol === 'ETH' && (
           <Button
             onClick={depositETH}
             type="primary"
-            style={{ flex: 0 }}
+            style={{flex: 0}}
             loading={depositLoading}
             tooltip="Your deposit is still pending. Please wait for confirmation."
             disabled={disabledSubmit}
@@ -166,7 +167,7 @@ function InputStep({
           <Button
             onClick={onNext}
             type="primary"
-            style={{ flex: 0 }}
+            style={{flex: 0}}
             disabled={disabledSubmit}
           >
             NEXT

@@ -27,7 +27,7 @@ import FarmList from 'components/farmList/FarmList';
 import networkService from 'services/networkService';
 
 import ethLogo from 'images/ethereum.svg';
-import JLKNLogo from 'images/JLKN.svg';
+import TESTLogo from 'images/test.svg';
 
 import * as styles from './Farm.module.scss';
 
@@ -103,7 +103,7 @@ class Farm extends React.Component {
             return (
               <FarmList 
                 key={i}
-                logo={isETH ? ethLogo : JLKNLogo}
+                logo={isETH ? ethLogo : TESTLogo}
                 name={isETH ? "Ethereum" : "TEST"}
                 shortName={isETH ? "ETH" : "TEST"}
                 poolInfo={poolInfo.L1LP[v]}
@@ -120,7 +120,7 @@ class Farm extends React.Component {
             return (
               <FarmList 
                 key={i}
-                logo={isETH ? ethLogo : JLKNLogo}
+                logo={isETH ? ethLogo : TESTLogo}
                 name={isETH ? "Ethereum" : "TEST"}
                 shortName={isETH ? "ETH" : "TEST"}
                 poolInfo={poolInfo.L2LP[v]}

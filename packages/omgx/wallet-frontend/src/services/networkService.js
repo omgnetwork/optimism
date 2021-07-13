@@ -93,8 +93,10 @@ class NetworkService {
     this.L1StandardBridgeAddress = null
 
     this.ERC721Address = null
+    
     this.L1ERC20Address = null
     this.L2ERC20Address = null
+    
     this.L1MessengerAddress = null
     this.L1LPAddress = null
     this.L2LPAddress = null
@@ -340,7 +342,7 @@ class NetworkService {
       )
       //console.log("L2ETHContract:", this.L2ETHContract.address)
 
-      /*The test token?*/
+      /*The test token*/
       this.L1ERC20Contract = new ethers.Contract(
         addresses.TOKENS.TEST.L1,
         //this.L1ERC20Address,
@@ -453,22 +455,6 @@ class NetworkService {
     // connect to the wallet
     this.provider = new ethers.providers.Web3Provider(window.ethereum)
     this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
-  }
-
-  async discoverERC20Assets() {
-    console.log(this.tokenAddresses)
-    //L1 = this.tokenAddresses[token.symbol].L1
-    //       L2 = this.tokenAddresses[token.symbol].L2
-    // const nw = getAllNetworks()
-    // const chainParam = {
-    //   chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
-    //   chainName: 'OMGX L2',
-    //   rpcUrls: [nw.rinkeby.L2.rpcUrl],
-    // }
-
-    // // connect to the wallet
-    // this.provider = new ethers.providers.Web3Provider(window.ethereum)
-    // this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
   }
 
   async getTransactions() {
@@ -1173,16 +1159,42 @@ class NetworkService {
     return l2Receipt
   }
 
-  async L1LPBalance(currency) {
+  async L1LPBalance(tokenAddress) {
     let balance
-    if (currency === this.L2ETHAddress || currency === this.L1ETHAddress) {
+    let tokenAddressLC = tokenAddress.toLowerCase()
+    if (
+      tokenAddressLC === this.L2ETHAddress || 
+      tokenAddressLC === this.L1ETHAddress
+    ) {
       balance = await this.L1Provider.getBalance(this.L1LPAddress)
     } else if (
-      currency === this.L2ERC20Address ||
-      currency === this.L1ERC20Address
+      tokenAddressLC === this.L2ERC20Address.toLowerCase() ||
+      tokenAddressLC === this.L1ERC20Address.toLowerCase()
     ) {
       balance = await this.L1ERC20Contract.connect(this.L1Provider).balanceOf(
         this.L1LPAddress
+      )
+    }
+    const decimals = 18
+    return logAmount(balance.toString(), decimals)
+  }
+
+  async L2LPBalance(tokenAddress) {
+    let balance
+    let tokenAddressLC = tokenAddress.toLowerCase()
+    if (
+      tokenAddressLC === this.L2ETHAddress || 
+      tokenAddressLC === this.L1ETHAddress
+    ) { //We are dealing with ETH
+      balance = await this.L2ETHContract.connect(this.L2Provider).balanceOf(
+        this.L2LPAddress
+      )
+    } else if (
+      tokenAddressLC === this.L2ERC20Address.toLowerCase() ||
+      tokenAddressLC === this.L1ERC20Address.toLowerCase()
+    ) { //we are dealing with TEST
+      balance = await this.L2ERC20Contract.connect(this.L2Provider).balanceOf(
+        this.L2LPAddress
       )
     }
     const decimals = 18
@@ -1234,23 +1246,6 @@ class NetworkService {
     return L1Receipt
   }
 
-  async L2LPBalance(currency) {
-    let balance
-    if (currency === this.L1ETHAddress) {
-      balance = await this.L2ETHContract.connect(this.L2Provider).balanceOf(
-        this.L2LPAddress
-      )
-    } else if (currency.toLowerCase() === this.L1ERC20Address.toLowerCase()) {
-      balance = await this.L2ERC20Contract.balanceOf(this.L2LPAddress)
-    } else {
-      balance = await this.L2ERC20Contract.connect(this.L2Provider).balanceOf(
-        this.L2LPAddress
-      )
-    }
-    const decimals = 18
-    return logAmount(balance.toString(), decimals)
-  }
-
   async getTestToken() {
     try {
       const getTokenTX = await this.L2TokenPoolContract.requestToken({
@@ -1267,28 +1262,32 @@ class NetworkService {
 
   async getPriorityTokens() {
     try {
-      //get the addresses from the address files
-      return priorityTokens.map((token) => {
-        let address = this.tokenAddresses
-          ? this.tokenAddresses[token.symbol] || {}
-          : {}
-        if (address.symbol === 'ETH') {
-          address = {
-            L1: 'ToDo',
-            L2: 'ToDo',
-          }
+      let returnTokens = []
+
+      priorityTokens.map((token) => {
+        
+        let L1 = ''
+        let L2 = ''
+        
+        if (token.symbol === 'ETH') {
+          L1 = this.L1ETHAddress
+          L2 = this.L2ETHAddress
+        } else {
+          L1 = this.tokenAddresses[token.symbol].L1
+          L2 = this.tokenAddresses[token.symbol].L2
         }
-        return {
+
+        let tokenF = {
           symbol: token.symbol,
           icon: token.icon,
           name: token.name,
-          details: {
-            ...address,
-            name: token.name,
-            symbol: token.symbol,
-          },
+          L1,
+          L2
         }
+
+        returnTokens.push(tokenF)
       })
+      return returnTokens
     } catch (error) {
       return error
     }
@@ -1299,18 +1298,26 @@ class NetworkService {
       let returnTokens = []
       //get the addresses from the address files
       swapTokens.map((token) => {
+        
         let L1 = ''
+        let L2 = ''
+        
         if (token.symbol === 'ETH') {
-          L1 = 'ToDo'
+          L1 = this.L1ETHAddress
+          L2 = this.L2ETHAddress
         } else {
           L1 = this.tokenAddresses[token.symbol].L1
+          L2 = this.tokenAddresses[token.symbol].L2
         }
+
         let tokenF = {
           symbol: token.symbol,
           icon: token.icon,
           name: token.name,
           L1,
+          L2
         }
+
         returnTokens.push(tokenF)
       })
       return returnTokens
@@ -1321,17 +1328,32 @@ class NetworkService {
 
   async getDropdownTokens() {
     try {
-      return dropdownTokens.map((option) => {
-        let token = this.tokenAddresses[option.symbol]
-        return {
-          label: option.name,
-          value: option.name,
-          details: {
-            ...option,
-            ...token,
-          },
+      let returnTokens = []
+      //get the addresses from the address files
+      dropdownTokens.map((token) => {
+        
+        let L1 = ''
+        let L2 = ''
+        
+        if (token.symbol === 'ETH') {
+          L1 = this.L1ETHAddress
+          L2 = this.L2ETHAddress
+        } else {
+          L1 = this.tokenAddresses[token.symbol].L1
+          L2 = this.tokenAddresses[token.symbol].L2
         }
+
+        let tokenF = {
+          symbol: token.symbol,
+          icon: token.icon,
+          name: token.name,
+          L1,
+          L2
+        }
+
+        returnTokens.push(tokenF)
       })
+      return returnTokens
     } catch (error) {
       return error
     }

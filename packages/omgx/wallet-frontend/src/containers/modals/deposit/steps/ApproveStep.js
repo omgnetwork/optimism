@@ -11,6 +11,7 @@ import {
   resetApprove,
   depositL1LP,
 } from 'actions/networkAction'
+
 import { openAlert, setActiveHistoryTab1 } from 'actions/uiAction'
 import networkService from 'services/networkService'
 import { selectLoading } from 'selectors/loadingSelector'
@@ -20,12 +21,13 @@ import * as styles from '../DepositModal.module.scss'
 
 function ApproveStep({
   onClose,
-  currency,
-  currencyL2,
+  currencyL1Address,
+  currencyL2Address,
   value,
   tokenInfo,
   fast,
 }) {
+  
   const dispatch = useDispatch()
   const [allowance, setAllowance] = useState('')
   const [allowDeposit, setAllowDeposit] = useState(false)
@@ -36,27 +38,32 @@ function ApproveStep({
   const approveLoading = useSelector(selectLoading(['APPROVE/CREATE']))
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
   const weiAmount = powAmount(value, tokenInfo.decimals)
+  
   const checkAllowance = useCallback(async () => {
     try {
       let allowance
-      if (fast === false) {
-        allowance = await networkService.checkAllowance(currency)
-      } else {
-        allowance = await networkService.checkAllowance(
-          currency,
+      
+      if (fast) {
+        allowance = await networkService.checkAllowance(currencyL1Address,
           networkService.L1LPAddress
         )
+      } else {
+        allowance = await networkService.checkAllowance(currencyL1Address)
       }
+
       setAllowance(allowance)
+      
       const allowanceBN = new BN(allowance)
       const weiAmountBN = new BN(weiAmount)
+      
       allowanceBN.gte(weiAmountBN)
         ? setAllowDeposit(true)
         : setAllowDeposit(false)
+      
     } catch (error) {
       onClose()
     }
-  }, [onClose, currency, weiAmount, fast])
+  }, [onClose, currencyL1Address, weiAmount, fast])
 
   useEffect(() => {
     checkAllowance()
@@ -73,10 +80,10 @@ function ApproveStep({
     let res
     if (fast) {
       res = await dispatch(
-        approveErc20(weiAmount, currency, networkService.L1LPAddress)
+        approveErc20(weiAmount, currencyL1Address, networkService.L1LPAddress)
       )
     } else {
-      res = await dispatch(approveErc20(weiAmount, currency))
+      res = await dispatch(approveErc20(weiAmount, currencyL1Address))
     }
     if (res) {
       dispatch(openAlert('ERC20 approval submitted.'))
@@ -88,10 +95,10 @@ function ApproveStep({
     let res
     if (fast) {
       res = await dispatch(
-        resetApprove(weiAmount, currency, networkService.L1LPAddress)
+        resetApprove(weiAmount, currencyL1Address, networkService.L1LPAddress)
       )
     } else {
-      res = await dispatch(resetApprove(weiAmount, currency))
+      res = await dispatch(resetApprove(weiAmount, currencyL1Address))
     }
     if (res) {
       dispatch(openAlert('ERC20 approval reset successful.'))
@@ -100,19 +107,20 @@ function ApproveStep({
   }
 
   async function doDeposit() {
+    
     let res
-    if (fast === false) {
+    
+    if (fast) {
+      res = await dispatch(depositL1LP(currencyL1Address, value))
+    } else 
       res = await dispatch(
-        depositErc20(weiAmount, currency, gasPrice, currencyL2)
+        depositErc20(weiAmount, currencyL1Address, gasPrice, currencyL2Address)
       )
-    } else {
-      res = await dispatch(depositL1LP(currency, value))
     }
+    
     if (res) {
       dispatch(setActiveHistoryTab1('Deposits'))
-      if (fast === false) {
-        dispatch(openAlert(`${tokenName} deposit submitted.`))
-      } else {
+      if (fast) {
         dispatch(
           openAlert(
             `${tokenName} was deposited to the L1LP. You will receive ${(
@@ -120,6 +128,8 @@ function ApproveStep({
             ).toFixed(2)} ${tokenName} on L2`
           )
         )
+      } else {
+        dispatch(openAlert(`${tokenName} deposit submitted.`))
       }
       handleClose()
     }
@@ -154,7 +164,7 @@ function ApproveStep({
       {allowance === '0' && (
         <>
           <p>
-            {`To deposit ${value.toString()} ${tokenName}, you first need to allow us to hold ${value.toString()} of your ${tokenName}. Click below to submit an approval transaction.`}
+            {`To deposit ${value.toString()} ${tokenName}, you first need to allow us to hold ${value.toString()} of your ${tokenName}. Click below to approve.`}
           </p>
           {renderGasPicker}
           <div className={styles.buttons}>

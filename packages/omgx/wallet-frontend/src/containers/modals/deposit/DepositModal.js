@@ -24,36 +24,40 @@ import Modal from 'components/modal/Modal'
 
 import InputStep from './steps/InputStep'
 import InputStepFast from './steps/InputStepFast'
-
 import ApproveStep from './steps/ApproveStep'
 
-const ETH0x = '0x0000000000000000000000000000000000000000'
+/* THIS ONLY MAKES SENSE ON L1 - so let's do all the lookups etc for L1 */
 
 function DepositModal({ open, omgOnly = false, fast = false }) {
+  
   const dispatch = useDispatch()
 
   const [step, setStep] = useState('INPUT_STEP')
-  const [currency, setCurrency] = useState(ETH0x)
-  const [currencyL2, setCurrencyL2] = useState(ETH0x)
+  const [currencyL1Address, setCurrencyL1Address] = useState('')
+  const [currencyL2Address, setCurrencyL2Address] = useState('')
   const [tokenInfo, setTokenInfo] = useState({})
   const [value, setValue] = useState('')
 
+  //given choice of L1 currency, as defined by the currency's L1 address, obtain as much information as possible 
+  //about this ERC20, and use that to parametrize the tokenInfo
   useEffect(() => {
     async function getTokenInfo() {
-      const _currency = currency.toLowerCase()
-      console.log('_currency', _currency)
-      if (_currency && ethers.utils.isAddress(_currency)) {
-        const tokenInfo = await getToken(_currency)
-        setTokenInfo(tokenInfo)
+      if(currencyL1Address === '') return
+      const _currencyL1Address = currencyL1Address.toLowerCase()
+      if (_currencyL1Address && ethers.utils.isAddress(_currencyL1Address)) {
+        const tokenInfo = await getToken(_currencyL1Address)
+        setTokenInfo(tokenInfo) //that gets the token info for L1
+        //if it's not yet in the system, pull all the info
       } else {
         setTokenInfo({})
       }
     }
     getTokenInfo()
-  }, [currency])
+  }, [currencyL1Address])
 
   const handleClose = useCallback(() => {
-    setCurrency(ETH0x)
+    setCurrencyL1Address('')
+    setCurrencyL2Address('')
     setValue('')
     setStep('INPUT_STEP')
     dispatch(closeModal('depositModal'))
@@ -64,14 +68,14 @@ function DepositModal({ open, omgOnly = false, fast = false }) {
       {!!fast && step === 'INPUT_STEP' && (
         <InputStepFast
           onClose={handleClose}
-          onNext={() => setStep('APPROVE_STEP')}
-          currency={currency}
-          currencyL2={currencyL2}
+          onNext={()=>setStep('APPROVE_STEP')}
+          currencyL1Address={currencyL1Address}
+          currencyL2Address={currencyL2Address}
+          setCurrencyL1Address={setCurrencyL1Address}
+          setCurrencyL2Address={setCurrencyL2Address}
           tokenInfo={tokenInfo}
-          value={value}
-          setCurrency={setCurrency}
-          setCurrencyL2={setCurrencyL2}
           setTokenInfo={setTokenInfo}
+          value={value}
           setValue={setValue}
           omgOnly={omgOnly}
         />
@@ -79,14 +83,14 @@ function DepositModal({ open, omgOnly = false, fast = false }) {
       {!fast && step === 'INPUT_STEP' && (
         <InputStep
           onClose={handleClose}
-          onNext={() => setStep('APPROVE_STEP')}
-          currency={currency}
-          currencyL2={currencyL2}
+          onNext={()=>setStep('APPROVE_STEP')}
+          currencyL1Address={currencyL1Address}
+          currencyL2Address={currencyL2Address}
+          setCurrencyL1Address={setCurrencyL1Address}
+          setCurrencyL2Address={setCurrencyL2Address}
           tokenInfo={tokenInfo}
-          value={value}
-          setCurrency={setCurrency}
-          setCurrencyL2={setCurrencyL2}
           setTokenInfo={setTokenInfo}
+          value={value}
           setValue={setValue}
           omgOnly={omgOnly}
         />
@@ -94,8 +98,8 @@ function DepositModal({ open, omgOnly = false, fast = false }) {
       {step === 'APPROVE_STEP' && (
         <ApproveStep
           onClose={handleClose}
-          currency={currency}
-          currencyL2={currencyL2}
+          currencyL1Address={currencyL1Address}
+          currencyL2Address={currencyL2Address}
           value={value}
           tokenInfo={tokenInfo}
           fast={fast}

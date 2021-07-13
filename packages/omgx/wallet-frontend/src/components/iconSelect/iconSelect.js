@@ -15,7 +15,7 @@ limitations under the License. */
 import React from 'react'
 import Select from 'react-select'
 import etherIcon from '../../images/ether-icon.png'
-import testIcon from '../../images/JLKN.svg'
+import testIcon from '../../images/test.svg'
 import omgxIcon from '../../images/omg-icon-circle.png'
 import sushiIcon from '../../images/sushi-icon.png'
 import usdtIcon from '../../images/usdt-icon.png'
@@ -41,9 +41,7 @@ function IconSelect({
         return (
           <div
             className={styles.tokenIcon}
-            onClick={() => {
-              onTokenSelect(t)
-            }}
+            onClick={()=>{onTokenSelect(t)}}
           >
             <img src={tokenIcons[t.icon]} width="40px" alt={t.title} />
             <p>{t.symbol}</p>
@@ -58,19 +56,8 @@ function IconSelect({
       {dropdownOptions.length > 0 && (
         <div className={styles.selectContainer}>
           <Select
-            options={[
-              ...dropdownOptions,
-              {
-                value: 'manual',
-                label: 'Other',
-                details: {
-                  name: 'Manual',
-                },
-              },
-            ]}
-            onChange={(token) => {
-              onTokenSelect(token)
-            }}
+            options={[...dropdownOptions]}
+            onChange={(token)=>{onTokenSelect(token)}}
           />
         </div>
       )}
