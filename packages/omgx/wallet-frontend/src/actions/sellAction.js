@@ -466,7 +466,7 @@ export const acceptBid = ( cMD ) => async (dispatch) => {
   const balance = state.balance;
   const itemOpenList = state.sell.itemOpenList;
 
-  const availableBalanceArray = balance.childchain.filter(i => i.currency === cMD.sellerItemToSend.currency);
+  const availableBalanceArray = balance.layer2.filter(i => i.currency === cMD.sellerItemToSend.currency);
   let availableBalance = 0;
   if (availableBalanceArray.length) {
     availableBalance = availableBalanceArray[0].amount;

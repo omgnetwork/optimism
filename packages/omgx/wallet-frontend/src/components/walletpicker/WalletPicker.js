@@ -193,7 +193,7 @@ function WalletPicker ({ onEnable, enabled }) {
 
       <div className={styles.MainBar} >
         <div className={styles.MainLeft}>
-          OMGX Example Web Wallet<br/>
+          OMGX Gateway<br/>
           90 Second Swap-On and Swap-Off<br/>
           Traditional Deposits and 7 Day Exits<br/>
         </div>

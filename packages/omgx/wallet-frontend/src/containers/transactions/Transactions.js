@@ -27,7 +27,7 @@ import { setActiveHistoryTab2 } from 'actions/uiAction'
 import { selectActiveHistoryTab1 } from 'selectors/uiSelector'
 import { selectActiveHistoryTab2 } from 'selectors/uiSelector'
 
-import { selectChildchainTransactions } from 'selectors/transactionSelector';
+import { selectlayer2Transactions } from 'selectors/transactionSelector';
 import { selectLoading } from 'selectors/loadingSelector'
 
 import Tabs from 'components/tabs/Tabs'
@@ -59,7 +59,7 @@ function Transactions () {
   const activeTab1 = useSelector(selectActiveHistoryTab1, isEqual);
   const activeTab2 = useSelector(selectActiveHistoryTab2, isEqual);
 
-  const unorderedTransactions = useSelector(selectChildchainTransactions, isEqual);
+  const unorderedTransactions = useSelector(selectlayer2Transactions, isEqual);
   const transactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
 
   const _transactions = transactions.filter(i => {

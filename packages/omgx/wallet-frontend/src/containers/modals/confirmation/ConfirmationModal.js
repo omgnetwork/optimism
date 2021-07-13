@@ -38,7 +38,7 @@ class ConfirmationModal extends React.Component {
   constructor(props) {
     super(props);
     
-    const { childchain } = this.props.balance;
+    const { layer2 } = this.props.balance;
 
     this.state = {
       loading: this.props,
@@ -46,7 +46,7 @@ class ConfirmationModal extends React.Component {
       cMD: this.props.ui.cMD,
       approvedAllowance: 0,
       neededAllowance: 0,
-      balances: childchain.reduce((acc, cur) => {
+      balances: layer2.reduce((acc, cur) => {
         acc[cur.symbol] = cur.amount;
         return acc;
       }, {}),
@@ -54,7 +54,7 @@ class ConfirmationModal extends React.Component {
   }
 
   async componentDidUpdate(prevState) {
-    const { childchain } = this.props.balance;
+    const { layer2 } = this.props.balance;
     const { open, loading } = this.props;
     const { cMD } = this.props.ui;
 
@@ -71,9 +71,9 @@ class ConfirmationModal extends React.Component {
       this.setState({ loading });
     }
 
-    if (prevState.balance.childchain !== childchain) {
+    if (prevState.balance.layer2 !== layer2) {
       this.setState({ 
-        balances: childchain.reduce((acc, cur) => {
+        balances: layer2.reduce((acc, cur) => {
           acc[cur.symbol] = cur.amount;
           return acc;
         }, {}) 

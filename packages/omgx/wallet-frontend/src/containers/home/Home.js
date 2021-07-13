@@ -17,7 +17,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector, batch } from 'react-redux';
 import { selectWalletMethod } from 'selectors/setupSelector';
 import { selectModalState } from 'selectors/uiSelector';
-// import { selectChildchainTransactions } from 'selectors/transactionSelector';
+// import { selectlayer2Transactions } from 'selectors/transactionSelector';
 //import { selectLogin } from 'selectors/loginSelector';
 
 import useInterval from 'util/useInterval';
@@ -94,7 +94,7 @@ function Home () {
 
   const walletMethod = useSelector(selectWalletMethod())
   // const loggedIn = useSelector(selectLogin());
-  // const transactions = useSelector(selectChildchainTransactions, isEqual);
+  // const transactions = useSelector(selectlayer2Transactions, isEqual);
   
   useEffect(() => {
     const body = document.getElementsByTagName('body')[0];

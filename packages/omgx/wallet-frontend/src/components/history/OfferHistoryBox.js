@@ -108,7 +108,7 @@ class BidOfferHistoryBox extends React.Component {
   handleAcceptBid(itemID, bidID, address) {
 
     const { decryptedItem, bidOfferData, FHEseed, AESKey } = this.state;
-    const { childchain } = this.props.balance;
+    const { layer2 } = this.props.balance;
 
     // The buyers are willing to pay more than the sellers' minimum
     // buyer data
@@ -125,7 +125,7 @@ class BidOfferHistoryBox extends React.Component {
     const sellerItemToSendAmountRemain = accDiv(decryptedItem[itemID][10], Math.pow(10, 5));
 
     let sellerItemToSend = '', sellerItemToReceive = '';
-    childchain.forEach(element => {
+    layer2.forEach(element => {
       if (element.symbol.toLowerCase() === sellerItemToSendSymbol.toLowerCase()) {
         sellerItemToSend = element;
       }

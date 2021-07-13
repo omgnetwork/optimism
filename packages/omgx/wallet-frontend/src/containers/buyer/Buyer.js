@@ -105,7 +105,7 @@ class Buyer extends React.Component {
     } = this.props.swap;
 
     const { 
-      childchain
+      layer2
     } = this.props.balance;
 
     const {
@@ -125,7 +125,7 @@ class Buyer extends React.Component {
       buyerExchangeRate: '',
 
       // Balance
-      childchain,
+      layer2,
 
       numberOfItemsOnVarna,
       generateOfferLoad, 
@@ -257,11 +257,11 @@ class Buyer extends React.Component {
     } = this.props.swap;
 
     const { 
-      childchain
+      layer2
     } = this.props.balance;
 
-    if (prevState.balance.childchain !== childchain) {
-      this.setState({ childchain });
+    if (prevState.balance.layer2 !== layer2) {
+      this.setState({ layer2 });
     }
 
     if (prevState.tokenList !== tokenList) {

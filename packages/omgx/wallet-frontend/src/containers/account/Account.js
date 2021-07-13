@@ -21,7 +21,7 @@ import truncate from 'truncate-middle';
 
 import { selectLoading } from 'selectors/loadingSelector';
 import { selectIsSynced } from 'selectors/statusSelector';
-import { selectChildchainBalance, selectRootchainBalance } from 'selectors/balanceSelector';
+import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector';
 
 import { openModal, openAlert, openError } from 'actions/uiAction';
 
@@ -40,8 +40,8 @@ function Account () {
 
   const dispatch = useDispatch();
   const isSynced = useSelector(selectIsSynced);
-  const childBalance = useSelector(selectChildchainBalance, isEqual);
-  const rootBalance = useSelector(selectRootchainBalance, isEqual);
+  const childBalance = useSelector(selectlayer2Balance, isEqual);
+  const rootBalance = useSelector(selectlayer1Balance, isEqual);
   const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]));
 
   const disabled = !childBalance.length || !isSynced ;

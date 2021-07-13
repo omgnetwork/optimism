@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { BigNumber } from 'ethers'
 import { isEqual } from 'lodash'
 
-import { selectChildchainBalance } from 'selectors/balanceSelector'
+import { selectlayer2Balance } from 'selectors/balanceSelector'
 
 import { exitOMGX, depositL2LP, approveErc20 } from 'actions/networkAction'
 import { openAlert, openError } from 'actions/uiAction'
@@ -46,7 +46,7 @@ function DoExitStep({ handleClose, fast }) {
   const [allowance, setAllowance] = useState(0)
   const [disabledSubmit, setDisabledSubmit] = useState(true)
 
-  const balances = useSelector(selectChildchainBalance, isEqual)
+  const balances = useSelector(selectlayer2Balance, isEqual)
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
   const approveLoading = useSelector(selectLoading(['APPROVE/CREATE']))
 

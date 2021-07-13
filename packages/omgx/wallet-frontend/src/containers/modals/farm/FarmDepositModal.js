@@ -27,8 +27,8 @@ class FarmDepositModal extends React.Component {
       stakeToken,
       stakeValue: '',
       // balance
-      rootchainBalance: balance.rootchain,
-      childchainBalance: balance.childchain,
+      layer1Balance: balance.layer1,
+      layer2Balance: balance.layer2,
       // allowance
       approvedAllowance: 0,
       // loading
@@ -58,15 +58,15 @@ class FarmDepositModal extends React.Component {
 
     if (!isEqual(prevState.balance, balance)) {
       this.setState({
-        childchainBalance: balance.childchain,
-        rootchainBalance: balance.rootchain,
+        layer2Balance: balance.layer2,
+        layer1Balance: balance.layer1,
       });
     }
   }
 
   getMaxTransferValue () {
-    const { rootchainBalance, childchainBalance, stakeToken } = this.state;
-    const transferingBalanceObject = (stakeToken.L1orL2Pool === 'L1LP' ? rootchainBalance : childchainBalance)
+    const { layer1Balance, layer2Balance, stakeToken } = this.state;
+    const transferingBalanceObject = (stakeToken.L1orL2Pool === 'L1LP' ? layer1Balance : layer2Balance)
       .find(i => i.currency === stakeToken.currency);
     if (!transferingBalanceObject) {
       return;
@@ -131,12 +131,12 @@ class FarmDepositModal extends React.Component {
     const {
       open,
       stakeToken, stakeValue,
-      rootchainBalance, childchainBalance,
+      layer1Balance, layer2Balance,
       approvedAllowance,
       loading,
     } = this.state;
 
-    const selectOptions = (stakeToken.L1orL2Pool === 'L1LP' ? rootchainBalance : childchainBalance)
+    const selectOptions = (stakeToken.L1orL2Pool === 'L1LP' ? layer1Balance : layer2Balance)
       .reduce((acc, cur) => {
       if (cur.currency.toLowerCase() === stakeToken.currency.toLowerCase()) {
         acc.push({

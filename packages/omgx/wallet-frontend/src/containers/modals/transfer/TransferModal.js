@@ -20,7 +20,7 @@ import BN from 'bignumber.js';
 
 import { transfer } from 'actions/networkAction';
 
-import { selectChildchainBalance } from 'selectors/balanceSelector';
+import { selectlayer2Balance } from 'selectors/balanceSelector';
 import { selectLoading } from 'selectors/loadingSelector';
 import { closeModal, openAlert } from 'actions/uiAction';
 
@@ -41,7 +41,7 @@ function TransferModal ({ open }) {
   const [ value, setValue ] = useState('');
   const [ recipient, setRecipient ] = useState('');
 
-  const balances = useSelector(selectChildchainBalance, isEqual);
+  const balances = useSelector(selectlayer2Balance, isEqual);
 
   const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]));
 

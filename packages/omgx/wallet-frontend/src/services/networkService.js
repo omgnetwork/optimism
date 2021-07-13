@@ -515,17 +515,17 @@ class NetworkService {
   async getBalances() {
     
     try {
-      const rootChainBalance = await this.L1Provider.getBalance(this.account)
-      console.log('ETH balance on L1:', rootChainBalance.toString())
+      const layer1Balance = await this.L1Provider.getBalance(this.account)
+      console.log('ETH balance on L1:', layer1Balance.toString())
 
       const ERC20L1Balance = await this.L1ERC20Contract.connect(
         this.L1Provider
       ).balanceOf(this.account)
       console.log('Balance of the test token on L1:', ERC20L1Balance.toString())
 
-      const childChainBalance = await this.L2Provider.getBalance(this.account)
+      const layer2Balance = await this.L2Provider.getBalance(this.account)
 
-      console.log("oETH balance on L2:", childChainBalance.toString())
+      console.log("oETH balance on L2:", layer2Balance.toString())
 
       const ERC20L2Balance = await this.L2ERC20Contract.connect(
         this.L2Provider
@@ -603,7 +603,7 @@ class NetworkService {
       }
 
       const ethToken = await getToken(this.L1ETHAddress)
-      console.log('Checking ethToken:', ethToken)
+      //console.log('Checking ethToken:', ethToken)
 
       let testToken = null
 
@@ -617,12 +617,12 @@ class NetworkService {
         testToken = await getToken(this.L2ERC20Address)
       }
 
-      console.log('testToken:', testToken)
+      //console.log('testToken:', testToken)
 
-      const rootchainEthBalance = [
+      const layer1Balances = [
         {
           ...ethToken,
-          amount: new BN(rootChainBalance.toString()),
+          amount: new BN(layer1Balance.toString()),
         },
         {
           ...testToken,
@@ -631,12 +631,12 @@ class NetworkService {
         },
       ]
 
-      const childchainEthBalance = [
+      const layer2Balances = [
         {
           ...ethToken,
           currency: this.L2ETHAddress,
           symbol: 'oETH',
-          amount: new BN(childChainBalance.toString()),
+          amount: new BN(layer2Balance.toString()),
         },
         {
           ...testToken,
@@ -645,12 +645,12 @@ class NetworkService {
         },
       ]
 
-      console.log('rootchainEthBalance:', rootchainEthBalance)
-      console.log('childchainEthBalance:', childchainEthBalance)
+      console.log('layer1Balances:', layer1Balances)
+      console.log('layer2Balances:', layer2Balances)
 
       return {
-        rootchain: orderBy(rootchainEthBalance, (i) => i.currency),
-        childchain: orderBy(childchainEthBalance, (i) => i.currency),
+        layer1: orderBy(layer1Balances, (i) => i.currency),
+        layer2: orderBy(layer2Balances, (i) => i.currency),
       }
     } catch (error) {
       throw new WebWalletError({

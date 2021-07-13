@@ -96,8 +96,8 @@ class Seller extends React.Component {
     } = this.props.sellTask;
     
     const { 
-      rootchain, 
-      childchain
+      layer1, 
+      layer2
     } = this.props.balance;
 
     const {
@@ -123,7 +123,7 @@ class Seller extends React.Component {
       configureItemToOMGXLoad, 
       configureItemToOMGXError,
       // Balance
-      rootchain, childchain,
+      layer1, layer2,
       // Transaction History
       transactions: orderBy(transaction, i => i.blockNumber, 'desc'),
       // Page
@@ -264,8 +264,8 @@ class Seller extends React.Component {
     } = this.props.sellTask;
     
     const { 
-      rootchain, 
-      childchain
+      layer1, 
+      layer2
     } = this.props.balance;
     
     const { 
@@ -358,12 +358,12 @@ class Seller extends React.Component {
       this.setState({ itemOpenOrClosedError });
     }
 
-    if (prevState.balance.rootchain !== rootchain) {
-      this.setState({ rootchain });
+    if (prevState.balance.layer1 !== layer1) {
+      this.setState({ layer1 });
     }
 
-    if (prevState.balance.childchain !== childchain) {
-      this.setState({ childchain });
+    if (prevState.balance.layer2 !== layer2) {
+      this.setState({ layer2 });
     }
 
     /**************************************************************************/

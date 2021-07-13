@@ -39,7 +39,7 @@ class BidHistoryBox extends React.Component {
   async handleAcceptSeller () {
     
     const { data } = this.state;
-    const { childchain } = this.props.balance;
+    const { layer2 } = this.props.balance;
 
       // agree amount is how many tokens buyer will receive
       const agreeAmount = data.bidAcceptDetails.agreeAmount;
@@ -51,7 +51,7 @@ class BidHistoryBox extends React.Component {
       const buyerItemToSendCurrency = data.bidAcceptDetails.currencyB;
       // buyer item Object
       let buyerItemToSend = '';
-      childchain.forEach(element => {
+      layer2.forEach(element => {
         if (element.currency === buyerItemToSendCurrency) {
           buyerItemToSend = element;
         }
