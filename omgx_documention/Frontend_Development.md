@@ -29,7 +29,7 @@ To facilitate development and testing, there are three accounts that will receiv
 
 * Deployer (aka Bob) - This one starts out with 5000 ETH on L1 and 4999.9036 oETH on L2. During deployment, a test token is created called TEST, and the deployer (aka Bob) holds the entire initial supply (10000000000) on the L1. This account also has the *owner permissions* for the test NFT. 
 
-_Account Address: 0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc  
+_Account Address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266  
 Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80_    
 
 * Alice (PK_2)

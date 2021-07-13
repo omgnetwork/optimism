@@ -24,7 +24,9 @@ const initialState = {
     decimals: 18,
     symbol: 'ETH',
     name: 'Ethereum',
-    redalert: false
+    redalert: false,
+    balanceL1: '',
+    balanceL2: ''
   }
 }
 
@@ -34,7 +36,7 @@ function tokenReducer (state = initialState, action) {
       return { 
         ...state, 
         [action.payload.currency]: action.payload,
-      };
+      }
     case 'TOKEN/GET/FAILURE':
       return {
         ...state,
