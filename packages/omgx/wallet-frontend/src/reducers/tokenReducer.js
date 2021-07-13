@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 const ETH0x = '0x0000000000000000000000000000000000000000'
-const oETH  = '0x4200000000000000000000000000000000000006'
+const oETH = '0x4200000000000000000000000000000000000006'
 
 const initialState = {
   [ETH0x]: {
@@ -26,15 +26,15 @@ const initialState = {
     name: 'Ethereum',
     redalert: false,
     balanceL1: '',
-    balanceL2: ''
-  }
+    balanceL2: '',
+  },
 }
 
-function tokenReducer (state = initialState, action) {
+function tokenReducer(state = initialState, action) {
   switch (action.type) {
     case 'TOKEN/GET/SUCCESS':
-      return { 
-        ...state, 
+      return {
+        ...state,
         [action.payload.currency]: action.payload,
       }
     case 'TOKEN/GET/FAILURE':
@@ -43,8 +43,8 @@ function tokenReducer (state = initialState, action) {
         [action.payload.currency]: action.payload,
       }
     default:
-      return state;
+      return state
   }
 }
 
-export default tokenReducer;
+export default tokenReducer

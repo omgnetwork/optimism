@@ -13,19 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-const initialState = {
-  layer1: [],
-  layer2: [],
+export function selectTokens(state) {
+  return state.tokenList
 }
-
-function balanceReducer(state = initialState, action) {
-  switch (action.type) {
-    case 'BALANCE/GET/SUCCESS':
-      const { layer1, layer2 } = action.payload
-      return { ...state, layer1, layer2 }
-    default:
-      return state
-  }
-}
-
-export default balanceReducer

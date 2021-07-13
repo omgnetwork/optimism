@@ -17,12 +17,32 @@
       font-size: 14px;
       text-transform: uppercase;
     }
+    .tokenIconBalance {
+      font-size: 12px;
+      margin-bottom: 0px;
+    }
   }
 
   .customOptionContainer {
     display: flex;
     justify-content: space-around;
     align-items: center;
+  }
+}
+
+.ddOptionLabel {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: column;
+  .optionBalance {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    p {
+      margin-bottom: 0;
+      font-size: 12px;
+    }
   }
 }
 

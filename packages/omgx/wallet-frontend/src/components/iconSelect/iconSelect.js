@@ -41,13 +41,51 @@ function IconSelect({
         return (
           <div
             className={styles.tokenIcon}
-            onClick={()=>{onTokenSelect(t)}}
+            onClick={() => {
+              onTokenSelect(t)
+            }}
           >
             <img src={tokenIcons[t.icon]} width="40px" alt={t.title} />
             <p>{t.symbol}</p>
+            {Number(t.balanceL1) || Number(t.balanceL2) ? (
+              <p className={styles.tokenIconBalance}>Balance</p>
+            ) : (
+              ''
+            )}
+            {Number(t.balanceL1) ? (
+              <p className={styles.tokenIconBalance}>L1: {t.balanceL1}</p>
+            ) : (
+              ''
+            )}
+            {Number(t.balanceL2) ? (
+              <p className={styles.tokenIconBalance}>L1: {t.balanceL1}</p>
+            ) : (
+              ''
+            )}
           </div>
         )
       })}
+    </div>
+  )
+
+  const formatOptionLabel = (t) => (
+    <div className={styles.ddOptionLabel}>
+      <span>{t.label}</span>
+      <div classsName={styles.optionBalance}>
+        {Number(t.balanceL1) || Number(t.balanceL2) ? (
+          <span className={styles.tokenIconBalance}>Balance</span>
+        ) : null}
+        {Number(t.balanceL1) ? (
+          <span className={styles.tokenIconBalance}>
+            L1: {Number(t.balanceL1).toFixed(1)}
+          </span>
+        ) : null}
+        {Number(t.balanceL2) ? (
+          <span className={styles.tokenIconBalance}>
+            L2: {Number(t.balanceL2).toFixed(1)}
+          </span>
+        ) : null}
+      </div>
     </div>
   )
 
@@ -56,8 +94,17 @@ function IconSelect({
       {dropdownOptions.length > 0 && (
         <div className={styles.selectContainer}>
           <Select
-            options={[...dropdownOptions]}
-            onChange={(token)=>{onTokenSelect(token)}}
+            formatOptionLabel={formatOptionLabel}
+            options={[...dropdownOptions].map((i) => {
+              return {
+                label: i.name,
+                value: i.name,
+                ...i,
+              }
+            })}
+            onChange={(token) => {
+              onTokenSelect(token)
+            }}
           />
         </div>
       )}
