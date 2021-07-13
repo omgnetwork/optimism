@@ -127,10 +127,10 @@ function Account () {
             </div>
             <div className={styles.RabbitRightBottomNote}>
             {networkLayer === 'L1' && 
-              <span>You are on Mainnet (L1). Here, you can send tokens to OMGX. To do things on OMGX (L2), please switch to L2 in your wallet.</span>
+              <span>You are on Mainnet (L1). Here, you can send tokens to OMGX. To use the OMGX L2, please switch to L2 in MetaMask.</span>
             }
             {networkLayer === 'L2' && 
-              <span>You are on OMGX (L2). Here, you can trade, send tokens to others on OMGX, and send tokens to L1. To use L1, please switch to L1 in your wallet.</span>
+              <span>You are on OMGX (L2). Here, you can trade, send tokens to others on OMGX, and send tokens to L1. To use L1, please switch to L1 in MetaMask.</span>
             }
             </div>
           </div>
