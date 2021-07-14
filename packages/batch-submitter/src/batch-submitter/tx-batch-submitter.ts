@@ -361,6 +361,14 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
           idx,
           ele,
         })
+
+        this.logger.warn("Enabled autoFixBatchOptions - fixMonotonicity")
+        this.autoFixBatchOptions = {
+          fixDoublePlayedDeposits: false,
+          fixMonotonicity: true,
+          fixSkippedDeposits: false,
+        }
+
         return false
       }
       if (ele.blockNumber < lastBlockNumber) {
@@ -368,6 +376,14 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
           idx,
           ele,
         })
+
+        this.logger.warn("Enabled autoFixBatchOptions - fixMonotonicity")
+        this.autoFixBatchOptions = {
+          fixDoublePlayedDeposits: false,
+          fixMonotonicity: true,
+          fixSkippedDeposits: false,
+        }
+
         return false
       }
       lastTimestamp = ele.timestamp
@@ -414,6 +430,32 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
         queueElement.blockNumber
       )
     }
+
+    if (!isEqual) {
+      if (timestamp !== queueElement.timestamp &&
+        blockNumber === queueElement.blockNumber) {
+        this.logger.warn("Enabled autoFixBatchOptions - fixSkippedDeposits")
+        this.autoFixBatchOptions = {
+          fixDoublePlayedDeposits: false,
+          fixMonotonicity: false,
+          fixSkippedDeposits: true,
+        }
+      } else {
+        this.logger.warn("Enabled autoFixBatchOptions - fixMonotonicity")
+        this.autoFixBatchOptions = {
+          fixDoublePlayedDeposits: false,
+          fixMonotonicity: true,
+          fixSkippedDeposits: false,
+        }
+      }
+    } else {
+      this.autoFixBatchOptions = {
+        fixDoublePlayedDeposits: false,
+        fixMonotonicity: false,
+        fixSkippedDeposits: false,
+      }
+    }
+
     return isEqual
   }
 
@@ -489,7 +531,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
             break
           }
         }
-        fixedBatch.push(ele)
+        // fixedBatch.push(ele)
         if (!ele.isSequencerTx) {
           nextQueueIndex++
         }
