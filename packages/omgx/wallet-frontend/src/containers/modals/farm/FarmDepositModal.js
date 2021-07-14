@@ -87,7 +87,8 @@ class FarmDepositModal extends React.Component {
       powAmount(stakeValue, 18),
       stakeToken.currency,
       stakeToken.LPAddress,
-      networkService.L2ERC20Contract.abi,
+      networkService.L2_TEST_Contract.abi, //we are using _TEST_ here but is really 
+      //does not matter - all we need is soemthing that conforms to ERC20
     );
     if (approveTX) {
       this.props.dispatch(openAlert("Your transaction was approved."));

@@ -13,6 +13,8 @@ import { selectLoading } from 'selectors/loadingSelector'
 import networkService from 'services/networkService'
 import * as styles from '../DepositModal.module.scss'
 
+import { depositL1LP } from 'actions/networkAction';
+
 function InputStepFast({
   onClose,
   onNext,
@@ -37,6 +39,19 @@ function InputStepFast({
 
   function handleClose() {
     onClose()
+  }
+
+  async function depositETH () {
+    if (value > 0 && tokenInfo) {
+      let res = await dispatch(depositL1LP(selectedToken.L1, value))
+      if (res) {
+        dispatch(setActiveHistoryTab1('Deposits'));
+        dispatch(openAlert(`ETH was deposited the the L1LP. You will receive ${(Number(value) * 0.97).toFixed(2)} oETH on L2`));
+        handleClose();
+      } else {
+        dispatch(openError('Failed to deposit ETH'));
+      }
+    }
   }
 
   useEffect(() => {
@@ -136,6 +151,19 @@ function InputStepFast({
         >
           CANCEL
         </Button>
+        {selectedToken && selectedToken.symbol === 'ETH' && (
+          <Button
+            onClick={depositETH}
+            type='primary'
+            style={{ flex: 0 }}
+            loading={depositLoading}
+            tooltip='Your deposit is still pending. Please wait for confirmation.'
+            disabled={disabledSubmit}
+          >
+            DEPOSIT
+          </Button>
+        )}
+        {selectedToken && selectedToken.symbol !== 'ETH' && (
         <Button
           onClick={onNext}
           type="primary"
@@ -144,6 +172,7 @@ function InputStepFast({
         >
           NEXT
         </Button>
+        )}
       </div>
     </>
   )

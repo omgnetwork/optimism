@@ -78,7 +78,7 @@ class Farm extends React.Component {
   }
 
   isETH(address) {
-    return [networkService.L2ETHAddress, networkService.L1ETHAddress].includes(address);
+    return [networkService.L2_ETH_Address, networkService.L1_ETH_Address].includes(address);
   }
 
   render() {
@@ -100,6 +100,7 @@ class Farm extends React.Component {
         <div className={styles.TableContainer}>
           {Object.keys(poolInfo.L1LP).map((v, i) => {
             const isETH = this.isETH(v);
+            console.log("isETH:",isETH)
             return (
               <FarmList 
                 key={i}

@@ -34,7 +34,8 @@ describe('System setup', async () => {
       "OVM_L1StandardBridge",
       env.bobl1Wallet
     ).attach(L1StandardBridgeAddress)
-        const L2StandardBridgeAddress = await L1StandardBridge.l2TokenBridge()
+    
+    L2StandardBridgeAddress = await L1StandardBridge.l2TokenBridge()
 
     //let's tap into the contract we just deployed
     L1ERC20 = new Contract(
