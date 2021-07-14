@@ -70,6 +70,8 @@ echo "vault write -format=json -f immutability-eth-plugin/wallets/test-wallet-2/
 ACCOUNT0=$(vault write -f -field=address immutability-eth-plugin/wallets/test-wallet-2/accounts)
 banner
 vault write -format=json -f -output-curl-string immutability-eth-plugin/wallets/test-wallet-2/accounts
+echo "Funding $ACCOUNT0"
+node index.js $ACCOUNT0
 
 banner
 echo "CREATE SECOND NEW ACCOUNT IN WALLET"
@@ -81,11 +83,11 @@ vault write  -output-curl-string -f immutability-eth-plugin/wallets/test-wallet-
 
 banner
 #TODO need to fund these accounts first
-# echo "TRANSFER FUNDS FROM $ACCOUNT0 TO $ACCOUNT1"
-# echo "vault write -format=json immutability-eth-plugin/wallets/test-wallet-2/accounts/$ACCOUNT0/debit to=$ACCOUNT1 amount=$FUNDING_AMOUNT"
-# vault write -format=json immutability-eth-plugin/wallets/test-wallet-2/accounts/$ACCOUNT0/debit to=$ACCOUNT1 amount=$FUNDING_AMOUNT
-# check_result $? 0
-# banner
+echo "TRANSFER FUNDS FROM $ACCOUNT0 TO $ACCOUNT1"
+echo "vault write -format=json immutability-eth-plugin/wallets/test-wallet-2/accounts/$ACCOUNT0/debit to=$ACCOUNT1 amount=$FUNDING_AMOUNT"
+vault write -format=json immutability-eth-plugin/wallets/test-wallet-2/accounts/$ACCOUNT0/debit to=$ACCOUNT1 amount=$FUNDING_AMOUNT
+check_result $? 0
+banner
 # vault write  -output-curl-string immutability-eth-plugin/wallets/test-wallet-2/accounts/$ACCOUNT0/debit to=$ACCOUNT1 amount=$FUNDING_AMOUNT
 
 banner

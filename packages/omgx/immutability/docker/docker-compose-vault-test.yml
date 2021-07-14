@@ -6,7 +6,16 @@ services:
     environment:
       RUN_TEST: "true"
       TEST: "true"
+    user: root
     volumes:
       # - "./docker/immutability/ca/certs/:/etc/ssl/certs/"
       - "./../packages/omgx/immutability/test:/vault/test"
       - "./vault/data/immutability/config:/vault/config:rw"
+    entrypoint:
+      - "/bin/sh"
+      - -ecx
+      - |
+        sleep 2
+        apk add --update nodejs npm
+        cd /vault/test && npm install
+        /vault/vault.sh
