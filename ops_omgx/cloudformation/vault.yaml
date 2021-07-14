@@ -1,0 +1,190 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Enya Deployer Application Deployment"
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev
+
+  CFHelperELBv2RulePriorityStack:
+    Type: String
+    Default: CF-Helper-ELBv2-Rule-Priority
+
+  ServiceCount:
+    Type: Number
+    Default: 1
+
+  ImageTag:
+    Type: String
+    Default: push2aws
+
+  VaultImage:
+    Type: String
+    Default: vault
+
+  DockerPrefix:
+    Type: String
+    Default: omgx
+
+  ECRRegistry:
+    Type: String
+    Default: 942431445534.dkr.ecr.us-east-1.amazonaws.com
+
+  InfrastructureStackName:
+    Description: Infrastructure stack to associate this stack with
+    Type: String
+    Default: infrastructure-coredev
+
+  SecretName:
+    Description: AWS Secret Name used for the service
+    Type: String
+
+Conditions:
+  IsProduction:
+    !Equals [!Ref EnvironmentName, "production"]
+
+Resources:
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: !Sub ecs-tasks.${AWS::URLSuffix}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AllowAccessToSecrets
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "secretsmanager:GetResourcePolicy"
+                  - "secretsmanager:GetSecretValue"
+                  - "secretsmanager:DescribeSecret"
+                  - "secretsmanager:ListSecretVersionIds"
+                Resource:
+                  - arn:aws:secretsmanager:us-east-1:942431445534:secret:*
+  VaultLBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 8900
+      Protocol: HTTP
+      VpcId:
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:VpcId"
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 30
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP # TODO Implement proper healthcheck
+      HealthCheckTimeoutSeconds: 15
+      HealthyThresholdCount: 3
+      UnhealthyThresholdCount: 10
+      Matcher:
+        HttpCode: 200
+  VaultLBTargetGroup1:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 8901
+      Protocol: HTTP
+      VpcId:
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:VpcId"
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 30
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP # TODO Implement proper healthcheck
+      HealthCheckTimeoutSeconds: 15
+      HealthyThresholdCount: 3
+      UnhealthyThresholdCount: 10
+      Matcher:
+        HttpCode: 200
+  VaultLBListenerRulePriority:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken:
+        Fn::ImportValue: !Sub "${CFHelperELBv2RulePriorityStack}:Function"
+      ListenerArn:
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:VaultListener"
+  VaultLBListenerRulePriority1:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken:
+        Fn::ImportValue: !Sub "${CFHelperELBv2RulePriorityStack}:Function"
+      ListenerArn:
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:VaultListener1"
+  VaultLBListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref VaultLBTargetGroup
+      Conditions:
+        - Field: host-header
+          HostHeaderConfig:
+            Values:
+            - Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerInt:DNSName"
+      ListenerArn:
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:VaultListener"
+      Priority: !GetAtt VaultLBListenerRulePriority.Value
+  VaultLBListenerRule1:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref VaultLBTargetGroup1
+      Conditions:
+        - Field: host-header
+          HostHeaderConfig:
+            Values:
+            - Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerInt:DNSName"
+      ListenerArn:
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:VaultListener1"
+      Priority: !GetAtt VaultLBListenerRulePriority1.Value
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+        - Image: !Sub "${ECRRegistry}/${DockerPrefix}/${VaultImage}:${ImageTag}"
+          Name: vault
+          PortMappings:
+            - ContainerPort: 8900
+              HostPort: 0
+            - ContainerPort: 8901
+              HostPort: 0
+          Environment:
+            - Name: SECRETNAME
+              Value: !Ref SecretName
+          EntryPoint:
+            - "/bin/sh -ecx /vault/vault.sh"
+          DockerLabels:
+            com.datadoghq.ad.check_names: '["vault"]'
+            com.datadoghq.ad.init_configs: '[{}]'
+            com.datadoghq.ad.logs: '[{"source": "vault", "service": "vault"}]'
+          Essential: true
+          Memory: "256"
+      NetworkMode: bridge
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      Family: !Sub "Vault-${EnvironmentName}"
+  ECSService:
+    Type: AWS::ECS::Service
+    DependsOn: VaultLBListenerRule
+    Properties:
+      Cluster:
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:EcsCluster"
+      LoadBalancers:
+        - ContainerName: vault
+          ContainerPort: 8900
+          TargetGroupArn: !Ref VaultLBTargetGroup
+        - ContainerName: vault
+          ContainerPort: 8901
+          TargetGroupArn: !Ref VaultLBTargetGroup1
+      DesiredCount: !Ref ServiceCount
+      LaunchType: EC2
+      SchedulingStrategy: REPLICA
+      ServiceName: !Sub "Vault-${EnvironmentName}"
+      TaskDefinition: !Ref TaskDefinition
