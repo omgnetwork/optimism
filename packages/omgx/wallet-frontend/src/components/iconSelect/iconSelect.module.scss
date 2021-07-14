@@ -13,6 +13,9 @@
     align-items: center;
     justify-content: space-around;
     cursor: pointer;
+    .tokenSymbol {
+      margin: 0;
+    }
     p {
       font-size: 14px;
       text-transform: uppercase;

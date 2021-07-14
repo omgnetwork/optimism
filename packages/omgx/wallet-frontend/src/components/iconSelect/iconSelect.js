@@ -40,13 +40,14 @@ function IconSelect({
       {priorityOptions.map((t) => {
         return (
           <div
+            key={t.symbol}
             className={styles.tokenIcon}
             onClick={() => {
               onTokenSelect(t)
             }}
           >
             <img src={tokenIcons[t.icon]} width="40px" alt={t.title} />
-            <p>{t.symbol}</p>
+            <p className={styles.tokenSymbol}>{t.symbol}</p>
             {Number(t.balanceL1) || Number(t.balanceL2) ? (
               <p className={styles.tokenIconBalance}>Balance</p>
             ) : (
@@ -71,7 +72,7 @@ function IconSelect({
   const formatOptionLabel = (t) => (
     <div className={styles.ddOptionLabel}>
       <span>{t.label}</span>
-      <div classsName={styles.optionBalance}>
+      <div className={styles.optionBalance}>
         {Number(t.balanceL1) || Number(t.balanceL2) ? (
           <span className={styles.tokenIconBalance}>Balance</span>
         ) : null}
@@ -95,7 +96,13 @@ function IconSelect({
         <div className={styles.selectContainer}>
           <Select
             formatOptionLabel={formatOptionLabel}
-            options={[...dropdownOptions].map((i) => {
+            options={[
+              ...dropdownOptions,
+              {
+                label: 'Manual',
+                value: 'Manual',
+              },
+            ].map((i) => {
               return {
                 label: i.name,
                 value: i.name,

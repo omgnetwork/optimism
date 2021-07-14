@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   selectlayer1Balance,
-  selectlayer2Balance
+  selectlayer2Balance,
 } from 'selectors/balanceSelector'
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectTokens } from 'selectors/tokenSelector'
@@ -46,42 +46,49 @@ function InputStep({
 
   useEffect(() => {
     console.group('tokens')
-    let allOptions = values(tokens).map((t) => {
-      let isBalanceL2Exists = balancesL2.find((i) => i.symbol === t.symbol)
-      let isBalanceL1Exists = balancesL1.find((i) => i.symbol === t.symbol)
-      let isPriority = priorityTokens.find((i) => i.symbol === t.symbol)
-      let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbol)
+    let allOptions = values(tokens)
+      .map((t) => {
+        let isBalanceL2Exists = balancesL2.find((i) => i.symbol === t.symbol)
+        let isBalanceL1Exists = balancesL1.find((i) => i.symbol === t.symbol)
+        let isPriority = priorityTokens.find((i) => i.symbol === t.symbol)
+        let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbol)
 
-      let balanceL1 = ''
-      if (isBalanceL1Exists) {
-        balanceL1 = logAmount(
-          isBalanceL1Exists.amount,
-          isBalanceL1Exists.decimals
-        )
-      }
-      let balanceL2 = ''
-      if (isBalanceL2Exists) {
-        balanceL2 = logAmount(
-          isBalanceL2Exists.amount,
-          isBalanceL2Exists.decimals
-        )
-      }
+        let balanceL1 = ''
+        if (isBalanceL1Exists) {
+          balanceL1 = logAmount(
+            isBalanceL1Exists.amount,
+            isBalanceL1Exists.decimals
+          )
+        }
+        let balanceL2 = ''
+        if (isBalanceL2Exists) {
+          balanceL2 = logAmount(
+            isBalanceL2Exists.amount,
+            isBalanceL2Exists.decimals
+          )
+        }
 
-      // added this to have the token icon available;
-      let priorityToken = {}
-      if (!!isPriority) {
-        priorityToken = isPriority
-      }
+        // added this to have the token icon available;
+        let priorityToken = {}
+        if (!!isPriority) {
+          priorityToken = isPriority
+        }
 
-      return {
-        ...t,
-        priority: !!isPriority,
-        ...priorityToken,
-        showInDD: !!isDropdown,
-        balanceL2,
-        balanceL1,
-      }
-    })
+        // check the balance wether user is having it or not.
+        if (!balanceL1) {
+          return
+        }
+
+        return {
+          ...t,
+          priority: !!isPriority,
+          ...priorityToken,
+          showInDD: !!isDropdown,
+          balanceL2,
+          balanceL1,
+        }
+      })
+      .filter(Boolean)
 
     console.log('allOptions', allOptions)
     setTokenOptions(allOptions)
@@ -98,8 +105,8 @@ function InputStep({
       setCurrencyL1Address('')
       setCurrencyL2Address('')
     } else if (selectedToken) {
-      setCurrencyL1Address(selectedToken.L1 || '')
-      setCurrencyL2Address(selectedToken.L2 || '')
+      setCurrencyL1Address(selectedToken.L1address || '')
+      setCurrencyL2Address(selectedToken.L2address || '')
     }
   }, [selectedToken, setCurrencyL1Address, setCurrencyL2Address])
 
@@ -192,18 +199,21 @@ function InputStep({
         <Button onClick={handleClose} type="outline" style={{ flex: 0 }}>
           CANCEL
         </Button>
-        {selectedToken && selectedToken.symbol === 'ETH' && (
-          <Button
-            onClick={depositETH}
-            type="primary"
-            style={{ flex: 0 }}
-            loading={depositLoading}
-            tooltip="Your deposit is still pending. Please wait for confirmation."
-            disabled={disabledSubmit}
-          >
-            DEPOSIT
-          </Button>
-        )}
+        {selectedToken &&
+          selectedToken.symbol === 'ETH' &&
+          !!selectedToken.balanceL1 &&
+          !!Number(selectedToken.balanceL1) && (
+            <Button
+              onClick={depositETH}
+              type="primary"
+              style={{ flex: 0 }}
+              loading={depositLoading}
+              tooltip="Your deposit is still pending. Please wait for confirmation."
+              disabled={disabledSubmit}
+            >
+              DEPOSIT
+            </Button>
+          )}
         {selectedToken && selectedToken.symbol !== 'ETH' && (
           <Button
             onClick={onNext}
