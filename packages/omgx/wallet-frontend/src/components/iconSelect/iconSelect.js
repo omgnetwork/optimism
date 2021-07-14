@@ -48,18 +48,8 @@ function IconSelect({
           >
             <img src={tokenIcons[t.icon]} width="40px" alt={t.title} />
             <p className={styles.tokenSymbol}>{t.symbol}</p>
-            {Number(t.balanceL1) || Number(t.balanceL2) ? (
-              <p className={styles.tokenIconBalance}>Balance</p>
-            ) : (
-              ''
-            )}
             {Number(t.balanceL1) ? (
-              <p className={styles.tokenIconBalance}>L1: {t.balanceL1}</p>
-            ) : (
-              ''
-            )}
-            {Number(t.balanceL2) ? (
-              <p className={styles.tokenIconBalance}>L1: {t.balanceL1}</p>
+              <p className={styles.tokenIconBalance}>{Number(t.balanceL1).toFixed(2)}</p>
             ) : (
               ''
             )}
@@ -73,17 +63,9 @@ function IconSelect({
     <div className={styles.ddOptionLabel}>
       <span>{t.label}</span>
       <div className={styles.optionBalance}>
-        {Number(t.balanceL1) || Number(t.balanceL2) ? (
-          <span className={styles.tokenIconBalance}>Balance</span>
-        ) : null}
         {Number(t.balanceL1) ? (
           <span className={styles.tokenIconBalance}>
-            L1: {Number(t.balanceL1).toFixed(1)}
-          </span>
-        ) : null}
-        {Number(t.balanceL2) ? (
-          <span className={styles.tokenIconBalance}>
-            L2: {Number(t.balanceL2).toFixed(1)}
+            {Number(t.balanceL1).toFixed(2)}
           </span>
         ) : null}
       </div>

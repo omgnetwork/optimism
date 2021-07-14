@@ -46,7 +46,7 @@ function InputStepFast({
       let res = await dispatch(depositL1LP(selectedToken.L1, value))
       if (res) {
         dispatch(setActiveHistoryTab1('Deposits'));
-        dispatch(openAlert(`ETH was deposited the the L1LP. You will receive ${(Number(value) * 0.97).toFixed(2)} oETH on L2`));
+        dispatch(openAlert(`ETH was deposited the the L1LP. You will receive ${(Number(value) * (100 - Number(feeRate))/100).toFixed(2)} oETH on L2`));
         handleClose();
       } else {
         dispatch(openError('Failed to deposit ETH'));
@@ -81,7 +81,7 @@ function InputStepFast({
   //look up levels in the L2 liquidity pools
   if (selectedToken) {
     networkService.L2LPBalance(selectedToken.L2).then((res) => {
-      setLPBalance(Number(res).toFixed(1))
+      setLPBalance(Number(res).toFixed(2))
     })
     networkService.getTotalFeeRate().then((feeRate) => {
       setFeeRate(feeRate)
@@ -116,7 +116,8 @@ function InputStepFast({
             The L2 liquidity pool contains {LPBalance} oETH. 
             The liquidity fee is{' '}{feeRate}%.{' '}
             {value &&
-              `You will receive ${(Number(value) * 0.97).toFixed(2)} 
+              `You will receive 
+              ${(Number(value) * (100 - Number(feeRate))/100).toFixed(2)} 
               oETH on L2.`
             }
           </h3>
@@ -129,8 +130,9 @@ function InputStepFast({
             The L2 liquidity pool contains {LPBalance} {selectedToken.symbol}. 
             The liquidity fee is {feeRate}%.{' '}
             {value &&
-              `You will receive ${(Number(value) * 0.97).toFixed(2)} ${
-                selectedToken.symbol} on L2.`
+              `You will receive 
+              ${(Number(value) * (100 - Number(feeRate))/100).toFixed(2)} 
+              ${selectedToken.symbol} on L2.`
             }
           </h3>
         </>
@@ -155,7 +157,7 @@ function InputStepFast({
           <Button
             onClick={depositETH}
             type='primary'
-            style={{ flex: 0 }}
+            style={{flex: 0}}
             loading={depositLoading}
             tooltip='Your deposit is still pending. Please wait for confirmation.'
             disabled={disabledSubmit}
@@ -164,14 +166,14 @@ function InputStepFast({
           </Button>
         )}
         {selectedToken && selectedToken.symbol !== 'ETH' && (
-        <Button
-          onClick={onNext}
-          type="primary"
-          style={{flex: 0}}
-          disabled={disabledSubmit}
-        >
-          NEXT
-        </Button>
+          <Button
+            onClick={onNext}
+            type="primary"
+            style={{flex: 0}}
+            disabled={disabledSubmit}
+          >
+            NEXT
+          </Button>
         )}
       </div>
     </>
