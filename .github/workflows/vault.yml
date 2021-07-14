@@ -42,13 +42,12 @@ jobs:
     - name: Wait for Vault
       working-directory: ./ops
       run: |
-        echo $(docker-compose logs | grep "Dying.")
-        while $(docker-compose logs | grep "Dying.") > /dev/null;
+        while [ $(docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml logs | grep -c "Dying.") -ne 1 ];
         do
             sleep 1
             echo "Waiting for Vault..."
-            echo $(docker-compose logs | grep "Dying.")
         done
+        echo "Vault has executed tests"
     - name: Test validation
       working-directory: ./ops
-      run: exit $(docker-compose logs | grep -c "DID NOT PASS THE REQUIRED TEST")
+      run: exit $(docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml logs | grep -c "DID NOT PASS THE REQUIRED TEST")
