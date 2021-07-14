@@ -361,14 +361,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
           idx,
           ele,
         })
-
-        this.logger.warn("Enabled autoFixBatchOptions - fixMonotonicity")
-        this.autoFixBatchOptions = {
-          fixDoublePlayedDeposits: false,
-          fixMonotonicity: true,
-          fixSkippedDeposits: false,
-        }
-
+        this._enableAutoFixBatchOptions(1)
         return false
       }
       if (ele.blockNumber < lastBlockNumber) {
@@ -376,14 +369,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
           idx,
           ele,
         })
-
-        this.logger.warn("Enabled autoFixBatchOptions - fixMonotonicity")
-        this.autoFixBatchOptions = {
-          fixDoublePlayedDeposits: false,
-          fixMonotonicity: true,
-          fixSkippedDeposits: false,
-        }
-
+        this._enableAutoFixBatchOptions(1)
         return false
       }
       lastTimestamp = ele.timestamp
@@ -410,10 +396,11 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
 
     // TODO: Verify queue element hash equality. The queue element hash can be computed with:
     // keccak256( abi.encode( msg.sender, _target, _gasLimit, _data))
-
+    this._enableAutoFixBatchOptions(0)
     // Check timestamp & blockNumber equality
     if (timestamp !== queueElement.timestamp) {
       isEqual = false
+      this._enableAutoFixBatchOptions(2)
       logEqualityError(
         'Timestamp',
         queueIndex,
@@ -423,37 +410,13 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     }
     if (blockNumber !== queueElement.blockNumber) {
       isEqual = false
+      this._enableAutoFixBatchOptions(1)
       logEqualityError(
         'Block Number',
         queueIndex,
         blockNumber,
         queueElement.blockNumber
       )
-    }
-
-    if (!isEqual) {
-      if (timestamp !== queueElement.timestamp &&
-        blockNumber === queueElement.blockNumber) {
-        this.logger.warn("Enabled autoFixBatchOptions - fixSkippedDeposits")
-        this.autoFixBatchOptions = {
-          fixDoublePlayedDeposits: false,
-          fixMonotonicity: false,
-          fixSkippedDeposits: true,
-        }
-      } else {
-        this.logger.warn("Enabled autoFixBatchOptions - fixMonotonicity")
-        this.autoFixBatchOptions = {
-          fixDoublePlayedDeposits: false,
-          fixMonotonicity: true,
-          fixSkippedDeposits: false,
-        }
-      }
-    } else {
-      this.autoFixBatchOptions = {
-        fixDoublePlayedDeposits: false,
-        fixMonotonicity: false,
-        fixSkippedDeposits: false,
-      }
     }
 
     return isEqual
@@ -825,5 +788,31 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
 
   private _isSequencerTx(block: L2Block): boolean {
     return block.transactions[0].queueOrigin === QueueOrigin.Sequencer
+  }
+
+  private _enableAutoFixBatchOptions(type: number) {
+    if (type === 0) {
+      this.autoFixBatchOptions = {
+        fixDoublePlayedDeposits: false,
+        fixMonotonicity: false,
+        fixSkippedDeposits: false,
+      }
+    }
+    if (type === 1) {
+      this.logger.warn("Enabled autoFixBatchOptions - fixMonotonicity")
+      this.autoFixBatchOptions = {
+        fixDoublePlayedDeposits: false,
+        fixMonotonicity: true,
+        fixSkippedDeposits: false,
+      }
+    }
+    if (type === 2) {
+      this.logger.warn("Enabled autoFixBatchOptions - fixSkippedDeposits")
+      this.autoFixBatchOptions = {
+        fixDoublePlayedDeposits: false,
+        fixMonotonicity: false,
+        fixSkippedDeposits: true,
+      }
+    }
   }
 }
