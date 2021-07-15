@@ -73,7 +73,6 @@ function DoExitStepFast({ handleClose }) {
         networkService.L2LPAddress
       )
       setAllowance(allowance)
-      handleClose()
     }
   }
 
