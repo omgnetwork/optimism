@@ -87,10 +87,6 @@ func (b *LesApiBackend) SetHead(number uint64) {
 	b.eth.blockchain.SetHead(number)
 }
 
-func (b *LesApiBackend) IngestTransactions([]*types.Transaction) error {
-	panic("not implemented")
-}
-
 func (b *LesApiBackend) HeaderByNumber(ctx context.Context, number rpc.BlockNumber) (*types.Header, error) {
 	if number == rpc.LatestBlockNumber || number == rpc.PendingBlockNumber {
 		return b.eth.blockchain.CurrentHeader(), nil
@@ -286,22 +282,22 @@ func (b *LesApiBackend) SuggestPrice(ctx context.Context) (*big.Int, error) {
 }
 
 // NB: Non sequencer nodes cannot suggest L1 gas prices.
-func (b *LesApiBackend) SuggestL1GasPrice(ctx context.Context) (*big.Int, error) {
-	panic("SuggestL1GasPrice not implemented")
+func (b *LesApiBackend) SuggestDataPrice(ctx context.Context) (*big.Int, error) {
+	panic("SuggestDataPrice not implemented")
 }
 
 // NB: Non sequencer nodes cannot suggest L2 execution gas prices.
-func (b *LesApiBackend) SuggestL2GasPrice(ctx context.Context) (*big.Int, error) {
-	panic("SuggestL2GasPrice not implemented")
+func (b *LesApiBackend) SuggestExecutionPrice(ctx context.Context) (*big.Int, error) {
+	panic("SuggestExecutionPrice not implemented")
 }
 
 // NB: Non sequencer nodes cannot set L1 gas prices.
-func (b *LesApiBackend) SetL1GasPrice(ctx context.Context, gasPrice *big.Int) error {
+func (b *LesApiBackend) SetDataPrice(ctx context.Context, gasPrice *big.Int) {
 	panic("SetDataPrice is not implemented")
 }
 
 // NB: Non sequencer nodes cannot set L2 execution prices.
-func (b *LesApiBackend) SetL2GasPrice(ctx context.Context, gasPrice *big.Int) error {
+func (b *LesApiBackend) SetExecutionPrice(ctx context.Context, gasPrice *big.Int) {
 	panic("SetExecutionPrice is not implemented")
 }
 

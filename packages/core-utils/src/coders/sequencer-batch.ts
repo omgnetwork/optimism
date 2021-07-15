@@ -15,6 +15,10 @@ export interface AppendSequencerBatchParams {
   transactions: string[] // total_size_bytes[],total_size_bytes[]
 }
 
+/**********************
+ * Internal Functions *
+ *********************/
+
 const APPEND_SEQUENCER_BATCH_METHOD_ID = 'appendSequencerBatch()'
 
 export const encodeAppendSequencerBatch = (

@@ -1,14 +1,4 @@
 ---
-2-reviewers:
-  - '.github/**/*'
-  - 'l2geth/**/*'
-  - 'ops/**/*'
-  - 'packages/batch-submitter/**/*'
-  - 'packages/contracts/**/*'
-  - 'packages/data-transport-layer/**/*'
-  - 'packages/message-relayer/**/*'
-  - 'patches/**/*'
-
 A-ci:
   - any: ['.github/**/*']
 
@@ -45,4 +35,3 @@ M-ops:
 
 M-smock:
   - any: ['packages/smock/**/*']
-

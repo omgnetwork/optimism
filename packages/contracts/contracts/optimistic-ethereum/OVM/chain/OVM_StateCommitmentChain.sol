@@ -10,13 +10,12 @@ import { Lib_MerkleTree } from "../../libraries/utils/Lib_MerkleTree.sol";
 /* Interface Imports */
 import { iOVM_FraudVerifier } from "../../iOVM/verification/iOVM_FraudVerifier.sol";
 import { iOVM_StateCommitmentChain } from "../../iOVM/chain/iOVM_StateCommitmentChain.sol";
-import { iOVM_CanonicalTransactionChain } from
-    "../../iOVM/chain/iOVM_CanonicalTransactionChain.sol";
+import { iOVM_CanonicalTransactionChain } from "../../iOVM/chain/iOVM_CanonicalTransactionChain.sol";
 import { iOVM_BondManager } from "../../iOVM/verification/iOVM_BondManager.sol";
 import { iOVM_ChainStorageContainer } from "../../iOVM/chain/iOVM_ChainStorageContainer.sol";
 
 /* External Imports */
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import '@openzeppelin/contracts/math/SafeMath.sol';
 
 /**
  * @title OVM_StateCommitmentChain
@@ -73,7 +72,7 @@ contract OVM_StateCommitmentChain is iOVM_StateCommitmentChain, Lib_AddressResol
         )
     {
         return iOVM_ChainStorageContainer(
-            resolve("OVM_ChainStorageContainer-SCC-batches")
+            resolve("OVM_ChainStorageContainer:SCC:batches")
         );
     }
 
@@ -150,9 +149,7 @@ contract OVM_StateCommitmentChain is iOVM_StateCommitmentChain, Lib_AddressResol
         );
 
         require(
-            getTotalElements() + _batch.length <=
-                iOVM_CanonicalTransactionChain(resolve("OVM_CanonicalTransactionChain"))
-                .getTotalElements(),
+            getTotalElements() + _batch.length <= iOVM_CanonicalTransactionChain(resolve("OVM_CanonicalTransactionChain")).getTotalElements(),
             "Number of state roots cannot exceed the number of canonical transactions."
         );
 
@@ -270,7 +267,6 @@ contract OVM_StateCommitmentChain is iOVM_StateCommitmentChain, Lib_AddressResol
     {
         bytes27 extraData = batches().getGlobalMetadata();
 
-        // solhint-disable max-line-length
         uint40 totalElements;
         uint40 lastSequencerTimestamp;
         assembly {
@@ -278,7 +274,6 @@ contract OVM_StateCommitmentChain is iOVM_StateCommitmentChain, Lib_AddressResol
             totalElements          :=         and(extraData, 0x000000000000000000000000000000000000000000000000000000FFFFFFFFFF)
             lastSequencerTimestamp := shr(40, and(extraData, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000))
         }
-        // solhint-enable max-line-length
 
         return (
             totalElements,

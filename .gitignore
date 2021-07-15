@@ -14,21 +14,10 @@ cache-ovm
 l2geth/build/bin
 packages/contracts/deployments/custom
 packages/contracts/coverage*
-packages/contracts/@ens*
-packages/contracts/@openzeppelin*
-packages/contracts/hardhat*
 
 packages/data-transport-layer/db
-
-packages/omgx/wallet/wallet/build
 
 # vim
 *.swp
 
 .env
-env.js
-env.yml
-*.log
-
-packages/omgx/wallet-frontend/build
-.serverless

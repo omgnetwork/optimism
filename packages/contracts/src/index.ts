@@ -1,5 +1,4 @@
 export * from './contract-defs'
-export * from './state-dump/get-dump'
+export { getLatestStateDump, StateDump } from './contract-dumps'
 export * from './contract-deployment'
 export * from './predeploys'
-export * from './connect-contracts'
