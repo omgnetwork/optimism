@@ -32,5 +32,3 @@ env.yml
 
 packages/omgx/wallet-frontend/build
 .serverless
-
-ops/vault/data
