@@ -6,8 +6,6 @@ import {
   RUN_OVM_TEST_GAS,
 } from './test/helpers/constants'
 
-import '@nomiclabs/hardhat-ethers'
-
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {

@@ -16,14 +16,13 @@ import {
   SmockOptions,
   SmockSpec,
 } from './types'
-import { bindSmock, unbindSmock } from './binding'
+import { bindSmock } from './binding'
 import { makeRandomAddress } from '../utils'
 import { findBaseHardhatProvider } from '../common'
 
 /**
  * Generates an ethers Interface instance when given a smock spec. Meant for standardizing the
  * various input types we might reasonably want to support.
- *
  * @param spec Smock specification object. Thing you want to base the interface on.
  * @param hre Hardhat runtime environment. Used so we can
  * @return Interface generated from the spec.
@@ -58,7 +57,6 @@ const makeContractInterfaceFromSpec = async (
 
 /**
  * Creates a mock contract function from a real contract function.
- *
  * @param contract Contract object to make a mock function for.
  * @param functionName Name of the function to mock.
  * @param vm Virtual machine reference, necessary for call assertions to work.
@@ -81,25 +79,18 @@ const smockifyFunction = (
 
           let data: any = toHexString(calldataBuf)
           try {
-            data = contract.interface.decodeFunctionData(
-              fragment.format(),
-              data
-            )
+            data = contract.interface.decodeFunctionData(fragment.name, data)
           } catch (e) {
             console.error(e)
           }
 
           return {
             functionName: fragment.name,
-            functionSignature: fragment.format(),
             data,
           }
         })
         .filter((functionResult: any) => {
-          return (
-            functionResult.functionName === functionName ||
-            functionResult.functionSignature === functionName
-          )
+          return functionResult.functionName === functionName
         })
         .map((functionResult: any) => {
           return functionResult.data
@@ -139,7 +130,6 @@ const smockifyFunction = (
 
 /**
  * Turns a specification into a mock contract.
- *
  * @param spec Smock contract specification.
  * @param opts Optional additional settings.
  */
@@ -172,15 +162,6 @@ export const smockit = async (
     opts.provider || (hre as any).ethers.provider // TODO: Probably check that this exists.
   ) as MockContract
 
-  // We attach a wallet to the contract so that users can send transactions *from* a smock.
-  await hre.network.provider.request({
-    method: 'hardhat_impersonateAccount',
-    params: [contract.address],
-  })
-
-  // Now we actually get the signer and attach it to the mock.
-  contract.wallet = await (hre as any).ethers.getSigner(contract.address)
-
   // Start by smocking the fallback.
   contract.smocked = {
     fallback: smockifyFunction(
@@ -200,7 +181,9 @@ export const smockit = async (
   }
 
   // TODO: Make this less of a hack.
-  ;(contract as any)._smockit = async function (data: Buffer): Promise<{
+  ;(contract as any)._smockit = async function (
+    data: Buffer
+  ): Promise<{
     resolve: 'return' | 'revert'
     functionName: string
     rawReturnValue: any
@@ -219,7 +202,7 @@ export const smockit = async (
     let mockFn: any
     if (fn !== null) {
       params = this.interface.decodeFunctionData(fn, toHexString(data))
-      mockFn = this.smocked[fn.name] || this.smocked[fn.format()]
+      mockFn = this.smocked[fn.name]
     } else {
       params = toHexString(data)
       mockFn = this.smocked.fallback
@@ -311,24 +294,4 @@ export const smockit = async (
   await bindSmock(contract, provider)
 
   return contract
-}
-
-/**
- * Unbinds a mock contract (meaning the contract will no longer behave as a mock).
- *
- * @param mock Mock contract or address to unbind.
- */
-export const unbind = async (mock: MockContract | string): Promise<void> => {
-  // Only support native hardhat runtime, haven't bothered to figure it out for anything else.
-  if (hre.network.name !== 'hardhat') {
-    throw new Error(
-      `[smock]: smock is only compatible with the "hardhat" network, got: ${hre.network.name}`
-    )
-  }
-
-  // Find the provider object. See comments for `findBaseHardhatProvider`
-  const provider = findBaseHardhatProvider(hre)
-
-  // Unbind the contract.
-  await unbindSmock(mock, provider)
 }

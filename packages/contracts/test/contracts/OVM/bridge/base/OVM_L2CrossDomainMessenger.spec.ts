@@ -11,7 +11,7 @@ import {
   setProxyTarget,
   NON_NULL_BYTES32,
   NON_ZERO_ADDRESS,
-  encodeXDomainCalldata,
+  getXDomainCalldata,
   getNextBlockNumber,
 } from '../../../../helpers'
 import { solidityKeccak256 } from 'ethers/lib/utils'
@@ -71,8 +71,9 @@ describe('OVM_L2CrossDomainMessenger', () => {
 
   let OVM_L2CrossDomainMessenger: Contract
   beforeEach(async () => {
-    OVM_L2CrossDomainMessenger =
-      await Factory__OVM_L2CrossDomainMessenger.deploy(AddressManager.address)
+    OVM_L2CrossDomainMessenger = await Factory__OVM_L2CrossDomainMessenger.deploy(
+      AddressManager.address
+    )
   })
 
   describe('sendMessage', () => {
@@ -88,7 +89,7 @@ describe('OVM_L2CrossDomainMessenger', () => {
       expect(
         Mock__OVM_L2ToL1MessagePasser.smocked.passMessageToL1.calls[0]
       ).to.deep.equal([
-        encodeXDomainCalldata(target, await signer.getAddress(), message, 0),
+        getXDomainCalldata(target, await signer.getAddress(), message, 0),
       ])
     })
 
@@ -182,9 +183,7 @@ describe('OVM_L2CrossDomainMessenger', () => {
       // There should be no 'relayedMessage' event logged in the receipt.
       const logs = (
         await Mock__OVM_L2ToL1MessagePasser.provider.getTransactionReceipt(
-          (
-            await resProm
-          ).hash
+          (await resProm).hash
         )
       ).logs
       expect(logs).to.deep.equal([])
@@ -194,7 +193,7 @@ describe('OVM_L2CrossDomainMessenger', () => {
         await OVM_L2CrossDomainMessenger.successfulMessages(
           solidityKeccak256(
             ['bytes'],
-            [encodeXDomainCalldata(target, sender, message, 0)]
+            [getXDomainCalldata(target, sender, message, 0)]
           )
         )
       ).to.be.true
@@ -205,15 +204,14 @@ describe('OVM_L2CrossDomainMessenger', () => {
         Mock__OVM_L1CrossDomainMessenger.address
       )
 
-      const reentrantMessage =
-        OVM_L2CrossDomainMessenger.interface.encodeFunctionData(
-          'relayMessage',
-          [target, sender, message, 1]
-        )
+      const reentrantMessage = OVM_L2CrossDomainMessenger.interface.encodeFunctionData(
+        'relayMessage',
+        [target, sender, message, 1]
+      )
 
       // Calculate xDomainCallData used for indexing
       // (within the first call to the L2 Messenger).
-      const xDomainCallData = encodeXDomainCalldata(
+      const xDomainCallData = getXDomainCalldata(
         OVM_L2CrossDomainMessenger.address,
         sender,
         reentrantMessage,
