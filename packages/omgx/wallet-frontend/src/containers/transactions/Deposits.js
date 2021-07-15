@@ -50,7 +50,7 @@ function Deposits ({ searchHistory, transactions }) {
     return i.hash.includes(searchHistory) && (
       i.to !== null && (
       i.to.toLowerCase() === networkService.L1LPAddress.toLowerCase() ||
-      i.to.toLowerCase() === networkService.L1ETHAddress.toLowerCase()));
+      i.to.toLowerCase() === networkService.L1_ETH_Address.toLowerCase()));
   });
 
   const startingIndex = page === 1 ? 0 : ((page - 1) * PER_PAGE);
