@@ -194,7 +194,6 @@ else
     test_plugin
 fi
 
-
 if [ -n "$TEST" ]; then
     echo "Dying."
 else
