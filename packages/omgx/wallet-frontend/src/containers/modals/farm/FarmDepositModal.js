@@ -47,7 +47,7 @@ class FarmDepositModal extends React.Component {
     if (!isEqual(prevState.farm.stakeToken, stakeToken)) {
       let approvedAllowance = powAmount(10, 50);
       // There is no need to check allowance for depositing ETH
-      if (stakeToken.currency !== networkService.L1ETHAddress) {
+      if (stakeToken.currency !== networkService.L1_ETH_Address) {
         approvedAllowance = await networkService.checkAllowance(
           stakeToken.currency,
           stakeToken.LPAddress
@@ -94,7 +94,7 @@ class FarmDepositModal extends React.Component {
       this.props.dispatch(openAlert("Your transaction was approved."));
       let approvedAllowance = powAmount(10, 50);
       // There is no need to check allowance for depositing ETH
-      if (stakeToken.currency !== networkService.L1ETHAddress) {
+      if (stakeToken.currency !== networkService.L1_ETH_Address) {
         approvedAllowance = await networkService.checkAllowance(
           stakeToken.currency,
           stakeToken.LPAddress
