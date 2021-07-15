@@ -14,7 +14,6 @@ import {
   getStorageXOR,
   encodeSolidityError,
 } from '../../../../helpers'
-import { predeploys } from '../../../../../src'
 
 const CREATED_CONTRACT_1 = '0x2bda4a99d5be88609d23b1e4ab5d1d34fb1c2feb'
 const CREATED_CONTRACT_2 = '0x2bda4a99d5be88609d23b1e4ab5d1d34fb1c2feb'
@@ -401,7 +400,8 @@ const test_ovmCREATE: TestDefinition = {
       ],
     },
     {
-      name: 'ovmCREATE => ovmSSTORE, ovmCALL(CREATED) => ovmSLOAD(EXIST) + ovmSLOAD(NONEXIST)',
+      name:
+        'ovmCREATE => ovmSSTORE, ovmCALL(CREATED) => ovmSLOAD(EXIST) + ovmSLOAD(NONEXIST)',
       steps: [
         {
           functionName: 'ovmCREATE',
@@ -449,7 +449,8 @@ const test_ovmCREATE: TestDefinition = {
       ],
     },
     {
-      name: 'ovmCREATE => ovmCALL(ADDRESS_1) => ovmSSTORE, ovmCALL(ADDRESS_1) => ovmSLOAD',
+      name:
+        'ovmCREATE => ovmCALL(ADDRESS_1) => ovmSSTORE, ovmCALL(ADDRESS_1) => ovmSLOAD',
       steps: [
         {
           functionName: 'ovmCREATE',
@@ -501,7 +502,8 @@ const test_ovmCREATE: TestDefinition = {
     {
       // TODO: appears to be failing due to a smoddit issue
       skip: true,
-      name: 'ovmCREATE => (ovmCALL(ADDRESS_2) => ovmSSTORE) + ovmREVERT, ovmCALL(ADDRESS_2) => ovmSLOAD',
+      name:
+        'ovmCREATE => (ovmCALL(ADDRESS_2) => ovmSSTORE) + ovmREVERT, ovmCALL(ADDRESS_2) => ovmSLOAD',
       steps: [
         {
           functionName: 'ovmCREATE',
@@ -770,12 +772,11 @@ const test_ovmCREATE: TestDefinition = {
             },
           },
           contractStorage: {
-            [predeploys.OVM_DeployerWhitelist]: {
+            ['0x4200000000000000000000000000000000000002']: {
               // initialized? true, allowArbitraryDeployment? false
-              '0x0000000000000000000000000000000000000000000000000000000000000000':
-                getStorageXOR(
-                  '0x0000000000000000000000000000000000000000000000000000000000000001'
-                ),
+              '0x0000000000000000000000000000000000000000000000000000000000000000': getStorageXOR(
+                '0x0000000000000000000000000000000000000000000000000000000000000001'
+              ),
               // non-whitelisted deployer is whitelisted? false
               [NON_WHITELISTED_DEPLOYER_KEY]: getStorageXOR(
                 ethers.constants.HashZero
@@ -787,7 +788,7 @@ const test_ovmCREATE: TestDefinition = {
             },
           },
           verifiedContractStorage: {
-            [predeploys.OVM_DeployerWhitelist]: {
+            ['0x4200000000000000000000000000000000000002']: {
               '0x0000000000000000000000000000000000000000000000000000000000000000': 1,
               [NON_WHITELISTED_DEPLOYER_KEY]: 1,
               [WHITELISTED_DEPLOYER_KEY]: 1,
@@ -901,12 +902,11 @@ const test_ovmCREATE: TestDefinition = {
             },
           },
           contractStorage: {
-            [predeploys.OVM_DeployerWhitelist]: {
+            ['0x4200000000000000000000000000000000000002']: {
               // initialized? true, allowArbitraryDeployment? true
-              '0x0000000000000000000000000000000000000000000000000000000000000000':
-                getStorageXOR(
-                  '0x0000000000000000000000000000000000000000000000000000000000000101'
-                ),
+              '0x0000000000000000000000000000000000000000000000000000000000000000': getStorageXOR(
+                '0x0000000000000000000000000000000000000000000000000000000000000101'
+              ),
               // non-whitelisted deployer is whitelisted? false
               [NON_WHITELISTED_DEPLOYER_KEY]: getStorageXOR(
                 ethers.constants.HashZero
@@ -918,7 +918,7 @@ const test_ovmCREATE: TestDefinition = {
             },
           },
           verifiedContractStorage: {
-            [predeploys.OVM_DeployerWhitelist]: {
+            ['0x4200000000000000000000000000000000000002']: {
               '0x0000000000000000000000000000000000000000000000000000000000000000': 1,
               [NON_WHITELISTED_DEPLOYER_KEY]: 1,
               [WHITELISTED_DEPLOYER_KEY]: 1,
@@ -945,8 +945,7 @@ const test_ovmCREATE: TestDefinition = {
                           subSteps: [],
                         },
                         expectedReturnStatus: true,
-                        expectedReturnValue:
-                          CREATED_BY_NON_WHITELISTED_DEPLOYER,
+                        expectedReturnValue: CREATED_BY_NON_WHITELISTED_DEPLOYER,
                       },
                     ],
                   },

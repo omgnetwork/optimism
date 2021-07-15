@@ -90,7 +90,8 @@ const test_ovmCALL: TestDefinition = {
       ],
     },
     {
-      name: 'ovmCALL(ADDRESS_1) => ovmSSTORE + ovmSLOAD, ovmCALL(ADDRESS_1) => ovmSLOAD',
+      name:
+        'ovmCALL(ADDRESS_1) => ovmSSTORE + ovmSLOAD, ovmCALL(ADDRESS_1) => ovmSLOAD',
       steps: [
         {
           functionName: 'ovmCALL',
@@ -139,7 +140,8 @@ const test_ovmCALL: TestDefinition = {
       ],
     },
     {
-      name: 'ovmCALL(ADDRESS_1) => ovmCALL(ADDRESS_2) => ovmADDRESS + ovmCALLER',
+      name:
+        'ovmCALL(ADDRESS_1) => ovmCALL(ADDRESS_2) => ovmADDRESS + ovmCALLER',
       steps: [
         {
           functionName: 'ovmCALL',

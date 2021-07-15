@@ -2,9 +2,11 @@
 import { BigNumber, ethers, constants } from 'ethers'
 import { getContractFactory } from '@eth-optimism/contracts'
 import {
+  ctcCoder,
   fromHexString,
   toHexString,
   toRpcHexString,
+  TxType,
   EventArgsSequencerBatchAppended,
 } from '@eth-optimism/core-utils'
 
@@ -20,9 +22,7 @@ import {
 import {
   SEQUENCER_ENTRYPOINT_ADDRESS,
   SEQUENCER_GAS_LIMIT,
-  parseSignatureVParam,
 } from '../../../utils'
-import { MissingElementError } from './errors'
 
 export const handleEventsSequencerBatchAppended: EventHandlerSet<
   EventArgsSequencerBatchAppended,
@@ -69,7 +69,7 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
       submitter: l1Transaction.from,
       l1TransactionHash: l1Transaction.hash,
       l1TransactionData: l1Transaction.data,
-      gasLimit: `${SEQUENCER_GAS_LIMIT}`,
+      gasLimit: SEQUENCER_GAS_LIMIT,
 
       prevTotalElements: batchSubmissionEvent.args._prevTotalElements,
       batchIndex: batchSubmissionEvent.args._batchIndex,
@@ -78,7 +78,7 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
       batchExtraData: batchSubmissionEvent.args._extraData,
     }
   },
-  parseEvent: (event, extraData, l2ChainId) => {
+  parseEvent: (event, extraData) => {
     const transactionEntries: TransactionEntry[] = []
 
     // It's easier to deal with this data if it's a Buffer.
@@ -104,9 +104,8 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
           nextTxPointer
         )
 
-        const decoded = maybeDecodeSequencerBatchTransaction(
-          sequencerTransaction,
-          l2ChainId
+        const { decoded, type } = maybeDecodeSequencerBatchTransaction(
+          sequencerTransaction
         )
 
         transactionEntries.push({
@@ -116,11 +115,12 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
           batchIndex: extraData.batchIndex.toNumber(),
           blockNumber: BigNumber.from(context.blockNumber).toNumber(),
           timestamp: BigNumber.from(context.timestamp).toNumber(),
-          gasLimit: BigNumber.from(extraData.gasLimit).toString(),
+          gasLimit: BigNumber.from(extraData.gasLimit).toNumber(),
           target: SEQUENCER_ENTRYPOINT_ADDRESS,
           origin: null,
           data: toHexString(sequencerTransaction),
           queueOrigin: 'sequencer',
+          type,
           value: decoded ? decoded.value : '0x0',
           queueIndex: null,
           decoded,
@@ -148,11 +148,12 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
           batchIndex: extraData.batchIndex.toNumber(),
           blockNumber: BigNumber.from(0).toNumber(),
           timestamp: BigNumber.from(0).toNumber(),
-          gasLimit: BigNumber.from(0).toString(),
+          gasLimit: BigNumber.from(0).toNumber(),
           target: constants.AddressZero,
           origin: constants.AddressZero,
           data: '0x',
           queueOrigin: 'l1',
+          type: 'EIP155',
           value: '0x0',
           queueIndex: queueIndex.toNumber(),
           decoded: null,
@@ -182,19 +183,6 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
     }
   },
   storeEvent: async (entry, db) => {
-    // Defend against situations where we missed an event because the RPC provider
-    // (infura/alchemy/whatever) is missing an event.
-    if (entry.transactionBatchEntry.index > 0) {
-      const prevTransactionBatchEntry = await db.getTransactionBatchByIndex(
-        entry.transactionBatchEntry.index - 1
-      )
-
-      // We should *always* have a previous transaction batch here.
-      if (prevTransactionBatchEntry === null) {
-        throw new MissingElementError('SequencerBatchAppended')
-      }
-    }
-
     await db.putTransactionBatchEntries([entry.transactionBatchEntry])
     await db.putTransactionEntries(entry.transactionEntries)
 
@@ -250,26 +238,58 @@ const parseSequencerBatchTransaction = (
 }
 
 const maybeDecodeSequencerBatchTransaction = (
-  transaction: Buffer,
-  l2ChainId: number
-): DecodedSequencerBatchTransaction | null => {
-  try {
-    const decodedTx = ethers.utils.parseTransaction(transaction)
+  transaction: Buffer
+): {
+  decoded: DecodedSequencerBatchTransaction | null
+  type: 'EIP155' | 'ETH_SIGN' | null
+} => {
+  let decoded = null
+  let type = null
 
-    return {
-      nonce: BigNumber.from(decodedTx.nonce).toString(),
-      gasPrice: BigNumber.from(decodedTx.gasPrice).toString(),
-      gasLimit: BigNumber.from(decodedTx.gasLimit).toString(),
-      value: toRpcHexString(decodedTx.value),
-      target: toHexString(decodedTx.to), // Maybe null this out for creations?
-      data: toHexString(decodedTx.data),
-      sig: {
-        v: parseSignatureVParam(decodedTx.v, l2ChainId),
-        r: toHexString(decodedTx.r),
-        s: toHexString(decodedTx.s),
-      },
+  try {
+    const txType = transaction.slice(0, 1).readUInt8()
+    if (txType === TxType.EIP155) {
+      type = 'EIP155'
+      decoded = ctcCoder.eip155TxData.decode(transaction.toString('hex'))
+    } else if (txType === TxType.EthSign) {
+      type = 'ETH_SIGN'
+      decoded = ctcCoder.ethSignTxData.decode(transaction.toString('hex'))
+    } else if (txType === TxType.EthSign2) {
+      type = 'ETH_SIGN'
+      decoded = ctcCoder.ethSign2TxData.decode(transaction.toString('hex'))
+    } else {
+      throw new Error(`Unknown sequencer transaction type.`)
+    }
+    // Temporary fix to propagate the value
+    decoded.value = '0x0'
+    // Validate the transaction
+    if (!validateBatchTransaction(type, decoded)) {
+      decoded = null
     }
   } catch (err) {
-    return null
+    // Do nothing
   }
+
+  return {
+    decoded,
+    type,
+  }
+}
+
+export function validateBatchTransaction(
+  type: string | null,
+  decoded: DecodedSequencerBatchTransaction | null
+): boolean {
+  // Unknown types are considered invalid
+  if (type === null) {
+    return false
+  }
+  if (type === 'EIP155' || type === 'ETH_SIGN') {
+    if (decoded.sig.v !== 1 && decoded.sig.v !== 0) {
+      return false
+    }
+    return true
+  }
+  // Allow soft forks
+  return false
 }

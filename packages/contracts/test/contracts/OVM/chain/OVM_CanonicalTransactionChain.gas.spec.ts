@@ -20,11 +20,10 @@ import {
   getNextBlockNumber,
 } from '../../../helpers'
 
-import { predeploys } from '../../../../src'
-
 // Still have some duplication from OVM_CanonicalTransactionChain.spec.ts, but it's so minimal that
 // this is probably cleaner for now. Particularly since we're planning to move all of this out into
 // core-utils soon anyway.
+const DECOMPRESSION_ADDRESS = '0x4200000000000000000000000000000000000008'
 const MAX_GAS_LIMIT = 8_000_000
 
 const appendSequencerBatch = async (
@@ -56,7 +55,7 @@ describe('[GAS BENCHMARK] OVM_CanonicalTransactionChain', () => {
     )
     await AddressManager.setAddress(
       'OVM_DecompressionPrecompileAddress',
-      predeploys.OVM_SequencerEntrypoint
+      DECOMPRESSION_ADDRESS
     )
 
     Mock__OVM_ExecutionManager = await smockit(
@@ -98,13 +97,12 @@ describe('[GAS BENCHMARK] OVM_CanonicalTransactionChain', () => {
 
   let OVM_CanonicalTransactionChain: Contract
   beforeEach(async () => {
-    OVM_CanonicalTransactionChain =
-      await Factory__OVM_CanonicalTransactionChain.deploy(
-        AddressManager.address,
-        FORCE_INCLUSION_PERIOD_SECONDS,
-        FORCE_INCLUSION_PERIOD_BLOCKS,
-        MAX_GAS_LIMIT
-      )
+    OVM_CanonicalTransactionChain = await Factory__OVM_CanonicalTransactionChain.deploy(
+      AddressManager.address,
+      FORCE_INCLUSION_PERIOD_SECONDS,
+      FORCE_INCLUSION_PERIOD_BLOCKS,
+      MAX_GAS_LIMIT
+    )
 
     const batches = await Factory__OVM_ChainStorageContainer.deploy(
       AddressManager.address,
@@ -116,12 +114,12 @@ describe('[GAS BENCHMARK] OVM_CanonicalTransactionChain', () => {
     )
 
     await AddressManager.setAddress(
-      'OVM_ChainStorageContainer-CTC-batches',
+      'OVM_ChainStorageContainer:CTC:batches',
       batches.address
     )
 
     await AddressManager.setAddress(
-      'OVM_ChainStorageContainer-CTC-queue',
+      'OVM_ChainStorageContainer:CTC:queue',
       queue.address
     )
 
@@ -133,8 +131,9 @@ describe('[GAS BENCHMARK] OVM_CanonicalTransactionChain', () => {
 
   describe('appendSequencerBatch [ @skip-on-coverage ]', () => {
     beforeEach(() => {
-      OVM_CanonicalTransactionChain =
-        OVM_CanonicalTransactionChain.connect(sequencer)
+      OVM_CanonicalTransactionChain = OVM_CanonicalTransactionChain.connect(
+        sequencer
+      )
     })
 
     it('200 transactions in a single context', async () => {

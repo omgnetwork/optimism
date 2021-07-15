@@ -1,38 +1,5 @@
 # @eth-optimism/smock
 
-## 1.1.7
-
-### Patch Changes
-
-- Updated dependencies [049200f4]
-  - @eth-optimism/core-utils@0.5.0
-
-## 1.1.6
-
-### Patch Changes
-
-- 71349a4e: Minor smock patch to add support for hardhat 2.4.0 and up
-- Updated dependencies [d9644c34]
-- Updated dependencies [df5ff890]
-  - @eth-optimism/core-utils@0.4.6
-
-## 1.1.5
-
-### Patch Changes
-
-- 5e3c5d1c: Fixes a bug that would break call assertions for overloaded smocked functions
-- e6e87ae1: Fix a bug where overloaded functions would not be handled correctly
-- Updated dependencies [a64f8161]
-- Updated dependencies [750a5021]
-- Updated dependencies [c2b6e14b]
-  - @eth-optimism/core-utils@0.4.5
-
-## 1.1.4
-
-### Patch Changes
-
-- a656f06: Adds a wallet object to smock contracts that can be used to send transactions
-
 ## 1.1.3
 
 ### Patch Changes

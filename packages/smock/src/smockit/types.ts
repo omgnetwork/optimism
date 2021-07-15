@@ -1,7 +1,6 @@
 /* Imports: External */
 import { Artifact } from 'hardhat/types'
 import { Contract, ContractFactory, ethers } from 'ethers'
-import { Signer } from '@ethersproject/abstract-signer'
 import { Provider } from '@ethersproject/abstract-provider'
 import { JsonFragment, Fragment } from '@ethersproject/abi'
 
@@ -48,8 +47,6 @@ export type MockContract = Contract & {
   smocked: {
     [name: string]: MockContractFunction
   }
-
-  wallet: Signer
 }
 
 export interface SmockedVM {
