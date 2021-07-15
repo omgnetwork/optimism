@@ -1,5 +1,51 @@
 # @eth-optimism/core-utils
 
+## 0.5.0
+
+### Minor Changes
+
+- 049200f4: removed unused functions from core-utils
+
+## 0.4.7
+
+### Patch Changes
+
+- 224b04c0: Adds a pollInterval delay to watcher.ts
+
+## 0.4.6
+
+### Patch Changes
+
+- d9644c34: Minor fix on watchers to pick up finalization of transactions on L1
+- df5ff890: improved watcher ability to find transactions during periods of high load
+
+## 0.4.5
+
+### Patch Changes
+
+- a64f8161: Implement the next fee spec in both geth and in core-utils
+- 750a5021: Delete dead transaction coders. These are no longer used now that RLP encoded transactions are used
+- c2b6e14b: Implement the latest fee spec such that the L2 gas limit is scaled and the tx.gasPrice/tx.gasLimit show correctly in metamask
+
+## 0.4.4
+
+### Patch Changes
+
+- f091e86: Have watcher correctly handle failed L1 => L2 messages
+- f880479: End to end fee integration with recoverable L2 gas limit
+
+## 0.4.3
+
+### Patch Changes
+
+- 96a586e: Migrate bcfg interface to core-utils
+
+## 0.4.2
+
+### Patch Changes
+
+- b799caa: Update toRpcHexString to accept ethers.BigNumber and add tests
+
 ## 0.4.1
 
 ### Patch Changes

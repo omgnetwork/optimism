@@ -1,14 +1,32 @@
 /* Imports: External */
-import { BaseService } from '@eth-optimism/common-ts'
+import { BaseService, Metrics } from '@eth-optimism/common-ts'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { BigNumber } from 'ethers'
 import { LevelUp } from 'levelup'
+import axios from 'axios'
+import bfj from 'bfj'
+import { Gauge } from 'prom-client'
 
 /* Imports: Internal */
 import { TransportDB } from '../../db/transport-db'
 import { sleep, toRpcHexString, validators } from '../../utils'
 import { L1DataTransportServiceOptions } from '../main/service'
 import { handleSequencerBlock } from './handlers/transaction'
+
+interface L2IngestionMetrics {
+  highestSyncedL2Block: Gauge<string>
+}
+
+const registerMetrics = ({
+  client,
+  registry,
+}: Metrics): L2IngestionMetrics => ({
+  highestSyncedL2Block: new client.Gauge({
+    name: 'data_transport_layer_highest_synced_l2_block',
+    help: 'Highest Synced L2 Block Number',
+    registers: [registry],
+  }),
+})
 
 export interface L2IngestionServiceOptions
   extends L1DataTransportServiceOptions {
@@ -50,6 +68,8 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
     super('L2_Ingestion_Service', options, optionSettings)
   }
 
+  private l2IngestionMetrics: L2IngestionMetrics
+
   private state: {
     db: TransportDB
     l2RpcProvider: JsonRpcProvider
@@ -61,6 +81,8 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
         'Using legacy sync, this will be quite a bit slower than normal'
       )
     }
+
+    this.l2IngestionMetrics = registerMetrics(this.metrics)
 
     this.state.db = new TransportDB(this.options.db)
 
@@ -86,7 +108,11 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
         )
 
         // We're already at the head, so no point in attempting to sync.
-        if (highestSyncedL2BlockNumber === targetL2Block) {
+        // Also wait on edge case of no L2 transactions
+        if (
+          highestSyncedL2BlockNumber === targetL2Block ||
+          currentL2Block === 0
+        ) {
           await sleep(this.options.pollingInterval)
           continue
         }
@@ -107,6 +133,8 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
 
         await this.state.db.setHighestSyncedUnconfirmedBlock(targetL2Block)
 
+        this.l2IngestionMetrics.highestSyncedL2Block.set(targetL2Block)
+
         if (
           currentL2Block - highestSyncedL2BlockNumber <
           this.options.transactionsPerPollingInterval
@@ -115,10 +143,13 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
         }
       } catch (err) {
         if (!this.running || this.options.dangerouslyCatchAllErrors) {
-          this.logger.error('Caught an unhandled error', { err })
+          this.logger.error('Caught an unhandled error', {
+            message: err.toString(),
+            stack: err.stack,
+            code: err.code,
+          })
           await sleep(this.options.pollingInterval)
         } else {
-          // TODO: Is this the best thing to do here?
           throw err
         }
       }
@@ -127,6 +158,7 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
 
   /**
    * Synchronizes unconfirmed transactions from a range of sequencer blocks.
+   *
    * @param startBlockNumber Block to start querying from.
    * @param endBlockNumber Block to query to.
    */
@@ -165,11 +197,31 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
         )
       })
     } else {
-      blocks = await this.state.l2RpcProvider.send('eth_getBlockRange', [
-        toRpcHexString(startBlockNumber),
-        toRpcHexString(endBlockNumber),
-        true,
-      ])
+      // This request returns a large response.  Parsing it into JSON inside the ethers library is
+      // quite slow, and can block the event loop for upwards of multiple seconds.  When this happens,
+      // incoming http requests will likely timeout and fail.
+      // Instead, we will parse the incoming http stream directly with the bfj package, which yields
+      // the event loop periodically so that we don't fail to serve requests.
+      const req = {
+        jsonrpc: '2.0',
+        method: 'eth_getBlockRange',
+        params: [
+          toRpcHexString(startBlockNumber),
+          toRpcHexString(endBlockNumber),
+          true,
+        ],
+        id: '1',
+      }
+
+      const resp = await axios.post(
+        this.state.l2RpcProvider.connection.url,
+        req,
+        { responseType: 'stream' }
+      )
+      const respJson = await bfj.parse(resp.data, {
+        yieldRate: 4096, // this yields abit more often than the default of 16384
+      })
+      blocks = respJson.result
     }
 
     for (const block of blocks) {

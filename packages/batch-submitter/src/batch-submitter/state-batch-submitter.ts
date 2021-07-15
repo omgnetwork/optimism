@@ -12,7 +12,7 @@ import {
 import { Logger, Metrics } from '@eth-optimism/common-ts'
 
 /* Internal Imports */
-import { Range, BatchSubmitter, BLOCK_OFFSET } from '.'
+import { BlockRange, BatchSubmitter } from '.'
 
 export class StateBatchSubmitter extends BatchSubmitter {
   // TODO: Change this so that we calculate start = scc.totalElements() and end = ctc.totalElements()!
@@ -40,6 +40,7 @@ export class StateBatchSubmitter extends BatchSubmitter {
     maxGasPriceInGwei: number,
     gasRetryIncrement: number,
     gasThresholdInGwei: number,
+    blockOffset: number,
     logger: Logger,
     metrics: Metrics,
     fraudSubmissionAddress: string
@@ -60,6 +61,7 @@ export class StateBatchSubmitter extends BatchSubmitter {
       maxGasPriceInGwei,
       gasRetryIncrement,
       gasThresholdInGwei,
+      blockOffset,
       logger,
       metrics
     )
@@ -114,18 +116,18 @@ export class StateBatchSubmitter extends BatchSubmitter {
     return
   }
 
-  public async _getBatchStartAndEnd(): Promise<Range> {
+  public async _getBatchStartAndEnd(): Promise<BlockRange> {
     this.logger.info('Getting batch start and end for state batch submitter...')
-    // TODO: Remove BLOCK_OFFSET by adding a tx to Geth's genesis
     const startBlock: number =
-      (await this.chainContract.getTotalElements()).toNumber() + BLOCK_OFFSET
+      (await this.chainContract.getTotalElements()).toNumber() +
+      this.blockOffset
     this.logger.info('Retrieved start block number from SCC', {
       startBlock,
     })
 
     // We will submit state roots for txs which have been in the tx chain for a while.
     const totalElements: number =
-      (await this.ctcContract.getTotalElements()).toNumber() + BLOCK_OFFSET
+      (await this.ctcContract.getTotalElements()).toNumber() + this.blockOffset
     this.logger.info('Retrieved total elements from CTC', {
       totalElements,
     })
@@ -171,20 +173,23 @@ export class StateBatchSubmitter extends BatchSubmitter {
       return
     }
 
-    const offsetStartsAtIndex = startBlock - BLOCK_OFFSET // TODO: Remove BLOCK_OFFSET by adding a tx to Geth's genesis
+    const offsetStartsAtIndex = startBlock - this.blockOffset
     this.logger.debug('Submitting batch.', { tx })
 
     const nonce = await this.signer.getTransactionCount()
     const contractFunction = async (gasPrice): Promise<TransactionReceipt> => {
+      this.logger.info('Submitting appendStateBatch transaction', {
+        gasPrice,
+        nonce,
+        contractAddr: this.chainContract.address,
+      })
       const contractTx = await this.chainContract.appendStateBatch(
         batch,
         offsetStartsAtIndex,
         { nonce, gasPrice }
       )
       this.logger.info('Submitted appendStateBatch transaction', {
-        nonce,
         txHash: contractTx.hash,
-        contractAddr: this.chainContract.address,
         from: contractTx.from,
       })
       this.logger.debug('appendStateBatch transaction data', {

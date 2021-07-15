@@ -1,8 +1,12 @@
 import { Contract, ContractFactory, Wallet } from 'ethers'
 import { ethers } from 'hardhat'
-import { expect } from 'chai'
+import { TxGasLimit, TxGasPrice } from '@eth-optimism/core-utils'
+import chai, { expect } from 'chai'
 import { GWEI } from './shared/utils'
 import { OptimismEnv } from './shared/env'
+import { solidity } from 'ethereum-waffle'
+
+chai.use(solidity)
 
 describe('Basic ERC20 interactions', async () => {
   const initialAmount = 1000
@@ -60,11 +64,11 @@ describe('Basic ERC20 interactions', async () => {
     const transfer = await ERC20.transfer(other.address, 100)
     const receipt = await transfer.wait()
 
-    // The expected fee paid is the value returned by eth_estimateGas gas multiplied
-    // by 1 gwei, since that's the value eth_gasPrice always returns
-    const expectedFeePaid = (
-      await ERC20.estimateGas.transfer(other.address, 100)
-    ).mul(GWEI)
+    // The expected fee paid is the value returned by eth_estimateGas
+    const gasLimit = await ERC20.estimateGas.transfer(other.address, 100)
+    const gasPrice = await wallet.getGasPrice()
+    expect(gasPrice).to.deep.equal(TxGasPrice)
+    const expectedFeePaid = gasLimit.mul(gasPrice)
 
     // There are two events from the transfer with the first being
     // the ETH fee paid and the second of the value transfered (100)
@@ -78,5 +82,11 @@ describe('Basic ERC20 interactions', async () => {
 
     expect(receiverBalance.toNumber()).to.equal(100)
     expect(senderBalance.toNumber()).to.equal(900)
+  })
+
+  it('should revert if trying to transfer too much', async () => {
+    await expect(
+      ERC20.transfer(other.address, initialAmount * 2)
+    ).to.be.revertedWith('insufficient balance')
   })
 })
