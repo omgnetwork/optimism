@@ -7,10 +7,7 @@ import { ethers } from 'ethers'
 import { isEqual, values } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  selectlayer1Balance,
-  selectlayer2Balance,
-} from 'selectors/balanceSelector'
+import { selectlayer1Balance } from 'selectors/balanceSelector'
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectTokens } from 'selectors/tokenSelector'
 import networkService from 'services/networkService'
@@ -36,7 +33,7 @@ function InputStep({
   const [selectedToken, setSelectedToken] = useState(null)
 
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
-  const balancesL2 = useSelector(selectlayer2Balance, isEqual)
+
   const balancesL1 = useSelector(selectlayer1Balance, isEqual)
   const tokens = useSelector(selectTokens, isEqual)
 
@@ -45,10 +42,8 @@ function InputStep({
   }
 
   useEffect(() => {
-    console.group('tokens')
     let allOptions = values(tokens)
       .map((t) => {
-        let isBalanceL2Exists = balancesL2.find((i) => i.symbol === t.symbol)
         let isBalanceL1Exists = balancesL1.find((i) => i.symbol === t.symbol)
         let isPriority = priorityTokens.find((i) => i.symbol === t.symbol)
         let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbol)
@@ -58,13 +53,6 @@ function InputStep({
           balanceL1 = logAmount(
             isBalanceL1Exists.amount,
             isBalanceL1Exists.decimals
-          )
-        }
-        let balanceL2 = ''
-        if (isBalanceL2Exists) {
-          balanceL2 = logAmount(
-            isBalanceL2Exists.amount,
-            isBalanceL2Exists.decimals
           )
         }
 
@@ -84,7 +72,6 @@ function InputStep({
           priority: !!isPriority,
           ...priorityToken,
           showInDD: !!isDropdown,
-          balanceL2,
           balanceL1,
           balance: balanceL1,
         }
@@ -92,9 +79,7 @@ function InputStep({
       .filter(Boolean)
 
     setTokenOptions(allOptions)
-
-    console.groupEnd()
-  }, [tokens, priorityTokens, dropdownTokens, balancesL2, balancesL1])
+  }, [tokens, priorityTokens, dropdownTokens, balancesL1])
 
   useEffect(() => {
     setSelectedToken(null)

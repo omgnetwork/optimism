@@ -13,26 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { BigNumber } from 'ethers'
-import { isEqual } from 'lodash'
-
-import { selectlayer2Balance } from 'selectors/balanceSelector'
-
-import { exitOMGX, depositL2LP, approveErc20 } from 'actions/networkAction'
+import { exitOMGX } from 'actions/networkAction'
 import { openAlert, openError } from 'actions/uiAction'
+import Button from 'components/button/Button'
+import IconSelect from 'components/iconSelect/iconSelect'
+import Input from 'components/input/Input'
+import { isEqual } from 'lodash'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { selectlayer2Balance } from 'selectors/balanceSelector'
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectTokens } from 'selectors/tokenSelector'
-
-import Button from 'components/button/Button'
-
-import { logAmount, powAmount } from 'util/amountConvert'
 import networkService from 'services/networkService'
-
+import { logAmount } from 'util/amountConvert'
 import * as styles from '../ExitModal.module.scss'
-import Input from 'components/input/Input'
-import IconSelect from 'components/iconSelect/iconSelect'
 
 function DoExitStep({ handleClose }) {
   const dispatch = useDispatch()
@@ -44,6 +38,7 @@ function DoExitStep({ handleClose }) {
   const [dropdownTokens, setDropDownTokens] = useState([])
   const [selectedToken, setSelectedToken] = useState(null)
   const [value, setValue] = useState('')
+  const tokens = useSelector(selectTokens, isEqual)
 
   const [disabledSubmit, setDisabledSubmit] = useState(true)
 
@@ -81,12 +76,9 @@ function DoExitStep({ handleClose }) {
   }
 
   useEffect(() => {
-    console.log(priorityTokens)
-    console.log(dropdownTokens)
-
-    let pTokens = priorityTokens
+    let allOptions = values(tokens)
       .map((t) => {
-        let isBalanceExist = balancesL2.find((b) => {
+        let isBalanceL2Exists = balancesL2.find((b) => {
           if (
             (t.symbol === 'ETH' && b.symbol === 'oETH') ||
             t.symbol === b.symbol
@@ -96,62 +88,42 @@ function DoExitStep({ handleClose }) {
           return false
         })
 
+        let isPriority = priorityTokens.find((i) => i.symbol === t.symbol)
+        let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbol)
         let balanceL2 = ''
-        if (isBalanceExist) {
-          balanceL2 = logAmount(isBalanceExist.amount, isBalanceExist.decimals)
+        if (isBalanceL2Exists) {
+          balanceL2 = logAmount(
+            isBalanceL2Exists.amount,
+            isBalanceL2Exists.decimals
+          )
         }
 
+        // added this to have the token icon available;
+        let priorityToken = {}
+        if (!!isPriority) {
+          priorityToken = isPriority
+        }
+
+        // check the balance wether user is having it or not.
         if (!balanceL2) {
           return
         }
 
         return {
           ...t,
-          priority: true,
-          showInDD: false,
-          balanceL2,
-          balance: balanceL2,
-          ...isBalanceExist,
-        }
-      })
-      .filter(Boolean)
-    let ddTokens = dropdownTokens
-      .map((t) => {
-        let isBalanceExist = balancesL2.find((b) => {
-          if (
-            (t.symbol === 'ETH' && b.symbol === 'oETH') ||
-            t.symbol === b.symbol
-          ) {
-            return true
-          }
-          return false
-        })
-
-        let balanceL2 = ''
-        if (isBalanceExist) {
-          balanceL2 = logAmount(isBalanceExist.amount, isBalanceExist.decimals)
-        }
-
-        if (!balanceL2) {
-          return
-        }
-
-        return {
-          ...t,
-          priority: false,
-          showInDD: true,
-          ...isBalanceExist,
+          priority: !!isPriority,
+          ...priorityToken,
+          showInDD: !!isDropdown,
           balanceL2,
           balance: balanceL2,
         }
       })
       .filter(Boolean)
-    console.log('All options', [...pTokens, ...ddTokens])
-    setTokenOptions([...pTokens, ...ddTokens])
-  }, [balancesL2, priorityTokens, dropdownTokens])
+
+    setTokenOptions(allOptions)
+  }, [balancesL2, priorityTokens, dropdownTokens, tokens])
 
   useEffect(() => {
-    console.log('selectedToken', selectedToken)
     if (selectedToken && selectedToken.name === 'Manual') {
       setCurrency('')
     } else if (!!selectedToken) {
