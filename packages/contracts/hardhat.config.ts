@@ -15,7 +15,10 @@ import '@typechain/hardhat'
 import '@eth-optimism/hardhat-ovm'
 import './tasks/deploy'
 import './tasks/l2-gasprice'
+<<<<<<< HEAD
 import './tasks/set-owner'
+=======
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 import 'hardhat-gas-reporter'
 
 // Load environment variables from .env

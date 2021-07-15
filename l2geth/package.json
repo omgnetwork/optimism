@@ -1,6 +1,10 @@
 {
   "name": "@eth-optimism/l2geth",
+<<<<<<< HEAD
   "version": "0.4.6",
+=======
+  "version": "0.4.4",
+>>>>>>> Crunchy tiger 0.0.1 (#201)
   "private": true,
   "devDependencies": {}
 }

@@ -1,5 +1,6 @@
 # Changelog
 
+<<<<<<< HEAD
 ## 0.4.5
 
 ### Patch Changes
@@ -8,6 +9,8 @@
 - Updated dependencies [c73c3939]
   - @eth-optimism/core-utils@0.5.1
 
+=======
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 ## 0.4.4
 
 ### Patch Changes

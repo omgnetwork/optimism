@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 const dirtree = require('directory-tree')
 const fs = require('fs')
+<<<<<<< HEAD
 const { predeploys } = require('../dist/predeploys')
+=======
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 
 /**
  *
@@ -38,10 +41,24 @@ const networks = {
 
 ### Predeploy contracts:
 |Contract|Address|
+<<<<<<< HEAD
 |--|--|\n`
   for (const [name, addr] of Object.entries(predeploys)) {
     md += `|${name}|${addr}|\n`
   }
+=======
+|--|--|
+|OVM_ETH: | \`0x4200000000000000000000000000000000000006\`
+|OVM_L2StandardBridge: | \`0x4200000000000000000000000000000000000010\`
+|OVM_L2CrossDomainMessenger: | \`0x4200000000000000000000000000000000000007\`
+|OVM_L2ToL1MessagePasser: | \`0x4200000000000000000000000000000000000000\`
+|OVM_L1MessageSender: | \`0x4200000000000000000000000000000000000001\`
+|OVM_DeployerWhitelist: | \`0x4200000000000000000000000000000000000002\`
+|OVM_ECDSAContractAccount: | \`0x4200000000000000000000000000000000000003\`
+|OVM_SequencerEntrypoint: | \`0x4200000000000000000000000000000000000005\`
+|Lib_AddressManager: | \`0x4200000000000000000000000000000000000008\`
+|ERC1820Registry: | \`0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24\`
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 
   md += `\n---
 ---

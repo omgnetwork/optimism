@@ -328,11 +328,19 @@ func (s *SyncService) initializeLatestL1(ctcDeployHeight *big.Int) error {
 		// There are no enqueues yet
 		if errors.Is(err, errElementNotFound) {
 			return nil
+<<<<<<< HEAD
 		}
 		// Other unexpected error
 		if err != nil {
 			return fmt.Errorf("Cannot fetch last confirmed queue tx: %w", err)
 		}
+=======
+		}
+		// Other unexpected error
+		if err != nil {
+			return fmt.Errorf("Cannot fetch last confirmed queue tx: %w", err)
+		}
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 		// No error, the queue element was found
 		queueIndex = enqueue.GetMeta().QueueIndex
 	}
@@ -695,10 +703,17 @@ func (s *SyncService) applyIndexedTransaction(tx *types.Transaction) error {
 	next := s.GetNextIndex()
 	if *index == next {
 		return s.applyTransactionToTip(tx)
+<<<<<<< HEAD
 	}
 	if *index < next {
 		return s.applyHistoricalTransaction(tx)
 	}
+=======
+	}
+	if *index < next {
+		return s.applyHistoricalTransaction(tx)
+	}
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 	return fmt.Errorf("Received tx at index %d when looking for %d", *index, next)
 }
 
@@ -858,6 +873,12 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	// Only count the calldata here as the overhead of the fully encoded
 	// RLP transaction is handled inside of EncodeL2GasLimit
 	expectedTxGasLimit := fees.EncodeTxGasLimit(tx.Data(), l1GasPrice, l2GasLimit, l2GasPrice)
+<<<<<<< HEAD
+=======
+	if err != nil {
+		return err
+	}
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 
 	// This should only happen if the unscaled transaction fee is greater than 18.44 ETH
 	if !expectedTxGasLimit.IsUint64() {
@@ -865,10 +886,16 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	}
 
 	userFee := new(big.Int).Mul(new(big.Int).SetUint64(tx.Gas()), tx.GasPrice())
+<<<<<<< HEAD
 	expectedFee := new(big.Int).Mul(expectedTxGasLimit, fees.BigTxGasPrice)
 	opts := fees.PaysEnoughOpts{
 		UserFee:       userFee,
 		ExpectedFee:   expectedFee,
+=======
+	opts := fees.PaysEnoughOpts{
+		UserFee:       userFee,
+		ExpectedFee:   expectedTxGasLimit.Mul(expectedTxGasLimit, fees.BigTxGasPrice),
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 		ThresholdUp:   s.feeThresholdUp,
 		ThresholdDown: s.feeThresholdDown,
 	}
@@ -879,8 +906,12 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 				fees.ErrFeeTooLow, userFee, expectedTxGasLimit, fees.BigTxGasPrice)
 		}
 		if errors.Is(err, fees.ErrFeeTooHigh) {
+<<<<<<< HEAD
 			return fmt.Errorf("%w: %d, use less than %d * %f", fees.ErrFeeTooHigh, userFee,
 				expectedFee, s.feeThresholdDown)
+=======
+			return fmt.Errorf("%w: %d", fees.ErrFeeTooHigh, userFee)
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 		}
 		return err
 	}
@@ -907,10 +938,17 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 	qo := tx.QueueOrigin()
 	if qo != types.QueueOriginSequencer {
 		return fmt.Errorf("invalid transaction with queue origin %d", qo)
+<<<<<<< HEAD
 	}
 	if err := s.txpool.ValidateTx(tx); err != nil {
 		return fmt.Errorf("invalid transaction: %w", err)
 	}
+=======
+	}
+	if err := s.txpool.ValidateTx(tx); err != nil {
+		return fmt.Errorf("invalid transaction: %w", err)
+	}
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 	return s.applyTransaction(tx)
 }
 
@@ -945,11 +983,19 @@ func (s *SyncService) isAtTip(index *uint64, get indexGetter) (bool, error) {
 	}
 	if err != nil {
 		return false, err
+<<<<<<< HEAD
 	}
 	// There are no known enqueue transactions locally or remotely
 	if latest == nil && index == nil {
 		return true, nil
 	}
+=======
+	}
+	// There are no known enqueue transactions locally or remotely
+	if latest == nil && index == nil {
+		return true, nil
+	}
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 	// Only one of the transactions are nil due to the check above so they
 	// cannot be equal
 	if latest == nil || index == nil {
@@ -1047,6 +1093,7 @@ func (s *SyncService) syncQueue() (*uint64, error) {
 	index, err := s.sync(s.client.GetLatestEnqueueIndex, s.GetNextEnqueueIndex, s.syncQueueTransactionRange)
 	if err != nil {
 		return nil, fmt.Errorf("Cannot sync queue: %w", err)
+<<<<<<< HEAD
 	}
 	return index, nil
 }
@@ -1114,6 +1161,75 @@ func (s *SyncService) updateEthContext() error {
 		s.SetLatestL1BlockNumber(context.BlockNumber)
 		s.SetLatestL1Timestamp(context.Timestamp)
 	}
+=======
+	}
+	return index, nil
+}
+
+// syncQueueTransactionRange will apply a range of queue transactions from
+// start to end (inclusive)
+func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
+	log.Info("Syncing enqueue transactions range", "start", start, "end", end)
+	for i := start; i <= end; i++ {
+		tx, err := s.client.GetEnqueue(i)
+		if err != nil {
+			return fmt.Errorf("Canot get enqueue transaction; %w", err)
+		}
+		if err := s.applyTransaction(tx); err != nil {
+			return fmt.Errorf("Cannot apply transaction: %w", err)
+		}
+	}
+	return nil
+}
+
+// syncTransactions will sync transactions to the remote tip based on the
+// backend
+func (s *SyncService) syncTransactions(backend Backend) (*uint64, error) {
+	getLatest := func() (*uint64, error) {
+		return s.client.GetLatestTransactionIndex(backend)
+	}
+	sync := func(start, end uint64) error {
+		return s.syncTransactionRange(start, end, backend)
+	}
+	index, err := s.sync(getLatest, s.GetNextIndex, sync)
+	if err != nil {
+		return nil, fmt.Errorf("Cannot sync transactions with backend %s: %w", backend.String(), err)
+	}
+	return index, nil
+}
+
+// syncTransactionRange will sync a range of transactions from
+// start to end (inclusive) from a specific Backend
+func (s *SyncService) syncTransactionRange(start, end uint64, backend Backend) error {
+	log.Info("Syncing transaction range", "start", start, "end", end, "backend", backend.String())
+	for i := start; i <= end; i++ {
+		tx, err := s.client.GetTransaction(i, backend)
+		if err != nil {
+			return fmt.Errorf("cannot fetch transaction %d: %w", i, err)
+		}
+		if err = s.applyTransaction(tx); err != nil {
+			return fmt.Errorf("Cannot apply transaction: %w", err)
+		}
+	}
+	return nil
+}
+
+// updateEthContext will update the OVM execution context's
+// timestamp and blocknumber if enough time has passed since
+// it was last updated. This is a sequencer only function.
+func (s *SyncService) updateEthContext() error {
+	context, err := s.client.GetLatestEthContext()
+	if err != nil {
+		return fmt.Errorf("Cannot get eth context: %w", err)
+	}
+	current := time.Unix(int64(s.GetLatestL1Timestamp()), 0)
+	next := time.Unix(int64(context.Timestamp), 0)
+	if next.Sub(current) > s.timestampRefreshThreshold {
+		log.Info("Updating Eth Context", "timetamp", context.Timestamp, "blocknumber", context.BlockNumber)
+		s.SetLatestL1BlockNumber(context.BlockNumber)
+		s.SetLatestL1Timestamp(context.Timestamp)
+	}
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 	return nil
 }
 

@@ -1,5 +1,6 @@
 # Changelog
 
+<<<<<<< HEAD
 ## 0.4.6
 
 ### Patch Changes
@@ -14,6 +15,8 @@
 - 53b37978: Fixes the flags to use float64 instead of bools for the `--rollup.feethresholddown` and `-rollup.feethresholdup` config options
 - 709c85d6: Prevents the sequencer from accepting transactions with a too high nonce
 
+=======
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 ## 0.4.4
 
 ### Patch Changes

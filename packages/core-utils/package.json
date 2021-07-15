@@ -1,6 +1,10 @@
 {
   "name": "@eth-optimism/core-utils",
+<<<<<<< HEAD
   "version": "0.5.1",
+=======
+  "version": "0.5.0",
+>>>>>>> Crunchy tiger 0.0.1 (#201)
   "main": "dist/index",
   "files": [
     "dist/*"

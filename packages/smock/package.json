@@ -3,7 +3,11 @@
   "files": [
     "dist/src/*"
   ],
+<<<<<<< HEAD
   "version": "1.1.9",
+=======
+  "version": "1.1.7",
+>>>>>>> Crunchy tiger 0.0.1 (#201)
   "main": "dist/src/index",
   "types": "dist/src/index",
   "author": "Optimism PBC",
@@ -27,7 +31,11 @@
     "hardhat": "^2"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@eth-optimism/core-utils": "^0.5.1",
+=======
+    "@eth-optimism/core-utils": "^0.5.0",
+>>>>>>> Crunchy tiger 0.0.1 (#201)
     "bn.js": "^5.2.0"
   },
   "devDependencies": {

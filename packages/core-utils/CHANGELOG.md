@@ -1,11 +1,14 @@
 # @eth-optimism/core-utils
 
+<<<<<<< HEAD
 ## 0.5.1
 
 ### Patch Changes
 
 - c73c3939: Update the typescript version to `4.3.5`
 
+=======
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 ## 0.5.0
 
 ### Minor Changes

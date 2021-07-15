@@ -1,5 +1,6 @@
 # @eth-optimism/smock
 
+<<<<<<< HEAD
 ## 1.1.9
 
 ### Patch Changes
@@ -14,6 +15,8 @@
 
 - d1da05be: Add a test and a doc section for returning multiple uint256 arrays
 
+=======
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 ## 1.1.7
 
 ### Patch Changes

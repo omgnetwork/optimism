@@ -157,13 +157,18 @@ func TestPaysEnough(t *testing.T) {
 		},
 		"fee-threshold-up": {
 			opts: &PaysEnoughOpts{
+<<<<<<< HEAD
 				UserFee:       common.Big256,
+=======
+				UserFee:       common.Big3,
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 				ExpectedFee:   common.Big1,
 				ThresholdUp:   new(big.Float).SetFloat64(1.5),
 				ThresholdDown: nil,
 			},
 			err: ErrFeeTooHigh,
 		},
+<<<<<<< HEAD
 		"fee-too-low-high": {
 			opts: &PaysEnoughOpts{
 				UserFee:       new(big.Int).SetUint64(10_000),
@@ -191,6 +196,8 @@ func TestPaysEnough(t *testing.T) {
 			},
 			err: ErrFeeTooLow,
 		},
+=======
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 	}
 
 	for name, tt := range tests {

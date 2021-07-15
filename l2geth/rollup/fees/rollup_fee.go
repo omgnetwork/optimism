@@ -3,7 +3,10 @@ package fees
 import (
 	"errors"
 	"fmt"
+<<<<<<< HEAD
 	"math"
+=======
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -116,7 +119,11 @@ func PaysEnough(opts *PaysEnoughOpts) error {
 		return fmt.Errorf("%w: no expected fee", errMissingInput)
 	}
 
+<<<<<<< HEAD
 	fee := new(big.Int).Set(opts.ExpectedFee)
+=======
+	fee := opts.ExpectedFee
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 	// Allow for a downward buffer to protect against L1 gas price volatility
 	if opts.ThresholdDown != nil {
 		fee = mulByFloat(fee, opts.ThresholdDown)
@@ -130,7 +137,11 @@ func PaysEnough(opts *PaysEnoughOpts) error {
 	if opts.ThresholdUp != nil {
 		// overpaying = user fee - expected fee
 		overpaying := new(big.Int).Sub(opts.UserFee, opts.ExpectedFee)
+<<<<<<< HEAD
 		threshold := mulByFloat(opts.ExpectedFee, opts.ThresholdUp)
+=======
+		threshold := mulByFloat(overpaying, opts.ThresholdUp)
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 		// if overpaying > threshold, return error
 		if overpaying.Cmp(threshold) == 1 {
 			return ErrFeeTooHigh
@@ -141,10 +152,16 @@ func PaysEnough(opts *PaysEnoughOpts) error {
 
 func mulByFloat(num *big.Int, float *big.Float) *big.Int {
 	n := new(big.Float).SetUint64(num.Uint64())
+<<<<<<< HEAD
 	product := n.Mul(n, float)
 	pfloat, _ := product.Float64()
 	rounded := math.Ceil(pfloat)
 	return new(big.Int).SetUint64(uint64(rounded))
+=======
+	n = n.Mul(n, float)
+	value, _ := float.Uint64()
+	return new(big.Int).SetUint64(value)
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 }
 
 // calculateL1GasLimit computes the L1 gasLimit based on the calldata and

@@ -1,6 +1,10 @@
 {
   "name": "@eth-optimism/common-ts",
+<<<<<<< HEAD
   "version": "0.1.5",
+=======
+  "version": "0.1.4",
+>>>>>>> Crunchy tiger 0.0.1 (#201)
   "main": "dist/index",
   "files": [
     "dist/*"

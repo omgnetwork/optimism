@@ -1,11 +1,14 @@
 # @eth-optimism/integration-tests
 
+<<<<<<< HEAD
 ## 0.2.2
 
 ### Patch Changes
 
 - c73c3939: Update the typescript version to `4.3.5`
 
+=======
+>>>>>>> Crunchy tiger 0.0.1 (#201)
 ## 0.2.1
 
 ### Patch Changes
