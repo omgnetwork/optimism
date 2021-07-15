@@ -2,8 +2,7 @@
 pragma solidity >0.5.0 <0.8.0;
 
 /* Interface Imports */
-import { iOVM_CrossDomainMessenger } from
-    "../../iOVM/bridge/messaging/iOVM_CrossDomainMessenger.sol";
+import { iAbs_BaseCrossDomainMessenger } from "../../iOVM/bridge/messaging/iAbs_BaseCrossDomainMessenger.sol";
 
 /**
  * @title OVM_CrossDomainEnabled
@@ -24,7 +23,7 @@ contract OVM_CrossDomainEnabled {
 
     /***************
      * Constructor *
-     ***************/
+     ***************/    
 
     /**
      * @param _messenger Address of the CrossDomainMessenger on the current layer.
@@ -69,32 +68,32 @@ contract OVM_CrossDomainEnabled {
     /**
      * Gets the messenger, usually from storage. This function is exposed in case a child contract
      * needs to override.
-     * @return The address of the cross-domain messenger contract which should be used.
+     * @return The address of the cross-domain messenger contract which should be used. 
      */
     function getCrossDomainMessenger()
         internal
         virtual
         returns (
-            iOVM_CrossDomainMessenger
+            iAbs_BaseCrossDomainMessenger
         )
     {
-        return iOVM_CrossDomainMessenger(messenger);
+        return iAbs_BaseCrossDomainMessenger(messenger);
     }
 
     /**
      * Sends a message to an account on another domain
      * @param _crossDomainTarget The intended recipient on the destination domain
-     * @param _message The data to send to the target (usually calldata to a function with
+     * @param _data The data to send to the target (usually calldata to a function with
      *  `onlyFromCrossDomainAccount()`)
      * @param _gasLimit The gasLimit for the receipt of the message on the target domain.
      */
     function sendCrossDomainMessage(
         address _crossDomainTarget,
-        uint32 _gasLimit,
-        bytes memory _message
+        bytes memory _data,
+        uint32 _gasLimit
     )
         internal
     {
-        getCrossDomainMessenger().sendMessage(_crossDomainTarget, _message, _gasLimit);
+        getCrossDomainMessenger().sendMessage(_crossDomainTarget, _data, _gasLimit);
     }
 }

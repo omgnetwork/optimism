@@ -51,6 +51,40 @@ const config: HardhatUserConfig = {
 export default config
 ```
 
+## Table of Contents
+- [API](#api)
+  * [Functions](#functions)
+    + [`smockit`](#-smockit-)
+      - [Import](#import)
+      - [Signature](#signature)
+    + [`smoddit`](#-smoddit-)
+      - [Import](#import-1)
+      - [Signature](#signature-1)
+  * [Types](#types)
+    + [`smockit`](#-smockit--1)
+      - [`MockContract`](#-mockcontract-)
+      - [`MockContractFunction`](#-mockcontractfunction-)
+      - [`MockReturnValue`](#-mockreturnvalue-)
+    + [`smoddit`](#-smoddit--1)
+      - [`ModifiableContractFactory`](#-modifiablecontractfactory-)
+      - [`ModifiableContract`](#-modifiablecontract-)
+- [Examples (smockit)](#examples--smockit-)
+  * [Via `ethers.Contract`](#via--etherscontract-)
+  * [Asserting Call Count](#asserting-call-count)
+  * [Asserting Call Data](#asserting-call-data)
+  * [Returning (w/o Data)](#returning--w-o-data-)
+  * [Returning a Struct](#returning-a-struct)
+  * [Returning a Function](#returning-a-function)
+  * [Returning a Function (w/ Arguments)](#returning-a-function--w--arguments-)
+  * [Reverting (w/o Data)](#reverting--w-o-data-)
+  * [Reverting (w/ Data)](#reverting--w--data-)
+- [Examples (smoddit)](#examples--smoddit-)
+  * [Creating a Modifiable Contract](#creating-a-modifiable-contract)
+  * [Modifying a `uint256`](#modifying-a--uint256-)
+  * [Modifying a Struct](#modifying-a-struct)
+  * [Modifying a Mapping](#modifying-a-mapping)
+  * [Modifying a Nested Mapping](#modifying-a-nested-mapping)
+
 ## API
 ### Functions
 #### `smockit`
@@ -88,13 +122,10 @@ const smoddit = async (
 #### `smockit`
 ##### `MockContract`
 ```typescript
-interface MockContract extends ethers.Contract {
+interface MockContract extends Contract {
   smocked: {
     [functionName: string]: MockContractFunction
   }
-
-  // A wallet you can use to send transactions *from* a smocked contract
-  wallet: ethers.Signer
 }
 ```
 
@@ -128,14 +159,14 @@ export type MockReturnValue =
 #### `smoddit`
 ##### `ModifiableContractFactory`
 ```typescript
-interface ModifiableContractFactory extends ethers.ContractFactory {
+interface ModifiableContractFactory extends ContractFactory {
   deploy: (...args: any[]) => Promise<ModifiableContract>
 }
 ```
 
 ##### `ModifiableContract`
 ```typescript
-interface ModifiableContract extends ethers.Contract {
+interface ModifiableContract extends Contract {
   smodify: {
     put: (storage: any) => Promise<void>
   }
@@ -240,25 +271,6 @@ MyMockContract.smocked.myFunction.will.return.with({
 console.log(await MyMockContract.myFunction()) // ['Some value', 1234, true]
 ```
 
-### Returning a Multiple Arrays
-```typescript
-import { ethers } from 'hardhat'
-import { smockit } from '@eth-optimism/smock'
-
-const MyContractFactory = await ethers.getContractFactory('MyContract')
-const MyContract = await MyContractFactory.deploy(...)
-
-// Smockit!
-const MyMockContract = await smockit(MyContract)
-
-MyMockContract.smocked.myFunction.will.return.with([
-  [1234, 5678],
-  [4321, 8765]
-])
-
-console.log(await MyMockContract.myFunction()) // [ [1234, 5678], [4321, 8765] ]
-```
-
 ### Returning a Function
 ```typescript
 import { ethers } from 'hardhat'
@@ -325,20 +337,6 @@ const MyMockContract = await smockit(MyContract)
 MyMockContract.smocked.myFunction.will.revert.with('0x1234')
 
 console.log(await MyMockContract.myFunction('Some return value!')) // Revert!
-```
-
-### Sending transactions from a smocked contract
-```typescript
-import { ethers } from 'hardhat'
-import { smockit } from '@eth-optimism/smock'
-
-const myContractFactory = await ethers.getContractFactory('MyContract')
-const myContract = await myContractFactory.deploy(...)
-
-// Smockit!
-const mock = await smockit('AnotherContract')
-
-await myContract.connect(mock.wallet).doSomeFunction() // msg.sender == mock.address
 ```
 
 ## Examples (smoddit)

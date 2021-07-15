@@ -87,7 +87,8 @@ const test_ovmDELEGATECALL: TestDefinition = {
       ],
     },
     {
-      name: 'ovmCALL(ADDRESS_1) => ovmCALL(ADDRESS_2) => ovmDELEGATECALL(ADDRESS_3) => ovmCALLER',
+      name:
+        'ovmCALL(ADDRESS_1) => ovmCALL(ADDRESS_2) => ovmDELEGATECALL(ADDRESS_3) => ovmCALLER',
       steps: [
         {
           functionName: 'ovmCALL',
@@ -126,7 +127,8 @@ const test_ovmDELEGATECALL: TestDefinition = {
       ],
     },
     {
-      name: 'ovmCALL(ADDRESS_1) => (ovmDELEGATECALL(ADDRESS_2) => ovmSSTORE) + ovmSLOAD',
+      name:
+        'ovmCALL(ADDRESS_1) => (ovmDELEGATECALL(ADDRESS_2) => ovmSSTORE) + ovmSLOAD',
       steps: [
         {
           functionName: 'ovmCALL',
@@ -200,7 +202,8 @@ const test_ovmDELEGATECALL: TestDefinition = {
       ],
     },
     {
-      name: 'ovmCALL(ADDRESS_1) => ovmCALL(ADDRESS_2) => ovmDELEGATECALL(ADDRESS_3) => ovmDELEGATECALL(ADDRESS_4) => ovmCALLER',
+      name:
+        'ovmCALL(ADDRESS_1) => ovmCALL(ADDRESS_2) => ovmDELEGATECALL(ADDRESS_3) => ovmDELEGATECALL(ADDRESS_4) => ovmCALLER',
       steps: [
         {
           functionName: 'ovmCALL',
@@ -249,7 +252,8 @@ const test_ovmDELEGATECALL: TestDefinition = {
       ],
     },
     {
-      name: 'ovmCALL(ADDRESS_1) => ovmCALL(ADDRESS_2) => ovmDELEGATECALL(ADDRESS_3) => ovmDELEGATECALL(ADDRESS_4) => ovmADDRESS',
+      name:
+        'ovmCALL(ADDRESS_1) => ovmCALL(ADDRESS_2) => ovmDELEGATECALL(ADDRESS_3) => ovmDELEGATECALL(ADDRESS_4) => ovmADDRESS',
       steps: [
         {
           functionName: 'ovmCALL',
@@ -298,7 +302,8 @@ const test_ovmDELEGATECALL: TestDefinition = {
       ],
     },
     {
-      name: 'ovmCALL(ADDRESS_1) => ovmCALL(ADDRESS_2) => ovmDELEGATECALL(ADDRESS_3) => ovmDELEGATECALL(ADDRESS_4) => ovmCREATE',
+      name:
+        'ovmCALL(ADDRESS_1) => ovmCALL(ADDRESS_2) => ovmDELEGATECALL(ADDRESS_3) => ovmDELEGATECALL(ADDRESS_4) => ovmCREATE',
       steps: [
         {
           functionName: 'ovmCALL',
