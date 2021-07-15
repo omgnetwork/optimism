@@ -9,6 +9,11 @@ type OptionSettings<TOptions> = {
   }
 }
 
+type BaseServiceOptions<T> = T & {
+  logger?: Logger
+  metrics?: Metrics
+}
+
 /**
  * Base for other "Service" objects. Handles your standard initialization process, can dynamically
  * start and stop.
@@ -18,14 +23,21 @@ export class BaseService<T> {
   protected options: T
   protected logger: Logger
   protected metrics: Metrics
-  protected initialized: boolean = false
-  protected running: boolean = false
+  protected initialized = false
+  protected running = false
 
-  constructor(name: string, options: T, optionSettings: OptionSettings<T>) {
+  constructor(
+    name: string,
+    options: BaseServiceOptions<T>,
+    optionSettings: OptionSettings<T>
+  ) {
     validateOptions(options, optionSettings)
     this.name = name
     this.options = mergeDefaultOptions(options, optionSettings)
-    this.logger = new Logger({ name })
+    this.logger = options.logger || new Logger({ name })
+    if (options.metrics) {
+      this.metrics = options.metrics
+    }
   }
 
   /**
@@ -97,10 +109,10 @@ export class BaseService<T> {
 /**
  * Combines user provided and default options.
  */
-function mergeDefaultOptions<T>(
+const mergeDefaultOptions = <T>(
   options: T,
   optionSettings: OptionSettings<T>
-): T {
+): T => {
   for (const optionName of Object.keys(optionSettings)) {
     const optionDefault = optionSettings[optionName].default
     if (optionDefault === undefined) {
@@ -120,7 +132,7 @@ function mergeDefaultOptions<T>(
 /**
  * Performs option validation against the option settings
  */
-function validateOptions<T>(options: T, optionSettings: OptionSettings<T>) {
+const validateOptions = <T>(options: T, optionSettings: OptionSettings<T>) => {
   for (const optionName of Object.keys(optionSettings)) {
     const optionValidationFunction = optionSettings[optionName].validate
     if (optionValidationFunction === undefined) {

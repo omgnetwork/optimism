@@ -27,6 +27,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/accounts/scwallet"
 	"github.com/ethereum/go-ethereum/common"
@@ -44,13 +45,17 @@ import (
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/ethereum/go-ethereum/rollup/fees"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/tyler-smith/go-bip39"
 )
 
 const (
-	defaultGasPrice = params.GWei
+	defaultGasPrice = params.Wei * fees.TxGasPrice
 )
+
+var errOVMUnsupported = errors.New("OVM: Unsupported RPC Method")
+var bigDefaultGasPrice = new(big.Int).SetUint64(defaultGasPrice)
 
 // PublicEthereumAPI provides an API to access Ethereum related information.
 // It offers only methods that operate on public data that is freely available to anyone.
@@ -65,7 +70,7 @@ func NewPublicEthereumAPI(b Backend) *PublicEthereumAPI {
 
 // GasPrice always returns 1 gwei. See `DoEstimateGas` below for context.
 func (s *PublicEthereumAPI) GasPrice(ctx context.Context) (*hexutil.Big, error) {
-	return (*hexutil.Big)(big.NewInt(defaultGasPrice)), nil
+	return (*hexutil.Big)(bigDefaultGasPrice), nil
 }
 
 // ProtocolVersion returns the current Ethereum protocol version this node supports
@@ -928,7 +933,7 @@ func DoCall(ctx context.Context, b Backend, args CallArgs, blockNrOrHash rpc.Blo
 
 	// Create new call message
 	var msg core.Message
-	msg = types.NewMessage(addr, args.To, 0, value, gas, gasPrice, data, false, &addr, nil, types.QueueOriginSequencer, 0)
+	msg = types.NewMessage(addr, args.To, 0, value, gas, gasPrice, data, false, &addr, nil, types.QueueOriginSequencer)
 	if vm.UsingOVM {
 		cfg := b.ChainConfig()
 		executionManager := cfg.StateDump.Accounts["OVM_ExecutionManager"]
@@ -1008,7 +1013,18 @@ func (s *PublicBlockChainAPI) Call(ctx context.Context, args CallArgs, blockNrOr
 	if overrides != nil {
 		accounts = *overrides
 	}
-	result, _, _, err := DoCall(ctx, s.b, args, blockNrOrHash, accounts, vm.Config{}, 5*time.Second, s.b.RPCGasCap())
+	result, _, failed, err := DoCall(ctx, s.b, args, blockNrOrHash, accounts, vm.Config{}, 5*time.Second, s.b.RPCGasCap())
+	if err != nil {
+		return nil, err
+	}
+	if failed {
+		reason, errUnpack := abi.UnpackRevert(result)
+		err := errors.New("execution reverted")
+		if errUnpack == nil {
+			err = fmt.Errorf("execution reverted: %v", reason)
+		}
+		return (hexutil.Bytes)(result), err
+	}
 	return (hexutil.Bytes)(result), err
 }
 
@@ -1018,32 +1034,34 @@ func (s *PublicBlockChainAPI) Call(ctx context.Context, args CallArgs, blockNrOr
 // fees can compensate for the additional costs the sequencer pays for publishing the
 // transaction calldata
 func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrOrHash rpc.BlockNumberOrHash, gasCap *big.Int) (hexutil.Uint64, error) {
-	if args.Data == nil {
-		return 0, errors.New("transaction data cannot be nil")
-	}
-
 	// 1. get the gas that would be used by the transaction
 	gasUsed, err := legacyDoEstimateGas(ctx, b, args, blockNrOrHash, gasCap)
 	if err != nil {
 		return 0, err
 	}
-
 	// 2a. fetch the data price, depends on how the sequencer has chosen to update their values based on the
 	// l1 gas prices
-	dataPrice, err := b.SuggestDataPrice(ctx)
+	l1GasPrice, err := b.SuggestL1GasPrice(ctx)
 	if err != nil {
 		return 0, err
 	}
-
 	// 2b. fetch the execution gas price, by the typical mempool dynamics
-	executionPrice, err := b.SuggestExecutionPrice(ctx)
+	l2GasPrice, err := b.SuggestL2GasPrice(ctx)
 	if err != nil {
 		return 0, err
 	}
-
-	// 3. calculate the fee and normalize by the default gas price
-	fee := core.CalculateRollupFee(*args.Data, uint64(gasUsed), dataPrice, executionPrice).Uint64() / defaultGasPrice
-	return (hexutil.Uint64)(fee), nil
+	data := []byte{}
+	if args.Data != nil {
+		data = *args.Data
+	}
+	// 3. calculate the fee using just the calldata. The additional overhead of
+	// RLP encoding is covered inside of EncodeL2GasLimit
+	l2GasLimit := new(big.Int).SetUint64(uint64(gasUsed))
+	fee := fees.EncodeTxGasLimit(data, l1GasPrice, l2GasLimit, l2GasPrice)
+	if !fee.IsUint64() {
+		return 0, fmt.Errorf("estimate gas overflow: %s", fee)
+	}
+	return (hexutil.Uint64)(fee.Uint64()), nil
 }
 
 func legacyDoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrOrHash rpc.BlockNumberOrHash, gasCap *big.Int) (hexutil.Uint64, error) {
@@ -1082,19 +1100,21 @@ func legacyDoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrO
 		args.From = &common.Address{}
 	}
 	// Create a helper to check if a gas allowance results in an executable transaction
-	executable := func(gas uint64) bool {
+	executable := func(gas uint64) (bool, []byte) {
 		args.Gas = (*hexutil.Uint64)(&gas)
 
-		_, _, failed, err := DoCall(ctx, b, args, blockNrOrHash, nil, vm.Config{}, 0, gasCap)
+		res, _, failed, err := DoCall(ctx, b, args, blockNrOrHash, nil, vm.Config{}, 0, gasCap)
 		if err != nil || failed {
-			return false
+			return false, res
 		}
-		return true
+		return true, res
 	}
 	// Execute the binary search and hone in on an executable gas limit
 	for lo+1 < hi {
 		mid := (hi + lo) / 2
-		if !executable(mid) {
+		ok, _ := executable(mid)
+
+		if !ok {
 			lo = mid
 		} else {
 			hi = mid
@@ -1102,18 +1122,43 @@ func legacyDoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrO
 	}
 	// Reject the transaction as invalid if it still fails at the highest allowance
 	if hi == cap {
-		if !executable(hi) {
-			return 0, fmt.Errorf("gas required exceeds allowance (%d) or always failing transaction", cap)
+		ok, res := executable(hi)
+		if !ok {
+			if len(res) >= 4 && bytes.Equal(res[:4], abi.RevertSelector) {
+				reason, errUnpack := abi.UnpackRevert(res)
+				err := errors.New("execution reverted")
+				if errUnpack == nil {
+					err = fmt.Errorf("execution reverted: %v", reason)
+				}
+				return 0, err
+			}
+			return 0, fmt.Errorf("gas required exceeds allowance (%d)", cap)
 		}
 	}
 	return hexutil.Uint64(hi), nil
 }
 
 // EstimateGas returns an estimate of the amount of gas needed to execute the
-// given transaction against the current pending block.
+// given transaction against the current pending block. This is modified to
+// encode the fee in wei as gas price is always 1
 func (s *PublicBlockChainAPI) EstimateGas(ctx context.Context, args CallArgs) (hexutil.Uint64, error) {
 	blockNrOrHash := rpc.BlockNumberOrHashWithNumber(rpc.PendingBlockNumber)
 	return DoEstimateGas(ctx, s.b, args, blockNrOrHash, s.b.RPCGasCap())
+}
+
+// EstimateExecutionGas returns an estimate of the amount of gas needed to execute the
+// given transaction against the current pending block.
+func (s *PublicBlockChainAPI) EstimateExecutionGas(ctx context.Context, args CallArgs, round *bool) (hexutil.Uint64, error) {
+	blockNrOrHash := rpc.BlockNumberOrHashWithNumber(rpc.PendingBlockNumber)
+	estimate, err := legacyDoEstimateGas(ctx, s.b, args, blockNrOrHash, s.b.RPCGasCap())
+	if err != nil {
+		return estimate, err
+	}
+	if round != nil && *round {
+		rounded := fees.Ceilmod(new(big.Int).SetUint64(uint64(estimate)), fees.BigTenThousand)
+		estimate = (hexutil.Uint64)(rounded.Uint64())
+	}
+	return estimate, nil
 }
 
 // ExecutionResult groups all structured logs emitted by the EVM
@@ -1286,7 +1331,10 @@ type RPCTransaction struct {
 // newRPCTransaction returns a transaction that will serialize to the RPC
 // representation, with the given location metadata set (if available).
 func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber uint64, index uint64) *RPCTransaction {
-	var signer types.Signer = types.NewOVMSigner(tx.ChainId())
+	var signer types.Signer = types.FrontierSigner{}
+	if tx.Protected() {
+		signer = types.NewEIP155Signer(tx.ChainId())
+	}
 	from, _ := types.Sender(signer, tx)
 	v, r, s := tx.RawSignatureValues()
 
@@ -1316,14 +1364,8 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		if meta.L1BlockNumber != nil {
 			result.L1BlockNumber = (*hexutil.Big)(meta.L1BlockNumber)
 		}
-		if meta.QueueOrigin != nil {
-			switch meta.QueueOrigin.Uint64() {
-			case uint64(types.QueueOriginSequencer):
-				result.QueueOrigin = "sequencer"
-			case uint64(types.QueueOriginL1ToL2):
-				result.QueueOrigin = "l1"
-			}
-		}
+
+		result.QueueOrigin = fmt.Sprint(meta.QueueOrigin)
 
 		if meta.Index != nil {
 			index := (hexutil.Uint64)(*meta.Index)
@@ -1332,15 +1374,6 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		if meta.QueueIndex != nil {
 			queueIndex := (hexutil.Uint64)(*meta.QueueIndex)
 			result.QueueIndex = &queueIndex
-		}
-
-		switch meta.SignatureHashType {
-		case types.SighashEthSign:
-			result.TxType = "EthSign"
-		case types.SighashEIP155:
-			result.TxType = "EIP155"
-		case types.CreateEOA:
-			result.TxType = "CreateEOA"
 		}
 	}
 	return result
@@ -1514,7 +1547,7 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, ha
 
 	var signer types.Signer = types.FrontierSigner{}
 	if tx.Protected() {
-		signer = types.NewOVMSigner(tx.ChainId())
+		signer = types.NewEIP155Signer(tx.ChainId())
 	}
 	from, _ := types.Sender(signer, tx)
 
@@ -1574,9 +1607,8 @@ type SendTxArgs struct {
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input"`
 
-	L1BlockNumber     *big.Int                `json:"l1BlockNumber"`
-	L1MessageSender   *common.Address         `json:"l1MessageSender"`
-	SignatureHashType types.SignatureHashType `json:"signatureHashType"`
+	L1BlockNumber   *big.Int        `json:"l1BlockNumber"`
+	L1MessageSender *common.Address `json:"l1MessageSender"`
 }
 
 // setDefaults is a helper function that fills in default values for unspecified tx fields.
@@ -1648,12 +1680,14 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	}
 	if args.To == nil {
 		tx := types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
-		txMeta := types.NewTransactionMeta(args.L1BlockNumber, 0, nil, types.SighashEIP155, types.QueueOriginSequencer, nil, nil, nil)
+		raw, _ := rlp.EncodeToBytes(tx)
+		txMeta := types.NewTransactionMeta(args.L1BlockNumber, 0, nil, types.QueueOriginSequencer, nil, nil, raw)
 		tx.SetTransactionMeta(txMeta)
 		return tx
 	}
 	tx := types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
-	txMeta := types.NewTransactionMeta(args.L1BlockNumber, 0, args.L1MessageSender, args.SignatureHashType, types.QueueOriginSequencer, nil, nil, nil)
+	raw, _ := rlp.EncodeToBytes(tx)
+	txMeta := types.NewTransactionMeta(args.L1BlockNumber, 0, args.L1MessageSender, types.QueueOriginSequencer, nil, nil, raw)
 	tx.SetTransactionMeta(txMeta)
 	return tx
 }
@@ -1683,10 +1717,9 @@ func SubmitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (c
 // SendTransaction creates a transaction for the given argument, sign it and submit it to the
 // transaction pool.
 func (s *PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args SendTxArgs) (common.Hash, error) {
-	if s.b.IsVerifier() {
-		return common.Hash{}, errors.New("Cannot send transaction in verifier mode")
+	if vm.UsingOVM {
+		return common.Hash{}, errOVMUnsupported
 	}
-
 	// Look up the wallet containing the requested signer
 	account := accounts.Account{Address: args.From}
 
@@ -1719,6 +1752,9 @@ func (s *PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args Sen
 // FillTransaction fills the defaults (nonce, gas, gasPrice) on a given unsigned transaction,
 // and returns it to the caller for further processing (signing + broadcast)
 func (s *PublicTransactionPoolAPI) FillTransaction(ctx context.Context, args SendTxArgs) (*SignTransactionResult, error) {
+	if vm.UsingOVM {
+		return nil, errOVMUnsupported
+	}
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, s.b); err != nil {
 		return nil, err
@@ -1747,39 +1783,8 @@ func (s *PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, encod
 	if err := rlp.DecodeBytes(encodedTx, tx); err != nil {
 		return common.Hash{}, err
 	}
-
-	if new(big.Int).Mod(tx.GasPrice(), big.NewInt(1000000)).Cmp(big.NewInt(0)) != 0 {
-		return common.Hash{}, errors.New("Gas price must be a multiple of 1,000,000 wei")
-	}
-	// L1Timestamp and L1BlockNumber will be set by the miner
-	txMeta := types.NewTransactionMeta(nil, 0, nil, types.SighashEIP155, types.QueueOriginSequencer, nil, nil, nil)
-	tx.SetTransactionMeta(txMeta)
-	return SubmitTransaction(ctx, s.b, tx)
-}
-
-// SendRawEthSignTransaction will add the signed transaction to the mempool.
-// The signature hash was computed with `eth_sign`, meaning that the
-// `abi.encodedPacked` transaction was prefixed with the string
-// "Ethereum Signed Message".
-func (s *PublicTransactionPoolAPI) SendRawEthSignTransaction(ctx context.Context, encodedTx hexutil.Bytes) (common.Hash, error) {
-	if s.b.IsVerifier() {
-		return common.Hash{}, errors.New("Cannot send raw ethsign transaction in verifier mode")
-	}
-
-	if s.b.IsSyncing() {
-		return common.Hash{}, errors.New("Cannot send raw transaction while syncing")
-	}
-
-	tx := new(types.Transaction)
-	if err := rlp.DecodeBytes(encodedTx, tx); err != nil {
-		return common.Hash{}, err
-	}
-
-	if new(big.Int).Mod(tx.GasPrice(), big.NewInt(1000000)).Cmp(big.NewInt(0)) != 0 {
-		return common.Hash{}, errors.New("Gas price must be a multiple of 1,000,000 wei")
-	}
-	// L1Timestamp and L1BlockNumber will be set by the miner
-	txMeta := types.NewTransactionMeta(nil, 0, nil, types.SighashEthSign, types.QueueOriginSequencer, nil, nil, nil)
+	// L1Timestamp and L1BlockNumber will be set right before execution
+	txMeta := types.NewTransactionMeta(nil, 0, nil, types.QueueOriginSequencer, nil, nil, encodedTx)
 	tx.SetTransactionMeta(txMeta)
 	return SubmitTransaction(ctx, s.b, tx)
 }
@@ -1794,6 +1799,9 @@ func (s *PublicTransactionPoolAPI) SendRawEthSignTransaction(ctx context.Context
 //
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sign
 func (s *PublicTransactionPoolAPI) Sign(addr common.Address, data hexutil.Bytes) (hexutil.Bytes, error) {
+	if vm.UsingOVM {
+		return nil, errOVMUnsupported
+	}
 	// Look up the wallet containing the requested signer
 	account := accounts.Account{Address: addr}
 
@@ -1819,6 +1827,9 @@ type SignTransactionResult struct {
 // The node needs to have the private key of the account corresponding with
 // the given from address and it needs to be unlocked.
 func (s *PublicTransactionPoolAPI) SignTransaction(ctx context.Context, args SendTxArgs) (*SignTransactionResult, error) {
+	if vm.UsingOVM {
+		return nil, errOVMUnsupported
+	}
 	if args.Gas == nil {
 		return nil, fmt.Errorf("gas not specified")
 	}
@@ -1859,7 +1870,7 @@ func (s *PublicTransactionPoolAPI) PendingTransactions() ([]*RPCTransaction, err
 	for _, tx := range pending {
 		var signer types.Signer = types.HomesteadSigner{}
 		if tx.Protected() {
-			signer = types.NewOVMSigner(tx.ChainId())
+			signer = types.NewEIP155Signer(tx.ChainId())
 		}
 		from, _ := types.Sender(signer, tx)
 		if _, exists := accounts[from]; exists {
@@ -1887,7 +1898,7 @@ func (s *PublicTransactionPoolAPI) Resend(ctx context.Context, sendArgs SendTxAr
 	for _, p := range pending {
 		var signer types.Signer = types.HomesteadSigner{}
 		if p.Protected() {
-			signer = types.NewOVMSigner(p.ChainId())
+			signer = types.NewEIP155Signer(p.ChainId())
 		}
 		wantSigHash := signer.Hash(matchTx)
 
@@ -1972,6 +1983,27 @@ func (api *PublicRollupAPI) GetInfo(ctx context.Context) rollupInfo {
 	}
 }
 
+type gasPrices struct {
+	L1GasPrice *hexutil.Big `json:"l1GasPrice"`
+	L2GasPrice *hexutil.Big `json:"l2GasPrice"`
+}
+
+// GasPrices returns the L1 and L2 gas price known by the node
+func (api *PublicRollupAPI) GasPrices(ctx context.Context) (*gasPrices, error) {
+	l1GasPrice, err := api.b.SuggestL1GasPrice(ctx)
+	if err != nil {
+		return nil, err
+	}
+	l2GasPrice, err := api.b.SuggestL2GasPrice(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &gasPrices{
+		L1GasPrice: (*hexutil.Big)(l1GasPrice),
+		L2GasPrice: (*hexutil.Big)(l2GasPrice),
+	}, nil
+}
+
 // PrivatelRollupAPI provides private RPC methods to control the sequencer.
 // These methods can be abused by external users and must be considered insecure for use by untrusted users.
 type PrivateRollupAPI struct {
@@ -1984,15 +2016,15 @@ func NewPrivateRollupAPI(b Backend) *PrivateRollupAPI {
 	return &PrivateRollupAPI{b: b}
 }
 
-// SetDataPrice sets the gas price to be used when quoting calldata publishing costs
+// SetL1GasPrice sets the gas price to be used when quoting calldata publishing costs
 // to users
-func (api *PrivateRollupAPI) SetDataPrice(ctx context.Context, gasPrice hexutil.Big) {
-	api.b.SetDataPrice(ctx, (*big.Int)(&gasPrice))
+func (api *PrivateRollupAPI) SetL1GasPrice(ctx context.Context, gasPrice hexutil.Big) error {
+	return api.b.SetL1GasPrice(ctx, (*big.Int)(&gasPrice))
 }
 
-// SetExecutionPrice sets the gas price to be used when executing transactions on
-func (api *PrivateRollupAPI) SetExecutionPrice(ctx context.Context, gasPrice hexutil.Big) {
-	api.b.SetExecutionPrice(ctx, (*big.Int)(&gasPrice))
+// SetL2GasPrice sets the gas price to be used when executing transactions on
+func (api *PrivateRollupAPI) SetL2GasPrice(ctx context.Context, gasPrice hexutil.Big) error {
+	return api.b.SetL2GasPrice(ctx, (*big.Int)(&gasPrice))
 }
 
 // PublicDebugAPI is the collection of Ethereum APIs exposed over the public
@@ -2115,6 +2147,51 @@ func (api *PrivateDebugAPI) ChaindbCompact() error {
 // SetHead rewinds the head of the blockchain to a previous block.
 func (api *PrivateDebugAPI) SetHead(number hexutil.Uint64) {
 	api.b.SetHead(uint64(number))
+}
+
+func (api *PrivateDebugAPI) IngestTransactions(txs []*RPCTransaction) error {
+	transactions := make([]*types.Transaction, len(txs))
+
+	for i, tx := range txs {
+		nonce := uint64(tx.Nonce)
+		value := tx.Value.ToInt()
+		gasLimit := uint64(tx.Gas)
+		gasPrice := tx.GasPrice.ToInt()
+		data := tx.Input
+		l1BlockNumber := tx.L1BlockNumber.ToInt()
+		l1Timestamp := uint64(tx.L1Timestamp)
+		rawTransaction := tx.RawTransaction
+
+		var queueOrigin types.QueueOrigin
+		switch tx.QueueOrigin {
+		case "sequencer":
+			queueOrigin = types.QueueOriginSequencer
+		case "l1":
+			queueOrigin = types.QueueOriginL1ToL2
+		default:
+			return fmt.Errorf("Transaction with unknown queue origin: %s", tx.TxType)
+		}
+
+		var transaction *types.Transaction
+		if tx.To == nil {
+			transaction = types.NewContractCreation(nonce, value, gasLimit, gasPrice, data)
+		} else {
+			transaction = types.NewTransaction(nonce, *tx.To, value, gasLimit, gasPrice, data)
+		}
+
+		meta := types.TransactionMeta{
+			L1BlockNumber:   l1BlockNumber,
+			L1Timestamp:     l1Timestamp,
+			L1MessageSender: tx.L1TxOrigin,
+			QueueOrigin:     queueOrigin,
+			Index:           (*uint64)(tx.Index),
+			QueueIndex:      (*uint64)(tx.QueueIndex),
+			RawTransaction:  rawTransaction,
+		}
+		transaction.SetTransactionMeta(&meta)
+		transactions[i] = transaction
+	}
+	return api.b.IngestTransactions(transactions)
 }
 
 // PublicNetAPI offers network related RPC methods
