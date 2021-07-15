@@ -39,6 +39,7 @@ function IconSelect({
   onTokenSelect,
   priorityOptions = [],
   dropdownOptions = [],
+  disableDD = false,
 }) {
   /* These are the Token Icons */
   const tokenPicker = (
@@ -80,13 +81,14 @@ function IconSelect({
 
   const dropdownTokenPicker = (
     <>
-      {dropdownOptions.length > 0 && (
+      {!disableDD && dropdownOptions && (
         <div className={styles.selectContainer}>
           <Select
             formatOptionLabel={formatOptionLabel}
             options={[
               ...dropdownOptions,
               {
+                name: 'Manual',
                 label: 'Manual',
                 value: 'Manual',
               },

@@ -1,19 +1,31 @@
-//import { depositETHL2, depositL1LP } from 'actions/networkAction'
-import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
+/*
+Copyright 2019-present OmiseGO Pte Ltd
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. */
+import { depositL1LP } from 'actions/networkAction'
+import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
 import Button from 'components/button/Button'
 import IconSelect from 'components/iconSelect/iconSelect'
 import Input from 'components/input/Input'
-import Tabs from 'components/tabs/Tabs'
 import { ethers } from 'ethers'
-
+import { isEqual } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { selectlayer1Balance } from 'selectors/balanceSelector'
 import { selectLoading } from 'selectors/loadingSelector'
 import networkService from 'services/networkService'
+import { logAmount } from 'util/amountConvert'
 import * as styles from '../DepositModal.module.scss'
-
-import { depositL1LP } from 'actions/networkAction'
 
 function InputStepFast({
   onClose,
@@ -30,9 +42,11 @@ function InputStepFast({
   const dispatch = useDispatch()
 
   const [tokens, setTokens] = useState([])
+  const [priorityOptions, setPriorityOptions] = useState([])
   const [selectedToken, setSelectedToken] = useState(null)
   const [LPBalance, setLPBalance] = useState(0)
   const [feeRate, setFeeRate] = useState(0)
+  const balancesL1 = useSelector(selectlayer1Balance, isEqual)
 
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
 
@@ -79,6 +93,43 @@ function InputStepFast({
       })
   }, [])
 
+  useEffect(() => {
+    if (tokens && tokens.length > 0) {
+      let allOptions = tokens
+        .map((t) => {
+          let isBalanceExist = balancesL1.find((b) => {
+            if (
+              (t.symbol === 'ETH' && b.symbol === 'oETH') ||
+              t.symbol === b.symbol
+            ) {
+              return true
+            }
+            return false
+          })
+
+          let balanceL1 = ''
+          if (isBalanceExist) {
+            balanceL1 = logAmount(
+              isBalanceExist.amount,
+              isBalanceExist.decimals
+            )
+          }
+
+          if (!balanceL1) {
+            return
+          }
+
+          return {
+            ...t,
+            ...isBalanceExist,
+            balanceL1,
+          }
+        })
+        .filter(Boolean)
+      setPriorityOptions(allOptions)
+    }
+  }, [tokens, balancesL1])
+
   const disabledSubmit =
     value <= 0 ||
     !selectedToken.L2 ||
@@ -104,6 +155,11 @@ function InputStepFast({
             : selectedToken.symbol
           : ''}
       </div>
+      <div className={styles.tokenBalance}>
+        {selectedToken
+          ? `Balance: ${Number(selectedToken.balanceL1).toFixed(2)}`
+          : ''}
+      </div>
     </div>
   )
 
@@ -112,7 +168,11 @@ function InputStepFast({
       <h2>Fast Swap onto OMGX</h2>
 
       {!selectedToken ? (
-        <IconSelect priorityOptions={tokens} onTokenSelect={setSelectedToken} />
+        <IconSelect
+          priorityOptions={priorityOptions}
+          disableDD={true}
+          onTokenSelect={setSelectedToken}
+        />
       ) : null}
 
       {!!selectedToken && (

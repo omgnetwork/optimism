@@ -101,7 +101,7 @@ function InputStep({
   }, [])
 
   useEffect(() => {
-    if (selectedToken && selectedToken.label === 'manual') {
+    if (selectedToken && selectedToken.label === 'Manual') {
       setCurrencyL1Address('')
       setCurrencyL2Address('')
     } else if (selectedToken) {

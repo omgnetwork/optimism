@@ -73,7 +73,7 @@ function DoExitStepFast({ handleClose }) {
         networkService.L2LPAddress
       )
       setAllowance(allowance)
-      // hit to close modal
+      handleClose()
     }
   }
 
@@ -168,6 +168,7 @@ function DoExitStepFast({ handleClose }) {
       {!selectedToken ? (
         <IconSelect
           priorityOptions={priorityOptions}
+          disableDD={true}
           onTokenSelect={setSelectedToken}
         />
       ) : null}
@@ -182,7 +183,6 @@ function DoExitStepFast({ handleClose }) {
             setExitAmount(i.target.value)
           }}
           unit={selectedToken ? renderUnit : ''}
-          selectValue={currency}
           maxValue={selectedToken.balanceL2}
         />
       )}

@@ -23,6 +23,7 @@ import { selectlayer2Balance } from 'selectors/balanceSelector'
 import { exitOMGX, depositL2LP, approveErc20 } from 'actions/networkAction'
 import { openAlert, openError } from 'actions/uiAction'
 import { selectLoading } from 'selectors/loadingSelector'
+import { selectTokens } from 'selectors/tokenSelector'
 
 import Button from 'components/button/Button'
 
@@ -33,141 +34,45 @@ import * as styles from '../ExitModal.module.scss'
 import Input from 'components/input/Input'
 import IconSelect from 'components/iconSelect/iconSelect'
 
-function DoExitStep({ handleClose, fast }) {
+function DoExitStep({ handleClose }) {
   const dispatch = useDispatch()
 
   const [currency, setCurrency] = useState('')
+
+  const [tokenOptions, setTokenOptions] = useState([])
   const [priorityTokens, setPriorityTokens] = useState([])
   const [dropdownTokens, setDropDownTokens] = useState([])
   const [selectedToken, setSelectedToken] = useState(null)
   const [value, setValue] = useState('')
-  const [LPBalance, setLPBalance] = useState(0)
-  const [feeRate, setFeeRate] = useState(0)
-  const [allowance, setAllowance] = useState(0)
+
   const [disabledSubmit, setDisabledSubmit] = useState(true)
 
-  const balances = useSelector(selectlayer2Balance, isEqual)
+  const balancesL2 = useSelector(selectlayer2Balance, isEqual)
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
-  const approveLoading = useSelector(selectLoading(['APPROVE/CREATE']))
-
-  useEffect(() => {
-    if (balances.length && !currency) {
-      setCurrency(balances[0].currency)
-    }
-    if (fast && currency) {
-      networkService.L1LPBalance(currency).then((res) => {
-        setLPBalance(Number(res).toFixed(1))
-      })
-      networkService.getTotalFeeRate().then((feeRate) => {
-        setFeeRate(feeRate)
-      })
-      if (!exitLoading) {
-        networkService
-          .checkAllowance(currency, networkService.L2LPAddress)
-          .then((allowance) => {
-            setAllowance(allowance)
-          })
-      }
-    }
-  }, [balances, currency, fast, exitLoading])
-
-  const selectOptions = balances.map((i) => ({
-    title: i.symbol,
-    value: i.symbol,
-    L2address: i.currency,
-    subTitle: `Balance: ${logAmount(i.amount, i.decimals)}`,
-  }))
-
-  const currencySymbols = balances.reduce((acc, cur) => {
-    acc[cur.currency] = cur.symbol
-    return acc
-  }, {})
-
-  async function doApprove() {
-    const res = await dispatch(
-      approveErc20(powAmount(value, 18), currency, networkService.L2LPAddress)
-    )
-    if (res) {
-      dispatch(openAlert(`Transaction was approved`))
-      const allowance = await networkService.checkAllowance(
-        currency,
-        networkService.L2LPAddress
-      )
-      setAllowance(allowance)
-    }
-  }
 
   async function doExit() {
-    let res
-    if (fast) {
-      res = await dispatch(depositL2LP(currency, value))
-    } else {
-      res = await dispatch(exitOMGX(currency, value))
-    }
-
-    let currencyL1 = currencySymbols[currency]
+    let res = await dispatch(exitOMGX(currency, value))
 
     //person will receive ETH on the L1, not oETH
-    if (currencyL1 === 'oETH') {
-      currencyL1 = 'ETH'
-    }
-
+    let currencyL1 = selectedToken.symbol
     if (res) {
-      if (fast) {
-        dispatch(
-          openAlert(
-            `${
-              currencySymbols[currency]
-            } was deposited into the L2 liquidity pool. You will receive ${(
-              Number(value) * 0.97
-            ).toFixed(2)} ${currencyL1} on L1.`
-          )
+      dispatch(
+        openAlert(
+          `${selectedToken.symbol} was exited to L1. You will receive ${Number(
+            value
+          ).toFixed(2)} ${
+            currencyL1 === 'oETH' ? 'ETH' : currencyL1
+          } on L1 after 7 days.`
         )
-      } else {
-        dispatch(
-          openAlert(
-            `${
-              currencySymbols[currency]
-            } was exited to L1. You will receive ${Number(value).toFixed(
-              2
-            )} ${currencyL1} on L1 after 7 days.`
-          )
-        )
-      }
+      )
       handleClose()
     } else {
       dispatch(openError(`Failed to exit L2`))
     }
   }
 
-  function getMaxTransferValue() {
-    const transferingBalanceObject = balances.find(
-      (i) => i.currency === currency
-    )
-    if (!transferingBalanceObject) {
-      return
-    }
-    return logAmount(
-      transferingBalanceObject.amount,
-      transferingBalanceObject.decimals
-    )
-  }
-
   function setExitAmount(value) {
-    const transferingBalanceObject = balances.find(
-      (i) => i.currency === currency
-    )
-    const maxTransferValue = Number(
-      logAmount(
-        transferingBalanceObject.amount,
-        transferingBalanceObject.decimals
-      )
-    )
-    if (
-      Number(value) > 0 &&
-      (fast ? Number(value) < Number(LPBalance) : true) &&
-      Number(value) < Number(maxTransferValue)
-    ) {
+    if (Number(value) > 0 && Number(value) < Number(selectedToken.balance)) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
@@ -176,10 +81,81 @@ function DoExitStep({ handleClose, fast }) {
   }
 
   useEffect(() => {
-    if (selectedToken && selectedToken.label === 'manual') {
+    console.log(priorityTokens)
+    console.log(dropdownTokens)
+
+    let pTokens = priorityTokens
+      .map((t) => {
+        let isBalanceExist = balancesL2.find((b) => {
+          if (
+            (t.symbol === 'ETH' && b.symbol === 'oETH') ||
+            t.symbol === b.symbol
+          ) {
+            return true
+          }
+          return false
+        })
+
+        let balanceL2 = ''
+        if (isBalanceExist) {
+          balanceL2 = logAmount(isBalanceExist.amount, isBalanceExist.decimals)
+        }
+
+        if (!balanceL2) {
+          return
+        }
+
+        return {
+          ...t,
+          priority: true,
+          showInDD: false,
+          balanceL2,
+          balance: balanceL2,
+          ...isBalanceExist,
+        }
+      })
+      .filter(Boolean)
+    let ddTokens = dropdownTokens
+      .map((t) => {
+        let isBalanceExist = balancesL2.find((b) => {
+          if (
+            (t.symbol === 'ETH' && b.symbol === 'oETH') ||
+            t.symbol === b.symbol
+          ) {
+            return true
+          }
+          return false
+        })
+
+        let balanceL2 = ''
+        if (isBalanceExist) {
+          balanceL2 = logAmount(isBalanceExist.amount, isBalanceExist.decimals)
+        }
+
+        if (!balanceL2) {
+          return
+        }
+
+        return {
+          ...t,
+          priority: false,
+          showInDD: true,
+          ...isBalanceExist,
+          balanceL2,
+          balance: balanceL2,
+        }
+      })
+      .filter(Boolean)
+    console.log('All options', [...pTokens, ...ddTokens])
+    setTokenOptions([...pTokens, ...ddTokens])
+  }, [balancesL2, priorityTokens, dropdownTokens])
+
+  useEffect(() => {
+    console.log('selectedToken', selectedToken)
+    if (selectedToken && selectedToken.name === 'Manual') {
       setCurrency('')
     } else if (!!selectedToken) {
-      setCurrency(selectedToken.details.L2 || '')
+      setCurrency(selectedToken.L2address || '')
     }
   }, [selectedToken, setCurrency])
 
@@ -193,7 +169,7 @@ function DoExitStep({ handleClose, fast }) {
       .catch((err) => {
         console.log('error', err)
       })
-    // load dropdown tokens
+
     networkService
       .getDropdownTokens()
       .then((res) => {
@@ -204,68 +180,59 @@ function DoExitStep({ handleClose, fast }) {
       })
   }, [])
 
+  const renderUnit = (
+    <div className={styles.tokenDetail}>
+      <div className={styles.tokenSymbol}>
+        {selectedToken ? selectedToken.symbol : ''}
+      </div>
+      <div className={styles.tokenBalance}>
+        {selectedToken
+          ? `Balance: ${Number(selectedToken.balance).toFixed(2)}`
+          : ''}
+      </div>
+    </div>
+  )
+
   return (
     <>
-      {fast && <h2>Start Fast (Swap-off) Exit</h2>}
-      {!fast && (
-        <h2>
-          Start Standard Exit : {` ${selectedToken ? selectedToken.title : ''}`}
-        </h2>
-      )}
+      <h2>
+        Start Standard Exit : {` ${selectedToken ? selectedToken.name : ''}`}
+      </h2>
 
-      {!fast && !selectedToken ? (
+      {!selectedToken ? (
         <IconSelect
-          priorityOptions={priorityTokens}
-          dropdownOptions={dropdownTokens}
+          priorityOptions={tokenOptions.filter((d) => !!d.priority)}
+          dropdownOptions={tokenOptions.filter((d) => !!d.showInDD)}
           onTokenSelect={setSelectedToken}
         />
       ) : null}
 
-      {!fast && selectedToken ? (
+      {selectedToken ? (
         <>
           <Input
             label="L2 Contract Address"
             placeholder="0x"
             value={currency}
-            paste={selectedToken ? selectedToken.title === 'manual' : false}
+            paste={selectedToken ? selectedToken.name === 'Manual' : false}
             onChange={(i) => setCurrency(i.target.value.toLowerCase())} //because this is a user input!!
           />
         </>
       ) : null}
-
       <Input
         label="Amount to exit"
         placeholder={0}
         value={value}
+        type="number"
         onChange={(i) => {
           setExitAmount(i.target.value)
         }}
-        selectValue={currency}
-        maxValue={getMaxTransferValue()}
+        unit={
+          selectedToken && selectedToken.name !== 'Manual' ? renderUnit : ''
+        }
+        maxValue={selectedToken ? selectedToken.balanceL2 : 0}
       />
-      {/* TODO: remove me */}
-      {fast && currencySymbols[currency] === 'oETH' && (
-        <h3>
-          The L1 liquidity pool has {LPBalance} ETH. The liquidity fee is{' '}
-          {feeRate}%.{' '}
-          {value &&
-            `You will receive ${(Number(value) * 0.97).toFixed(2)} ETH on L1.`}
-        </h3>
-      )}
 
-      {/* TODO: remove me */}
-      {fast && currencySymbols[currency] !== 'oETH' && (
-        <h3>
-          The L1 liquidity pool has {LPBalance} {currencySymbols[currency]}. The
-          liquidity fee is {feeRate}%.{' '}
-          {value &&
-            `You will receive ${(Number(value) * 0.97).toFixed(2)} ${
-              currencySymbols[currency]
-            } on L1.`}
-        </h3>
-      )}
-
-      {!fast && currencySymbols[currency] === 'oETH' && (
+      {!!selectedToken && selectedToken.symbol === 'oETH' && (
         <h3>
           {value &&
             `You will receive ${Number(value).toFixed(
@@ -274,37 +241,12 @@ function DoExitStep({ handleClose, fast }) {
         </h3>
       )}
 
-      {!fast && currencySymbols[currency] !== 'oETH' && (
+      {!!selectedToken && selectedToken.symbol !== 'oETH' && (
         <h3>
           {value &&
             `You will receive ${Number(value).toFixed(2)} ${
-              currencySymbols[currency]
+              selectedToken.symbol || ''
             } on L1. Your funds will be available on L1 in 7 days.`}
-        </h3>
-      )}
-
-      {/* TODO: remove me */}
-
-      {fast &&
-        BigNumber.from(allowance).lt(
-          BigNumber.from(powAmount(value ? value : 0, 18))
-        ) && (
-          <h3>
-            To deposit {value.toString()}{' '}
-            {currencySymbols[currency] === 'oETH'
-              ? 'ETH'
-              : currencySymbols[currency]}
-            , you first need to allow us to hold {value.toString()} of your{' '}
-            {currencySymbols[currency] === 'oETH'
-              ? 'ETH'
-              : currencySymbols[currency]}
-            . Click below to submit an approval transaction.
-          </h3>
-        )}
-      {/* TODO: remove me */}
-      {fast && Number(LPBalance) < Number(value) && (
-        <h3 style={{ color: 'red' }}>
-          The L1 liquidity pool doesn't have enough balance to cover your swap.
         </h3>
       )}
 
@@ -317,22 +259,7 @@ function DoExitStep({ handleClose, fast }) {
         >
           CANCEL
         </Button>
-        {fast &&
-        BigNumber.from(allowance).lt(
-          BigNumber.from(powAmount(value ? value : 0, 18))
-        ) ? (
-          <Button
-            onClick={doApprove}
-            type="primary"
-            style={{ flex: 0 }}
-            loading={approveLoading}
-            className={styles.button}
-            tooltip="Your exit is still pending. Please wait for confirmation."
-            disabled={disabledSubmit}
-          >
-            APPROVE
-          </Button>
-        ) : (
+        {!!selectedToken && (
           <Button
             onClick={doExit}
             type="primary"

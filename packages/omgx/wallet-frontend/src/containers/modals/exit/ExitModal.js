@@ -35,7 +35,7 @@ function ExitModal({ open, fast }) {
       {!!fast ? (
         <DoExitStepFast handleClose={handleClose} />
       ) : (
-        <DoExitStep handleClose={handleClose} fast={fast} />
+        <DoExitStep handleClose={handleClose} />
       )}
     </Modal>
   )
