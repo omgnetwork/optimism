@@ -415,6 +415,8 @@ func (s *SyncService) SequencerLoop() {
 			log.Error("Cannot update L1 gas price", "msg", err)
 		}
 		s.txLock.Lock()
+		//log.Debug("MMDBG sync_service.go in sequencer loop")
+
 		if err := s.sequence(); err != nil {
 			log.Error("Could not sequence", "error", err)
 		}
@@ -460,7 +462,7 @@ func (s *SyncService) syncBatchesToTip() error {
 }
 
 func (s *SyncService) syncTransactionsToTip() error {
-	sync := func() (*uint64, error) {
+	sync := func() (bool, *uint64, error) {
 		return s.syncTransactions(s.backend)
 	}
 	check := func() (*uint64, error) {
@@ -917,7 +919,7 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 // syncer represents a function that can sync remote items and then returns the
 // index that it synced to as well as an error if it encountered one. It has
 // side effects on the state and its functionality depends on the current state
-type syncer func() (*uint64, error)
+type syncer func() (bool, *uint64, error)
 
 // rangeSyncer represents a function that syncs a range of items between its two
 // arguments (inclusive)
@@ -937,6 +939,7 @@ type indexGetter func() (*uint64, error)
 // of the remote datasource
 func (s *SyncService) isAtTip(index *uint64, get indexGetter) (bool, error) {
 	latest, err := get()
+	log.Debug("MMDBG isAtTip got", "index", *index, "latest", *latest, "err", err)
 	if errors.Is(err, errElementNotFound) {
 		if index == nil {
 			return true, nil
@@ -974,17 +977,19 @@ func (s *SyncService) syncToTip(sync syncer, getTip indexGetter) error {
 	defer s.loopLock.Unlock()
 
 	for {
-		index, err := sync()
+		isAtTip, _, err := sync()
 		if errors.Is(err, errElementNotFound) {
 			return nil
 		}
 		if err != nil {
 			return err
 		}
+/*
 		isAtTip, err := s.isAtTip(index, getTip)
 		if err != nil {
 			return err
 		}
+*/
 		if isAtTip {
 			return nil
 		}
@@ -992,33 +997,34 @@ func (s *SyncService) syncToTip(sync syncer, getTip indexGetter) error {
 }
 
 // sync will sync a range of items
-func (s *SyncService) sync(getLatest indexGetter, getNext nextGetter, syncer rangeSyncer) (*uint64, error) {
+func (s *SyncService) sync(getLatest indexGetter, getNext nextGetter, syncer rangeSyncer) (bool, *uint64, error) {
 	latestIndex, err := getLatest()
 	if err != nil {
-		return nil, fmt.Errorf("Cannot sync: %w", err)
+		return false, nil, fmt.Errorf("Cannot sync: %w", err)
 	}
 	if latestIndex == nil {
-		return nil, errors.New("Latest index is not defined")
+		return false, nil, errors.New("Latest index is not defined")
 	}
 
 	nextIndex := getNext()
+log.Debug("MMDBG in sync()", "latestIndex", *latestIndex, "nextIndex", nextIndex, "atTip", (nextIndex == *latestIndex+1))
 	if nextIndex == *latestIndex+1 {
-		return latestIndex, nil
+		return true, latestIndex, nil
 	}
 	if err := syncer(nextIndex, *latestIndex); err != nil {
-		return nil, err
+		return false, nil, err
 	}
-	return latestIndex, nil
+	return false, latestIndex, nil // FIXME
 }
 
 // syncBatches will sync a range of batches from the current known tip to the
 // remote tip.
-func (s *SyncService) syncBatches() (*uint64, error) {
-	index, err := s.sync(s.client.GetLatestTransactionBatchIndex, s.GetNextBatchIndex, s.syncTransactionBatchRange)
+func (s *SyncService) syncBatches() (bool, *uint64, error) {
+	atTip, index, err := s.sync(s.client.GetLatestTransactionBatchIndex, s.GetNextBatchIndex, s.syncTransactionBatchRange)
 	if err != nil {
-		return nil, fmt.Errorf("Cannot sync batches: %w", err)
+		return false, nil, fmt.Errorf("Cannot sync batches: %w", err)
 	}
-	return index, nil
+	return atTip, index, nil
 }
 
 // syncTransactionBatchRange will sync a range of batched transactions from
@@ -1043,12 +1049,12 @@ func (s *SyncService) syncTransactionBatchRange(start, end uint64) error {
 
 // syncQueue will sync from the local tip to the known tip of the remote
 // enqueue transaction feed.
-func (s *SyncService) syncQueue() (*uint64, error) {
-	index, err := s.sync(s.client.GetLatestEnqueueIndex, s.GetNextEnqueueIndex, s.syncQueueTransactionRange)
+func (s *SyncService) syncQueue() (bool, *uint64, error) {
+	atTip, index, err := s.sync(s.client.GetLatestEnqueueIndex, s.GetNextEnqueueIndex, s.syncQueueTransactionRange)
 	if err != nil {
-		return nil, fmt.Errorf("Cannot sync queue: %w", err)
+		return false, nil, fmt.Errorf("Cannot sync queue: %w", err)
 	}
-	return index, nil
+	return atTip, index, nil
 }
 
 // syncQueueTransactionRange will apply a range of queue transactions from
@@ -1069,18 +1075,18 @@ func (s *SyncService) syncQueueTransactionRange(start, end uint64) error {
 
 // syncTransactions will sync transactions to the remote tip based on the
 // backend
-func (s *SyncService) syncTransactions(backend Backend) (*uint64, error) {
+func (s *SyncService) syncTransactions(backend Backend) (bool, *uint64, error) {
 	getLatest := func() (*uint64, error) {
 		return s.client.GetLatestTransactionIndex(backend)
 	}
 	sync := func(start, end uint64) error {
 		return s.syncTransactionRange(start, end, backend)
 	}
-	index, err := s.sync(getLatest, s.GetNextIndex, sync)
+	atTip, index, err := s.sync(getLatest, s.GetNextIndex, sync)
 	if err != nil {
-		return nil, fmt.Errorf("Cannot sync transactions with backend %s: %w", backend.String(), err)
+		return false, nil, fmt.Errorf("Cannot sync transactions with backend %s: %w", backend.String(), err)
 	}
-	return index, nil
+	return atTip, index, nil
 }
 
 // syncTransactionRange will sync a range of transactions from
