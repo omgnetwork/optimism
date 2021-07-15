@@ -68,9 +68,9 @@ describe('OVM_ExecutionManager gas consumption', () => {
 
     // deploy the state manager and mock it for the state transitioner
     MOCK__STATE_MANAGER = await smockit(
-      await (
-        await ethers.getContractFactory('OVM_StateManager')
-      ).deploy(NON_ZERO_ADDRESS)
+      await (await ethers.getContractFactory('OVM_StateManager')).deploy(
+        NON_ZERO_ADDRESS
+      )
     )
 
     // Setup the SM to satisfy all the checks executed during EM.run()
@@ -110,7 +110,7 @@ describe('OVM_ExecutionManager gas consumption', () => {
       )
       console.log(`calculated gas cost of ${gasCost}`)
 
-      const benchmark: number = 110_000
+      const benchmark: number = 105_000
       expect(gasCost).to.be.lte(benchmark)
       expect(gasCost).to.be.gte(
         benchmark - 1_000,

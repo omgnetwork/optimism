@@ -9,6 +9,20 @@ import { Lib_OVMCodec } from "../../optimistic-ethereum/libraries/codec/Lib_OVMC
  * @title TestLib_OVMCodec
  */
 contract TestLib_OVMCodec {
+
+    function decodeEIP155Transaction(
+        bytes memory _transaction,
+        bool _isEthSignedMessage
+    )
+        public
+        pure
+        returns (
+            Lib_OVMCodec.EIP155Transaction memory _decoded
+        )
+    {
+        return Lib_OVMCodec.decodeEIP155Transaction(_transaction, _isEthSignedMessage);
+    }
+
     function encodeTransaction(
         Lib_OVMCodec.Transaction memory _transaction
     )
@@ -31,5 +45,20 @@ contract TestLib_OVMCodec {
         )
     {
         return Lib_OVMCodec.hashTransaction(_transaction);
+    }
+
+    function decompressEIP155Transaction(
+        bytes memory _transaction,
+        uint256 _chainId
+    )
+        public
+        returns (
+            Lib_OVMCodec.EIP155Transaction memory _decompressed
+        )
+    {
+        return Lib_OVMCodec.decompressEIP155Transaction(
+            _transaction,
+            _chainId
+        );
     }
 }

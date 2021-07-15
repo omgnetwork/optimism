@@ -21,7 +21,6 @@ interface StorageSlot {
 
 /**
  * Reads the storage layout of a contract.
- *
  * @param name Name of the contract to get a storage layout for.
  * @return Storage layout for the given contract name.
  */
@@ -44,7 +43,6 @@ export const getStorageLayout = async (name: string): Promise<any> => {
 
 /**
  * Converts storage into a list of storage slots.
- *
  * @param storageLayout Contract storage layout.
  * @param obj Storage object to convert.
  * @returns List of storage slots.
@@ -110,7 +108,6 @@ export const getStorageSlots = (
 
 /**
  * Flattens an object.
- *
  * @param obj Object to flatten.
  * @param prefix Current object prefix (used recursively).
  * @param res Current result (used recursively).
@@ -146,7 +143,6 @@ const flattenObject = (
 
 /**
  * Gets the slot positions for a provided variable type.
- *
  * @param storageLayout Contract's storage layout.
  * @param inputTypeName Variable type name.
  * @returns Slot positions.

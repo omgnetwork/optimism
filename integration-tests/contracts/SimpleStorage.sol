@@ -18,12 +18,6 @@ contract SimpleStorage {
         totalCount++;
     }
 
-    function setValueNotXDomain(bytes32 newValue) public {
-        msgSender = msg.sender;
-        value = newValue;
-        totalCount++;
-    }
-
     function dumbSetValue(bytes32 newValue) public {
         value = newValue;
     }

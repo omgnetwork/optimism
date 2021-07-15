@@ -1,8 +1,7 @@
 /* Imports: External */
-import { BaseService, Logger, Metrics } from '@eth-optimism/common-ts'
+import { BaseService, Metrics } from '@eth-optimism/common-ts'
 import express, { Request, Response } from 'express'
 import promBundle from 'express-prom-bundle'
-import { Gauge } from 'prom-client'
 import cors from 'cors'
 import { BigNumber } from 'ethers'
 import { JsonRpcProvider } from '@ethersproject/providers'
@@ -28,7 +27,6 @@ import { L1DataTransportServiceOptions } from '../main/service'
 export interface L1TransportServerOptions
   extends L1DataTransportServiceOptions {
   db: LevelUp
-  metrics: Metrics
 }
 
 const optionSettings = {
@@ -51,18 +49,7 @@ const optionSettings = {
       return validators.isUrl(val) || validators.isJsonRpcProvider(val)
     },
   },
-  l2RpcProvider: {
-    validate: (val: unknown) => {
-      return validators.isUrl(val) || validators.isJsonRpcProvider(val)
-    },
-  },
   defaultBackend: {
-    default: 'l1',
-    validate: (val: string) => {
-      return val === 'l1' || val === 'l2'
-    },
-  },
-  l1GasPriceBackend: {
     default: 'l1',
     validate: (val: string) => {
       return val === 'l1' || val === 'l2'
@@ -80,7 +67,6 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     server: any
     db: TransportDB
     l1RpcProvider: JsonRpcProvider
-    l2RpcProvider: JsonRpcProvider
   } = {} as any
 
   protected async _init(): Promise<void> {
@@ -93,11 +79,6 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
       typeof this.options.l1RpcProvider === 'string'
         ? new JsonRpcProvider(this.options.l1RpcProvider)
         : this.options.l1RpcProvider
-
-    this.state.l2RpcProvider =
-      typeof this.options.l2RpcProvider === 'string'
-        ? new JsonRpcProvider(this.options.l2RpcProvider)
-        : this.options.l2RpcProvider
 
     this._initializeApp()
   }
@@ -125,68 +106,26 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
   private _initializeApp() {
     // TODO: Maybe pass this in as a parameter instead of creating it here?
     this.state.app = express()
-
-    if (this.options.useSentry) {
-      this._initSentry()
+    if (this.options.ethNetworkName) {
+      this._initMonitoring()
     }
-
     this.state.app.use(cors())
-
-    // Add prometheus middleware to express BEFORE route registering
-    this.state.app.use(
-      // This also serves metrics on port 3000 at /metrics
-      promBundle({
-        // Provide metrics registry that other metrics uses
-        promRegistry: this.metrics.registry,
-        includeMethod: true,
-        includePath: true,
-      })
-    )
-
     this._registerAllRoutes()
-
     // Sentry error handling must be after all controllers
     // and before other error middleware
-    if (this.options.useSentry) {
+    if (this.options.ethNetworkName) {
       this.state.app.use(Sentry.Handlers.errorHandler())
-    }
-
-    this.logger.info('HTTP Server Options', {
-      defaultBackend: this.options.defaultBackend,
-      l1GasPriceBackend: this.options.l1GasPriceBackend,
-    })
-
-    if (this.state.l1RpcProvider) {
-      this.logger.info('HTTP Server L1 RPC Provider initialized', {
-        url: this.state.l1RpcProvider.connection.url,
-      })
-    } else {
-      this.logger.warn('HTTP Server L1 RPC Provider not initialized')
-    }
-    if (this.state.l2RpcProvider) {
-      this.logger.info('HTTP Server L2 RPC Provider initialized', {
-        url: this.state.l2RpcProvider.connection.url,
-      })
-    } else {
-      this.logger.warn('HTTP Server L2 RPC Provider not initialized')
     }
   }
 
   /**
-   * Initialize Sentry and related middleware
+   * Initialize Sentry and Prometheus metrics for deployed instances
    */
-  private _initSentry() {
-    const sentryOptions = {
+  private _initMonitoring() {
+    // Init Sentry options
+    Sentry.init({
       dsn: this.options.sentryDsn,
       release: this.options.release,
-      environment: this.options.ethNetworkName,
-    }
-    this.logger = new Logger({
-      name: this.name,
-      sentryOptions,
-    })
-    Sentry.init({
-      ...sentryOptions,
       integrations: [
         new Sentry.Integrations.Http({ tracing: true }),
         new Tracing.Integrations.Express({
@@ -197,11 +136,24 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     })
     this.state.app.use(Sentry.Handlers.requestHandler())
     this.state.app.use(Sentry.Handlers.tracingHandler())
+    // Init metrics
+    this.metrics = new Metrics({
+      prefix: this.name,
+      labels: {
+        environment: this.options.nodeEnv,
+        network: this.options.ethNetworkName,
+        release: this.options.release,
+      },
+    })
+    const metricsMiddleware = promBundle({
+      includeMethod: true,
+      includePath: true,
+    })
+    this.state.app.use(metricsMiddleware)
   }
 
   /**
    * Registers a route on the server.
-   *
    * @param method Http method type.
    * @param route Route to register.
    * @param handler Handler called and is expected to return a JSON response.
@@ -233,12 +185,11 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         return res.json(json)
       } catch (e) {
         const elapsed = Date.now() - start
-        this.logger.error('Failed HTTP Request', {
+        this.logger.info('Failed HTTP Request', {
           method: req.method,
           url: req.url,
           elapsed,
           msg: e.toString(),
-          stack: e.stack,
         })
         return res.status(400).json({
           error: e.toString(),
@@ -266,10 +217,8 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
             highestL2BlockNumber = await this.state.db.getHighestL2BlockNumber()
             break
           case 'l2':
-            currentL2Block =
-              await this.state.db.getLatestUnconfirmedTransaction()
-            highestL2BlockNumber =
-              (await this.state.db.getHighestSyncedUnconfirmedBlock()) - 1
+            currentL2Block = await this.state.db.getLatestUnconfirmedTransaction()
+            highestL2BlockNumber = await this.state.db.getHighestSyncedUnconfirmedBlock()
             break
           default:
             throw new Error(`Unknown transaction backend ${backend}`)
@@ -308,21 +257,8 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this._registerRoute(
       'get',
       '/eth/gasprice',
-      async (req): Promise<GasPriceResponse> => {
-        const backend = req.query.backend || this.options.l1GasPriceBackend
-        let gasPrice: BigNumber
-
-        if (backend === 'l1') {
-          gasPrice = await this.state.l1RpcProvider.getGasPrice()
-        } else if (backend === 'l2') {
-          const response = await this.state.l2RpcProvider.send(
-            'rollup_gasPrices',
-            []
-          )
-          gasPrice = BigNumber.from(response.l1GasPrice)
-        } else {
-          throw new Error(`Unknown L1 gas price backend: ${backend}`)
-        }
+      async (): Promise<GasPriceResponse> => {
+        const gasPrice = await this.state.l1RpcProvider.getGasPrice()
 
         return {
           gasPrice: gasPrice.toString(),
@@ -523,12 +459,11 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           }
         }
 
-        const transactions =
-          await this.state.db.getFullTransactionsByIndexRange(
-            BigNumber.from(batch.prevTotalElements).toNumber(),
-            BigNumber.from(batch.prevTotalElements).toNumber() +
-              BigNumber.from(batch.size).toNumber()
-          )
+        const transactions = await this.state.db.getFullTransactionsByIndexRange(
+          BigNumber.from(batch.prevTotalElements).toNumber(),
+          BigNumber.from(batch.prevTotalElements).toNumber() +
+            BigNumber.from(batch.size).toNumber()
+        )
 
         return {
           batch,
@@ -552,12 +487,11 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
           }
         }
 
-        const transactions =
-          await this.state.db.getFullTransactionsByIndexRange(
-            BigNumber.from(batch.prevTotalElements).toNumber(),
-            BigNumber.from(batch.prevTotalElements).toNumber() +
-              BigNumber.from(batch.size).toNumber()
-          )
+        const transactions = await this.state.db.getFullTransactionsByIndexRange(
+          BigNumber.from(batch.prevTotalElements).toNumber(),
+          BigNumber.from(batch.prevTotalElements).toNumber() +
+            BigNumber.from(batch.size).toNumber()
+        )
 
         return {
           batch,

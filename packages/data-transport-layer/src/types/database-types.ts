@@ -5,18 +5,19 @@ export interface DecodedSequencerBatchTransaction {
     v: number
   }
   value: string
-  gasLimit: string
-  gasPrice: string
-  nonce: string
+  gasLimit: number
+  gasPrice: number
+  nonce: number
   target: string
   data: string
+  type: number
 }
 
 export interface EnqueueEntry {
   index: number
   target: string
   data: string
-  gasLimit: string
+  gasLimit: number
   origin: string
   blockNumber: number
   timestamp: number
@@ -28,12 +29,13 @@ export interface TransactionEntry {
   data: string
   blockNumber: number
   timestamp: number
-  gasLimit: string
+  gasLimit: number
   target: string
   origin: string
   value: string
   queueOrigin: 'sequencer' | 'l1'
   queueIndex: number | null
+  type: 'EIP155' | 'ETH_SIGN' | null
   decoded: DecodedSequencerBatchTransaction | null
   confirmed: boolean
 }
