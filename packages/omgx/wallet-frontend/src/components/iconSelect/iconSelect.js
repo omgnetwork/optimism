@@ -29,6 +29,12 @@ const tokenIcons = {
   testIcon: testIcon,
 }
 
+/**
+ * 📓  Option should have property called balance
+ *    - incase of deposit it will hold the value as balanceL1
+ *    - incase of exit it will hold the value as balanceL2
+ */
+
 function IconSelect({
   onTokenSelect,
   priorityOptions = [],
@@ -48,11 +54,11 @@ function IconSelect({
           >
             <img src={tokenIcons[t.icon]} width="40px" alt={t.title} />
             <p className={styles.tokenSymbol}>{t.symbol}</p>
-            {Number(t.balanceL1) ? (
-              <p className={styles.tokenIconBalance}>{Number(t.balanceL1).toFixed(2)}</p>
-            ) : (
-              ''
-            )}
+            {Number(t.balance) ? (
+              <p className={styles.tokenIconBalance}>
+                {Number(t.balance).toFixed(2)}
+              </p>
+            ) : null}
           </div>
         )
       })}
@@ -63,9 +69,9 @@ function IconSelect({
     <div className={styles.ddOptionLabel}>
       <span>{t.label}</span>
       <div className={styles.optionBalance}>
-        {Number(t.balanceL1) ? (
+        {Number(t.balance) ? (
           <span className={styles.tokenIconBalance}>
-            {Number(t.balanceL1).toFixed(2)}
+            {Number(t.balance).toFixed(2)}
           </span>
         ) : null}
       </div>

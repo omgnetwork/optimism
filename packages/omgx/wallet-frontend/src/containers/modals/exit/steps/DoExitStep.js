@@ -154,7 +154,6 @@ function DoExitStep({ handleClose, fast }) {
   }
 
   function setExitAmount(value) {
-    
     const transferingBalanceObject = balances.find(
       (i) => i.currency === currency
     )
@@ -244,7 +243,7 @@ function DoExitStep({ handleClose, fast }) {
         selectValue={currency}
         maxValue={getMaxTransferValue()}
       />
-
+      {/* TODO: remove me */}
       {fast && currencySymbols[currency] === 'oETH' && (
         <h3>
           The L1 liquidity pool has {LPBalance} ETH. The liquidity fee is{' '}
@@ -254,6 +253,7 @@ function DoExitStep({ handleClose, fast }) {
         </h3>
       )}
 
+      {/* TODO: remove me */}
       {fast && currencySymbols[currency] !== 'oETH' && (
         <h3>
           The L1 liquidity pool has {LPBalance} {currencySymbols[currency]}. The
@@ -283,6 +283,8 @@ function DoExitStep({ handleClose, fast }) {
         </h3>
       )}
 
+      {/* TODO: remove me */}
+
       {fast &&
         BigNumber.from(allowance).lt(
           BigNumber.from(powAmount(value ? value : 0, 18))
@@ -299,7 +301,7 @@ function DoExitStep({ handleClose, fast }) {
             . Click below to submit an approval transaction.
           </h3>
         )}
-
+      {/* TODO: remove me */}
       {fast && Number(LPBalance) < Number(value) && (
         <h3 style={{ color: 'red' }}>
           The L1 liquidity pool doesn't have enough balance to cover your swap.

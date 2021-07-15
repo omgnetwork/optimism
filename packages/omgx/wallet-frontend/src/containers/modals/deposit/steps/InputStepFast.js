@@ -13,7 +13,7 @@ import { selectLoading } from 'selectors/loadingSelector'
 import networkService from 'services/networkService'
 import * as styles from '../DepositModal.module.scss'
 
-import { depositL1LP } from 'actions/networkAction';
+import { depositL1LP } from 'actions/networkAction'
 
 function InputStepFast({
   onClose,
@@ -27,7 +27,6 @@ function InputStepFast({
   setValue,
   setTokenInfo,
 }) {
-  
   const dispatch = useDispatch()
 
   const [tokens, setTokens] = useState([])
@@ -41,15 +40,22 @@ function InputStepFast({
     onClose()
   }
 
-  async function depositETH () {
+  async function depositETH() {
     if (value > 0 && tokenInfo) {
       let res = await dispatch(depositL1LP(selectedToken.L1, value))
       if (res) {
-        dispatch(setActiveHistoryTab1('Deposits'));
-        dispatch(openAlert(`ETH was deposited the the L1LP. You will receive ${(Number(value) * (100 - Number(feeRate))/100).toFixed(2)} oETH on L2`));
-        handleClose();
+        dispatch(setActiveHistoryTab1('Deposits'))
+        dispatch(
+          openAlert(
+            `ETH was deposited the the L1LP. You will receive ${(
+              (Number(value) * (100 - Number(feeRate))) /
+              100
+            ).toFixed(2)} oETH on L2`
+          )
+        )
+        handleClose()
       } else {
-        dispatch(openError('Failed to deposit ETH'));
+        dispatch(openError('Failed to deposit ETH'))
       }
     }
   }
@@ -73,7 +79,8 @@ function InputStepFast({
       })
   }, [])
 
-  const disabledSubmit = value <= 0 ||
+  const disabledSubmit =
+    value <= 0 ||
     !selectedToken.L2 ||
     !ethers.utils.isAddress(selectedToken.L2) ||
     Number(value) > Number(LPBalance)
@@ -88,55 +95,62 @@ function InputStepFast({
     })
   }
 
+  const renderUnit = (
+    <div className={styles.tokenDetail}>
+      <div className={styles.tokenSymbol}>
+        {selectedToken
+          ? selectedToken.symbol === 'oETH'
+            ? 'ETH'
+            : selectedToken.symbol
+          : ''}
+      </div>
+    </div>
+  )
+
   return (
     <>
       <h2>Fast Swap onto OMGX</h2>
 
       {!selectedToken ? (
-        <IconSelect 
-          priorityOptions={tokens} 
-          onTokenSelect={setSelectedToken} 
-        />
+        <IconSelect priorityOptions={tokens} onTokenSelect={setSelectedToken} />
       ) : null}
 
       {!!selectedToken && (
         <Input
           label="Amount to swap onto OMGX"
           type="number"
-          unit={selectedToken ? selectedToken.symbol : ''}
+          unit={selectedToken ? renderUnit : null}
           placeholder={0}
           value={value}
-          onChange={(i)=>setValue(i.target.value)}
+          onChange={(i) => setValue(i.target.value)}
         />
       )}
 
-      {selectedToken && selectedToken.symbol === 'ETH' && 
+      {selectedToken && selectedToken.symbol === 'ETH' && (
         <>
           <h3>
-            The L2 liquidity pool contains {LPBalance} oETH. 
-            The liquidity fee is{' '}{feeRate}%.{' '}
+            The L2 liquidity pool contains {LPBalance} oETH. The liquidity fee
+            is {feeRate}%.{' '}
             {value &&
-              `You will receive 
-              ${(Number(value) * (100 - Number(feeRate))/100).toFixed(2)} 
-              oETH on L2.`
-            }
+              `You will receive
+              ${((Number(value) * (100 - Number(feeRate))) / 100).toFixed(2)}
+              oETH on L2.`}
           </h3>
         </>
-      }
+      )}
 
-      {selectedToken && selectedToken.symbol === 'TEST' &&
+      {selectedToken && selectedToken.symbol === 'TEST' && (
         <>
           <h3>
-            The L2 liquidity pool contains {LPBalance} {selectedToken.symbol}. 
+            The L2 liquidity pool contains {LPBalance} {selectedToken.symbol}.
             The liquidity fee is {feeRate}%.{' '}
             {value &&
-              `You will receive 
-              ${(Number(value) * (100 - Number(feeRate))/100).toFixed(2)} 
-              ${selectedToken.symbol} on L2.`
-            }
+              `You will receive
+              ${((Number(value) * (100 - Number(feeRate))) / 100).toFixed(2)}
+              ${selectedToken.symbol} on L2.`}
           </h3>
         </>
-      }
+      )}
 
       {Number(LPBalance) < Number(value) && (
         <h3 style={{ color: 'red' }}>
@@ -146,20 +160,16 @@ function InputStepFast({
       )}
 
       <div className={styles.buttons}>
-        <Button 
-          onClick={handleClose} 
-          type="outline" 
-          style={{flex: 0}}
-        >
+        <Button onClick={handleClose} type="outline" style={{ flex: 0 }}>
           CANCEL
         </Button>
         {selectedToken && selectedToken.symbol === 'ETH' && (
           <Button
             onClick={depositETH}
-            type='primary'
-            style={{flex: 0}}
+            type="primary"
+            style={{ flex: 0 }}
             loading={depositLoading}
-            tooltip='Your deposit is still pending. Please wait for confirmation.'
+            tooltip="Your deposit is still pending. Please wait for confirmation."
             disabled={disabledSubmit}
           >
             DEPOSIT
@@ -169,7 +179,7 @@ function InputStepFast({
           <Button
             onClick={onNext}
             type="primary"
-            style={{flex: 0}}
+            style={{ flex: 0 }}
             disabled={disabledSubmit}
           >
             NEXT

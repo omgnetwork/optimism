@@ -86,11 +86,11 @@ function InputStep({
           showInDD: !!isDropdown,
           balanceL2,
           balanceL1,
+          balance: balanceL1,
         }
       })
       .filter(Boolean)
 
-    console.log('allOptions', allOptions)
     setTokenOptions(allOptions)
 
     console.groupEnd()
@@ -151,6 +151,23 @@ function InputStep({
     !currencyL2Address ||
     !ethers.utils.isAddress(currencyL2Address)
 
+  const renderUnit = (
+    <div className={styles.tokenDetail}>
+      <div className={styles.tokenSymbol}>
+        {selectedToken
+          ? selectedToken.symbol === 'oETH'
+            ? 'ETH'
+            : selectedToken.symbol
+          : ''}
+      </div>
+      <div className={styles.tokenBalance}>
+        {selectedToken
+          ? `Balance: ${Number(selectedToken.balanceL1).toFixed(2)}`
+          : ''}
+      </div>
+    </div>
+  )
+
   return (
     <>
       <h2>
@@ -189,7 +206,7 @@ function InputStep({
       <Input
         label="Amount to deposit into OMGX"
         type="number"
-        unit={selectedToken && selectedToken.symbol ? selectedToken.symbol : ''}
+        unit={selectedToken && selectedToken.symbol ? renderUnit : ''}
         placeholder={0}
         value={value}
         onChange={(i) => setValue(i.target.value)}
