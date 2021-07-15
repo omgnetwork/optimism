@@ -379,7 +379,6 @@ export class TransportDB {
     if (index === null) {
       return null
     }
-
     return this.db.get<TEntry>(`${key}:index`, index)
   }
 

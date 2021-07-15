@@ -18,13 +18,15 @@ import (
 const (
 	sequencer = "sequencer"
 	l1        = "l1"
-	EIP155    = "EIP155"
-	ETH_SIGN  = "ETH_SIGN"
 )
 
 // errElementNotFound represents the error case of the remote element not being
 // found. It applies to transactions, queue elements and batches
 var errElementNotFound = errors.New("element not found")
+
+// errHttpError represents the error case of when the remote server
+// returns a 400 or greater error
+var errHTTPError = errors.New("http error")
 
 // Batch represents the data structure that is submitted with
 // a series of transactions to layer one
@@ -70,13 +72,12 @@ type transaction struct {
 	BatchIndex  uint64          `json:"batchIndex"`
 	BlockNumber uint64          `json:"blockNumber"`
 	Timestamp   uint64          `json:"timestamp"`
-	Value       hexutil.Uint64  `json:"value"`
-	GasLimit    uint64          `json:"gasLimit"`
+	Value       *hexutil.Big    `json:"value"`
+	GasLimit    uint64          `json:"gasLimit,string"`
 	Target      common.Address  `json:"target"`
 	Origin      *common.Address `json:"origin"`
 	Data        hexutil.Bytes   `json:"data"`
 	QueueOrigin string          `json:"queueOrigin"`
-	Type        string          `json:"type"`
 	QueueIndex  *uint64         `json:"queueIndex"`
 	Decoded     *decoded        `json:"decoded"`
 }
@@ -86,7 +87,7 @@ type Enqueue struct {
 	Index       *uint64         `json:"ctcIndex"`
 	Target      *common.Address `json:"target"`
 	Data        *hexutil.Bytes  `json:"data"`
-	GasLimit    *uint64         `json:"gasLimit"`
+	GasLimit    *uint64         `json:"gasLimit,string"`
 	Origin      *common.Address `json:"origin"`
 	BlockNumber *uint64         `json:"blockNumber"`
 	Timestamp   *uint64         `json:"timestamp"`
@@ -104,13 +105,13 @@ type signature struct {
 // When this struct exists in other structs and is set to `nil`,
 // it means that the decoding failed.
 type decoded struct {
-	Signature signature      `json:"sig"`
-	Value     hexutil.Uint64 `json:"value"`
-	GasLimit  uint64         `json:"gasLimit"`
-	GasPrice  uint64         `json:"gasPrice"`
-	Nonce     uint64         `json:"nonce"`
-	Target    common.Address `json:"target"`
-	Data      hexutil.Bytes  `json:"data"`
+	Signature signature       `json:"sig"`
+	Value     *hexutil.Big    `json:"value"`
+	GasLimit  uint64          `json:"gasLimit,string"`
+	GasPrice  uint64          `json:"gasPrice,string"`
+	Nonce     uint64          `json:"nonce,string"`
+	Target    *common.Address `json:"target"`
+	Data      hexutil.Bytes   `json:"data"`
 }
 
 // RollupClient is able to query for information
@@ -118,21 +119,24 @@ type decoded struct {
 type RollupClient interface {
 	GetEnqueue(index uint64) (*types.Transaction, error)
 	GetLatestEnqueue() (*types.Transaction, error)
-	GetTransaction(uint64) (*types.Transaction, error)
-	GetLatestTransaction() (*types.Transaction, error)
+	GetLatestEnqueueIndex() (*uint64, error)
+	GetTransaction(uint64, Backend) (*types.Transaction, error)
+	GetLatestTransaction(Backend) (*types.Transaction, error)
+	GetLatestTransactionIndex(Backend) (*uint64, error)
 	GetEthContext(uint64) (*EthContext, error)
 	GetLatestEthContext() (*EthContext, error)
 	GetLastConfirmedEnqueue() (*types.Transaction, error)
 	GetLatestTransactionBatch() (*Batch, []*types.Transaction, error)
+	GetLatestTransactionBatchIndex() (*uint64, error)
 	GetTransactionBatch(uint64) (*Batch, []*types.Transaction, error)
-	SyncStatus() (*SyncStatus, error)
+	SyncStatus(Backend) (*SyncStatus, error)
 	GetL1GasPrice() (*big.Int, error)
 }
 
 // Client is an HTTP based RollupClient
 type Client struct {
 	client *resty.Client
-	signer *types.OVMSigner
+	signer *types.EIP155Signer
 }
 
 // TransactionResponse represents the response from the remote server when
@@ -154,7 +158,16 @@ func NewClient(url string, chainID *big.Int) *Client {
 	client := resty.New()
 	client.SetHostURL(url)
 	client.SetHeader("User-Agent", "sequencer")
-	signer := types.NewOVMSigner(chainID)
+	client.OnAfterResponse(func(c *resty.Client, r *resty.Response) error {
+		statusCode := r.StatusCode()
+		if statusCode >= 400 {
+			method := r.Request.Method
+			url := r.Request.URL
+			return fmt.Errorf("%d cannot %s %s: %w", statusCode, method, url, errHTTPError)
+		}
+		return nil
+	})
+	signer := types.NewEIP155Signer(chainID)
 
 	return &Client{
 		client: client,
@@ -240,7 +253,6 @@ func enqueueToTransaction(enqueue *Enqueue) (*types.Transaction, error) {
 		blockNumber,
 		timestamp,
 		&origin,
-		types.SighashEIP155,
 		types.QueueOriginL1ToL2,
 		enqueue.Index,
 		enqueue.QueueIndex,
@@ -272,9 +284,46 @@ func (c *Client) GetLatestEnqueue() (*types.Transaction, error) {
 	return tx, nil
 }
 
+// GetLatestEnqueueIndex returns the latest `enqueue()` index
+func (c *Client) GetLatestEnqueueIndex() (*uint64, error) {
+	tx, err := c.GetLatestEnqueue()
+	if err != nil {
+		return nil, err
+	}
+	index := tx.GetMeta().QueueIndex
+	if index == nil {
+		return nil, errors.New("Latest queue index is nil")
+	}
+	return index, nil
+}
+
+// GetLatestTransactionIndex returns the latest CTC index that has been batch
+// submitted or not, depending on the backend
+func (c *Client) GetLatestTransactionIndex(backend Backend) (*uint64, error) {
+	tx, err := c.GetLatestTransaction(backend)
+	if err != nil {
+		return nil, err
+	}
+	index := tx.GetMeta().Index
+	if index == nil {
+		return nil, errors.New("Latest index is nil")
+	}
+	return index, nil
+}
+
+// GetLatestTransactionBatchIndex returns the latest transaction batch index
+func (c *Client) GetLatestTransactionBatchIndex() (*uint64, error) {
+	batch, _, err := c.GetLatestTransactionBatch()
+	if err != nil {
+		return nil, err
+	}
+	index := batch.Index
+	return &index, nil
+}
+
 // batchedTransactionToTransaction converts a transaction into a
 // types.Transaction that can be consumed by the SyncService
-func batchedTransactionToTransaction(res *transaction, signer *types.OVMSigner) (*types.Transaction, error) {
+func batchedTransactionToTransaction(res *transaction, signer *types.EIP155Signer) (*types.Transaction, error) {
 	// `nil` transactions are not found
 	if res == nil {
 		return nil, errElementNotFound
@@ -289,24 +338,12 @@ func batchedTransactionToTransaction(res *transaction, signer *types.OVMSigner) 
 	} else {
 		return nil, fmt.Errorf("Unknown queue origin: %s", res.QueueOrigin)
 	}
-	// The transaction type must be EIP155 or EthSign. Throughout this
-	// codebase, it is referred to as "sighash type" but it could actually
-	// be generalized to transaction type. Right now the only different
-	// types use a different signature hashing scheme.
-	var sighashType types.SignatureHashType
-	if res.Type == EIP155 {
-		sighashType = types.SighashEIP155
-	} else if res.Type == ETH_SIGN {
-		sighashType = types.SighashEthSign
-	} else {
-		return nil, fmt.Errorf("Unknown transaction type: %s", res.Type)
-	}
 	// Transactions that have been decoded are
 	// Queue Origin Sequencer transactions
 	if res.Decoded != nil {
 		nonce := res.Decoded.Nonce
 		to := res.Decoded.Target
-		value := new(big.Int).SetUint64(uint64(res.Decoded.Value))
+		value := (*big.Int)(res.Decoded.Value)
 		// Note: there are two gas limits, one top level and
 		// another on the raw transaction itself. Maybe maxGasLimit
 		// for the top level?
@@ -315,17 +352,16 @@ func batchedTransactionToTransaction(res *transaction, signer *types.OVMSigner) 
 		data := res.Decoded.Data
 
 		var tx *types.Transaction
-		if to == (common.Address{}) {
+		if to == nil {
 			tx = types.NewContractCreation(nonce, value, gasLimit, gasPrice, data)
 		} else {
-			tx = types.NewTransaction(nonce, to, value, gasLimit, gasPrice, data)
+			tx = types.NewTransaction(nonce, *to, value, gasLimit, gasPrice, data)
 		}
 
 		txMeta := types.NewTransactionMeta(
 			new(big.Int).SetUint64(res.BlockNumber),
 			res.Timestamp,
 			res.Origin,
-			sighashType,
 			queueOrigin,
 			&res.Index,
 			res.QueueIndex,
@@ -360,13 +396,12 @@ func batchedTransactionToTransaction(res *transaction, signer *types.OVMSigner) 
 	gasLimit := res.GasLimit
 	data := res.Data
 	origin := res.Origin
-	value := new(big.Int).SetUint64(uint64(res.Value))
+	value := (*big.Int)(res.Value)
 	tx := types.NewTransaction(nonce, target, value, gasLimit, big.NewInt(0), data)
 	txMeta := types.NewTransactionMeta(
 		new(big.Int).SetUint64(res.BlockNumber),
 		res.Timestamp,
 		origin,
-		sighashType,
 		queueOrigin,
 		&res.Index,
 		res.QueueIndex,
@@ -377,11 +412,14 @@ func batchedTransactionToTransaction(res *transaction, signer *types.OVMSigner) 
 }
 
 // GetTransaction will get a transaction by Canonical Transaction Chain index
-func (c *Client) GetTransaction(index uint64) (*types.Transaction, error) {
+func (c *Client) GetTransaction(index uint64, backend Backend) (*types.Transaction, error) {
 	str := strconv.FormatUint(index, 10)
 	response, err := c.client.R().
 		SetPathParams(map[string]string{
 			"index": str,
+		}).
+		SetQueryParams(map[string]string{
+			"backend": backend.String(),
 		}).
 		SetResult(&TransactionResponse{}).
 		Get("/transaction/index/{index}")
@@ -398,9 +436,12 @@ func (c *Client) GetTransaction(index uint64) (*types.Transaction, error) {
 
 // GetLatestTransaction will get the latest transaction, meaning the transaction
 // with the greatest Canonical Transaction Chain index
-func (c *Client) GetLatestTransaction() (*types.Transaction, error) {
+func (c *Client) GetLatestTransaction(backend Backend) (*types.Transaction, error) {
 	response, err := c.client.R().
 		SetResult(&TransactionResponse{}).
+		SetQueryParams(map[string]string{
+			"backend": backend.String(),
+		}).
 		Get("/transaction/latest")
 
 	if err != nil {
@@ -460,23 +501,26 @@ func (c *Client) GetLastConfirmedEnqueue() (*types.Transaction, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Cannot get latest enqueue: %w", err)
 	}
-	// This should only happen if the database is empty
+	// This should only happen if there are no L1 to L2 transactions yet
 	if enqueue == nil {
-		return nil, nil
+		return nil, errElementNotFound
 	}
 	// Work backwards looking for the first enqueue
 	// to have an index, which means it has been included
 	// in the canonical transaction chain.
 	for {
 		meta := enqueue.GetMeta()
+		// The enqueue has an index so it has been confirmed
 		if meta.Index != nil {
 			return enqueue, nil
 		}
+		// There is no queue index so this is a bug
 		if meta.QueueIndex == nil {
 			return nil, fmt.Errorf("queue index is nil")
 		}
+		// No enqueue transactions have been confirmed yet
 		if *meta.QueueIndex == uint64(0) {
-			return enqueue, nil
+			return nil, errElementNotFound
 		}
 		next, err := c.GetEnqueue(*meta.QueueIndex - 1)
 		if err != nil {
@@ -487,9 +531,12 @@ func (c *Client) GetLastConfirmedEnqueue() (*types.Transaction, error) {
 }
 
 // SyncStatus will query the remote server to determine if it is still syncing
-func (c *Client) SyncStatus() (*SyncStatus, error) {
+func (c *Client) SyncStatus(backend Backend) (*SyncStatus, error) {
 	response, err := c.client.R().
 		SetResult(&SyncStatus{}).
+		SetQueryParams(map[string]string{
+			"backend": backend.String(),
+		}).
 		Get("/eth/syncing")
 
 	if err != nil {
@@ -531,7 +578,7 @@ func (c *Client) GetTransactionBatch(index uint64) (*Batch, []*types.Transaction
 		Get("/batch/transaction/index/{index}")
 
 	if err != nil {
-		return nil, nil, fmt.Errorf("Cannot get transaction batch %d", index)
+		return nil, nil, fmt.Errorf("Cannot get transaction batch %d: %w", index, err)
 	}
 	txBatch, ok := response.Result().(*TransactionBatchResponse)
 	if !ok {
@@ -542,9 +589,9 @@ func (c *Client) GetTransactionBatch(index uint64) (*Batch, []*types.Transaction
 
 // parseTransactionBatchResponse will turn a TransactionBatchResponse into a
 // Batch and its corresponding types.Transactions
-func parseTransactionBatchResponse(txBatch *TransactionBatchResponse, signer *types.OVMSigner) (*Batch, []*types.Transaction, error) {
-	if txBatch == nil {
-		return nil, nil, nil
+func parseTransactionBatchResponse(txBatch *TransactionBatchResponse, signer *types.EIP155Signer) (*Batch, []*types.Transaction, error) {
+	if txBatch == nil || txBatch.Batch == nil {
+		return nil, nil, errElementNotFound
 	}
 	batch := txBatch.Batch
 	txs := make([]*types.Transaction, len(txBatch.Transactions))

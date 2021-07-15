@@ -83,7 +83,7 @@ describe('OVM_StateCommitmentChain', () => {
     )
 
     await AddressManager.setAddress(
-      'OVM_ChainStorageContainer:SCC:batches',
+      'OVM_ChainStorageContainer-SCC-batches',
       batches.address
     )
 
@@ -170,7 +170,8 @@ describe('OVM_StateCommitmentChain', () => {
 
         describe('when outside sequencer publish window', () => {
           beforeEach(async () => {
-            const SEQUENCER_PUBLISH_WINDOW = await OVM_StateCommitmentChain.SEQUENCER_PUBLISH_WINDOW()
+            const SEQUENCER_PUBLISH_WINDOW =
+              await OVM_StateCommitmentChain.SEQUENCER_PUBLISH_WINDOW()
             await increaseEthTime(
               ethers.provider,
               SEQUENCER_PUBLISH_WINDOW.toNumber() + 1
