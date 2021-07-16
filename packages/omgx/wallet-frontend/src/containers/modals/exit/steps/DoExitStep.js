@@ -18,7 +18,7 @@ import { openAlert, openError } from 'actions/uiAction'
 import Button from 'components/button/Button'
 import IconSelect from 'components/iconSelect/iconSelect'
 import Input from 'components/input/Input'
-import { isEqual } from 'lodash'
+import { isEqual, values } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectlayer2Balance } from 'selectors/balanceSelector'
@@ -38,6 +38,7 @@ function DoExitStep({ handleClose }) {
   const [dropdownTokens, setDropDownTokens] = useState([])
   const [selectedToken, setSelectedToken] = useState(null)
   const [value, setValue] = useState('')
+
   const tokens = useSelector(selectTokens, isEqual)
 
   const [disabledSubmit, setDisabledSubmit] = useState(true)
@@ -46,6 +47,7 @@ function DoExitStep({ handleClose }) {
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
 
   async function doExit() {
+
     let res = await dispatch(exitOMGX(currency, value))
 
     //person will receive ETH on the L1, not oETH
@@ -91,6 +93,7 @@ function DoExitStep({ handleClose }) {
         let isPriority = priorityTokens.find((i) => i.symbol === t.symbol)
         let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbol)
         let balanceL2 = ''
+        
         if (isBalanceL2Exists) {
           balanceL2 = logAmount(
             isBalanceL2Exists.amount,
@@ -98,13 +101,13 @@ function DoExitStep({ handleClose }) {
           )
         }
 
-        // added this to have the token icon available;
+        // added this to have the token icon available
         let priorityToken = {}
         if (!!isPriority) {
           priorityToken = isPriority
         }
 
-        // check the balance wether user is having it or not.
+        // check the balance whether user has this token
         if (!balanceL2) {
           return
         }

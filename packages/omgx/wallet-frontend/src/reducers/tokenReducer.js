@@ -13,18 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-const ETH0x = '0x0000000000000000000000000000000000000000'
-const oETH = '0x4200000000000000000000000000000000000006'
+const L1ETH = '0x0000000000000000000000000000000000000000'
+const L2ETH = '0x4200000000000000000000000000000000000006'
 
 const initialState = {
-  [ETH0x]: {
-    currency: ETH0x,
-    L1address: ETH0x,
-    L2address: oETH,
-    decimals: 18,
-    symbol: 'ETH',
-    name: 'Ethereum',
-    redalert: false,
+  [L1ETH]: {
+    currency:  L1ETH,
+    addressL1: L1ETH,
+    addressL2: L2ETH,
+    decimals:  18,
+    symbolL1:  'ETH',
+    symbolL2:  'oETH',
+    name:      'Ethereum',
+    redalert:  false,
     balanceL1: '',
     balanceL2: '',
   },

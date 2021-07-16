@@ -31,8 +31,8 @@ const tokenIcons = {
 
 /**
  * 📓  Option should have property called balance
- *    - incase of deposit it will hold the value as balanceL1
- *    - incase of exit it will hold the value as balanceL2
+ *    - in case of deposit it will hold the value as balanceL1
+ *    - in case of exit it will hold the value as balanceL2
  */
 
 function IconSelect({
@@ -49,9 +49,7 @@ function IconSelect({
           <div
             key={t.symbol}
             className={styles.tokenIcon}
-            onClick={() => {
-              onTokenSelect(t)
-            }}
+            onClick={()=>{onTokenSelect(t)}}
           >
             <img src={tokenIcons[t.icon]} width="40px" alt={t.title} />
             <p className={styles.tokenSymbol}>{t.symbol}</p>
@@ -99,9 +97,7 @@ function IconSelect({
                 ...i,
               }
             })}
-            onChange={(token) => {
-              onTokenSelect(token)
-            }}
+            onChange={(token)=>{onTokenSelect(token)}}
           />
         </div>
       )}

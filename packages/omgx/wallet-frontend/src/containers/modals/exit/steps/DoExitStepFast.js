@@ -34,6 +34,7 @@ import Input from 'components/input/Input'
 import IconSelect from 'components/iconSelect/iconSelect'
 
 function DoExitStepFast({ handleClose }) {
+
   const dispatch = useDispatch()
 
   const [currency, setCurrency] = useState('')
@@ -46,8 +47,13 @@ function DoExitStepFast({ handleClose }) {
   const [feeRate, setFeeRate] = useState(0)
   const [allowance, setAllowance] = useState(0)
   const [disabledSubmit, setDisabledSubmit] = useState(true)
+
   const approveLoading = useSelector(selectLoading(['APPROVE/CREATE']))
+  const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
+
   const balancesL2 = useSelector(selectlayer2Balance, isEqual)
+
+  console.log("options:",priorityOptions)
 
   function setExitAmount(value) {
     if (
@@ -63,17 +69,49 @@ function DoExitStepFast({ handleClose }) {
   }
 
   async function doApprove() {
+
+    dispatch(openAlert(`calling approveERC20`))
     const res = await dispatch(
-      approveErc20(powAmount(value, 18), currency, networkService.L2LPAddress)
+      approveErc20(
+        powAmount(value, 18), 
+        currency, 
+        networkService.L2LPAddress //L2StandardERC20
+      )
     )
+    
     if (res) {
+      console.log('res:',res)
       dispatch(openAlert(`Transaction was approved`))
       const allowance = await networkService.checkAllowance(
         currency,
         networkService.L2LPAddress
       )
+      
+      console.log('Allowance:',allowance)
+
       setAllowance(allowance)
     }
+
+  }
+
+  async function doExit() {
+
+    let res = await dispatch(depositL2LP(currency, value));
+
+    let currencyL1 = selectedToken.symbol //currencySymbols[currency];
+
+    //person will receive ETH on the L1, not oETH
+    if(currencyL1 === 'oETH') {
+      currencyL1 = 'ETH'
+    }
+
+    if (res) {
+      dispatch(openAlert(`${selectedToken.symbol} was deposited into the L2 liquidity pool. You will receive ${(Number(value) * 0.97).toFixed(2)} ${currencyL1} on L1.`));
+      handleClose();
+    } else {
+      dispatch(openError(`Failed to fast-exit L2`));
+    }
+
   }
 
   useEffect(() => {
@@ -91,16 +129,19 @@ function DoExitStepFast({ handleClose }) {
   useEffect(() => {
     if (currency) {
       networkService.L1LPBalance(currency).then((res) => {
-        setLPBalance(Number(res).toFixed(1))
+        setLPBalance(Number(res).toFixed(2))
       })
       networkService.getTotalFeeRate().then((feeRate) => {
         setFeeRate(feeRate)
       })
-      networkService
-        .checkAllowance(currency, networkService.L2LPAddress)
-        .then((allowance) => {
-          setAllowance(allowance)
-        })
+      // networkService
+      //   .checkAllowance(
+      //     currency, 
+      //     networkService.L2LPAddress
+      //   )
+      //   .then((allowance) => {
+      //     setAllowance(allowance)
+      //   })
     }
   }, [currency])
 
@@ -236,21 +277,30 @@ function DoExitStepFast({ handleClose }) {
         >
           CANCEL
         </Button>
-        {BigNumber.from(allowance).lt(
-          BigNumber.from(powAmount(value ? value : 0, 18))
-        ) ? (
+        {BigNumber.from(allowance).lt(BigNumber.from(powAmount(value ? value : 0, 18))) ? 
           <Button
             onClick={doApprove}
             type="primary"
-            style={{ flex: 0 }}
+            style={{flex: 0}}
             loading={approveLoading}
             className={styles.button}
             tooltip="Your exit is still pending. Please wait for confirmation."
             disabled={disabledSubmit}
           >
             APPROVE
+          </Button> : 
+          <Button
+            onClick={doExit}
+            type='primary'
+            style={{flex: 0}}
+            loading={exitLoading}
+            className={styles.button}
+            tooltip='Your exit is still pending. Please wait for confirmation.'
+            disabled={disabledSubmit}
+          >
+            FAST EXIT FUNDS TO L2
           </Button>
-        ) : null}
+        }
       </div>
     </>
   )

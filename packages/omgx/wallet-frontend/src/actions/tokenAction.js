@@ -78,20 +78,22 @@ export async function addToken ( tokenContractAddressL1 ) {
       networkService.L1Provider, //Everything is defined by the L1 address - will deal with the L2 address later
     )
 
-    const [ _symbol, _decimals, _name ] = await Promise.all([
+    const [ _symbolL1, _decimals, _name ] = await Promise.all([
       tokenContract.symbol(),
       tokenContract.decimals(),
       tokenContract.name()
     ]).catch(e => [ null, null, null ])
     
     const decimals = _decimals ? Number(_decimals.toString()) : 'NOT ON ETHEREUM'
-    const symbol = _symbol || 'NOT ON ETHEREUM'
+    const symbolL1 = _symbolL1 || 'NOT ON ETHEREUM'
+    let symbolL2 = _symbolL1 || 'NOT ON ETHEREUM'
     const name = _name || 'NOT ON ETHEREUM'
     let _tokenContractAddressL2 = null
     
     //ETH is special as always
     if(_tokenContractAddressL1 === ETHL1 ) {
       _tokenContractAddressL2 = ETHL2
+      symbolL2 = 'oETH'
     }
     
     /********* DO WE HAVE L2 DATA?? *************/
@@ -109,9 +111,10 @@ export async function addToken ( tokenContractAddressL1 ) {
 
     const tokenInfo = {
       currency: _tokenContractAddressL1,
-      L1address: _tokenContractAddressL1,
-      L2address: _tokenContractAddressL2,
-      symbol,
+      addressL1: _tokenContractAddressL1,
+      addressL2: _tokenContractAddressL2,
+      symbolL1,
+      symbolL2,
       decimals,
       name,
       redalert: _decimals ? false : true 

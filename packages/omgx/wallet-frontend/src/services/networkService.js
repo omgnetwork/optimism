@@ -509,6 +509,7 @@ class NetworkService {
   }
 
   async getBalances() {
+
     try {
       // Always check ETH and oETH
       const layer1Balance = await this.L1Provider.getBalance(this.account)
@@ -548,6 +549,7 @@ class NetworkService {
       const tA = Object.values(state.tokenList)
 
       for (var i = 0; i < tA.length; i++) {
+        
         let token = tA[i]
 
         //ETH is special - will break things here
@@ -574,6 +576,7 @@ class NetworkService {
       }
 
       for (var i = 0; i < tA.length; i++) {
+
         let token = tA[i]
 
         //oETH is special - will break things here
@@ -608,6 +611,9 @@ class NetworkService {
       //   this.L2Provider
       // ).balanceOf(this.account)
       // console.log('Balance of the test token on L2:', ERC20L2Balance.toString())
+      
+      console.log(layer1Balances)
+      console.log(layer2Balances)
 
       // //how many NFTs do I own?
       const ERC721L2Balance = await this.ERC721Contract.connect(
@@ -788,27 +794,26 @@ class NetworkService {
     }
   }
 
-  //Only relevant to L1
-  //
   async checkAllowance(
-    currency,
-    targetContract = this.L1StandardBridgeAddress
+    currencyAddress,
+    targetContract  // = this.L1StandardBridgeAddress
   ) {
     try {
       const ERC20Contract = new ethers.Contract(
-        currency,
-        L1ERC20Json.abi,
+        currencyAddress,
+        L1ERC20Json.abi, //could use any abi - just something with .allowance
         this.provider.getSigner()
       )
       const allowance = await ERC20Contract.allowance(
         this.account,
         targetContract
       )
+      console.log("allowance:",allowance)
       return allowance.toString()
     } catch (error) {
       throw new WebWalletError({
         originalError: error,
-        customErrorMessage: 'Could not check deposit allowance for ERC20.',
+        customErrorMessage: 'Could not check ERC20 allowance.',
         reportToSentry: false,
         reportToUi: true,
       })
@@ -817,14 +822,19 @@ class NetworkService {
 
   async approveErc20(
     value,
-    currency,
-    approveContractAddress = this.L1StandardBridgeAddress,
-    contractABI = L1ERC20Json.abi
+    currencyAddress,
+    approveContractAddress// = this.L1StandardBridgeAddress,
+    //contractABI// = L1ERC20Json.abi
   ) {
+    console.log("Approving ERC20")
+    console.log("value",value)
+
     try {
+
       const ERC20Contract = new ethers.Contract(
-        currency,
-        contractABI,
+        currencyAddress,
+        L1ERC20Json.abi, //could use any standard ERC20 abi - just something with .allowance
+        //contractABI,
         this.provider.getSigner()
       )
 

@@ -40,15 +40,20 @@ function ApproveStep({
   const weiAmount = powAmount(value, tokenInfo.decimals)
   
   const checkAllowance = useCallback(async () => {
+    
     try {
       let allowance
       
       if (fast) {
-        allowance = await networkService.checkAllowance(currencyL1Address,
+        allowance = await networkService.checkAllowance(
+          currencyL1Address,
           networkService.L1LPAddress
         )
       } else {
-        allowance = await networkService.checkAllowance(currencyL1Address)
+        allowance = await networkService.checkAllowance(
+          currencyL1Address,
+          networkService.L1StandardBridgeAddress
+        )
       }
 
       setAllowance(allowance)
