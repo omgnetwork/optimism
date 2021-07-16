@@ -18,7 +18,7 @@ async function deploy(thisObject, contracts) {
       contract[1].bytecode,
       bob,
     )
-    thisObject[contract[0]] = await Factory__contract.deploy(...(contract[2] || []), {gasLimit: 1000000, gasPrice: 0})
+    thisObject[contract[0]] = await Factory__contract.deploy(...(contract[2] || []), {gasLimit: 800000, gasPrice: 0})
     await thisObject[contract[0]].deployTransaction.wait()
   }
 }
