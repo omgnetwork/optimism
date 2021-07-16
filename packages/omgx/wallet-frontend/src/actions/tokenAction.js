@@ -86,11 +86,11 @@ export async function addToken ( tokenContractAddressL1 ) {
     
     const decimals = _decimals ? Number(_decimals.toString()) : 'NOT ON ETHEREUM'
     const symbolL1 = _symbolL1 || 'NOT ON ETHEREUM'
-    let symbolL2 = _symbolL1 || 'NOT ON ETHEREUM'
+    let   symbolL2 = _symbolL1 || 'NOT ON ETHEREUM'
     const name = _name || 'NOT ON ETHEREUM'
-    let _tokenContractAddressL2 = null
-    
+       
     //ETH is special as always
+    let _tokenContractAddressL2 = null
     if(_tokenContractAddressL1 === ETHL1 ) {
       _tokenContractAddressL2 = ETHL2
       symbolL2 = 'oETH'

@@ -21,13 +21,11 @@ const initialState = {
     currency:  L1ETH,
     addressL1: L1ETH,
     addressL2: L2ETH,
-    decimals:  18,
     symbolL1:  'ETH',
     symbolL2:  'oETH',
+    decimals:  18,
     name:      'Ethereum',
     redalert:  false,
-    balanceL1: '',
-    balanceL2: '',
   },
 }
 

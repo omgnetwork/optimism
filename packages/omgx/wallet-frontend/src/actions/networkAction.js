@@ -28,6 +28,7 @@ export function fetchEthStats() {
 }
 
 export function fetchBalances() {
+  console.log("fetchBalances")
   return createAction('BALANCE/GET', () => networkService.getBalances())
 }
 
@@ -113,18 +114,30 @@ export function depositL1LP(currency, value) {
   )
 }
 
-export function approveErc20(
+export function approveERC20(
   value,
   currency,
   approveContractAddress,
   contractABI
 ) {
   return createAction('APPROVE/CREATE', () =>
-    networkService.approveErc20(
+    networkService.approveERC20(
       value,
       currency,
       approveContractAddress,
       contractABI
+    )
+  )
+}
+
+export function approveERC20_L2LP(
+  value,
+  currency,
+) {
+  return createAction('APPROVE/CREATE', () =>
+    networkService.approveERC20_L2LP(
+      value,
+      currency,
     )
   )
 }

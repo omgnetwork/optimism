@@ -17,7 +17,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector, batch } from 'react-redux';
 import { selectWalletMethod } from 'selectors/setupSelector';
 import { selectModalState } from 'selectors/uiSelector';
-// import { selectlayer2Transactions } from 'selectors/transactionSelector';
+//import { selectlayer2Transactions } from 'selectors/transactionSelector';
 //import { selectLogin } from 'selectors/loginSelector';
 
 import useInterval from 'util/useInterval';
@@ -57,21 +57,14 @@ import NFT from 'containers/nft/Nft';
 import MobileHeader from 'components/mobileheader/MobileHeader';
 import MobileMenu from 'components/mobilemenu/MobileMenu';
 
-//Varna
-// import Login from 'containers/login/Login';
-// import Seller from 'containers/seller/Seller';
-// import Buyer from 'containers/buyer/Buyer';
-
 // Farm
 import Farm from 'containers/farm/Farm';
-
-//import networkService from 'services/networkService';
 
 import logo from 'images/omgx.png';
 
 import * as styles from './Home.module.scss';
 
-const POLL_INTERVAL = 10000; //in milliseconds?
+const POLL_INTERVAL = 5000; //milliseconds
 
 function Home () {
 
@@ -93,7 +86,6 @@ function Home () {
   const farmWithdrawModalState = useSelector(selectModalState('farmWithdrawModal'))
 
   const walletMethod = useSelector(selectWalletMethod())
-  // const loggedIn = useSelector(selectLogin());
   // const transactions = useSelector(selectlayer2Transactions, isEqual);
   
   useEffect(() => {
@@ -124,6 +116,7 @@ function Home () {
     });
   }, POLL_INTERVAL * 2);
 
+  //get all account balances
   useInterval(() => {
     dispatch(fetchBalances());
   }, POLL_INTERVAL);

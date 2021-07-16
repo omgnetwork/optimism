@@ -6,7 +6,7 @@ import Button from 'components/button/Button'
 import GasPicker from 'components/gaspicker/GasPicker'
 
 import {
-  approveErc20,
+  approveERC20,
   depositErc20,
   resetApprove,
   depositL1LP,
@@ -85,10 +85,10 @@ function ApproveStep({
     let res
     if (fast) {
       res = await dispatch(
-        approveErc20(weiAmount, currencyL1Address, networkService.L1LPAddress)
+        approveERC20(weiAmount, currencyL1Address, networkService.L1LPAddress)
       )
     } else {
-      res = await dispatch(approveErc20(weiAmount, currencyL1Address))
+      res = await dispatch(approveERC20(weiAmount, currencyL1Address))
     }
 
     if (res) {

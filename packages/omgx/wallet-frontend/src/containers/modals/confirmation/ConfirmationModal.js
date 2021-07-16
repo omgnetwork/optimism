@@ -20,7 +20,7 @@ import BN from 'bignumber.js';
 import { closeModal } from 'actions/uiAction';
 import { acceptBid } from 'actions/sellAction';
 import { acceptSellerSwap } from 'actions/buyAction';
-import { approveErc20 } from 'actions/networkAction';
+import { approveERC20 } from 'actions/networkAction';
 import { openAlert } from 'actions/uiAction';
 
 import Button from 'components/button/Button';
@@ -112,7 +112,7 @@ class ConfirmationModal extends React.Component {
     const { neededAllowance } = this.state;
 
     if (cMD.type === "sellerAccept") {
-      const res = await this.props.dispatch(approveErc20(
+      const res = await this.props.dispatch(approveERC20(
         neededAllowance,
         cMD.sellerItemToSend.currency,
         networkService.AtomicSwapAddress,
@@ -125,7 +125,7 @@ class ConfirmationModal extends React.Component {
 
     if (cMD.type === "buyerAccept") {
       const allowance = new BN(neededAllowance).times(10).toString();
-      const res = await this.props.dispatch(approveErc20(
+      const res = await this.props.dispatch(approveERC20(
         allowance,
         cMD.buyerItemToSend.currency,
         networkService.AtomicSwapAddress,

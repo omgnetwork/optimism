@@ -79,11 +79,12 @@ class FarmDepositModal extends React.Component {
   }
 
   async handleApprove() {
+    
     const { stakeToken, stakeValue } = this.state;
 
     this.setState({ loading: true });
 
-    const approveTX = await networkService.approveErc20(
+    const approveTX = await networkService.approveERC20(
       powAmount(stakeValue, 18),
       stakeToken.currency,
       stakeToken.LPAddress,
@@ -92,7 +93,7 @@ class FarmDepositModal extends React.Component {
       //does not matter - all we need is something that conforms to ERC20
     );
     if (approveTX) {
-      this.props.dispatch(openAlert("Your transaction was approved."));
+      this.props.dispatch(openAlert("Your amount was approved."));
       let approvedAllowance = powAmount(10, 50);
       // There is no need to check allowance for depositing ETH
       if (stakeToken.currency !== networkService.L1_ETH_Address) {
@@ -103,7 +104,7 @@ class FarmDepositModal extends React.Component {
       }
       this.setState({ approvedAllowance, loading: false });
     } else {
-      this.props.dispatch(openError("Failed to approve the transaction."));
+      this.props.dispatch(openError("Failed to approve the amount."));
       this.setState({ loading: false });
     }
   }
@@ -152,16 +153,15 @@ class FarmDepositModal extends React.Component {
 
     return (
       <Modal open={open}>
+        
         <h2>Stake {`${stakeToken.symbol}`}</h2>
 
         <InputSelect
           label='Amount to stake'
           placeholder={0}
           value={stakeValue}
-          onChange={i => {
-            this.setState({stakeValue: i.target.value});
-          }}
-          onSelect={i => {}}
+          onChange={i=>{this.setState({stakeValue: i.target.value})}}
+          onSelect={i=>{}}
           selectOptions={selectOptions}
           selectValue={stakeToken.currency}
           maxValue={this.getMaxTransferValue()}
@@ -190,7 +190,7 @@ class FarmDepositModal extends React.Component {
               disabled={Number(this.getMaxTransferValue()) < Number(stakeValue) || stakeValue === '' || !stakeValue}
               loading={loading}
             >
-              CONFIRM
+              STAKE!
             </Button>
           </div>
         }
@@ -200,7 +200,6 @@ class FarmDepositModal extends React.Component {
             <div className={styles.disclaimer}>
               To stake {stakeValue} {stakeToken.symbol},
               you first need to approve this amount.
-              Click below to submit an approval transaction.
             </div>
             <div className={styles.buttons}>
               <Button
@@ -217,7 +216,7 @@ class FarmDepositModal extends React.Component {
                 loading={loading}
                 disabled={Number(this.getMaxTransferValue()) < Number(stakeValue)}
               >
-                Approve
+                APPROVE AMOUNT
               </Button>
             </div>
           </>

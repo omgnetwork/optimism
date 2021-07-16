@@ -82,20 +82,6 @@ function Account () {
   const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
   const masterConfig = networkService.masterConfig;
 
-  const handleDepositETHL1 = useCallback(
-    () => dispatch(networkService.depositETHL1()),
-    [dispatch]
-  );
-
-  const handleGetToken = async () => {
-    const res = await networkService.getTestToken();
-    if (res) {
-      dispatch(openAlert('10 test tokens were sent to your wallet'));
-    } else {
-      dispatch(openError('You reached the limit'));
-    }
-  }
-
   return (
     <div className={styles.Account}>
 
@@ -155,26 +141,15 @@ function Account () {
         </div>
       }
 
-      <div className={styles.buttons}>
-        <Button
-          onClick={() => handleModalClick('addNewTokenModal')}
-          type='primary'
-          disabled={!isSynced || criticalTransactionLoading}
-          style={{maxWidth: '150px', padding: '8px'}}
-        >
-          ADD ERC20 ASSETS
-        </Button>
-      </div>
-
       <div className={styles.balances} style={{marginTop: 30}}>
 
       <div className={styles.boxWrapper}>
 
         <div className={styles.location}>
-          <div>L1</div>
-            {networkLayer === 'L1' && <span className={styles.under}>You are here</span>}
+          <div>&nbsp;</div>
+            {networkLayer === 'L1' && <span className={styles.under}>You are on L1</span>}
             {networkLayer === 'L2' && <span>&nbsp;</span>}
-          <div>L1</div>
+          <div>&nbsp;</div>
         </div>
 
         <div className={[styles.box, networkLayer === 'L2' ? styles.dim : styles.active].join(' ')}>
@@ -184,15 +159,6 @@ function Account () {
               <span>Balance on L1</span>
               <span>Ethereum Network</span>
             </div>
-            {masterConfig === 'local' &&
-              <div
-                onClick={()=>handleDepositETHL1()}
-                className={[styles.transfer, !isSynced ? styles.disabled : ''].join(' ')}
-              >
-                <Send />
-                <span>ETH Test Fountain</span>
-              </div>
-            }
           </div>
 
           {rootBalance.map((i, index) => {
@@ -234,7 +200,7 @@ function Account () {
               disabled={!isSynced || criticalTransactionLoading}
               style={{maxWidth: '150px', padding: '8px'}}
             > 
-            <ArrowBack/>FAST EXIT
+            <ArrowBack/>FAST OFFRAMP
             </Button>
           </div>
         }
@@ -242,11 +208,11 @@ function Account () {
           <div className={styles.buttons}>
             <Button
               onClick={() => handleModalClick('depositModal')}
-              type='primary'
+              type='secondary'
               disabled={!isSynced || criticalTransactionLoading}
-              style={{maxWidth: '150px', padding: '8px'}}
+              style={{maxWidth: '120px', padding: '4px', fontSize: '0.8em'}}
             >
-              SLOW ONRAMP<ArrowForward/>
+              Traditional Deposit<ArrowForward/>
             </Button>
           </div>
         }
@@ -254,11 +220,11 @@ function Account () {
           <div className={styles.buttons}>
             <Button
               onClick={() => handleModalClick('exitModal')}
-              type='primary'
+              type='secondary'
               disabled={disabled || criticalTransactionLoading}
-              style={{maxWidth: '150px', padding: '8px'}}
+              style={{maxWidth: '120px', padding: '4px', fontSize: '0.8em'}}
             >
-              <ArrowBack/>SLOW EXIT
+              <ArrowBack/>Traditional Exit
             </Button>
           </div>
         }
@@ -267,10 +233,10 @@ function Account () {
       
       <div className={styles.boxWrapper}>
         <div className={styles.location}>
-          <div>L2</div>
+          <div>&nbsp;</div>
             {networkLayer === 'L1' && <span>&nbsp;</span>}
-            {networkLayer === 'L2' && <span className={styles.under}>You are here</span>}
-          <div>L2</div>
+            {networkLayer === 'L2' && <span className={styles.under}>You are on L2</span>}
+          <div>&nbsp;</div>
         </div>
         <div className={[styles.box, networkLayer === 'L1' ? styles.dim : styles.active].join(' ')}>
           <div className={styles.header}>
@@ -278,13 +244,6 @@ function Account () {
               <span>Balance on L2</span>
               <span>OMGX</span>
             </div>
-              <div
-                onClick={()=>handleGetToken()}
-                className={[styles.transfer, networkLayer === 'L1' ? styles.disabled : ''].join(' ')}
-              >
-                <Send />
-                <span>GET TEST</span>
-              </div>
               <div
                 onClick={()=>handleModalClick('transferModal')}
                 className={[styles.transfer, networkLayer === 'L1' ? styles.disabled : ''].join(' ')}

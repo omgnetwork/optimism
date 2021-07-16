@@ -33,14 +33,18 @@ import { WebWalletError } from 'services/errorService'
 //Base contracts
 import L1StandardBridgeJson from '../deployment/artifacts/optimistic-ethereum/OVM/bridge/tokens/OVM_L1StandardBridge.sol/OVM_L1StandardBridge.json'
 import L2StandardBridgeJson from '../deployment/artifacts-ovm/optimistic-ethereum/OVM/bridge/tokens/OVM_L2StandardBridge.sol/OVM_L2StandardBridge.json'
+
+
+//OMGX LP contracts
+import L1LPJson from '../deployment/artifacts/contracts/LP/L1LiquidityPool.sol/L1LiquidityPool.json'
+import L2LPJson from '../deployment/artifacts-ovm/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
+
+//Standard ERC20 jsons - should be very similar? 
+import L1ERC20Json from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.json'
 import L2ERC20Json from '../deployment/artifacts-ovm/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
 
-//OMGX L1 Contracts
-import L1LPJson from '../deployment/artifacts/contracts/LP/L1LiquidityPool.sol/L1LiquidityPool.json'
-import L1ERC20Json from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.json'
-
 //OMGX L2 Contracts
-import L2LPJson from '../deployment/artifacts-ovm/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
+
 import ERC721Json from '../deployment/artifacts-ovm/contracts/ERC721Mock.sol/ERC721Mock.json'
 import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol/TokenPool.json'
 import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
@@ -60,22 +64,19 @@ import addressOMGXAxiosInstance from 'api/addressOMGXAxios'
 //Generally, the wallet will get these from the two HTTP deployment servers
 const localAddresses = require(`../deployment/local/addresses.json`)
 const rinkebyAddresses = require(`../deployment/rinkeby/addresses.json`)
+
 const priorityTokens = require('../deployment/tokensPriority.json')
 const dropdownTokens = require('../deployment/tokensDropdown.json')
 const swapTokens = require('../deployment/tokensSwap.json')
 
 class NetworkService {
   constructor() {
+
     this.L1Provider = null
     this.L2Provider = null
 
     this.provider = null
     this.environment = null
-
-    this.L2_ETH_Contract = null
-
-    this.L1_TEST_Contract = null
-    this.L2_TEST_Contract = null
 
     this.ERC721Contract = null
 
@@ -92,19 +93,24 @@ class NetworkService {
 
     // addresses
     this.L1StandardBridgeAddress = null
+    this.L2StandardBridgeAddress = '0x4200000000000000000000000000000000000010'
 
     this.ERC721Address = null
 
     this.L1_TEST_Address = null
     this.L2_TEST_Address = null
 
-    this.L1MessengerAddress = null
+    this.L1_TEST_Contract = null
+    this.L2_TEST_Contract = null
+
     this.L1LPAddress = null
     this.L2LPAddress = null
 
-    this.L2StandardBridgeAddress = '0x4200000000000000000000000000000000000010'
     this.L1_ETH_Address = '0x0000000000000000000000000000000000000000'
     this.L2_ETH_Address = '0x4200000000000000000000000000000000000006'
+    this.L2_ETH_Contract = null
+
+    this.L1MessengerAddress = null
     this.L2MessengerAddress = '0x4200000000000000000000000000000000000007'
 
     this.tokenAddresses = null
@@ -166,6 +172,7 @@ class NetworkService {
   }
 
   async initializeAccounts(masterSystemConfig) {
+
     console.log('NS: initializeAccounts() for', masterSystemConfig)
 
     let resOMGX = null
@@ -173,6 +180,7 @@ class NetworkService {
     let addresses = null
 
     try {
+
       console.log('Loading OMGX contract addresses')
 
       if (masterSystemConfig === 'local') {
@@ -304,7 +312,8 @@ class NetworkService {
       //backwards compat
       if (addresses.hasOwnProperty('Proxy__OVM_L1StandardBridge'))
         this.L1StandardBridgeAddress = addresses.Proxy__OVM_L1StandardBridge
-      else this.L1StandardBridgeAddress = addresses.L1StandardBridge
+      else 
+        this.L1StandardBridgeAddress = addresses.L1StandardBridge
 
       this.L1_TEST_Address = addresses.TOKENS.TEST.L1
       this.L2_TEST_Address = addresses.TOKENS.TEST.L2
@@ -315,7 +324,8 @@ class NetworkService {
       //backwards compat
       if (addresses.hasOwnProperty('L2ERC721'))
         this.ERC721Address = addresses.L2ERC721
-      else this.ERC721Address = addresses.ERC721
+      else 
+        this.ERC721Address = addresses.ERC721
 
       this.L2TokenPoolAddress = addresses.L2TokenPool
       this.AtomicSwapAddress = addresses.AtomicSwap
@@ -510,7 +520,10 @@ class NetworkService {
 
   async getBalances() {
 
+    //console.log("Checking Balances")
+
     try {
+      
       // Always check ETH and oETH
       const layer1Balance = await this.L1Provider.getBalance(this.account)
       //console.log('ETH balance on L1:', layer1Balance.toString())
@@ -525,22 +538,23 @@ class NetworkService {
         getToken(this.tokenAddresses[token].L1)
       })
 
-      const ethToken = await getToken(this.L1_ETH_Address)
+      //const ethToken = await getToken(this.L1_ETH_Address)
       //console.log('Checking ethToken:', ethToken)
 
       const layer1Balances = [
         {
-          ...ethToken,
+          currency: this.L1_ETH_Address,
           symbol: 'ETH',
+          decimals: 18,
           amount: new BN(layer1Balance.toString()),
         },
       ]
 
       const layer2Balances = [
         {
-          ...ethToken,
           currency: this.L2_ETH_Address,
           symbol: 'oETH',
+          decimals: 18,
           amount: new BN(layer2Balance.toString()),
         },
       ]
@@ -548,15 +562,18 @@ class NetworkService {
       const state = store.getState()
       const tA = Object.values(state.tokenList)
 
+      //console.log(tA)
+
       for (var i = 0; i < tA.length; i++) {
         
         let token = tA[i]
 
-        //ETH is special - will break things here
-        if (token.L1address === this.L1_ETH_Address) continue
+        //ETH is special - will break things,
+        //so, continue
+        if (token.addressL1 === this.L1_ETH_Address) continue
 
         const tokenC = new ethers.Contract(
-          token.L1address,
+          token.addressL1,
           L1ERC20Json.abi,
           this.provider.getSigner()
         )
@@ -569,7 +586,7 @@ class NetworkService {
 
         layer1Balances.push({
           currency: token.currency,
-          symbol: token.symbol,
+          symbol: token.symbolL1,
           decimals: token.decimals,
           amount: new BN(balance.toString()),
         })
@@ -579,11 +596,12 @@ class NetworkService {
 
         let token = tA[i]
 
-        //oETH is special - will break things here
-        if (token.L2address === this.L2_ETH_Address) continue
+        //ETH is special - will break things,
+        //so, continue
+        if (token.addressL2 === this.L2_ETH_Address) continue
 
         const tokenC = new ethers.Contract(
-          token.L2address,
+          token.addressL2,
           L2ERC20Json.abi,
           this.provider.getSigner()
         )
@@ -596,7 +614,7 @@ class NetworkService {
 
         layer2Balances.push({
           currency: token.currency,
-          symbol: token.symbol,
+          symbol: token.symbolL2,
           decimals: token.decimals,
           amount: new BN(balance.toString()),
         })
@@ -612,8 +630,8 @@ class NetworkService {
       // ).balanceOf(this.account)
       // console.log('Balance of the test token on L2:', ERC20L2Balance.toString())
       
-      console.log(layer1Balances)
-      console.log(layer2Balances)
+      //console.log(layer1Balances)
+      //console.log(layer2Balances)
 
       // //how many NFTs do I own?
       const ERC721L2Balance = await this.ERC721Contract.connect(
@@ -695,34 +713,6 @@ class NetworkService {
         reportToSentry: false,
         reportToUi: false,
       })
-    }
-  }
-
-  depositETHL1 = () => async (dispatch) => {
-    //for this to work, we have to be on the L1
-    //otherwise makes no sense
-    if (this.L1orL2 !== 'L1') return
-
-    try {
-      //const L1ProviderRPC = new JsonRpcProvider(l1Network.rpcUrl);
-      const signer = this.L1Provider.getSigner()
-
-      // Send 1 ETH
-      const txOption = {
-        to: this.account,
-        value: parseEther('1'),
-        gasPrice: parseUnits('4.1', 'gwei'),
-        gasLimit: hexlify(120000),
-      }
-
-      const tx = await signer.sendTransaction(txOption)
-      await tx.wait()
-
-      console.log(tx)
-
-      dispatch(openAlert('Deposited ETH to L1'))
-    } catch (error) {
-      dispatch(openError('Failed to deposit ETH to L1'))
     }
   }
 
@@ -820,28 +810,63 @@ class NetworkService {
     }
   }
 
-  async approveErc20(
-    value,
-    currencyAddress,
-    approveContractAddress// = this.L1StandardBridgeAddress,
-    //contractABI// = L1ERC20Json.abi
+  async approveERC20_L2LP(
+    depositAmount_string,
+    currencyAddress
   ) {
-    console.log("Approving ERC20")
-    console.log("value",value)
-
+    
     try {
 
-      const ERC20Contract = new ethers.Contract(
-        currencyAddress,
-        L1ERC20Json.abi, //could use any standard ERC20 abi - just something with .allowance
-        //contractABI,
-        this.provider.getSigner()
+      console.log("approveERC20_L2LP")
+      
+      //we could use any L2 ERC contract here - just getting generic parts of the abi
+      //but we know we alaways have the TEST contract, so will use that
+      const L2ERC20Contract = this.L2_TEST_Contract.attach(currencyAddress)
+
+      let allowance_BN = await L2ERC20Contract.allowance(
+        this.account,
+        this.L2LPAddress
       )
 
-      const approveStatus = await ERC20Contract.approve(
-        approveContractAddress,
-        value,
-        this.L1orL2 === 'L1' ? {} : { gasPrice: 0 }
+      let depositAmount_BN = new BN(depositAmount_string)
+
+      if (depositAmount_BN.gt(allowance_BN)) {
+        const approveStatus = await L2ERC20Contract.approve(
+          this.L2LPAddress,
+          depositAmount_string,
+          //{ gasPrice: 0 } //this can be hardcoded here because, by definition, I'm always on L2
+        )
+        await approveStatus.wait()
+      }
+
+      allowance_BN = await L2ERC20Contract.allowance(
+        this.account,
+        this.L2LPAddress
+      )
+      
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
+  async approveERC20(
+    depositAmount_string,
+    currencyAddress,
+    spenderAddress, //for example, = this.L1StandardBridgeAddress, for example
+    contractABI //for example, = L1ERC20Json.abi
+  ) {
+    
+    try {
+
+      //we could use any L2 ERC contract here - just getting generic parts of the abi
+      //but we know we alaways have the TEST contract, so will use that
+      const L2ERC20Contract = this.L2_TEST_Contract.attach(currencyAddress)
+
+      const approveStatus = await L2ERC20Contract.approve(
+        spenderAddress,       //this is the spender
+        depositAmount_string, //and this is how much the spender will be able to spend 
+        //this.L1orL2 === 'L1' ? {} : { gasPrice: 0 }
       )
       await approveStatus.wait()
 
@@ -879,7 +904,7 @@ class NetworkService {
     } catch (error) {
       throw new WebWalletError({
         originalError: error,
-        customErrorMessage: 'Could not reset approval allowance for ERC20.',
+        customErrorMessage: 'Could not reset allowance for ERC20.',
         reportToSentry: false,
         reportToUi: true,
       })
@@ -888,6 +913,7 @@ class NetworkService {
 
   //Used to move ERC20 Tokens from L1 to L2
   async depositErc20(value, currency, gasPrice, currencyL2) {
+
     try {
       const L1_TEST_Contract = this.L1_TEST_Contract.attach(currency)
 
@@ -932,31 +958,33 @@ class NetworkService {
   }
 
   //Standard 7 day exit from OMGX
-  async exitOMGX(currency, value) {
+  //updated
+  async exitOMGX(currencyAddress, value) {
+    
     const allowance = await this.checkAllowance(
-      currency,
+      currencyAddress,
       this.L2StandardBridgeAddress
     )
-    const L2_TEST_Contract = new ethers.Contract(
-      currency,
+    const L2_ERC20_Contract = new ethers.Contract(
+      currencyAddress,
       L2ERC20Json.abi,
       this.provider.getSigner()
     )
-    const decimals = await L2_TEST_Contract.decimals()
+    const decimals = await L2_ERC20_Contract.decimals()
     // need the frontend updates
     if (BigNumber.from(allowance).lt(parseUnits(value, decimals))) {
-      const res = await this.approveErc20(
+      const res = await this.approveERC20(
         // take caution while using parseEther() with erc20
         // l2 erc20 can be customised to have non 18 decimals
         parseUnits(value, decimals),
-        currency,
+        currencyAddress,
         this.L2StandardBridgeAddress
       )
       if (!res) return false
     }
 
     const tx = await this.L2StandardBridgeContract.withdraw(
-      currency,
+      currencyAddress,
       parseUnits(value, decimals),
       this.L1GasLimit,
       utils.formatBytes32String(new Date().getTime().toString()),
@@ -1290,39 +1318,13 @@ class NetworkService {
   /**************************************************************/
   /***** SWAP OFF from OMGX by depositing funds to the L2LP *****/
   /**************************************************************/
-  async depositL2LP(currency, value) {
-    /*
-    //this should already have been done earlier?????
-
-    const L2_TEST_Contract = this.L2_TEST_Contract.attach(currency)
-
-    let allowance = await L2_TEST_Contract.allowance(
-      this.account,
-      this.L2LPAddress
-    )
-    allowance = new BN(allowance.toString())
-
-    if (depositAmount.gt(allowance)) {
-      const approveStatus = await L2_TEST_Contract.approve(
-        this.L2LPAddress,
-        depositAmount.toString(),
-        { gasPrice: 0 }
-      )
-      await approveStatus.wait()
-    }
-    */
-
-    const token = await getToken(currency)
-    const decimals = token.decimals
-    let depositAmount = powAmount(value, decimals)
-    depositAmount = new BN(depositAmount)
+  async depositL2LP(currency, depositAmount_string) {
 
     const depositTX = await this.L2LPContract.clientDepositL2(
-      depositAmount.toString(),
+      depositAmount_string,
       currency,
-      { gasPrice: 0 }
+      //{ gasPrice: 0 }
     )
-
     await depositTX.wait()
 
     // Waiting the response from L1
@@ -1337,20 +1339,6 @@ class NetworkService {
     console.log(' completed Deposit! L1 tx hash:', L1Receipt.transactionHash)
 
     return L1Receipt
-  }
-
-  async getTestToken() {
-    try {
-      const getTokenTX = await this.L2TokenPoolContract.requestToken({
-        gasPrice: 0,
-      })
-      await getTokenTX.wait()
-      //console.log(getTokenTX)
-      return true
-    } catch (error) {
-      console.log(error)
-      return false
-    }
   }
 
   async getPriorityTokens() {
