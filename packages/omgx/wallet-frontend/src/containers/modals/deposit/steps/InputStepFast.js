@@ -61,8 +61,8 @@ function InputStepFast({
         dispatch(setActiveHistoryTab1('Deposits'))
         dispatch(
           openAlert(
-            `ETH was deposited into the L1LP. You will receive 
-            ${((Number(value) * (100 - Number(feeRate)))/100).toFixed(2)} 
+            `ETH was deposited into the L1LP. You will receive
+            ${((Number(value) * (100 - Number(feeRate))) / 100).toFixed(2)}
             oETH on L2`
           )
         )
@@ -115,7 +115,7 @@ function InputStepFast({
           }
 
           if (!balanceL1) {
-            return
+            return null
           }
 
           return {
@@ -181,18 +181,19 @@ function InputStepFast({
           unit={selectedToken ? renderUnit : null}
           placeholder={0}
           value={value}
-          onChange={(i)=>setValue(i.target.value)}
+          onChange={(i) => setValue(i.target.value)}
         />
       )}
 
       {selectedToken && selectedToken.symbol === 'ETH' && (
         <>
           <h3>
-            Liquidity pool balance: {LPBalance} oETH<br/> 
-            Liquidity fee: {feeRate}%<br/>
+            Liquidity pool balance: {LPBalance} oETH
+            <br />
+            Liquidity fee: {feeRate}%<br />
             {value &&
               `You will receive
-              ${((Number(value) * (100-Number(feeRate)))/100).toFixed(2)}
+              ${((Number(value) * (100 - Number(feeRate))) / 100).toFixed(2)}
               oETH on L2`}
           </h3>
         </>
@@ -201,11 +202,12 @@ function InputStepFast({
       {selectedToken && selectedToken.symbol !== 'ETH' && (
         <>
           <h3>
-            Liquidity pool ballance: {LPBalance} {selectedToken.symbol}<br/>
-            Liquidity fee: {feeRate}%<br/>
+            Liquidity pool ballance: {LPBalance} {selectedToken.symbol}
+            <br />
+            Liquidity fee: {feeRate}%<br />
             {value &&
               `You will receive
-              ${((Number(value) * (100-Number(feeRate)))/100).toFixed(2)}
+              ${((Number(value) * (100 - Number(feeRate))) / 100).toFixed(2)}
               ${selectedToken.symbol} on L2`}
           </h3>
         </>
@@ -219,18 +221,14 @@ function InputStepFast({
       )}
 
       <div className={styles.buttons}>
-        <Button 
-          onClick={handleClose} 
-          type="outline" 
-          style={{flex: 0}}
-        >
+        <Button onClick={handleClose} type="outline" style={{ flex: 0 }}>
           CANCEL
         </Button>
         {selectedToken && selectedToken.symbol === 'ETH' && (
           <Button
             onClick={depositETH}
             type="primary"
-            style={{flex: 0, minWidth: 200}}
+            style={{ flex: 0, minWidth: 200 }}
             loading={depositLoading}
             tooltip="Your transaction is still pending. Please wait for confirmation."
             disabled={disabledSubmit}
@@ -242,7 +240,7 @@ function InputStepFast({
           <Button
             onClick={onNext}
             type="primary"
-            style={{flex: 0, minWidth: 200}}
+            style={{ flex: 0, minWidth: 200 }}
             disabled={disabledSubmit}
           >
             NEXT

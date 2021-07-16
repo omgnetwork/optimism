@@ -18,14 +18,14 @@ const L2ETH = '0x4200000000000000000000000000000000000006'
 
 const initialState = {
   [L1ETH]: {
-    currency:  L1ETH,
+    currency: L1ETH,
     addressL1: L1ETH,
     addressL2: L2ETH,
-    symbolL1:  'ETH',
-    symbolL2:  'oETH',
-    decimals:  18,
-    name:      'Ethereum',
-    redalert:  false,
+    symbolL1: 'ETH',
+    symbolL2: 'oETH',
+    decimals: 18,
+    name: 'Ethereum',
+    redalert: false,
   },
 }
 

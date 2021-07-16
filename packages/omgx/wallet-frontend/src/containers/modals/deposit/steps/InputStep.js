@@ -44,9 +44,9 @@ function InputStep({
   useEffect(() => {
     let allOptions = values(tokens)
       .map((t) => {
-        let isBalanceL1Exists = balancesL1.find((i) => i.symbol === t.symbol)
-        let isPriority = priorityTokens.find((i) => i.symbol === t.symbol)
-        let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbol)
+        let isBalanceL1Exists = balancesL1.find((i) => i.symbol === t.symbolL1)
+        let isPriority = priorityTokens.find((i) => i.symbol === t.symbolL1)
+        let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbolL1)
 
         let balanceL1 = ''
         if (isBalanceL1Exists) {

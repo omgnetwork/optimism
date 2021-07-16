@@ -47,7 +47,6 @@ function DoExitStep({ handleClose }) {
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
 
   async function doExit() {
-
     let res = await dispatch(exitOMGX(currency, value))
 
     //person will receive ETH on the L1, not oETH
@@ -82,18 +81,18 @@ function DoExitStep({ handleClose }) {
       .map((t) => {
         let isBalanceL2Exists = balancesL2.find((b) => {
           if (
-            (t.symbol === 'ETH' && b.symbol === 'oETH') ||
-            t.symbol === b.symbol
+            (t.symbolL2 === 'ETH' && b.symbol === 'oETH') ||
+            t.symbolL2 === b.symbol
           ) {
             return true
           }
           return false
         })
 
-        let isPriority = priorityTokens.find((i) => i.symbol === t.symbol)
-        let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbol)
+        let isPriority = priorityTokens.find((i) => i.symbol === t.symbolL2)
+        let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbolL2)
         let balanceL2 = ''
-        
+
         if (isBalanceL2Exists) {
           balanceL2 = logAmount(
             isBalanceL2Exists.amount,
@@ -109,7 +108,7 @@ function DoExitStep({ handleClose }) {
 
         // check the balance whether user has this token
         if (!balanceL2) {
-          return
+          return null
         }
 
         return {

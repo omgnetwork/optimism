@@ -20,10 +20,7 @@ import { isEqual } from 'lodash'
 
 import { selectlayer2Balance } from 'selectors/balanceSelector'
 
-import { 
-  depositL2LP, 
-  approveERC20_L2LP 
-} from 'actions/networkAction'
+import { depositL2LP, approveERC20_L2LP } from 'actions/networkAction'
 
 import { openAlert, openError } from 'actions/uiAction'
 import { selectLoading } from 'selectors/loadingSelector'
@@ -38,7 +35,6 @@ import Input from 'components/input/Input'
 import IconSelect from 'components/iconSelect/iconSelect'
 
 function DoExitStepFast({ handleClose }) {
-
   const dispatch = useDispatch()
 
   const [currency, setCurrency] = useState('')
@@ -71,44 +67,49 @@ function DoExitStepFast({ handleClose }) {
   }
 
   async function doApprove() {
-    
     const res = await dispatch(
       approveERC20_L2LP(
         powAmount(value, 18), //takes a value, converts to 18 decimals, generates string
-        currency 
+        currency
       )
     )
-    
+
     if (res) {
       dispatch(openAlert(`Transaction was approved`))
       setAllowance(powAmount(value, 18))
     }
+  }
 
+  const recievableAmount = (value) => {
+    return (Number(value) * ((100 - Number(feeRate)) / 100)).toFixed(2)
   }
 
   async function doExit() {
-
     let res = await dispatch(
       depositL2LP(
-        currency, 
-        powAmount(value, 18), //takes a value, converts to 18 decimals, generates string
+        currency,
+        powAmount(value, 18) //takes a value, converts to 18 decimals, generates string
       )
     )
 
     let currencyL1 = selectedToken.symbol //currencySymbols[currency];
 
     //person will receive ETH on the L1, not oETH
-    if(currencyL1 === 'oETH') {
+    if (currencyL1 === 'oETH') {
       currencyL1 = 'ETH'
     }
 
     if (res) {
-      dispatch(openAlert(`${selectedToken.symbol} was deposited into the L2 liquidity pool. You will receive ${(Number(value) * 0.97).toFixed(2)} ${currencyL1} on L1.`));
-      handleClose();
+      dispatch(
+        openAlert(
+          `${selectedToken.symbol} was deposited into the L2 liquidity pool.
+          You will receive ${recievableAmount(value)} ${currencyL1} on L1.`
+        )
+      )
+      handleClose()
     } else {
-      dispatch(openError(`Failed to fast-exit fund from L2`));
+      dispatch(openError(`Failed to fast-exit fund from L2`))
     }
-
   }
 
   useEffect(() => {
@@ -163,7 +164,7 @@ function DoExitStepFast({ handleClose }) {
           }
 
           if (!balanceL2) {
-            return
+            return null
           }
 
           return {
@@ -208,7 +209,9 @@ function DoExitStepFast({ handleClose }) {
           placeholder={0}
           value={value}
           type="number"
-          onChange={(i)=>{setExitAmount(i.target.value)}}
+          onChange={(i) => {
+            setExitAmount(i.target.value)
+          }}
           unit={selectedToken ? renderUnit : ''}
           maxValue={selectedToken.balanceL2}
         />
@@ -216,36 +219,40 @@ function DoExitStepFast({ handleClose }) {
 
       {selectedToken && selectedToken.symbol === 'oETH' && (
         <h3>
-          L1 liquidity pool balance: {LPBalance} ETH<br/>
-          Liquidity fee:{' '}{feeRate}%<br/>
+          L1 liquidity pool balance: {LPBalance} ETH
+          <br />
+          Liquidity fee: {feeRate}%<br />
           {value &&
-            `You will receive 
-            ${(Number(value) * 0.97).toFixed(2)} 
+            `You will receive
+            ${recievableAmount(value)}
             ETH on L1`}
         </h3>
       )}
 
       {selectedToken && selectedToken.symbol !== 'oETH' && (
         <h3>
-          L1 liquidity pool balance: {LPBalance} {selectedToken.symbol}<br/>
-          Liquidity fee:{' '}{feeRate}%<br/>
+          L1 liquidity pool balance: {LPBalance} {selectedToken.symbol}
+          <br />
+          Liquidity fee: {feeRate}%<br />
           {value &&
-            `You will receive 
-            ${(Number(value) * 0.97).toFixed(2)} 
-            ${selectedToken.symbol} 
+            `You will receive
+            ${recievableAmount(value)}
+            ${selectedToken.symbol}
             on L1`}
         </h3>
       )}
 
-      {BigNumber.from(allowance).lt(BigNumber.from(powAmount(value ? value : 0, 18))) && (
+      {BigNumber.from(allowance).lt(
+        BigNumber.from(powAmount(value ? value : 0, 18))
+      ) && (
         <h3>
-          To exit {Number(value).toFixed(2)}{' '}{selectedToken.symbol},
-          you first need to approve the amount.
+          To exit {Number(value).toFixed(2)} {selectedToken.symbol}, you first
+          need to approve the amount.
         </h3>
       )}
 
       {Number(LPBalance) < Number(value) && (
-        <h3 style={{color: 'red'}}>
+        <h3 style={{ color: 'red' }}>
           The L1 liquidity pool is too small to cover your proposed swap.
         </h3>
       )}
@@ -255,34 +262,37 @@ function DoExitStepFast({ handleClose }) {
           onClick={handleClose}
           className={styles.button}
           type="outline"
-          style={{flex: 0}}
+          style={{ flex: 0 }}
         >
           CANCEL
         </Button>
-        {BigNumber.from(allowance).lt(BigNumber.from(powAmount(value ? value : 0, 18))) ? 
+        {BigNumber.from(allowance).lt(
+          BigNumber.from(powAmount(value ? value : 0, 18))
+        ) ? (
           <Button
             onClick={doApprove}
             type="primary"
-            style={{flex: 0, minWidth: 200}}
+            style={{ flex: 0, minWidth: 200 }}
             loading={approveLoading}
             className={styles.button}
             tooltip="Your exit is still pending. Please wait for confirmation."
             disabled={disabledSubmit}
           >
             APPROVE AMOUNT
-          </Button> : 
+          </Button>
+        ) : (
           <Button
             onClick={doExit}
-            type='primary'
-            style={{flex: 0, minWidth: 200}}
+            type="primary"
+            style={{ flex: 0, minWidth: 200 }}
             loading={exitLoading}
             className={styles.button}
-            tooltip='Your exit is still pending. Please wait for confirmation.'
+            tooltip="Your exit is still pending. Please wait for confirmation."
             disabled={disabledSubmit}
           >
             FAST EXIT TO L1
           </Button>
-        }
+        )}
       </div>
     </>
   )

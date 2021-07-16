@@ -18,7 +18,7 @@ import erc20abi from 'human-standard-token-abi';
 import networkService from 'services/networkService';
 import store from 'store';
 
-/* 
+/*
 Returns Token info
 If we don't have the info, try to get it
 */
@@ -39,7 +39,7 @@ export async function getToken ( tokenContractAddressL1 ) {
   /*****************************************************************/
 
   const state = store.getState()
-  
+
   if (state.tokenList[_tokenContractAddressL1]) {
     return state.tokenList[_tokenContractAddressL1];
   } else {
@@ -49,7 +49,7 @@ export async function getToken ( tokenContractAddressL1 ) {
   }
 }
 
-/* 
+/*
 Get the token info from networkService.web3.eth.Contract
 */
 export async function addToken ( tokenContractAddressL1 ) {
@@ -61,8 +61,8 @@ export async function addToken ( tokenContractAddressL1 ) {
   /*****************************************************************/
   const _tokenContractAddressL1 = tokenContractAddressL1.toLowerCase();
   /*****************************************************************/
-    
-  //if we already have looked it up, no need to look up again. 
+
+  //if we already have looked it up, no need to look up again.
   if (state.tokenList[_tokenContractAddressL1]) {
     console.log("token already in list:",_tokenContractAddressL1)
     return state.tokenList[_tokenContractAddressL1];
@@ -73,7 +73,7 @@ export async function addToken ( tokenContractAddressL1 ) {
     //let's try to get the token details from the chain
     //if we know the address, we can do that
     const tokenContract = new ethers.Contract(
-      _tokenContractAddressL1, 
+      _tokenContractAddressL1,
       erc20abi,
       networkService.L1Provider, //Everything is defined by the L1 address - will deal with the L2 address later
     )
@@ -83,26 +83,26 @@ export async function addToken ( tokenContractAddressL1 ) {
       tokenContract.decimals(),
       tokenContract.name()
     ]).catch(e => [ null, null, null ])
-    
+
     const decimals = _decimals ? Number(_decimals.toString()) : 'NOT ON ETHEREUM'
     const symbolL1 = _symbolL1 || 'NOT ON ETHEREUM'
     let   symbolL2 = _symbolL1 || 'NOT ON ETHEREUM'
     const name = _name || 'NOT ON ETHEREUM'
-       
+
     //ETH is special as always
     let _tokenContractAddressL2 = null
     if(_tokenContractAddressL1 === ETHL1 ) {
       _tokenContractAddressL2 = ETHL2
       symbolL2 = 'oETH'
     }
-    
+
     /********* DO WE HAVE L2 DATA?? *************/
     // Let's go see
     //console.log("Addresses for lookup:", networkService.tokenAddresses)
 
     let tA = networkService.tokenAddresses
 
-    Object.keys(tA).map((token, i) => {
+    Object.keys(tA).forEach((token, i) => {
       //let's see if we know about this Token
       if(_tokenContractAddressL1 === tA[token].L1.toLowerCase()) {
         _tokenContractAddressL2 = tA[token].L2.toLowerCase()
@@ -117,7 +117,7 @@ export async function addToken ( tokenContractAddressL1 ) {
       symbolL2,
       decimals,
       name,
-      redalert: _decimals ? false : true 
+      redalert: _decimals ? false : true
     }
 
     store.dispatch({

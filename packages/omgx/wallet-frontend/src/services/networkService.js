@@ -14,7 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import { hexlify } from '@ethersproject/bytes'
 import { parseUnits, parseEther } from '@ethersproject/units'
 import { Watcher } from '@eth-optimism/watcher'
 import { ethers, BigNumber, utils } from 'ethers'
@@ -27,7 +26,6 @@ import { getToken } from 'actions/tokenAction'
 import { getNFTs, addNFT } from 'actions/nftAction'
 import { setMinter } from 'actions/setupAction'
 
-import { openAlert, openError } from 'actions/uiAction'
 import { WebWalletError } from 'services/errorService'
 
 //Base contracts
@@ -38,7 +36,7 @@ import L2StandardBridgeJson from '../deployment/artifacts-ovm/optimistic-ethereu
 import L1LPJson from '../deployment/artifacts/contracts/LP/L1LiquidityPool.sol/L1LiquidityPool.json'
 import L2LPJson from '../deployment/artifacts-ovm/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
 
-//Standard ERC20 jsons - should be very similar? 
+//Standard ERC20 jsons - should be very similar?
 import L1ERC20Json from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.json'
 import L2ERC20Json from '../deployment/artifacts-ovm/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
 
@@ -70,7 +68,6 @@ const swapTokens = require('../deployment/tokensSwap.json')
 
 class NetworkService {
   constructor() {
-
     this.L1Provider = null
     this.L2Provider = null
 
@@ -171,7 +168,6 @@ class NetworkService {
   }
 
   async initializeAccounts(masterSystemConfig) {
-
     console.log('NS: initializeAccounts() for', masterSystemConfig)
 
     let resOMGX = null
@@ -179,7 +175,6 @@ class NetworkService {
     let addresses = null
 
     try {
-
       console.log('Loading OMGX contract addresses')
 
       if (masterSystemConfig === 'local') {
@@ -292,20 +287,20 @@ class NetworkService {
         )
       }
 
-      if(addresses.hasOwnProperty('Proxy__OVM_L1CrossDomainMessengerFast'))
-        this.L1FastMessengerAddress = addresses.Proxy__OVM_L1CrossDomainMessengerFast
+      if (addresses.hasOwnProperty('Proxy__OVM_L1CrossDomainMessengerFast'))
+        this.L1FastMessengerAddress =
+          addresses.Proxy__OVM_L1CrossDomainMessengerFast
       else if (addresses.hasOwnProperty('OVM_L1CrossDomainMessengerFast')) {
         this.L1FastMessengerAddress = addresses.OVM_L1CrossDomainMessengerFast
       } else {
         this.L1FastMessengerAddress = addresses.L1FastMessengerAddress
       }
-      console.log('L1FastMessengerAddress set to:',this.L1FastMessengerAddress)
+      console.log('L1FastMessengerAddress set to:', this.L1FastMessengerAddress)
 
       //backwards compat
       if (addresses.hasOwnProperty('Proxy__OVM_L1StandardBridge'))
         this.L1StandardBridgeAddress = addresses.Proxy__OVM_L1StandardBridge
-      else 
-        this.L1StandardBridgeAddress = addresses.L1StandardBridge
+      else this.L1StandardBridgeAddress = addresses.L1StandardBridge
 
       this.L1_TEST_Address = addresses.TOKENS.TEST.L1
       this.L2_TEST_Address = addresses.TOKENS.TEST.L2
@@ -316,8 +311,7 @@ class NetworkService {
       //backwards compat
       if (addresses.hasOwnProperty('L2ERC721'))
         this.ERC721Address = addresses.L2ERC721
-      else 
-        this.ERC721Address = addresses.ERC721
+      else this.ERC721Address = addresses.ERC721
 
       this.L2TokenPoolAddress = addresses.L2TokenPool
       this.AtomicSwapAddress = addresses.AtomicSwap
@@ -511,11 +505,9 @@ class NetworkService {
   }
 
   async getBalances() {
-
     //console.log("Checking Balances")
 
     try {
-      
       // Always check ETH and oETH
       const layer1Balance = await this.L1Provider.getBalance(this.account)
       //console.log('ETH balance on L1:', layer1Balance.toString())
@@ -526,7 +518,7 @@ class NetworkService {
       // Add the token to our master list, if we do not have it yet
       // if the token is already in the list, then this function does nothing
       // but if a new token shows up, then it will get added
-      Object.keys(this.tokenAddresses).map((token, i) => {
+      Object.keys(this.tokenAddresses).forEach((token, i) => {
         getToken(this.tokenAddresses[token].L1)
       })
 
@@ -557,7 +549,6 @@ class NetworkService {
       //console.log(tA)
 
       for (var i = 0; i < tA.length; i++) {
-        
         let token = tA[i]
 
         //ETH is special - will break things,
@@ -584,8 +575,7 @@ class NetworkService {
         })
       }
 
-      for (var i = 0; i < tA.length; i++) {
-
+      for (let i = 0; i < tA.length; i++) {
         let token = tA[i]
 
         //ETH is special - will break things,
@@ -621,7 +611,7 @@ class NetworkService {
       //   this.L2Provider
       // ).balanceOf(this.account)
       // console.log('Balance of the test token on L2:', ERC20L2Balance.toString())
-      
+
       //console.log(layer1Balances)
       //console.log(layer2Balances)
 
@@ -655,7 +645,7 @@ class NetworkService {
         let nftName = await this.ERC721Contract.getName()
         let nftSymbol = await this.ERC721Contract.getSymbol()
 
-        for (var i = 0; i < Number(ERC721L2Balance.toString()); i++) {
+        for (let i = 0; i < Number(ERC721L2Balance.toString()); i++) {
           tokenID = BigNumber.from(i)
           nftTokenIDs = await this.ERC721Contract.tokenOfOwnerByIndex(
             this.account,
@@ -778,7 +768,7 @@ class NetworkService {
 
   async checkAllowance(
     currencyAddress,
-    targetContract  // = this.L1StandardBridgeAddress
+    targetContract // = this.L1StandardBridgeAddress
   ) {
     try {
       const ERC20Contract = new ethers.Contract(
@@ -790,7 +780,7 @@ class NetworkService {
         this.account,
         targetContract
       )
-      console.log("allowance:",allowance)
+      console.log('allowance:', allowance)
       return allowance.toString()
     } catch (error) {
       throw new WebWalletError({
@@ -802,15 +792,10 @@ class NetworkService {
     }
   }
 
-  async approveERC20_L2LP(
-    depositAmount_string,
-    currencyAddress
-  ) {
-    
+  async approveERC20_L2LP(depositAmount_string, currencyAddress) {
     try {
+      console.log('approveERC20_L2LP')
 
-      console.log("approveERC20_L2LP")
-      
       //we could use any L2 ERC contract here - just getting generic parts of the abi
       //but we know we alaways have the TEST contract, so will use that
       const L2ERC20Contract = this.L2_TEST_Contract.attach(currencyAddress)
@@ -825,7 +810,7 @@ class NetworkService {
       if (depositAmount_BN.gt(allowance_BN)) {
         const approveStatus = await L2ERC20Contract.approve(
           this.L2LPAddress,
-          depositAmount_string,
+          depositAmount_string
           //{ gasPrice: 0 } //this can be hardcoded here because, by definition, I'm always on L2
         )
         await approveStatus.wait()
@@ -835,7 +820,7 @@ class NetworkService {
         this.account,
         this.L2LPAddress
       )
-      
+
       return true
     } catch (error) {
       return false
@@ -848,16 +833,14 @@ class NetworkService {
     spenderAddress, //for example, = this.L1StandardBridgeAddress, for example
     contractABI //for example, = L1ERC20Json.abi
   ) {
-    
     try {
-
       //we could use any L2 ERC contract here - just getting generic parts of the abi
       //but we know we alaways have the TEST contract, so will use that
       const L2ERC20Contract = this.L2_TEST_Contract.attach(currencyAddress)
 
       const approveStatus = await L2ERC20Contract.approve(
-        spenderAddress,       //this is the spender
-        depositAmount_string, //and this is how much the spender will be able to spend 
+        spenderAddress, //this is the spender
+        depositAmount_string //and this is how much the spender will be able to spend
         //this.L1orL2 === 'L1' ? {} : { gasPrice: 0 }
       )
       await approveStatus.wait()
@@ -905,7 +888,6 @@ class NetworkService {
 
   //Used to move ERC20 Tokens from L1 to L2
   async depositErc20(value, currency, gasPrice, currencyL2) {
-
     try {
       const L1_TEST_Contract = this.L1_TEST_Contract.attach(currency)
 
@@ -952,7 +934,6 @@ class NetworkService {
   //Standard 7 day exit from OMGX
   //updated
   async exitOMGX(currencyAddress, value) {
-    
     const allowance = await this.checkAllowance(
       currencyAddress,
       this.L2StandardBridgeAddress
@@ -1311,10 +1292,9 @@ class NetworkService {
   /***** SWAP OFF from OMGX by depositing funds to the L2LP *****/
   /**************************************************************/
   async depositL2LP(currency, depositAmount_string) {
-
     const depositTX = await this.L2LPContract.clientDepositL2(
       depositAmount_string,
-      currency,
+      currency
       //{ gasPrice: 0 }
     )
     await depositTX.wait()
@@ -1335,9 +1315,7 @@ class NetworkService {
 
   async getPriorityTokens() {
     try {
-      let returnTokens = []
-
-      priorityTokens.map((token) => {
+      return priorityTokens.map((token) => {
         let L1 = ''
         let L2 = ''
 
@@ -1349,17 +1327,14 @@ class NetworkService {
           L2 = this.tokenAddresses[token.symbol].L2
         }
 
-        let tokenF = {
+        return {
           symbol: token.symbol,
           icon: token.icon,
           name: token.name,
           L1,
           L2,
         }
-
-        returnTokens.push(tokenF)
       })
-      return returnTokens
     } catch (error) {
       return error
     }
@@ -1367,9 +1342,8 @@ class NetworkService {
 
   async getSwapTokens() {
     try {
-      let returnTokens = []
       //get the addresses from the address files
-      swapTokens.map((token) => {
+      return swapTokens.map((token) => {
         let L1 = ''
         let L2 = ''
 
@@ -1381,17 +1355,14 @@ class NetworkService {
           L2 = this.tokenAddresses[token.symbol].L2
         }
 
-        let tokenF = {
+        return {
           symbol: token.symbol,
           icon: token.icon,
           name: token.name,
           L1,
           L2,
         }
-
-        returnTokens.push(tokenF)
       })
-      return returnTokens
     } catch (error) {
       return error
     }
@@ -1399,9 +1370,8 @@ class NetworkService {
 
   async getDropdownTokens() {
     try {
-      let returnTokens = []
       //get the addresses from the address files
-      dropdownTokens.map((token) => {
+      return dropdownTokens.map((token) => {
         let L1 = ''
         let L2 = ''
 
@@ -1413,17 +1383,14 @@ class NetworkService {
           L2 = this.tokenAddresses[token.symbol].L2
         }
 
-        let tokenF = {
+        return {
           symbol: token.symbol,
           icon: token.icon,
           name: token.name,
           L1,
           L2,
         }
-
-        returnTokens.push(tokenF)
       })
-      return returnTokens
     } catch (error) {
       return error
     }
