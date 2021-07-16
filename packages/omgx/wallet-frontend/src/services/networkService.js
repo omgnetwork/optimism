@@ -34,7 +34,6 @@ import { WebWalletError } from 'services/errorService'
 import L1StandardBridgeJson from '../deployment/artifacts/optimistic-ethereum/OVM/bridge/tokens/OVM_L1StandardBridge.sol/OVM_L1StandardBridge.json'
 import L2StandardBridgeJson from '../deployment/artifacts-ovm/optimistic-ethereum/OVM/bridge/tokens/OVM_L2StandardBridge.sol/OVM_L2StandardBridge.json'
 
-
 //OMGX LP contracts
 import L1LPJson from '../deployment/artifacts/contracts/LP/L1LiquidityPool.sol/L1LiquidityPool.json'
 import L2LPJson from '../deployment/artifacts-ovm/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
@@ -293,21 +292,14 @@ class NetworkService {
         )
       }
 
-      //this.L1FastMessengerAddress = addresses.OVM_L1CrossDomainMessengerFast
-      //backwards compat
-      if (addresses.hasOwnProperty('OVM_L1CrossDomainMessengerFast')) {
+      if(addresses.hasOwnProperty('Proxy__OVM_L1CrossDomainMessengerFast'))
+        this.L1FastMessengerAddress = addresses.Proxy__OVM_L1CrossDomainMessengerFast
+      else if (addresses.hasOwnProperty('OVM_L1CrossDomainMessengerFast')) {
         this.L1FastMessengerAddress = addresses.OVM_L1CrossDomainMessengerFast
-        console.log(
-          'L1FastMessengerAddress set to:',
-          this.L1FastMessengerAddress
-        )
       } else {
         this.L1FastMessengerAddress = addresses.L1FastMessengerAddress
-        console.log(
-          'LEGACY: L1FastMessengerAddress set to:',
-          this.L1FastMessengerAddress
-        )
       }
+      console.log('L1FastMessengerAddress set to:',this.L1FastMessengerAddress)
 
       //backwards compat
       if (addresses.hasOwnProperty('Proxy__OVM_L1StandardBridge'))
