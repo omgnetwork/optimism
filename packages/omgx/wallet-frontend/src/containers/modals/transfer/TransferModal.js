@@ -35,6 +35,7 @@ import { logAmount } from 'util/amountConvert';
 import * as styles from './TransferModal.module.scss';
 
 function TransferModal ({ open }) {
+
   const dispatch = useDispatch();
 
   const [ currency, setCurrency ] = useState('');
@@ -49,13 +50,13 @@ function TransferModal ({ open }) {
     if (balances.length && !currency) {
       setCurrency(balances[0].currency);
     }
-  }, [ balances, currency, open ]);
+  }, [ balances, currency, open ])
 
   const selectOptions = balances.map(i => ({
     title: i.symbol,
     value: i.currency,
-    subTitle: `Balance: ${logAmount(i.amount, i.decimals)}`
-  }));
+    subTitle: `Balance: ${logAmount(i.amount, i.decimals, 2)}`
+  }))
 
   async function submit () {
     if (
@@ -66,11 +67,11 @@ function TransferModal ({ open }) {
       try {
         const transferResponse = await dispatch(transfer(recipient, value, currency));
         if (transferResponse) {
-          dispatch(openAlert('Transaction was submitted'));
+          dispatch(openAlert('Transaction submitted'));
           handleClose();
         }
       } catch (err) {
-        //
+        //guess not really?
       }
     }
   }
@@ -89,11 +90,12 @@ function TransferModal ({ open }) {
 
   function getMaxTransferValue () {
 
-    const transferingBalanceObject = balances.find(i => i.currency === currency);
-    if (!transferingBalanceObject) {
-      return;
-    }
-    return logAmount(transferingBalanceObject.amount, transferingBalanceObject.decimals);
+    const transferingBalanceObject = balances.find(i => i.currency === currency)
+
+    if (!transferingBalanceObject) return
+    
+    return logAmount(transferingBalanceObject.amount, transferingBalanceObject.decimals)
+
   }
 
   function renderTransferScreen () {
@@ -102,7 +104,7 @@ function TransferModal ({ open }) {
         <h2>Transfer</h2>
         
         <div className={styles.address}>
-          {`From address : ${networkService.account}`}
+          {`From address: ${networkService.account}`}
         </div>
 
         <Input
@@ -139,12 +141,10 @@ function TransferModal ({ open }) {
 
           <Button
             className={styles.button}
-            onClick={() => {
-              submit({ useLedgerSign: false });
-            }}
+            onClick={()=>{submit({useLedgerSign: false})}}
             type='primary'
             loading={loading}
-            tooltip='Your transfer transaction is still pending. Please wait for confirmation.'
+            tooltip='Your transfer is still pending. Please wait for confirmation.'
             disabled={disabledTransfer}
           >
             TRANSFER
