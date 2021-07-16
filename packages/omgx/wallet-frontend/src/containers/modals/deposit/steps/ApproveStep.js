@@ -94,7 +94,7 @@ function ApproveStep({
     }
 
     if (res) {
-      dispatch(openAlert('Amount approval submitted.'))
+      dispatch(openAlert('Amount approval submitted'))
       checkAllowance()
     }
   }
@@ -109,7 +109,7 @@ function ApproveStep({
       res = await dispatch(resetApprove(weiAmount, currencyL1Address))
     }
     if (res) {
-      dispatch(openAlert('Amount reset.'))
+      dispatch(openAlert('Amount reset'))
       checkAllowance()
     }
   }
@@ -248,7 +248,7 @@ function ApproveStep({
               onClick={doDeposit}
               type="primary"
               style={{flex: 0, minWidth: 200}}
-              tooltip={`Your ${fast ? 'swap' : 'deposit'} is still pending. Please wait for confirmation.`}
+              tooltip={`Your transaction is still pending. Please wait for confirmation.`}
               loading={depositLoading}
               disabled={depositLoading}
             >

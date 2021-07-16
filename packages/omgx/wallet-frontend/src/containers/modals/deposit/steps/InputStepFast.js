@@ -181,15 +181,15 @@ function InputStepFast({
           unit={selectedToken ? renderUnit : null}
           placeholder={0}
           value={value}
-          onChange={(i) => setValue(i.target.value)}
+          onChange={(i)=>setValue(i.target.value)}
         />
       )}
 
       {selectedToken && selectedToken.symbol === 'ETH' && (
         <>
           <h3>
-            The L2 liquidity pool contains {LPBalance} oETH. The liquidity fee
-            is {feeRate}%.{' '}
+            Liquidity pool balance: {LPBalance} oETH<br/> 
+            Liquidity fee: {feeRate}%<br/>
             {value &&
               `You will receive
               ${((Number(value) * (100-Number(feeRate)))/100).toFixed(2)}
@@ -198,10 +198,10 @@ function InputStepFast({
         </>
       )}
 
-      {selectedToken && selectedToken.symbol === 'TEST' && (
+      {selectedToken && selectedToken.symbol !== 'ETH' && (
         <>
           <h3>
-            L2 liquidity pool ballance: {LPBalance} {selectedToken.symbol}<br/>
+            Liquidity pool ballance: {LPBalance} {selectedToken.symbol}<br/>
             Liquidity fee: {feeRate}%<br/>
             {value &&
               `You will receive
@@ -232,7 +232,7 @@ function InputStepFast({
             type="primary"
             style={{flex: 0, minWidth: 200}}
             loading={depositLoading}
-            tooltip="Your swap is still pending. Please wait for confirmation."
+            tooltip="Your transaction is still pending. Please wait for confirmation."
             disabled={disabledSubmit}
           >
             SWAP ON!
