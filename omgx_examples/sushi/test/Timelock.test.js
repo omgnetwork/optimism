@@ -7,10 +7,10 @@ const { encodeParameters } = require('./utilities/index');
 const { latest, duration, increase } = require('./utilities/time');
 const { bob, alice, carol, dev, minter } = require('./utilities/wallet');
 
-const MasterChefJSON = require('../artifacts/contracts/MasterChef.sol/MasterChef.ovm.json');
-const SushiTokenJSON = require('../artifacts/contracts/SushiToken.sol/SushiToken.ovm.json');
-const ERC20MockJSON = require('../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.ovm.json');
-const TimelockJSON = require('../artifacts/contracts/governance/Timelock.sol/Timelock.ovm.json');
+const MasterChefJSON = require('../artifacts-ovm/contracts/MasterChef.sol/MasterChef.ovm.json');
+const SushiTokenJSON = require('../artifacts-ovm/contracts/SushiToken.sol/SushiToken.ovm.json');
+const ERC20MockJSON = require('../artifacts-ovm/contracts/mocks/ERC20Mock.sol/ERC20Mock.ovm.json');
+const TimelockJSON = require('../artifacts-ovm/contracts/governance/Timelock.sol/Timelock.ovm.json');
 
 /******************************************************************/
 /*************   evm_increaseTime is not supported ****************/
@@ -45,15 +45,15 @@ describe("Timelock", function () {
   })
 
   beforeEach(async function () {
-    this.sushi = await this.Factory__SushiToken.deploy()
+    this.sushi = await this.Factory__SushiToken.deploy({gasLimit: 800000, gasPrice: 0})
     await this.sushi.deployTransaction.wait()
-    this.timelock = await this.Factory__Timelock.deploy(bob.address, "259200")
+    this.timelock = await this.Factory__Timelock.deploy(bob.address, "259200", {gasLimit: 800000, gasPrice: 0})
     await this.timelock.deployTransaction.wait()
   })
 
   it("should not allow non-owner to do operation", async function () {
     let transferOwnership
-    transferOwnership = await this.sushi.transferOwnership(this.timelock.address);
+    transferOwnership = await this.sushi.transferOwnership(this.timelock.address, {gasLimit: 800000, gasPrice: 0});
     await transferOwnership.wait()
 
     await expect(this.sushi.transferOwnership(carol.address)).to.be.eventually.rejected;
