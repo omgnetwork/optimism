@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 import React from 'react'
 import Select from 'react-select'
-import etherIcon from '../../images/ether-icon.png'
+import etherIcon from '../../images/ethereum.svg'
 import testIcon from '../../images/test.svg'
 import omgxIcon from '../../images/omg-icon-circle.png'
 import sushiIcon from '../../images/sushi-icon.png'
@@ -49,7 +49,9 @@ function IconSelect({
           <div
             key={t.symbol}
             className={styles.tokenIcon}
-            onClick={()=>{onTokenSelect(t)}}
+            onClick={() => {
+              onTokenSelect(t)
+            }}
           >
             <img src={tokenIcons[t.icon]} width="40px" alt={t.title} />
             <p className={styles.tokenSymbol}>{t.symbol}</p>
@@ -97,7 +99,9 @@ function IconSelect({
                 ...i,
               }
             })}
-            onChange={(token)=>{onTokenSelect(token)}}
+            onChange={(token) => {
+              onTokenSelect(token)
+            }}
           />
         </div>
       )}

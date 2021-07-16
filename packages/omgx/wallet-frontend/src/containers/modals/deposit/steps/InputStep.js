@@ -64,7 +64,7 @@ function InputStep({
 
         // check the balance wether user is having it or not.
         if (!balanceL1) {
-          return
+          return null
         }
 
         return {
@@ -74,10 +74,11 @@ function InputStep({
           showInDD: !!isDropdown,
           balanceL1,
           balance: balanceL1,
+          symbol: t.symbolL1,
         }
       })
       .filter(Boolean)
-
+    console.log(allOptions)
     setTokenOptions(allOptions)
   }, [tokens, priorityTokens, dropdownTokens, balancesL1])
 
@@ -86,12 +87,13 @@ function InputStep({
   }, [])
 
   useEffect(() => {
+    console.log('selectedToken', selectedToken)
     if (selectedToken && selectedToken.label === 'Manual') {
       setCurrencyL1Address('')
       setCurrencyL2Address('')
     } else if (selectedToken) {
-      setCurrencyL1Address(selectedToken.L1address || '')
-      setCurrencyL2Address(selectedToken.L2address || '')
+      setCurrencyL1Address(selectedToken.addressL1 || '')
+      setCurrencyL2Address(selectedToken.addressL2 || '')
     }
   }, [selectedToken, setCurrencyL1Address, setCurrencyL2Address])
 

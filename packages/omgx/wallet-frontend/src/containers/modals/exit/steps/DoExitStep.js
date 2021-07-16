@@ -118,6 +118,7 @@ function DoExitStep({ handleClose }) {
           showInDD: !!isDropdown,
           balanceL2,
           balance: balanceL2,
+          symbol: t.symbolL2,
         }
       })
       .filter(Boolean)
@@ -129,7 +130,7 @@ function DoExitStep({ handleClose }) {
     if (selectedToken && selectedToken.name === 'Manual') {
       setCurrency('')
     } else if (!!selectedToken) {
-      setCurrency(selectedToken.L2address || '')
+      setCurrency(selectedToken.addressL2 || '')
     }
   }, [selectedToken, setCurrency])
 

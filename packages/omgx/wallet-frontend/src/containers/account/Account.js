@@ -23,7 +23,8 @@ import { isEqual } from 'lodash'
 import React, { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
-  selectlayer1Balance, selectlayer2Balance
+  selectlayer1Balance,
+  selectlayer2Balance,
 } from 'selectors/balanceSelector'
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectIsSynced } from 'selectors/statusSelector'
@@ -31,11 +32,6 @@ import networkService from 'services/networkService'
 import truncate from 'truncate-middle'
 import { logAmount } from 'util/amountConvert'
 import * as styles from './Account.module.scss'
-import bunny_sad from 'images/bunny_sad.svg'
-import { selectLoading } from 'selectors/loadingSelector'
-import networkService from 'services/networkService'
-import bunny_sad from 'images/bunny_sad.svg';
-import { logAmount } from 'util/amountConvert';
 
 function Account() {
   const dispatch = useDispatch()
