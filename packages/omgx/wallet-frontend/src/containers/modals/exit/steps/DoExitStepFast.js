@@ -208,9 +208,7 @@ function DoExitStepFast({ handleClose }) {
           placeholder={0}
           value={value}
           type="number"
-          onChange={(i) => {
-            setExitAmount(i.target.value)
-          }}
+          onChange={(i)=>{setExitAmount(i.target.value)}}
           unit={selectedToken ? renderUnit : ''}
           maxValue={selectedToken.balanceL2}
         />

@@ -82,7 +82,9 @@ function ApproveStep({
   }
 
   async function doApprove() {
+    
     let res
+    
     if (fast) {
       res = await dispatch(
         approveERC20(weiAmount, currencyL1Address, networkService.L1LPAddress)
@@ -92,7 +94,7 @@ function ApproveStep({
     }
 
     if (res) {
-      dispatch(openAlert('ERC20 approval submitted.'))
+      dispatch(openAlert('Amount approval submitted.'))
       checkAllowance()
     }
   }
@@ -107,7 +109,7 @@ function ApproveStep({
       res = await dispatch(resetApprove(weiAmount, currencyL1Address))
     }
     if (res) {
-      dispatch(openAlert('ERC20 approval reset successful.'))
+      dispatch(openAlert('Amount reset.'))
       checkAllowance()
     }
   }
@@ -129,9 +131,8 @@ function ApproveStep({
       if (fast) {
         dispatch(
           openAlert(
-            `${tokenName} was deposited to the L1LP. You will receive ${(
-              Number(value) * 0.97
-            ).toFixed(2)} ${tokenName} on L2`
+            `${tokenName} was deposited to the L1LP. You will receive 
+             ${(Number(value) * 0.97).toFixed(2)} ${tokenName} on L2`
           )
         )
       } else {
@@ -142,7 +143,11 @@ function ApproveStep({
   }
 
   const renderCancelButton = (
-    <Button onClick={handleClose} type="outline" style={{ flex: 0 }}>
+    <Button 
+      onClick={handleClose} 
+      type="outline" 
+      style={{flex: 0}}
+    >
       CANCEL
     </Button>
   )
@@ -155,11 +160,22 @@ function ApproveStep({
     />
   )
 
-  const tokenName = tokenInfo.symbol || tokenInfo.currency
+  const tokenName = tokenInfo.symbolL1 || tokenInfo.currency
 
   return (
     <>
-      <h2>Approval</h2>
+
+      {!allowDeposit && (
+        <h2>Approve Amount</h2>
+      )}
+
+      {allowDeposit && fast && (
+        <h2>Complete Swap</h2>
+      )}
+
+      {allowDeposit && !fast && (
+        <h2>Complete Deposit</h2>
+      )}
 
       {!allowance && (
         <div className={styles.loader}>
@@ -170,7 +186,7 @@ function ApproveStep({
       {allowance === '0' && (
         <>
           <p>
-            {`To deposit ${value.toString()} ${tokenName}, you first need to allow us to hold ${value.toString()} of your ${tokenName}. Click below to approve.`}
+            {`To deposit ${value.toString()} ${tokenName}, please first approve the amount.`}
           </p>
           {renderGasPicker}
           <div className={styles.buttons}>
@@ -178,12 +194,12 @@ function ApproveStep({
             <Button
               onClick={doApprove}
               type="primary"
-              style={{ flex: 0 }}
-              tooltip="Your approval transaction is still pending. Please wait for confirmation."
+              style={{flex: 0, minWidth: 200}}
+              tooltip="Your amount approval is still pending. Please wait for confirmation."
               loading={approveLoading}
               disabled={approveLoading}
             >
-              APPROVE
+              APPROVE AMOUNT
             </Button>
           </div>
         </>
@@ -194,14 +210,14 @@ function ApproveStep({
         new BN(allowance).lt(new BN(weiAmount)) && (
           <>
             <p>
-              {`You are only approved to deposit ${logAmount(
-                allowance,
-                tokenInfo.decimals
-              )} ${tokenName}. Since you want to deposit ${value} ${tokenName}, you will need to reset your allowance.`}
+              {`You are approved for  
+                ${logAmount(allowance,tokenInfo.decimals)} ${tokenName}. 
+                Since you want to deposit ${value} ${tokenName}, 
+                please approve the new amount.`}
             </p>
             <p>
-              You will be prompted with 2 approval requests. One to reset the
-              allowance to 0, and another for the new amount.
+              You will be prompted with 2 requests. One to reset the
+              amount to 0, and the other for the new amount.
             </p>
             {renderGasPicker}
             <div className={styles.buttons}>
@@ -209,12 +225,12 @@ function ApproveStep({
               <Button
                 onClick={doReset}
                 type="primary"
-                style={{ flex: 0 }}
-                tooltip="Your reset transaction is still pending. Please wait for confirmation."
+                style={{flex: 0, minWidth: 200}}
+                tooltip="Your approval is still pending. Please wait for confirmation."
                 loading={resetLoading}
                 disabled={resetLoading}
               >
-                RESET
+                INCREASE AMOUNT
               </Button>
             </div>
           </>
@@ -223,7 +239,7 @@ function ApproveStep({
       {allowDeposit && (
         <>
           <p>
-            {`Your approval request for ${value} ${tokenName} was confirmed. Click below to make the deposit.`}
+            {`Amount approved. To complete the transaction, click ${fast ? `COMPLETE SWAP` : `DEPOSIT`}`}
           </p>
           {renderGasPicker}
           <div className={styles.buttons}>
@@ -231,16 +247,17 @@ function ApproveStep({
             <Button
               onClick={doDeposit}
               type="primary"
-              style={{ flex: 0 }}
-              tooltip="Your deposit transaction is still pending. Please wait for confirmation."
+              style={{flex: 0, minWidth: 200}}
+              tooltip={`Your ${fast ? 'swap' : 'deposit'} is still pending. Please wait for confirmation.`}
               loading={depositLoading}
               disabled={depositLoading}
             >
-              DEPOSIT
+              {fast ? `COMPLETE SWAP` : `DEPOSIT`} 
             </Button>
           </div>
         </>
       )}
+
     </>
   )
 }

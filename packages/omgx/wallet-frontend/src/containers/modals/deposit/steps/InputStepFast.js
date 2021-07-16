@@ -61,10 +61,9 @@ function InputStepFast({
         dispatch(setActiveHistoryTab1('Deposits'))
         dispatch(
           openAlert(
-            `ETH was deposited the the L1LP. You will receive ${(
-              (Number(value) * (100 - Number(feeRate))) /
-              100
-            ).toFixed(2)} oETH on L2`
+            `ETH was deposited into the L1LP. You will receive 
+            ${((Number(value) * (100 - Number(feeRate)))/100).toFixed(2)} 
+            oETH on L2`
           )
         )
         handleClose()
@@ -193,8 +192,8 @@ function InputStepFast({
             is {feeRate}%.{' '}
             {value &&
               `You will receive
-              ${((Number(value) * (100 - Number(feeRate))) / 100).toFixed(2)}
-              oETH on L2.`}
+              ${((Number(value) * (100-Number(feeRate)))/100).toFixed(2)}
+              oETH on L2`}
           </h3>
         </>
       )}
@@ -202,12 +201,12 @@ function InputStepFast({
       {selectedToken && selectedToken.symbol === 'TEST' && (
         <>
           <h3>
-            The L2 liquidity pool contains {LPBalance} {selectedToken.symbol}.
-            The liquidity fee is {feeRate}%.{' '}
+            L2 liquidity pool ballance: {LPBalance} {selectedToken.symbol}<br/>
+            Liquidity fee: {feeRate}%<br/>
             {value &&
               `You will receive
-              ${((Number(value) * (100 - Number(feeRate))) / 100).toFixed(2)}
-              ${selectedToken.symbol} on L2.`}
+              ${((Number(value) * (100-Number(feeRate)))/100).toFixed(2)}
+              ${selectedToken.symbol} on L2`}
           </h3>
         </>
       )}
@@ -220,26 +219,30 @@ function InputStepFast({
       )}
 
       <div className={styles.buttons}>
-        <Button onClick={handleClose} type="outline" style={{ flex: 0 }}>
+        <Button 
+          onClick={handleClose} 
+          type="outline" 
+          style={{flex: 0}}
+        >
           CANCEL
         </Button>
         {selectedToken && selectedToken.symbol === 'ETH' && (
           <Button
             onClick={depositETH}
             type="primary"
-            style={{ flex: 0 }}
+            style={{flex: 0, minWidth: 200}}
             loading={depositLoading}
-            tooltip="Your deposit is still pending. Please wait for confirmation."
+            tooltip="Your swap is still pending. Please wait for confirmation."
             disabled={disabledSubmit}
           >
-            DEPOSIT
+            SWAP ON!
           </Button>
         )}
         {selectedToken && selectedToken.symbol !== 'ETH' && (
           <Button
             onClick={onNext}
             type="primary"
-            style={{ flex: 0 }}
+            style={{flex: 0, minWidth: 200}}
             disabled={disabledSubmit}
           >
             NEXT
