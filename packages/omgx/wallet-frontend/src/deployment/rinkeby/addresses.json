@@ -1,8 +1,8 @@
 {
-  "AddressManager": "",
-  "OVM_L1CrossDomainMessenger": "",
-  "Proxy__OVM_L1CrossDomainMessenger": "",
-  "Proxy__OVM_L1StandardBridge": "",
+  "AddressManager": "0x93A96D6A5beb1F661cf052722A1424CDDA3e9418",
+  "OVM_L1CrossDomainMessenger": "0x8109f1Af0e8A74e393703Ca5447C5414E1946500",
+  "Proxy__OVM_L1CrossDomainMessenger": "0xF10EEfC14eB5b7885Ea9F7A631a21c7a82cf5D76",
+  "Proxy__OVM_L1StandardBridge": "0xDe085C82536A06b40D20654c2AbA342F2abD7077",
   "TOKENS": {
     "TEST": {
       "L1": "0xaB1e3377dEED7811beADf4b5773B59fB267089fb",
@@ -53,7 +53,6 @@
   "L2LiquidityPool": "0xEd3417AE90fA0BfE15Fab8b949a9a459F9f4ef26",
   "L1StandardBridge": "0xDe085C82536A06b40D20654c2AbA342F2abD7077",
   "L1MessengerAddress": "0xF10EEfC14eB5b7885Ea9F7A631a21c7a82cf5D76",
-  "L1FastMessengerAddress": "0xF296F4ca6A5725F55EdF1C67F80204871E65F87d",
   "OVM_L1CrossDomainMessengerFast": "0xF296F4ca6A5725F55EdF1C67F80204871E65F87d",
   "L2TokenPool": "0x82B178EE692572e21D73d5F1ebC1c7c438Fc52DD",
   "AtomicSwap": "0xfCc9525fDDbafbD3393821F7dAf96F68Bba93294",
