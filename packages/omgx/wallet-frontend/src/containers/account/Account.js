@@ -13,28 +13,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Send, ArrowBack, ArrowForward } from '@material-ui/icons';
-import { isEqual } from 'lodash';
-import truncate from 'truncate-middle';
+import React, { useCallback } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Send, ArrowBack, ArrowForward } from '@material-ui/icons'
+import { isEqual } from 'lodash'
+import truncate from 'truncate-middle'
 
-import { selectLoading } from 'selectors/loadingSelector';
-import { selectIsSynced } from 'selectors/statusSelector';
-import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector';
+import { selectLoading } from 'selectors/loadingSelector'
+import { selectIsSynced } from 'selectors/statusSelector'
+import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector'
 
-import { openModal, openAlert, openError } from 'actions/uiAction';
+import { openModal } from 'actions/uiAction'
 
-import Copy from 'components/copy/Copy';
-import Button from 'components/button/Button';
-import { logAmount } from 'util/amountConvert';
+import Copy from 'components/copy/Copy'
+import Button from 'components/button/Button'
+import { logAmount } from 'util/amountConvert'
+import networkService from 'services/networkService'
 
-import networkService from 'services/networkService';
+import bunny_happy from 'images/bunny_happy.svg'
+import bunny_sad from 'images/bunny_sad.svg'
 
-import bunny_happy from 'images/bunny_happy.svg';
-import bunny_sad from 'images/bunny_sad.svg';
-
-import * as styles from './Account.module.scss';
+import * as styles from './Account.module.scss'
 
 function Account () {
 
@@ -80,7 +79,6 @@ function Account () {
 
   const wAddress = networkService.account ? truncate(networkService.account, 6, 4, '...') : '';
   const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
-  const masterConfig = networkService.masterConfig;
 
   return (
     <div className={styles.Account}>
@@ -186,9 +184,9 @@ function Account () {
               onClick={() => handleModalClick('depositModal', true)}
               type='primary'
               disabled={!isSynced || criticalTransactionLoading}
-              style={{maxWidth: '150px', padding: '8px'}}
+              style={{width: '150px', padding: '8px'}}
             >
-              FAST ONRAMP<ArrowForward/>
+              FAST DEPOSIT<ArrowForward/>
             </Button>
           </div>
         }
@@ -198,9 +196,9 @@ function Account () {
               onClick={() => handleModalClick('exitModal', true)}
               type='primary'
               disabled={!isSynced || criticalTransactionLoading}
-              style={{maxWidth: '150px', padding: '8px'}}
+              style={{width: '150px', padding: '8px'}}
             > 
-            <ArrowBack/>FAST OFFRAMP
+            <ArrowBack/>FAST EXIT
             </Button>
           </div>
         }

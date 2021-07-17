@@ -94,13 +94,12 @@ class Farm extends React.Component {
         <h2>Stake tokens to the liquidity pool to earn</h2>
         <div className={styles.Note}>
           Your tokens will be deposited into the liquidity pool. 
-          Meanwhile, you are rewarded with a portion of the fees collected from the swap users.
+          You will share the fees collected from the swap users.
         </div>
         <h3>L1 Liquidity Pool</h3>
         <div className={styles.TableContainer}>
           {Object.keys(poolInfo.L1LP).map((v, i) => {
-            const isETH = this.isETH(v);
-            console.log("isETH:",isETH)
+            const isETH = this.isETH(v)
             return (
               <FarmList 
                 key={i}
@@ -117,7 +116,7 @@ class Farm extends React.Component {
         <h3>L2 Liquidity Pool</h3>
         <div className={styles.TableContainer}>
           {Object.keys(poolInfo.L2LP).map((v, i) => {
-            const isETH = this.isETH(v);
+            const isETH = this.isETH(v)
             return (
               <FarmList 
                 key={i}

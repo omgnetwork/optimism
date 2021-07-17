@@ -415,7 +415,8 @@ describe('Liquidity Pool Test', async () => {
     await expect(withdrawTX.wait()).to.be.eventually.rejected;
   })
 
-  it("should withdraw reward", async () => {
+  it("should withdraw reward from L2 pool", async () => {
+    
     const preL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
     const preBobUserInfo = await L2LiquidityPool.userInfo(L2ERC20.address, env.bobl2Wallet.address)
     const pendingReward = BigNumber.from(preBobUserInfo.pendingReward).div(2)
@@ -439,7 +440,32 @@ describe('Liquidity Pool Test', async () => {
     expect(preL2ERC20Balance).to.deep.eq(postL2ERC20Balance.sub(pendingReward))
   })
 
-  it("shouldn't withdraw reward", async () => {
+  it("should withdraw reward from L1 pool", async () => {
+    
+    const preL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
+    const preBobUserInfo = await L1LiquidityPool.userInfo(L1ERC20.address, env.bobl1Wallet.address)
+    const pendingReward = BigNumber.from(preBobUserInfo.pendingReward).div(2)
+
+    const withdrawRewardTX = await L1LiquidityPool.withdrawReward(
+      pendingReward,
+      L1ERC20.address,
+      env.bobl1Wallet.address//,
+      //{gasLimit: 800000, gasPrice: 0}
+    )
+    await withdrawRewardTX.wait()
+
+    const postBobUserInfo = await L1LiquidityPool.userInfo(
+      L1ERC20.address,
+      env.bobl1Wallet.address//,
+      //{gasLimit: 800000, gasPrice: 0}
+    )
+    const postL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
+
+    expect(postBobUserInfo.pendingReward).to.deep.eq(preBobUserInfo.pendingReward.sub(pendingReward))
+    expect(preL1ERC20Balance).to.deep.eq(postL1ERC20Balance.sub(pendingReward))
+  })
+
+  it("shouldn't withdraw reward from L2 pool", async () => {
     const withdrawRewardAmount = utils.parseEther("100")
 
     const withdrawRewardTX = await L2LiquidityPool.withdrawReward(

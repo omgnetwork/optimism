@@ -44,9 +44,9 @@ function InputStep({
   useEffect(() => {
     let allOptions = values(tokens)
       .map((t) => {
-        let isBalanceL1Exists = balancesL1.find((i) => i.symbol === t.symbol)
-        let isPriority = priorityTokens.find((i) => i.symbol === t.symbol)
-        let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbol)
+        let isBalanceL1Exists = balancesL1.find((i) => i.symbol === t.symbolL1)
+        let isPriority = priorityTokens.find((i) => i.symbol === t.symbolL1)
+        let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbolL1)
 
         let balanceL1 = ''
         if (isBalanceL1Exists) {
@@ -64,7 +64,7 @@ function InputStep({
 
         // check the balance wether user is having it or not.
         if (!balanceL1) {
-          return
+          return null
         }
 
         return {
@@ -90,8 +90,8 @@ function InputStep({
       setCurrencyL1Address('')
       setCurrencyL2Address('')
     } else if (selectedToken) {
-      setCurrencyL1Address(selectedToken.L1address || '')
-      setCurrencyL2Address(selectedToken.L2address || '')
+      setCurrencyL1Address(selectedToken.addressL1 || '')
+      setCurrencyL2Address(selectedToken.addressL2 || '')
     }
   }, [selectedToken, setCurrencyL1Address, setCurrencyL2Address])
 
@@ -188,14 +188,16 @@ function InputStep({
         </>
       ) : null}
 
-      <Input
-        label="Amount to deposit into OMGX"
-        type="number"
-        unit={selectedToken && selectedToken.symbol ? renderUnit : ''}
-        placeholder={0}
-        value={value}
-        onChange={(i) => setValue(i.target.value)}
-      />
+      {selectedToken &&
+        <Input
+          label="Amount to deposit into OMGX"
+          type="number"
+          unit={selectedToken && selectedToken.symbol ? renderUnit : ''}
+          placeholder={0}
+          value={value}
+          onChange={(i) => setValue(i.target.value)}
+        />
+      }
 
       <div className={styles.buttons}>
         <Button onClick={handleClose} type="outline" style={{ flex: 0 }}>

@@ -115,7 +115,7 @@ function InputStepFast({
           }
 
           if (!balanceL1) {
-            return
+            return null
           }
 
           return {
@@ -188,11 +188,10 @@ function InputStepFast({
       {selectedToken && selectedToken.symbol === 'ETH' && (
         <>
           <h3>
-            Liquidity pool balance: {LPBalance} oETH<br/> 
-            Liquidity fee: {feeRate}%<br/>
+            Swap fee: {feeRate}%<br/>
             {value &&
               `You will receive
-              ${((Number(value) * (100-Number(feeRate)))/100).toFixed(2)}
+              ${((Number(value) * (100 - Number(feeRate))) / 100).toFixed(2)}
               oETH on L2`}
           </h3>
         </>
@@ -201,11 +200,10 @@ function InputStepFast({
       {selectedToken && selectedToken.symbol !== 'ETH' && (
         <>
           <h3>
-            Liquidity pool ballance: {LPBalance} {selectedToken.symbol}<br/>
-            Liquidity fee: {feeRate}%<br/>
+            Swap fee: {feeRate}%<br/>
             {value &&
               `You will receive
-              ${((Number(value) * (100-Number(feeRate)))/100).toFixed(2)}
+              ${((Number(value) * (100 - Number(feeRate))) / 100).toFixed(2)}
               ${selectedToken.symbol} on L2`}
           </h3>
         </>
@@ -213,8 +211,8 @@ function InputStepFast({
 
       {Number(LPBalance) < Number(value) && (
         <h3 style={{ color: 'red' }}>
-          The L2 liquidity pool balance is too low to cover your swap - please
-          use the traditional deposit instead.
+          The liquidity pool balance (of {LPBalance}) is too low to cover your swap - please
+          use the traditional deposit or reduce the amount to swap.
         </h3>
       )}
 

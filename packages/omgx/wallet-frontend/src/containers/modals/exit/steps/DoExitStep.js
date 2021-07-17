@@ -82,16 +82,16 @@ function DoExitStep({ handleClose }) {
       .map((t) => {
         let isBalanceL2Exists = balancesL2.find((b) => {
           if (
-            (t.symbol === 'ETH' && b.symbol === 'oETH') ||
-            t.symbol === b.symbol
+            (t.symbolL2 === 'ETH' && b.symbol === 'oETH') ||
+            t.symbolL2 === b.symbol
           ) {
             return true
           }
           return false
         })
 
-        let isPriority = priorityTokens.find((i) => i.symbol === t.symbol)
-        let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbol)
+        let isPriority = priorityTokens.find((i) => i.symbol === t.symbolL2)
+        let isDropdown = dropdownTokens.find((i) => i.symbol === t.symbolL2)
         let balanceL2 = ''
         
         if (isBalanceL2Exists) {
@@ -109,7 +109,7 @@ function DoExitStep({ handleClose }) {
 
         // check the balance whether user has this token
         if (!balanceL2) {
-          return
+          return null
         }
 
         return {
@@ -130,7 +130,7 @@ function DoExitStep({ handleClose }) {
     if (selectedToken && selectedToken.name === 'Manual') {
       setCurrency('')
     } else if (!!selectedToken) {
-      setCurrency(selectedToken.L2address || '')
+      setCurrency(selectedToken.addressL2 || '')
     }
   }, [selectedToken, setCurrency])
 

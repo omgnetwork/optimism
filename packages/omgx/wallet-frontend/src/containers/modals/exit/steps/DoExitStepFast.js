@@ -83,27 +83,31 @@ function DoExitStepFast({ handleClose }) {
       dispatch(openAlert(`Transaction was approved`))
       setAllowance(powAmount(value, 18))
     }
+  }
 
+  const receivableAmount = (value) => {
+     return (Number(value) * ((100 - Number(feeRate)) / 100)).toFixed(2)
   }
 
   async function doExit() {
 
     let res = await dispatch(
       depositL2LP(
-        currency, 
-        powAmount(value, 18), //takes a value, converts to 18 decimals, generates string
+        currency,
+        powAmount(value, 18) //takes a value, converts to 18 decimals, generates string
       )
     )
 
-    let currencyL1 = selectedToken.symbol //currencySymbols[currency];
+    let currencyL1 = selectedToken.symbol
 
     //person will receive ETH on the L1, not oETH
-    if(currencyL1 === 'oETH') {
+    if (currencyL1 === 'oETH') {
       currencyL1 = 'ETH'
     }
 
     if (res) {
-      dispatch(openAlert(`${selectedToken.symbol} was deposited into the L2 liquidity pool. You will receive ${(Number(value) * 0.97).toFixed(2)} ${currencyL1} on L1.`));
+      dispatch(openAlert(`${selectedToken.symbol} was deposited into the L2 liquidity pool. 
+        You will receive ${receivableAmount(value)} ${currencyL1} on L1.`));
       handleClose();
     } else {
       dispatch(openError(`Failed to fast-exit fund from L2`));
@@ -163,7 +167,7 @@ function DoExitStepFast({ handleClose }) {
           }
 
           if (!balanceL2) {
-            return
+            return null
           }
 
           return {
@@ -190,9 +194,30 @@ function DoExitStepFast({ handleClose }) {
     </div>
   )
 
+  console.log(allowance)
+  console.log(value)
+  console.log(typeof(value))
+
+  const allowanceTooSmall = BigNumber.from(allowance).lt(BigNumber.from(powAmount(value ? value : 0, 18)))
+
   return (
     <>
-      <h2>Fast Exit</h2>
+
+      {!selectedToken && 
+        <h2>Fast Exit</h2>
+      }
+
+      {selectedToken && value === '' &&
+        <h2>Select Amount</h2>
+      }
+
+      {selectedToken && Number(value) > 0 && allowanceTooSmall &&
+        <h2>Approve Amount</h2>
+      }
+
+      {selectedToken && allowance > 0 &&
+        <h2>Complete fast exit</h2>
+      }
 
       {!selectedToken ? (
         <IconSelect
@@ -202,7 +227,7 @@ function DoExitStepFast({ handleClose }) {
         />
       ) : null}
 
-      {!!selectedToken && (
+      {selectedToken && (
         <Input
           label="Amount to exit"
           placeholder={0}
@@ -216,37 +241,36 @@ function DoExitStepFast({ handleClose }) {
 
       {selectedToken && selectedToken.symbol === 'oETH' && (
         <h3>
-          L1 liquidity pool balance: {LPBalance} ETH<br/>
-          Liquidity fee:{' '}{feeRate}%<br/>
+          Fee:{' '}{feeRate}%<br/>
           {value &&
             `You will receive 
-            ${(Number(value) * 0.97).toFixed(2)} 
+            ${receivableAmount(value)} 
             ETH on L1`}
         </h3>
       )}
 
       {selectedToken && selectedToken.symbol !== 'oETH' && (
         <h3>
-          L1 liquidity pool balance: {LPBalance} {selectedToken.symbol}<br/>
-          Liquidity fee:{' '}{feeRate}%<br/>
+          Fee:{' '}{feeRate}%<br/>
           {value &&
             `You will receive 
-            ${(Number(value) * 0.97).toFixed(2)} 
+            ${receivableAmount(value)} 
             ${selectedToken.symbol} 
             on L1`}
         </h3>
       )}
 
-      {BigNumber.from(allowance).lt(BigNumber.from(powAmount(value ? value : 0, 18))) && (
+      {allowanceTooSmall && (
         <h3>
-          To exit {Number(value).toFixed(2)}{' '}{selectedToken.symbol},
+          To exit {Number(value).toFixed(2)} {selectedToken.symbol},
           you first need to approve the amount.
         </h3>
       )}
 
       {Number(LPBalance) < Number(value) && (
         <h3 style={{color: 'red'}}>
-          The L1 liquidity pool is too small to cover your proposed swap.
+          The liquidity pool balance (of {LPBalance}) is too low to cover your swap - please
+          use the traditional exit or reduce the amount to swap.
         </h3>
       )}
 
@@ -259,18 +283,20 @@ function DoExitStepFast({ handleClose }) {
         >
           CANCEL
         </Button>
-        {BigNumber.from(allowance).lt(BigNumber.from(powAmount(value ? value : 0, 18))) ? 
+        {allowanceTooSmall && 
           <Button
             onClick={doApprove}
-            type="primary"
+            type='primary'
             style={{flex: 0, minWidth: 200}}
             loading={approveLoading}
             className={styles.button}
-            tooltip="Your exit is still pending. Please wait for confirmation."
+            tooltip='Your exit is still pending. Please wait for confirmation.'
             disabled={disabledSubmit}
           >
             APPROVE AMOUNT
-          </Button> : 
+          </Button>
+        }
+        {selectedToken && !allowanceTooSmall && 
           <Button
             onClick={doExit}
             type='primary'
@@ -280,7 +306,7 @@ function DoExitStepFast({ handleClose }) {
             tooltip='Your exit is still pending. Please wait for confirmation.'
             disabled={disabledSubmit}
           >
-            FAST EXIT TO L1
+            FAST EXIT
           </Button>
         }
       </div>

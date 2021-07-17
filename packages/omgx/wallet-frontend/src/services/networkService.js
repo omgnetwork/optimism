@@ -14,7 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import { hexlify } from '@ethersproject/bytes'
 import { parseUnits, parseEther } from '@ethersproject/units'
 import { Watcher } from '@eth-optimism/watcher'
 import { ethers, BigNumber, utils } from 'ethers'
@@ -27,7 +26,6 @@ import { getToken } from 'actions/tokenAction'
 import { getNFTs, addNFT } from 'actions/nftAction'
 import { setMinter } from 'actions/setupAction'
 
-import { openAlert, openError } from 'actions/uiAction'
 import { WebWalletError } from 'services/errorService'
 
 //Base contracts
@@ -43,7 +41,6 @@ import L1ERC20Json from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.j
 import L2ERC20Json from '../deployment/artifacts-ovm/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
 
 //OMGX L2 Contracts
-
 import ERC721Json from '../deployment/artifacts-ovm/contracts/ERC721Mock.sol/ERC721Mock.json'
 import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol/TokenPool.json'
 import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
@@ -69,6 +66,7 @@ const dropdownTokens = require('../deployment/tokensDropdown.json')
 const swapTokens = require('../deployment/tokensSwap.json')
 
 class NetworkService {
+
   constructor() {
 
     this.L1Provider = null
@@ -526,7 +524,7 @@ class NetworkService {
       // Add the token to our master list, if we do not have it yet
       // if the token is already in the list, then this function does nothing
       // but if a new token shows up, then it will get added
-      Object.keys(this.tokenAddresses).map((token, i) => {
+      Object.keys(this.tokenAddresses).forEach((token, i) => {
         getToken(this.tokenAddresses[token].L1)
       })
 
@@ -556,7 +554,7 @@ class NetworkService {
 
       //console.log(tA)
 
-      for (var i = 0; i < tA.length; i++) {
+      for (let i = 0; i < tA.length; i++) {
         
         let token = tA[i]
 
@@ -584,7 +582,7 @@ class NetworkService {
         })
       }
 
-      for (var i = 0; i < tA.length; i++) {
+      for (let i = 0; i < tA.length; i++) {
 
         let token = tA[i]
 
@@ -655,7 +653,7 @@ class NetworkService {
         let nftName = await this.ERC721Contract.getName()
         let nftSymbol = await this.ERC721Contract.getSymbol()
 
-        for (var i = 0; i < Number(ERC721L2Balance.toString()); i++) {
+        for (let i = 0; i < Number(ERC721L2Balance.toString()); i++) {
           tokenID = BigNumber.from(i)
           nftTokenIDs = await this.ERC721Contract.tokenOfOwnerByIndex(
             this.account,
@@ -1019,7 +1017,11 @@ class NetworkService {
   /***** Pool, User Info, to populate the Farm tab *****/
   /*****************************************************/
   async getL1LPInfo() {
-    const tokenAddressList = [this.L1_ETH_Address, this.L1_TEST_Address]
+    
+    const tokenAddressList = [
+      this.L1_ETH_Address, 
+      this.L1_TEST_Address
+    ]
 
     const L1LPContract = new ethers.Contract(
       this.L1LPAddress,
@@ -1083,14 +1085,18 @@ class NetworkService {
         l1TokenAddress: tokenAddress,
         amount: userTokenInfo.amount.toString(),
         pendingReward: userTokenInfo.pendingReward.toString(),
-        rewardDebt: userTokenInfo.rewardDebt.toString(),
+        rewardDebt: userTokenInfo.rewardDebt.toString()
       }
     }
     return { poolInfo, userInfo }
   }
 
   async getL2LPInfo() {
-    const tokenAddressList = [this.L2_ETH_Address, this.L2_TEST_Address]
+    
+    const tokenAddressList = [
+      this.L2_ETH_Address, 
+      this.L2_TEST_Address
+    ]
 
     const L2LPContract = new ethers.Contract(
       this.L2LPAddress,
@@ -1102,6 +1108,7 @@ class NetworkService {
     const userInfo = {}
 
     for (let tokenAddress of tokenAddressList) {
+      
       let tokenBalance
 
       if (tokenAddress === this.L2_ETH_Address) {
@@ -1154,9 +1161,10 @@ class NetworkService {
         l2TokenAddress: tokenAddress,
         amount: userTokenInfo.amount.toString(),
         pendingReward: userTokenInfo.pendingReward.toString(),
-        rewardDebt: userTokenInfo.rewardDebt.toString(),
+        rewardDebt: userTokenInfo.rewardDebt.toString()
       }
     }
+
     return { poolInfo, userInfo }
   }
 
@@ -1191,15 +1199,35 @@ class NetworkService {
   }
 
   /***********************************************/
-  /*****              Get Reward             *****/
+  /*****           Get Reward L1             *****/
   /***********************************************/
-  async getReward(currency, value) {
+  async getRewardL1(currencyL1Address, userReward_BN) {
+    
+    try {
+      const withdrawRewardTX = await this.L1LPContract.withdrawReward(
+        userReward_BN,
+        currencyL1Address,
+        this.account,
+        //{ gasPrice: 0 }
+      )
+      await withdrawRewardTX.wait()
+      return true
+    } catch (err) {
+      return false
+    }
+  }
+
+  /***********************************************/
+  /*****           Get Reward L2             *****/
+  /***********************************************/
+  async getRewardL2(currencyL2Address, userReward_BN) {
+    
     try {
       const withdrawRewardTX = await this.L2LPContract.withdrawReward(
-        value,
-        currency,
+        userReward_BN,
+        currencyL2Address,
         this.account,
-        { gasPrice: 0 }
+        //{ gasPrice: 0 }
       )
       await withdrawRewardTX.wait()
       return true
@@ -1252,7 +1280,7 @@ class NetworkService {
     )
     console.log(' got L1->L2 message hash', l1ToL2msgHash)
     const l2Receipt = await this.watcher.getL2TransactionReceipt(l1ToL2msgHash)
-    console.log(' completed Deposit! L2 tx hash:', l2Receipt.transactionHash)
+    console.log(' completed swap-on ! L2 tx hash:', l2Receipt.transactionHash)
 
     return l2Receipt
   }
@@ -1335,9 +1363,9 @@ class NetworkService {
 
   async getPriorityTokens() {
     try {
-      let returnTokens = []
 
-      priorityTokens.map((token) => {
+      return priorityTokens.map((token) => {
+
         let L1 = ''
         let L2 = ''
 
@@ -1349,7 +1377,7 @@ class NetworkService {
           L2 = this.tokenAddresses[token.symbol].L2
         }
 
-        let tokenF = {
+        return {
           symbol: token.symbol,
           icon: token.icon,
           name: token.name,
@@ -1357,9 +1385,8 @@ class NetworkService {
           L2,
         }
 
-        returnTokens.push(tokenF)
       })
-      return returnTokens
+
     } catch (error) {
       return error
     }
@@ -1367,9 +1394,9 @@ class NetworkService {
 
   async getSwapTokens() {
     try {
-      let returnTokens = []
-      //get the addresses from the address files
-      swapTokens.map((token) => {
+
+      return swapTokens.map((token) => {
+
         let L1 = ''
         let L2 = ''
 
@@ -1381,17 +1408,15 @@ class NetworkService {
           L2 = this.tokenAddresses[token.symbol].L2
         }
 
-        let tokenF = {
+        return {
           symbol: token.symbol,
           icon: token.icon,
           name: token.name,
           L1,
           L2,
         }
-
-        returnTokens.push(tokenF)
       })
-      return returnTokens
+
     } catch (error) {
       return error
     }
@@ -1399,9 +1424,9 @@ class NetworkService {
 
   async getDropdownTokens() {
     try {
-      let returnTokens = []
-      //get the addresses from the address files
-      dropdownTokens.map((token) => {
+      
+      return dropdownTokens.map((token) => {
+
         let L1 = ''
         let L2 = ''
 
@@ -1413,17 +1438,15 @@ class NetworkService {
           L2 = this.tokenAddresses[token.symbol].L2
         }
 
-        let tokenF = {
+        return {
           symbol: token.symbol,
           icon: token.icon,
           name: token.name,
           L1,
           L2,
         }
-
-        returnTokens.push(tokenF)
       })
-      return returnTokens
+
     } catch (error) {
       return error
     }

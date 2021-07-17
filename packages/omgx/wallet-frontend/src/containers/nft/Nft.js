@@ -147,7 +147,7 @@ class Nft extends React.Component {
               container
               spacing={2}
               direction="row"
-              justify="flex-start"
+              justifyContent="flex-start"
               alignItems="flex-start"
             >
               {Object.keys(NFTs).map(elem => (

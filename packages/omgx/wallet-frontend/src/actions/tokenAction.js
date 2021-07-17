@@ -102,7 +102,7 @@ export async function addToken ( tokenContractAddressL1 ) {
 
     let tA = networkService.tokenAddresses
 
-    Object.keys(tA).map((token, i) => {
+    Object.keys(tA).forEach((token, i) => {
       //let's see if we know about this Token
       if(_tokenContractAddressL1 === tA[token].L1.toLowerCase()) {
         _tokenContractAddressL2 = tA[token].L2.toLowerCase()
