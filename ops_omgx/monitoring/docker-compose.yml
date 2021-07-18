@@ -5,3 +5,7 @@ services:
     image: enyalabs/omgx-monitor:v1.3.5
     env_file:
       - .env
+    labels:
+      - "com.datadoghq.tags.env=production"
+      - "com.datadoghq.tags.service=omgx-monitor"
+      - "com.datadoghq.tags.version=v1.3.5"
