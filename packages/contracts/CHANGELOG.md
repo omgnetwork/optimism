@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.12
+
+### Patch Changes
+
+- 6132e7ab: Move various dependencies from primary deps to dev deps
+
 ## 0.2.11
 
 ### Patch Changes

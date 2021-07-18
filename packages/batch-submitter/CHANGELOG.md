@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.6
+
+### Patch Changes
+
+- 751e2be8: Add the support for different sequencer & proposer keys in the batch submitter.
+- Updated dependencies [6132e7ab]
+  - @eth-optimism/contracts@0.2.12
+
 ## 0.2.5
 
 ### Patch Changes

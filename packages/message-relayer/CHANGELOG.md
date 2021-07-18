@@ -1,5 +1,13 @@
 # @eth-optimism/message-relayer
 
+## 0.0.6
+
+### Patch Changes
+
+- 33fcd841: Add a check for `OVM_L2MessageRelayer` in the AddressManager before attempting to relay messages to help surface errors more quickly
+- Updated dependencies [6132e7ab]
+  - @eth-optimism/contracts@0.2.12
+
 ## 0.0.5
 
 ### Patch Changes

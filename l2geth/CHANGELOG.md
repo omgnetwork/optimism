@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.7
+
+### Patch Changes
+
+- 9b7dd4bf: Update `scripts/start.sh` to parse the websocket port and pass to geth at runtime
+
 ## 0.2.6
 
 ### Patch Changes
