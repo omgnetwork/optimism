@@ -1,7 +1,9 @@
 version: "3"
 
+x-volumes:
+  &my-volumes
+      - "/tmp/vault_auth:/vault/config:rw"
 services:
-
 # base service builder
 
   omgx_builder:
@@ -60,16 +62,29 @@ services:
       FILTER_POLLING_INTERVAL: 30000
       RETRIES: 70
 
+  vault_init:
+    depends_on:
+      - vault
+    entrypoint:
+      - "/bin/sh"
+      - -ecx
+      - |
+        sleep 8s
+        ls /vault/config.unseal.json
+    volumes:
+      *my-volumes
+    image: node:11
+    environment:
+      VAULT_URL: https://vault:8200
+
   vault:
     image: omgx/vault
     # deploy:
     #    replicas: 0
     ports:
       - "127.0.0.1:8200:8200"
-    #volumes:
-      # - "./docker/immutability/ca/certs/:/etc/ssl/certs/"
-      #- "./../packages/omgx/immutability/scripts:/vault/test:r"
-      #- "./vault/data/immutability/config:/vault/config:rw"
+    volumes:
+      *my-volumes
     entrypoint:
       - "/bin/sh"
       - -ecx
@@ -78,28 +93,6 @@ services:
         /vault/vault.sh
 
 # and, tests for all the OMGX-specific services
-
-  # vault_test_setup:
-  #   image: omgx/omgx_builder
-  #   deploy:
-  #      replicas: 0
-  #   build:
-  #     context: ..
-  #     dockerfile: ./ops/docker/Dockerfile.omgx_monorepo
-  #   entrypoint:
-  #     - "/bin/sh"
-  #     - -ecx
-  #     - |
-  #       cd /optimism/packages/omgx/contracts
-  #       yarn test:integration
-  #   environment:
-  #     L1_NODE_WEB3_URL: http://l1_chain:8545
-  #     L2_NODE_WEB3_URL: http://l2geth:8545
-  #     URL: http://deployer:8081/addresses.json
-  #     OMGX_URL: http://omgx_deployer:8079/addresses.json
-  #     TEST_PRIVATE_KEY_1: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-  #     TEST_PRIVATE_KEY_2: "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba"
-  #     TEST_PRIVATE_KEY_3: "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e"
 
   omgx_test_contracts:
     image: omgx/omgx_builder

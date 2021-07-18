@@ -72,7 +72,7 @@ echo "vault write -format=json immutability-eth-plugin/wallets/$OVM/accounts/$UN
 vault write -format=json immutability-eth-plugin/wallets/$OVM/accounts/$UNAUTHORIZED/ovm/appendStateBatch batch="0x1111111111111111111111111111111111111111111111111111111111111111" batch="0x1111111111111111111111111111111111111111111111111111111111111111" should_start_at_element=0 nonce=0 gas_price=$GAS_PRICE_HIGH contract=$PLASMA_CONTRACT
 check_result $? 2
 banner
-#vault write  -output-curl-string immutability-eth-plugin/wallets/$OVM/accounts/$UNAUTHORIZED/ovm/appendStateBatch nonce=0 gas_price=$GAS_PRICE_HIGH batch=$batch should_start_at_element=0 contract=$PLASMA_CONTRACT
+vault write  -output-curl-string immutability-eth-plugin/wallets/$OVM/accounts/$UNAUTHORIZED/ovm/appendStateBatch nonce=0 gas_price=$GAS_PRICE_HIGH batch="0x1111111111111111111111111111111111111111111111111111111111111111" batch="0x1111111111111111111111111111111111111111111111111111111111111111" should_start_at_element=0 contract=$PLASMA_CONTRACT
 
 
 banner
@@ -85,3 +85,4 @@ echo "vault write -format=json immutability-eth-plugin/wallets/$OVM/accounts/$UN
 vault write -format=json immutability-eth-plugin/wallets/$OVM/accounts/$UNAUTHORIZED/ovm/appendSequencerBatch should_start_at_element=10 total_elements_to_append=1 contexts="{\"num_sequenced_transactions\": 2, \"num_subsequent_queue_transactions\": 1, \"timestamp\": 100, \"block_number\": 200}" transactions="0x45423400000011" transactions="0x45423400000012" nonce=0 gas_price=$GAS_PRICE_HIGH contract=$PLASMA_CONTRACT
 check_result $? 2
 banner
+vault write  -output-curl-string immutability-eth-plugin/wallets/$OVM/accounts/$UNAUTHORIZED/ovm/appendSequencerBatch should_start_at_element=10 total_elements_to_append=1 contexts="{\"num_sequenced_transactions\": 2, \"num_subsequent_queue_transactions\": 1, \"timestamp\": 100, \"block_number\": 200}" transactions="0x45423400000011" transactions="0x45423400000012" nonce=0 gas_price=$GAS_PRICE_HIGH contract=$PLASMA_CONTRACT

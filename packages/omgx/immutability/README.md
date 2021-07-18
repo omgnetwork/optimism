@@ -1,29 +1,9 @@
 # immutability-eth-plugin docker
+cd ops/
+rm -rf vault/ && docker build ../ --file /Users/inomurko/opt/optimism/ops/docker/Dockerfile.omgx_vault --tag omgx/vault:latest && docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml up l1_chain vault
 
-Previously, when you executed `docker-compose -f docker/docker-compose.yml up --build` it would:
-
-* Spin up a ganache container
-* Deploy the plasma contracts
-* Spin up an `ephemeral` vault instance
-* Execute some smoke tests
-
-Now, the behavior is different.
-
-The first time you bring up the `docker-compose`, it will:
-
-* Spin up a ganache container
-* Deploy the plasma contracts
-* Spin up a `persistent` vault instance
-* Initialize the vault instance - with one key shard
-* Unseal the vault instance
-* Execute some smoke tests
-
-From then on, however, all subsequent runs of `docker-compose` will:
-
-* Spin up a ganache container
-* Deploy the plasma contracts
-* Spin up a `persistent` vault instance
-* Unseal the vault instance
+The overlay `docker-compose-vault-test.yml` persist data on disk, if you want to re-start from fresh, delete the Vault dir like above.
+If you make any changes to Vault code (lets say route plugins for http req/resp) you need to delete the Vault dir so that the plugin reloads or use the cycle.sh script in test/.
 
 If you interact with vault from the outside - say change the rpc_url, create new accounts, etc - all that will be persisted. so, each subsequent time you run docker-compose, your previous interactions will be retained.
 
@@ -67,6 +47,4 @@ export VAULT_TOKEN=$(cat $GOPATH/src/github.com/omgnetwork/immutability-eth-plug
 
 vault read -format=json immutability-eth-plugin/config
 
-``` 
-
-Unless of course, you are using elixir... in which case, you are on your own. 
+```

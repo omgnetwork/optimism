@@ -97,3 +97,11 @@ TEMP_ACCOUNT=$(vault write -f -field=address immutability-eth-plugin/wallets/tes
 check_result $? 0
 banner
 vault write  -output-curl-string -f immutability-eth-plugin/wallets/test-wallet-2/accounts
+
+banner
+echo "LIST ALL ACCOUNTS IN WALLET"
+echo "vault list -format=json immutability-eth-plugin/wallets/test-wallet-2/accounts"
+vault list immutability-eth-plugin/wallets/test-wallet-2/accounts
+check_result $? 0
+banner
+vault list  -output-curl-string immutability-eth-plugin/wallets/test-wallet-2/accounts
