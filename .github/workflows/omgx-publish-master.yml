@@ -56,6 +56,7 @@ jobs:
           docker build ../ --file docker/Dockerfile.omgx_monorepo --tag omgx/omgx_builder:${{ steps.tag.outputs.VERSION }}
           docker build ../ --file docker/Dockerfile.omgx_deployer --tag omgx/omgx_deployer:${{ steps.tag.outputs.VERSION }}
           docker build ../ --file docker/Dockerfile.gas-oracle --tag omgx/gas-oracle:${{ steps.tag.outputs.VERSION }}
+          docker build ../ --file docker/Dockerfile.omgx_vault --tag omgx/vault:${{ steps.tag.outputs.VERSION }}
           docker build ../ --file docker/Dockerfile.omgx_message-relayer-fast --tag omgx/omgx_message-relayer-fast:${{ steps.tag.outputs.VERSION }}
       - name: Rename and retag the Optimism images
         working-directory: ./ops
