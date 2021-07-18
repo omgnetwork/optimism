@@ -4,10 +4,7 @@ import * as path from 'path'
 import fetch from 'node-fetch'
 import { ethers } from 'ethers'
 import { subtask, extendEnvironment } from 'hardhat/config'
-import {
-  HardhatNetworkHDAccountsConfig,
-  HardhatNetworkAccountUserConfig,
-} from 'hardhat/types/config'
+import { HardhatNetworkHDAccountsConfig } from 'hardhat/types/config'
 import { getCompilersDir } from 'hardhat/internal/util/global-dir'
 import { Artifacts } from 'hardhat/internal/artifacts'
 import {
@@ -35,7 +32,6 @@ const OVM_POLLING_INTERVAL = 50
 /**
  * Find or generate an OVM soljson.js compiler file and return the path of this file.
  * We pass the path to this file into hardhat.
- *
  * @param version Solidity compiler version to get a path for in the format `X.Y.Z`.
  * @return Path to the downloaded soljson.js file.
  */
@@ -51,9 +47,8 @@ const getOvmSolcPath = async (version: string): Promise<string> => {
   const ovmCompilersCache = path.join(await getCompilersDir(), 'ovm')
 
   // Need to create the OVM compiler cache folder if it doesn't already exist.
-  if (!fs.existsSync(ovmCompilersCache)) {
-    fs.mkdirSync(ovmCompilersCache, { recursive: true })
-  }
+  if (!fs.existsSync(ovmCompilersCache))
+    [fs.mkdirSync(ovmCompilersCache, { recursive: true })]
 
   // Pull information about the latest commit in the solc-bin repo. We'll use this to invalidate
   // our compiler cache if necessary.
@@ -191,9 +186,7 @@ subtask(
       }
     }
 
-    if (Object.keys(ovmInput.sources).length === 0) {
-      return {}
-    }
+    if (Object.keys(ovmInput.sources).length === 0) return {}
 
     // Build both inputs separately.
     const ovmOutput = await hre.run(TASK_COMPILE_SOLIDITY_RUN_SOLCJS, {
@@ -252,28 +245,21 @@ extendEnvironment(async (hre) => {
 
       // override the provider polling interval
       const provider = new ethers.providers.JsonRpcProvider(
-        (hre as any).ethers.provider.url || (hre as any).network.config.url
+        (hre as any).ethers.provider.url
       )
       provider.pollingInterval = interval
 
       // the gas price is overriden to the user provided gasPrice or to 0.
       provider.getGasPrice = async () =>
         ethers.BigNumber.from(hre.network.config.gasPrice || 0)
+      ;(hre as any).ethers.provider = provider
 
       // if the node is up, override the getSigners method's signers
       try {
         let signers: ethers.Signer[]
-        const accounts = hre.network.config.accounts as
-          | HardhatNetworkHDAccountsConfig
-          | HardhatNetworkAccountUserConfig[]
-        if (Array.isArray(accounts)) {
-          signers = (accounts as HardhatNetworkAccountUserConfig[]).map(
-            (account) =>
-              new ethers.Wallet(
-                typeof account === 'string' ? account : account.privateKey
-              ).connect(provider)
-          )
-        } else if (accounts) {
+        const accounts = hre.network.config
+          .accounts as HardhatNetworkHDAccountsConfig
+        if (accounts) {
           const indices = Array.from(Array(20).keys()) // generates array of [0, 1, 2, ..., 18, 19]
           signers = indices.map((i) =>
             ethers.Wallet.fromMnemonic(
@@ -290,11 +276,8 @@ extendEnvironment(async (hre) => {
         }
 
         ;(hre as any).ethers.getSigners = () => signers
-        // eslint-disable-next-line no-empty
+        /* tslint:disable:no-empty */
       } catch (e) {}
-
-      // Update the provider at the very end to avoid any weird issues.
-      ;(hre as any).ethers.provider = provider
     }
   }
 })

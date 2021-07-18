@@ -1,10 +1,17 @@
 /* Imports: External */
 import * as dotenv from 'dotenv'
-import { Bcfg } from '@eth-optimism/core-utils'
-import Config from 'bcfg'
+import Config from 'bcfg' // TODO: Add some types for bcfg if we get the chance.
 
 /* Imports: Internal */
 import { L1DataTransportService } from './main/service'
+
+interface Bcfg {
+  load: (options: { env?: boolean; argv?: boolean }) => void
+  str: (name: string, defaultValue?: string) => string
+  uint: (name: string, defaultValue?: number) => number
+  bool: (name: string, defaultValue?: boolean) => boolean
+  ufloat: (name: string, defaultValue?: number) => number
+}
 
 type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
 ;(async () => {
@@ -46,8 +53,6 @@ type ethNetwork = 'mainnet' | 'kovan' | 'goerli'
         false
       ),
       defaultBackend: config.str('default-backend', 'l1'),
-      l1GasPriceBackend: config.str('l1-gas-price-backend', 'l1'),
-      useSentry: config.bool('use-sentry', false),
       sentryDsn: config.str('sentry-dsn'),
       sentryTraceRate: config.ufloat('sentry-trace-rate', 0.05),
     })

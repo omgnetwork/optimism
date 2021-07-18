@@ -130,16 +130,6 @@ func (b *EthAPIBackend) SetHead(number uint64) {
 	b.eth.syncService.SetLatestL1BlockNumber(blockNumber.Uint64())
 }
 
-func (b *EthAPIBackend) IngestTransactions(txs []*types.Transaction) error {
-	for _, tx := range txs {
-		err := b.eth.syncService.IngestTransaction(tx)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (b *EthAPIBackend) HeaderByNumber(ctx context.Context, number rpc.BlockNumber) (*types.Header, error) {
 	// Pending block is only known by the miner
 	if number == rpc.PendingBlockNumber {
@@ -307,10 +297,19 @@ func (b *EthAPIBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 // a lock can be used around the remotes for when the sequencer is reorganizing.
 func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
 	if b.UsingOVM {
+		// The value field is not rolled up so it must be set to 0
+		if signedTx.Value().Cmp(new(big.Int)) != 0 {
+			return fmt.Errorf("Cannot send transaction with non-zero value. Use WETH.transfer()")
+		}
+
 		to := signedTx.To()
 		if to != nil {
 			if *to == (common.Address{}) {
 				return errors.New("Cannot send transaction to zero address")
+			}
+			// Prevent transactions from being submitted if the gas limit too high
+			if signedTx.Gas() >= b.gasLimit {
+				return fmt.Errorf("Transaction gasLimit (%d) is greater than max gasLimit (%d)", signedTx.Gas(), b.gasLimit)
 			}
 			// Prevent QueueOriginSequencer transactions that are too large to
 			// be included in a batch. The `MaxCallDataSize` should be set to
@@ -322,7 +321,7 @@ func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction)
 				return fmt.Errorf("Calldata cannot be larger than %d, sent %d", b.MaxCallDataSize, len(signedTx.Data()))
 			}
 		}
-		return b.eth.syncService.ValidateAndApplySequencerTransaction(signedTx)
+		return b.eth.syncService.ApplyTransaction(signedTx)
 	}
 	// OVM Disabled
 	return b.eth.txPool.AddLocal(signedTx)
@@ -381,20 +380,20 @@ func (b *EthAPIBackend) SuggestPrice(ctx context.Context) (*big.Int, error) {
 	return b.gpo.SuggestPrice(ctx)
 }
 
-func (b *EthAPIBackend) SuggestL1GasPrice(ctx context.Context) (*big.Int, error) {
-	return b.rollupGpo.SuggestL1GasPrice(ctx)
+func (b *EthAPIBackend) SuggestDataPrice(ctx context.Context) (*big.Int, error) {
+	return b.rollupGpo.SuggestDataPrice(ctx)
 }
 
-func (b *EthAPIBackend) SuggestL2GasPrice(ctx context.Context) (*big.Int, error) {
-	return b.rollupGpo.SuggestL2GasPrice(ctx)
+func (b *EthAPIBackend) SuggestExecutionPrice(ctx context.Context) (*big.Int, error) {
+	return b.rollupGpo.SuggestExecutionPrice(ctx)
 }
 
-func (b *EthAPIBackend) SetL1GasPrice(ctx context.Context, gasPrice *big.Int) error {
-	return b.rollupGpo.SetL1GasPrice(gasPrice)
+func (b *EthAPIBackend) SetDataPrice(ctx context.Context, gasPrice *big.Int) {
+	b.rollupGpo.SetDataPrice(gasPrice)
 }
 
-func (b *EthAPIBackend) SetL2GasPrice(ctx context.Context, gasPrice *big.Int) error {
-	return b.rollupGpo.SetL2GasPrice(gasPrice)
+func (b *EthAPIBackend) SetExecutionPrice(ctx context.Context, gasPrice *big.Int) {
+	b.rollupGpo.SetExecutionPrice(gasPrice)
 }
 
 func (b *EthAPIBackend) ChainDb() ethdb.Database {

@@ -7,7 +7,7 @@ import {
 } from '../../../../helpers'
 
 const globalContext = {
-  ovmCHAINID: 28,
+  ovmCHAINID: 420,
 }
 
 const transactionContext = {

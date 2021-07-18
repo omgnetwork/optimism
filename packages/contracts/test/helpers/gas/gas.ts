@@ -1,6 +1,5 @@
 import { ethers } from 'hardhat'
-import { Contract, Signer, BigNumber } from 'ethers'
-import { expect } from 'chai'
+import { Contract, Signer } from 'ethers'
 
 export class GasMeasurement {
   GasMeasurementContract: Contract
@@ -16,11 +15,10 @@ export class GasMeasurement {
     methodName: string,
     methodArgs: Array<any> = []
   ): Promise<number> {
-    const gasCost: number =
-      await this.GasMeasurementContract.callStatic.measureCallGas(
-        targetContract.address,
-        targetContract.interface.encodeFunctionData(methodName, methodArgs)
-      )
+    const gasCost: number = await this.GasMeasurementContract.callStatic.measureCallGas(
+      targetContract.address,
+      targetContract.interface.encodeFunctionData(methodName, methodArgs)
+    )
 
     return gasCost
   }
