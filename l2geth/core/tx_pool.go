@@ -92,9 +92,8 @@ var (
 )
 
 var (
-	evictionInterval    = time.Minute             // Time interval to check for evictable transactions
-	statsReportInterval = 8 * time.Second         // Time interval to report transaction pool stats
-	gwei                = big.NewInt(params.GWei) // 1 gwei, used as a flag for "rollup" transactions
+	evictionInterval    = time.Minute     // Time interval to check for evictable transactions
+	statsReportInterval = 8 * time.Second // Time interval to report transaction pool stats
 )
 
 var (
@@ -540,10 +539,14 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	}
 
 	// Ensure the transaction doesn't exceed the current block limit gas.
-	// We skip this condition check if the transaction's gasPrice is set to 1gwei,
-	// which indicates a "rollup" transaction that's paying for its data.
-	if pool.currentMaxGas < tx.Gas() && tx.GasPrice().Cmp(gwei) != 0 {
-		return ErrGasLimit
+	if vm.UsingOVM {
+		if pool.currentMaxGas < tx.L2Gas() {
+			return ErrGasLimit
+		}
+	} else {
+		if pool.currentMaxGas < tx.Gas() {
+			return ErrGasLimit
+		}
 	}
 
 	// Make sure the transaction is signed properly
@@ -557,8 +560,14 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrUnderpriced
 	}
 	// Ensure the transaction adheres to nonce ordering
-	if pool.currentState.GetNonce(from) > tx.Nonce() {
-		return ErrNonceTooLow
+	if vm.UsingOVM {
+		if pool.currentState.GetNonce(from) != tx.Nonce() {
+			return ErrNonceTooLow
+		}
+	} else {
+		if pool.currentState.GetNonce(from) > tx.Nonce() {
+			return ErrNonceTooLow
+		}
 	}
 	// Transactor should have enough funds to cover the costs
 	// cost == V + GP * GL

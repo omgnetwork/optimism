@@ -1,6 +1,6 @@
 /* Imports: External */
-import { ctcCoder } from '@eth-optimism/core-utils'
 import { BigNumber, constants, ethers } from 'ethers'
+import { serialize } from '@ethersproject/transactions'
 
 /* Imports: Internal */
 import { TransportDB } from '../../../db/transport-db'
@@ -13,6 +13,7 @@ import {
   padHexString,
   SEQUENCER_ENTRYPOINT_ADDRESS,
   SEQUENCER_GAS_LIMIT,
+  parseSignatureVParam,
 } from '../../../utils'
 
 export const handleSequencerBlock = {
@@ -37,34 +38,44 @@ export const handleSequencerBlock = {
       blockNumber: BigNumber.from(transaction.l1BlockNumber).toNumber(),
       timestamp: BigNumber.from(transaction.l1Timestamp).toNumber(),
       queueOrigin: transaction.queueOrigin,
-      type: parseTxType(transaction.txType),
       confirmed: false,
     }
 
     if (transaction.queueOrigin === 'sequencer') {
       const decodedTransaction: DecodedSequencerBatchTransaction = {
         sig: {
-          v: BigNumber.from(transaction.v).toNumber() - 2 * chainId - 35,
+          v: parseSignatureVParam(transaction.v, chainId),
           r: padHexString(transaction.r, 32),
           s: padHexString(transaction.s, 32),
         },
         value: transaction.value,
-        gasLimit: BigNumber.from(transaction.gas).toNumber(),
-        gasPrice: BigNumber.from(transaction.gasPrice).toNumber(), // ?
-        nonce: BigNumber.from(transaction.nonce).toNumber(),
-        target: transaction.to || constants.AddressZero, // ?
+        gasLimit: BigNumber.from(transaction.gas).toString(),
+        gasPrice: BigNumber.from(transaction.gasPrice).toString(),
+        nonce: BigNumber.from(transaction.nonce).toString(),
+        target: transaction.to,
         data: transaction.input,
-        type: transaction.txType,
       }
 
       transactionEntry = {
         ...transactionEntry,
-        gasLimit: SEQUENCER_GAS_LIMIT, // ?
+        gasLimit: `${SEQUENCER_GAS_LIMIT}`, // ?
         target: SEQUENCER_ENTRYPOINT_ADDRESS,
         origin: null,
-        data: maybeEncodeSequencerBatchTransaction(
-          decodedTransaction,
-          transaction.txType
+        data: serialize(
+          {
+            value: transaction.value,
+            gasLimit: transaction.gas,
+            gasPrice: transaction.gasPrice,
+            nonce: transaction.nonce,
+            to: transaction.to,
+            data: transaction.input,
+            chainId,
+          },
+          {
+            v: BigNumber.from(transaction.v).toNumber(),
+            r: padHexString(transaction.r, 32),
+            s: padHexString(transaction.s, 32),
+          }
         ),
         decoded: decodedTransaction,
         queueIndex: null,
@@ -72,7 +83,7 @@ export const handleSequencerBlock = {
     } else {
       transactionEntry = {
         ...transactionEntry,
-        gasLimit: BigNumber.from(transaction.gas).toNumber(),
+        gasLimit: BigNumber.from(transaction.gas).toString(),
         target: ethers.utils.getAddress(transaction.to),
         origin: ethers.utils.getAddress(transaction.l1TxOrigin),
         data: transaction.input,
@@ -110,38 +121,4 @@ export const handleSequencerBlock = {
     await db.putUnconfirmedTransactionEntries([entry.transactionEntry])
     await db.putUnconfirmedStateRootEntries([entry.stateRootEntry])
   },
-}
-
-/**
- * Attempts to encode a sequencer batch transaction.
- * @param transaction Transaction to encode.
- * @param type Transaction type.
- */
-const maybeEncodeSequencerBatchTransaction = (
-  transaction: DecodedSequencerBatchTransaction,
-  type: 'EIP155' | 'EthSign' | null
-): string => {
-  if (type === 'EIP155') {
-    return ctcCoder.eip155TxData.encode(transaction).toLowerCase()
-  } else if (type === 'EthSign') {
-    return ctcCoder.ethSignTxData.encode(transaction).toLowerCase()
-  } else {
-    // Throw?
-    return
-  }
-}
-
-/**
- * Handles differences between the sequencer's enum strings and our own.
- * Will probably want to move this into core-utils eventually.
- * @param type Sequencer transaction type to parse.
- */
-const parseTxType = (
-  type: 'EIP155' | 'EthSign' | null
-): 'EIP155' | 'ETH_SIGN' | null => {
-  if (type === 'EthSign') {
-    return 'ETH_SIGN'
-  } else {
-    return type
-  }
 }

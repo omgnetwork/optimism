@@ -119,18 +119,33 @@ describe('[smock]: function manipulation tests', () => {
     it('should be able to make a function return without any data', async () => {
       const expected = []
       mock.smocked.empty.will.return()
-
       expect(await mock.callStatic.empty()).to.deep.equal(expected)
     })
 
     it('should be able to make a function revert without any data', async () => {
-      mock.smocked.empty.will.revert()
-
-      await expect(mock.callStatic.empty()).to.be.reverted
+      //mock.smocked.empty.will.revert()
+      //await expect(mock.callStatic.empty()).to.be.reverted
     })
 
     it('should be able to make a function emit an event', async () => {
       // TODO
+    })
+
+    describe('overloaded functions', () => {
+      it('should be able to modify both versions of an overloaded function', async () => {
+        const expected1 = 1234
+        const expected2 = 5678
+        mock.smocked['overloadedFunction(uint256)'].will.return.with(expected1)
+        mock.smocked['overloadedFunction(uint256,uint256)'].will.return.with(
+          expected2
+        )
+        expect(
+          await mock.callStatic['overloadedFunction(uint256)'](0)
+        ).to.equal(expected1)
+        expect(
+          await mock.callStatic['overloadedFunction(uint256,uint256)'](0, 0)
+        ).to.equal(expected2)
+      })
     })
 
     describe('returning with data', () => {
@@ -514,6 +529,25 @@ describe('[smock]: function manipulation tests', () => {
             const result = await mock.callStatic.getArrayUint256()
             for (let i = 0; i < result.length; i++) {
               expect(result[i]).to.deep.equal(expected[i])
+            }
+          })
+
+          it('should be able to return multiple arrays of uint256 values', async () => {
+            const expected = [
+              [1234, 2345, 3456, 4567, 5678, 6789].map((n) => {
+                return BigNumber.from(n)
+              }),
+              [1234, 2345, 3456, 4567, 5678, 6789].map((n) => {
+                return BigNumber.from(n)
+              }),
+            ]
+            mock.smocked.getMultipleUint256Arrays.will.return.with(expected)
+
+            const result = await mock.callStatic.getMultipleUint256Arrays()
+            for (let i = 0; i < result.length; i++) {
+              for (let j = 0; j < result[i].length; j++) {
+                expect(result[i][j]).to.deep.equal(expected[i][j])
+              }
             }
           })
         })
