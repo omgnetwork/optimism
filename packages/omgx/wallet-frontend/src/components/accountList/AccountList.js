@@ -28,6 +28,8 @@ class AccountList extends React.Component {
     }
   }
   
+  componentDidUpdate(prevState) {
+
     const { token, chain, networkLayer, disabled } = this.props;
 
     if (!isEqual(prevState.token, token)) {
