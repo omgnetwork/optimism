@@ -69,7 +69,10 @@ function Input({
                 MAX
               </div>
             )}
-            {unit}
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+              {unit}
+              <span style={{fontSize: '0.7em'}}>Balance: {Number(maxValue).toFixed(3)}</span>
+            </div>
           </div>
         )}
         {paste && (

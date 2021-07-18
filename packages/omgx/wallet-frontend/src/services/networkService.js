@@ -533,19 +533,23 @@ class NetworkService {
 
       const layer1Balances = [
         {
+          address: this.L1_ETH_Address,
+          addressL2: this.L2_ETH_Address,
           currency: this.L1_ETH_Address,
           symbol: 'ETH',
           decimals: 18,
-          amount: new BN(layer1Balance.toString()),
+          balance: new BN(layer1Balance.toString()),
         },
       ]
 
       const layer2Balances = [
         {
-          currency: this.L2_ETH_Address,
+          address: this.L2_ETH_Address,
+          addressL1: this.L1_ETH_Address,
+          currency: this.L1_ETH_Address,
           symbol: 'oETH',
           decimals: 18,
-          amount: new BN(layer2Balance.toString()),
+          balance: new BN(layer2Balance.toString()),
         },
       ]
 
@@ -576,9 +580,11 @@ class NetworkService {
 
         layer1Balances.push({
           currency: token.currency,
+          address: token.addressL1,
+          addressL2: token.addressL2,
           symbol: token.symbolL1,
           decimals: token.decimals,
-          amount: new BN(balance.toString()),
+          balance: new BN(balance.toString())
         })
       }
 
@@ -604,9 +610,11 @@ class NetworkService {
 
         layer2Balances.push({
           currency: token.currency,
+          address: token.addressL2,
+          addressL1: token.addressL1,
           symbol: token.symbolL2,
           decimals: token.decimals,
-          amount: new BN(balance.toString()),
+          balance: new BN(balance.toString())
         })
       }
 
@@ -776,7 +784,7 @@ class NetworkService {
 
   async checkAllowance(
     currencyAddress,
-    targetContract  // = this.L1StandardBridgeAddress
+    targetContract
   ) {
     try {
       const ERC20Contract = new ethers.Contract(
@@ -841,22 +849,23 @@ class NetworkService {
   }
 
   async approveERC20(
-    depositAmount_string,
-    currencyAddress,
-    spenderAddress, //for example, = this.L1StandardBridgeAddress, for example
-    contractABI //for example, = L1ERC20Json.abi
+    value,
+    currency,
+    approveContractAddress = this.L1StandardBridgeAddress,
+    contractABI = L1ERC20Json.abi
   ) {
     
     try {
 
-      //we could use any L2 ERC contract here - just getting generic parts of the abi
-      //but we know we alaways have the TEST contract, so will use that
-      const L2ERC20Contract = this.L2_TEST_Contract.attach(currencyAddress)
+      const ERC20Contract = new ethers.Contract(
+        currency,
+        contractABI,
+        this.provider.getSigner()
+      )
 
-      const approveStatus = await L2ERC20Contract.approve(
-        spenderAddress,       //this is the spender
-        depositAmount_string, //and this is how much the spender will be able to spend 
-        //this.L1orL2 === 'L1' ? {} : { gasPrice: 0 }
+      const approveStatus = await ERC20Contract.approve(
+        approveContractAddress,
+        value
       )
       await approveStatus.wait()
 
@@ -905,14 +914,15 @@ class NetworkService {
   async depositErc20(value, currency, gasPrice, currencyL2) {
 
     try {
+      //could use any ERC20 here...
       const L1_TEST_Contract = this.L1_TEST_Contract.attach(currency)
 
-      const allowance = await L1_TEST_Contract.allowance(
-        this.account,
-        this.L1StandardBridgeAddress
+      const approveStatus = await L1_TEST_Contract.approve(
+        this.L1StandardBridgeAddress, //this is the spender
+        value, //and this is how much the spender will be able to spend 
+        //this.L1orL2 === 'L1' ? {} : { gasPrice: 0 }
       )
-
-      console.log({ allowance: allowance.toString(), value })
+      await approveStatus.wait()
 
       const depositTxStatus = await this.L1StandardBridgeContract.depositERC20(
         currency,
@@ -1264,6 +1274,7 @@ class NetworkService {
   /***** SWAP ON to OMGX by depositing funds to the L1LP *****/
   /***********************************************************/
   async depositL1LP(currency, value) {
+    
     const decimals = 18 //bit dangerous?
     let depositAmount = powAmount(value, decimals)
 
@@ -1305,7 +1316,13 @@ class NetworkService {
         this.L1LPAddress
       )
     }
-    return logAmount(balance.toString(), decimals)
+
+    if(typeof(balance) === 'undefined') {
+      return logAmount('0', decimals)
+    } else {
+      return logAmount(balance.toString(), decimals)
+    }
+
   }
 
   /***************************************/
@@ -1332,22 +1349,55 @@ class NetworkService {
         this.L2LPAddress
       )
     }
-    return logAmount(balance.toString(), decimals)
+    
+    console.log("L2LPBalance:",typeof(balance))
+
+    if(typeof(balance) === 'undefined') {
+      return logAmount('0', decimals)
+    } else {
+      return logAmount(balance.toString(), decimals)
+    }
+    
   }
 
   /**************************************************************/
   /***** SWAP OFF from OMGX by depositing funds to the L2LP *****/
   /**************************************************************/
-  async depositL2LP(currency, depositAmount_string) {
+  async depositL2LP(currencyAddress, depositAmount_string) {
+
+    const L2ERC20Contract = new ethers.Contract(
+      currencyAddress,
+      L2ERC20Json.abi,
+      this.provider.getSigner()
+    )
+
+    let allowance_BN = await L2ERC20Contract.allowance(
+      this.account,
+      this.L2LPAddress
+    )
+
+    //const decimals = await L2ERC20Contract.decimals() 
+
+    let depositAmount_BN = new BN(depositAmount_string)
+
+    if (depositAmount_BN.gt(allowance_BN)) {
+      const approveStatus = await L2ERC20Contract.approve(
+        this.L2LPAddress,
+        depositAmount_string,
+        //{ gasPrice: 0 } //this can be hardcoded here because, by definition, I'm always on L2
+      )
+      await approveStatus.wait()
+      if (!approveStatus) return false
+    }
 
     const depositTX = await this.L2LPContract.clientDepositL2(
       depositAmount_string,
-      currency,
+      currencyAddress,
       //{ gasPrice: 0 }
     )
     await depositTX.wait()
 
-    // Waiting the response from L1
+    // Waiting for the response from L1
     const [L2ToL1msgHash] = await this.fastWatcher.getMessageHashesFromL2Tx(
       depositTX.hash
     )

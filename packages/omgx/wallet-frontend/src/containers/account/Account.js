@@ -13,20 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useCallback } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Send, ArrowBack, ArrowForward } from '@material-ui/icons'
+import React from 'react'
+import { useSelector } from 'react-redux'
+
 import { isEqual } from 'lodash'
 import truncate from 'truncate-middle'
 
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectIsSynced } from 'selectors/statusSelector'
+
 import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector'
 
-import { openModal } from 'actions/uiAction'
+import AccountList from 'components/accountList/AccountList';
 
 import Copy from 'components/copy/Copy'
-import Button from 'components/button/Button'
+
 import { logAmount } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
@@ -36,43 +37,24 @@ import bunny_sad from 'images/bunny_sad.svg'
 import * as styles from './Account.module.scss'
 
 function Account () {
-
-  const dispatch = useDispatch();
-  const isSynced = useSelector(selectIsSynced);
+  
   const childBalance = useSelector(selectlayer2Balance, isEqual);
   const rootBalance = useSelector(selectlayer1Balance, isEqual);
+
+  const isSynced = useSelector(selectIsSynced);
   const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]));
 
-  const disabled = !childBalance.length || !isSynced ;
-
-  const handleModalClick = useCallback(
-    async (name, fast = false, beginner = false) => {
-      if (name === 'transferModal' || name === 'exitModal') {
-        const correctLayer = await dispatch(networkService.confirmLayer('L2'));
-        if (!correctLayer) return 
-      }
-      if (name === 'depositModal') {
-        const correctLayer = await dispatch(networkService.confirmLayer('L1'));
-        if (!correctLayer) return 
-      }
-      if (name === 'addAssetModal') {
-        //const correctLayer = await dispatch(networkService.confirmLayer('L1'));
-        //if (!correctLayer) return 
-      }
-      dispatch(openModal(name, beginner, fast))
-    }, [ dispatch ]
-  );
+  const disabled = criticalTransactionLoading || !isSynced
 
   let balances = {
-    /*____ : {have: false, amount: 0, amountShort: '0'},*/
     oETH : {have: false, amount: 0, amountShort: '0'}
   }
 
   childBalance.reduce((acc, cur) => {
-    if (cur.symbol === 'oETH' && cur.amount > 0 ) {
+    if (cur.symbol === 'oETH' && cur.balance > 0 ) {
       acc['oETH']['have'] = true;
-      acc['oETH']['amount'] = cur.amount;
-      acc['oETH']['amountShort'] = logAmount(cur.amount, cur.decimals, 2);
+      acc['oETH']['amount'] = cur.balance;
+      acc['oETH']['amountShort'] = logAmount(cur.balance, cur.decimals, 2);
     }
     return acc;
   }, balances)
@@ -88,14 +70,6 @@ function Account () {
         <Copy value={networkService.account} />
       </div>
 
-{/*
-      {balances['oETH']['have'] &&
-        <h3 style={{marginBottom: '30px'}}>Status: Ready to use OMGX</h3> 
-      }
-      {!balances['oETH']['have'] &&
-        <h3 style={{marginBottom: '30px'}}>Status: Bunny Cry. You do not have any oETH on OMGX</h3> 
-      }
-*/}
       {balances['oETH']['have'] &&
         <div className={styles.RabbitBox}>
           <img className={styles.bunny} src={bunny_happy} alt='Happy Bunny' />
@@ -111,10 +85,10 @@ function Account () {
             </div>
             <div className={styles.RabbitRightBottomNote}>
             {networkLayer === 'L1' && 
-              <span>You are on Mainnet (L1). Here, you can send tokens to OMGX. To use the OMGX L2, please switch to L2 in MetaMask.</span>
+              <span>You are on L1. To use the L2, please switch to L2 in MetaMask.</span>
             }
             {networkLayer === 'L2' && 
-              <span>You are on OMGX (L2). Here, you can trade, transfer tokens to others on OMGX, and send tokens to L1. To use L1, please switch to L1 in MetaMask.</span>
+              <span>You are on L2. To use the L1, please switch to L1 in MetaMask.</span>
             }
             </div>
           </div>
@@ -125,144 +99,67 @@ function Account () {
         <div className={styles.RabbitBox}>
           <img className={styles.bunny} src={bunny_sad} alt='Sad Bunny' />
           <div className={styles.RabbitRight}>
-            <div
-              className={styles.RabbitRightTop}
-            >
+            <div className={styles.RabbitRightTop}>
               OMGX Balance
             </div>
             <div className={styles.RabbitRightMiddle}>
-                0
+                <div className={styles.sad}>0</div>
             </div>
             <div className={styles.RabbitRightBottom}>
+              oETH
+            </div>
+            <div className={styles.RabbitRightBottomNote}>
+            {networkLayer === 'L1' && 
+              <span>You are on L1. To use the L2, please switch to L2 in MetaMask.</span>
+            }
+            {networkLayer === 'L2' && 
+              <span>You are on L2. To use the L1, please switch to L1 in MetaMask.</span>
+            }
             </div>
           </div>
         </div>
       }
 
-      <div className={styles.balances} style={{marginTop: 30}}>
-
-      <div className={styles.boxWrapper}>
-
-        <div className={styles.location}>
-          <div>&nbsp;</div>
-            {networkLayer === 'L1' && <span className={styles.under}>You are on L1</span>}
-            {networkLayer === 'L2' && <span>&nbsp;</span>}
-          <div>&nbsp;</div>
-        </div>
-
-        <div className={[styles.box, networkLayer === 'L2' ? styles.dim : styles.active].join(' ')}>
-
-          <div className={styles.header}>
-            <div className={styles.title}>
-              <span>Balance on L1</span>
-              <span>Ethereum Network</span>
-            </div>
-          </div>
-
-          {rootBalance.map((i, index) => {
-            return (
-              <div key={index} className={styles.row}>
-                <div className={styles.token}>
-                  <span className={styles.symbol}>{i.symbol}</span>
-                </div>
-                <span>{logAmount(i.amount, i.decimals, 4)}</span>
-              </div>
-            );
-          })}
-
-        </div>
+  <div className={styles.BalanceWrapper}>
+    <div>
+      <div className={styles.title}>
+        <span style={{fontSize: '0.8em'}}>Balance on L1</span><br/>
+        <span>Ethereum Network</span><br/>
       </div>
-
-      <div className={styles.boxWrapper}>
-        <div className={styles.location}>
-          &nbsp;
-        </div>
-        <div className={styles.boxActions}>
-        {networkLayer === 'L1' &&
-          <div className={styles.buttons}>
-            <Button
-              onClick={() => handleModalClick('depositModal', true)}
-              type='primary'
-              disabled={!isSynced || criticalTransactionLoading}
-              style={{width: '150px', padding: '8px'}}
-            >
-              FAST DEPOSIT<ArrowForward/>
-            </Button>
-          </div>
-        }
-        {networkLayer === 'L2' &&
-          <div className={styles.buttons}>
-            <Button
-              onClick={() => handleModalClick('exitModal', true)}
-              type='primary'
-              disabled={!isSynced || criticalTransactionLoading}
-              style={{width: '150px', padding: '8px'}}
-            > 
-            <ArrowBack/>FAST EXIT
-            </Button>
-          </div>
-        }
-        {networkLayer === 'L1' &&
-          <div className={styles.buttons}>
-            <Button
-              onClick={() => handleModalClick('depositModal')}
-              type='secondary'
-              disabled={!isSynced || criticalTransactionLoading}
-              style={{maxWidth: '120px', padding: '4px', fontSize: '0.8em'}}
-            >
-              Traditional Deposit<ArrowForward/>
-            </Button>
-          </div>
-        }
-        {networkLayer === 'L2' &&
-          <div className={styles.buttons}>
-            <Button
-              onClick={() => handleModalClick('exitModal')}
-              type='secondary'
-              disabled={disabled || criticalTransactionLoading}
-              style={{maxWidth: '120px', padding: '4px', fontSize: '0.8em'}}
-            >
-              <ArrowBack/>Traditional Exit
-            </Button>
-          </div>
-        }
-        </div>
-      </div>
-      
-      <div className={styles.boxWrapper}>
-        <div className={styles.location}>
-          <div>&nbsp;</div>
-            {networkLayer === 'L1' && <span>&nbsp;</span>}
-            {networkLayer === 'L2' && <span className={styles.under}>You are on L2</span>}
-          <div>&nbsp;</div>
-        </div>
-        <div className={[styles.box, networkLayer === 'L1' ? styles.dim : styles.active].join(' ')}>
-          <div className={styles.header}>
-            <div className={styles.title}>
-              <span>Balance on L2</span>
-              <span>OMGX</span>
-            </div>
-              <div
-                onClick={()=>handleModalClick('transferModal')}
-                className={[styles.transfer, networkLayer === 'L1' ? styles.disabled : ''].join(' ')}
-              >
-                <Send />
-                <span>TRANSFER</span>
-              </div>
-          </div>
-          {childBalance.map((i, index) => {
-            return (
-              <div key={index} className={styles.row}>
-                <div className={styles.token}>
-                  <span className={styles.symbol}>{i.symbol}</span>
-                </div>
-                <span>{logAmount(i.amount, i.decimals, 4)}</span>
-              </div>
-            );
-          })}
-        </div>
+      <div className={styles.TableContainer}>
+        {rootBalance.map((i, index) => {
+          return (
+            <AccountList 
+              key={i.currency}
+              token={i}
+              chain={'L1'}
+              networkLayer={networkLayer}
+              disabled={disabled}
+            />
+          )
+        })}
       </div>
     </div>
+    <div>
+      <div className={styles.title}>
+        <span style={{fontSize: '0.8em'}}>Balance on L2</span><br/>
+        <span>OMGX</span><br/>
+      </div>
+      <div className={styles.TableContainer}>
+        {childBalance.map((i, index) => {
+          return (
+            <AccountList 
+              key={i.currency}
+              token={i}
+              chain={'L2'}
+              networkLayer={networkLayer}
+              disabled={disabled}
+            />
+          )
+        })}
+      </div>
+    </div>
+  </div>
 
   </div>
   );

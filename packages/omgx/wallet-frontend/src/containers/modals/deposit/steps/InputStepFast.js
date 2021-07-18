@@ -12,206 +12,145 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
-import { depositL1LP } from 'actions/networkAction'
+
+import { depositL1LP, approveERC20 } from 'actions/networkAction'
 import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
 import Button from 'components/button/Button'
-import IconSelect from 'components/iconSelect/iconSelect'
 import Input from 'components/input/Input'
-import { ethers } from 'ethers'
-import { isEqual } from 'lodash'
+
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { selectlayer1Balance } from 'selectors/balanceSelector'
 import { selectLoading } from 'selectors/loadingSelector'
 import networkService from 'services/networkService'
-import { logAmount } from 'util/amountConvert'
+import { powAmount, logAmount } from 'util/amountConvert'
 import * as styles from '../DepositModal.module.scss'
 
-function InputStepFast({
-  onClose,
-  onNext,
-  currencyL1Address,
-  currencyL2Address,
-  setCurrencyL1Address,
-  setCurrencyL2Address,
-  tokenInfo,
-  value,
-  setValue,
-  setTokenInfo,
-}) {
+function InputStepFast({ handleClose, token }) {
+  
   const dispatch = useDispatch()
 
-  const [tokens, setTokens] = useState([])
-  const [priorityOptions, setPriorityOptions] = useState([])
-  const [selectedToken, setSelectedToken] = useState(null)
+  const [value, setValue] = useState('')
   const [LPBalance, setLPBalance] = useState(0)
   const [feeRate, setFeeRate] = useState(0)
-  const balancesL1 = useSelector(selectlayer1Balance, isEqual)
+  const [disabledSubmit, setDisabledSubmit] = useState(true)
 
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
 
-  function handleClose() {
-    onClose()
+  function setAmount(value) {
+    if (
+      Number(value) > 0 &&
+      Number(value) < Number(LPBalance) &&
+      Number(value) < Number(token.balance)
+    ) {
+      setDisabledSubmit(false)
+    } else {
+      setDisabledSubmit(true)
+    }
+    setValue(value)
   }
 
-  async function depositETH() {
-    if (value > 0 && tokenInfo) {
-      let res = await dispatch(depositL1LP(selectedToken.L1, value))
-      if (res) {
-        dispatch(setActiveHistoryTab1('Deposits'))
-        dispatch(
-          openAlert(
-            `ETH was deposited into the L1LP. You will receive 
-            ${((Number(value) * (100 - Number(feeRate)))/100).toFixed(2)} 
-            oETH on L2`
-          )
-        )
-        handleClose()
-      } else {
-        dispatch(openError('Failed to deposit ETH'))
-      }
-    }
-  }
+  async function doDeposit() {
 
-  useEffect(() => {
-    if (!!selectedToken) {
-      setCurrencyL1Address(selectedToken.L1 || '')
-      setCurrencyL2Address(selectedToken.L2 || '')
-    }
-  }, [selectedToken, setCurrencyL1Address, setCurrencyL2Address])
+    let res
 
-  //which tokens are available for swap on?
-  useEffect(() => {
-    networkService
-      .getSwapTokens() //this is where the set of swap tokens is defined
-      .then((res) => {
-        setTokens(res)
-      })
-      .catch((err) => {
-        console.log('error', err)
-      })
-  }, [])
-
-  useEffect(() => {
-    if (tokens && tokens.length > 0) {
-      let allOptions = tokens
-        .map((t) => {
-          let isBalanceExist = balancesL1.find((b) => {
-            if (
-              (t.symbol === 'ETH' && b.symbol === 'oETH') ||
-              t.symbol === b.symbol
-            ) {
-              return true
-            }
-            return false
-          })
-
-          let balanceL1 = ''
-          if (isBalanceExist) {
-            balanceL1 = logAmount(
-              isBalanceExist.amount,
-              isBalanceExist.decimals
+    if(token.symbol === 'ETH') {
+      console.log("Trying to deposit ETH")
+      if (value > 0) {
+        res = await dispatch(depositL1LP(token.address, value))
+        if (res) {
+          dispatch(setActiveHistoryTab1('Deposits'))
+          dispatch(
+            openAlert(
+              `ETH was deposited into the L1LP. You will receive 
+              ${((Number(value) * (100 - Number(feeRate)))/100).toFixed(2)} 
+              oETH on L2`
             )
-          }
-
-          if (!balanceL1) {
-            return null
-          }
-
-          return {
-            ...t,
-            ...isBalanceExist,
-            balanceL1,
-          }
-        })
-        .filter(Boolean)
-      setPriorityOptions(allOptions)
+          )
+          handleClose()
+        } else {
+          dispatch(openError('Failed to deposit ETH'))
+        }
+      }
+    } else {
+      console.log("Getting ready to adjust allowance")
     }
-  }, [tokens, balancesL1])
+    
+    console.log("Getting ready to adjust allowance")
 
-  const disabledSubmit =
-    value <= 0 ||
-    !selectedToken.L2 ||
-    !ethers.utils.isAddress(selectedToken.L2) ||
-    Number(value) > Number(LPBalance)
+    //at this point we know it's not ETH
+    res = await dispatch(
+      approveERC20(powAmount(value, token.decimals), token.address, networkService.L1LPAddress)
+    )
 
-  //look up levels in the L2 liquidity pools
-  if (selectedToken) {
-    networkService.L2LPBalance(selectedToken.L2).then((res) => {
-      setLPBalance(Number(res).toFixed(2))
-    })
-    networkService.getTotalFeeRate().then((feeRate) => {
-      setFeeRate(feeRate)
-    })
+    if(!res) {
+      dispatch(openError('Failed to approve amount'))
+    }
+
+    res = await dispatch(
+      depositL1LP(token.address, value)
+    )
+
+    if (res) {
+      dispatch(setActiveHistoryTab1('Deposits'))
+      dispatch(
+        openAlert(
+          `${token.symbol} was deposited to the L1LP. You will receive 
+           ${(Number(value) * 0.97).toFixed(2)} ${token.symbol} on L2`
+        )
+      )
+      handleClose()
+    } else {
+      dispatch(openError('Failed to deposit into the L1 liquidity pool'))
+    }
+
   }
 
-  const renderUnit = (
-    <div className={styles.tokenDetail}>
-      <div className={styles.tokenSymbol}>
-        {selectedToken
-          ? selectedToken.symbol === 'oETH'
-            ? 'ETH'
-            : selectedToken.symbol
-          : ''}
-      </div>
-      <div className={styles.tokenBalance}>
-        {selectedToken
-          ? `Balance: ${Number(selectedToken.balanceL1).toFixed(2)}`
-          : ''}
-      </div>
-    </div>
-  )
+  const receivableAmount = (value) => {
+    return (Number(value) * ((100 - Number(feeRate)) / 100)).toFixed(2)
+  }
+
+  useEffect(() => {
+    if (typeof(token) !== 'undefined') {
+      networkService.L2LPBalance(token.address).then((res) => {
+        setLPBalance(Number(res).toFixed(2))
+      })
+      networkService.getTotalFeeRate().then((feeRate) => {
+        setFeeRate(feeRate)
+      })
+    }
+  }, [token])
+
+  const label = 'There is a ' + feeRate + '% fee.'
 
   return (
     <>
       <h2>Fast Swap onto OMGX</h2>
 
-      {!selectedToken ? (
-        <IconSelect
-          priorityOptions={priorityOptions}
-          disableDD={true}
-          onTokenSelect={setSelectedToken}
-        />
-      ) : null}
+      <Input
+        label={label}
+        placeholder={`Amount to swap on to OMGX`}
+        value={value}
+        type="number"
+        onChange={(i)=>{setAmount(i.target.value)}}
+        unit={token.symbol}
+        maxValue={logAmount(token.balance, token.decimals)}
+      />
 
-      {!!selectedToken && (
-        <Input
-          label="Amount to swap onto OMGX"
-          type="number"
-          unit={selectedToken ? renderUnit : null}
-          placeholder={0}
-          value={value}
-          onChange={(i)=>setValue(i.target.value)}
-        />
+      {token && token.symbol === 'ETH' && (
+        <h3>
+          {value && `You will receive ${receivableAmount(value)} oETH on L2.`}
+        </h3>
       )}
 
-      {selectedToken && selectedToken.symbol === 'ETH' && (
-        <>
-          <h3>
-            Swap fee: {feeRate}%<br/>
-            {value &&
-              `You will receive
-              ${((Number(value) * (100 - Number(feeRate))) / 100).toFixed(2)}
-              oETH on L2`}
-          </h3>
-        </>
-      )}
-
-      {selectedToken && selectedToken.symbol !== 'ETH' && (
-        <>
-          <h3>
-            Swap fee: {feeRate}%<br/>
-            {value &&
-              `You will receive
-              ${((Number(value) * (100 - Number(feeRate))) / 100).toFixed(2)}
-              ${selectedToken.symbol} on L2`}
-          </h3>
-        </>
+      {token && token.symbol !== 'ETH' && (
+        <h3>
+          {value && `You will receive ${receivableAmount(value)} ${token.symbol} on L2.`}
+        </h3>
       )}
 
       {Number(LPBalance) < Number(value) && (
         <h3 style={{ color: 'red' }}>
-          The liquidity pool balance (of {LPBalance}) is too low to cover your swap - please
+          The liquidity pool balance (of {LPBalance}) is too low to cover your swap. Please
           use the traditional deposit or reduce the amount to swap.
         </h3>
       )}
@@ -223,29 +162,17 @@ function InputStepFast({
           style={{flex: 0}}
         >
           CANCEL
-        </Button>
-        {selectedToken && selectedToken.symbol === 'ETH' && (
-          <Button
-            onClick={depositETH}
-            type="primary"
-            style={{flex: 0, minWidth: 200}}
-            loading={depositLoading}
-            tooltip="Your transaction is still pending. Please wait for confirmation."
-            disabled={disabledSubmit}
-          >
-            SWAP ON!
-          </Button>
-        )}
-        {selectedToken && selectedToken.symbol !== 'ETH' && (
-          <Button
-            onClick={onNext}
-            type="primary"
-            style={{flex: 0, minWidth: 200}}
-            disabled={disabledSubmit}
-          >
-            NEXT
-          </Button>
-        )}
+        </Button>        
+        <Button
+          onClick={doDeposit}
+          type="primary"
+          style={{flex: 0, minWidth: 200}}
+          loading={depositLoading}
+          tooltip="Your swap is still pending. Please wait for confirmation."
+          disabled={disabledSubmit}
+        >
+          SWAP ON!
+        </Button>       
       </div>
     </>
   )

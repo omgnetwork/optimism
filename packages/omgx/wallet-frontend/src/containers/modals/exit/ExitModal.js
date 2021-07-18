@@ -16,14 +16,14 @@ limitations under the License. */
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
-import { closeModal } from 'actions/uiAction'
-
 import Modal from 'components/modal/Modal'
+import { closeModal } from 'actions/uiAction'
 
 import DoExitStep from './steps/DoExitStep'
 import DoExitStepFast from './steps/DoExitStepFast'
 
-function ExitModal({ open, fast }) {
+function ExitModal({ open, token, fast }) {
+  
   const dispatch = useDispatch()
 
   function handleClose() {
@@ -33,9 +33,9 @@ function ExitModal({ open, fast }) {
   return (
     <Modal open={open}>
       {!!fast ? (
-        <DoExitStepFast handleClose={handleClose} />
+        <DoExitStepFast handleClose={handleClose} token={token} />
       ) : (
-        <DoExitStep handleClose={handleClose} />
+        <DoExitStep handleClose={handleClose} token={token} />
       )}
     </Modal>
   )
