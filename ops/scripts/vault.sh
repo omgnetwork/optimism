@@ -148,32 +148,11 @@ function test_banner {
     echo "************************************************************************************************************************************"
 }
 
-function test_plugin {
-	if [ -n "$RUN_TEST" ]; then
-    test_banner
-		test_banner
-		echo "SMOKE TEST BASIC WALLET FUNCTIONALITY"
-		test_banner
-		/vault/test/smoke.wallet.sh
-		test_banner
-		echo "SMOKE TEST OVM SUBMIT BATCH"
-		test_banner
-		/vault/test/smoke.ovm.sh
-		echo "SMOKE TEST OVM CUSTOM ENCODING"
-		test_banner
-		/vault/test/smoke.encode_asb.sh
-	else
-			echo "Skipping tests."
-			wait $VAULT_PID
-	fi
-}
-
 if [ -f "$VAULT_CREDENTIALS" ]; then
     sleep 10
 		unseal
 		vault status
     vault secrets list
-		test_plugin
 else
     sleep 10
     echo "Generating vault credentials"
@@ -185,9 +164,7 @@ else
     vault audit enable file file_path=stdout
     vault status
     vault secrets list
-    test_plugin
 fi
-
 
 if [ -n "$TEST" ]; then
     echo "Dying."

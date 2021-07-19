@@ -10,6 +10,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -272,7 +273,7 @@ func (b *PluginBackend) pathEncodeAppendSequencerBatch(ctx context.Context, req 
 }
 
 func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
-	//log.Print(util.PrettyPrint(data))
+	log.Print(util.PrettyPrint(data))
 
 	config, err := b.configured(ctx, req)
 	if err != nil {
@@ -323,7 +324,8 @@ func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *lo
 		return nil, fmt.Errorf("invalid gas_price")
 	}
 	transactOpts.GasPrice = util.ValidNumber(gasPriceRaw)
-
+	log.Print("transactOpts.GasPrice")
+	log.Print(transactOpts.GasPrice)
 	// //transactOpts needs nonce. Use supplied nonce
 	nonceRaw := data.Get("nonce").(string)
 	if nonceRaw == "" {

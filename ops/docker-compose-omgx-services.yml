@@ -1,8 +1,5 @@
 version: "3"
 
-x-volumes:
-  &my-volumes
-      - "/tmp/vault_auth:/vault/config:rw"
 services:
 # base service builder
 
@@ -62,29 +59,12 @@ services:
       FILTER_POLLING_INTERVAL: 30000
       RETRIES: 70
 
-  vault_init:
-    depends_on:
-      - vault
-    entrypoint:
-      - "/bin/sh"
-      - -ecx
-      - |
-        sleep 8s
-        ls /vault/config.unseal.json
-    volumes:
-      *my-volumes
-    image: node:11
-    environment:
-      VAULT_URL: https://vault:8200
-
   vault:
     image: omgx/vault
-    # deploy:
-    #    replicas: 0
     ports:
       - "127.0.0.1:8200:8200"
     volumes:
-      *my-volumes
+      - "/tmp/vault_auth:/vault/config:rw"
     entrypoint:
       - "/bin/sh"
       - -ecx

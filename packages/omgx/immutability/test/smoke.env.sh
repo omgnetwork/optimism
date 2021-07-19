@@ -9,11 +9,12 @@ export RPC_L2_URL="http://l2geth:8545"
 export CONTRACTS_PATH="/vault/contracts/erc20/build/"
 export GAS_PRICE_LOW="1"
 export GAS_PRICE_HIGH="37000000000"
+export GAS_PRICE_HIGH2="70000000000"
 export FUNDING_AMOUNT=100000000000000000
 export TEST_AMOUNT=10000000000000000
 export PASSPHRASE="passion bauble hypnotic hanky kiwi effective overcast roman staleness"
 export EMPTY=""
-
+export VAULT_ADDR="https://127.0.0.1:8900"
 function check_result(){
   EXIT_STATUS=$1
   EXPECTED=$2

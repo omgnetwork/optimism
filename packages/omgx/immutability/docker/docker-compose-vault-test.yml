@@ -1,12 +1,41 @@
 version: "3"
+###
+### stuff is a bit convoluted here, simply because the process isn't trivial
+### To execute Vault tests, that submit stuff to L1 contracts, we need all the addresses (OVM_CTC, OVM_SCC).
+### But for these contracts to be deployed, these contracts need Sequencer and Proposer addresses.
+### So we start Vault and wait for it to be ready (the grep thingy in entrypoint)
+### We continue with wallet, account and policy creation and setup. And write them to a file tokens.sh.
+### The deployer mounts this volume and checks for the existence of this file and sources it when it comes up. This
+### Exposes Sequencer and Deployer addresses as ENV vars in the deployer node.
+### I guess this is OK for local docker-compose, but it certanly won't be OK for production Vault deploy.
+### The Vault is a delicate thing.
 
 services:
 
+  deployer:
+    volumes:
+      - "./../packages/omgx/immutability/test:/vault/test"
+    entrypoint:
+      - "/bin/bash"
+      - -ecx
+      - |
+       while [ ! -f /vault/test/tokens.sh ]
+       do
+         sleep 1
+         echo "Waiting for the Vault accounts"
+       done
+       cat /vault/test/tokens.sh
+       source /vault/test/tokens.sh
+       ./deployer.sh
+
   vault:
+    user: root
     environment:
+      VAULT_ADDR: https://127.0.0.1:8900
+      VAULT_CACERT: /vault/config/ca.crt
       RUN_TEST: "true"
       TEST: "true"
-    user: root
+      URL: http://deployer:8081/addresses.json
     volumes:
       # - "./docker/immutability/ca/certs/:/etc/ssl/certs/"
       - "./../packages/omgx/immutability/test:/vault/test"
@@ -15,7 +44,26 @@ services:
       - "/bin/sh"
       - -ecx
       - |
-        sleep 2
         apk add --update nodejs npm
         cd /vault/test && npm install
-        /vault/vault.sh
+        nohup /vault/vault.sh > /tmp/vault.out &
+        while [ $$(cat /tmp/vault.out | grep -c "Success! Enabled the immutability-eth-plugin secrets engine at: immutability-eth-plugin/") -ne 1 ];
+        do
+            sleep 1
+            echo "Waiting for Vault..."
+        done
+        export VAULT_TOKEN=$$(cat /vault/config/unseal.json | jq -r .root_token)
+        echo "Config and provisioning, create tokens.sh"
+        . /vault/test/config.sh
+        RETRIES=$${RETRIES:-60}
+        if [[ ! -z "$$URL" ]]; then
+          # get the addrs from the URL provided
+          ADDRESSES=$$(curl --fail --show-error --silent --retry-connrefused --retry $$RETRIES --retry-delay 5 $$URL)
+          export OVM_CTC=$$(echo $$ADDRESSES | jq -r '.OVM_CanonicalTransactionChain')
+          export OVM_SCC=$$(echo $$ADDRESSES | jq -r '.OVM_StateCommitmentChain')
+        fi
+        source /vault/test/tokens.sh
+         # cleanup
+        rm /vault/test/tokens.sh
+        echo "Executing tests"
+        . /vault/test/execute_tests.sh
