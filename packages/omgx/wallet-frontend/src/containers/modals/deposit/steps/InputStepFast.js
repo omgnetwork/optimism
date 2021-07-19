@@ -35,6 +35,8 @@ function InputStepFast({ handleClose, token }) {
   const [disabledSubmit, setDisabledSubmit] = useState(true)
 
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
+  const approvalLoading = useSelector(selectLoading(['APPROVE/CREATE']))
+  
 
   function setAmount(value) {
     if (
@@ -54,7 +56,9 @@ function InputStepFast({ handleClose, token }) {
     let res
 
     if(token.symbol === 'ETH') {
-      console.log("Trying to deposit ETH")
+      
+      console.log("ETH Fast swap on")
+      
       if (value > 0) {
         res = await dispatch(depositL1LP(token.address, value))
         if (res) {
@@ -67,19 +71,23 @@ function InputStepFast({ handleClose, token }) {
             )
           )
           handleClose()
+          return
         } else {
           dispatch(openError('Failed to deposit ETH'))
+          return
         }
       }
-    } else {
-      console.log("Getting ready to adjust allowance")
-    }
+    } 
     
-    console.log("Getting ready to adjust allowance")
-
     //at this point we know it's not ETH
+    console.log("ERC20 Fast swap on")
+
     res = await dispatch(
-      approveERC20(powAmount(value, token.decimals), token.address, networkService.L1LPAddress)
+      approveERC20(
+        powAmount(value, token.decimals), 
+        token.address, 
+        networkService.L1LPAddress
+      )
     )
 
     if(!res) {
@@ -95,12 +103,12 @@ function InputStepFast({ handleClose, token }) {
       dispatch(
         openAlert(
           `${token.symbol} was deposited to the L1LP. You will receive 
-           ${(Number(value) * 0.97).toFixed(2)} ${token.symbol} on L2`
+           ${receivableAmount(value)} ${token.symbol} on L2`
         )
       )
       handleClose()
     } else {
-      dispatch(openError('Failed to deposit into the L1 liquidity pool'))
+      dispatch(openError('Failed to deposit ERC20'))
     }
 
   }
@@ -121,14 +129,22 @@ function InputStepFast({ handleClose, token }) {
   }, [token])
 
   const label = 'There is a ' + feeRate + '% fee.'
+  
+  let buttonLabel = 'DEPOSIT'
+
+  if(depositLoading) {
+    buttonLabel = "Depositing..."
+  } else if (approvalLoading) {
+    buttonLabel = "Approving..."
+  }
 
   return (
     <>
-      <h2>Fast Swap onto OMGX</h2>
+      <h2>Fast Deposit</h2>
 
       <Input
         label={label}
-        placeholder={`Amount to swap on to OMGX`}
+        placeholder={`Amount to deposit`}
         value={value}
         type="number"
         onChange={(i)=>{setAmount(i.target.value)}}
@@ -150,8 +166,8 @@ function InputStepFast({ handleClose, token }) {
 
       {Number(LPBalance) < Number(value) && (
         <h3 style={{ color: 'red' }}>
-          The liquidity pool balance (of {LPBalance}) is too low to cover your swap. Please
-          use the traditional deposit or reduce the amount to swap.
+          The liquidity pool balance (of {LPBalance}) is too low to cover your fast deposit. Please
+          use the traditional deposit or reduce the amount.
         </h3>
       )}
 
@@ -167,11 +183,11 @@ function InputStepFast({ handleClose, token }) {
           onClick={doDeposit}
           type="primary"
           style={{flex: 0, minWidth: 200}}
-          loading={depositLoading}
-          tooltip="Your swap is still pending. Please wait for confirmation."
+          loading={depositLoading || approvalLoading}
+          tooltip="Your deposit is still pending. Please wait for confirmation."
           disabled={disabledSubmit}
         >
-          SWAP ON!
+          {buttonLabel}
         </Button>       
       </div>
     </>

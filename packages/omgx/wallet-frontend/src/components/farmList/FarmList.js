@@ -23,11 +23,18 @@ class FarmList extends React.Component {
     
     super(props);
     
-    const { logo, name, shortName, poolInfo, userInfo, L1orL2Pool } = this.props;
+    const { 
+      logo, name, shortName, 
+      poolInfo, userInfo, L1orL2Pool,
+      balance, decimals 
+    } = this.props;
 
     this.state = {
       logo,
-      name, shortName,
+      name, 
+      shortName,
+      balance,
+      decimals,
       L1orL2Pool,
       // data
       poolInfo, userInfo,
@@ -41,7 +48,7 @@ class FarmList extends React.Component {
   
   componentDidUpdate(prevState) {
 
-    const { poolInfo, userInfo } = this.props;
+    const { poolInfo, userInfo, balance, decimals } = this.props;
 
     if (!isEqual(prevState.poolInfo, poolInfo)) {
       this.setState({ poolInfo });
@@ -51,26 +58,38 @@ class FarmList extends React.Component {
       this.setState({ userInfo });
     }
 
+    if (!isEqual(prevState.balance, balance)) {
+      this.setState({ balance });
+    }
+
+    if (!isEqual(prevState.decimals, decimals)) {
+      this.setState({ decimals });
+    }
+
   }
 
   handleStakeToken() {
-    const { shortName, poolInfo, L1orL2Pool } = this.state;
+    const { shortName, poolInfo, L1orL2Pool, balance, decimals } = this.state;
     this.props.dispatch(updateStakeToken({
       symbol: shortName,
       currency: L1orL2Pool === 'L1LP' ? poolInfo.l1TokenAddress : poolInfo.l2TokenAddress,
       LPAddress: L1orL2Pool === 'L1LP' ? networkService.L1LPAddress : networkService.L2LPAddress,
       L1orL2Pool,
+      balance,
+      decimals
     }));
     this.props.dispatch(openModal('farmDepositModal'));
   }
 
   handleWithdrawToken() {
-    const { shortName, poolInfo, L1orL2Pool } = this.state;
+    const { shortName, poolInfo, L1orL2Pool, balance, decimals } = this.state;
     this.props.dispatch(updateWithdrawToken({
       symbol: shortName,
       currency: L1orL2Pool === 'L1LP' ? poolInfo.l1TokenAddress : poolInfo.l2TokenAddress,
       LPAddress: L1orL2Pool === 'L1LP' ? networkService.L1LPAddress : networkService.L2LPAddress,
       L1orL2Pool,
+      balance,
+      decimals
     }));
     this.props.dispatch(openModal('farmWithdrawModal'));
   }

@@ -237,6 +237,7 @@ class NetworkService {
 
       console.log('NS: masterConfig:', this.masterSystemConfig)
       console.log('NS: this.chainID:', this.chainID)
+      console.log('NS: network:', network)
 
       //there are numerous possible chains we could be on
       //either local, rinkeby etc
@@ -290,11 +291,13 @@ class NetworkService {
         )
       }
 
-      if(addresses.hasOwnProperty('Proxy__OVM_L1CrossDomainMessengerFast'))
+      if(addresses.hasOwnProperty('Proxy__OVM_L1CrossDomainMessengerFast')) {
         this.L1FastMessengerAddress = addresses.Proxy__OVM_L1CrossDomainMessengerFast
+      }
       else if (addresses.hasOwnProperty('OVM_L1CrossDomainMessengerFast')) {
         this.L1FastMessengerAddress = addresses.OVM_L1CrossDomainMessengerFast
-      } else {
+      } 
+      else {
         this.L1FastMessengerAddress = addresses.L1FastMessengerAddress
       }
       console.log('L1FastMessengerAddress set to:',this.L1FastMessengerAddress)
@@ -455,32 +458,102 @@ class NetworkService {
   }
 
   async getTransactions() {
-    //rinkeby L1
-    if (this.masterSystemConfig === 'rinkeby' && this.chainID === 4) {
-      const response = await etherScanInstance(
+
+    if (this.masterSystemConfig === 'rinkeby') {
+      
+      let txL1
+      let txL2
+
+      const responseL1 = await etherScanInstance(
         this.masterSystemConfig,
-        this.L1orL2
+        /*this.L1orL2*/ 'L1'
       ).get(`&address=${this.account}`)
-      if (response.status === 200) {
-        const transactions = await response.data
-        if (transactions.status === '1') {
-          return transactions.result
+      if (responseL1.status === 200) {
+        const transactionsL1 = await responseL1.data
+        if (transactionsL1.status === '1') {
+          //thread in ChainID
+          txL1 = transactionsL1.result.map(v => ({...v, chain: 'L1'}))
+          //return transactions.result
         }
       }
-    }
-    //rinkeby L2
-    if (this.masterSystemConfig === 'rinkeby' && this.chainID === 28) {
-      const response = await omgxWatcherAxiosInstance(
+
+      const responseL2 = await omgxWatcherAxiosInstance(
         this.masterSystemConfig
       ).post('get.transaction', {
         address: this.account,
         fromRange: 0,
-        toRange: 100,
+        toRange: 1000,
       })
-      if (response.status === 201) {
-        return response.data
+      if (responseL2.status === 201) {
+        txL2 = responseL2.data.map(v => ({...v, chain: 'L2'}))
+        const annotated = await this.parseTransaction( [...txL1, ...txL2] )
+        return annotated
       }
     }
+
+  }
+
+  /* Where possible, annotate the transactions 
+  based on contract addresses */
+  async parseTransaction( transactions ) {
+
+    var annotatedTX
+
+    if (this.masterSystemConfig === 'rinkeby') {
+      
+      annotatedTX = transactions.map(item => {
+        
+        let to = item.to
+        
+        if ( to === null || to === '') {
+          return item
+        }
+
+        to = to.toLowerCase()
+
+        if (to === this.L2LPAddress.toLowerCase()) {
+          console.log("L2->L1 Swap Off")
+          return Object.assign({}, item, { typeTX: 'L2->L1 Exit via Fast Offramp' })
+        } 
+
+        if (to === this.L1LPAddress.toLowerCase()) {
+          console.log("L1->L2 Swap On")
+          return Object.assign({}, item, { typeTX: 'L1->L2 Deposit via Fast Onramp' })
+        } 
+
+        if (to === this.L1StandardBridgeAddress.toLowerCase()) {
+          console.log("L1->L2 Traditional Deposit")
+          return Object.assign({}, item, { typeTX: 'L1->L2 Traditional Deposit' })
+        } 
+
+        if (to === this.L1_TEST_Address.toLowerCase()) {
+          console.log("L1 ERC20 Amount Approval")
+          return Object.assign({}, item, { typeTX: 'L1 ERC20 Amount Approval' })
+        } 
+
+        // if (item.crossDomainMessage) {
+        //   if(to === this.L2LPAddress.toLowerCase()) {
+        //     console.log("Found EXIT: L2LPAddress")
+        //     return Object.assign({}, item, { typeTX: 'EXIT: L2LPAddress' })
+        //   } 
+        //   else if (to === this.L2_TEST_Address.toLowerCase()) {
+        //     console.log("Found EXIT: L2_TEST_Address")
+        //     return Object.assign({}, item, { typeTX: 'EXIT: L2_TEST_Address' })
+        //   } 
+        //   else if (to === this.L2_ETH_Address.toLowerCase()) {
+        //     console.log("Found EXIT: L2_ETH_Address")
+        //     return Object.assign({}, item, { typeTX: 'EXIT: L2_ETH_Address' })
+        //   }
+        // }
+
+        return item
+
+      })
+
+    }
+    
+    return annotatedTX
+
   }
 
   async getExits() {
@@ -766,21 +839,21 @@ class NetworkService {
     }
   }
 
-  async getAllTransactions() {
-    let transactionHistory = {}
-    const latest = await this.L2Provider.eth.getBlockNumber()
-    const blockNumbers = Array.from(Array(latest).keys())
+  // async getAllTransactions() {
+  //   let transactionHistory = {}
+  //   const latest = await this.L2Provider.eth.getBlockNumber()
+  //   const blockNumbers = Array.from(Array(latest).keys())
 
-    for (let blockNumber of blockNumbers) {
-      const blockData = await this.L2Provider.eth.getBlock(blockNumber)
-      const transactionsArray = blockData.transactions
-      if (transactionsArray.length === 0) {
-        transactionHistory.push({
-          /*ToDo*/
-        })
-      }
-    }
-  }
+  //   for (let blockNumber of blockNumbers) {
+  //     const blockData = await this.L2Provider.eth.getBlock(blockNumber)
+  //     const transactionsArray = blockData.transactions
+  //     if (transactionsArray.length === 0) {
+  //       transactionHistory.push({
+  //         /*ToDo*/
+  //       })
+  //     }
+  //   }
+  // }
 
   async checkAllowance(
     currencyAddress,
@@ -796,7 +869,6 @@ class NetworkService {
         this.account,
         targetContract
       )
-      console.log("allowance:",allowance)
       return allowance.toString()
     } catch (error) {
       throw new WebWalletError({

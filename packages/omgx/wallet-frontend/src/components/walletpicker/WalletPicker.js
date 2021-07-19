@@ -52,7 +52,6 @@ function WalletPicker ({ onEnable, enabled }) {
 
   const dispatchSetWalletMethod = useCallback((methodName) => {
     //console.log("dispatchSetWalletMethod:",methodName)
-
     dispatch(setWalletMethod(methodName));
   }, [ dispatch ])
 

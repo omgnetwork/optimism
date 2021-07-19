@@ -8,7 +8,7 @@ import { getFarmInfo } from 'actions/farmAction';
 
 import Button from 'components/button/Button';
 import Modal from 'components/modal/Modal';
-import InputSelect from 'components/inputselect/InputSelect';
+import Input from 'components/input/Input';
 import { logAmount, powAmount } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
@@ -19,16 +19,13 @@ class FarmDepositModal extends React.Component {
   constructor(props) {
     super(props);
 
-    const { open, balance } = this.props;
+    const { open } = this.props;
     const { stakeToken } = this.props.farm;
 
     this.state = {
       open,
       stakeToken,
       stakeValue: '',
-      // balance
-      layer1Balance: balance.layer1,
-      layer2Balance: balance.layer2,
       // allowance
       approvedAllowance: 0,
       // loading
@@ -37,7 +34,8 @@ class FarmDepositModal extends React.Component {
   }
 
   async componentDidUpdate(prevState) {
-    const { open, balance } = this.props;
+
+    const { open } = this.props;
     const { stakeToken } = this.props.farm;
 
     if (prevState.open !== open) {
@@ -56,22 +54,16 @@ class FarmDepositModal extends React.Component {
       this.setState({ approvedAllowance, stakeToken });
     }
 
-    if (!isEqual(prevState.balance, balance)) {
-      this.setState({
-        layer2Balance: balance.layer2,
-        layer1Balance: balance.layer1,
-      });
-    }
   }
 
   getMaxTransferValue () {
-    const { layer1Balance, layer2Balance, stakeToken } = this.state;
-    const transferingBalanceObject = (stakeToken.L1orL2Pool === 'L1LP' ? layer1Balance : layer2Balance)
-      .find(i => i.currency === stakeToken.currency);
-    if (!transferingBalanceObject) {
-      return;
-    }
-    return logAmount(transferingBalanceObject.amount, transferingBalanceObject.decimals);
+    const { stakeToken } = this.state;
+    // const transferingBalanceObject = (stakeToken.L1orL2Pool === 'L1LP' ? layer1Balance : layer2Balance)
+    //   .find(i => i.currency === stakeToken.currency);
+    // if (!transferingBalanceObject) {
+    //   return;
+    // }
+    return logAmount(stakeToken.balance, stakeToken.decimals);
   }
 
   handleClose() {
@@ -131,41 +123,28 @@ class FarmDepositModal extends React.Component {
   }
 
   render() {
+    
     const {
       open,
-      stakeToken, stakeValue,
-      layer1Balance, layer2Balance,
+      stakeToken, 
+      stakeValue,
       approvedAllowance,
       loading,
     } = this.state;
 
-    const selectOptions = (stakeToken.L1orL2Pool === 'L1LP' ? layer1Balance : layer2Balance)
-      .reduce((acc, cur) => {
-      if (cur.currency.toLowerCase() === stakeToken.currency.toLowerCase()) {
-        acc.push({
-          title: cur.symbol,
-          value: cur.currency,
-          subTitle: `Balance: ${logAmount(cur.amount, cur.decimals)}`
-        })
-      }
-      return acc;
-    }, []);
-
     return (
+
       <Modal open={open}>
         
         <h2>Stake {`${stakeToken.symbol}`}</h2>
 
-        <InputSelect
-          label='Amount to stake'
-          placeholder={0}
+        <Input
+          placeholder={`Amount to stake`}
           value={stakeValue}
+          type="number"
           onChange={i=>{this.setState({stakeValue: i.target.value})}}
-          onSelect={i=>{}}
-          selectOptions={selectOptions}
-          selectValue={stakeToken.currency}
+          unit={stakeToken.symbol}
           maxValue={this.getMaxTransferValue()}
-          disabledSelect={true}
         />
 
         {Number(stakeValue) > Number(this.getMaxTransferValue()) &&

@@ -38,6 +38,7 @@ function InputStep({ handleClose, token }) {
         }
       }
     } else {
+      console.log("Depositing ERC20")
       res = await dispatch(
         depositErc20(powAmount(value, token.decimals), token.address, gasPrice, token.addressL2)
       )
@@ -67,6 +68,8 @@ function InputStep({ handleClose, token }) {
       setGasPrice={setGasPrice}
     />
   )
+
+  console.log("Loading:", depositLoading)
 
   return (
     <>
