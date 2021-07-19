@@ -26,8 +26,10 @@ describe("SushiBar", function () {
   beforeEach(async function () {
     this.sushi = await this.Factory__SushiToken.deploy({gasLimit: 800000, gasPrice: 0})
     await this.sushi.deployTransaction.wait()
-    this.bar = await this.Factory__SushiBar.deploy(this.sushi.address, {gasLimit: 800000, gasPrice: 0})
+    this.bar = await this.Factory__SushiBar.deploy({gasLimit: 800000, gasPrice: 0})
     await this.bar.deployTransaction.wait()
+    const barInitTx = await this.bar.initialize(this.sushi.address, {gasLimit: 800000, gasPrice: 0})
+    await barInitTx.wait()
     let mint
     mint = await this.sushi.mint(alice.address, "100", {gasLimit: 800000, gasPrice: 0})
     await mint.wait()

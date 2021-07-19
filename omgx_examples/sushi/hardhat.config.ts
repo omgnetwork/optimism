@@ -15,7 +15,7 @@ const config = {
       // This sets the gas price to 0 for all transactions on L2. We do this
       // because account balances are not automatically initiated with an ETH
       // balance.
-      gas: 800000,
+      gas: 10000000,
       gasPrice: 0,
       chainId: 28,
       ovm: true

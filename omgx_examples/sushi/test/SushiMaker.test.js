@@ -31,9 +31,15 @@ describe("SushiMaker", function () {
       ["strudel", ERC20MockJSON, ["$TRDL", "$TRDL", getBigNumber("10000000")]],
       ["factory", UniswapV2FactoryJSON, [bob.address]],
     ])
-    await deploy(this, [["bar", SushiBarJSON, [this.sushi.address]]])
-    await deploy(this, [["sushiMaker", SushiMakerJSON, [this.factory.address, this.bar.address, this.sushi.address, this.weth.address]]])
-    await deploy(this, [["exploiter", SushiMakerExploitMockJSON, [this.sushiMaker.address]]])
+    await deploy(this, [["bar", SushiBarJSON, []]])
+    barInitTx = await this.bar.initialize(this.sushi.address)
+    await barInitTx.wait()
+    await deploy(this, [["sushiMaker", SushiMakerJSON, []]])
+    sushiMakerInitTx = await this.sushiMaker.initialize(this.factory.address, this.bar.address, this.sushi.address, this.weth.address, {gasLimit: 800000, gasPrice: 0})
+    await sushiMakerInitTx.wait()
+    await deploy(this, [["exploiter", SushiMakerExploitMockJSON, []]])
+    exploiterInitTx = await this.exploiter.initialize(this.sushiMaker.address, {gasLimit: 800000, gasPrice: 0})
+    await exploiterInitTx.wait()
     await createSLP(this, "sushiEth", this.sushi, this.weth, getBigNumber(10))
     await createSLP(this, "strudelEth", this.strudel, this.weth, getBigNumber(10))
     await createSLP(this, "daiEth", this.dai, this.weth, getBigNumber(10))

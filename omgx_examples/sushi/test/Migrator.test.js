@@ -77,8 +77,11 @@ describe("Migrator", function () {
 
     this.lp2 = await this.Factory__UniswapV2Pair.attach(pair2TX.events[1].args.pair)
 
-    this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "1000", "0", "100000", {gasLimit: 800000, gasPrice: 0})
+    this.chef = await this.Factory__MasterChef.deploy()
     await this.chef.deployTransaction.wait()
+
+    const chefInitializeTx = await this.chef.initialize(this.sushi.address, dev.address, "1000", "0", "100000", {gasLimit: 800000, gasPrice: 0})
+    await chefInitializeTx.wait()
 
     this.migrator = await this.Factory__Migrator.deploy(this.chef.address, this.factory1.address, this.factory2.address, "0", {gasLimit: 800000, gasPrice: 0})
     await this.migrator.deployTransaction.wait()

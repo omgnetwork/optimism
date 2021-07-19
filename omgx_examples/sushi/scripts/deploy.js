@@ -40,28 +40,28 @@ const main = async () => {
     _args: []
   })
 
+  console.log(await SushiToken.symbol())
+
   const SushiBar = await deploy({
     contractName: "SushiBar",
     rpcUrl: l2RpcUrl,
     pk: deployPrivateKey,
     ovm: true,
-    _args: [SushiToken.address]
+    _args: []
   })
+
+  await (await SushiBar.initialize(SushiToken.address, { gasLimit: 800000, gasPrice: 0 })).wait()
 
   const MasterChef = await deploy({
     contractName: "MasterChef",
     rpcUrl: l2RpcUrl,
     pk: deployPrivateKey,
     ovm: true,
-    _args: [
-      SushiToken.address,
-      deployAddress,
-      utils.parseEther("100000000"),
-      "0",
-      utils.parseEther("100000000")
-    ]
+    _args: []
   });
 
+  await (await MasterChef.initialize(SushiToken.address, deployAddress, utils.parseEther("100000000"), "0", utils.parseEther("100000000"), { gasLimit: 800000, gasPrice: 0 })).wait()
+  console.log(SushiToken.address)
   if (await SushiToken.owner() !== MasterChef.address) {
     // Transfer Sushi Ownership to Chef
     console.log(" 🔑 Transfer Sushi Ownership to Chef")

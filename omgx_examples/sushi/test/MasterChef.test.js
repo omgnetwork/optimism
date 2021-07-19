@@ -40,8 +40,11 @@ describe("MasterChef", function () {
   })
 
   it("should set correct state variables", async function () {
-    this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "1000", "0", "1000", {gasLimit: 800000, gasPrice: 0})
+    this.chef = await this.Factory__MasterChef.deploy()
     await this.chef.deployTransaction.wait()
+
+    const chefInitializeTx = await this.chef.initialize(this.sushi.address, dev.address, "1000", "0", "1000", {gasLimit: 800000, gasPrice: 0})
+    await chefInitializeTx.wait()
 
     const ownershipTX = await this.sushi.transferOwnership(this.chef.address, {gasLimit: 800000, gasPrice: 0})
     await ownershipTX.wait()
@@ -56,8 +59,11 @@ describe("MasterChef", function () {
   })
 
   it("should allow dev and only dev to update dev", async function () {
-    this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "1000", "0", "1000",{gasLimit: 800000, gasPrice: 0})
+    this.chef = await this.Factory__MasterChef.deploy()
     await this.chef.deployTransaction.wait()
+
+    const chefInitializeTx = await this.chef.initialize(this.sushi.address, dev.address, "1000", "0", "1000", {gasLimit: 800000, gasPrice: 0})
+    await chefInitializeTx.wait()
 
     expect(await this.chef.devaddr()).to.equal(dev.address)
 
@@ -102,8 +108,11 @@ describe("MasterChef", function () {
 
     it("should allow emergency withdraw", async function () {
       // 100 per block farming rate starting at block 100 with bonus until block 1000
-      this.chef = await this.Factory__MasterChef.deploy(this.sushi.address, dev.address, "100", "100", "1000",{gasLimit: 800000, gasPrice: 0})
+      this.chef = await this.Factory__MasterChef.deploy()
       await this.chef.deployTransaction.wait()
+
+      const chefInitializeTx = await this.chef.initialize(this.sushi.address, dev.address, "100", "100", "1000",{gasLimit: 800000, gasPrice: 0})
+      await chefInitializeTx.wait()
 
       const addTX = await this.chef.add("100", this.lp.address, true,{gasLimit: 800000, gasPrice: 0})
       await addTX.wait()

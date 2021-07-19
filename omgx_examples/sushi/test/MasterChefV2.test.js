@@ -32,9 +32,12 @@ describe("MasterChefV2", function () {
     await deploy(this,
       [["lp", ERC20MockJSON, ["LP Token", "LPT", getBigNumber(10)]],
       ["dummy", ERC20MockJSON, ["Dummy", "DummyT", getBigNumber(10)]],
-      ['chef', MasterChefJSON, [this.sushi.address, alice.address, getBigNumber(100), "0", "0"]]
+      ['chef', MasterChefJSON, []]
     ])
 
+
+    chefInitializeTx = await this.chef.initialize(this.sushi.address, alice.address, getBigNumber(100), "0", "0", {gasLimit: 800000, gasPrice: 0})
+    await chefInitializeTx.wait()
     let transferTX, addTX, approveTX, depositTX, initTX
     transferTX = await this.sushi.transferOwnership(this.chef.address, {gasLimit: 800000, gasPrice: 0})
     await transferTX.wait()
@@ -48,11 +51,15 @@ describe("MasterChefV2", function () {
     await depositTX.wait()
 
     await deploy(this, [
-        ['chef2', MasterChefV2JSON, [this.chef.address, this.sushi.address, 1]],
+        ['chef2', MasterChefV2JSON, []],
         ["rlp", ERC20MockJSON, ["LP", "rLPT", getBigNumber(10)]],
         ["r", ERC20MockJSON, ["Reward", "RewardT", getBigNumber(100000)]],
     ])
-    await deploy(this, [["rewarder", RewarderMockJSON, [getBigNumber(1), this.r.address, this.chef2.address]]])
+    chef2InitTx = await this.chef2.initialize(this.chef.address, this.sushi.address, 1, {gasLimit: 800000, gasPrice: 0})
+    await chef2InitTx.wait()
+    await deploy(this, [["rewarder", RewarderMockJSON, []]])
+    rewarderInitTx = await this.rewarder.initialize(getBigNumber(1), this.r.address, this.chef2.address, {gasLimit: 800000, gasPrice: 0})
+    await rewarderInitTx.wait()
     approveTX = await this.dummy.approve(this.chef2.address, getBigNumber(10), {gasLimit: 800000, gasPrice: 0})
     await approveTX.wait()
     initTX = await this.chef2.init(this.dummy.address, {gasLimit: 800000, gasPrice: 0})

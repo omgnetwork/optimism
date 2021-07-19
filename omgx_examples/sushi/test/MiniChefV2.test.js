@@ -31,13 +31,17 @@ describe("MiniChefV2", function () {
     await deploy(this,
       [["lp", ERC20MockJSON, ["LP Token", "LPT", getBigNumber(10)]],
       ["dummy", ERC20MockJSON, ["Dummy", "DummyT", getBigNumber(10)]],
-      ['chef', MiniChefV2JSON, [this.sushi.address]],
+      ['chef', MiniChefV2JSON, []],
       ["rlp", ERC20MockJSON, ["LP", "rLPT", getBigNumber(10)]],
       ["r", ERC20MockJSON, ["Reward", "RewardT", getBigNumber(100000)]],
     ])
 
-    await deploy(this, [["rewarder", RewarderMockJSON, [getBigNumber(1), this.r.address, this.chef.address]]])
+    chefInitTx = await this.chef.initialize(this.sushi.address, {gasLimit: 800000, gasPrice: 0})
+    await chefInitTx.wait()
 
+    await deploy(this, [["rewarder", RewarderMockJSON, []]])
+    rewarderInitTx = await this.rewarder.initialize(getBigNumber(1), this.r.address, this.chef.address, {gasLimit: 800000, gasPrice: 0})
+    await rewarderInitTx.wait()
     const mintTX = await this.sushi.mint(this.chef.address, getBigNumber(10000), {gasLimit: 800000, gasPrice: 0})
     await mintTX.wait()
     const approveTX = await this.lp.approve(this.chef.address, getBigNumber(10), {gasLimit: 800000, gasPrice: 0})
