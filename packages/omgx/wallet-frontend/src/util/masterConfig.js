@@ -17,40 +17,44 @@ require('dotenv').config()
 
 const NETWORKS = {
   local: {
-    addressUrl:       `http://${window.location.hostname}:8080/addresses.json`,
-    addressOMGXUrl:   `http://${window.location.hostname}:8078/addresses.json`,
-    OMGX_WATCHER_URL: null,//Does not exist on local
+    addressUrl: `http://${window.location.hostname}:8080/addresses.json`,
+    addressOMGXUrl: `http://${window.location.hostname}:8078/addresses.json`,
+    OMGX_WATCHER_URL: null, //Does not exist on local
     L1: {
-      name: "Local L1",
+      name: 'Local L1',
       chainId: 31337,
       rpcUrl: `http://${window.location.hostname}:9545`,
-      blockExplorer: null,//does not exist on local
+      blockExplorer: null, //does not exist on local
+      transaction: null, //TODO: ❓ @jan please provide the valid url here for local
     },
     L2: {
-      name: "Local L2",
+      name: 'Local L2',
       chainId: 28,
       rpcUrl: `http://${window.location.hostname}:8545`,
-      blockExplorer: null,//does not exist on local
+      blockExplorer: null, //does not exist on local
+      transaction: null, //TODO: ❓ @jan please provide the valid url here for local
     },
   },
   rinkeby: {
-    addressUrl:       `https://rinkeby.omgx.network:8080/addresses.json`,
-    addressOMGXUrl:   `https://rinkeby.omgx.network:8078/addresses.json`,
+    addressUrl: `https://rinkeby.omgx.network:8080/addresses.json`,
+    addressOMGXUrl: `https://rinkeby.omgx.network:8078/addresses.json`,
     OMGX_WATCHER_URL: `https://api-watcher.rinkeby.omgx.network/`,
     L1: {
-      name: "Rinkeby L1",
+      name: 'Rinkeby L1',
       chainId: 4,
       rpcUrl: `https://rinkeby.infura.io/v3/${process.env.REACT_APP_INFURA_ID}`,
       blockExplorer: `https://api-rinkeby.etherscan.io/api?module=account&action=txlist&startblock=0&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_ETHERSCAN_API}`,
+      transaction: `https://rinkeby.etherscan.io/tx/`,
     },
     L2: {
-      name: "Rinkeby L2",
+      name: 'Rinkeby L2',
       chainId: 28,
       rpcUrl: `https://rinkeby.omgx.network`,
       blockExplorer: `https://blockexplorer.rinkeby.omgx.network`,
-    }
+      transaction: `https://blockexplorer.rinkeby.omgx.network/tx/`,
+    },
   },
-/*
+  /*
   mainnet: {
     addressUrl:       `https://mainnet.omgx.network:8080/addresses.json`,
     addressOMGXUrl:   `https://mainnet.omgx.network:8078/addresses.json`,
@@ -72,7 +76,7 @@ const NETWORKS = {
 }
 
 const BaseServices = {
-  WALLET_SERVICE:   `https://api-service.rinkeby.omgx.network/`,
+  WALLET_SERVICE: `https://api-service.rinkeby.omgx.network/`,
   //relevant to local?
   SELLER_OPTIMISM_API_URL: `https://pm7f0dp9ud.execute-api.us-west-1.amazonaws.com/prod/`,
   //relevant to local?
@@ -83,10 +87,10 @@ const BaseServices = {
   WEBSOCKET_API_URL: `wss://d1cj5xnal2.execute-api.us-west-1.amazonaws.com/prod`,
 }
 
-export function getAllNetworks () {
-  return NETWORKS;
+export function getAllNetworks() {
+  return NETWORKS
 }
 
-export function getBaseServices () {
-  return BaseServices;
+export function getBaseServices() {
+  return BaseServices
 }
