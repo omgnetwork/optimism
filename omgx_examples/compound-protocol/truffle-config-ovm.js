@@ -4,7 +4,7 @@ const HDWalletProvider = require('@truffle/hdwallet-provider')
 module.exports = {
   contracts_build_directory: './build-ovm',
   networks: {
-    omgx: {
+    optimism: {
       provider: function () {
         return new HDWalletProvider({
           mnemonic: {
@@ -18,12 +18,25 @@ module.exports = {
       port: 8545,
       gasPrice: 0,
       gas: 54180127,
+    },
+    omgx_rinkeby: {
+      provider: function () {
+        return new HDWalletProvider({
+          mnemonic: {
+            phrase: mnemonicPhrase
+          },
+          providerOrUrl: 'http://rinkeby.omgx.network'
+        })
+      },
+      network_id: 28,
+      host: 'http://rinkeby.omgx.network',
+      gasPrice: 0,
+      gas: 54180127,
     }
   },
   compilers: {
     solc: {
-      // Add path to the optimism solc fork
-      version: "node_modules/@eth-optimism/solc",
+      version: 'node_modules/@eth-optimism/solc',
       settings: {
         optimizer: {
           enabled: true,

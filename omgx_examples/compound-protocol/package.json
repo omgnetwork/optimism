@@ -17,8 +17,9 @@
     "checksize": "npx run ./script/saddle/comptrollerSize.js",
     "ganache": "npx ganache-cli -l 10000038 -i 1234 -e 100000 -a 10 -u 0 -g 1000000000 --allowUnlimitedContractSize -m \"$HDWALLET_MNEMONIC\"",
     "migrate": "npx truffle migrate",
-    "migrate:ovm": "yarn truffle migrate --network omgx --config truffle-config-ovm.js",
-    "compile:ovm": "truffle compile --config truffle-config-ovm.js"
+    "migrate:ovm": "yarn truffle migrate --network optimism --config truffle-config-ovm.js",
+    "compile:ovm": "truffle compile --config truffle-config-ovm.js",
+    "deploy:omgx": "truffle migrate --network omgx_rinkeby --config truffle-config-ovm.js"
   },
   "repository": "git@github.com:compound-finance/compound-protocol.git",
   "author": "Compound Finance",
@@ -31,12 +32,12 @@
     "solparse": "^2.2.8"
   },
   "dependencies": {
-    "eth-saddle": "^0.1.21",
-    "@eth-optimism/solc": "0.5.16-alpha.7",
+    "@eth-optimism/solc": "0.5.16-alpha.6",
     "@truffle/hdwallet-provider": "^1.4.0",
+    "eth-saddle": "^0.1.21",
     "rimraf": "^3.0.2",
-    "truffle": "^5.3.6"
-
+    "truffle": "^5.3.6",
+    "truffle-contract-size": "^2.0.1"
   },
   "resolutions": {
     "scrypt.js": "https://registry.npmjs.org/@compound-finance/ethereumjs-wallet/-/ethereumjs-wallet-0.6.3.tgz",
