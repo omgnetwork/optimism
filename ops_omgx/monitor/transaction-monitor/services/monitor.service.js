@@ -305,26 +305,6 @@ class MonitorService extends OptimismEnv {
     return [blocksData, receiptsData]
   }
 
-  async getL1TransactionReceipt(msgHash, fast=false) {
-    const blockNumber = await this.L1Provider.getBlockNumber();
-    const startingBlock = Math.max(blockNumber - this.numberBlockToFetch, 0);
-
-    const filter = {
-      address: (fast ? this.OVM_L1CrossDomainMessengerFast : this.OVM_L1CrossDomainMessenger),
-      topics: [ethers.utils.id(`RelayedMessage(bytes32)`)],
-      fromBlock: startingBlock,
-    }
-
-    const logs = await this.L1Provider.getLogs(filter);
-    const matches = logs.filter(i => i.data === msgHash);
-
-    if (matches.length > 0) {
-      if (matches.length > 1) return false;
-      return true
-    } else {
-      return false;
-    }
-  }
 
   async getCrossDomainMessageStatusL2(receiptData, blocksData){
     this.logger.info(`Searching ${receiptData.transactionHash}...`);
@@ -337,10 +317,6 @@ class MonitorService extends OptimismEnv {
     let crossDomainMessageFinalize = false;
     let fastRelay = false;
 
-    if (filteredBlockData.length) {
-      crossDomainMessageSendTime = filteredBlockData[0].timestamp ;
-      crossDomainMessageEstimateFinalizedTime = crossDomainMessageSendTime + 60 * 60;
-    }
     // Find the transaction that sends message from L2 to L1
     const filteredLogData = receiptData.logs.filter(i => i.address === this.OVM_L2CrossDomainMessenger && i.topics[0] === ethers.utils.id('SentMessage(bytes)'));
 
@@ -361,13 +337,18 @@ class MonitorService extends OptimismEnv {
 
       }
     }
+
+    if (filteredBlockData.length) {
+      crossDomainMessageSendTime = filteredBlockData[0].timestamp ;
+      crossDomainMessageEstimateFinalizedTime = fastRelay ?
+        crossDomainMessageSendTime + 60 : crossDomainMessageSendTime + 60 * 60 * 24 * 6;
+    }
+
     receiptData.crossDomainMessageSendTime = crossDomainMessageSendTime;
     receiptData.crossDomainMessageEstimateFinalizedTime = crossDomainMessageEstimateFinalizedTime;
     receiptData.crossDomainMessage = crossDomainMessage;
     receiptData.crossDomainMessageFinalize = crossDomainMessageFinalize;
     receiptData.fastRelay = fastRelay;
-
-
 
     return receiptData;
   }
@@ -399,6 +380,27 @@ class MonitorService extends OptimismEnv {
     receiptData.crossDomainMessageFinalizedTime = crossDomainMessageFinalizedTime;
 
     return receiptData;
+  }
+
+  async getL1TransactionReceipt(msgHash, fast=false) {
+    const blockNumber = await this.L1Provider.getBlockNumber();
+    const startingBlock = Math.max(blockNumber - this.numberBlockToFetch, 0);
+
+    const filter = {
+      address: (fast ? this.OVM_L1CrossDomainMessengerFast : this.OVM_L1CrossDomainMessenger),
+      topics: [ethers.utils.id(`RelayedMessage(bytes32)`)],
+      fromBlock: startingBlock,
+    }
+
+    const logs = await this.L1Provider.getLogs(filter);
+    const matches = logs.filter(i => i.data === msgHash);
+
+    if (matches.length > 0) {
+      if (matches.length > 1) return false;
+      return true
+    } else {
+      return false;
+    }
   }
 
   // gets list of addresses whose messages may finalize fast
