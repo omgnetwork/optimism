@@ -27,7 +27,9 @@ const deployFn: DeployFunction = async (hre) => {
     nftSymbol,
     nftName,
     BigNumber.from(String(0)), //starting index for the tokenIDs
-    "", //the base URI is empty in this case
+    '0x0000000000000000000000000000000000000000',
+    'Genesis',
+    'OMGX_Rinkeby_28',
     {gasLimit: 800000, gasPrice: 0}
   )
   await L2ERC721.deployTransaction.wait()

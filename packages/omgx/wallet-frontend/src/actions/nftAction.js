@@ -58,7 +58,9 @@ export async function addNFT ( NFT ) {
     decimals: 0,
     name:  NFT.name, 
     symbol:  NFT.symbol, 
-    address: NFT.address
+    address: NFT.address,
+    originID: NFT.originID,
+    originAddress: NFT.originAddress
   }
 
   console.log("nft info:",info)
@@ -89,7 +91,9 @@ export async function addNFTFactory ( Factory ) {
     decimals: 0,
     symbol:  Factory.symbol, 
     layer: Factory.layer,
-    name: Factory.name, 
+    name: Factory.name,
+    originID: Factory.originID,
+    originAddress: Factory.originAddress 
   }
 
   console.log("nft factory:",factory)

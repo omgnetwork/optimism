@@ -6,16 +6,37 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title ERC721Mock
- * This mock just provides a public safeMint, mint, and burn functions for testing purposes
+ * 
  */
 contract ERC721Mock is Ownable, ERC721 {
 
     uint256 tID;
 
-    constructor (string memory name, string memory symbol, uint256 tID_start, string memory baseURI) 
+    // Ancestral NFT
+    struct Ancestor { 
+       address cAddress;
+       string id;
+       string chain;
+    }
+  
+    Ancestor genesis;
+
+    constructor (
+        string memory name, 
+        string memory symbol, 
+        uint256 tID_start, 
+        address origin_cAddress,
+        string memory origin_id,
+        string memory origin_chain
+    ) 
         ERC721(name, symbol) {
-        _setBaseURI(baseURI);
+        _setBaseURI('');
         tID = tID_start;
+        genesis = Ancestor(
+            origin_cAddress,
+            origin_id,
+            origin_chain
+        );
     }
 
     function mintNFT(address recipient, string memory tokenURI) public onlyOwner returns (uint256)
@@ -30,13 +51,12 @@ contract ERC721Mock is Ownable, ERC721 {
         return tID;
     }
 
-    function baseURI() public view override returns (string memory) {
-        return baseURI();
-    }
-
-    function setBaseURI(string calldata newBaseURI) public {
-        _setBaseURI(newBaseURI);
-    }
+    function getGenesis() public view returns (
+        address, 
+        string memory, 
+        string memory) {  
+        return(genesis.cAddress, genesis.id, genesis.chain);  
+    } 
 
     function setTokenURI(uint256 tokenId, string memory _tokenURI) public {
         _setTokenURI(tokenId, _tokenURI);
@@ -45,14 +65,6 @@ contract ERC721Mock is Ownable, ERC721 {
     //for a specific tokenId, get the associated NFT
     function getTokenURI(uint256 tokenId) public view returns (string memory) {
         return tokenURI(tokenId);
-    }
-
-    function getName() public view returns (string memory) {
-        return name();
-    }
-
-    function getSymbol() public view returns (string memory) {
-        return symbol();
     }
 
     function exists(uint256 tokenId) public view returns (bool) {

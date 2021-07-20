@@ -456,17 +456,27 @@ class NetworkService {
       const ERC721Owner = await this.ERC721Contract.owner()
       console.log("NFT Owner:",ERC721Owner)
 
+      console.log("NFT Contract:",this.ERC721Contract)
+
       if (this.account === ERC721Owner) {
+        
         console.log("Great, you are the NFT owner - adding factory")
+        
         setMinter(true)
+        
         let nftName = await this.ERC721Contract.getName()
         let nftSymbol = await this.ERC721Contract.getSymbol()
+        let nftOriginAddress = /*'0000'*/ await this.ERC721Contract.getOrigin_NFT_Address()
+        let nftOriginID = '0001' //await this.ERC721Contract.getOrigin_NFT_ID()
+
         addNFTFactory({
             name: nftName,
             symbol: nftSymbol,
             owner: this.account,
             layer: 'L2',
-            address: this.ERC721Contract.address
+            address: this.ERC721Contract.address,
+            originAddress: nftOriginAddress,
+            originID: nftOriginID
         })
       } else {
         setMinter(false)
