@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-require('dotenv').config()
+require('dotenv').config();
 
 const NETWORKS = {
   local: {
@@ -73,7 +73,7 @@ const NETWORKS = {
     }
   }
 */
-}
+};
 
 const BaseServices = {
   WALLET_SERVICE: `https://api-service.rinkeby.omgx.network/`,
@@ -85,12 +85,12 @@ const BaseServices = {
   SERVICE_OPTIMISM_API_URL: `https://zlba6djrv6.execute-api.us-west-1.amazonaws.com/prod/`,
   //relevant to local?
   WEBSOCKET_API_URL: `wss://d1cj5xnal2.execute-api.us-west-1.amazonaws.com/prod`,
-}
+};
 
 export function getAllNetworks() {
-  return NETWORKS
+  return NETWORKS;
 }
 
 export function getBaseServices() {
-  return BaseServices
+  return BaseServices;
 }

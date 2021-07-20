@@ -16,29 +16,29 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React from 'react'
-import { connect } from 'react-redux'
-import { isEqual } from 'lodash'
+import React from 'react';
+import { connect } from 'react-redux';
+import { isEqual } from 'lodash';
 
-import { getFarmInfo, getFee } from 'actions/farmAction'
+import { getFarmInfo, getFee } from 'actions/farmAction';
 
-import FarmList from 'components/farmList/FarmList'
+import FarmList from 'components/farmList/FarmList';
 
-import networkService from 'services/networkService'
+import networkService from 'services/networkService';
 
-import ethLogo from 'images/ethereum.svg'
-import TESTLogo from 'images/test.svg'
+import ethLogo from 'images/ethereum.svg';
+import TESTLogo from 'images/test.svg';
 
-import * as styles from './Farm.module.scss'
+import * as styles from './Farm.module.scss';
 
 class Farm extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
 
     const { totalFeeRate, userRewardFeeRate, poolInfo, userInfo } =
-      this.props.farm
+      this.props.farm;
 
-    const { layer1, layer2 } = this.props.balance
+    const { layer1, layer2 } = this.props.balance;
 
     this.state = {
       totalFeeRate,
@@ -47,45 +47,45 @@ class Farm extends React.Component {
       userInfo,
       layer1,
       layer2,
-    }
+    };
   }
 
   componentDidMount() {
-    const { totalFeeRate, userRewardFeeRate } = this.props.farm
+    const { totalFeeRate, userRewardFeeRate } = this.props.farm;
     if (!totalFeeRate || !userRewardFeeRate) {
-      this.props.dispatch(getFee())
+      this.props.dispatch(getFee());
     }
-    this.props.dispatch(getFarmInfo())
+    this.props.dispatch(getFarmInfo());
   }
 
   componentDidUpdate(prevState) {
     const { totalFeeRate, userRewardFeeRate, poolInfo, userInfo } =
-      this.props.farm
+      this.props.farm;
 
-    const { layer1, layer2 } = this.props.balance
+    const { layer1, layer2 } = this.props.balance;
 
     if (prevState.farm.totalFeeRate !== totalFeeRate) {
-      this.setState({ totalFeeRate })
+      this.setState({ totalFeeRate });
     }
 
     if (prevState.farm.userRewardFeeRate !== userRewardFeeRate) {
-      this.setState({ userRewardFeeRate })
+      this.setState({ userRewardFeeRate });
     }
 
     if (!isEqual(prevState.farm.poolInfo, poolInfo)) {
-      this.setState({ poolInfo })
+      this.setState({ poolInfo });
     }
 
     if (!isEqual(prevState.farm.userInfo, userInfo)) {
-      this.setState({ userInfo })
+      this.setState({ userInfo });
     }
 
     if (!isEqual(prevState.balance.layer1, layer1)) {
-      this.setState({ layer1 })
+      this.setState({ layer1 });
     }
 
     if (!isEqual(prevState.balance.layer2, layer2)) {
-      this.setState({ layer2 })
+      this.setState({ layer2 });
     }
   }
 
@@ -93,32 +93,32 @@ class Farm extends React.Component {
     return [
       networkService.L2_ETH_Address,
       networkService.L1_ETH_Address,
-    ].includes(address)
+    ].includes(address);
   }
 
   getBalance(address, chain) {
-    const { layer1, layer2 } = this.state
+    const { layer1, layer2 } = this.state;
 
-    if (typeof layer1 === 'undefined') return [0, 0]
-    if (typeof layer2 === 'undefined') return [0, 0]
+    if (typeof layer1 === 'undefined') return [0, 0];
+    if (typeof layer2 === 'undefined') return [0, 0];
 
     if (chain === 'L1') {
-      let tokens = Object.entries(layer1)
+      let tokens = Object.entries(layer1);
       for (let i = 0; i < tokens.length; i++) {
         if (tokens[i][1].address.toLowerCase() === address.toLowerCase()) {
-          return [tokens[i][1].balance, tokens[i][1].decimals]
+          return [tokens[i][1].balance, tokens[i][1].decimals];
         }
       }
     } else if (chain === 'L2') {
-      let tokens = Object.entries(layer2)
+      let tokens = Object.entries(layer2);
       for (let i = 0; i < tokens.length; i++) {
         if (tokens[i][1].address.toLowerCase() === address.toLowerCase()) {
-          return [tokens[i][1].balance, tokens[i][1].decimals]
+          return [tokens[i][1].balance, tokens[i][1].decimals];
         }
       }
     }
 
-    return [0, 0]
+    return [0, 0];
   }
 
   render() {
@@ -127,7 +127,7 @@ class Farm extends React.Component {
       poolInfo,
       // user
       userInfo,
-    } = this.state
+    } = this.state;
 
     return (
       <div className={styles.Farm}>
@@ -140,11 +140,11 @@ class Farm extends React.Component {
         <div className={styles.TableContainer}>
           {Object.keys(poolInfo.L1LP).map((v, i) => {
             if (!Object.values(poolInfo.L1LP[v]).length) {
-              return <></>
+              return <></>;
             }
-            const isETH = poolInfo.L1LP[v].isETH
+            const isETH = poolInfo.L1LP[v].isETH;
 
-            const ret = this.getBalance(v, 'L1')
+            const ret = this.getBalance(v, 'L1');
             return (
               <FarmList
                 key={i}
@@ -157,18 +157,18 @@ class Farm extends React.Component {
                 balance={ret[0]}
                 decimals={ret[1]}
               />
-            )
+            );
           })}
         </div>
         <h3>L2 Liquidity Pool</h3>
         <div className={styles.TableContainer}>
           {Object.keys(poolInfo.L2LP).map((v, i) => {
             if (!Object.values(poolInfo.L2LP[v]).length) {
-              return <></>
+              return <></>;
             }
-            const isETH = poolInfo.L2LP[v].isETH
+            const isETH = poolInfo.L2LP[v].isETH;
 
-            const ret = this.getBalance(v, 'L2')
+            const ret = this.getBalance(v, 'L2');
             return (
               <FarmList
                 key={i}
@@ -181,17 +181,17 @@ class Farm extends React.Component {
                 balance={ret[0]}
                 decimals={ret[1]}
               />
-            )
+            );
           })}
         </div>
       </div>
-    )
+    );
   }
 }
 
 const mapStateToProps = (state) => ({
   farm: state.farm,
   balance: state.balance,
-})
+});
 
-export default connect(mapStateToProps)(Farm)
+export default connect(mapStateToProps)(Farm);
