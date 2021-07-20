@@ -33,7 +33,7 @@ The service fetches the L1 ETH balances of `sequencer`, `proposer`, `relayer` an
 * `L1ETHBalance`: The ETH balances of all accounts
 * `L1ETHCostFee`: The ETH fees that we pay to maintain the Layer 2 since the gas oracle service starts
 
-The service also fetches the L2 gas fees collected by us based on the `gasUsage * gasPrice` and increased L2 block numbers in each polling interval. We also calulate the average gas usage per block, so we can estimate the gas price.
+The service also fetches the L2 gas fees collected by us based on the `gasUsage * gasPrice` and increased L2 block numbers in each polling interval. We also calculate the average gas usage per block, so we can estimate the gas price.
 
 * `L2ETHCollectFee`: The ETH fees that we collect from the Layer 2 transactions.
   $$
@@ -63,5 +63,6 @@ When the new estimated L2 gas price is not in the range of `(1 + GAS_PRICE_ORACL
 
 ## Problem
 
-1. `numberOfBlocksInterval` can affect the gas price significantly. The possible solution is increased the `POLLING_INTERVAL` to 30 mins.
+1. `numberOfBlocksInterval` can affect the gas price significantly. The possible solution is to increase the `POLLING_INTERVAL` to 30 mins.
 2. When the service starts, the gas price will be restored to the `GAS_PRICE_ORACLE_FLOOR_PRICE`.
+3. The `GAS_PRICE_ORACLE_FLOOR_PRICE` and `GAS_PRICE_ORACLE_ROOF_PRICE` are not easy to be determined in the test environment.
