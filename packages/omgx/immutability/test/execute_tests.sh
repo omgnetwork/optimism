@@ -1,5 +1,10 @@
 #!/bin/bash
 
+trap 'catch' EXIT
+catch() {
+  echo "Done with tests."
+}
+
 function test_banner {
     echo "************************************************************************************************************************************"
 }
@@ -24,6 +29,4 @@ function test_plugin {
 	fi
 }
 
-
 test_plugin
-echo "Done with tests."

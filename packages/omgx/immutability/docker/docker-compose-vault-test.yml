@@ -17,7 +17,7 @@ services:
       - "./../packages/omgx/immutability/test:/vault/test"
     entrypoint:
       - "/bin/bash"
-      - -ecx
+      - -ec
       - |
        while [ ! -f /vault/test/tokens.sh ]
        do
@@ -44,7 +44,7 @@ services:
       - "./vault/data/immutability/config:/vault/config:rw"
     entrypoint:
       - "/bin/sh"
-      - -ecx
+      - -ec
       - |
         apk add --update nodejs npm
         cd /vault/test && npm install
@@ -69,4 +69,3 @@ services:
         rm /vault/test/tokens.sh
         echo "Executing tests"
         . /vault/test/execute_tests.sh
-        echo "Tests done."
