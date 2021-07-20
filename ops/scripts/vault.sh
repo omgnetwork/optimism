@@ -144,10 +144,6 @@ function configure_plugin {
 	fi
 }
 
-function test_banner {
-    echo "************************************************************************************************************************************"
-}
-
 if [ -f "$VAULT_CREDENTIALS" ]; then
     sleep 10
 		unseal

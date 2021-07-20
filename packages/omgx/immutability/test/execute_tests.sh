@@ -26,4 +26,4 @@ function test_plugin {
 
 
 test_plugin
-
+echo "Done with tests."

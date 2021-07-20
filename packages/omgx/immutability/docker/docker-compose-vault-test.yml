@@ -30,6 +30,8 @@ services:
 
   vault:
     user: root
+    deploy:
+       replicas: 1
     environment:
       VAULT_ADDR: https://127.0.0.1:8900
       VAULT_CACERT: /vault/config/ca.crt
@@ -67,3 +69,4 @@ services:
         rm /vault/test/tokens.sh
         echo "Executing tests"
         . /vault/test/execute_tests.sh
+        echo "Tests done."

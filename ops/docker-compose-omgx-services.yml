@@ -61,6 +61,8 @@ services:
 
   vault:
     image: omgx/vault
+    deploy:
+       replicas: 0
     ports:
       - "127.0.0.1:8200:8200"
     build:
