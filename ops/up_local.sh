@@ -44,7 +44,7 @@ OMGX_DOCKERFILE=docker-compose-omgx-services.yml
 #append :latest tag to all apps
 yq eval '(.services.[].image | select(. == "ethereumoptimism*")) |= sub("ethereumoptimism", "omgx")' ${ORIGINAL_DOCKERFILE} | \
 yq eval '(.services.[].image) += ":latest"' - \
-#> ${DOCKERFILE}
+> ${DOCKERFILE}
 
 if [[ $BUILD == 1 ]]; then
     docker-compose build --parallel -- builder l2geth l1_chain
@@ -62,6 +62,7 @@ if [[ $BUILD == 1 ]]; then
     docker build ../ --file $DIR/docker/Dockerfile.omgx_monorepo --tag omgx/omgx_builder:latest
     docker build ../ --file $DIR/docker/Dockerfile.omgx_deployer --tag omgx/omgx_deployer:latest
     docker build ../ --file $DIR/docker/Dockerfile.omgx_message-relayer-fast --tag omgx/omgx_message-relayer-fast:latest
+    docker build ../ --file $DIR/docker/Dockerfile.omgx_vault --tag omgx/vault:latest
 elif [[ $BUILD == 0 ]]; then
     docker-compose -f $DIR/$DOCKERFILE -f $DIR/$OMGX_DOCKERFILE pull
 fi

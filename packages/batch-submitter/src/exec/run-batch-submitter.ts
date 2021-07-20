@@ -143,7 +143,10 @@ export const run = async () => {
       return l1Provider.getSigner(DEBUG_IMPERSONATE_SEQUENCER_ADDRESS)
     }
 
-    if (SEQUENCER_PRIVATE_KEY) {
+    if (SEQUENCER_ADDRESS) {
+      return SEQUENCER_ADDRESS;
+    }
+    else if (SEQUENCER_PRIVATE_KEY) {
       return new Wallet(SEQUENCER_PRIVATE_KEY, l1Provider)
     } else if (SEQUENCER_MNEMONIC) {
       return Wallet.fromMnemonic(SEQUENCER_MNEMONIC, SEQUENCER_HD_PATH).connect(
@@ -151,7 +154,7 @@ export const run = async () => {
       )
     }
     throw new Error(
-      'Must pass one of SEQUENCER_PRIVATE_KEY, MNEMONIC, or SEQUENCER_MNEMONIC'
+      'Must pass one of SEQUENCER_PRIVATE_KEY, MNEMONIC, SEQUENCER_MNEMONIC or SEQUENCER_ADDRESS'
     )
   }
 
@@ -168,7 +171,10 @@ export const run = async () => {
       return l1Provider.getSigner(DEBUG_IMPERSONATE_PROPOSER_ADDRESS)
     }
 
-    if (PROPOSER_PRIVATE_KEY) {
+    if (PROPOSER_ADDRESS) {
+      return PROPOSER_ADDRESS;
+    }
+    else if (PROPOSER_PRIVATE_KEY) {
       return new Wallet(PROPOSER_PRIVATE_KEY, l1Provider)
     } else if (PROPOSER_MNEMONIC) {
       return Wallet.fromMnemonic(PROPOSER_MNEMONIC, PROPOSER_HD_PATH).connect(
@@ -176,7 +182,7 @@ export const run = async () => {
       )
     }
     throw new Error(
-      'Must pass one of PROPOSER_PRIVATE_KEY, MNEMONIC, or PROPOSER_MNEMONIC'
+      'Must pass one of PROPOSER_PRIVATE_KEY, MNEMONIC, PROPOSER_MNEMONIC or PROPOSER_ADDRESS'
     )
   }
 
@@ -210,32 +216,56 @@ export const run = async () => {
     parseInt(env.GAS_THRESHOLD_IN_GWEI, 10) || 100
   )
 
-  // Private keys & mnemonics
-  const SEQUENCER_PRIVATE_KEY = config.str(
-    'sequencer-private-key',
-    env.SEQUENCER_PRIVATE_KEY
-  )
-  // Kept for backwards compatibility
-  const PROPOSER_PRIVATE_KEY = config.str(
-    'proposer-private-key',
-    env.PROPOSER_PRIVATE_KEY || env.SEQUENCER_PRIVATE_KEY
-  )
-  const SEQUENCER_MNEMONIC = config.str(
-    'sequencer-mnemonic',
-    env.SEQUENCER_MNEMONIC || env.MNEMONIC
-  )
-  const PROPOSER_MNEMONIC = config.str(
-    'proposer-mnemonic',
-    env.PROPOSER_MNEMONIC || env.MNEMONIC
-  )
-  const SEQUENCER_HD_PATH = config.str(
-    'sequencer-hd-path',
-    env.SEQUENCER_HD_PATH || env.HD_PATH
-  )
-  const PROPOSER_HD_PATH = config.str(
-    'proposer-hd-path',
-    env.PROPOSER_HD_PATH || env.HD_PATH
-  )
+  let SEQUENCER_PRIVATE_KEY;
+  let SEQUENCER_HD_PATH;
+  let SEQUENCER_MNEMONIC;
+  let SEQUENCER_ADDRESS;
+  if (env.SEQUENCER_ADDRESS === undefined) {
+    // Private keys & mnemonics
+    SEQUENCER_PRIVATE_KEY = config.str(
+      'sequencer-private-key',
+      env.SEQUENCER_PRIVATE_KEY
+    )
+    SEQUENCER_HD_PATH = config.str(
+      'sequencer-hd-path',
+      env.SEQUENCER_HD_PATH || env.HD_PATH
+    )
+    SEQUENCER_MNEMONIC = config.str(
+      'sequencer-mnemonic',
+      env.SEQUENCER_MNEMONIC || env.MNEMONIC
+    )
+  } else {
+    SEQUENCER_ADDRESS = config.str(
+      'sequencer-address',
+      env.SEQUENCER_ADDRESS
+    )
+  }
+
+  let PROPOSER_PRIVATE_KEY;
+  let PROPOSER_MNEMONIC;
+  let PROPOSER_HD_PATH;
+  let PROPOSER_ADDRESS;
+  if (env.PROPOSER_ADDRESS === undefined){
+    // Kept for backwards compatibility
+    PROPOSER_PRIVATE_KEY = config.str(
+      'proposer-private-key',
+      env.PROPOSER_PRIVATE_KEY || env.SEQUENCER_PRIVATE_KEY
+    )
+    PROPOSER_MNEMONIC = config.str(
+      'proposer-mnemonic',
+      env.PROPOSER_MNEMONIC || env.MNEMONIC
+    )
+    PROPOSER_HD_PATH = config.str(
+      'proposer-hd-path',
+      env.PROPOSER_HD_PATH || env.HD_PATH
+    )
+  } else {
+    PROPOSER_ADDRESS = config.str(
+      'proposer-private-key',
+      env.PROPOSER_ADDRESS || env.SEQUENCER_ADDRESS
+    )
+  }
+
 
   // Auto fix batch options -- TODO: Remove this very hacky config
   const AUTO_FIX_BATCH_OPTIONS_CONF = config.str(
