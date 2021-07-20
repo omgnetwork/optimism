@@ -63,6 +63,9 @@ services:
     image: omgx/vault
     ports:
       - "127.0.0.1:8200:8200"
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.omgx_vault
     volumes:
       - "/tmp/vault_auth:/vault/config:rw"
     entrypoint:

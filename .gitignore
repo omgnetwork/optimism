@@ -34,3 +34,5 @@ packages/omgx/wallet-frontend/build
 .serverless
 
 ops/vault/data
+append-sequencer-batch.hcl
+append-state-batch-proposer.hcl

@@ -38,17 +38,7 @@ jobs:
       run: |
         mkdir -p $DATA_DIR
         sudo chown -R 100:1000 $DATA_DIR && sudo chmod -R 777 $DATA_DIR
-        docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml up -d l1_chain vault
-    - name: Wait for Vault
-      working-directory: ./ops
-      run: |
-        while [ $(docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml logs | grep -c "Dying.") -ne 1 ];
-        do
-            sleep 1
-            echo "Waiting for Vault..."
-        done
-        echo "Vault has executed tests"
-        docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml logs
+        docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml up -d l1_chain deployer vault
     - name: Test validation
       working-directory: ./ops
       run: exit $(docker-compose -f docker-compose-omgx.yml -f docker-compose-omgx-services.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml logs | grep -c "DID NOT PASS THE REQUIRED TEST")
