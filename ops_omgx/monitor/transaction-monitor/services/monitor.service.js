@@ -174,10 +174,9 @@ class MonitorService extends OptimismEnv {
       this.transactionMonitorSQL = false;
       await this.endDatabaseService();
 
-
       this.logger.info(`Found block, receipt and transaction data. Sleeping ${this.transactionMonitorInterval} ms...`);
     } else {
-      this.logger.info('No new block found.');
+      // this.logger.info('No new block found.');
     }
 
     await this.sleep(this.transactionMonitorInterval);
@@ -280,7 +279,7 @@ class MonitorService extends OptimismEnv {
     this.crossDomainMessageMonitorSQL = false;
     await this.endDatabaseService();
 
-    this.logger.info(`Found cross domain messages. Sleeping ${this.crossDomainMessageMonitorInterval} ms...`);
+    this.logger.info(`End searching cross domain messages. Sleeping ${this.crossDomainMessageMonitorInterval} ms...`);
 
     await this.sleep(this.crossDomainMessageMonitorInterval);
   }
@@ -378,6 +377,11 @@ class MonitorService extends OptimismEnv {
 
     receiptData.crossDomainMessageFinalize = crossDomainMessageFinalize;
     receiptData.crossDomainMessageFinalizedTime = crossDomainMessageFinalizedTime;
+
+    this.logger.info("Found the cross domain message status", {
+      crossDomainMessageFinalize,
+      crossDomainMessageFinalizedTime
+    });
 
     return receiptData;
   }
