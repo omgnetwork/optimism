@@ -8,7 +8,12 @@ import networkService from 'services/networkService';
 import { Grid } from '@material-ui/core/'
 import { isEqual } from 'lodash';
 
+import ListNFT from 'components/listNFT/listNFT';
+
 import * as styles from './Nft.module.scss';
+
+import cellIcon from 'images/hela.jpg';
+import factoryIcon from 'images/factory.png';
 
 class Nft extends React.Component {
 
@@ -16,14 +21,17 @@ class Nft extends React.Component {
 
     super(props);
 
-    const { nftList } = this.props;
+    const { list, factories } = this.props.nft;
     const { minter } = this.props.setup;
 
-    //console.log(this.props)
     console.log(this.props.setup)
+    console.log(this.props)
+    console.log("List:", list)
+    console.log("Factories:", factories)
 
     this.state = {
-      NFTs: nftList,
+      list,
+      factories,
       minter: minter,
       loading: false,
       receiverAddress: '',
@@ -37,15 +45,22 @@ class Nft extends React.Component {
   }
 
   componentDidUpdate(prevState) {
-    const { nftList } = this.props;
-    if (!isEqual(prevState.nftList, nftList)) {
-      this.setState({ NFTs: nftList });
+
+    const { list, factories } = this.props.nft;
+    
+    if (!isEqual(prevState.nft.list, list)) {
+     this.setState({ list });
     }
+
+    if (!isEqual(prevState.nft.factories, factories)) {
+     this.setState({ factories });
+    }
+ 
   }
 
-  async handleMintAndSend() {
+  async handleDeployDerivative() {
 
-    const { receiverAddress, ownerName, tokenURI } = this.state;
+    const { /*receiverAddress, ownerName, tokenURI*/ } = this.state;
 
     const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'));
     
@@ -56,16 +71,16 @@ class Nft extends React.Component {
 
     this.setState({ loading: true });
 
-    const mintTX = await networkService.mintAndSendNFT(
-      receiverAddress, 
-      ownerName, 
-      tokenURI
-    );
+    const deployTX = await networkService.deployNewNFTContract(
+      //receiverAddress, 
+      //ownerName, 
+      //tokenURI
+    )
     
-    if (mintTX) {
-      this.props.dispatch(openAlert(`You minted a new NFT for ${receiverAddress}. The owner's name is ${ownerName}.`));
+    if (deployTX) {
+      this.props.dispatch(openAlert(`You have deployed a new NFT factory.`));
     } else {
-      this.props.dispatch(openError('NFT minting error'));
+      this.props.dispatch(openError('NFT factory deployment error'));
     }
 
     this.setState({ loading: false })
@@ -78,59 +93,52 @@ class Nft extends React.Component {
       receiverAddress,
       ownerName,
       tokenURI,
-      NFTs,
+      list,
+      factories,
       minter 
     } = this.state;
 
-    const numberOfNFTs = Object.keys(NFTs).length;
+    console.log("List:",list)
+    console.log("Factories:",factories)
+
+    const numberOfNFTs = Object.keys(list).length;
 
     return (
 
       <div className={styles.container}>
         
         <div className={styles.boxContainer}>
-          
-          <h2>Minter/Owner Functions</h2>
-                    
+
+          <h2>Your NFT Factories</h2>
+
           {minter && 
-            <div className={styles.note}>Status: You have owner permissions and are authorized to mint new NFTs. Once you have filled in all the information, click "Mint and Send".</div> 
+            <div className={styles.note}>Status: You have owner permissions and are authorized to mint new NFTs. Select the desired NFT factory, click "Actions", fill in the information, and click "Mint and Send".</div> 
           }
           {!minter &&
-            <div className={styles.note}>Status: You do not have owner permissions and you not are authorized to mint new NFTs. The input fields are disabled.</div> 
+            <div className={styles.note}>Status: You do not have owner permissions and you not are authorized to mint new NFTs. Obtain an NFT, and then you can derive new NFTs from it.</div> 
           }
 
-          <Input
-            placeholder="Receiver Address (e.g. Ox.....)"
-            onChange={i=>{this.setState({receiverAddress: i.target.value})}}
-            value={receiverAddress}
-            disabled={!minter}
-          />
-          <Input
-            placeholder="NFT Owner Name (e.g. Henrietta Lacks)"
-            onChange={i=>{this.setState({ownerName: i.target.value})}}
-            value={ownerName}
-            disabled={!minter}
-          />
-          <Input
-            placeholder="NFT URL (e.g. https://jimb.stanford.edu)"
-            onChange={i=>{this.setState({tokenURI: i.target.value})}}
-            value={tokenURI}
-            disabled={!minter}
-          />
-          <Button
-            className={styles.button}
-            onClick={() => {this.handleMintAndSend()}}
-            type='primary'
-            loading={loading}
-            disabled={!receiverAddress || !ownerName || !tokenURI || !minter}
-          >
-            Mint and Send
-          </Button>
-        </div>
+          <div className={styles.TableContainer}>
+            {Object.keys(factories).map((v, i) => {
+              return (
+                <ListNFT 
+                  key={i}
+                  name={factories[v].name}
+                  symbol={factories[v].symbol}
+                  owner={factories[v].owner}
+                  address={factories[v].address}
+                  layer={factories[v].layer}
+                  icon={factoryIcon}
+                />
+              )
+            })
+          }
+          </div>
+      </div>
 
         <div className={styles.nftContainer}>
           
-          <h2>My NFTs</h2>
+          <h2>Your NFTs</h2>
 
           {numberOfNFTs === 1 && 
             <div className={styles.note}>You have one NFT and it should be shown below.</div> 
@@ -142,28 +150,24 @@ class Nft extends React.Component {
             <div className={styles.note}>You do not have any NFTs.</div> 
           }
 
-          <div className={styles.nftHolder}>
-            <Grid
-              container
-              spacing={2}
-              direction="row"
-              justifyContent="flex-start"
-              alignItems="flex-start"
-            >
-              {Object.keys(NFTs).map(elem => (
-                <Grid item xs={4} key={elem}>
-                  <NFTCard
-                    name={NFTs[elem].name}
-                    symbol={NFTs[elem].symbol}
-                    UUID={NFTs[elem].UUID}
-                    owner={NFTs[elem].owner}
-                    URL={NFTs[elem].url}
-                    time={NFTs[elem].mintedTime}
-                  >
-                  </NFTCard>
-                </Grid>
-              ))}
-            </Grid>
+          <div className={styles.TableContainer}>
+            {Object.keys(list).map((v, i) => {
+              return (
+                <ListNFT 
+                  key={i}
+                  name={list[v].name}
+                  symbol={list[v].symbol}
+                  owner={list[v].owner}
+                  address={list[v].address}
+                  layer={list[v].layer}
+                  icon={cellIcon}
+                  UUID={list[v].UUID}
+                  URL={list[v].url}
+                  time={list[v].mintedTime}
+                />
+              )
+            })
+          }
           </div>
 
         </div>
@@ -174,7 +178,7 @@ class Nft extends React.Component {
 }
 
 const mapStateToProps = state => ({ 
-  nftList: state.nftList,
+  nft: state.nft,
   setup: state.setup
 });
 

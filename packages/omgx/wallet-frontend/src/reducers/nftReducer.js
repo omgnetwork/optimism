@@ -14,15 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 const initialState = {
-};
+  list: {},
+  factories: {}
+}
 
 function nftReducer (state = initialState, action) {
   switch (action.type) {
     case 'NFT/GET/SUCCESS':
+      console.log("Adding to overall state:", action.payload)
       return { 
-        ...state, 
-        [action.payload.UUID]: action.payload,
-      };
+        ...state,
+        list: {
+          ...state.list,
+          [action.payload.UUID]: action.payload
+        } 
+      }
+      case 'NFT/CREATEFACTORY/SUCCESS':
+      return { 
+        ...state,
+        factories: {
+          ...state.factories,
+          [action.payload.address]: action.payload
+        } 
+      }
     default:
       return state;
   }

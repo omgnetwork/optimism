@@ -15,38 +15,90 @@ limitations under the License. */
 
 import store from 'store';
 
+// export function getFactories () {
+//   const myFacotries = localStorage.getItem("NFTFactories")
+
+//   const state = store.getState()
+//   return state.nftList;
+// }
+
+//simply lists all the info in the nftList
 export function getNFTs () {
   const state = store.getState()
-  return state.nftList;
+  console.log("state.nft:",state.nft)
+  return state.nft.list;
 }
 
-export async function addNFT ( NFTproperties ) {
+//simply lists all the info in the nftList
+export function getNFTFactories () {
+  const state = store.getState()
+  console.log("state.nft:",state.nft)
+  return state.nft.factory;
+}
+
+export async function addNFT ( NFT ) {
+  
+  console.log("adding NFT to state:", NFT)
 
   const state = store.getState();
-  const UUID = NFTproperties.UUID;
+  const UUID = NFT.UUID;
+
+  console.log("state.nft.list:", state.nft.list)
     
   //if we already have looked it up, no need to look up again. 
-  if (state.nftList[UUID]) {
-    return state.nftList[UUID];
+  if (state.nft.list[UUID]) {
+    return state.nft.list[UUID];
   }
   
-  const nftInfo = {
-    UUID: NFTproperties.UUID, 
-    owner: NFTproperties.owner, 
-    url: NFTproperties.url, 
-    mintedTime: NFTproperties.mintedTime, 
+  const info = {
+    UUID: NFT.UUID, 
+    owner: NFT.owner, 
+    url: NFT.url, 
+    mintedTime: NFT.mintedTime, 
     decimals: 0,
-    name:  NFTproperties.name, 
-    symbol:  NFTproperties.symbol, 
-  };
+    name:  NFT.name, 
+    symbol:  NFT.symbol, 
+    address: NFT.address
+  }
 
-  //console.log("nftInfo0:",nftInfo)
+  console.log("nft info:",info)
 
   store.dispatch({
     type: 'NFT/GET/SUCCESS',
-    payload: nftInfo
+    payload: info
   })
 
-  return nftInfo;
+  return info
+
+}
+
+export async function addNFTFactory ( Factory ) {
+
+  const state = store.getState();
+  //const UUID = NFTproperties.UUID;
+    
+  //if we already have looked it up, no need to look up again. 
+  if (state.nft.factories[Factory.address]) {
+    return state.nft.factories[Factory.address];
+  }
+  
+  const factory = {
+    owner: Factory.owner, 
+    address: Factory.address,
+    mintedTime: Factory.mintedTime, 
+    decimals: 0,
+    symbol:  Factory.symbol, 
+    layer: Factory.layer,
+    name: Factory.name, 
+  }
+
+  console.log("nft factory:",factory)
+
+  store.dispatch({
+    type: 'NFT/CREATEFACTORY/SUCCESS',
+    payload: factory
+  })
+
+  return factory;
 
 }
