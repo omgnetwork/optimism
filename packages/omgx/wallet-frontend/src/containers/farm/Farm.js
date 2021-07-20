@@ -156,7 +156,10 @@ class Farm extends React.Component {
         <h3>L1 Liquidity Pool</h3>
         <div className={styles.TableContainer}>
           {Object.keys(poolInfo.L1LP).map((v, i) => {
-            const isETH = this.isETH(v)
+            if (!Object.values(poolInfo.L1LP[v]).length) {
+              return <></>;
+            }
+            const isETH = poolInfo.L1LP[v].isETH;
             const ret = this.getBalance(v, 'L1')
             return (
               <FarmList 
@@ -176,7 +179,10 @@ class Farm extends React.Component {
         <h3>L2 Liquidity Pool</h3>
         <div className={styles.TableContainer}>
           {Object.keys(poolInfo.L2LP).map((v, i) => {
-            const isETH = this.isETH(v)
+            if (!Object.values(poolInfo.L2LP[v]).length) {
+              return <></>;
+            }
+            const isETH = poolInfo.L2LP[v].isETH;
             const ret = this.getBalance(v, 'L2')
             return (
               <FarmList 
