@@ -3,7 +3,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const { Contract, Wallet, ContractFactory, BigNumber, providers } = require('ethers');
-const { encodeParameters } = require('./utilities/index');
+const { encodeParameters, gasOptions } = require('./utilities/index');
 const { latest, duration, increase } = require('./utilities/time');
 const { bob, alice, carol, dev, minter } = require('./utilities/wallet');
 
@@ -45,15 +45,15 @@ describe("Timelock", function () {
   })
 
   beforeEach(async function () {
-    this.sushi = await this.Factory__SushiToken.deploy({gasLimit: 800000, gasPrice: 0})
+    this.sushi = await this.Factory__SushiToken.deploy(gasOptions)
     await this.sushi.deployTransaction.wait()
-    this.timelock = await this.Factory__Timelock.deploy(bob.address, "259200", {gasLimit: 800000, gasPrice: 0})
+    this.timelock = await this.Factory__Timelock.deploy(bob.address, "259200", gasOptions)
     await this.timelock.deployTransaction.wait()
   })
 
   it("should not allow non-owner to do operation", async function () {
     let transferOwnership
-    transferOwnership = await this.sushi.transferOwnership(this.timelock.address, {gasLimit: 800000, gasPrice: 0});
+    transferOwnership = await this.sushi.transferOwnership(this.timelock.address, gasOptions);
     await transferOwnership.wait()
 
     await expect(this.sushi.transferOwnership(carol.address)).to.be.eventually.rejected;
