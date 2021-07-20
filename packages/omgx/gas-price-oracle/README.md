@@ -36,25 +36,21 @@ The service fetches the L1 ETH balances of `sequencer`, `proposer`, `relayer` an
 The service also fetches the L2 gas fees collected by us based on the `gasUsage * gasPrice` and increased L2 block numbers in each polling interval. We also calculate the average gas usage per block, so we can estimate the gas price.
 
 * `L2ETHCollectFee`: The ETH fees that we collect from the Layer 2 transactions.
-  $$
-  \sum_{TX_i}^{TX_{i+t}} gasUsage_{i+j}\times gasPrice_{i+j}
-  $$
-  
 * `avgL2GasUsagePerBlock` : The average gas usage per block in each polling interval
-  $$
-  \frac{\sum_{TX_i}^{TX_{i+t}}gasUsage_{i+j}}{blockNumbers}
-  $$
-
 * `numberOfBlocksInterval`: The increased number of blocks in each pooling interval
 
 The estimated gas usages in the next interval are
-$$
-estimatedGasUsage =avgL2GasUsagePerBlock\times numberOfBlocksInterval = \sum_{TX_i}^{TX_{i+t}}gasUsage_{i+j}
-$$
+
+```
+estimatedGasUsage = avgL2GasUsagePerBlock * numberOfBlocksInterval
+```
+
 The estimated L2 gas price that we should charge in the next interval is
-$$
-\frac{L1ETHCostFee - L2ETHCollectFee}{estimatedGasUsage}
-$$
+
+```
+estimatedL2GasPrice = (L1ETHCostFee - L2ETHCollectFee) / estimatedGasUsage
+```
+
 When the estimated L2 gas price is lower than the `GAS_PRICE_ORACLE_FLOOR_PRICE`, we set the gas price as the `GAS_PRICE_ORACLE_FLOOR_PRICE`.
 
 When the estimated L2 gas price is larger than the `GAS_PRICE_ORACLE_ROOF_PRICE`, we set the gas price as the `GAS_PRICE_ORACLE_ROOF_PRICE`.
