@@ -8,8 +8,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 
 source $DIR/smoke.env.sh
 OVM="OVM-wallet"
-node index.js $SEQUENCER
-node index.js $PROPOSER
+node index.js $SEQUENCER_ADDRESS
+node index.js $PROPOSER_ADDRESS
 banner
 echo "CONFIGURE MOUNT"
 echo "vault write -format=json immutability-eth-plugin/config  rpc_url='$RPC_URL' chain_id='$CHAIN_ID' rpc_l2_url='$RPC_L2_URL' chain_l2_id='$CHAIN_L2_ID'"
@@ -93,9 +93,9 @@ banner
 banner
 echo "Append Sequencer Batch tests"
 echo "*** SHOULD NOT FAIL! ***"
-echo "AUTHORIZED SUBMISSION OF AppendSequencerBatch BY $SEQUENCER"
-echo "vault write -format=json immutability-eth-plugin/wallets/sequencer/accounts/$SEQUENCER/ovm/appendSequencerBatch should_start_at_element=10 total_elements_to_append=1 contexts="{\"num_sequenced_transactions\": 2, \"num_subsequent_queue_transactions\": 1, \"timestamp\": 100, \"block_number\": 200}" transactions="0x45423400000011" transactions="0x45423400000012" nonce=0 gas_price=$GAS_PRICE_HIGH2 contract=$OVM_CTC"
-vault write -format=json immutability-eth-plugin/wallets/sequencer/accounts/$SEQUENCER/ovm/appendSequencerBatch should_start_at_element=10 total_elements_to_append=1 contexts="{\"num_sequenced_transactions\": 2, \"num_subsequent_queue_transactions\": 1, \"timestamp\": 100, \"block_number\": 200}" transactions="0x45423400000011" transactions="0x45423400000012" nonce=0 gas_price=$GAS_PRICE_HIGH2 contract=$OVM_CTC
+echo "AUTHORIZED SUBMISSION OF AppendSequencerBatch BY $SEQUENCER_ADDRESS"
+echo "vault write -format=json immutability-eth-plugin/wallets/sequencer/accounts/$SEQUENCER_ADDRESS/ovm/appendSequencerBatch should_start_at_element=10 total_elements_to_append=1 contexts="{\"num_sequenced_transactions\": 2, \"num_subsequent_queue_transactions\": 1, \"timestamp\": 100, \"block_number\": 200}" transactions="0x45423400000011" transactions="0x45423400000012" nonce=0 gas_price=$GAS_PRICE_HIGH2 contract=$OVM_CTC"
+vault write -format=json immutability-eth-plugin/wallets/sequencer/accounts/$SEQUENCER_ADDRESS/ovm/appendSequencerBatch should_start_at_element=10 total_elements_to_append=1 contexts="{\"num_sequenced_transactions\": 2, \"num_subsequent_queue_transactions\": 1, \"timestamp\": 100, \"block_number\": 200}" transactions="0x45423400000011" transactions="0x45423400000012" nonce=0 gas_price=$GAS_PRICE_HIGH2 contract=$OVM_CTC
 check_result $? 0
 banner
-vault write  -output-curl-string immutability-eth-plugin/wallets/sequencer/accounts/$SEQUENCER/ovm/appendSequencerBatch should_start_at_element=10 total_elements_to_append=1 contexts="{\"num_sequenced_transactions\": 2, \"num_subsequent_queue_transactions\": 1, \"timestamp\": 100, \"block_number\": 200}" transactions="0x45423400000011" transactions="0x45423400000012" nonce=0 gas_price=$GAS_PRICE_HIGH2 contract=$OVM_CTC
+vault write  -output-curl-string immutability-eth-plugin/wallets/sequencer/accounts/$SEQUENCER_ADDRESS/ovm/appendSequencerBatch should_start_at_element=10 total_elements_to_append=1 contexts="{\"num_sequenced_transactions\": 2, \"num_subsequent_queue_transactions\": 1, \"timestamp\": 100, \"block_number\": 200}" transactions="0x45423400000011" transactions="0x45423400000012" nonce=0 gas_price=$GAS_PRICE_HIGH2 contract=$OVM_CTC

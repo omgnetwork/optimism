@@ -6,6 +6,13 @@ import * as ynatm from '@eth-optimism/ynatm'
 import { RollupInfo, sleep } from '@eth-optimism/core-utils'
 import { Logger, Metrics } from '@eth-optimism/common-ts'
 import { getContractFactory } from 'old-contracts'
+import { getBalance, getBatchSignerAddress } from './provider-helper'
+
+export interface BatchSigner {
+  // one or the other, not both!
+  address: string
+  signer: Signer
+}
 
 export interface BlockRange {
   start: number
@@ -38,7 +45,8 @@ export abstract class BatchSubmitter {
   protected metrics: BatchSubmitterMetrics
 
   constructor(
-    readonly signer: Signer,
+    readonly batchSigner: BatchSigner,
+    readonly l1Provider: providers.JsonRpcProvider,
     readonly l2Provider: providers.JsonRpcProvider,
     readonly minTxSize: number,
     readonly maxTxSize: number,
@@ -81,7 +89,7 @@ export abstract class BatchSubmitter {
 
     this.logger.info('Readying to submit next batch...', {
       l2ChainId: this.l2ChainId,
-      batchSubmitterAddress: await this.signer.getAddress(),
+      batchSubmitterAddress: await getBatchSignerAddress(this.batchSigner),
     })
 
     if (this.syncing === true) {
@@ -99,8 +107,11 @@ export abstract class BatchSubmitter {
   }
 
   protected async _hasEnoughETHToCoverGasCosts(): Promise<boolean> {
-    const address = await this.signer.getAddress()
-    const balance = await this.signer.getBalance()
+    const address = await getBatchSignerAddress(this.batchSigner)
+    const balance = await getBalance(
+      this.l1Provider,
+      await getBatchSignerAddress(this.batchSigner)
+    )
     const ether = utils.formatEther(balance)
     const num = parseFloat(ether)
 
@@ -135,7 +146,10 @@ export abstract class BatchSubmitter {
     sccAddress: string
   }> {
     const addressManager = (
-      await getContractFactory('Lib_AddressManager', this.signer)
+      await getContractFactory(
+        'Lib_AddressManager',
+        getBatchSignerAddress(this.batchSigner)
+      )
     ).attach(this.addressManagerAddress)
     const sccAddress = await addressManager.getAddress(
       'OVM_StateCommitmentChain'
@@ -220,7 +234,7 @@ export abstract class BatchSubmitter {
       return this.minGasPriceInGwei
     }
     let minGasPriceInGwei = parseInt(
-      utils.formatUnits(await this.signer.getGasPrice(), 'gwei'),
+      utils.formatUnits(await this.l1Provider.getGasPrice(), 'gwei'),
       10
     )
     if (minGasPriceInGwei > this.maxGasPriceInGwei) {

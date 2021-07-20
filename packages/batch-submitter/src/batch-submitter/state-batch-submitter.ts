@@ -1,6 +1,6 @@
 /* External Imports */
 import { Promise as bPromise } from 'bluebird'
-import { Contract, Signer, providers } from 'ethers'
+import { Contract, providers } from 'ethers'
 import { TransactionReceipt } from '@ethersproject/abstract-provider'
 import { getContractFactory } from 'old-contracts'
 import {
@@ -10,9 +10,9 @@ import {
   remove0x,
 } from '@eth-optimism/core-utils'
 import { Logger, Metrics } from '@eth-optimism/common-ts'
-
+import { getBatchSignerAddress, getTransactionCount } from './provider-helper'
 /* Internal Imports */
-import { BlockRange, BatchSubmitter } from '.'
+import { BlockRange, BatchSubmitter, BatchSigner } from '.'
 
 export class StateBatchSubmitter extends BatchSubmitter {
   // TODO: Change this so that we calculate start = scc.totalElements() and end = ctc.totalElements()!
@@ -25,7 +25,8 @@ export class StateBatchSubmitter extends BatchSubmitter {
   private fraudSubmissionAddress: string
 
   constructor(
-    signer: Signer,
+    batch_signer: BatchSigner,
+    l1Provider: providers.JsonRpcProvider,
     l2Provider: providers.JsonRpcProvider,
     minTxSize: number,
     maxTxSize: number,
@@ -46,7 +47,8 @@ export class StateBatchSubmitter extends BatchSubmitter {
     fraudSubmissionAddress: string
   ) {
     super(
-      signer,
+      batch_signer,
+      l1Provider,
       l2Provider,
       minTxSize,
       maxTxSize,
@@ -98,10 +100,10 @@ export class StateBatchSubmitter extends BatchSubmitter {
     }
 
     this.chainContract = (
-      await getContractFactory('OVM_StateCommitmentChain', this.signer)
+      await getContractFactory('OVM_StateCommitmentChain', this.l1Provider)
     ).attach(sccAddress)
     this.ctcContract = (
-      await getContractFactory('OVM_CanonicalTransactionChain', this.signer)
+      await getContractFactory('OVM_CanonicalTransactionChain', this.l1Provider)
     ).attach(ctcAddress)
 
     this.logger.info('Connected Optimism contracts', {
@@ -176,7 +178,8 @@ export class StateBatchSubmitter extends BatchSubmitter {
     const offsetStartsAtIndex = startBlock - this.blockOffset
     this.logger.debug('Submitting batch.', { tx })
 
-    const nonce = await this.signer.getTransactionCount()
+    const address = await getBatchSignerAddress(this.batchSigner)
+    const nonce = await getTransactionCount(this.l1Provider, address)
     const contractFunction = async (gasPrice): Promise<TransactionReceipt> => {
       this.logger.info('Submitting appendStateBatch transaction', {
         gasPrice,
@@ -195,7 +198,7 @@ export class StateBatchSubmitter extends BatchSubmitter {
       this.logger.debug('appendStateBatch transaction data', {
         data: contractTx.data,
       })
-      return this.signer.provider.waitForTransaction(
+      return this.l1Provider.waitForTransaction(
         contractTx.hash,
         this.numConfirmations
       )

@@ -1,6 +1,6 @@
 /* External Imports */
 import { Promise as bPromise } from 'bluebird'
-import { Signer, ethers, Contract, providers } from 'ethers'
+import { ethers, Contract, providers } from 'ethers'
 import { TransactionReceipt } from '@ethersproject/abstract-provider'
 import { getContractInterface, getContractFactory } from 'old-contracts'
 import { getContractInterface as getNewContractInterface } from '@eth-optimism/contracts'
@@ -12,6 +12,7 @@ import {
   QueueOrigin,
 } from '@eth-optimism/core-utils'
 import { Logger, Metrics } from '@eth-optimism/common-ts'
+import { getBatchSignerAddress, getTransactionCount } from './provider-helper'
 
 /* Internal Imports */
 import {
@@ -21,7 +22,7 @@ import {
   AppendSequencerBatchParams,
 } from '../transaction-chain-contract'
 
-import { BlockRange, BatchSubmitter } from '.'
+import { BlockRange, BatchSubmitter, BatchSigner } from '.'
 
 export interface AutoFixBatchOptions {
   fixDoublePlayedDeposits: boolean
@@ -37,7 +38,8 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
   private autoFixBatchOptions: AutoFixBatchOptions
 
   constructor(
-    signer: Signer,
+    batchSigner: BatchSigner,
+    l1Provider: providers.JsonRpcProvider,
     l2Provider: providers.JsonRpcProvider,
     minTxSize: number,
     maxTxSize: number,
@@ -62,7 +64,8 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     } // TODO: Remove this
   ) {
     super(
-      signer,
+      batchSigner,
+      l1Provider,
       l2Provider,
       minTxSize,
       maxTxSize,
@@ -112,13 +115,13 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     }
 
     const unwrapped_OVM_CanonicalTransactionChain = (
-      await getContractFactory('OVM_CanonicalTransactionChain', this.signer)
+      await getContractFactory('OVM_CanonicalTransactionChain', this.l1Provider)
     ).attach(ctcAddress)
 
     this.chainContract = new CanonicalTransactionChainContract(
       unwrapped_OVM_CanonicalTransactionChain.address,
       getContractInterface('OVM_CanonicalTransactionChain'),
-      this.signer
+      this.l1Provider
     )
     this.logger.info('Initialized new CTC', {
       address: this.chainContract.address,
@@ -140,7 +143,8 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       )
 
       if (!this.disableQueueBatchAppend) {
-        const nonce = await this.signer.getTransactionCount()
+        const address = await getBatchSignerAddress(this.batchSigner)
+        const nonce = await getTransactionCount(this.l1Provider, address)
         const contractFunction = async (
           gasPrice
         ): Promise<TransactionReceipt> => {
@@ -160,7 +164,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
           this.logger.debug('appendQueueBatch transaction data', {
             data: tx.data,
           })
-          return this.signer.provider.waitForTransaction(
+          return this.l1Provider.waitForTransaction(
             tx.hash,
             this.numConfirmations
           )
@@ -215,7 +219,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
   ): Promise<TransactionReceipt> {
     // Do not submit batch if gas price above threshold
     const gasPriceInGwei = parseInt(
-      ethers.utils.formatUnits(await this.signer.getGasPrice(), 'gwei'),
+      ethers.utils.formatUnits(await this.l1Provider.getGasPrice(), 'gwei'),
       10
     )
     if (gasPriceInGwei > this.gasThresholdInGwei) {
@@ -244,13 +248,14 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       return
     }
     this.metrics.numTxPerBatch.observe(endBlock - startBlock)
-    const l1tipHeight = await this.signer.provider.getBlockNumber()
+    const l1tipHeight = await this.l1Provider.getBlockNumber()
     this.logger.debug('Submitting batch.', {
       calldata: batchParams,
       l1tipHeight,
     })
 
-    const nonce = await this.signer.getTransactionCount()
+    const address = await getBatchSignerAddress(this.batchSigner)
+    const nonce = await getTransactionCount(this.l1Provider, address)
     const contractFunction = async (gasPrice): Promise<TransactionReceipt> => {
       this.logger.info('Submitting appendSequencerBatch transaction', {
         gasPrice,
@@ -268,10 +273,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       this.logger.debug('appendSequencerBatch transaction data', {
         data: tx.data,
       })
-      return this.signer.provider.waitForTransaction(
-        tx.hash,
-        this.numConfirmations
-      )
+      return this.l1Provider.waitForTransaction(tx.hash, this.numConfirmations)
     }
     return this._submitAndLogTx(contractFunction, 'Submitted batch!')
   }
@@ -615,7 +617,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     const manager = new Contract(
       this.addressManagerAddress,
       getNewContractInterface('Lib_AddressManager'),
-      this.signer.provider
+      this.l1Provider
     )
 
     const addr = await manager.getAddress(
@@ -624,7 +626,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     const container = new Contract(
       addr,
       getNewContractInterface('iOVM_ChainStorageContainer'),
-      this.signer.provider
+      this.l1Provider
     )
 
     let meta = await container.getGlobalMetadata()
@@ -799,7 +801,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       }
     }
     if (type === 1) {
-      this.logger.warn("Enabled autoFixBatchOptions - fixMonotonicity")
+      this.logger.warn('Enabled autoFixBatchOptions - fixMonotonicity')
       this.autoFixBatchOptions = {
         fixDoublePlayedDeposits: false,
         fixMonotonicity: true,
@@ -807,7 +809,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       }
     }
     if (type === 2) {
-      this.logger.warn("Enabled autoFixBatchOptions - fixSkippedDeposits")
+      this.logger.warn('Enabled autoFixBatchOptions - fixSkippedDeposits')
       this.autoFixBatchOptions = {
         fixDoublePlayedDeposits: false,
         fixMonotonicity: false,

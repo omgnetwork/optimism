@@ -44,6 +44,6 @@ SEQUENCER_TOKEN=$(vault token create -field=token -period=10m -policy=append-seq
 echo "#!/bin/bash" >> $DIR/tokens.sh
 echo "export PROPOSER_TOKEN=$PROPOSER_TOKEN" >> $DIR/tokens.sh
 echo "export SEQUENCER_TOKEN=$SEQUENCER_TOKEN" >> $DIR/tokens.sh
-echo "export SEQUENCER=$ACCOUNT0" >> $DIR/tokens.sh
-echo "export PROPOSER=$ACCOUNT1" >> $DIR/tokens.sh
+echo "export SEQUENCER_ADDRESS=$ACCOUNT0" >> $DIR/tokens.sh
+echo "export PROPOSER_ADDRESS=$ACCOUNT1" >> $DIR/tokens.sh
 cat $DIR/tokens.sh

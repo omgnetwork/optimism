@@ -72,7 +72,7 @@ services:
       - "/tmp/vault_auth:/vault/config:rw"
     entrypoint:
       - "/bin/sh"
-      - -ecx
+      - -ec
       - |
         sleep 2
         /vault/vault.sh
