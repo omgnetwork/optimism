@@ -87,7 +87,7 @@ var GovernorBravoDelegator = artifacts.require("GovernorBravoDelegator");
 var Comp = artifacts.require("Comp");
 
 
-let estaddress = '0x904f6e9E84DbA69151B1a1997d790169538BF25F';
+let adminAddress = '0x3a6C1f6C2de6c47e45d1Fd2d04C0F2601CF5979C';
 
 /**
  * Error: Could not find artifacts for CTokenInterfaces from any sources
@@ -96,11 +96,11 @@ let estaddress = '0x904f6e9E84DbA69151B1a1997d790169538BF25F';
 
 module.exports = function(deployer, network, accounts) {
   deployer.then(async () => {
-  await deployer.deploy(GovernorBravoDelegate, {gasPrice: 0});
-  await deployer.deploy(SafeMath, {gasPrice: 0});
-  await deployer.deploy(Comp, estaddress, {gasPrice: 0});
-  await deployer.deploy(Timelock, estaddress, 172800, {gasPrice: 0});
-  await deployer.deploy(GovernorBravoDelegator, Timelock.address, Comp.address, Timelock.address, GovernorBravoDelegate.address, 17280, 1, "100000000000000000000000", {gasPrice: 0});
+  await deployer.deploy(GovernorBravoDelegate);
+  await deployer.deploy(SafeMath);
+  await deployer.deploy(Comp, adminAddress);
+  await deployer.deploy(Timelock, adminAddress, 172800);
+  await deployer.deploy(GovernorBravoDelegator, Timelock.address, Comp.address, Timelock.address, GovernorBravoDelegate.address, 17280, 1, "100000000000000000000000"); 
   });
 };
 
