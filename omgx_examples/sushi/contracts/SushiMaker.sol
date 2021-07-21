@@ -224,6 +224,7 @@ contract SushiMaker is Ownable {
     // F1 - F10: OK
     // C1 - C24: OK
     // All safeTransfer, swap: X1 - X5: OK
+    // CHANGE FOR OFF-CHAIN FEES
     function _swap(
         address fromToken,
         address toToken,

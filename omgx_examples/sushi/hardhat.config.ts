@@ -20,6 +20,16 @@ const config = {
       chainId: 28,
       ovm: true
     },
+    rinkeby: {
+      url: 'https://rinkeby.omgx.network',
+      // This sets the gas price to 0 for all transactions on L2. We do this
+      // because account balances are not automatically initiated with an ETH
+      // balance.
+      // gas: 10000000,
+      // gasPrice: 0,
+      chainId: 28,
+      ovm: true
+    },
   },
   solidity: {
     compilers: [

@@ -92,6 +92,7 @@ contract UniswapV2Pair is UniswapV2ERC20 {
     }
 
     // if fee is on, mint liquidity equivalent to 1/6th of the growth in sqrt(k)
+    // NEED TO CHANGE FOR OFF-CHAIN PRICE (CURRENTLY protocol fees = 1/6th of LP fees)!
     function _mintFee(uint112 _reserve0, uint112 _reserve1) private returns (bool feeOn) {
         address feeTo = IUniswapV2Factory(factory).feeTo();
         feeOn = feeTo != address(0);
@@ -167,6 +168,25 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         if (feeOn) kLast = uint(reserve0).mul(reserve1); // reserve0 and reserve1 are up-to-date
         emit Burn(msg.sender, amount0, amount1, to);
     }
+    // this low-level function compares on-chain price to off-chain price to calculate fees
+    function offChainCompare(uint112 reserve0, uint112 reserve1) internal returns (uint feeX10){
+        require(reserve0 > 0 && reserve1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY');
+        uint feeX10 = 10;
+
+        // API Call: Comparing off-chain price to on-chain price
+
+        // If call fails or priceDiff <= 30, then return 3
+
+        // if(priceDiff > 30 && priceDiff <= 60)
+        // {
+        //     feeX10 = 6;
+        // }
+
+        // else if(priceDiff > 60)
+        // {
+        //     feeX10 = 10;
+        // }
+    }
 
     // this low-level function should be called from a contract which performs important safety checks
     function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external lock {
@@ -190,14 +210,16 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         uint amount1In = balance1 > _reserve1 - amount1Out ? balance1 - (_reserve1 - amount1Out) : 0;
         require(amount0In > 0 || amount1In > 0, 'UniswapV2: INSUFFICIENT_INPUT_AMOUNT');
         { // scope for reserve{0,1}Adjusted, avoids stack too deep errors
-        uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(3));
-        uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(3));
+        uint feeX10 = offChainCompare(_reserve0,_reserve1);
+        uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(feeX10));
+        uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(feeX10));
         require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'UniswapV2: K');
         }
 
         _update(balance0, balance1, _reserve0, _reserve1);
         emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, to);
     }
+
 
     // force balances to match reserves
     function skim(address to) external lock {

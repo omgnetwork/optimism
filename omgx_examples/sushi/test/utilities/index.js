@@ -4,7 +4,7 @@ const { bob } = require('./wallet');
 const BASE_TEN = 10
 const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000"
 
-const gasOptions = {gasLimit: 800000, gasPrice: 0}
+const gasOptions = {}
 
 function encodeParameters(types, values) {
   const abi = new ethers.utils.AbiCoder()
