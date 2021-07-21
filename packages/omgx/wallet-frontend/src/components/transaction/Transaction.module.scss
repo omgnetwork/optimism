@@ -31,9 +31,19 @@
         margin: 5px 0px
       }
     }
-    .detail {
-      padding: 15px 0px
+
+    .content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .detail {
+        padding: 15px 0px
+      }
+
+
     }
+
+    
   }
 
   .detailLink {
