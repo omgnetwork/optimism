@@ -9,6 +9,7 @@ const env = process.env;
 const deployPrivateKey = env.DEPLOYER_PRIVATE_KEY;
 const l2RpcUrl = env.L2_NODE_WEB3_URL;
 const l2ETHAddress = "0x4200000000000000000000000000000000000006";
+const gasOptions = { gasPrice: 15000000 }
 
 function writeFileSyncRecursive(filename, content, charset) {
   const folders = filename.split('/').slice(0, -1)
@@ -50,7 +51,7 @@ const main = async () => {
     _args: []
   })
 
-  await (await SushiBar.initialize(SushiToken.address, { gasLimit: 800000, gasPrice: 0 })).wait()
+  await (await SushiBar.initialize(SushiToken.address, gasOptions)).wait()
 
   const MasterChef = await deploy({
     contractName: "MasterChef",
@@ -65,13 +66,13 @@ const main = async () => {
   if (await SushiToken.owner() !== MasterChef.address) {
     // Transfer Sushi Ownership to Chef
     console.log(" 🔑 Transfer Sushi Ownership to Chef")
-    await (await SushiToken.transferOwnership(MasterChef.address, { gasLimit: 800000, gasPrice: 0 })).wait()
+    await (await SushiToken.transferOwnership(MasterChef.address, gasOptions)).wait()
   }
 
   if (await MasterChef.owner() !== deployAddress) {
     // Transfer ownership of MasterChef to Dev
     console.log(" 🔑 Transfer ownership of MasterChef to Dev")
-    await (await MasterChef.transferOwnership(deployAddress, { gasLimit: 800000, gasPrice: 0 })).wait()
+    await (await MasterChef.transferOwnership(deployAddress, gasOptions)).wait()
   }
 
   const UniswapV2Factory = await deploy({
