@@ -134,9 +134,11 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
       return acc
     }, BigNumber.from('0'))
 
-    this.state.L1ETHCostFee = this.state.L1ETHCostFee.add(
-      this.state.L1ETHBalance.add(addedETHBalance).sub(L1ETHBalanceLatest)
-    )
+    if (!this.state.L1ETHBalance.eq(BigNumber.from('0'))) {
+      this.state.L1ETHCostFee = this.state.L1ETHCostFee.add(
+        this.state.L1ETHBalance.add(addedETHBalance).sub(L1ETHBalanceLatest)
+      )
+    }
     this.state.L1ETHBalance = L1ETHBalanceLatest
     this.state.lastQueriedL1Block = latestQueriedL1Block
 
