@@ -85,14 +85,20 @@ function Transaction ({
           </div> 
           <div>{title}</div>
         </div>
-        <div className={styles.detail}>
-          <div>{subTitle}</div>
-          <div>{typeTX}</div>
-          {link && <a href={link}
-              target={'_blank'}
-              rel='noopener noreferrer'
-              className={styles.detailLink}>View Details</a>  }
+        <div className={styles.content}>
+          <div className={styles.detail}>
+            <div>{subTitle}</div>
+            <div>{typeTX}</div>
+            {link && <a href={link}
+                target={'_blank'}
+                rel='noopener noreferrer'
+                className={styles.detailLink}>View Details</a>  }
+          </div>
+          <div className={styles.right}>
+            {renderValue()}
+          </div>
         </div>
+        
       </div>
 {/*       
       <Resolved
@@ -107,9 +113,9 @@ function Transaction ({
         <div>{subTitle}</div>
         <div>{typeTX}</div>
       </Resolved> */}
-      <div className={styles.right}>
+      {/* <div className={styles.right}>
         {renderValue()}
-      </div>
+      </div> */}
     </div>
   )
 }
