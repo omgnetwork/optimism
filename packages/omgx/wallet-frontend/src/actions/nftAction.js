@@ -15,13 +15,6 @@ limitations under the License. */
 
 import store from 'store';
 
-// export function getFactories () {
-//   const myFacotries = localStorage.getItem("NFTFactories")
-
-//   const state = store.getState()
-//   return state.nftList;
-// }
-
 //simply lists all the info in the nftList
 export function getNFTs () {
   const state = store.getState()
@@ -60,7 +53,8 @@ export async function addNFT ( NFT ) {
     symbol:  NFT.symbol, 
     address: NFT.address,
     originID: NFT.originID,
-    originAddress: NFT.originAddress
+    originAddress: NFT.originAddress,
+    originChain: NFT.originChain
   }
 
   console.log("nft info:",info)
@@ -93,7 +87,8 @@ export async function addNFTFactory ( Factory ) {
     layer: Factory.layer,
     name: Factory.name,
     originID: Factory.originID,
-    originAddress: Factory.originAddress 
+    originAddress: Factory.originAddress,
+    originChain: Factory.originChain 
   }
 
   console.log("nft factory:",factory)

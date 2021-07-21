@@ -158,7 +158,11 @@ class NetworkService {
 
       let nft = await this.ERC721Contract.connect(
         this.provider.getSigner()
-      ).mintNFT(receiverAddress, meta, { gasPrice: 0 })
+      ).mintNFT(
+        receiverAddress, 
+        meta, 
+        { gasLimit: 800000, gasPrice: 0 }
+      )
 
       await nft.wait()
       console.log('New ERC721:', nft)
@@ -170,17 +174,28 @@ class NetworkService {
     }
   }
 
-  async deployNewNFTContract(/*receiverAddress, ownerName, tokenURI*/) {
+
+
+/*
+const deployTX = await networkService.deployNewNFTContract(
+      newNFTsymbol,
+      newNFTname,
+      oriAddress,
+      oriID,
+      'OMGX Rinkeby L2'
+    )
+    */
+
+
+  async deployNewNFTContract(
+      nftSymbol,
+      nftName,
+      oriAddress,
+      oriID,
+      oriChain) {
     
     try {
       console.log("Deploying new NFT factory")
-
-      //import L2ERC721Json from '../artifacts-ovm/contracts/ERC721Mock.sol/ERC721Mock.json'
-      //let Factory__L2ERC721: ContractFactory
-      //let L2ERC721: Contract
-
-      const nftName = 'TestNFT2'
-      const nftSymbol = 'TST2'
 
       let Factory__L2ERC721 = new ContractFactory(
          L2ERC721Json.abi,
@@ -192,43 +207,32 @@ class NetworkService {
         nftSymbol,
         nftName,
         BigNumber.from(String(0)), //starting index for the tokenIDs
-        "", //the base URI is empty in this case
+        oriAddress,
+        oriID,
+        oriChain,
         {gasLimit: 800000, gasPrice: 0}
       )
       await newL2ERC721.deployTransaction.wait()
+
+      addNFTFactory({
+        symbol: nftSymbol,
+        name: nftName,
+        owner: this.account,
+        layer: 'L2',
+        address: newL2ERC721.address,
+        originAddress: oriAddress,
+        originID: oriID,
+        originChain: oriChain
+      })
+
       console.log('New NFT L2ERC721 deployed to:', newL2ERC721.address)
+
       return true
     } catch (error) {
       console.log(error)
       return false
     }
 
-/*
-0x827Bc265AA32FA1d93d3Ed44EFb87fb3922d24a4
-*/
-
-/*
-0xBc8D98F43a5fC71bAaC8dB90Ee266595c3251418
-*/
-
-    // try {
-    //   let meta = ownerName + '#' + Date.now().toString() + '#' + tokenURI
-
-    //   console.log('meta:', meta)
-    //   console.log('receiverAddress:', receiverAddress)
-
-    //   let nft = await this.ERC721Contract.connect(
-    //     this.provider.getSigner()
-    //   ).mintNFT(receiverAddress, meta, { gasPrice: 0 })
-
-    //   await nft.wait()
-    //   console.log('New ERC721:', nft)
-      
-    //   return true
-    // } catch (error) {
-    //   console.log(error)
-    //   return false
-    // }
   }
 
   async initializeAccounts(masterSystemConfig) {
@@ -454,8 +458,8 @@ class NetworkService {
       )
 
       const ERC721Owner = await this.ERC721Contract.owner()
-      console.log("NFT Owner:",ERC721Owner)
 
+      console.log("NFT Owner:",ERC721Owner)
       console.log("NFT Contract:",this.ERC721Contract)
 
       if (this.account === ERC721Owner) {
@@ -464,23 +468,34 @@ class NetworkService {
         
         setMinter(true)
         
-        let nftName = await this.ERC721Contract.getName()
-        let nftSymbol = await this.ERC721Contract.getSymbol()
-        let nftOriginAddress = /*'0000'*/ await this.ERC721Contract.getOrigin_NFT_Address()
-        let nftOriginID = '0001' //await this.ERC721Contract.getOrigin_NFT_ID()
+        let nftName = await this.ERC721Contract.name()
+        let nftSymbol = await this.ERC721Contract.symbol()
+        let genesis = await this.ERC721Contract.getGenesis()
+        
+        console.log("NFT Genesis:", genesis)
 
         addNFTFactory({
-            name: nftName,
-            symbol: nftSymbol,
-            owner: this.account,
-            layer: 'L2',
-            address: this.ERC721Contract.address,
-            originAddress: nftOriginAddress,
-            originID: nftOriginID
+          name: nftName,
+          symbol: nftSymbol,
+          owner: this.account,
+          layer: 'L2',
+          address: this.ERC721Contract.address,
+          originAddress: genesis[0],
+          originID: genesis[1],
+          originChain: genesis[2]
         })
+
       } else {
         setMinter(false)
       }
+
+/*
+NFT Genesis: [
+  '0x0000000000000000000000000000000000000000',
+  'Genesis',
+  'OMGX_Rinkeby_28'
+]
+*/
 
       //Fire up the new watcher
       //const addressManager = getAddressManager(bobl1Wallet)
@@ -773,36 +788,10 @@ class NetworkService {
         })
       }
 
-      // const ERC20L1Balance = await this.L1_TEST_Contract.connect(
-      //   this.L1Provider
-      // ).balanceOf(this.account)
-      // console.log('Balance of the test token on L1:', ERC20L1Balance.toString())
-
-      // const ERC20L2Balance = await this.L2_TEST_Contract.connect(
-      //   this.L2Provider
-      // ).balanceOf(this.account)
-      // console.log('Balance of the test token on L2:', ERC20L2Balance.toString())
-      
-      //console.log(layer1Balances)
-      //console.log(layer2Balances)
-
       // //how many NFTs do I own?
       const ERC721L2Balance = await this.ERC721Contract.connect(
         this.L2Provider
       ).balanceOf(this.account)
-      //console.log('ERC721L2Balance', ERC721L2Balance)
-      //console.log("this.account",this.account)
-      //console.log(this.ERC721Contract)
-
-
-/*
-0x5B406cB7697a31C040Bd4A3aaf8826E944aC79b2
-*/
-
-      const ERC721L2BalanceM = await this.ERC721Contract.connect(
-        this.L2Provider
-      ).balanceOf('0x5B406cB7697a31C040Bd4A3aaf8826E944aC79b2')
-      console.log('Marcs Balance:', ERC721L2BalanceM)
 
       //let see if we already know about them
       const myNFTS = getNFTs()
@@ -824,8 +813,9 @@ class NetworkService {
         let meta = null
 
         //always the same, no need to have in the loop
-        let nftName = await this.ERC721Contract.getName()
-        let nftSymbol = await this.ERC721Contract.getSymbol()
+        let nftName = await this.ERC721Contract.name()
+        let nftSymbol = await this.ERC721Contract.symbol()
+        let genesis = await this.ERC721Contract.getGenesis()
 
         for (let i = 0; i < Number(ERC721L2Balance.toString()); i++) {
           
@@ -865,6 +855,9 @@ class NetworkService {
             name: nftName,
             symbol: nftSymbol,
             address: this.ERC721Contract.address,
+            originAddress: genesis[0],
+            originID: genesis[1],
+            originChain: genesis[2]
           })
         }
       } else {

@@ -1,24 +1,20 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { isEqual } from 'lodash';
-import { logAmount, powAmount } from 'util/amountConvert';
-import { BigNumber } from 'ethers';
 
-import { openAlert, openError, openModal } from 'actions/uiAction';
-import { getFarmInfo, updateStakeToken, updateWithdrawToken } from 'actions/farmAction';
+import { openAlert, openError } from 'actions/uiAction';
 
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import AddIcon from '@material-ui/icons/Add';
-import RemoveIcon from '@material-ui/icons/Remove';
 
 import networkService from 'services/networkService';
-
-import cells from 'images/hela.jpg';
+import root from 'images/root.png';
 
 import * as styles from './listNFT.module.scss';
+
+import truncate from 'truncate-middle'
 
 class listNFT extends React.Component {
   
@@ -35,8 +31,12 @@ class listNFT extends React.Component {
       icon,
       UUID,
       time,
-      URL
+      URL,
+      oriChain,
+      oriAddress,
+      oriID
     } = this.props;
+
 
     this.state = {
       name,
@@ -51,28 +51,26 @@ class listNFT extends React.Component {
       receiverAddress: '',
       tokenURI: '',
       ownerName: '',
-      /*logo,
-      name, 
-      shortName,
-      balance,
-      decimals,
-      L1orL2Pool,
-      // data
-      poolInfo, userInfo,
-      */
       //drop down box
       dropDownBox: false,
       dropDownBoxInit: true,
       // loading
       loading: false,
       newNFTsymbol: '',
-      newNFTname: '' 
+      newNFTname: '',
+      oriChain,
+      oriAddress,
+      oriID 
     }
   }
   
   componentDidUpdate(prevState) {
 
-    const { name, layer, symbol, owner, address, UUID, time, URL } = this.props;
+    const { 
+      name, layer, symbol, owner, 
+      address, UUID, time, URL,
+      oriChain, oriAddress, oriID 
+    } = this.props;
 
     if (!isEqual(prevState.name, name)) {
       this.setState({ name })
@@ -106,129 +104,23 @@ class listNFT extends React.Component {
       this.setState({ URL })
     }
 
-    // if (!isEqual(prevState.poolInfo, poolInfo)) {
-    //   this.setState({ poolInfo });
-    // }
-
-    // if (!isEqual(prevState.userInfo, userInfo)) {
-    //   this.setState({ userInfo });
-    // }
-
-    // if (!isEqual(prevState.balance, balance)) {
-    //   this.setState({ balance });
-    // }
-
-    // if (!isEqual(prevState.decimals, decimals)) {
-    //   this.setState({ decimals });
-    // }
-
-  }
-/*
-  handleStakeToken() {
-    const { shortName, poolInfo, L1orL2Pool, balance, decimals } = this.state;
-    this.props.dispatch(updateStakeToken({
-      symbol: shortName,
-      currency: L1orL2Pool === 'L1LP' ? poolInfo.l1TokenAddress : poolInfo.l2TokenAddress,
-      LPAddress: L1orL2Pool === 'L1LP' ? networkService.L1LPAddress : networkService.L2LPAddress,
-      L1orL2Pool,
-      balance,
-      decimals
-    }));
-    this.props.dispatch(openModal('farmDepositModal'));
-  }
-
-  handleWithdrawToken() {
-    const { shortName, poolInfo, L1orL2Pool, balance, decimals } = this.state;
-    this.props.dispatch(updateWithdrawToken({
-      symbol: shortName,
-      currency: L1orL2Pool === 'L1LP' ? poolInfo.l1TokenAddress : poolInfo.l2TokenAddress,
-      LPAddress: L1orL2Pool === 'L1LP' ? networkService.L1LPAddress : networkService.L2LPAddress,
-      L1orL2Pool,
-      balance,
-      decimals
-    }));
-    this.props.dispatch(openModal('farmWithdrawModal'));
-  }
-
-  async handleHarvest() {
-    
-    const { poolInfo, userInfo, shortName } = this.state;
-
-    this.setState({ loading: true })
-
-    const userReward = BigNumber.from(userInfo.pendingReward).add(
-      BigNumber.from(userInfo.amount)
-      .mul(BigNumber.from(poolInfo.accUserRewardPerShare))
-      .div(BigNumber.from(powAmount(1, 12)))
-      .sub(BigNumber.from(userInfo.rewardDebt))
-    ).toString()
-
-    let getRewardTX = null;
-
-    if(networkService.L1orL2 === 'L1') {
-      getRewardTX = await networkService.getRewardL1(
-        poolInfo.l1TokenAddress,
-        userReward
-      )
-    } else if (networkService.L1orL2 === 'L2') {
-      getRewardTX = await networkService.getRewardL2(
-        poolInfo.l2TokenAddress,
-        userReward
-      )
-    } else {
-      console.log("handleHarvest(): Chain not set")
+    if (!isEqual(prevState.oriChain, oriChain)) {
+      this.setState({ oriChain })
     }
 
-    if (getRewardTX) {
-      this.props.dispatch(openAlert(`${logAmount(userReward, 18, 2)} ${shortName} was added to your account`));
-      this.props.dispatch(getFarmInfo());
-      this.setState({ loading: false });
-    } else {
-      this.props.dispatch(openError("Failed to get reward"));
-      this.setState({ loading: false });
+    if (!isEqual(prevState.oriAddress, oriAddress)) {
+      this.setState({ oriAddress })
+    }
+
+    if (!isEqual(prevState.oriID, oriID)) {
+      this.setState({ oriID })
     }
 
   }
-*/
-
-/*
-        <CardMedia
-          className={styles.NFTmedia}
-          image={cells}
-          title="Cell line"
-        />
-        <CardContent 
-          style={{padding: 0, margin: 7}}
-        >
-          <Typography variant="h5">
-            {name}
-          </Typography>
-          <Typography variant="h6">
-            {symbol}
-          </Typography>
-          <Typography variant="body2" color="textSecondary" component="p" style={{fontSize: '0.9em',marginBottom: '15px'}}>
-            <span style={{fontWeight: '600'}}>NFT ID: </span>{UUID}<br/>
-            <span style={{fontWeight: '600'}}>Owner: </span>{owner}<br/>
-            <span style={{fontWeight: '600'}}>Time Minted:</span><br/>{time}<br/>
-          </Typography>
-          <Typography 
-            variant="body2" 
-            color="textSecondary" 
-            component="p" 
-          >
-            <a style={{color: 'blue'}} 
-              href={URL}
-            >
-              DATASHEET
-            </a>
-          </Typography>
-        </CardContent>
-        */
 
   async handleMintAndSend() {
 
     const { receiverAddress, ownerName, tokenURI } = this.state;
-
     const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
     
     if (!networkStatus) {
@@ -253,6 +145,36 @@ class listNFT extends React.Component {
     this.setState({ loading: false })
   }
 
+  async handleDeployDerivative() {
+
+    const { newNFTsymbol, newNFTname, address, UUID  } = this.state;
+
+    const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
+    
+    if (!networkStatus) {
+      this.props.dispatch(openError('Please use L2 network.'));
+      return;
+    }
+
+    this.setState({ loading: true });
+
+    const deployTX = await networkService.deployNewNFTContract(
+      newNFTsymbol,
+      newNFTname,
+      address,
+      UUID,
+      'OMGX_Rinkeby_28'
+    )
+    
+    if (deployTX) {
+      this.props.dispatch(openAlert(`You have deployed a new NFT factory.`));
+    } else {
+      this.props.dispatch(openError('NFT factory deployment error'));
+    }
+
+    this.setState({ loading: false })
+  }
+
   render() {
 
     const { 
@@ -260,13 +182,13 @@ class listNFT extends React.Component {
       symbol,
       owner,
       address,
-      layer,
       icon,
       UUID,
       time,
       URL,
-      //logo, name, shortName,
-      //poolInfo, userInfo,
+      oriChain,
+      oriAddress,
+      oriID, 
       dropDownBox, 
       dropDownBoxInit,
       loading,
@@ -275,24 +197,7 @@ class listNFT extends React.Component {
       ownerName,
       newNFTsymbol,
       newNFTname 
-      //L1orL2Pool
     } = this.state;
-
-/*
-    let userReward = 0;
-
-    if (Object.keys(userInfo).length && Object.keys(poolInfo).length) {
-      userReward = BigNumber.from(userInfo.pendingReward).add(
-        BigNumber.from(userInfo.amount)
-        .mul(BigNumber.from(poolInfo.accUserRewardPerShare))
-        .div(BigNumber.from(powAmount(1, 12)))
-        .sub(BigNumber.from(userInfo.rewardDebt))
-      ).toString()
-    }
-*/
-    // L1orL2Pool: L1LP || L2LP
-    // networkService.L1OrL2 L1: || L2
-//    const disabled = !L1orL2Pool.includes(networkService.L1orL2);
 
     return (
       <div className={styles.listNFT}>
@@ -310,15 +215,15 @@ class listNFT extends React.Component {
               <div className={styles.BasicText}>{name} ({symbol})</div>
               <div className={styles.BasicLightText}>Owner: {owner}</div>
               <div className={styles.BasicLightText}>UUID: {UUID}</div>
-              <div className={styles.BasicLightText}>Address: {address}</div>
+              <div className={styles.BasicLightText}>Address: {truncate(address, 6, 4, '...')}</div>
               <div className={styles.BasicLightText}>Time minted: {time}</div>
-              <div className={styles.BasicLightText}>{URL}</div>
-              <a style={{color: 'blue', paddingTop: '3px'}} href={URL}>DATASHEET</a>
+              <a style={{color: 'blue', paddingTop: '2px', fontSize: '0.7em', fontWeight: '700'}} href={URL}>DATASHEET</a>
             </> }
             {!UUID && <>
-            <div className={styles.BasicText}>{name} ({symbol}) Factory</div><br/>
-            <div className={styles.BasicLightText}>Owner:<br/>{owner}</div><br/>
-            <div className={styles.BasicLightText}>Address:<br/>{address}</div>
+              <div className={styles.BasicText}>{name} ({symbol}) Factory</div><br/>
+              <div className={styles.BasicLightText}>Owner: {owner}</div> 
+              <div className={styles.BasicLightText}>Address: {truncate(address, 6, 4, '...')}</div>
+              <div className={styles.BasicLightText}>Chain: {oriChain}</div>
             </> }
           </div>
 
@@ -339,8 +244,23 @@ class listNFT extends React.Component {
           className={dropDownBox ? 
             styles.dropDownContainer: dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
         >
+          
+          <div className={styles.boxOrigin}>
+            <img className={styles.Image} src={root} alt="root"/>
+            <div className={styles.originRight}>
+              <div className={styles.BasicText}>Root</div>
+              <div className={styles.BasicLightText}>Address: {oriAddress}</div>
+              <div className={styles.BasicLightText}>NFT: {oriID}</div>
+              <div className={styles.BasicLightText}>Chain: {oriChain}</div>
+            </div>
+          </div>
+
           <div className={styles.boxContainer}>
           {!UUID && <>
+            <h3>Mint and Send</h3>
+            <div 
+              className={styles.BasicLightText}
+            >To mint and send a new {name} NFT, please fill in the information and click "Mint and Send".</div><br/>
             <Input
               small={true}
               placeholder="Receiver Address (Ox.....)"
@@ -370,6 +290,9 @@ class listNFT extends React.Component {
             </Button>
           </>}  
           {UUID && <>
+            <h3>Derive New NFT Factory</h3>
+            <div className={styles.BasicLightText}
+            >To derive a new NFT factory from this NFT, please fill in the information and click "Derive".</div><br/>
             <Input
               small={true}
               placeholder="NFT Symbol (e.g. TWST)"
@@ -386,10 +309,10 @@ class listNFT extends React.Component {
               type='primary'
               size='small'
               disabled={!newNFTname || !newNFTsymbol}
-              onClick={()=>{this.handleMintAndSend()}}
+              onClick={()=>{this.handleDeployDerivative()}}
               loading={loading}
             >
-              Derive NFT factory from this NFT
+              Derive
             </Button>
           </>}  
           </div>

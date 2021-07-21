@@ -20,9 +20,6 @@ const deployFn: DeployFunction = async (hre) => {
     (hre as any).deployConfig.deployer_l2
   )
 
-  // Mint a new NFT on L2
-  // [nftSymbol, nftName]
-  // this is owned by bobl1Wallet
   L2ERC721 = await Factory__L2ERC721.deploy(
     nftSymbol,
     nftName,

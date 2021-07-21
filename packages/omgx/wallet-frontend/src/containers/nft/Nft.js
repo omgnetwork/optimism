@@ -1,11 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import Input from 'components/input/Input';
-import NFTCard from 'components/nft/NftCard';
-import Button from 'components/button/Button';
-import { openError, openAlert } from 'actions/uiAction';
-import networkService from 'services/networkService';
-import { Grid } from '@material-ui/core/'
 import { isEqual } from 'lodash';
 
 import ListNFT from 'components/listNFT/listNFT';
@@ -24,17 +18,11 @@ class Nft extends React.Component {
     const { list, factories } = this.props.nft;
     const { minter } = this.props.setup;
 
-    console.log(this.props.setup)
-    console.log(this.props)
-    console.log("List:", list)
-    console.log("Factories:", factories)
-
     this.state = {
       list,
       factories,
       minter: minter,
       loading: false,
-      receiverAddress: '',
       ownerName: '',
       tokenURI: '' 
     }
@@ -58,48 +46,13 @@ class Nft extends React.Component {
  
   }
 
-  async handleDeployDerivative() {
-
-    const { /*receiverAddress, ownerName, tokenURI*/ } = this.state;
-
-    const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'));
-    
-    if (!networkStatus) {
-      this.props.dispatch(openError('Please use L2 network.'));
-      return;
-    }
-
-    this.setState({ loading: true });
-
-    const deployTX = await networkService.deployNewNFTContract(
-      //receiverAddress, 
-      //ownerName, 
-      //tokenURI
-    )
-    
-    if (deployTX) {
-      this.props.dispatch(openAlert(`You have deployed a new NFT factory.`));
-    } else {
-      this.props.dispatch(openError('NFT factory deployment error'));
-    }
-
-    this.setState({ loading: false })
-  }
-
   render() {
 
     const { 
-      loading,
-      receiverAddress,
-      ownerName,
-      tokenURI,
       list,
       factories,
       minter 
     } = this.state;
-
-    console.log("List:",list)
-    console.log("Factories:",factories)
 
     const numberOfNFTs = Object.keys(list).length;
 
@@ -112,10 +65,15 @@ class Nft extends React.Component {
           <h2>Your NFT Factories</h2>
 
           {minter && 
-            <div className={styles.note}>Status: You have owner permissions and are authorized to mint new NFTs. Select the desired NFT factory, click "Actions", fill in the information, and click "Mint and Send".</div> 
+            <div className={styles.note}>
+            Status: You have owner permissions and are authorized to mint new NFTs. 
+            Select the desired NFT factory and click "Actions" to mint NFTs.
+            </div> 
           }
           {!minter &&
-            <div className={styles.note}>Status: You do not have owner permissions and you not are authorized to mint new NFTs. Obtain an NFT, and then you can derive new NFTs from it.</div> 
+            <div className={styles.note}>Status: You do not have owner permissions and you not 
+            are authorized to mint new NFTs. 
+            Obtain an NFT, and then you can derive new NFTs from it.</div> 
           }
 
           <div className={styles.TableContainer}>
@@ -129,6 +87,9 @@ class Nft extends React.Component {
                   address={factories[v].address}
                   layer={factories[v].layer}
                   icon={factoryIcon}
+                  oriChain={factories[v].originChain}
+                  oriAddress={factories[v].originAddress}
+                  oriID={factories[v].originID}
                 />
               )
             })
@@ -164,6 +125,9 @@ class Nft extends React.Component {
                   UUID={list[v].UUID}
                   URL={list[v].url}
                   time={list[v].mintedTime}
+                  oriChain={list[v].originChain}
+                  oriAddress={list[v].originAddress}
+                  oriID={list[v].originID}
                 />
               )
             })

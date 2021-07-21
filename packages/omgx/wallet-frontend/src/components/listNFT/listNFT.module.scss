@@ -1,6 +1,6 @@
 @import 'index.scss';
 
-$dropDownHeight: 165px;
+$dropDownHeight: 325px;
 
 .listNFT {
 
@@ -16,10 +16,10 @@ $dropDownHeight: 165px;
       justify-content: center;
       align-items: center;    
       .Image {
-        width: 70px;
-        height: 70px;
+        width: 80px;
+        height: 80px;
         border-radius: 10px;
-        padding: 10px;
+        margin: 10px;
       }
     }
     .Table2 {
@@ -29,6 +29,7 @@ $dropDownHeight: 165px;
       align-items: flex-start;
       padding: 10px;
       padding-left: 0px;
+      min-width: 250px;
     }
     .Table3 {
       display: flex;
@@ -71,6 +72,25 @@ $dropDownHeight: 165px;
     width: 90%;
     padding: 0px;
     margin: 8px;
+  }
+
+  .boxOrigin {
+    display: flex;
+    flex-direction: row;
+    width: 90%;
+    padding: 0px;
+    margin: 0px;
+    .Image {
+        width: 70px;
+        height: 70px;
+        border-radius: 10px;
+        padding: 0px;
+    }
+    .originRight {
+        flex-direction: column;
+        padding-top: 6px;
+        padding-left: 6px;
+    }
   }
 
   /*************************/

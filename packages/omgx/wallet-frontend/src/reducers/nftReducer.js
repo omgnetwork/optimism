@@ -13,9 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+let nftFactories = localStorage.getItem("nftFactories")
+
+if (nftFactories) {
+  nftFactories = JSON.parse(nftFactories)
+  console.log("Factories Cache:",nftFactories)
+}
+
 const initialState = {
   list: {},
-  factories: {}
+  factories: nftFactories ? nftFactories : {}
 }
 
 function nftReducer (state = initialState, action) {
@@ -30,12 +37,19 @@ function nftReducer (state = initialState, action) {
         } 
       }
       case 'NFT/CREATEFACTORY/SUCCESS':
+
+      localStorage.setItem("nftFactories", JSON.stringify({
+          ...state.factories,
+          [action.payload.address]: action.payload
+        })
+      )
+
       return { 
         ...state,
         factories: {
           ...state.factories,
           [action.payload.address]: action.payload
-        } 
+        }
       }
     default:
       return state;
