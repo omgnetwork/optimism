@@ -1,9 +1,10 @@
 /* Imports: External */
-import { ethers } from 'ethers'
+import { BigNumber, Contract, ethers } from 'ethers'
+import { predeploys } from '@eth-optimism/contracts'
 
 /* Imports: Internal */
-import { OptimismEnv } from './env'
-import { Direction } from './watcher-utils'
+import { OptimismEnv, useDynamicTimeoutForWithdrawals } from './env'
+import { Direction, CrossDomainMessagePair } from './watcher-utils'
 
 interface TransactionParams {
   contract: ethers.Contract
@@ -13,6 +14,8 @@ interface TransactionParams {
 
 // Arbitrary big amount of gas for the L1<>L2 messages.
 const MESSAGE_GAS = 8_000_000
+const DEFAULT_TEST_GAS_L1 = 330_000
+const DEFAULT_TEST_GAS_L2 = 1_300_000
 
 export const executeL1ToL2Transactions = async (
   env: OptimismEnv,
@@ -78,6 +81,71 @@ export const executeL2Transactions = async (
   }
 }
 
+export const executeDepositErc20 = async (env: OptimismEnv, tsx) => {
+  console.log('fdsf')
+}
+
+export const executeWithdrawErc20 = async (env: OptimismEnv, tsx) => {
+  console.log('fdsf')
+}
+
+export const executeWithdrawETH = async (env: OptimismEnv, txs) => {
+  let totalL1FeePaid: BigNumber = BigNumber.from(0)
+  for (const withdrawAmount of txs) {
+    await useDynamicTimeoutForWithdrawals(this, env)
+    const transaction = await env.l2Bridge.withdraw(
+      predeploys.OVM_ETH,
+      withdrawAmount,
+      DEFAULT_TEST_GAS_L2,
+      '0xFFFF'
+    )
+    await transaction.wait()
+    await env.relayXDomainMessages(transaction)
+    const { tx } = await env.waitForXDomainTransaction(
+      transaction,
+      Direction.L2ToL1
+    )
+    totalL1FeePaid = totalL1FeePaid.add(tx.gasLimit.mul(tx.gasPrice))
+  }
+  return totalL1FeePaid
+}
+
+export const executeDepositETH = async (env: OptimismEnv, txs) => {
+  let totalL1FeePaid: BigNumber = BigNumber.from(0)
+  for (const depositAmount of txs) {
+    const { tx, receipt } = await env.waitForXDomainTransaction(
+      env.l1Bridge.depositETH(DEFAULT_TEST_GAS_L2, '0xFFFF', {
+        value: depositAmount,
+        gasLimit: DEFAULT_TEST_GAS_L1,
+      }),
+      Direction.L1ToL2
+    )
+    totalL1FeePaid = totalL1FeePaid.add(receipt.gasUsed.mul(tx.gasPrice))
+  }
+  return totalL1FeePaid
+}
+
+export const executeDepositETHParallel = async (env: OptimismEnv, txs) => {
+  let totalL1FeePaid: BigNumber = BigNumber.from(0)
+  const result: CrossDomainMessagePair[] = await Promise.all(
+    txs.map(async (depositAmount) => {
+      const receipt = await env.l1Bridge.depositETH(
+        DEFAULT_TEST_GAS_L2,
+        '0xFFFF',
+        {
+          value: depositAmount,
+          gasLimit: DEFAULT_TEST_GAS_L1,
+        }
+      )
+      await env.waitForXDomainTransaction(receipt, Direction.L1ToL2)
+    })
+  )
+  for (const { tx, receipt } of result) {
+    totalL1FeePaid = totalL1FeePaid.add(receipt.gasUsed.mul(tx.gasPrice))
+  }
+  return totalL1FeePaid
+}
+
 export const executeRepeatedL1ToL2Transactions = async (
   env: OptimismEnv,
   tx: TransactionParams,
@@ -108,6 +176,63 @@ export const executeRepeatedL2Transactions = async (
   await executeL2Transactions(
     env,
     [...Array(count).keys()].map(() => tx)
+  )
+}
+
+export const executeRepeatedDepositErc20 = async (
+  env: OptimismEnv,
+  l1ERC20: Contract,
+  l2ERC20: Contract,
+  withdrawAmount: number,
+  count: number
+) => {
+  await executeDepositErc20(
+    env,
+    [...Array(count).keys()].map(() => withdrawAmount)
+  )
+}
+
+export const executeRepeatedWithdrawErc20 = async (
+  env: OptimismEnv,
+  withdrawAmount: number,
+  count: number
+) => {
+  await executeWithdrawErc20(
+    env,
+    [...Array(count).keys()].map(() => withdrawAmount)
+  )
+}
+
+export const executeRepeatedWithdrawETH = async (
+  env: OptimismEnv,
+  withdrawAmount: number,
+  count: number
+) => {
+  return executeWithdrawETH(
+    env,
+    [...Array(count).keys()].map(() => withdrawAmount)
+  )
+}
+
+export const executeRepeatedDepositETH = async (
+  env: OptimismEnv,
+  depositAmount: number,
+  count: number
+) => {
+  return executeDepositETH(
+    env,
+    [...Array(count).keys()].map(() => depositAmount)
+  )
+}
+
+export const executeRepeatedDepositETHParallel = async (
+  env: OptimismEnv,
+  depositAmount: number,
+  count: number
+) => {
+  return executeDepositETHParallel(
+    env,
+    [...Array(count).keys()].map(() => depositAmount)
   )
 }
 
