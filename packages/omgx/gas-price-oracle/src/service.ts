@@ -162,12 +162,12 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
     )
     const collectGasLimitAndFee = txs.reduce((acc, cur) => {
       return [
-        acc[0].add(cur.gasLimit),
-        acc[1].add(cur.gasLimit.mul(cur.transactions[0].gasPrice))
+        acc[0].add(cur.transactions[0].gasLimit),
+        acc[1].add(cur.transactions[0].gasLimit.mul(cur.transactions[0].gasPrice))
       ]
     }, [BigNumber.from('0'), BigNumber.from('0')])
 
-    this.state.L2ETHCollectFee = latestQueriedL2Block === this.state.lastQueriedL2Block ?
+    this.state.L2ETHCollectFee = latestQueriedL2Block !== this.state.lastQueriedL2Block ?
       this.state.L2ETHCollectFee.add(collectGasLimitAndFee[1]) : this.state.L2ETHCollectFee
     this.state.lastQueriedL2Block = latestQueriedL2Block
     this.state.avgL2GasLimitPerBlock = collectGasLimitAndFee[0].div(numberOfBlocksInterval)
