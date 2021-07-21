@@ -16,6 +16,8 @@ interface TransactionParams {
 const MESSAGE_GAS = 8_000_000
 const DEFAULT_TEST_GAS_L1 = 330_000
 const DEFAULT_TEST_GAS_L2 = 1_300_000
+const l1GasLimit = 9999999
+const l2GasLimit = 9999999
 
 export const executeL1ToL2Transactions = async (
   env: OptimismEnv,
@@ -81,15 +83,43 @@ export const executeL2Transactions = async (
   }
 }
 
-export const executeDepositErc20 = async (env: OptimismEnv, tsx) => {
+export const executeDepositErc20 = async (
+  env: OptimismEnv,
+  l1ERC20: Contract,
+  l2ERC20: Contract,
+  txs: number[]
+) => {
+  for (const depositAmount of txs) {
+    const tx = await l1ERC20.approve(env.l1Bridge.address, depositAmount)
+    await tx.wait()
+
+    const l1Tx1 = await env.l1Bridge.depositERC20To(
+      l1ERC20.address,
+      l2ERC20.address,
+      env.l2Wallet.address,
+      depositAmount,
+      l2GasLimit,
+      ethers.utils.formatBytes32String('0')
+    )
+    await l1Tx1.wait()
+
+    // Wait for the message to be relayed to L2.
+    const [msgHash1] = await env.watcher.getMessageHashesFromL1Tx(l1Tx1.hash)
+    console.log(msgHash1)
+    await env.watcher.getL2TransactionReceipt(msgHash1)
+  }
+}
+
+export const executeWithdrawErc20 = async (
+  env: OptimismEnv,
+  l1ERC20: Contract,
+  l2ERC20: Contract,
+  txs: number[]
+) => {
   console.log('fdsf')
 }
 
-export const executeWithdrawErc20 = async (env: OptimismEnv, tsx) => {
-  console.log('fdsf')
-}
-
-export const executeWithdrawETH = async (env: OptimismEnv, txs) => {
+export const executeWithdrawETH = async (env: OptimismEnv, txs: number[]) => {
   let totalL1FeePaid: BigNumber = BigNumber.from(0)
   for (const withdrawAmount of txs) {
     await useDynamicTimeoutForWithdrawals(this, env)
@@ -110,7 +140,7 @@ export const executeWithdrawETH = async (env: OptimismEnv, txs) => {
   return totalL1FeePaid
 }
 
-export const executeDepositETH = async (env: OptimismEnv, txs) => {
+export const executeDepositETH = async (env: OptimismEnv, txs: number[]) => {
   let totalL1FeePaid: BigNumber = BigNumber.from(0)
   for (const depositAmount of txs) {
     const { tx, receipt } = await env.waitForXDomainTransaction(
@@ -183,22 +213,28 @@ export const executeRepeatedDepositErc20 = async (
   env: OptimismEnv,
   l1ERC20: Contract,
   l2ERC20: Contract,
-  withdrawAmount: number,
+  depositAmount: number,
   count: number
 ) => {
   await executeDepositErc20(
     env,
-    [...Array(count).keys()].map(() => withdrawAmount)
+    l1ERC20,
+    l2ERC20,
+    [...Array(count).keys()].map(() => depositAmount)
   )
 }
 
 export const executeRepeatedWithdrawErc20 = async (
   env: OptimismEnv,
+  l1ERC20: Contract,
+  l2ERC20: Contract,
   withdrawAmount: number,
   count: number
 ) => {
   await executeWithdrawErc20(
     env,
+    l1ERC20,
+    l2ERC20,
     [...Array(count).keys()].map(() => withdrawAmount)
   )
 }
