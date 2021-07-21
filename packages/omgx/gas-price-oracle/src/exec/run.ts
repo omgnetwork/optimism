@@ -46,12 +46,12 @@ const main = async () => {
   // 0.015 GWEI
   const GAS_PRICE_ORACLE_FLOOR_PRICE = config.uint(
     'gas-price-oracle-floor-price',
-    parseInt(env.GAS_PRICE_ORACLE_FLOOR_PRICE, 10) || 15000000
+    parseInt(env.GAS_PRICE_ORACLE_FLOOR_PRICE, 10) || 150000
   )
   // 2 GWEI
   const GAS_PRICE_ORACLE_ROOF_PRICE = config.uint(
     'gas-price-oracle-roof-price',
-    parseInt(env.GAS_PRICE_ORACLE_ROOF_PRICE, 10) || 2000000000
+    parseInt(env.GAS_PRICE_ORACLE_ROOF_PRICE, 10) || 20000000
   )
   const GAS_PRICE_ORACLE_MIN_PERCENT_CHANGE = config.uint(
     'gas-price-oracle-min-percent-change',
@@ -59,7 +59,7 @@ const main = async () => {
   )
   const POLLING_INTERVAL = config.uint(
     'polling-interval',
-    parseInt(env.POLLING_INTERVAL, 10) || 1000 * 60
+    parseInt(env.POLLING_INTERVAL, 10) || 1000 * 60 * 10
   )
 
   const ETHERSCAN_API = config.str(

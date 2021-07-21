@@ -52,7 +52,7 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
     L2ETHCollectFee: BigNumber
     lastQueriedL1Block: number
     lastQueriedL2Block: number
-    avgL2GasUsagePerBlock: BigNumber
+    avgL2GasLimitPerBlock: BigNumber
     numberOfBlocksInterval: number
     etherscanURL: string
   }
@@ -88,7 +88,7 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
     this.state.lastQueriedL1Block = await this.options.l1RpcProvider.getBlockNumber()
     this.state.lastQueriedL2Block = await this.options.l2RpcProvider.getBlockNumber()
 
-    this.state.avgL2GasUsagePerBlock = BigNumber.from('0')
+    this.state.avgL2GasLimitPerBlock = BigNumber.from('0')
     this.state.numberOfBlocksInterval = 0
 
     this.state.etherscanURL = `https://api-rinkeby.etherscan.io/api?module=account&action=txlist&apikey=${this.options.etherscanAPI}`
@@ -160,23 +160,23 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
       [...Array(latestQueriedL2Block - this.state.lastQueriedL2Block)]
       .map((_, i) => this.options.l2RpcProvider.getBlockWithTransactions(this.state.lastQueriedL2Block + i + 1))
     )
-    const collectGasUsageAndFee = txs.reduce((acc, cur) => {
+    const collectGasLimitAndFee = txs.reduce((acc, cur) => {
       return [
-        acc[0].add(cur.gasUsed),
-        acc[1].add(cur.gasUsed.mul(cur.transactions[0].gasPrice))
+        acc[0].add(cur.gasLimit),
+        acc[1].add(cur.gasLimit.mul(cur.transactions[0].gasPrice))
       ]
     }, [BigNumber.from('0'), BigNumber.from('0')])
 
     this.state.L2ETHCollectFee = latestQueriedL2Block === this.state.lastQueriedL2Block ?
-      this.state.L2ETHCollectFee.add(collectGasUsageAndFee[1]) : this.state.L2ETHCollectFee
+      this.state.L2ETHCollectFee.add(collectGasLimitAndFee[1]) : this.state.L2ETHCollectFee
     this.state.lastQueriedL2Block = latestQueriedL2Block
-    this.state.avgL2GasUsagePerBlock = collectGasUsageAndFee[0].div(numberOfBlocksInterval)
+    this.state.avgL2GasLimitPerBlock = collectGasLimitAndFee[0].div(numberOfBlocksInterval)
     this.state.numberOfBlocksInterval = numberOfBlocksInterval
 
     this.logger.info("Got L2 Gas Cost", {
       L2ETHCollectFee: this.state.L2ETHCollectFee.toString(),
       lastQueriedL2Block: this.state.lastQueriedL2Block,
-      avgL2GasUsagePerBlock: this.state.avgL2GasUsagePerBlock.toString(),
+      avgL2GasUsagePerBlock: this.state.avgL2GasLimitPerBlock.toString(),
       numberOfBlocksInterval: this.state.numberOfBlocksInterval,
     })
   }
@@ -189,7 +189,7 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
     let targetGasPrice = this.options.gasFloorPrice
 
     if (this.state.L1ETHCostFee.gt(this.state.L2ETHCollectFee)) {
-      const estimatedGas = BigNumber.from(this.state.numberOfBlocksInterval).mul(this.state.avgL2GasUsagePerBlock)
+      const estimatedGas = BigNumber.from(this.state.numberOfBlocksInterval).mul(this.state.avgL2GasLimitPerBlock)
       const estimatedGasPrice = this.state.L1ETHCostFee.sub(this.state.L2ETHCollectFee).div(estimatedGas)
 
       if (estimatedGasPrice.gt(BigNumber.from(this.options.gasRoofPrice))) {
