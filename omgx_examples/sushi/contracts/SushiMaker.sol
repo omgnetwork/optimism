@@ -10,6 +10,7 @@ import "./uniswapv2/interfaces/IUniswapV2Pair.sol";
 import "./uniswapv2/interfaces/IUniswapV2Factory.sol";
 
 import "./Ownable.sol";
+import "./OffChain.sol";
 
 // SushiMaker is MasterChef's left hand and kinda a wizard. He can cook up Sushi from pretty much anything!
 // This contract handles "serving up" rewards for xSushi holders by trading tokens collected from fees for Sushi.
@@ -32,6 +33,8 @@ contract SushiMaker is Ownable {
     address private weth;
     //0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
 
+    address public offChain;
+
     bool private initialized = false;
 
     // V1 - V5: OK
@@ -53,13 +56,15 @@ contract SushiMaker is Ownable {
         address _factory,
         address _bar,
         address _sushi,
-        address _weth
+        address _weth,
+        address _offChain
     ) public {
         require(!initialized, "Contract was already initialized");
         factory = IUniswapV2Factory(_factory);
         bar = _bar;
         sushi = _sushi;
         weth = _weth;
+        offChain = _offChain;
         initialized = true;
     }
 
@@ -240,17 +245,19 @@ contract SushiMaker is Ownable {
         // Interactions
         // X1 - X5: OK
         (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
-        uint256 amountInWithFee = amountIn.mul(997);
+        uint feeX10 = offChain(offChain).offChainCompare(reserve0,reserve1);
+        // uint feeX10 = 3;
+        uint256 amountInWithFee = amountIn.mul(1000 - feeX10);
         if (fromToken == pair.token0()) {
             amountOut =
-                amountIn.mul(997).mul(reserve1) /
+                amountIn.mul(1000 - feeX10).mul(reserve1) /
                 reserve0.mul(1000).add(amountInWithFee);
             IERC20(fromToken).safeTransfer(address(pair), amountIn);
             pair.swap(0, amountOut, to, new bytes(0));
             // TODO: Add maximum slippage?
         } else {
             amountOut =
-                amountIn.mul(997).mul(reserve0) /
+                amountIn.mul(1000 - feeX10).mul(reserve0) /
                 reserve1.mul(1000).add(amountInWithFee);
             IERC20(fromToken).safeTransfer(address(pair), amountIn);
             pair.swap(amountOut, 0, to, new bytes(0));

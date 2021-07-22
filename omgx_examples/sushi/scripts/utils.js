@@ -5,7 +5,7 @@ const { l2ethers } = require("hardhat");
 const { utils } = require("ethers");
 const R = require("ramda");
 
-const gasOptions = { gasPrice: 15000000 }
+const gasOptions = { gasPrice: 0, gasLimit: 1000000 }
 
 async function deploy({
   rpcUrl,

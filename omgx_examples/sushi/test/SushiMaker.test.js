@@ -12,6 +12,7 @@ const UniswapV2PairJSON = require('../artifacts-ovm/contracts/uniswapv2/UniswapV
 const SushiMakerExploitMockJSON = require('../artifacts-ovm/contracts/mocks/SushiMakerExploitMock.sol/SushiMakerExploitMock.ovm.json')
 const SushiMakerJSON = require('../artifacts-ovm/contracts/SushiMaker.sol/SushiMaker.ovm.json');
 const SushiBarJSON = require('../artifacts-ovm/contracts/SushiBar.sol/SushiBar.ovm.json');
+const OffChainJSON = require('../artifacts-ovm/contracts/OffChain.sol/OffChain.ovm.json');
 
 describe("SushiMaker", function () {
   before(async function () {
@@ -34,8 +35,9 @@ describe("SushiMaker", function () {
     await deploy(this, [["bar", SushiBarJSON, []]])
     barInitTx = await this.bar.initialize(this.sushi.address)
     await barInitTx.wait()
+    await deploy(this, [["OffChain", OffChainJSON, []]])
     await deploy(this, [["sushiMaker", SushiMakerJSON, []]])
-    sushiMakerInitTx = await this.sushiMaker.initialize(this.factory.address, this.bar.address, this.sushi.address, this.weth.address, gasOptions)
+    sushiMakerInitTx = await this.sushiMaker.initialize(this.factory.address, this.bar.address, this.sushi.address, this.weth.address, this.OffChain.address, gasOptions)
     await sushiMakerInitTx.wait()
     await deploy(this, [["exploiter", SushiMakerExploitMockJSON, []]])
     exploiterInitTx = await this.exploiter.initialize(this.sushiMaker.address, gasOptions)
