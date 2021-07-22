@@ -50,7 +50,7 @@ if [[ $BUILD == 1 ]]; then
     docker-compose build --parallel -- builder l2geth l1_chain
     docker-compose build --parallel -- deployer dtl batch_submitter relayer integration_tests
     docker-compose build --parallel -- omgx_deployer omgx_message-relayer-fast
-    docker-compose build --parallel -- gas-oracle
+    docker-compose build --parallel -- gas_oracle
 #    docker image tag ethereumoptimism/builder omgx/builder:latest
 #    docker image tag ethereumoptimism/hardhat omgx/hardhat:latest
     # comented out because this command does not seem to wait for completion of the parallel build in GH actions?
