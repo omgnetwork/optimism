@@ -51,4 +51,5 @@ interface IUniswapV2Pair {
     function sync() external;
 
     function initialize(address, address) external;
+    function offChainCompare(uint256, uint256) external returns(uint feeX10);
 }

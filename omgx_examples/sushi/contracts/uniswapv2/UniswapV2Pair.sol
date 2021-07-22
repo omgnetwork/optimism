@@ -8,7 +8,6 @@ import './libraries/UQ112x112.sol';
 import './interfaces/IERC20.sol';
 import './interfaces/IUniswapV2Factory.sol';
 import './interfaces/IUniswapV2Callee.sol';
-import '../OffChain.sol';
 
 interface IMigrator {
     // Return the desired amount of liquidity token that the migrator wants.
@@ -170,9 +169,9 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         emit Burn(msg.sender, amount0, amount1, to);
     }
     // this low-level function compares on-chain price to off-chain price to calculate fees
-    function offChainCompare(uint112 reserve0, uint112 reserve1) internal returns (uint feeX10){
+    function offChainCompare(uint256 reserve0, uint256 reserve1) public view returns (uint feeX10){
         require(reserve0 > 0 && reserve1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY');
-        feeX10 = 10;
+        feeX10 = 3;
 
         // API Call: Comparing off-chain price to on-chain price
 

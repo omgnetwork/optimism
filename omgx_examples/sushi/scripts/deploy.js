@@ -51,14 +51,6 @@ const main = async () => {
     _args: []
   })
 
-  const OffChain = await deploy({
-    contractName: "OffChain",
-    rpcUrl: l2RpcUrl,
-    pk: deployPrivateKey,
-    ovm: true,
-    _args: []
-  })
-
   await (await SushiBar.initialize(SushiToken.address, gasOptions)).wait()
 
   const MasterChef = await deploy({
