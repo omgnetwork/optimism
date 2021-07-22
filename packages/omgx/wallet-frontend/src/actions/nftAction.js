@@ -15,29 +15,26 @@ limitations under the License. */
 
 import store from 'store';
 
-//simply lists all the info in the nftList
 export function getNFTs () {
   const state = store.getState()
-  console.log("state.nft:",state.nft)
   return state.nft.list;
 }
 
-//simply lists all the info in the nftList
 export function getNFTFactories () {
   const state = store.getState()
-  console.log("state.nft:",state.nft)
-  return state.nft.factory;
+  return state.nft.factories;
+}
+
+export function getNFTContracts () {
+  const state = store.getState()
+  return state.nft.contracts;
 }
 
 export async function addNFT ( NFT ) {
   
-  console.log("adding NFT to state:", NFT)
-
   const state = store.getState();
   const UUID = NFT.UUID;
 
-  console.log("state.nft.list:", state.nft.list)
-    
   //if we already have looked it up, no need to look up again. 
   if (state.nft.list[UUID]) {
     return state.nft.list[UUID];
@@ -57,8 +54,6 @@ export async function addNFT ( NFT ) {
     originChain: NFT.originChain
   }
 
-  console.log("nft info:",info)
-
   store.dispatch({
     type: 'NFT/GET/SUCCESS',
     payload: info
@@ -68,19 +63,40 @@ export async function addNFT ( NFT ) {
 
 }
 
+export async function addNFTContract ( address ) {
+  
+  console.log("adding NFT Contract to state:", address)
+
+  const state = store.getState();
+    
+  //if we already have looked it up, no need to look up again. 
+  if (state.nft.contracts[address]) {
+    return state.nft.contracts[address];
+  }
+
+  store.dispatch({
+    type: 'NFT/ADDCONTRACT/SUCCESS',
+    payload: address
+  })
+
+  return address
+
+}
+
 export async function addNFTFactory ( Factory ) {
 
   const state = store.getState();
-  //const UUID = NFTproperties.UUID;
+    
+  const address = Factory.address
     
   //if we already have looked it up, no need to look up again. 
-  if (state.nft.factories[Factory.address]) {
-    return state.nft.factories[Factory.address];
+  if (state.nft.factories[address]) {
+    return state.nft.factories[address];
   }
   
   const factory = {
     owner: Factory.owner, 
-    address: Factory.address,
+    address,
     mintedTime: Factory.mintedTime, 
     decimals: 0,
     symbol:  Factory.symbol, 
@@ -88,7 +104,8 @@ export async function addNFTFactory ( Factory ) {
     name: Factory.name,
     originID: Factory.originID,
     originAddress: Factory.originAddress,
-    originChain: Factory.originChain 
+    originChain: Factory.originChain,
+    haveRights: Factory.haveRights
   }
 
   console.log("nft factory:",factory)
@@ -96,6 +113,11 @@ export async function addNFTFactory ( Factory ) {
   store.dispatch({
     type: 'NFT/CREATEFACTORY/SUCCESS',
     payload: factory
+  })
+
+  store.dispatch({
+    type: 'NFT/ADDCONTRACT/SUCCESS',
+    payload: address
   })
 
   return factory;

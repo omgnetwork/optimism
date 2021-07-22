@@ -1,13 +1,19 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { isEqual } from 'lodash';
+import React from 'react'
+import { connect } from 'react-redux'
+import { isEqual } from 'lodash'
 
-import ListNFT from 'components/listNFT/listNFT';
+import ListNFT from 'components/listNFT/listNFT'
 
-import * as styles from './Nft.module.scss';
+import Button from 'components/button/Button'
+import Input from 'components/input/Input'
+import networkService from 'services/networkService'
+import { openError } from 'actions/uiAction'
+import { addNFTContract } from 'actions/nftAction'
 
-import cellIcon from 'images/hela.jpg';
-import factoryIcon from 'images/factory.png';
+import * as styles from './Nft.module.scss'
+
+import cellIcon from 'images/hela.jpg'
+import factoryIcon from 'images/factory.png'
 
 class Nft extends React.Component {
 
@@ -16,15 +22,14 @@ class Nft extends React.Component {
     super(props);
 
     const { list, factories } = this.props.nft;
-    const { minter } = this.props.setup;
 
     this.state = {
       list,
       factories,
-      minter: minter,
       loading: false,
       ownerName: '',
-      tokenURI: '' 
+      tokenURI: '',
+      newAddress: ''
     }
   }
 
@@ -46,15 +51,41 @@ class Nft extends React.Component {
  
   }
 
+  async addNewNFT() {
+
+    const { newAddress  } = this.state;
+
+    const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
+    
+    if (!networkStatus) {
+      this.props.dispatch(openError('Please use L2 network.'));
+      return;
+    }
+
+    this.setState({ loading: true })
+
+    await addNFTContract( newAddress) 
+    await networkService.addNFTFactoryNS( newAddress )
+
+    this.setState({ newAddress: '' });
+
+    this.setState({ loading: false })
+
+  }
+
   render() {
 
     const { 
       list,
       factories,
-      minter 
+      newAddress,
+      loading 
     } = this.state;
 
-    const numberOfNFTs = Object.keys(list).length;
+    console.log("Factories:",factories)
+
+    const numberOfNFTs = Object.keys(list).length
+    const numberOfFactories = Object.keys(factories).length
 
     return (
 
@@ -64,13 +95,13 @@ class Nft extends React.Component {
 
           <h2>Your NFT Factories</h2>
 
-          {minter && 
+          {numberOfFactories && 
             <div className={styles.note}>
             Status: You have owner permissions and are authorized to mint new NFTs. 
             Select the desired NFT factory and click "Actions" to mint NFTs.
             </div> 
           }
-          {!minter &&
+          {!numberOfFactories &&
             <div className={styles.note}>Status: You do not have owner permissions and you not 
             are authorized to mint new NFTs. 
             Obtain an NFT, and then you can derive new NFTs from it.</div> 
@@ -90,16 +121,44 @@ class Nft extends React.Component {
                   oriChain={factories[v].originChain}
                   oriAddress={factories[v].originAddress}
                   oriID={factories[v].originID}
+                  haveRights={factories[v].haveRights}
                 />
               )
-            })
-          }
+            })}
           </div>
-      </div>
+        </div>
 
         <div className={styles.nftContainer}>
           
           <h2>Your NFTs</h2>
+
+            <div className={styles.note}>
+              To add an NFT, please fill in its contract address and click "Add".
+            </div> 
+
+            <div className={styles.ListNFT}>
+              
+              <div style={{fontSize: '1em', fontWeight: 700, paddingBottom: '5px'}}>Add NFT</div>
+
+              <Input
+                small={false}
+                style={{width: '90%'}}
+                placeholder="New NFT contract address (0x...)"
+                onChange={i=>{this.setState({newAddress: i.target.value})}}
+                value={newAddress}
+              />
+              
+              <Button
+                type='primary'
+                size='small'
+                disabled={!newAddress}
+                onClick={()=>{this.addNewNFT()}}
+                loading={loading}
+              >
+                Add NFT
+              </Button>
+              
+          </div>
 
           {numberOfNFTs === 1 && 
             <div className={styles.note}>You have one NFT and it should be shown below.</div> 
@@ -111,7 +170,6 @@ class Nft extends React.Component {
             <div className={styles.note}>You do not have any NFTs.</div> 
           }
 
-          <div className={styles.TableContainer}>
             {Object.keys(list).map((v, i) => {
               return (
                 <ListNFT 
@@ -132,7 +190,6 @@ class Nft extends React.Component {
               )
             })
           }
-          </div>
 
         </div>
 

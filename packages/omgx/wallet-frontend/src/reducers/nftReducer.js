@@ -13,22 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-let nftFactories = localStorage.getItem("nftFactories")
+//localStorage.removeItem("nftContracts")
 
-if (nftFactories) {
-  nftFactories = JSON.parse(nftFactories)
-  console.log("Factories Cache:",nftFactories)
+let nftContracts = localStorage.getItem("nftContracts")
+
+if (nftContracts) {
+  nftContracts = JSON.parse(nftContracts)
+  console.log("Contracts Cache:",nftContracts)
 }
 
 const initialState = {
   list: {},
-  factories: nftFactories ? nftFactories : {}
+  factories: {},
+  contracts: nftContracts ? nftContracts : {}
 }
 
 function nftReducer (state = initialState, action) {
   switch (action.type) {
+    
     case 'NFT/GET/SUCCESS':
-      console.log("Adding to overall state:", action.payload)
       return { 
         ...state,
         list: {
@@ -36,7 +39,26 @@ function nftReducer (state = initialState, action) {
           [action.payload.UUID]: action.payload
         } 
       }
-      case 'NFT/CREATEFACTORY/SUCCESS':
+
+    case 'NFT/ADDCONTRACT/SUCCESS':
+
+      const address = action.payload
+
+      localStorage.setItem("nftContracts", JSON.stringify({
+          ...state.contracts,
+          [address]: address
+        })
+      )
+
+      return { 
+        ...state,
+        contracts: {
+          ...state.contracts,
+          [address]: address
+        }
+      }
+
+    case 'NFT/CREATEFACTORY/SUCCESS':
 
       localStorage.setItem("nftFactories", JSON.stringify({
           ...state.factories,
@@ -51,6 +73,7 @@ function nftReducer (state = initialState, action) {
           [action.payload.address]: action.payload
         }
       }
+      
     default:
       return state;
   }

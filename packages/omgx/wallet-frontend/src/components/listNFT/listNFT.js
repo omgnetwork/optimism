@@ -34,7 +34,8 @@ class listNFT extends React.Component {
       URL,
       oriChain,
       oriAddress,
-      oriID
+      oriID,
+      haveRights
     } = this.props;
 
 
@@ -60,7 +61,8 @@ class listNFT extends React.Component {
       newNFTname: '',
       oriChain,
       oriAddress,
-      oriID 
+      oriID,
+      haveRights 
     }
   }
   
@@ -69,7 +71,8 @@ class listNFT extends React.Component {
     const { 
       name, layer, symbol, owner, 
       address, UUID, time, URL,
-      oriChain, oriAddress, oriID 
+      oriChain, oriAddress, oriID,
+      haveRights 
     } = this.props;
 
     if (!isEqual(prevState.name, name)) {
@@ -116,11 +119,15 @@ class listNFT extends React.Component {
       this.setState({ oriID })
     }
 
+    if (!isEqual(prevState.haveRights, haveRights)) {
+      this.setState({ haveRights })
+    }
+
   }
 
   async handleMintAndSend() {
 
-    const { receiverAddress, ownerName, tokenURI } = this.state;
+    const { receiverAddress, ownerName, tokenURI, address } = this.state;
     const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
     
     if (!networkStatus) {
@@ -132,6 +139,7 @@ class listNFT extends React.Component {
 
     const mintTX = await networkService.mintAndSendNFT(
       receiverAddress, 
+      address,
       ownerName, 
       tokenURI
     )
@@ -196,11 +204,12 @@ class listNFT extends React.Component {
       tokenURI,
       ownerName,
       newNFTsymbol,
-      newNFTname 
+      newNFTname,
+      haveRights 
     } = this.state;
 
     return (
-      <div className={styles.listNFT}>
+      <div className={styles.ListNFT}>
 
         <div 
           className={styles.topContainer} 
@@ -213,7 +222,7 @@ class listNFT extends React.Component {
           <div className={styles.Table2}>
             {UUID && <>
               <div className={styles.BasicText}>{name} ({symbol})</div>
-              <div className={styles.BasicLightText}>Owner: {owner}</div>
+              <div className={styles.BasicLightText}>Owner: {truncate(owner, 6, 4, '...')}</div>
               <div className={styles.BasicLightText}>UUID: {UUID}</div>
               <div className={styles.BasicLightText}>Address: {truncate(address, 6, 4, '...')}</div>
               <div className={styles.BasicLightText}>Time minted: {time}</div>
@@ -221,9 +230,10 @@ class listNFT extends React.Component {
             </> }
             {!UUID && <>
               <div className={styles.BasicText}>{name} ({symbol}) Factory</div><br/>
-              <div className={styles.BasicLightText}>Owner: {owner}</div> 
+              <div className={styles.BasicLightText}>Owner: {truncate(owner, 6, 4, '...')}</div> 
               <div className={styles.BasicLightText}>Address: {truncate(address, 6, 4, '...')}</div>
               <div className={styles.BasicLightText}>Chain: {oriChain}</div>
+              <div className={styles.BasicLightText}>Owner rights: {haveRights ? 'True' : 'False'}</div>
             </> }
           </div>
 
@@ -256,7 +266,7 @@ class listNFT extends React.Component {
           </div>
 
           <div className={styles.boxContainer}>
-          {!UUID && <>
+          {!UUID && haveRights && <>
             <h3>Mint and Send</h3>
             <div 
               className={styles.BasicLightText}
