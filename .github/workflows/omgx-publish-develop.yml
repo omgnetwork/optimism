@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'develop'
+      - 'mmontour1306-docker-compose'
 # on:
 #   push:
 #     branches:
@@ -48,34 +49,34 @@ jobs:
           docker build ../ --file docker/Dockerfile.monorepo --tag omgx/omgx_builder:latest
           docker build ../ --file docker/Dockerfile.omgx_deployer --tag omgx/omgx_deployer:latest
 
+#      - name: Rename and retag the optimism images
+#        working-directory: ./ops
+#        run: |
+#          docker image tag ethereumoptimism/builder omgx/builder:latest
+#          docker image tag ethereumoptimism/hardhat omgx/hardhat:latest
+#          docker image tag ethereumoptimism/deployer omgx/deployer:latest
+#          docker image tag ethereumoptimism/data-transport-layer omgx/data-transport-layer:latest
+#          docker image tag ethereumoptimism/l2geth omgx/l2geth:latest
+#          docker image tag ethereumoptimism/message-relayer omgx/message-relayer:latest
+#          docker image tag ethereumoptimism/batch-submitter omgx/batch-submitter:latest
+#          docker image tag ethereumoptimism/integration-tests omgx/integration-tests:latest
+#          docker image tag omgx/omgx_builder:latest omgx/omgx_builder:develop
+#          docker image tag omgx/omgx_deployer:latest omgx/omgx_deployer:develop
+#          docker image tag ethereumoptimism/builder omgx/builder:develop
+#          docker image tag ethereumoptimism/hardhat omgx/hardhat:develop
+#          docker image tag ethereumoptimism/deployer omgx/deployer:develop
+#          docker image tag ethereumoptimism/data-transport-layer omgx/data-transport-layer:develop
+#          docker image tag ethereumoptimism/l2geth omgx/l2geth:develop
+#          docker image tag ethereumoptimism/message-relayer omgx/message-relayer:develop
+#          docker image tag ethereumoptimism/batch-submitter omgx/batch-submitter:develop
+#          docker image tag ethereumoptimism/integration-tests omgx/integration-tests:develop
+#          docker rmi $(docker images | grep 'ethereumoptimism/' | awk '{print $1}')
+#          docker images
+
       - name: Rename and retag the optimism images
         working-directory: ./ops
         run: |
-          docker image tag ethereumoptimism/builder omgx/builder:latest
-          docker image tag ethereumoptimism/hardhat omgx/hardhat:latest
-          docker image tag ethereumoptimism/deployer omgx/deployer:latest
-          docker image tag ethereumoptimism/data-transport-layer omgx/data-transport-layer:latest
-          docker image tag ethereumoptimism/l2geth omgx/l2geth:latest
-          docker image tag ethereumoptimism/message-relayer omgx/message-relayer:latest
-          docker image tag ethereumoptimism/batch-submitter omgx/batch-submitter:latest
-          docker image tag ethereumoptimism/integration-tests omgx/integration-tests:latest
-
-          docker image tag omgx/omgx_builder:latest omgx/omgx_builder:develop
-          docker image tag omgx/omgx_deployer:latest omgx/omgx_deployer:develop
-          docker image tag ethereumoptimism/builder omgx/builder:develop
-          docker image tag ethereumoptimism/hardhat omgx/hardhat:develop
-          docker image tag ethereumoptimism/deployer omgx/deployer:develop
-          docker image tag ethereumoptimism/data-transport-layer omgx/data-transport-layer:develop
-          docker image tag ethereumoptimism/l2geth omgx/l2geth:develop
-          docker image tag ethereumoptimism/message-relayer omgx/message-relayer:develop
-          docker image tag ethereumoptimism/batch-submitter omgx/batch-submitter:develop
-          docker image tag ethereumoptimism/integration-tests omgx/integration-tests:develop
-          docker rmi $(docker images | grep 'ethereumoptimism/' | awk '{print $1}')
           docker images
-
-      - name: Rename and retag the optimism images
-        working-directory: ./ops
-        run: |
           for i in $(docker images --format "{{.Repository}}:{{.Tag}}" | grep omgx); do
             echo "$1"
             docker push "$i"

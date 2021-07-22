@@ -7,6 +7,7 @@ on:
       - 'develop'
       - '*rc'
       - 'regenesis/*'
+      - 'mmontour1306-docker-compose'
   pull_request:
   workflow_dispatch:
 
