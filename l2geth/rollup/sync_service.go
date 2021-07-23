@@ -262,6 +262,8 @@ func (s *SyncService) Start() error {
 	if s.verifier {
 		go s.VerifierLoop()
 	} else {
+context, err := s.client.GetLatestEthContext()
+log.Debug("MMDBG init context", "context", context, "err", err)
 		// The sequencer must sync the transactions to the tip and the
 		// pending queue transactions on start before setting sync status
 		// to false and opening up the RPC to accept transactions.
@@ -787,7 +789,12 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 		bn := s.GetLatestL1BlockNumber()
 		tx.SetL1Timestamp(ts)
 		tx.SetL1BlockNumber(bn)
-	} else if tx.L1Timestamp() > s.GetLatestL1Timestamp() {
+	// In a testing environment with an "automine" L1, we may receive two blocks with the same L1Timestamp.
+	// Checking for L1BLockNumber() as well as Timestamp() will ensure that the context is updated in this situation.
+	} else if tx.L1Timestamp() > s.GetLatestL1Timestamp() || tx.L1BlockNumber().Uint64() > s.GetLatestL1BlockNumber() {
+		if tx.L1Timestamp() == s.GetLatestL1Timestamp() {
+			log.Warn("Duplicate L1Timestamp() detected in applyTransactionToTip", "ts", tx.L1Timestamp(), "l1block", tx.L1BlockNumber().Uint64())
+		}
 		// If the timestamp of the transaction is greater than the sync
 		// service's locally maintained timestamp, update the timestamp and
 		// blocknumber to equal that of the transaction's. This should happen
