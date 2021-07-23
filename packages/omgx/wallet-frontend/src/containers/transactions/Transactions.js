@@ -13,10 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEqual, orderBy } from 'lodash';
 import { useSelector } from 'react-redux';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+
 
 import moment from 'moment';
 import truncate from 'truncate-middle';
@@ -52,7 +55,12 @@ function Transactions () {
   const [ page1, setPage1 ] = useState(1);
   // eslint-disable-next-line
   const [ page2, setPage2 ] = useState(1);
-  
+
+  const start = new Date();
+  const end = new Date();
+  const [startDate, setStartDate] = useState(new Date(start.setDate(1)));
+  const [endDate, setEndDate] = useState(new Date(end.setDate(end.getDate() + 7)));
+
   const [ searchHistory, setSearchHistory ] = useState('');
 
   const loading = useSelector(selectLoading([ 'TRANSACTION/GETALL' ]));
@@ -62,7 +70,9 @@ function Transactions () {
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual)
 
-  const transactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
+  // const transactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
+  const [transactions,setTransactions] = useState([]);
+  const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
 
   const _transactions = transactions.filter(i => {
     return i.hash.includes(searchHistory);
@@ -90,23 +100,62 @@ function Transactions () {
     return '';
   }
 
+  useEffect(()=>{
+    if(orderedTransactions) {
+      const filtered = orderedTransactions.filter((i)=>{
+        return (moment.unix(i.timeStamp).isAfter(startDate) && moment.unix(i.timeStamp).isBefore(endDate));
+      })
+      setTransactions(filtered);
+      setPage1(1)
+    }
+  },[startDate, endDate]);
+  
+  useEffect(()=>{
+    if(orderedTransactions) {
+      const filtered = orderedTransactions.filter((i)=>{
+        return (moment.unix(i.timeStamp).isAfter(startDate) && moment.unix(i.timeStamp).isBefore(endDate));
+      })
+      setTransactions(filtered);
+      setPage1(1)
+    }
+  },[]);
+
   return (
     <div className={styles.container}>
 
       <div className={styles.header}>
         <h2>Search</h2>
-        <Input
-          icon
-          placeholder='Search by hash'
-          value={searchHistory}
-          onChange={i => {
-            setPage1(1);
-            setSearchHistory(i.target.value);
-          }}
-          className={styles.searchBar}
-        />
-      </div>
+        <div className={styles.actions}>
+          <div>Start: </div>
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => setStartDate(date)}
+            selectsStart
+            startDate={startDate}
+            endDate={endDate}
+          />
 
+          <div>End: </div>
+          <DatePicker
+            selected={endDate}
+            onChange={(date) => setEndDate(date)}
+            selectsEnd
+            startDate={startDate}
+            endDate={endDate}
+            minDate={startDate}
+          />
+          <Input
+            icon
+            placeholder='Search by hash'
+            value={searchHistory}
+            onChange={i => {
+              setPage1(1);
+              setSearchHistory(i.target.value);
+            }}
+            className={styles.searchBar}
+          />
+        </div>
+      </div>
       <div className={styles.data}>
 
         <div className={styles.section}>
@@ -175,6 +224,7 @@ function Transactions () {
             <Exits 
               searchHistory={searchHistory}
               transactions={transactions}  
+              chainLink={chainLink}
             />
           }
 

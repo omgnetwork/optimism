@@ -31,7 +31,7 @@ import * as styles from './Transactions.module.scss'
 
 const PER_PAGE = 8;
 
-function Exits ({ searchHistory, transactions }) {
+function Exits ({ searchHistory, transactions,chainLink }) {
   
   const [ page, setPage ] = useState(1);
   const [ processExitModal, setProcessExitModal ] = useState(false);
@@ -82,7 +82,8 @@ function Exits ({ searchHistory, transactions }) {
       <Transaction
         key={`${index}`}
         chain='L2->L1 Exit'
-        link={`${etherscan}/tx/${i.hash}`}
+        // link={`${etherscan}/tx/${i.hash}`}
+        link={chainLink(i)}
         title={truncate(i.hash, 8, 6, '...')}
         blockNumber={`Block ${i.blockNumber}`}
         midTitle={midTitle}
