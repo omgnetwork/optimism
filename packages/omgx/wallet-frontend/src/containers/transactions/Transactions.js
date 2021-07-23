@@ -40,7 +40,10 @@ import Deposits from './Deposits';
 
 import * as styles from './Transactions.module.scss';
 
-const PER_PAGE = 5;
+import { getAllNetworks } from 'util/masterConfig'
+import { selectNetwork } from 'selectors/setupSelector'
+
+const PER_PAGE = 8;
 
 function Transactions () {
 
@@ -74,6 +77,19 @@ function Transactions () {
   //if totalNumberOfPages === 0, set to one so we don't get the strange "page 1 of 0" display
   if (totalNumberOfPages === 0) totalNumberOfPages = 1;
 
+  const currentNetwork = useSelector(selectNetwork());
+
+  const nw = getAllNetworks();
+
+  const chainLink = (item) => {
+    let network = nw[currentNetwork];
+    if (!!network && !!network[item.chain]) {
+      // network object should have L1 & L2
+      return `${network[item.chain].transaction}${item.hash}`;
+    }
+    return '';
+  }
+
   return (
     <div className={styles.container}>
 
@@ -81,7 +97,7 @@ function Transactions () {
         <h2>Search</h2>
         <Input
           icon
-          placeholder='Search history'
+          placeholder='Search by hash'
           value={searchHistory}
           onChange={i => {
             setPage1(1);
@@ -124,18 +140,14 @@ function Transactions () {
                 return (
                   <Transaction
                     key={index}
-                    link={ 
-                      i.chain === 'L1' ? 
-                      `https://rinkeby.etherscan.io/tx/${i.hash}` :
-                      `https://blockexplorer.rinkeby.omgx.network/tx/${i.hash}`
-                    }
-                    title={`${truncate(i.hash, 8, 4, '...')}`}
+                    link={chainLink(i)}
+                    title={`${truncate(i.hash, 8, 6, '...')}`}
                     midTitle={moment.unix(i.timeStamp).format('lll')}
-                    status={`Block ${i.blockNumber}`}
+                    blockNumber={`Block ${i.blockNumber}`}
                     chain={`${i.chain} Chain`}
                     typeTX={`${metaData}`}
                   />
-                );
+                )
               })}
             </div>
           )}
@@ -160,7 +172,10 @@ function Transactions () {
           />
 
           {activeTab2 === 'Exits' && 
-            <Exits searchHistory={searchHistory} />
+            <Exits 
+              searchHistory={searchHistory}
+              transactions={transactions}  
+            />
           }
 
         </div>
