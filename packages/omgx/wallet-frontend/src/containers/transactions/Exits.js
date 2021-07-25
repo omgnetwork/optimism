@@ -19,7 +19,6 @@ import { useSelector } from 'react-redux'
 import truncate from 'truncate-middle'
 
 import { selectLoading } from 'selectors/loadingSelector'
-import { selectEtherscan } from 'selectors/setupSelector'
 
 import ProcessExitsModal from 'containers/modals/processexit/ProcessExitsModal'
 import Transaction from 'components/transaction/Transaction'
@@ -37,7 +36,6 @@ function Exits ({ searchHistory, transactions,chainLink }) {
   const [ processExitModal, setProcessExitModal ] = useState(false);
   
   const loading = useSelector(selectLoading([ 'EXIT/GETALL' ]));  
-  const etherscan = useSelector(selectEtherscan());
 
   const _exits = transactions.filter(i => {
     return i.hash.includes(searchHistory) && (
@@ -82,7 +80,6 @@ function Exits ({ searchHistory, transactions,chainLink }) {
       <Transaction
         key={`${index}`}
         chain='L2->L1 Exit'
-        // link={`${etherscan}/tx/${i.hash}`}
         link={chainLink(i)}
         title={truncate(i.hash, 8, 6, '...')}
         blockNumber={`Block ${i.blockNumber}`}
