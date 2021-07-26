@@ -1,10 +1,11 @@
 {
   "name": "@omgx/wallet_react",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "buildenv-dev": "react-env",
     "buildenv-prod": "NODE_ENV=production react-env --dest build",
+    "get_artifacts": "./scripts/get_all_artifacts.sh",
     "serve": "npm run buildenv-prod && serve -s build -l 3000 -c public/serve.json",
     "start": "npm run buildenv-dev && react-scripts start",
     "build:deploy": "GENERATE_SOURCEMAP=false react-scripts build",
@@ -13,8 +14,8 @@
     "deploy": "aws s3 rm s3://omgx-wallet --recursive && aws s3 sync build s3://omgx-wallet && aws s3 cp s3://omgx-wallet/index.html s3://omgx-wallet/index.html --metadata-directive REPLACE --cache-control max-age=0 --content-type text/html"
   },
   "dependencies": {
-    "@eth-optimism/watcher": "^0.0.1-alpha.9",
     "@eth-optimism/contracts": "^0.4.1",
+    "@eth-optimism/watcher": "^0.0.1-alpha.9",
     "@ethersproject/providers": "^5.0.24",
     "@ethersproject/units": "^5.0.11",
     "@material-ui/core": "^4.11.3",
@@ -41,11 +42,13 @@
     "postinstall-postinstall": "^2.1.0",
     "react": "^16.12.0",
     "react-copy-to-clipboard": "^5.0.2",
+    "react-datepicker": "^4.1.1",
     "react-dom": "^16.12.0",
     "react-gtm-module": "^2.0.8",
     "react-redux": "^7.1.3",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^3.4.3",
+    "react-select": "^4.3.1",
     "redux": "^4.0.5",
     "redux-devtools-extension": "^2.13.8",
     "redux-mock-store": "^1.5.4",
@@ -53,8 +56,7 @@
     "serve": "^11.3.2",
     "truncate-middle": "^1.0.6",
     "uuid": "^8.3.2",
-    "workerize-loader": "^1.3.0",
-    "enyafhe": "git+https://github.com/enyalabs/EnyaFHE.git#4d0b48e"
+    "workerize-loader": "^1.3.0"
   },
   "eslintConfig": {
     "extends": "react-app"

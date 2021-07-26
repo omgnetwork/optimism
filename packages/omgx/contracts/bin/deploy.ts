@@ -6,11 +6,13 @@ require('dotenv').config()
 import hre from 'hardhat'
 
 const main = async () => {
-  
+
   console.log('Starting OMGX core contracts deployment...')
-  
+
   //const config = parseEnv()
   //not clear if the output is used anywhere?
+
+  const network = process.env.NETWORK || 'local'
 
   const l1Provider = new providers.JsonRpcProvider(process.env.L1_NODE_WEB3_URL)
   const l2Provider = new providers.JsonRpcProvider(process.env.L2_NODE_WEB3_URL)
@@ -52,7 +54,9 @@ const main = async () => {
     l2Provider,
     deployer_l1,
     deployer_l2,
-    noCompile: process.env.NO_COMPILE ? true : false,
+    addressManager,
+    network,
+    //noCompile: process.env.NO_COMPILE ? true : false, //not clear how/where this is connected
   })
 
 }

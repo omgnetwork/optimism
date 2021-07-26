@@ -30,7 +30,7 @@ import Notification from 'containers/notification/Notification';
 import WalletPicker from 'components/walletpicker/WalletPicker';
 import Alert from 'components/alert/Alert';
 
-import oracleService from 'services/oracleService';
+//import oracleService from 'services/oracleService';
 
 import * as styles from './App.module.scss';
 import { setWalletMethod } from 'actions/setupAction';
@@ -49,7 +49,7 @@ function App () {
   const handleAlertClose=()=>dispatch(closeAlert());
 
   useEffect(() => {
-    dispatch(oracleService.initialize());
+    //dispatch(oracleService.initialize());
     if (isChangingChain) {
       dispatch(setWalletMethod('browser'));
     }

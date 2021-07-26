@@ -13,45 +13,41 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import moment from 'moment';
-import truncate from 'truncate-middle';
+import React, { useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import moment from 'moment'
+import truncate from 'truncate-middle'
 
-import { selectLoading } from 'selectors/loadingSelector';
+import { selectLoading } from 'selectors/loadingSelector'
 
-import Pager from 'components/pager/Pager';
-import Transaction from 'components/transaction/Transaction';
+import Pager from 'components/pager/Pager'
+import Transaction from 'components/transaction/Transaction'
 
-import networkService from 'services/networkService';
+import networkService from 'services/networkService'
 
-import * as styles from './Transactions.module.scss';
+import * as styles from './Transactions.module.scss'
 
 const PER_PAGE = 10;
 
-function Deposits ({ searchHistory, transactions }) {
+function Deposits ({ searchHistory, transactions,chainLink }) {
 
   const [ page, setPage ] = useState(1);
 
-  // const ethDeposits = useSelector(selectEthDeposits, isEqual);
-  // const erc20Deposits = useSelector(selectErc20Deposits, isEqual);
   const loading = useSelector(selectLoading([ 'TRANSACTION/GETALL' ]));
 
   useEffect(() => {
     setPage(1);
   }, [ searchHistory ]);
 
-  // const deposits = orderBy(
-  //   [ ...ethDeposits, ...erc20Deposits ],
-  //   i => i.blockNumber, 'desc'
-  // );
-
   const _deposits = transactions.filter(i => {
     return i.hash.includes(searchHistory) && (
       i.to !== null && (
-      i.to.toLowerCase() === networkService.L1LPAddress.toLowerCase() ||
-      i.to.toLowerCase() === networkService.L1ETHAddress.toLowerCase()));
-  });
+        i.to.toLowerCase() === networkService.L1LPAddress.toLowerCase() ||
+        i.to.toLowerCase() === networkService.L1_ETH_Address.toLowerCase() ||
+        i.to.toLowerCase() === networkService.L1StandardBridgeAddress.toLowerCase()
+      )
+    )
+  })
 
   const startingIndex = page === 1 ? 0 : ((page - 1) * PER_PAGE);
   const endingIndex = page * PER_PAGE;
@@ -60,7 +56,8 @@ function Deposits ({ searchHistory, transactions }) {
   let totalNumberOfPages = Math.ceil(_deposits.length / PER_PAGE);
 
   //if totalNumberOfPages === 0, set to one so we don't get the strange "page 1 of 0" display
-  if (totalNumberOfPages === 0) totalNumberOfPages = 1;
+  if (totalNumberOfPages === 0) totalNumberOfPages = 1
+
 
   return (
     <div className={styles.transactionSection}>
@@ -73,28 +70,24 @@ function Deposits ({ searchHistory, transactions }) {
           onClickBack={()=>setPage(page - 1)}
         />
         {!paginatedDeposits.length && !loading && (
-          <div className={styles.disclaimer}>No deposit history.</div>
+          <div className={styles.disclaimer}>Deposit history coming soon...</div>
         )}
         {!paginatedDeposits.length && loading && (
           <div className={styles.disclaimer}>Loading...</div>
         )}
         {paginatedDeposits.map((i, index) => {
+          const metaData = typeof(i.typeTX) === 'undefined' ? '' : i.typeTX
           return (
             <Transaction
               key={index}
-              link={
-                networkService.chainID === 4 ?
-                  `https://rinkeby.etherscan.io/tx/${i.hash}`:
-                  networkService.chainID === 28 ?
-                  `https://blockexplorer.rinkeby.omgx.network/tx/${i.hash}`:
-                  undefined
-              }
-              title={truncate(i.hash, 6, 4, '...')}
-              midTitle='Deposit'
-              subTitle={moment.unix(i.timeStamp).format('lll')}
-              subStatus={`Block ${i.blockNumber}`}
+              link={chainLink(i)}
+              title={truncate(i.hash, 8, 6, '...')}
+              midTitle={moment.unix(i.timeStamp).format('lll')}
+              blockNumber={`Block ${i.blockNumber}`}
+              chain={`L1->L2 Deposit`}
+              typeTX={`${metaData}`}
             />
-          );
+          )
         })}
       </div>
     </div>

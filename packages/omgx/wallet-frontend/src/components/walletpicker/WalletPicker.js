@@ -28,13 +28,14 @@ import {
 
 import { openModal } from 'actions/uiAction';
 import { setWalletMethod, setNetwork } from 'actions/setupAction';
-import { getAllNetworks } from 'util/networkName';
+import { getAllNetworks } from 'util/masterConfig';
 
 import logo from 'images/omgx.png';
 import chevron from 'images/chevron.svg';
 
 import * as styles from './WalletPicker.module.scss';
 import { isChangingChain } from 'util/changeChain';
+import Button from 'components/button/Button';
 
 function WalletPicker ({ onEnable, enabled }) {
   const dispatch = useDispatch();
@@ -46,13 +47,11 @@ function WalletPicker ({ onEnable, enabled }) {
   const [ showAllNetworks, setShowAllNetworks ] = useState(false);
 
   const walletMethod = useSelector(selectWalletMethod())
-  const networkName = useSelector(selectNetwork())
+  const masterConfig = useSelector(selectNetwork())
 
   const wrongNetworkModalState = useSelector(selectModalState('wrongNetworkModal'));
 
   const dispatchSetWalletMethod = useCallback((methodName) => {
-    //console.log("dispatchSetWalletMethod:",methodName)
-
     dispatch(setWalletMethod(methodName));
   }, [ dispatch ])
 
@@ -69,8 +68,8 @@ function WalletPicker ({ onEnable, enabled }) {
     }
 
     async function enableBrowserWallet () {
-      //console.log("enableBrowserWallet() for",networkName)
-      const selectedNetwork = networkName ? networkName : "local";
+      //console.log("enableBrowserWallet() for",masterConfig)
+      const selectedNetwork = masterConfig ? masterConfig : "local";
       const walletEnabled = await networkService.enableBrowserWallet(selectedNetwork);
       //console.log("walletEnabled:",walletEnabled)
       return walletEnabled
@@ -78,18 +77,18 @@ function WalletPicker ({ onEnable, enabled }) {
         : dispatchSetWalletMethod(null);
     }
 
-  }, [ dispatchSetWalletMethod, walletMethod, networkName ]);
+  }, [ dispatchSetWalletMethod, walletMethod, masterConfig ]);
 
   useEffect(() => {
 
     async function initializeAccounts () {
 
-      //console.log("initializeAccounts() for:",networkName)
+      //console.log("initializeAccounts() for:",masterConfig)
 
-      const initialized = await networkService.initializeAccounts(networkName);
+      const initialized = await networkService.initializeAccounts(masterConfig);
 
       if (!initialized) {
-        console.log("Error !initialized for:",networkName)
+        console.log("Error !initialized for:",masterConfig)
         return setAccountsEnabled(false);
       }
 
@@ -106,7 +105,7 @@ function WalletPicker ({ onEnable, enabled }) {
     if (walletEnabled) {
       initializeAccounts();
     }
-  }, [ walletEnabled, networkName ]);
+  }, [ walletEnabled, masterConfig ]);
 
   useEffect(() => {
     if (accountsEnabled) {
@@ -158,7 +157,7 @@ function WalletPicker ({ onEnable, enabled }) {
             >
               <div className={styles.indicator} />
               <div>
-                OMGX {networkName}
+                OMGX {masterConfig}
               </div>
               {!!allNetworks.length && (
                 <img
@@ -193,34 +192,31 @@ function WalletPicker ({ onEnable, enabled }) {
 
       <div className={styles.MainBar} >
         <div className={styles.MainLeft}>
-          OMGX Example Web Wallet<br/>
+          OMGX Gateway<br/>
           90 Second Swap-On and Swap-Off<br/>
           Traditional Deposits and 7 Day Exits<br/>
         </div>
         <div className={styles.MainRightContainer}>
-        <div
-          className={styles.MainRight}
-          onClick={()=>dispatchSetWalletMethod('browser')}
-        >
-          <div
-            className={[styles.MainButton, !browserEnabled ? styles.disabled : ''].join(' ')}
+          <Button
+            type="primary"
+            disabled={!browserEnabled}
+            pulsate={true}
+            className={styles.ButtonConnect}
+            onClick={() => dispatchSetWalletMethod('browser')}
           >
-            <span>Connect to MetaMask</span>
-            {!browserEnabled &&
-              <div className={styles.disabledMM}>Your browser does not have a web3 provider.</div>
-            }
-          </div>
-        </div>
-        <div
-          className={styles.MainRightSecond}
-          onClick={()=>networkService.addL2Network()}
-        >
-          <div
-            className={styles.MainButtonSecond}
+            Connect to MetaMask
+          </Button>
+          {!browserEnabled &&
+            <div className={styles.disabledMM}>Your browser does not have a web3 provider.</div>
+          }
+
+          <Button
+            type="primary"
+            className={styles.ButtonAdd}
+            onClick={() => networkService.addL2Network()}
           >
-            <span>Add OMGX L2 Provider</span>
-          </div>
-        </div>
+            Add OMGX L2 Provider
+          </Button>
         </div>
       </div>
 
@@ -230,7 +226,7 @@ function WalletPicker ({ onEnable, enabled }) {
 
           <div className={styles.Title}>
             <span className={styles.B}>Demo of Traditional Deposit and Exit.</span>{' '}Note - for testing, we have turned off the 7 day exit delay.<br/><br/>
-            <span className={styles.B}>NEW.</span>{' '}Fast (90 second) Swap-On and Swap-Off, from L1 to L2, and back from L2 to L1. Despositing ETH on L1
+            <span className={styles.B}>NEW.</span>{' '}Fast (90 second) Swap-On and Swap-Off, from L1 to L2, and back from L2 to L1. Depositing ETH on L1
             transfers oETH to you on the L2, and vice versa. No more waiting to exit.<br/><br/>
             <span className={styles.B}>Staking and Community-provided Liquidity.</span>{' '}This fast on/off capability is
             based on paired Liquidity Pools on L1 and L2 provided by the operator and the broader community,
