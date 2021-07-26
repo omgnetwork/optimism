@@ -20,10 +20,13 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"math/big"
+	"strings"
 	"sync/atomic"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -32,10 +35,66 @@ import (
 	"github.com/ethereum/go-ethereum/rollup/dump"
 )
 
+// codec is a decoder for the return values of the execution manager. It decodes
+// (bool, bytes) from the bytes that are returned from both
+// `ExecutionManager.run()` and `ExecutionManager.simulateMessage()`
+var codec abi.ABI
+
+// innerData represents the results returned from the ExecutionManager
+// that are wrapped in `bytes`
+type innerData struct {
+	Success    bool   `abi:"_success"`
+	ReturnData []byte `abi:"_returndata"`
+}
+
+// runReturnData represents the actual return data of the ExecutionManager.
+// It wraps (bool, bytes) in an ABI encoded bytes
+type runReturnData struct {
+	ReturnData []byte `abi:"_returndata"`
+}
+
 // Will be removed when we update EM to return data in `run`.
 var deadPrefix, fortyTwoPrefix, zeroPrefix []byte
 
 func init() {
+	const abidata = `
+	[
+		{
+			"type": "function",
+			"name": "call",
+			"constant": true,
+			"inputs": [],
+			"outputs": [
+				{
+					"name": "_success",
+					"type": "bool"
+				},
+				{
+					"name": "_returndata",
+					"type": "bytes"
+				}
+			]
+		},
+		{
+			"type": "function",
+			"name": "blob",
+			"constant": true,
+			"inputs": [],
+			"outputs": [
+				{
+					"name": "_returndata",
+					"type": "bytes"
+				}
+			]
+		}
+	]
+`
+
+	var err error
+	codec, err = abi.JSON(strings.NewReader(abidata))
+	if err != nil {
+		panic(fmt.Errorf("unable to create abi decoder: %v", err))
+	}
 	deadPrefix = hexutil.MustDecode("0xdeaddeaddeaddeaddeaddeaddeaddeaddead")
 	zeroPrefix = hexutil.MustDecode("0x000000000000000000000000000000000000")
 	fortyTwoPrefix = hexutil.MustDecode("0x420000000000000000000000000000000000")
@@ -133,13 +192,15 @@ type Context struct {
 	Difficulty  *big.Int       // Provides information for DIFFICULTY
 
 	// OVM_ADDITION
-	EthCallSender         *common.Address
-	OriginalTargetAddress *common.Address
-	OriginalTargetResult  []byte
-	OriginalTargetReached bool
-	OvmExecutionManager   dump.OvmDumpAccount
-	OvmStateManager       dump.OvmDumpAccount
-	OvmSafetyChecker      dump.OvmDumpAccount
+	EthCallSender             *common.Address
+	IsL1ToL2Message           bool
+	IsSuccessfulL1ToL2Message bool
+	OvmExecutionManager       dump.OvmDumpAccount
+	OvmStateManager           dump.OvmDumpAccount
+	OvmSafetyChecker          dump.OvmDumpAccount
+	OvmL2CrossDomainMessenger dump.OvmDumpAccount
+	OvmETH                    dump.OvmDumpAccount
+	OvmL2StandardBridge       dump.OvmDumpAccount
 }
 
 // EVM is the Ethereum Virtual Machine base object and provides
@@ -190,6 +251,9 @@ func NewEVM(ctx Context, statedb StateDB, chainConfig *params.ChainConfig, vmCon
 		ctx.OvmExecutionManager = chainConfig.StateDump.Accounts["OVM_ExecutionManager"]
 		ctx.OvmStateManager = chainConfig.StateDump.Accounts["OVM_StateManager"]
 		ctx.OvmSafetyChecker = chainConfig.StateDump.Accounts["OVM_SafetyChecker"]
+		ctx.OvmL2CrossDomainMessenger = chainConfig.StateDump.Accounts["OVM_L2CrossDomainMessenger"]
+		ctx.OvmETH = chainConfig.StateDump.Accounts["OVM_ETH"]
+		ctx.OvmL2StandardBridge = chainConfig.StateDump.Accounts["OVM_L2StandardBridge"]
 	}
 
 	id := make([]byte, 4)
@@ -251,34 +315,6 @@ func (evm *EVM) Interpreter() Interpreter {
 // the necessary steps to create accounts and reverses the state in case of an
 // execution error or failed value transfer.
 func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error) {
-	var isTarget = false
-	if UsingOVM {
-		// OVM_ENABLED
-		if evm.depth == 0 {
-			// We're inside a new transaction, so make sure to wipe these variables beforehand.
-			evm.Context.OriginalTargetAddress = nil
-			evm.Context.OriginalTargetResult = []byte("00")
-			evm.Context.OriginalTargetReached = false
-		}
-
-		if caller.Address() == evm.Context.OvmExecutionManager.Address &&
-			!bytes.HasPrefix(addr.Bytes(), deadPrefix) &&
-			!bytes.HasPrefix(addr.Bytes(), zeroPrefix) &&
-			!bytes.HasPrefix(addr.Bytes(), fortyTwoPrefix) &&
-			evm.Context.OriginalTargetAddress == nil {
-			// Whew. Okay, so: we consider ourselves to be at a "target" as long as we were called
-			// by the execution manager, and we're not a precompile or "dead" address.
-			evm.Context.OriginalTargetAddress = &addr
-			evm.Context.OriginalTargetReached = true
-			isTarget = true
-		}
-		// Handle eth_call
-		if evm.Context.EthCallSender != nil && (caller.Address() == common.Address{}) {
-			evm.Context.OriginalTargetReached = true
-			isTarget = true
-		}
-	}
-
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}
@@ -294,6 +330,19 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		if !evm.Context.CanTransfer(evm.StateDB, caller.Address(), value) {
 			return nil, gas, ErrInsufficientBalance
 		}
+	}
+
+	// We need to be able to show a status of 1 ("no error") for successful L1 => L2 messages.
+	// The current way we figure out the success of the transaction (by parsing the
+	// returned data) would require an upgrade to the contracts that we likely won't make for a
+	// while. As a result, we'll use this mechanism where we set IsL1ToL2Message = true if
+	// we detect an L1 => L2 message and then IsSuccessfulL1ToL2Message = true if the message is
+	// successfully executed.
+	// Just to be safe (if the evm object ever gets reused), we set both values to false on the
+	// start of a new EVM execution.
+	if evm.depth == 0 {
+		evm.Context.IsL1ToL2Message = false
+		evm.Context.IsSuccessfulL1ToL2Message = false
 	}
 
 	var (
@@ -342,7 +391,34 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		}()
 	}
 
+	// Here's where we detect L1 => L2 messages. Based on the current contracts, we're guaranteed
+	// that the target address will only be the OVM_L2CrossDomainMessenger at a depth of 1 if this
+	// is an L1 => L2 message.
+	if evm.depth == 1 && addr == evm.Context.OvmL2CrossDomainMessenger.Address {
+		evm.Context.IsL1ToL2Message = true
+	}
+
 	ret, err = run(evm, contract, input, false)
+
+	// If all of these very particular conditions hold then we're guaranteed to be in a successful
+	// L1 => L2 message. It's not pretty, but it works. Broke this out into a series of checks to
+	// make it a bit more legible.
+	if evm.Context.IsL1ToL2Message && evm.depth == 3 {
+		var isValidMessageTarget = true
+		// 0x420... addresses are not valid targets except for the ETH predeploy.
+		if bytes.HasPrefix(addr.Bytes(), fortyTwoPrefix) && addr != evm.Context.OvmL2StandardBridge.Address {
+			isValidMessageTarget = false
+		}
+		// 0xdead... addresses are not valid targets.
+		if bytes.HasPrefix(addr.Bytes(), deadPrefix) {
+			isValidMessageTarget = false
+		}
+		// As long as this is a valid target and the message didn't revert then we can consider
+		// this a successful L1 => L2 message.
+		if isValidMessageTarget && err == nil {
+			evm.Context.IsSuccessfulL1ToL2Message = true
+		}
+	}
 
 	// When an error was returned by the EVM or when setting the creation code
 	// above we revert to the snapshot and consume any gas remaining. Additionally
@@ -356,58 +432,40 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 	if UsingOVM {
 		// OVM_ENABLED
-
-		if isTarget {
-			// If this was our target contract, store the result so that it can be later re-inserted
-			// into the user-facing return data (as seen below).
-			evm.Context.OriginalTargetResult = ret
-		}
-
 		if evm.depth == 0 {
 			// We're back at the root-level message call, so we'll need to modify the return data
 			// sent to us by the OVM_ExecutionManager to instead be the intended return data.
 
-			if !evm.Context.OriginalTargetReached {
-				// If we didn't get to the target contract, then our execution somehow failed
-				// (perhaps due to insufficient gas). Just return an error that represents this.
-				ret = common.FromHex("0x")
-				err = ErrOvmExecutionFailed
-			} else if len(evm.Context.OriginalTargetResult) >= 96 {
-				// We expect that EOA contracts return at least 96 bytes of data, where the first
-				// 32 bytes are the boolean success value and the next 64 bytes are unnecessary
-				// ABI encoding data. The actual return data starts at the 96th byte and can be
-				// empty.
-				success := evm.Context.OriginalTargetResult[:32]
-				ret = evm.Context.OriginalTargetResult[96:]
-
-				if !bytes.Equal(success, AbiBytesTrue) && !bytes.Equal(success, AbiBytesFalse) {
-					// If the first 32 bytes not either are the ABI encoding of "true" or "false",
-					// then the user hasn't correctly ABI encoded the result. We return the null
-					// hex string as a default here (an annoying default that would convince most
-					// people to just use the standard form).
-					ret = common.FromHex("0x")
-				} else if bytes.Equal(success, AbiBytesFalse) {
-					// If the first 32 bytes are the ABI encoding of "false", then we need to add an
-					// artificial error that represents the revert.
-					err = errExecutionReverted
-
-					// We also currently need to add an extra four empty bytes to the return data
-					// to appease ethers.js. Our return correctly inserts the four specific bytes
-					// that represent a "string error" to clients, but somehow the returndata size
-					// is a multiple of 32 (when we expect size % 32 == 4). ethers.js checks that
-					// [size % 32 == 4] before trying to decode a string error result. Adding these
-					// four empty bytes tricks ethers into correctly decoding the error string.
-					// ovmTODO: Figure out how to actually deal with this.
-					// ovmTODO: This may actually be completely broken if the first four bytes of
-					// the return data are **not** the specific "string error" bytes.
-					ret = append(ret, make([]byte, 4)...)
+			// We skip the parsing step if this was a successful L1 => L2 message. Note that if err
+			// is set (perhaps because of an error in ExecutionManager.run) we'll still return that
+			// error.
+			if !evm.Context.IsSuccessfulL1ToL2Message {
+				// Attempt to decode the returndata as as ExecutionManager.run when
+				// it is not an `eth_call` and as ExecutionManager.simulateMessage
+				// when it is an `eth_call`. If the data is not decodable as ABI
+				// encoded bytes, then return nothing. If the data is able to be
+				// decoded as bytes, then attempt to decode as (bool, bytes)
+				isDecodable := true
+				returnData := runReturnData{}
+				if err := codec.Unpack(&returnData, "blob", ret); err != nil {
+					isDecodable = false
 				}
-			} else {
-				// User hasn't conformed the standard format, just return "null" for the success
-				// (with no return data) to convince them to use the standard.
-				ret = common.FromHex("0x")
-			}
 
+				switch isDecodable {
+				case true:
+					inner := innerData{}
+					// If this fails to decode, the nil values will be set in
+					// `inner`, meaning that it will be interpreted as reverted
+					// execution with empty returndata
+					_ = codec.Unpack(&inner, "call", returnData.ReturnData)
+					if !inner.Success {
+						err = errExecutionReverted
+					}
+					ret = inner.ReturnData
+				case false:
+					ret = []byte{}
+				}
+			}
 			if evm.Context.EthCallSender == nil {
 				log.Debug("Reached the end of an OVM execution", "ID", evm.Id, "Return Data", hexutil.Encode(ret), "Error", err)
 			}

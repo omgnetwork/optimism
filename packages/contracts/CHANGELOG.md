@@ -1,5 +1,136 @@
 # Changelog
 
+## 0.4.5
+
+### Patch Changes
+
+- c73c3939: Update the typescript version to `4.3.5`
+- Updated dependencies [c73c3939]
+  - @eth-optimism/core-utils@0.5.1
+
+## 0.4.4
+
+### Patch Changes
+
+- 063151a6: Run lint over the tasks directory
+
+## 0.4.3
+
+### Patch Changes
+
+- 694cf429: Add a hardhat task for setting the L2 gas price
+
+## 0.4.2
+
+### Patch Changes
+
+- 0313794b: Add a factory contract we can whitelist for the community phase which will be used by the Gateway to create standard ERC20 tokens on L2
+- 21e47e1f: A small change to the L1 Messenger, which prevents an L2 to L1 call from send calling the CTC.
+- Updated dependencies [049200f4]
+  - @eth-optimism/core-utils@0.5.0
+
+## 0.4.1
+
+### Patch Changes
+
+- 98e02cfa: Add 0.4.0 deployment artifacts
+
+## 0.4.0
+
+### Minor Changes
+
+- db0dbfb2: Disables EOA contract upgrades until further notice
+- 5fc728da: Add a new Standard Token Bridge, to handle deposits and withdrawals of any ERC20 token.
+  For projects developing a custom bridge, if you were previously importing `iAbs_BaseCrossDomainMessenger`, you should now
+  import `iOVM_CrossDomainMessenger`.
+- 2e72fd90: Update AddressSet event to speed search up a bit. Breaks AddressSet API.
+- e04de624: Add support for ovmCALL with nonzero ETH value
+
+### Patch Changes
+
+- 25f09abd: Adds ERC1271 support to default contract account
+- dd8edc7b: Update the ECDSAContractAccount import path in the `contract-data.ts` file for connecting ethers contracts to the L2 contracts
+- c87e4c74: Migrated from tslint to eslint. The preference for lint exceptions is as follows: line level, block level, file level, package level.
+- 7f5936a8: Apply consistent styling to constants
+- f87a2d00: Use dashes instead of colons in contract names
+- 85da4979: Replaces RingBuffer with a simpler Buffer library
+- 57ca21a2: "Adds connectL1Contracts and connectL2Contracts utility functions"
+- c43b33ec: Add WETH9 compatible deposit and withdraw functions to OVM_ETH
+- 26bc63ad: Deploy new Goerli contracts at d3e743aa7a406c583f7d76f4fda607f592d03e47
+- a0d9e565: ECDSA account interface contract moved to predeploys dir
+- 2bd49730: Deploy v0.4.0 rc to Kovan
+- 38355a3b: Moved contracts in the "accounts" folder into the "predeploys" folder
+- 3c2c32e1: Use predeploy constants lib for EM wrapper
+- 48ece14c: Adds a temporary way to fund hardhat accounts when testing locally
+- 014dea71: Removes one-off GasPriceOracle deployment file
+- fa29b03e: Updates the deployment of the L1MultiMessageRelayer to NOT set the OVM_L2MessageRelayer address in the AddressManager
+- 6b46c8ba: Disable upgradability from the ECDSA account instead of the EOA proxy.
+- e045f582: Adds new SequencerFeeVault contract to store generated fees
+- e29fab10: Token gateways pass additional information: sender and arbitrary data.
+- c2a04893: Do not RLP decode the transaction in the OVM_ECDSAContractAccount
+- baacda34: Introduce the L1ChugSplashProxy contract
+- Updated dependencies [d9644c34]
+- Updated dependencies [df5ff890]
+  - @eth-optimism/core-utils@0.4.6
+
+## 0.3.5
+
+### Patch Changes
+
+- 4e03f8a9: Update contracts README to add deploy instructions.
+- 8e2bfd07: Introduces the congestion price oracle contract
+- 245136f1: Minor change to how deploy.ts is invoked
+- Updated dependencies [a64f8161]
+- Updated dependencies [750a5021]
+- Updated dependencies [c2b6e14b]
+  - @eth-optimism/core-utils@0.4.5
+
+## 0.3.4
+
+### Patch Changes
+
+- 7bf5941: Remove colon names from filenames
+- Updated dependencies [f091e86]
+- Updated dependencies [f880479]
+  - @eth-optimism/core-utils@0.4.4
+
+## 0.3.3
+
+### Patch Changes
+
+- 5e5d4a1: Separates logic for getting state dumps and making state dumps so we can bundle for browser
+
+## 0.3.2
+
+### Patch Changes
+
+- 7dd2f72: Remove incorrect comment.
+
+## 0.3.1
+
+### Patch Changes
+
+- 775118a: Updated package json with a missing dependency
+- Updated dependencies [96a586e]
+  - @eth-optimism/core-utils@0.4.3
+
+## 0.3.0
+
+### Minor Changes
+
+- b799caa: Updates to use RLP encoded transactions in batches for the `v0.3.0` release
+
+### Patch Changes
+
+- b799caa: Add value transfer support to ECDSAContractAccount
+- 6132e7a: Move various dependencies from primary deps to dev deps
+- b799caa: Add ExecutionManager return data & RLP encoding
+- b799caa: Makes ProxyEOA compatible with EIP1967, not backwards compatible since the storage slot changes.
+- 20747fd: Set L2MessageRelayer name to L1MultiMessageRelayer when deploying to mainnet
+- b799caa: Update ABI of simulateMessage to match run
+- Updated dependencies [b799caa]
+  - @eth-optimism/core-utils@0.4.2
+
 ## 0.2.12
 
 ### Patch Changes

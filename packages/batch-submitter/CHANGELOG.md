@@ -1,5 +1,140 @@
 # Changelog
 
+## 0.3.8
+
+### Patch Changes
+
+- c73c3939: Update the typescript version to `4.3.5`
+- Updated dependencies [c73c3939]
+  - @eth-optimism/common-ts@0.1.5
+  - @eth-optimism/contracts@0.4.5
+  - @eth-optimism/core-utils@0.5.1
+
+## 0.3.7
+
+### Patch Changes
+
+- 8a1e63dd: Prevent batch submitter from submitting batches if low on ETH
+- Updated dependencies [0313794b]
+- Updated dependencies [049200f4]
+- Updated dependencies [21e47e1f]
+  - @eth-optimism/contracts@0.4.2
+  - @eth-optimism/core-utils@0.5.0
+
+## 0.3.6
+
+### Patch Changes
+
+- f87a2d00: Use dashes instead of colons in contract names
+- 52d02b14: Add failure metrics to batch submitter
+- 31f517a2: Improved logging of batch submission timeout logs
+- 5c89c45f: Move the metric prefix string to a label #1047
+- Updated dependencies [25f09abd]
+- Updated dependencies [dd8edc7b]
+- Updated dependencies [c87e4c74]
+- Updated dependencies [db0dbfb2]
+- Updated dependencies [7f5936a8]
+- Updated dependencies [f87a2d00]
+- Updated dependencies [85da4979]
+- Updated dependencies [57ca21a2]
+- Updated dependencies [5fc728da]
+- Updated dependencies [2e72fd90]
+- Updated dependencies [c43b33ec]
+- Updated dependencies [26bc63ad]
+- Updated dependencies [a0d9e565]
+- Updated dependencies [2bd49730]
+- Updated dependencies [38355a3b]
+- Updated dependencies [3c2c32e1]
+- Updated dependencies [d9644c34]
+- Updated dependencies [48ece14c]
+- Updated dependencies [e04de624]
+- Updated dependencies [014dea71]
+- Updated dependencies [fa29b03e]
+- Updated dependencies [6b46c8ba]
+- Updated dependencies [e045f582]
+- Updated dependencies [5c89c45f]
+- Updated dependencies [df5ff890]
+- Updated dependencies [e29fab10]
+- Updated dependencies [c2a04893]
+- Updated dependencies [baacda34]
+  - @eth-optimism/contracts@0.4.0
+  - @eth-optimism/core-utils@0.4.6
+  - @eth-optimism/common-ts@0.1.4
+
+## 0.3.5
+
+### Patch Changes
+
+- 7cce55a9: Add status to generic error log to disambiguate errors
+
+## 0.3.4
+
+### Patch Changes
+
+- baa3b761: Improve Sentry support, initializing as needed and ensuring ERROR logs route to Sentry
+- cc742715: Fix typo in USE_HARDHAT config
+- 98b7839f: Change monotonicity band-aid code to log warnings not errors
+- c520100d: Fix a bug in fixMonotonicity auto healer
+- 85362d44: Log additional data in monotonicity violation
+- Updated dependencies [baa3b761]
+  - @eth-optimism/common-ts@0.1.3
+
+## 0.3.3
+
+### Patch Changes
+
+- 750a5021: Remove dead imports from core-utils
+- Updated dependencies [a64f8161]
+- Updated dependencies [4e03f8a9]
+- Updated dependencies [8e2bfd07]
+- Updated dependencies [750a5021]
+- Updated dependencies [c2b6e14b]
+- Updated dependencies [245136f1]
+  - @eth-optimism/core-utils@0.4.5
+  - @eth-optimism/contracts@0.3.5
+
+## 0.3.2
+
+### Patch Changes
+
+- 4340bb1: Fix: correctly read Batch Submitter env var defaults
+
+## 0.3.1
+
+### Patch Changes
+
+- c79dc8b: Add impersonate account debug config.
+- 0c16805: add metrics server to common-ts and batch submitter
+- fa4898a: Explicitly log error messages so that they do not show as empty objects
+- 96a586e: Updates the configuration to use bcfg in a backwards compatible way
+- c79dc8b: Make BLOCK_OFFSET configurable.
+- Updated dependencies [96a586e]
+- Updated dependencies [0c16805]
+- Updated dependencies [775118a]
+  - @eth-optimism/core-utils@0.4.3
+  - @eth-optimism/common-ts@0.1.2
+  - @eth-optimism/contracts@0.3.1
+
+## 0.3.0
+
+### Minor Changes
+
+- b799caa: Updates to use RLP encoded transactions in batches for the `v0.3.0` release
+
+### Patch Changes
+
+- 751e2be: Add the support for different sequencer & proposer keys in the batch submitter.
+- Updated dependencies [b799caa]
+- Updated dependencies [6132e7a]
+- Updated dependencies [b799caa]
+- Updated dependencies [b799caa]
+- Updated dependencies [b799caa]
+- Updated dependencies [20747fd]
+- Updated dependencies [b799caa]
+- Updated dependencies [b799caa]
+  - @eth-optimism/contracts@0.3.0
+  - @eth-optimism/core-utils@0.4.2
+
 ## 0.2.6
 
 ### Patch Changes
@@ -7,7 +142,7 @@
 - 751e2be8: Add the support for different sequencer & proposer keys in the batch submitter.
 - Updated dependencies [6132e7ab]
   - @eth-optimism/contracts@0.2.12
-
+  
 ## 0.2.5
 
 ### Patch Changes

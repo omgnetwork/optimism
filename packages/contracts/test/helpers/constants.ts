@@ -5,12 +5,12 @@ import { fromHexString, toHexString } from '@eth-optimism/core-utils'
 import xor from 'buffer-xor'
 
 /* Internal Imports */
-import { getContractDefinition } from '../../src'
+import { getContractDefinition } from '../../src/contract-defs'
 
 export const DEFAULT_ACCOUNTS = defaultAccounts
 export const DEFAULT_ACCOUNTS_HARDHAT = defaultAccounts.map((account) => {
   return {
-    balance: ethers.BigNumber.from(account.balance).toHexString(),
+    balance: account.balance,
     privateKey: account.secretKey,
   }
 })
@@ -45,7 +45,7 @@ try {
   len = fromHexString(
     getContractDefinition('Helper_TestRunner').deployedBytecode
   ).byteLength
-  /* tslint:disable:no-empty */
+  // eslint-disable-next-line no-empty
 } catch {}
 
 export const Helper_TestRunner_BYTELEN = len
