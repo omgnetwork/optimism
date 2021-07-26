@@ -151,6 +151,12 @@
 - b799caa: Remove the OVMSigner
 - b799caa: Prevent 0 value transactions with calldata via RPC
 
+## 0.2.7
+
+### Patch Changes
+
+- 9b7dd4bf: Update `scripts/start.sh` to parse the websocket port and pass to geth at runtime
+
 ## 0.2.6
 
 ### Patch Changes
