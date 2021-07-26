@@ -8,9 +8,9 @@ import Button from 'components/button/Button';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-import * as styles from './AccountList.module.scss';
+import * as styles from './listAccount.module.scss';
 
-class AccountList extends React.Component {
+class ListAccount extends React.Component {
   
   constructor(props) {
     
@@ -68,7 +68,7 @@ class AccountList extends React.Component {
     const enabled = (networkLayer === chain) ? true : false
 
     return (
-      <div className={styles.AccountList}>
+      <div className={styles.ListAccount}>
         
         <div 
           className={styles.topContainer}
@@ -127,7 +127,7 @@ class AccountList extends React.Component {
                 onClick={()=>{this.handleModalClick('depositModal', token, false)}}
                 type='secondary'
                 disabled={disabled}
-                style={{width: '100px', padding: '6px'}}
+                style={{width: '100px', padding: '6px', borderRadius: '5px'}}
               >
                 DEPOSIT
               </Button>
@@ -137,7 +137,7 @@ class AccountList extends React.Component {
                 onClick={()=>{this.handleModalClick('depositModal', token, true)}}
                 type='primary'
                 disabled={disabled}
-                style={{width: '120px', padding: '6px'}}
+                style={{width: '120px', padding: '6px', borderRadius: '5px'}}
               >
                 FAST DEPOSIT
               </Button>
@@ -152,7 +152,7 @@ class AccountList extends React.Component {
                 onClick={()=>{this.handleModalClick('transferModal', token, false)}}
                 type='primary'
                 disabled={disabled}
-                style={{width: '90px', padding: '6px'}}
+                style={{width: '90px', padding: '6px',borderRadius: '5px'}}
               >
                 TRANSFER
               </Button>
@@ -162,7 +162,7 @@ class AccountList extends React.Component {
                 onClick={()=>{this.handleModalClick('exitModal', token, false)}}
                 type='secondary'
                 disabled={disabled}
-                style={{width: '100px', padding: '6px'}}
+                style={{width: '100px', padding: '6px',borderRadius: '5px'}}
               >
                 7 DAY EXIT
               </Button>
@@ -172,7 +172,7 @@ class AccountList extends React.Component {
                 onClick={()=>{this.handleModalClick('exitModal', token, true)}}
                 type='primary'
                 disabled={disabled}
-                style={{width: '90px', padding: '6px'}}
+                style={{width: '90px', padding: '6px',borderRadius: '5px'}}
               >
                 FAST EXIT
               </Button>
@@ -194,4 +194,4 @@ const mapStateToProps = state => ({
   //buy: state.buy,
 });
 
-export default connect(mapStateToProps)(AccountList);
+export default connect(mapStateToProps)(ListAccount);
