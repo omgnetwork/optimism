@@ -69,7 +69,7 @@ describe('NFT Test\n', async () => {
 
   it(`should have a name`, async () => {
     const tokenName = await ERC721.name()
-    expect(tokenName).to.equal('TST')
+    expect(tokenName).to.equal('TestNFT')
   })
 
   it('should generate a new ERC721 and transfer it from Bob (a1a) to Alice (a2a)', async () => {
