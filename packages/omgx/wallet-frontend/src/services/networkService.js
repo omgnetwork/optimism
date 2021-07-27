@@ -131,7 +131,7 @@ class NetworkService {
 
     // gas
     this.L1GasLimit = 9999999
-    this.L2GasLimit = 210000000
+    this.L2GasLimit = 10000000
   }
 
   async enableBrowserWallet() {
@@ -1134,7 +1134,8 @@ class NetworkService {
       })
     }
   }
-
+  
+  /*Used when people want to fast exit - they have to deposit funds into the L2LP*/
   async approveERC20_L2LP(
     depositAmount_string,
     currencyAddress
@@ -1183,6 +1184,8 @@ class NetworkService {
     
     try {
 
+      console.log("approveERC20")
+      
       const ERC20Contract = new ethers.Contract(
         currency,
         contractABI,
@@ -1512,6 +1515,7 @@ class NetworkService {
   /*****            Add Liquidity            *****/
   /***********************************************/
   async addLiquidity(currency, value, L1orL2Pool) {
+    
     const decimals = 18 //should not assume?
     let depositAmount = powAmount(value, decimals)
 

@@ -69,7 +69,9 @@ class ListFarm extends React.Component {
   }
 
   handleStakeToken() {
-    const { shortName, poolInfo, L1orL2Pool, balance, decimals } = this.state;
+    
+    const { shortName, poolInfo, L1orL2Pool, balance, decimals } = this.state
+    
     this.props.dispatch(updateStakeToken({
       symbol: shortName,
       currency: L1orL2Pool === 'L1LP' ? poolInfo.l1TokenAddress : poolInfo.l2TokenAddress,
@@ -77,8 +79,9 @@ class ListFarm extends React.Component {
       L1orL2Pool,
       balance,
       decimals
-    }));
-    this.props.dispatch(openModal('farmDepositModal'));
+    }))
+    
+    this.props.dispatch(openModal('farmDepositModal'))
   }
 
   handleWithdrawToken() {

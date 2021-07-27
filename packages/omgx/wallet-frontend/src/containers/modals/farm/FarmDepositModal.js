@@ -74,30 +74,36 @@ class FarmDepositModal extends React.Component {
     
     const { stakeToken, stakeValue } = this.state;
 
-    this.setState({ loading: true });
+    this.setState({ loading: true })
 
-    const approveTX = await networkService.approveERC20(
-      powAmount(stakeValue, 18),
-      stakeToken.currency,
-      stakeToken.LPAddress,
-      networkService.L2_TEST_Contract.abi, 
-      //we are using _TEST_ here but is really 
-      //does not matter - all we need is something that conforms to ERC20
-    );
+    let approveTX
+
+    if(stakeToken.L1orL2Pool === 'L2LP') {
+      approveTX = await networkService.approveERC20_L2LP(
+        powAmount(stakeValue, 18),
+        stakeToken.currency,
+      )
+    } else if (stakeToken.L1orL2Pool === 'L1LP') {
+      approveTX = await networkService.approveERC20_L1LP(
+        powAmount(stakeValue, 18),
+        stakeToken.currency,
+      )
+    }
+
     if (approveTX) {
-      this.props.dispatch(openAlert("Your amount was approved."));
-      let approvedAllowance = powAmount(10, 50);
+      this.props.dispatch(openAlert("Amount was approved"))
+      let approvedAllowance = powAmount(10, 50)
       // There is no need to check allowance for depositing ETH
       if (stakeToken.currency !== networkService.L1_ETH_Address) {
         approvedAllowance = await networkService.checkAllowance(
           stakeToken.currency,
           stakeToken.LPAddress
-        );
+        )
       }
-      this.setState({ approvedAllowance, loading: false });
+      this.setState({ approvedAllowance, loading: false })
     } else {
-      this.props.dispatch(openError("Failed to approve the amount."));
-      this.setState({ loading: false });
+      this.props.dispatch(openError("Failed to approve amount"))
+      this.setState({ loading: false })
     }
   }
 
@@ -112,7 +118,7 @@ class FarmDepositModal extends React.Component {
       stakeToken.L1orL2Pool
     );
     if (addLiquidityTX) {
-      this.props.dispatch(openAlert("Your liquidity was added."));
+      this.props.dispatch(openAlert("Your liquidity was added"));
       this.props.dispatch(getFarmInfo());
       this.setState({ loading: false, stakeValue: '' });
       this.props.dispatch(closeModal("farmDepositModal"));
