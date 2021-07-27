@@ -26,6 +26,7 @@ const config = {
       // because account balances are not automatically initiated with an ETH
       // balance.
       // gas: 10000000,
+      gasPrice: 15000000,
       // gasPrice: 0,
       chainId: 28,
       ovm: true

@@ -9,7 +9,7 @@ const env = process.env;
 const deployPrivateKey = env.DEPLOYER_PRIVATE_KEY;
 const l2RpcUrl = env.L2_NODE_WEB3_URL;
 const l2ETHAddress = "0x4200000000000000000000000000000000000006";
-const gasOptions = { gasPrice: 0, gasLimit: 800000  }
+const gasOptions = { gasPrice: 15000000, gasLimit: 16400000 }
 
 function writeFileSyncRecursive(filename, content, charset) {
   const folders = filename.split('/').slice(0, -1)
