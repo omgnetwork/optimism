@@ -80,16 +80,13 @@ function DoExitStep({ handleClose, token }) {
         unit={token.symbol}
         maxValue={logAmount(token.balance, token.decimals)}
       />
-
-      {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
-        <h3>
-          {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
-        </h3>
-      )}
+      
       {token && token.symbol === 'oETH' && (
         <h3>
           {value &&
-            `You will receive ${Number(value).toFixed(2)} ETH on L1. 
+            `You will receive ${Number(value).toFixed(2)} ETH 
+            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''})
+            on L1. 
             Your funds will be available on L1 in 7 days.`}
         </h3>
       )}
@@ -98,7 +95,9 @@ function DoExitStep({ handleClose, token }) {
         <h3>
           {value &&
             `You will receive ${Number(value).toFixed(2)} 
-            ${token.symbol} on L1. 
+            ${token.symbol}
+            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''})
+            on L1. 
             Your funds will be available on L1 in 7 days.`}
         </h3>
       )}

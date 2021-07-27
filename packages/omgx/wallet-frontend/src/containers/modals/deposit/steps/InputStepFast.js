@@ -152,20 +152,16 @@ function InputStepFast({ handleClose, token }) {
         unit={token.symbol}
         maxValue={logAmount(token.balance, token.decimals)}
       />
-      {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
-        <h3>
-          {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
-        </h3>
-      )}
+      
       {token && token.symbol === 'ETH' && (
         <h3>
-          {value && `You will receive ${receivableAmount(value)} oETH on L2.`}
+          {value && `You will receive ${receivableAmount(value)} oETH ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}) on L2.`}
         </h3>
       )}
 
       {token && token.symbol !== 'ETH' && (
         <h3>
-          {value && `You will receive ${receivableAmount(value)} ${token.symbol} on L2.`}
+          {value && `You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}) on L2.`}
         </h3>
       )}
 

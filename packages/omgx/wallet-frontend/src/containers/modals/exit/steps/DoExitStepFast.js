@@ -110,18 +110,14 @@ function DoExitStepFast({ handleClose, token }) {
         maxValue={logAmount(token.balance, token.decimals)}
       />
 
-      {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
-        <h3>
-          {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
-        </h3>
-      )}
-
       {token && token.symbol === 'oETH' && (
         <h3>
           {value &&
             `You will receive 
             ${receivableAmount(value)} 
-            ETH on L1.`
+            ETH 
+            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''})
+            on L1.`
           }
         </h3>
       )}
@@ -132,6 +128,7 @@ function DoExitStepFast({ handleClose, token }) {
             `You will receive 
             ${receivableAmount(value)} 
             ${token.symbol} 
+            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''})
             on L1.`
           }
         </h3>
