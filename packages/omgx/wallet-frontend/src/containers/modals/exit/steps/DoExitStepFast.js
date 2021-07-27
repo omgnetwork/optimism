@@ -21,11 +21,12 @@ import { selectLoading } from 'selectors/loadingSelector'
 
 import Button from 'components/button/Button'
 
-import { logAmount, powAmount } from 'util/amountConvert'
+import { amountToUsd, logAmount, powAmount } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
 import * as styles from '../ExitModal.module.scss'
 import Input from 'components/input/Input'
+import { selectLookupPrice } from 'selectors/lookupSelector'
 
 function DoExitStepFast({ handleClose, token }) {
 
@@ -37,6 +38,7 @@ function DoExitStepFast({ handleClose, token }) {
   const [disabledSubmit, setDisabledSubmit] = useState(true)
 
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
+  const lookupPrice = useSelector(selectLookupPrice);
 
   function setAmount(value) {
     if (
@@ -107,6 +109,12 @@ function DoExitStepFast({ handleClose, token }) {
         unit={token.symbol}
         maxValue={logAmount(token.balance, token.decimals)}
       />
+
+      {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+        <h3>
+          {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
+        </h3>
+      )}
 
       {token && token.symbol === 'oETH' && (
         <h3>

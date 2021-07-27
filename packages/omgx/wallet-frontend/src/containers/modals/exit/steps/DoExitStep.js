@@ -20,7 +20,8 @@ import Input from 'components/input/Input'
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectLoading } from 'selectors/loadingSelector'
-import { logAmount } from 'util/amountConvert'
+import { selectLookupPrice } from 'selectors/lookupSelector'
+import { amountToUsd, logAmount } from 'util/amountConvert'
 import * as styles from '../ExitModal.module.scss'
 
 function DoExitStep({ handleClose, token }) {
@@ -30,6 +31,7 @@ function DoExitStep({ handleClose, token }) {
   const [value, setValue] = useState('')
   const [disabledSubmit, setDisabledSubmit] = useState(true)
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
+  const lookupPrice = useSelector(selectLookupPrice);
 
   async function doExit() {
 
@@ -79,6 +81,11 @@ function DoExitStep({ handleClose, token }) {
         maxValue={logAmount(token.balance, token.decimals)}
       />
 
+      {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+        <h3>
+          {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
+        </h3>
+      )}
       {token && token.symbol === 'oETH' && (
         <h3>
           {value &&

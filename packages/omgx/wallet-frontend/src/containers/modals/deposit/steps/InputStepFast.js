@@ -21,8 +21,9 @@ import Input from 'components/input/Input'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectLoading } from 'selectors/loadingSelector'
+import { selectLookupPrice } from 'selectors/lookupSelector'
 import networkService from 'services/networkService'
-import { powAmount, logAmount } from 'util/amountConvert'
+import { powAmount, logAmount, amountToUsd } from 'util/amountConvert'
 import * as styles from '../DepositModal.module.scss'
 
 function InputStepFast({ handleClose, token }) {
@@ -36,7 +37,7 @@ function InputStepFast({ handleClose, token }) {
 
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
   const approvalLoading = useSelector(selectLoading(['APPROVE/CREATE']))
-  
+  const lookupPrice = useSelector(selectLookupPrice);
 
   function setAmount(value) {
     if (
@@ -151,7 +152,11 @@ function InputStepFast({ handleClose, token }) {
         unit={token.symbol}
         maxValue={logAmount(token.balance, token.decimals)}
       />
-
+      {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+        <h3>
+          {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
+        </h3>
+      )}
       {token && token.symbol === 'ETH' && (
         <h3>
           {value && `You will receive ${receivableAmount(value)} oETH on L2.`}
