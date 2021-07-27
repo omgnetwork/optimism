@@ -23,7 +23,7 @@ import useInterval from 'util/useInterval';
 import {
   checkWatcherStatus,
   fetchBalances,
-  fetchTransactions,
+  fetchNFTs,
   fetchExits,
   fetchDeposits,
   fetchEthStats,
@@ -45,7 +45,7 @@ import FarmWithdrawModal from 'containers/modals/farm/FarmWithdrawModal';
 //Wallet Functions
 import Status from 'containers/status/Status';
 import Account from 'containers/account/Account';
-import Transactions from 'containers/transactions/Transactions';
+import Transactions from 'containers/transactions/History';
 
 //NFT Example Page
 import NFT from 'containers/nft/Nft';
@@ -109,13 +109,13 @@ function Home () {
       // watcher only calls
       dispatch(checkWatcherStatus());
       dispatch(fetchExits());
-      dispatch(fetchTransactions());
     });
   }, POLL_INTERVAL * 2);
 
   //get all account balances
   useInterval(() => {
     dispatch(fetchBalances());
+    dispatch(fetchNFTs());
   }, POLL_INTERVAL);
 
   useEffect(() => {
