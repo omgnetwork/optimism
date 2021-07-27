@@ -10,18 +10,6 @@ Parameters:
     Type: Number
     Default: 1
 
-  ImageTag:
-    Type: String
-    Default: push2aws
-
-  DockerPrefix:
-    Type: String
-    Default: omgx
-
-  ECRRegistry:
-    Type: String
-    Default: 942431445534.dkr.ecr.us-east-1.amazonaws.com
-
   InfrastructureStackName:
     Description: Infrastructure stack to associate this stack with
     Type: String
@@ -76,6 +64,25 @@ Resources:
                   - "elasticloadbalancing:RegisterTargets"
                   - "elasticloadbalancing:DeregisterInstancesFromLoadBalancer"
                 Resource: "*"
+  DNSRecordV4:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Type: A
+      AliasTarget:
+        DNSName:
+          Fn::Sub:
+            - "dualstack.${DomainName}."
+            - DomainName:
+                Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancer:DNSName"
+        HostedZoneId:
+          Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancer:CanonicalHostedZoneID"
+      HostedZoneName:
+        Fn::Sub:
+          - "${DomainName}."
+          - DomainName:
+              Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
+      Name:
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
 
   NginxL1ProxyTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup

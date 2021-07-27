@@ -10,14 +10,6 @@ Parameters:
     Type: Number
     Default: 1
 
-  ImageTag:
-    Type: String
-    Default: push2aws
-
-  GraphImage:
-    Type: String
-    Default: l2geth
-
   DockerPrefix:
     Type: String
     Default: omgx

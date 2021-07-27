@@ -124,28 +124,10 @@ Resources:
         - Field: host-header
           HostHeaderConfig:
             Values:
-            - !Ref DNSRecordV4
+            - Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
       ListenerArn: !Ref GoEthereumListener
       Priority: 1
-  DNSRecordV4:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      Type: A
-      AliasTarget:
-        DNSName:
-          Fn::Sub:
-            - "dualstack.${DomainName}."
-            - DomainName:
-                Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancer:DNSName"
-        HostedZoneId:
-          Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancer:CanonicalHostedZoneID"
-      HostedZoneName:
-        Fn::Sub:
-          - "${DomainName}."
-          - DomainName:
-              Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
-      Name:
-        Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
+
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -198,7 +180,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "geth_l2", "service": "geth_l2"}]'
           Essential: true
-          Memory: "8192"
+          Memory: "4096"
         - Image: 942431445534.dkr.ecr.us-east-1.amazonaws.com/omgx/nginx-eth-proxy:rpc_proxy
           Ulimits:
             - Name: nofile

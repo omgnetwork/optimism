@@ -15,7 +15,7 @@ SUBCMD=
 FORCE=no
 AWS_ECR="942431445534.dkr.ecr.${REGION}.amazonaws.com"
 SKIPSERVICE=
-DOCKER_IMAGES_LIST=`ls ${PATH_TO_CFN}|egrep -v '^0|^datadog|^optimism'|sed 's/.yaml//g'`
+DOCKER_IMAGES_LIST=`ls ${PATH_TO_CFN}|egrep -v '^0|^datadog|^optimism|^graph'|sed 's/.yaml//g'`
 ENV_PREFIX=
 FORCE=no
 
@@ -222,6 +222,24 @@ function check_dev_environment {
                --parameters \
                    ParameterKey=InfrastructureStackName,ParameterValue=${ENV_PREFIX}-infrastructure-core | jq '.StackId'
             aws cloudformation wait stack-create-complete --stack-name=${ENV_PREFIX}-datadog
+            info "Adding L1-Proxy to the ECS Cluster"
+            aws cloudformation create-stack \
+                 --stack-name ${ENV_PREFIX}-l1-proxy \
+                 --capabilities CAPABILITY_IAM \
+                 --template-body=file://06-l1-proxy.yaml \
+                 --region ${REGION} \
+                 --parameters \
+                     ParameterKey=InfrastructureStackName,ParameterValue=${ENV_PREFIX}-infrastructure-core | jq '.StackId'
+              aws cloudformation wait stack-create-complete --stack-name=${ENV_PREFIX}-l1-proxy
+              info "Adding Graph to the ECS Cluster"
+              aws cloudformation create-stack \
+                   --stack-name ${ENV_PREFIX}-graph \
+                   --capabilities CAPABILITY_IAM \
+                   --template-body=file://05-graph.yaml \
+                   --region ${REGION} \
+                   --parameters \
+                       ParameterKey=InfrastructureStackName,ParameterValue=${ENV_PREFIX}-infrastructure-core | jq '.StackId'
+                aws cloudformation wait stack-create-complete --stack-name=${ENV_PREFIX}-graph
           cd ..
       else
           info "VPC exists ... checking ECS Cluster"
@@ -246,6 +264,24 @@ function check_dev_environment {
                  --parameters \
                      ParameterKey=InfrastructureStackName,ParameterValue=${ENV_PREFIX}-infrastructure-core | jq '.StackId'
               aws cloudformation wait stack-create-complete --stack-name=${ENV_PREFIX}-datadog
+              info "Adding L1-Proxy to the ECS Cluster"
+              aws cloudformation create-stack \
+                   --stack-name ${ENV_PREFIX}-l1-proxy \
+                   --capabilities CAPABILITY_IAM \
+                   --template-body=file://06-l1-proxy.yaml \
+                   --region ${REGION} \
+                   --parameters \
+                       ParameterKey=InfrastructureStackName,ParameterValue=${ENV_PREFIX}-infrastructure-core | jq '.StackId'
+                aws cloudformation wait stack-create-complete --stack-name=${ENV_PREFIX}-l1-proxy
+                info "Adding Graph to the ECS Cluster"
+                aws cloudformation create-stack \
+                     --stack-name ${ENV_PREFIX}-graph \
+                     --capabilities CAPABILITY_IAM \
+                     --template-body=file://05-graph.yaml \
+                     --region ${REGION} \
+                     --parameters \
+                         ParameterKey=InfrastructureStackName,ParameterValue=${ENV_PREFIX}-infrastructure-core | jq '.StackId'
+                  aws cloudformation wait stack-create-complete --stack-name=${ENV_PREFIX}-graph
             cd ..
           else
             info "ECS Cluster exists"
