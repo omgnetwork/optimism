@@ -6,9 +6,11 @@ import {
   constants,
   providers,
   BigNumber,
+  utils,
 } from 'ethers'
 
 import * as request from "request-promise-native";
+import { expectEvent } from '@openzeppelin/test-helpers'
 
 require('dotenv').config()
 
@@ -70,16 +72,16 @@ if(!process.env.OMGX_URL) {
   console.log(`process.env.OMGX_URL set to:`,process.env.OMGX_URL)
 }
 
-export let addressManagerAddress = process.env.ETH1_ADDRESS_RESOLVER_ADDRESS
+export let addressManagerAddress = process.env.ADDRESS_MANAGER_ADDRESS
 export const getAddressManager = async (provider: any) => {
    //console.log(addressManagerAddress)
    if (addressManagerAddress){
-     console.log(`ETH1_ADDRESS_RESOLVER_ADDRESS var was set`)
+     console.log(`ADDRESS_MANAGER_ADDRESS var was set`)
      return getContractFactory('Lib_AddressManager')
     .connect(provider)
     .attach(addressManagerAddress) as any
    } else {
-     console.log(`ETH1_ADDRESS_RESOLVER_ADDRESS var was left unset. Using {$DEPLOYER} response`)
+     console.log(`ADDRESS_MANAGER_ADDRESS var was left unset. Using {$DEPLOYER} response`)
      addressManagerAddress = (await getDeployerAddresses()).AddressManager
      return getContractFactory('Lib_AddressManager')
      .connect(provider)
@@ -101,6 +103,27 @@ export const getOMGXDeployerAddresses = async () => {
   }
   const result = await request.get(options)
   return JSON.parse(result)
+}
+
+export const expectLogs = async (receipt, emitterAbi, emitterAddress, eventName, eventArgs = {}) => {
+  let eventABI = emitterAbi.filter(x => x.type === 'event' && x.name === eventName);
+  if (eventABI.length === 0) {
+    throw new Error(`No ABI entry for event '${eventName}'`);
+  } else if (eventABI.length > 1) {
+    throw new Error(`Multiple ABI entries for event '${eventName}', only uniquely named events are supported`);
+  }
+
+  eventABI = eventABI[0];
+  const eventSignature = `${eventName}(${eventABI.inputs.map(input => input.type).join(',')})`;
+  const eventTopic = utils.keccak256(utils.toUtf8Bytes(eventSignature))
+  const logs = receipt.logs
+  const abiCoder = new utils.AbiCoder();
+  const filterdLogs = logs.filter(log => log.topics.length > 0 && log.topics[0] === eventTopic && (!emitterAddress || log.address === emitterAddress))
+  .map(log => abiCoder.decode(eventABI.inputs, log.data, log.topics.slice(1)))
+  .map(decoded => ({ event: eventName, args: decoded }));
+
+  return expectEvent.inLogs(filterdLogs, eventName, eventArgs);
+
 }
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
