@@ -560,7 +560,7 @@ class NetworkService {
       const NFTcontracts = Object.values(await getNFTContracts())
       
       //Add factories based on cached contract addresses 
-      //this is information is also used for the balance lookup
+      //this information is also used for the balance lookup
       for(var i = 0; i < NFTcontracts.length; i++) {
         const address = NFTcontracts[i]
         console.log("Adding NFT contract:",address)
@@ -1110,22 +1110,6 @@ class NetworkService {
     }
   }
 
-  // async getAllTransactions() {
-  //   let transactionHistory = {}
-  //   const latest = await this.L2Provider.eth.getBlockNumber()
-  //   const blockNumbers = Array.from(Array(latest).keys())
-
-  //   for (let blockNumber of blockNumbers) {
-  //     const blockData = await this.L2Provider.eth.getBlock(blockNumber)
-  //     const transactionsArray = blockData.transactions
-  //     if (transactionsArray.length === 0) {
-  //       transactionHistory.push({
-  //         /*ToDo*/
-  //       })
-  //     }
-  //   }
-  // }
-
   async checkAllowance(
     currencyAddress,
     targetContract
@@ -1174,8 +1158,7 @@ class NetworkService {
       if (depositAmount_BN.gt(allowance_BN)) {
         const approveStatus = await L2ERC20Contract.approve(
           this.L2LPAddress,
-          depositAmount_string,
-          //{ gasPrice: 15000000 } //this can be hardcoded here because, by definition, I'm always on L2
+          depositAmount_string
         )
         await approveStatus.wait()
       }
@@ -1262,8 +1245,7 @@ class NetworkService {
 
       const approveStatus = await L1_TEST_Contract.approve(
         this.L1StandardBridgeAddress, //this is the spender
-        value, //and this is how much the spender will be able to spend 
-        //this.L1orL2 === 'L1' ? {} : { gasPrice: 15000000 }
+        value
       )
       await approveStatus.wait()
 
@@ -1541,12 +1523,7 @@ class NetworkService {
       ).addLiquidity(
         depositAmount,
         currency,
-        // deposit ETH or not
-        currency === this.L1_ETH_Address
-          ? { value: depositAmount }
-          : L1orL2Pool === 'L1LP'
-          ? {}
-          : { gasPrice: 15000000 }
+        currency === this.L1_ETH_Address ? { value: depositAmount } : {}
       )
       await addLiquidityTX.wait()
       return true
@@ -1565,8 +1542,7 @@ class NetworkService {
       const withdrawRewardTX = await this.L1LPContract.withdrawReward(
         userReward_BN,
         currencyL1Address,
-        this.account,
-        //{ gasPrice: 15000000 }
+        this.account
       )
       await withdrawRewardTX.wait()
       return true
@@ -1584,8 +1560,7 @@ class NetworkService {
       const withdrawRewardTX = await this.L2LPContract.withdrawReward(
         userReward_BN,
         currencyL2Address,
-        this.account,
-        //{ gasPrice: 15000000 }
+        this.account
       )
       await withdrawRewardTX.wait()
       return true
@@ -1608,8 +1583,7 @@ class NetworkService {
       ).withdrawLiquidity(
         withdrawAmount,
         currency,
-        this.account,
-        L1orL2Pool === 'L1LP' ? {} : { gasPrice: 15000000 }
+        this.account
       )
       await withdrawLiquidityTX.wait()
       return true
@@ -1731,8 +1705,7 @@ class NetworkService {
     if (depositAmount_BN.gt(allowance_BN)) {
       const approveStatus = await L2ERC20Contract.approve(
         this.L2LPAddress,
-        depositAmount_string,
-        //{ gasPrice: 15000000 } //this can be hardcoded here because, by definition, I'm always on L2
+        depositAmount_string
       )
       await approveStatus.wait()
       if (!approveStatus) return false
@@ -1740,8 +1713,7 @@ class NetworkService {
 
     const depositTX = await this.L2LPContract.clientDepositL2(
       depositAmount_string,
-      currencyAddress,
-      //{ gasPrice: 15000000 }
+      currencyAddress
     )
     await depositTX.wait()
 
