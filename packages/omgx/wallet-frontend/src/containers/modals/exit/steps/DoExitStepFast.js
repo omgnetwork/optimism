@@ -116,7 +116,7 @@ function DoExitStepFast({ handleClose, token }) {
             `You will receive 
             ${receivableAmount(value)} 
             ETH 
-            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''})
+            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
             on L1.`
           }
         </h3>
@@ -128,7 +128,7 @@ function DoExitStepFast({ handleClose, token }) {
             `You will receive 
             ${receivableAmount(value)} 
             ${token.symbol} 
-            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''})
+            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
             on L1.`
           }
         </h3>

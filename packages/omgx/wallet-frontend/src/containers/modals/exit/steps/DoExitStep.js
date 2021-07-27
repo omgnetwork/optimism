@@ -85,7 +85,7 @@ function DoExitStep({ handleClose, token }) {
         <h3>
           {value &&
             `You will receive ${Number(value).toFixed(2)} ETH 
-            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''})
+            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
             on L1. 
             Your funds will be available on L1 in 7 days.`}
         </h3>
@@ -96,7 +96,7 @@ function DoExitStep({ handleClose, token }) {
           {value &&
             `You will receive ${Number(value).toFixed(2)} 
             ${token.symbol}
-            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''})
+            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
             on L1. 
             Your funds will be available on L1 in 7 days.`}
         </h3>
