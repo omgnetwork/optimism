@@ -717,13 +717,13 @@ class NetworkService {
 
         if (to === this.L2_ETH_Address.toLowerCase()) {
           //console.log("L2 ETH Message")
-          return Object.assign({}, item, { typeTX: 'L2 ETH Token' })
+          return Object.assign({}, item, { typeTX: 'L2 ETH Ops (such as a L2->L2 Transfer)' })
         }
 
-        if (to === this.L2_ETH_Address.toLowerCase()) {
-          //console.log("L2 ETH Message")
-          return Object.assign({}, item, { typeTX: 'L2 ETH Token' })
-        } 
+        // if (to === this.L2_ETH_Address.toLowerCase()) {
+        //   //console.log("L2 ETH Message")
+        //   return Object.assign({}, item, { typeTX: 'L2 ETH Token' })
+        // } 
 
         if (item.crossDomainMessage) {
           if(to === this.L2LPAddress.toLowerCase()) {
