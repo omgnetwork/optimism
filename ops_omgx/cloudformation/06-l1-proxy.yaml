@@ -6,6 +6,14 @@ Parameters:
     Type: String
     Default: dev
 
+  ImageTag:
+    Type: String
+    Default: push2aws
+
+  DockerPrefix:
+    Type: String
+    Default: omgx
+
   ServiceCount:
     Type: Number
     Default: 1
@@ -160,7 +168,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "l1_proxy", "service": "l1_proxy"}]'
           Essential: true
-          Memory: "256"
+          Memory: "64"
           MountPoints:
             - ContainerPath: "/usr/local/openresty/nginx/conf/"
               SourceVolume: l1-proxy

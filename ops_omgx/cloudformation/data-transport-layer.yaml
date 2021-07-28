@@ -172,7 +172,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "nginx", "service": "nginx"}]'
           Essential: true
-          Memory: "256"
+          Memory: "128"
           Links:
             - data_transport_layer
       NetworkMode: bridge

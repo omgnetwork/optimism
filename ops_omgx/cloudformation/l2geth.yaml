@@ -100,6 +100,17 @@ Resources:
       Matcher:
         HttpCode: 200
 
+  GoEthereumListener1:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn:
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancer:ARN"
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref GoEthereumLBTargetGroup
+
   GoEthereumListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -180,7 +191,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "geth_l2", "service": "geth_l2"}]'
           Essential: true
-          Memory: "4096"
+          Memory: "2048"
         - Image: 942431445534.dkr.ecr.us-east-1.amazonaws.com/omgx/nginx-eth-proxy:rpc_proxy
           Ulimits:
             - Name: nofile
@@ -203,7 +214,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "l2_proxy", "service": "l2_proxy"}]'
           Essential: true
-          Memory: "256"
+          Memory: "64"
           Links:
             - geth_l2
       NetworkMode: bridge

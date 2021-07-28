@@ -146,6 +146,30 @@ Resources:
         ToPort: 80
         CidrIpv6: ::/0
       - IpProtocol: tcp
+        FromPort: 6001
+        ToPort: 6001
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 6001
+        ToPort: 6001
+        CidrIpv6: ::/0
+      - IpProtocol: tcp
+        FromPort: 8020
+        ToPort: 8020
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 8020
+        ToPort: 8020
+        CidrIpv6: ::/0
+      - IpProtocol: tcp
+        FromPort: 5001
+        ToPort: 5001
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 5001
+        ToPort: 5001
+        CidrIpv6: ::/0
+      - IpProtocol: tcp
         FromPort: 8081
         ToPort: 8081
         CidrIp: 0.0.0.0/0
@@ -184,125 +208,18 @@ Resources:
       - IpProtocol: tcp
         FromPort: 8040
         ToPort: 8040
-        CidrIpv6: ::/0
-      - IpProtocol: tcp
-        FromPort: 6001
-        ToPort: 6001
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 6001
-        ToPort: 6001
-        CidrIpv6: ::/0
-      - IpProtocol: tcp
-        FromPort: 8020
-        ToPort: 8020
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 8020
-        ToPort: 8020
-        CidrIpv6: ::/0
-      - IpProtocol: tcp
-        FromPort: 5001
-        ToPort: 5001
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 5001
-        ToPort: 5001
         CidrIpv6: ::/0
       Tags:
         - Key: Name
           Value: !Sub "${AWS::StackName}-LB"
 
-  LoadBalancerSecurityGroupGraph:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Sub "SG for ${AWS::StackName} External LB Graph"
-      VpcId:
-        Fn::ImportValue: !Sub "${InfrastructureStackName}:VpcId"
-      SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIpv6: ::/0
-      - IpProtocol: tcp
-        FromPort: 80
-        ToPort: 80
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 80
-        ToPort: 80
-        CidrIpv6: ::/0
-      - IpProtocol: tcp
-        FromPort: 8081
-        ToPort: 8081
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 8081
-        ToPort: 8081
-        CidrIpv6: ::/0
-      - IpProtocol: tcp
-        FromPort: 8000
-        ToPort: 8000
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 8000
-        ToPort: 8000
-        CidrIpv6: ::/0
-      - IpProtocol: tcp
-        FromPort: 8001
-        ToPort: 8001
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 8001
-        ToPort: 8001
-        CidrIpv6: ::/0
-      - IpProtocol: tcp
-        FromPort: 8030
-        ToPort: 8030
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 8030
-        ToPort: 8030
-        CidrIpv6: ::/0
-      - IpProtocol: tcp
-        FromPort: 8040
-        ToPort: 8040
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 8040
-        ToPort: 8040
-        CidrIpv6: ::/0
-      - IpProtocol: tcp
-        FromPort: 8020
-        ToPort: 8020
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 8020
-        ToPort: 8020
-        CidrIpv6: ::/0
-      - IpProtocol: tcp
-        FromPort: 5001
-        ToPort: 5001
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: 5001
-        ToPort: 5001
-        CidrIpv6: ::/0
-      Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-LB-Graph"
-
   LoadBalancerGraph:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      IpAddressType: dualstack
+      IpAddressType: ipv4
       Scheme: internet-facing
       SecurityGroups:
-      - !Ref LoadBalancerSecurityGroupGraph
+      - !Ref LoadBalancerSecurityGroup
       Subnets:
       - Fn::ImportValue: !Sub ${InfrastructureStackName}:PublicSubnet1
       - Fn::ImportValue: !Sub ${InfrastructureStackName}:PublicSubnet2
