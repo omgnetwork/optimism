@@ -16,13 +16,16 @@ interface TransactionParams {
 const MESSAGE_GAS = 8_000_000
 const DEFAULT_TEST_GAS_L1 = 330_000
 const DEFAULT_TEST_GAS_L2 = 1_300_000
+const l1GasLimit = 9999999
+const l2GasLimit = 9999999
+const hardhatMnemonic = "test test test test test test test test test test test junk"
 
 export const executeL1ToL2Transactions = async (
   env: OptimismEnv,
   txs: TransactionParams[]
 ) => {
   for (const tx of txs) {
-    const signer = ethers.Wallet.createRandom().connect(env.l1Wallet.provider)
+    const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic).connect(env.l1Wallet.provider)
     const receipt = await env.l1Messenger
       .connect(signer)
       .sendMessage(
@@ -33,7 +36,7 @@ export const executeL1ToL2Transactions = async (
         ),
         MESSAGE_GAS,
         {
-          gasPrice: 0,
+          // gasPrice: 0,
         }
       )
 
@@ -46,7 +49,7 @@ export const executeL2ToL1Transactions = async (
   txs: TransactionParams[]
 ) => {
   for (const tx of txs) {
-    const signer = ethers.Wallet.createRandom().connect(env.l2Wallet.provider)
+    const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic).connect(env.l2Wallet.provider)
     const receipt = await env.l2Messenger
       .connect(signer)
       .sendMessage(
@@ -57,7 +60,7 @@ export const executeL2ToL1Transactions = async (
         ),
         MESSAGE_GAS,
         {
-          gasPrice: 0,
+          // gasPrice: 0,
         }
       )
 
@@ -71,18 +74,46 @@ export const executeL2Transactions = async (
   txs: TransactionParams[]
 ) => {
   for (const tx of txs) {
-    const signer = ethers.Wallet.createRandom().connect(env.l2Wallet.provider)
+    const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic).connect(env.l2Wallet.provider)
     const result = await tx.contract
       .connect(signer)
       .functions[tx.functionName](...tx.functionParams, {
-        gasPrice: 0,
+        // gasPrice: 0,
       })
     await result.wait()
   }
 }
 
-export const executeDepositErc20 = async (env: OptimismEnv, tsx) => {
-  console.log('fdsf')
+export const executeDepositErc20 = async (
+  env: OptimismEnv,
+  l1ERC20: Contract,
+  l2ERC20: Contract,
+  txs: number[]
+) => {
+  for (const depositAmount of txs) {
+    const tx = await l1ERC20.approve(env.l1Bridge.address, depositAmount)
+    await tx.wait()
+
+    const l1Tx1 = await env.l1Bridge.depositERC20To(
+      l1ERC20.address,
+      l2ERC20.address,
+      env.l2Wallet.address,
+      depositAmount,
+      l2GasLimit,
+      ethers.utils.formatBytes32String('0')
+    )
+    await l1Tx1.wait()
+
+    // Wait for the message to be relayed to L2.
+    const [msgHash1] = await env.watcher.getMessageHashesFromL1Tx(l1Tx1.hash)
+    console.log(msgHash1)
+    await env.watcher.getL2TransactionReceipt(msgHash1)
+
+    const postL1Balance: BigNumber = await l1ERC20.balanceOf(
+      env.l1Wallet.address
+    )
+    console.log(postL1Balance.toString())
+  }
 }
 
 export const executeWithdrawErc20 = async (env: OptimismEnv, tsx) => {
@@ -188,6 +219,8 @@ export const executeRepeatedDepositErc20 = async (
 ) => {
   await executeDepositErc20(
     env,
+    l1ERC20,
+    l2ERC20,
     [...Array(count).keys()].map(() => withdrawAmount)
   )
 }
@@ -241,8 +274,8 @@ export const executeL1ToL2TransactionsParallel = async (
   txs: TransactionParams[]
 ) => {
   await Promise.all(
-    txs.map(async (tx) => {
-      const signer = ethers.Wallet.createRandom().connect(env.l1Wallet.provider)
+    txs.map(async (tx, index) => {
+      const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic, "m/44'/60'/0'/0/" + index.toString()).connect(env.l1Wallet.provider)
       const receipt = await env.l1Messenger
         .connect(signer)
         .sendMessage(
@@ -253,7 +286,7 @@ export const executeL1ToL2TransactionsParallel = async (
           ),
           MESSAGE_GAS,
           {
-            gasPrice: 0,
+            // gasPrice: 0,
           }
         )
 
@@ -267,8 +300,8 @@ export const executeL2ToL1TransactionsParallel = async (
   txs: TransactionParams[]
 ) => {
   await Promise.all(
-    txs.map(async (tx) => {
-      const signer = ethers.Wallet.createRandom().connect(env.l2Wallet.provider)
+    txs.map(async (tx, index) => {
+      const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic, "m/44'/60'/0'/0/" + index.toString()).connect(env.l2Wallet.provider)
       const receipt = await env.l2Messenger
         .connect(signer)
         .sendMessage(
@@ -279,7 +312,7 @@ export const executeL2ToL1TransactionsParallel = async (
           ),
           MESSAGE_GAS,
           {
-            gasPrice: 0,
+            // gasPrice: 0,
           }
         )
 
@@ -294,12 +327,12 @@ export const executeL2TransactionsParallel = async (
   txs: TransactionParams[]
 ) => {
   await Promise.all(
-    txs.map(async (tx) => {
-      const signer = ethers.Wallet.createRandom().connect(env.l2Wallet.provider)
+    txs.map(async (tx, index) => {
+      const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic, "m/44'/60'/0'/0/" + index.toString()).connect(env.l2Wallet.provider)
       const result = await tx.contract
         .connect(signer)
         .functions[tx.functionName](...tx.functionParams, {
-          gasPrice: 0,
+          // gasPrice: 0,
         })
       await result.wait()
     })
