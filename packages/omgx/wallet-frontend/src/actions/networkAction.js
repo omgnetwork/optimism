@@ -107,9 +107,9 @@ export function depositL2LP(token, value) {
   )
 }
 
-export function depositETHL2(value) {
+export function depositETHL2(value,gasLimit) {
   return createAction('DEPOSIT/CREATE', () =>
-    networkService.depositETHL2(value)
+    networkService.depositETHL2(value,gasLimit)
   )
 }
 
