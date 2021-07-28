@@ -49,7 +49,7 @@ function Account () {
   const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]));
   const tokenList = useSelector(selectTokens);
 
-  const network = useSelector(selectNetwork);
+  const network = useSelector(selectNetwork());
 
   const wAddress = networkService.account ? truncate(networkService.account, 6, 4, '...') : '';
   const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
