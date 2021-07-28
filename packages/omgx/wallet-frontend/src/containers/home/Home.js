@@ -24,7 +24,6 @@ import {
   checkWatcherStatus,
   fetchBalances,
   fetchNFTs,
-  fetchTransactions,
   fetchExits,
   fetchDeposits,
   fetchEthStats,
@@ -46,7 +45,7 @@ import FarmWithdrawModal from 'containers/modals/farm/FarmWithdrawModal';
 //Wallet Functions
 import Status from 'containers/status/Status';
 import Account from 'containers/account/Account';
-import Transactions from 'containers/transactions/Transactions';
+import Transactions from 'containers/transactions/History';
 
 //NFT Example Page
 import NFT from 'containers/nft/Nft';
@@ -110,7 +109,6 @@ function Home () {
       // watcher only calls
       dispatch(checkWatcherStatus());
       dispatch(fetchExits());
-      dispatch(fetchTransactions());
     });
   }, POLL_INTERVAL * 2);
 
@@ -125,7 +123,7 @@ function Home () {
   }, [])
   
   const handleSetPage = async (page) => {
-    setPageDisplay(page);
+    setPageDisplay(page)
   }
 
   return (
@@ -180,7 +178,7 @@ function Home () {
               className={pageDisplay === "Farm" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("Farm")}}
             >  
-              Farm
+              Earn
             </h2>
             <h2
               className={pageDisplay === "NFT" ? styles.subtitletextActive : styles.subtitletext}
