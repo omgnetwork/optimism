@@ -1069,7 +1069,6 @@ class NetworkService {
         { 
           value: parseEther(value),
           gasPrice: ethers.utils.parseUnits(`${gasPrice}`, 'wei'),
-          gasLimit: this.L2GasLimit
         }
       )
       await depositTxStatus.wait()
