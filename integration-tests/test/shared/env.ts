@@ -21,6 +21,7 @@ import {
 } from './utils'
 import {
   initWatcher,
+  initWatcherFast,
   CrossDomainMessagePair,
   Direction,
   waitForXDomainTransaction,
@@ -43,6 +44,7 @@ export class OptimismEnv {
 
   // The L1 <> L2 State watcher
   watcher: Watcher
+  watcherFast: Watcher
 
   // The wallets
   l1Wallet: Wallet
@@ -57,6 +59,7 @@ export class OptimismEnv {
     this.l2Messenger = args.l2Messenger
     this.gasPriceOracle = args.gasPriceOracle
     this.watcher = args.watcher
+    this.watcherFast = args.watcherFast
     this.l1Wallet = args.l1Wallet
     this.l2Wallet = args.l2Wallet
     this.ctc = args.ctc
@@ -66,6 +69,7 @@ export class OptimismEnv {
   static async new(): Promise<OptimismEnv> {
     const addressManager = getAddressManager(l1Wallet)
     const watcher = await initWatcher(l1Provider, l2Provider, addressManager)
+    const watcherFast = await initWatcherFast(l1Provider, l2Provider, addressManager)
     const l1Bridge = await getL1Bridge(l1Wallet, addressManager)
 
     // fund the user if needed
@@ -111,6 +115,7 @@ export class OptimismEnv {
       l2Bridge,
       l2Messenger,
       watcher,
+      watcherFast,
       l1Wallet,
       l2Wallet,
     })
