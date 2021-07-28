@@ -1164,11 +1164,38 @@ class NetworkService {
         await approveStatus.wait()
       }
 
-      allowance_BN = await L2ERC20Contract.allowance(
-        this.account,
-        this.L2LPAddress
-      )
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
+  async approveERC20_L1LP(
+    depositAmount_string,
+    currencyAddress
+  ) {
+    
+    try {
+
+      console.log("approveERC20_L1LP")
       
+      const ERC20Contract = new ethers.Contract(
+        currencyAddress,
+        L1ERC20Json.abi,
+        this.provider.getSigner()
+      )
+
+      const approveStatus = await ERC20Contract.approve(
+        this.L1LPAddress,
+        depositAmount_string
+      )
+      await approveStatus.wait()
+
+      let allowance_BN = await ERC20Contract.allowance(
+        this.account,
+        this.L1LPAddress
+      )
+
       return true
     } catch (error) {
       return false
@@ -1370,16 +1397,29 @@ class NetworkService {
     const userInfo = {}
 
     for (let tokenAddress of tokenAddressList) {
+      
       let tokenBalance
-      let isETH = false
+      let tokenSymbol
+      let tokenName
+      
+      console.log(tokenAddress)
+      console.log(this.L1_ETH_Address)
 
       if (tokenAddress === this.L1_ETH_Address) {
         tokenBalance = await this.L1Provider.getBalance(this.L1LPAddress)
-        isETH = true
+        console.log('Match')
+        tokenSymbol = 'ETH'
+        tokenName = 'Ethereum'
       } else if (tokenAddress === this.L1_TEST_Address) {
         tokenBalance = await this.L1_TEST_Contract.connect(
           this.L1Provider
         ).balanceOf(this.L1LPAddress)
+        tokenSymbol = await this.L2_TEST_Contract.connect(
+          this.L2Provider
+        ).symbol()
+        tokenName = await this.L2_TEST_Contract.connect(
+          this.L2Provider
+        ).name()
       }
       // Add new LPs here
       // else if (tokenAddress === __________) {
@@ -1395,6 +1435,8 @@ class NetworkService {
       ])
 
       poolInfo[tokenAddress] = {
+        symbol: tokenSymbol,
+        name: tokenName,
         l1TokenAddress: poolTokenInfo.l1TokenAddress,
         l2TokenAddress: poolTokenInfo.l2TokenAddress,
         accUserReward: poolTokenInfo.accUserReward.toString(),
@@ -1418,8 +1460,7 @@ class NetworkService {
                 ),
                 100
               ), // ( accUserReward - userDepositAmount ) / timeDuration
-        tokenBalance: tokenBalance.toString(),
-        isETH
+        tokenBalance: tokenBalance.toString()
       }
       userInfo[tokenAddress] = {
         l1TokenAddress: tokenAddress,
@@ -1450,15 +1491,23 @@ class NetworkService {
     for (let tokenAddress of tokenAddressList) {
       
       let tokenBalance
-      let isETH = false
+      let tokenSymbol
+      let tokenName
 
       if (tokenAddress === this.L2_ETH_Address) {
         tokenBalance = await this.L2Provider.getBalance(this.L2LPAddress)
-        isETH = true
+        tokenSymbol = 'oETH'
+        tokenName = 'Ethereum'
       } else if (tokenAddress === this.L2_TEST_Address) {
         tokenBalance = await this.L2_TEST_Contract.connect(
           this.L2Provider
         ).balanceOf(this.L2LPAddress)
+        tokenSymbol = await this.L2_TEST_Contract.connect(
+          this.L2Provider
+        ).symbol()
+         tokenName = await this.L2_TEST_Contract.connect(
+          this.L2Provider
+        ).name()
       }
       // Add new LPs here
       // else if (tokenAddress === __________) {
@@ -1474,6 +1523,8 @@ class NetworkService {
       ])
 
       poolInfo[tokenAddress] = {
+        symbol: tokenSymbol,
+        name: tokenName,
         l1TokenAddress: poolTokenInfo.l1TokenAddress,
         l2TokenAddress: poolTokenInfo.l2TokenAddress,
         accUserReward: poolTokenInfo.accUserReward.toString(),
@@ -1497,8 +1548,7 @@ class NetworkService {
                 ),
                 100
               ), // ( accUserReward - userDepositAmount ) / timeDuration
-        tokenBalance: tokenBalance.toString(),
-        isETH
+        tokenBalance: tokenBalance.toString()
       }
       userInfo[tokenAddress] = {
         l2TokenAddress: tokenAddress,
