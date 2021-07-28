@@ -1078,8 +1078,6 @@ class NetworkService {
       )
       console.log(' completed Deposit! L2 tx hash:', l2Receipt.transactionHash)
 
-      this.getBalances()
-
       return l2Receipt
     } catch {
       return false
@@ -1191,10 +1189,10 @@ class NetworkService {
       )
       await approveStatus.wait()
 
-      let allowance_BN = await ERC20Contract.allowance(
-        this.account,
-        this.L1LPAddress
-      )
+      // let allowance_BN = await ERC20Contract.allowance(
+      //   this.account,
+      //   this.L1LPAddress
+      // )
 
       return true
     } catch (error) {
