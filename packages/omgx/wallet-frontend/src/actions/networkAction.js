@@ -202,12 +202,12 @@ export function getTransferTypedData(data) {
   }
 }
 
-// export function fetchGas () {
-//   return createAction(
-//     'GAS/GET',
-//     () => networkService.getGasPrice()
-//   );
-// }
+export function fetchGas (params) {
+  return createAction(
+    'GAS/GET',
+    () => networkService.getGasPrice(params)
+  );
+}
 
 // export function fetchFees () {
 //   return async function (dispatch) {

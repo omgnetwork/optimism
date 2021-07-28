@@ -65,6 +65,7 @@ import omgxWatcherAxiosInstance from 'api/omgxWatcherAxios'
 import addressAxiosInstance from 'api/addressAxios'
 import addressOMGXAxiosInstance from 'api/addressOMGXAxios'
 import coinGeckoAxiosInstance from 'api/coinGeckoAxios'
+import ethGasStationAxiosInstance from 'api/ethGasStationAxios'
 
 //All the current addresses for fallback purposes only
 //These may or may not be present
@@ -1886,6 +1887,42 @@ class NetworkService {
       return error
     }
   }
+
+  async getGasPrice({
+    network, networkLayer
+  }) {
+    if(network === 'mainnet' && networkLayer === 'L1') {
+      try {
+        const { data: { safeLow, average, fast } } = await ethGasStationAxiosInstance.get('json/ethgasAPI.json');
+        return {
+          slow: safeLow * 100000000,
+          normal: average * 100000000,
+          fast: fast * 100000000
+        };
+      } catch (error) {
+        //
+      }
+      // if not web3 oracle
+      try {
+        const _medianEstimate = await this.web3.eth.getGasPrice();
+        const medianEstimate = Number(_medianEstimate);
+        return {
+          slow: Math.max(medianEstimate / 2, 1000000000),
+          normal: medianEstimate,
+          fast: medianEstimate * 5
+        };
+      } catch (error) {
+        //
+      }
+    } 
+    
+    return {
+      slow: 1000000000,
+      normal: 2000000000,
+      fast: 10000000000
+    }
+  }
+
 }
 
 const networkService = new NetworkService()
