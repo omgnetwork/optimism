@@ -69,7 +69,11 @@ export class OptimismEnv {
   static async new(): Promise<OptimismEnv> {
     const addressManager = getAddressManager(l1Wallet)
     const watcher = await initWatcher(l1Provider, l2Provider, addressManager)
-    const watcherFast = await initWatcherFast(l1Provider, l2Provider, addressManager)
+    const watcherFast = await initWatcherFast(
+      l1Provider,
+      l2Provider,
+      addressManager
+    )
     const l1Bridge = await getL1Bridge(l1Wallet, addressManager)
 
     // fund the user if needed

@@ -16,16 +16,17 @@ interface TransactionParams {
 const MESSAGE_GAS = 8_000_000
 const DEFAULT_TEST_GAS_L1 = 330_000
 const DEFAULT_TEST_GAS_L2 = 1_300_000
-const l1GasLimit = 9999999
-const l2GasLimit = 9999999
-const hardhatMnemonic = "test test test test test test test test test test test junk"
+const hardhatMnemonic =
+  'test test test test test test test test test test test junk'
 
 export const executeL1ToL2Transactions = async (
   env: OptimismEnv,
   txs: TransactionParams[]
 ) => {
   for (const tx of txs) {
-    const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic).connect(env.l1Wallet.provider)
+    const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic).connect(
+      env.l1Wallet.provider
+    )
     const receipt = await env.l1Messenger
       .connect(signer)
       .sendMessage(
@@ -49,7 +50,9 @@ export const executeL2ToL1Transactions = async (
   txs: TransactionParams[]
 ) => {
   for (const tx of txs) {
-    const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic).connect(env.l2Wallet.provider)
+    const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic).connect(
+      env.l2Wallet.provider
+    )
     const receipt = await env.l2Messenger
       .connect(signer)
       .sendMessage(
@@ -74,7 +77,9 @@ export const executeL2Transactions = async (
   txs: TransactionParams[]
 ) => {
   for (const tx of txs) {
-    const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic).connect(env.l2Wallet.provider)
+    const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic).connect(
+      env.l2Wallet.provider
+    )
     const result = await tx.contract
       .connect(signer)
       .functions[tx.functionName](...tx.functionParams, {
@@ -92,31 +97,33 @@ export const executeDepositErc20 = async (
 ) => {
   for (const depositAmount of txs) {
     // Move tokens from L1 to L2
-    console.log("Approve")
+    // console.log('Approve')
     const approveL1TX = await l1ERC20.approve(
       L1LiquidityPool.address,
-      depositAmount,
+      depositAmount
     )
-    console.log("Await approve")
+    // console.log('Await approve')
     await approveL1TX.wait()
 
-    console.log("Deposit L1")
+    // console.log('Deposit L1')
     const depositTX = await L1LiquidityPool.clientDepositL1(
       depositAmount,
-      l1ERC20.address, {gasLimit: DEFAULT_TEST_GAS_L1}
+      l1ERC20.address,
+      { gasLimit: DEFAULT_TEST_GAS_L1 }
     )
 
-    console.log("wait Deposit L1")
+    // console.log('wait Deposit L1')
     await depositTX.wait()
 
-    console.log("wait Deposit L1")
-    const [l1ToL2msgHash] = await env.watcher.getMessageHashesFromL1Tx(depositTX.hash)
+    // console.log('wait Deposit L1')
+    const [l1ToL2msgHash] = await env.watcher.getMessageHashesFromL1Tx(
+      depositTX.hash
+    )
 
-    console.log(' got L1->L2 message hash', l1ToL2msgHash)
+    // console.log(' got L1->L2 message hash', l1ToL2msgHash)
     const l2Receipt = await env.watcher.getL2TransactionReceipt(l1ToL2msgHash)
 
-    console.log(' completed Deposit! L2 tx hash:', l2Receipt.transactionHash)
-
+    // console.log(' completed Deposit! L2 tx hash:', l2Receipt.transactionHash)
   }
 }
 
@@ -125,31 +132,34 @@ export const executeWithdrawErc20 = async (
   l2ERC20: Contract,
   L2LiquidityPool: Contract,
   txs: number[]
-  ) => {
+) => {
   for (const depositAmount of txs) {
     // Move tokens from L2 to L1
     const approveL2TX = await l2ERC20.approve(
       L2LiquidityPool.address,
-      depositAmount,
+      depositAmount
     )
-    console.log("Await approve")
+    // console.log('Await approve')
     await approveL2TX.wait()
 
-    console.log("Deposit L2")
+    // console.log('Deposit L2')
     const withdrawTX = await L2LiquidityPool.clientDepositL2(
       depositAmount,
       l2ERC20.address
     )
-    console.log("wait Deposit L2")
+    // console.log('wait Deposit L2')
     await withdrawTX.wait()
 
-    console.log("Wait tx L2 -> L1")
-    const [l2ToL1msgHash] = await env.watcherFast.getMessageHashesFromL2Tx(withdrawTX.hash)
-    console.log(' got L2->L1 message hash', l2ToL1msgHash)
+    // console.log('Wait tx L2 -> L1')
+    const [l2ToL1msgHash] = await env.watcherFast.getMessageHashesFromL2Tx(
+      withdrawTX.hash
+    )
+    // console.log(' got L2->L1 message hash', l2ToL1msgHash)
 
-    const l1Receipt = await env.watcherFast.getL1TransactionReceipt(l2ToL1msgHash)
-    console.log(' completed Withdraw! L1 tx hash:', l1Receipt.transactionHash)
-
+    const l1Receipt = await env.watcherFast.getL1TransactionReceipt(
+      l2ToL1msgHash
+    )
+    // console.log(' completed Withdraw! L1 tx hash:', l1Receipt.transactionHash)
   }
 }
 
@@ -247,14 +257,14 @@ export const executeRepeatedDepositErc20 = async (
   env: OptimismEnv,
   l1ERC20: Contract,
   l1LiquidityPool: Contract,
-  withdrawAmount: number,
+  depositAmount: number,
   count: number
 ) => {
   await executeDepositErc20(
     env,
     l1ERC20,
     l1LiquidityPool,
-    [...Array(count).keys()].map(() => withdrawAmount)
+    [...Array(count).keys()].map(() => depositAmount)
   )
 }
 
@@ -312,7 +322,10 @@ export const executeL1ToL2TransactionsParallel = async (
 ) => {
   await Promise.all(
     txs.map(async (tx, index) => {
-      const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic, "m/44'/60'/0'/0/" + index.toString()).connect(env.l1Wallet.provider)
+      const signer = ethers.Wallet.fromMnemonic(
+        hardhatMnemonic,
+        "m/44'/60'/0'/0/" + index.toString()
+      ).connect(env.l1Wallet.provider)
       const receipt = await env.l1Messenger
         .connect(signer)
         .sendMessage(
@@ -338,7 +351,10 @@ export const executeL2ToL1TransactionsParallel = async (
 ) => {
   await Promise.all(
     txs.map(async (tx, index) => {
-      const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic, "m/44'/60'/0'/0/" + index.toString()).connect(env.l2Wallet.provider)
+      const signer = ethers.Wallet.fromMnemonic(
+        hardhatMnemonic,
+        "m/44'/60'/0'/0/" + index.toString()
+      ).connect(env.l2Wallet.provider)
       const receipt = await env.l2Messenger
         .connect(signer)
         .sendMessage(
@@ -365,7 +381,10 @@ export const executeL2TransactionsParallel = async (
 ) => {
   await Promise.all(
     txs.map(async (tx, index) => {
-      const signer = ethers.Wallet.fromMnemonic(hardhatMnemonic, "m/44'/60'/0'/0/" + index.toString()).connect(env.l2Wallet.provider)
+      const signer = ethers.Wallet.fromMnemonic(
+        hardhatMnemonic,
+        "m/44'/60'/0'/0/" + index.toString()
+      ).connect(env.l2Wallet.provider)
       const result = await tx.contract
         .connect(signer)
         .functions[tx.functionName](...tx.functionParams, {

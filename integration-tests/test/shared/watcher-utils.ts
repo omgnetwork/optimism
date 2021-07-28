@@ -30,7 +30,6 @@ export const initWatcher = async (
   })
 }
 
-
 export const initWatcherFast = async (
   l1Provider: JsonRpcProvider,
   l2Provider: JsonRpcProvider,
@@ -40,13 +39,11 @@ export const initWatcherFast = async (
     'Proxy__OVM_L1CrossDomainMessengerFast'
   )
 
-  if (l1MessengerAddress === "0x0000000000000000000000000000000000000000") {
+  if (l1MessengerAddress === '0x0000000000000000000000000000000000000000') {
     l1MessengerAddress = await AddressManager.getAddress(
       'OVM_L1CrossDomainMessengerFast'
     )
   }
-
-  console.log("FastWatcher", l1MessengerAddress)
 
   const l2MessengerAddress = await AddressManager.getAddress(
     'OVM_L2CrossDomainMessenger'
