@@ -59,8 +59,7 @@ describe("SushiToken", function () {
     await carolTX.wait()
     const bobTX = await this.sushi.connect(bob).transfer(carol.address, "100", {
       from: bob.address,
-      gasLimit: 800000,
-      gasPrice: 0,
+      gasOptions
     })
     await bobTX.wait()
 

@@ -111,9 +111,9 @@ describe("Migrator", function () {
     await transfer.wait()
     const sync = await this.lp1.sync(gasOptions)
     await sync.wait()
-    const approve = await this.lp1.connect(minter).approve(this.chef.address, "100000000000", { from: minter.address, gasLimit: 800000, gasPrice: 0})
+    const approve = await this.lp1.connect(minter).approve(this.chef.address, "100000000000", { from: minter.address, gasOptions})
     await approve.wait()
-    const deposit = await this.chef.connect(minter).deposit("0", "2000000", { from: minter.address, gasLimit: 800000, gasPrice: 0})
+    const deposit = await this.chef.connect(minter).deposit("0", "2000000", { from: minter.address, gasOptions})
     await deposit.wait()
     expect(await this.lp1.balanceOf(this.chef.address), "2000000")
     let migrate

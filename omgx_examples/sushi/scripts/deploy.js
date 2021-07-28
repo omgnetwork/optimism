@@ -9,7 +9,11 @@ const env = process.env;
 const deployPrivateKey = env.DEPLOYER_PRIVATE_KEY;
 const l2RpcUrl = env.L2_NODE_WEB3_URL;
 const l2ETHAddress = "0x4200000000000000000000000000000000000006";
-const gasOptions = { gasPrice: 15000000, gasLimit: 16400000 }
+
+gasSettings = {
+  gasLimit: 60000000,
+  gasPrice: 15000000
+}
 
 function writeFileSyncRecursive(filename, content, charset) {
   const folders = filename.split('/').slice(0, -1)
@@ -51,7 +55,10 @@ const main = async () => {
     _args: []
   })
 
-  await (await SushiBar.initialize(SushiToken.address, gasOptions)).wait()
+  await (await SushiBar.initialize(
+    SushiToken.address,
+    gasSettings
+   )).wait()
 
   const MasterChef = await deploy({
     contractName: "MasterChef",
@@ -61,18 +68,32 @@ const main = async () => {
     _args: []
   });
 
-  await (await MasterChef.initialize(SushiToken.address, deployAddress, utils.parseEther("100000000"), "0", utils.parseEther("100000000"), { gasLimit: 800000, gasPrice: 0 })).wait()
+  await (await MasterChef.initialize(
+    SushiToken.address,
+    deployAddress,
+    utils.parseEther("100000000"),
+    "0",
+    utils.parseEther("100000000"),
+    gasSettings
+  )).wait()
   console.log(SushiToken.address)
+
   if (await SushiToken.owner() !== MasterChef.address) {
     // Transfer Sushi Ownership to Chef
     console.log(" 🔑 Transfer Sushi Ownership to Chef")
-    await (await SushiToken.transferOwnership(MasterChef.address, gasOptions)).wait()
+    await (await SushiToken.transferOwnership(
+      MasterChef.address,
+      gasSettings
+    )).wait()
   }
 
   if (await MasterChef.owner() !== deployAddress) {
     // Transfer ownership of MasterChef to Dev
     console.log(" 🔑 Transfer ownership of MasterChef to Dev")
-    await (await MasterChef.transferOwnership(deployAddress, gasOptions)).wait()
+    await (await MasterChef.transferOwnership(
+      deployAddress,
+      gasSettings
+    )).wait()
   }
 
   const UniswapV2Factory = await deploy({
@@ -119,7 +140,7 @@ const main = async () => {
     "\n\n 🛰  Addresses: \n",
     addresses,
   )
-};
+}
 
 main()
   .then(() => process.exit(0))

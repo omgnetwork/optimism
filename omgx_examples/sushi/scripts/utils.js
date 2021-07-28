@@ -5,8 +5,6 @@ const { l2ethers } = require("hardhat");
 const { utils } = require("ethers");
 const R = require("ramda");
 
-const gasOptions = { gasPrice: 15000000, gasLimit: 16400000 }
-
 async function deploy({
   rpcUrl,
   contractName,
@@ -31,7 +29,7 @@ async function deploy({
   }
 
   const nonce = await signerProvider.getTransactionCount()
-  const deployed = await contractArtifacts.deploy(...contractArgs, { nonce, ...overrides, ...gasOptions });
+  const deployed = await contractArtifacts.deploy(...contractArgs, { nonce, ...overrides, gasPrice: 15000000 });
   await deployed.deployTransaction.wait()
 
   const checkCode = async (_address) => {
