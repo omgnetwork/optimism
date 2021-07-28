@@ -1068,7 +1068,7 @@ class NetworkService {
         utils.formatBytes32String(new Date().getTime().toString()),
         { 
           value: parseEther(value),
-          gasPrice: ethers.utils.parseUnits(`${gasPrice}`, 'gwei'),
+          gasPrice: ethers.utils.parseUnits(`${gasPrice}`, 'wei'),
           gasLimit: this.L2GasLimit
         }
       )
