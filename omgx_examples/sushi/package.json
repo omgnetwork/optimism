@@ -8,8 +8,8 @@
     "deploy:rinkeby": "TARGET=ovm hardhat --network rinkeby run scripts/deploy.js",
     "analyze": "TARGET=ovm hardhat run scripts/analyze.js",
     "test:omgx": "hardhat test --network omgx",
-    "test:rinkeby": "hardhat test --network rinkeby"
-
+    "test:rinkeby": "hardhat test --network rinkeby",
+    "patch": "patch-package"
   },
   "dependencies": {
     "@eth-optimism/ethereumjs-vm": "^4.2.0-alpha.3",

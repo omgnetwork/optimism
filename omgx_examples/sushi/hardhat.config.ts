@@ -7,7 +7,7 @@ import "@tenderly/hardhat-tenderly";
 
 const config = {
   mocha: {
-    timeout: 60000,
+    timeout: 600000,
   },
   networks: {
     omgx: {
