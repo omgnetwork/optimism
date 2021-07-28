@@ -1,7 +1,7 @@
 {
-  "name": "optimism-scanner",
+  "name": "@omgx/transaction-monitor",
   "version": "1.0.0",
-  "description": "[Optimism] Scanner",
+  "description": "omgx transaction monitor",
   "main": "index.js",
   "scripts": {
     "start": "node ./exec/run-monitor.js",
