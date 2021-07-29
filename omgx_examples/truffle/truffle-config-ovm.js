@@ -31,7 +31,7 @@ module.exports = {
       network_id: 28,
       host: 'http://rinkeby.omgx.network',
       gasPrice: 15000000,
-      gas: 7051975
+      gas: 8000000
     }
   },
   compilers: {
