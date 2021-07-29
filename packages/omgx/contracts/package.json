@@ -9,7 +9,7 @@
     "test/**/*.ts"
   ],
   "scripts": {
-    "build": "./scripts/build.sh",
+    "build": "hardhat compile && compile hardhat --network optimism",
     "build:contracts": "hardhat compile",
     "build:contracts:ovm": "hardhat compile --network optimism",
     "deploy": "ts-node \"./bin/deploy.ts\"",
