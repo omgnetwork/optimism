@@ -23,7 +23,9 @@ FROM node as builder
 # note: this approach can be a bit unhandy to maintain, but it allows
 # us to cache the installation steps
 WORKDIR /optimism
+
 COPY *.json yarn.lock ./
+
 COPY packages/core-utils/package.json ./packages/core-utils/package.json
 COPY packages/common-ts/package.json ./packages/common-ts/package.json
 COPY packages/hardhat-ovm/package.json ./packages/hardhat-ovm/package.json
@@ -34,12 +36,12 @@ COPY packages/batch-submitter/package.json ./packages/batch-submitter/package.js
 COPY packages/message-relayer/package.json ./packages/message-relayer/package.json
 
 COPY packages/omgx/contracts/package.json ./packages/omgx/contracts/package.json
+COPY packages/omgx/gas-price-oracle/package.json ./packages/omgx/gas-price-oracle/package.json
 COPY packages/omgx/message-relayer-fast/package.json ./packages/omgx/message-relayer-fast/package.json
 
 COPY integration-tests/package.json ./integration-tests/package.json
 
 RUN yarn install
-RUN yarn build
 
 ### BUILDER: Builds the typescript
 FROM node
