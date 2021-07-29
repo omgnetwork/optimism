@@ -11,7 +11,6 @@ module.exports = function (deployer, accounts) {
     10000,
     tokenName,
     tokenDecimals,
-    tokenSymbol,
-    { gasPrice: 0, gasLimit: 10000000 }
+    tokenSymbol
   )
 }
