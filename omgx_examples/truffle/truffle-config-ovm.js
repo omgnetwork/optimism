@@ -1,6 +1,6 @@
+const mnemonicPhrase =
+  'test test test test test test test test test test test junk'
 const HDWalletProvider = require('@truffle/hdwallet-provider')
-require('dotenv').config();
-const env = process.env;
 
 module.exports = {
   contracts_build_directory: './build-ovm',
@@ -9,30 +9,31 @@ module.exports = {
       provider: function () {
         return new HDWalletProvider({
           mnemonic: {
-            phrase: env.mnemonic
+            phrase: mnemonicPhrase,
           },
-          providerOrUrl: 'http://127.0.0.1:8545'
+          providerOrUrl: 'http://127.0.0.1:8545',
         })
       },
       network_id: 28,
       host: '127.0.0.1',
       port: 8545,
-      gasPrice: 15000000,
+      gasPrice: 0,
+      gas: 11000000,
     },
     omgx_rinkeby: {
       provider: function () {
         return new HDWalletProvider({
           mnemonic: {
-            phrase: env.mnemonic
+            phrase: mnemonicPhrase,
           },
-          providerOrUrl: 'http://rinkeby.omgx.network'
+          providerOrUrl: 'http://rinkeby.omgx.network',
         })
       },
       network_id: 28,
       host: 'http://rinkeby.omgx.network',
-      gasPrice: 15000000,
-      gas: 7051975
-    }
+      gasPrice: 0,
+      gas: 0,
+    },
   },
   compilers: {
     solc: {
@@ -40,9 +41,9 @@ module.exports = {
       settings: {
         optimizer: {
           enabled: true,
-          runs: 1
+          runs: 1,
         },
-      }
-    }
-  }
+      },
+    },
+  },
 }
