@@ -30,6 +30,7 @@ import uiReducer from './uiReducer';
 import setupReducer from './setupReducer';
 import notificationReducer from './notificationReducer';
 import farmReduer from './farmReducer';
+import lookupReducer from './lookupReducer';
 
 const rootReducer = combineReducers({
   loading: loadingReducer,
@@ -40,13 +41,14 @@ const rootReducer = combineReducers({
   exit: exitReducer,
   queue: queueReducer,
   tokenList: tokenReducer,
-  nftList: nftReducer,
+  nft: nftReducer,
   fees: feeReducer,
   gas: gasReducer,
   ui: uiReducer,
   setup: setupReducer,
   notification: notificationReducer,
   farm: farmReduer,
+  lookup: lookupReducer,
 });
 
 export default rootReducer;

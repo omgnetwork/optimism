@@ -30,6 +30,7 @@ function Transaction ({
   subTitle,
   chain,
   typeTX,
+  blockNumber,
   tooltip = ''
 }) {
   function renderValue () {
@@ -73,24 +74,42 @@ function Transaction ({
     )
   }
 
-  const Resolved = link ? 'a' : 'div'
-
   return (
     <div className={styles.Transaction}>
-      <Resolved
-        href={link}
-        target={'_blank'}
-        rel='noopener noreferrer'
-        className={styles.left}
-      >
-        <span style={{fontSize: '1.2em'}}>{chain}</span>
-        <div>{title}</div>
-        {midTitle && (<div className={styles.midTitle}>{midTitle}</div>)}
-        <div>{subTitle}</div>
-        <div>{typeTX}</div>
-      </Resolved>
-      <div className={styles.right}>
-        {renderValue()}
+      <div className={styles.transactionItem}>
+        <div className={styles.title}>
+          <div>{chain}</div>
+          <div>{title}</div>
+        </div>
+        {(midTitle || status) && 
+          <div className={styles.subTitle}>
+            <div>{midTitle}</div>
+            <div>{blockNumber}</div>
+          </div>
+        }
+        {subTitle && 
+          <div className={styles.subTitle}>
+            {subTitle}
+          </div>
+        }
+        <div className={styles.content}>
+          <div>{typeTX}</div>
+          {link && 
+            <a 
+              href={link}
+              target={'_blank'}
+              rel='noopener noreferrer'
+              className={styles.button}
+            >View Details</a>  
+          }
+        </div>
+        {(button || status) &&
+          <div className={styles.content}>
+            <div className={styles.right}>
+              {renderValue()}
+            </div>
+          </div>
+        }
       </div>
     </div>
   )
