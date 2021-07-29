@@ -72,9 +72,6 @@ COPY --from=downloader ovm-solc /root/.cache/hardhat-nodejs/compilers/ovm/0.7.6.
 # build it!
 RUN yarn build
 
-# at this point we should have all the build artifacts in place
-RUN ls -la ./packages/omgx/contracts
-
 # build integration tests' contracts
 RUN yarn workspace @eth-optimism/integration-tests build:integration
 
