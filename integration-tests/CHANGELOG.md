@@ -1,5 +1,11 @@
 # @eth-optimism/integration-tests
 
+## 0.2.3
+
+### Patch Changes
+
+- 1b30c5c6: Add ERC20 and ETH stress tests
+
 ## 0.2.2
 
 ### Patch Changes
