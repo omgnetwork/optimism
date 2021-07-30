@@ -25,7 +25,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-          # aws-region: us-east-1
       - name: Start EC2 runner
         id: start-ec2-runner
         uses: machulav/ec2-github-runner@v2
@@ -88,13 +87,6 @@ jobs:
         working-directory: ./ops
         run: ./scripts/wait-for-sequencer.sh
 
-      # - name: Build the services, bring the stack up + OMGX services
-      #   working-directory: ./ops
-      #   env:
-      #     BUILD: 1
-      #     DAEMON: 1
-      #   run: ./up_local.sh
-
       # just sets up background logs for the system that was just started
       # this just adds the logging
       - name: Start background logging
@@ -125,12 +117,6 @@ jobs:
             exit 1
           fi
 
-      # Very time and memory consuming
-      # and simply duplicates
-      # - name: Run the base system integration tests
-      #   working-directory: ./ops
-      #   run: docker-compose run integration_tests
-
       - name: Test the base OMGX contracts
         working-directory: ./packages/omgx/contracts
         run: |
@@ -155,7 +141,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-          # aws-region: us-east-1
       - name: Stop EC2 runner
         uses: machulav/ec2-github-runner@v2
         with:
