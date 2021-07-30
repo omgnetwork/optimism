@@ -49,7 +49,9 @@ import L1ERC20Json from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.j
 import L2ERC20Json from '../deployment/artifacts-ovm/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
 
 //OMGX L2 Contracts
-import L2ERC721Json from '../deployment/artifacts-ovm/contracts/ERC721Mock.sol/ERC721Mock.json'
+import L2ERC721Json from '../deployment/artifacts-ovm/contracts/ERC721Genesis.sol/ERC721Genesis.json'
+import L2ERC721RegJson from '../deployment/artifacts-ovm/contracts/ERC721Registry.sol/ERC721Registry.json'
+
 import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol/TokenPool.json'
 import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
 
@@ -62,16 +64,13 @@ import etherScanInstance from 'api/etherScanAxios'
 import omgxWatcherAxiosInstance from 'api/omgxWatcherAxios'
 import addressAxiosInstance from 'api/addressAxios'
 import addressOMGXAxiosInstance from 'api/addressOMGXAxios'
+import coinGeckoAxiosInstance from 'api/coinGeckoAxios'
 
 //All the current addresses for fallback purposes only
 //These may or may not be present
 //Generally, the wallet will get these from the two HTTP deployment servers
 const localAddresses = require(`../deployment/local/addresses.json`)
 const rinkebyAddresses = require(`../deployment/rinkeby/addresses.json`)
-
-const priorityTokens = require('../deployment/tokensPriority.json')
-const dropdownTokens = require('../deployment/tokensDropdown.json')
-const swapTokens = require('../deployment/tokensSwap.json')
 
 class NetworkService {
 
@@ -101,6 +100,7 @@ class NetworkService {
     this.L2StandardBridgeAddress = '0x4200000000000000000000000000000000000010'
 
     this.ERC721Address = null
+    this.ERC721RegAddress = null
 
     this.L1_TEST_Address = null
     this.L2_TEST_Address = null
@@ -128,7 +128,7 @@ class NetworkService {
 
     // gas
     this.L1GasLimit = 9999999
-    this.L2GasLimit = 9999999
+    this.L2GasLimit = 10000000
   }
 
   async enableBrowserWallet() {
@@ -159,9 +159,11 @@ class NetworkService {
     })
   }
 
-  async mintAndSendNFT(receiverAddress, contractAddress, ownerName, tokenURI) {
+  async mintAndSendNFT(receiverAddress, contractAddress, ownerName, tokenURI, type) {
+    
     try {
-      let meta = ownerName + '#' + Date.now().toString() + '#' + tokenURI
+
+      let meta = ownerName + '#' + Date.now().toString() + '#' + tokenURI + '#' + type 
 
       console.log('meta:', meta)
       console.log('receiverAddress:', receiverAddress)
@@ -176,12 +178,39 @@ class NetworkService {
         this.provider.getSigner()
       ).mintNFT(
         receiverAddress, 
-        meta, 
-        { gasLimit: 800000, gasPrice: 0 }
+        meta
       )
 
       await nft.wait()
-      console.log('New ERC721:', nft)
+            
+      const registry = new ethers.Contract(
+        this.ERC721RegAddress,
+        L2ERC721RegJson.abi,
+        this.L2Provider
+      )
+
+      const addresses = await registry.lookupAddress(
+        receiverAddress
+      )
+
+      console.log("the receiver's NFT contract addresses:", addresses)
+
+      const alreadyHaveAddresss = addresses.find((str) => str.toLowerCase() === contractAddress.toLowerCase())
+
+      if (alreadyHaveAddresss) {
+        //we are done - no need to double register addresss
+        console.log('done - no need to double register address')
+      } else {
+        //register address for the recipiant
+        let reg = await registry.connect(
+          this.provider.getSigner()
+        ).registerAddress(
+          receiverAddress, 
+          contractAddress
+        )
+        console.log("Reg:",reg)
+        console.log(`Contract registered in recipient's wallet`)
+      }
 
       return true
     } catch (error) {
@@ -192,34 +221,58 @@ class NetworkService {
 
   async addNFTFactoryNS( address ) {
 
-    const contract = new ethers.Contract(
+    let contract = new ethers.Contract(
       address,
       L2ERC721Json.abi,
       this.L2Provider
     )
 
-    //handles stale information in the local address cachce
-    if(typeof(contract) === 'undefined') return
-
     let haveRights = false
 
-    if (this.account === await contract.owner()) haveRights = true
-    
-    let nftName = await contract.name()
-    let nftSymbol = await contract.symbol()
-    let genesis = await contract.getGenesis()
-    
-    addNFTFactory({
-      name: nftName,
-      symbol: nftSymbol,
-      owner: this.account,
-      layer: 'L2',
-      address,
-      originAddress: genesis[0],
-      originID: genesis[1],
-      originChain: genesis[2],
-      haveRights
-    })
+    try {
+
+      let owner = await contract.owner()
+      owner = owner.toLowerCase()
+
+      if ( this.account.toLowerCase() === owner ) 
+        haveRights = true
+      
+      let nftName = await contract.name()
+      let nftSymbol = await contract.symbol()
+      let genesis = await contract.getGenesis()
+
+      let genesisContractAddress = genesis[0]
+
+      if( genesisContractAddress === '0x0000000000000000000000000000000000000000') {
+        //special case - this is the default NFT factory....
+        genesisContractAddress = this.ERC721Address
+      }
+      
+      //wallet address of whomever owns the parent
+      const genesisContract = new ethers.Contract(
+        genesisContractAddress,
+        L2ERC721Json.abi,
+        this.L2Provider
+      )
+      
+      const feeRecipient = await genesisContract.owner()
+
+      addNFTFactory({
+        name: nftName,
+        symbol: nftSymbol,
+        owner,
+        layer: 'L2',
+        address,
+        originAddress: genesis[0],
+        originID: genesis[1],
+        originChain: genesis[2],
+        originFeeRecipient: feeRecipient, 
+        haveRights
+      })
+
+    } catch (error) {
+      console.log("addNFTFactoryNS cache is stale:",error)
+    }
 
   }
 
@@ -232,12 +285,13 @@ class NetworkService {
   {
     
     try {
+      
       console.log("Deploying new NFT factory")
 
       let Factory__L2ERC721 = new ContractFactory(
-         L2ERC721Json.abi,
-         L2ERC721Json.bytecode,
-         this.provider.getSigner()
+        L2ERC721Json.abi,
+        L2ERC721Json.bytecode,
+        this.provider.getSigner()
       )
 
       let contract = await Factory__L2ERC721.deploy(
@@ -246,9 +300,9 @@ class NetworkService {
         BigNumber.from(String(0)), //starting index for the tokenIDs
         oriAddress,
         oriID,
-        oriChain,
-        {gasLimit: 800000, gasPrice: 0}
+        oriChain
       )
+
       await contract.deployTransaction.wait()
 
       this.addNFTFactoryNS( contract.address )
@@ -418,6 +472,12 @@ class NetworkService {
       else 
         this.ERC721Address = addresses.ERC721
 
+      //backwards compat
+      if (addresses.hasOwnProperty('L2ERC721Reg'))
+        this.ERC721RegAddress = addresses.L2ERC721Reg
+      else 
+        this.ERC721RegAddress = addresses.ERC721Reg
+
       this.L2TokenPoolAddress = addresses.L2TokenPool
       this.AtomicSwapAddress = addresses.AtomicSwap
 
@@ -496,16 +556,12 @@ class NetworkService {
       //we at least have the basic one
       const NFTcontracts = Object.values(await getNFTContracts())
       
-      //this deals with adding factories, based on cached contract addresses 
-      //this is information is also used for the balance lookup
+      //Add factories based on cached contract addresses 
+      //this information is also used for the balance lookup
       for(var i = 0; i < NFTcontracts.length; i++) {
-        
         const address = NFTcontracts[i]
-
         console.log("Adding NFT contract:",address)
-        
         this.addNFTFactoryNS( address )
-
       } 
 
       this.watcher = new Watcher({
@@ -616,67 +672,67 @@ class NetworkService {
         to = to.toLowerCase()
 
         if (to === this.L2LPAddress.toLowerCase()) {
-          console.log("L2->L1 Swap Off")
+          //console.log("L2->L1 Swap Off")
           return Object.assign({}, item, { typeTX: 'Fast Offramp' })
         } 
 
         if (to === this.L1LPAddress.toLowerCase()) {
-          console.log("L1->L2 Swap On")
+          //console.log("L1->L2 Swap On")
           return Object.assign({}, item, { typeTX: 'Fast Onramp' })
         } 
 
         if (to === this.L1StandardBridgeAddress.toLowerCase()) {
-          console.log("L1->L2 Traditional Deposit")
+          //console.log("L1->L2 Traditional Deposit")
           return Object.assign({}, item, { typeTX: 'Traditional' })
         } 
 
         if (to === this.L1_TEST_Address.toLowerCase()) {
-          console.log("L1 ERC20 Amount Approval")
+          //console.log("L1 ERC20 Amount Approval")
           return Object.assign({}, item, { typeTX: 'L1 ERC20 Amount Approval' })
         } 
 
         if (to === this.L2StandardBridgeAddress.toLowerCase()) {
           //0x4200000000000000000000000000000000000010
-          console.log("L2 Standard Bridge")
+          //console.log("L2 Standard Bridge")
           return Object.assign({}, item, { typeTX: 'L2 Standard Bridge' })
         } 
 
         if (to === this.L1Message.toLowerCase()) {
-          console.log("L1 Message")
+          //console.log("L1 Message")
           return Object.assign({}, item, { typeTX: 'L1 Message' })
         } 
 
         if (to === this.L2Message.toLowerCase()) {
-          console.log("L2 Message")
+          //console.log("L2 Message")
           return Object.assign({}, item, { typeTX: 'L2 Message' })
         } 
 
         if (to === this.L2_TEST_Address.toLowerCase()) {
-          console.log("L2 TEST Message")
+          //console.log("L2 TEST Message")
           return Object.assign({}, item, { typeTX: 'L2 TEST Token' })
         } 
 
         if (to === this.L2_ETH_Address.toLowerCase()) {
-          console.log("L2 ETH Message")
-          return Object.assign({}, item, { typeTX: 'L2 ETH Token' })
+          //console.log("L2 ETH Message")
+          return Object.assign({}, item, { typeTX: 'L2 ETH Ops (such as a L2->L2 Transfer)' })
         }
 
-        if (to === this.L2_ETH_Address.toLowerCase()) {
-          console.log("L2 ETH Message")
-          return Object.assign({}, item, { typeTX: 'L2 ETH Token' })
-        } 
+        // if (to === this.L2_ETH_Address.toLowerCase()) {
+        //   //console.log("L2 ETH Message")
+        //   return Object.assign({}, item, { typeTX: 'L2 ETH Token' })
+        // } 
 
         if (item.crossDomainMessage) {
           if(to === this.L2LPAddress.toLowerCase()) {
-            console.log("Found EXIT: L2LPAddress")
+            //console.log("Found EXIT: L2LPAddress")
             return Object.assign({}, item, { typeTX: 'FAST EXIT via L2LP' })
           } 
           else if (to === this.L2_TEST_Address.toLowerCase()) {
-            console.log("Found EXIT: L2_TEST_Address")
+            //console.log("Found EXIT: L2_TEST_Address")
             return Object.assign({}, item, { typeTX: 'EXIT (TEST Token)' })
           } 
           else if (to === this.L2_ETH_Address.toLowerCase()) {
-            console.log("Found EXIT: L2_ETH_Address")
+            //console.log("Found EXIT: L2_ETH_Address")
             return Object.assign({}, item, { typeTX: 'EXIT ETH' })
           }
         }
@@ -716,23 +772,54 @@ class NetworkService {
     }
   }
 
-  async getNFTs() {
+  async fetchNFTs() {
 
-    let numberOfNFTS = 0
+    /*
+      Metacomment on how this is coded: 
+      Is it messy? Yes.
+      Does it use arrow functions well? No.
+      Is it elegant? No.
+      Is it hard to maintain and understand? Yes.
+      Does it work? Yes.
+    */
 
+    //console.log('fetchNFTs')
+    
     let NFTfactories = Object.entries(await getNFTFactories())
 
-    //add factories, based on cached contract addresses 
-    //this is information is also used for the balance lookup
-    for(let i = 0; i < NFTfactories.length; i++) {
+    const localCache = NFTfactories.map(item => {return item[0].toLowerCase()})
 
-      const contract = new ethers.Contract(
+    //check user's blockchain NFT registry
+    const registry = new ethers.Contract(this.ERC721RegAddress,L2ERC721RegJson.abi,this.L2Provider)
+    const addresses = await registry.lookupAddress(this.account)
+    //console.log("Blockchain NFT wallet:", addresses)
+    
+    //make sure we have all the factories relevant to this user
+    for(let i = 0; i < addresses.length; i++) {
+      const newAddress = addresses[i]
+      var inCache = (localCache.indexOf(newAddress.toLowerCase()) > -1)
+      if(!inCache) {
+        console.log("Found a new NFT contract:",newAddress)
+        await addNFTContract( newAddress )
+        this.addNFTFactoryNS( newAddress )
+      }
+    }
+    
+    //How many NFTs do you have right now?
+    let numberOfNFTS = 0
+
+    //need to call this again because it might have changed
+    NFTfactories = Object.entries(await getNFTFactories())
+    
+    for(let i = 0; i < NFTfactories.length; i++) {
+      
+      let contract = new ethers.Contract(
         NFTfactories[i][1].address,
         L2ERC721Json.abi,
         this.L2Provider
       )
 
-      //how many NFTs do I own?
+      //how many NFTs of this flavor do I own?
       const balance = await contract.connect(
         this.L2Provider
       ).balanceOf(this.account)
@@ -741,20 +828,18 @@ class NetworkService {
 
     }
 
-    //lets see if we already know about them
+    //let's see if we already know about them
     const myNFTS = getNFTs()
     const numberOfStoredNFTS = Object.keys(myNFTS).length
 
     if (numberOfNFTS !== numberOfStoredNFTS) {
       
-      console.log('NFT change detected - need to add one or more NFTs')
+      console.log('NFT change - need to add one or more NFTs')
 
       for(let i = 0; i < NFTfactories.length; i++) {
 
         const address = NFTfactories[i][1].address
         
-        console.log("factory address:",address)
-
         const contract = new ethers.Contract(
           address,
           L2ERC721Json.abi,
@@ -770,19 +855,47 @@ class NetworkService {
         let nftSymbol = await contract.symbol()
         let genesis = await contract.getGenesis()
 
+        let genesisContractAddress = genesis[0]
+
+        if( genesisContractAddress === '0x0000000000000000000000000000000000000000') {
+          //special case - this is just the default NFT factory....
+          genesisContractAddress = this.ERC721Address
+        }
+        
+        //console.log("NFT genesis contract:", genesis)
+        //wallet address of whomever owns the parent
+        const genesisContract = new ethers.Contract(
+          genesisContractAddress,
+          L2ERC721Json.abi,
+          this.L2Provider
+        )
+        //console.log("genesisContract:", genesisContract)
+        
+        const feeRecipient = await genesisContract.owner()
+        //console.log("NFT feeRecipient:", feeRecipient)
+
         //can have more than 1 per contract
         for (let i = 0; i < Number(balance.toString()); i++) {
-        
-          const tokenID = BigNumber.from(i)
+          
+          //Goal here is to get all the tokenIDs, e.g. 3, 7, and 98,
+          //based on knowing the user's balance - e.g. three NFTs 
+          const tokenIndex = BigNumber.from(i)
 
-          const tID = await contract.tokenOfOwnerByIndex(
+          const tokenID = await contract.tokenOfOwnerByIndex(
             this.account,
-            tokenID
+            tokenIndex
           )
 
-          const nftMeta = await contract.getTokenURI(tID)
+          const nftMeta = await contract.getTokenURI(tokenID)
           const meta = nftMeta.split('#')
           const time = new Date(parseInt(meta[1]))
+
+          let type = 0          
+          //new flavor of NFT has type field
+          //default to zero for old NFTs
+          if(meta.length === 4) {
+            type = parseInt(meta[3])
+          }
 
           const mintedTime = String(
               time.toLocaleString('en-US', {
@@ -795,7 +908,7 @@ class NetworkService {
               })
             )
 
-          const UUID = address.substring(1, 6) + '_' + tID.toString() + '_' + this.account.substring(1, 6)
+          const UUID = address.substring(1, 6) + '_' + tokenID.toString() + '_' + this.account.substring(1, 6)
 
           const NFT = {
             UUID,
@@ -808,7 +921,9 @@ class NetworkService {
             address,
             originAddress: genesis[0],
             originID: genesis[1],
-            originChain: genesis[2]
+            originChain: genesis[2],
+            originFeeRecipient: feeRecipient,
+            type
           }
 
           await addNFT( NFT)
@@ -822,8 +937,6 @@ class NetworkService {
   }
 
   async getBalances() {
-
-    //console.log("Checking Balances")
 
     try {
       
@@ -868,8 +981,6 @@ class NetworkService {
 
       const state = store.getState()
       const tA = Object.values(state.tokenList)
-
-      //console.log(tA)
 
       for (let i = 0; i < tA.length; i++) {
         
@@ -964,8 +1075,6 @@ class NetworkService {
       )
       console.log(' completed Deposit! L2 tx hash:', l2Receipt.transactionHash)
 
-      this.getBalances()
-
       return l2Receipt
     } catch {
       return false
@@ -975,10 +1084,10 @@ class NetworkService {
   //Transfer funds from one account to another, on the L2
   async transfer(address, value, currency) {
     try {
+      //any old ERC20 json will do....
       const tx = await this.L2_TEST_Contract.attach(currency).transfer(
         address,
-        parseEther(value.toString()),
-        { gasPrice: 0 }
+        parseEther(value.toString())
       )
       await tx.wait()
       return tx
@@ -995,22 +1104,6 @@ class NetworkService {
       return false
     }
   }
-
-  // async getAllTransactions() {
-  //   let transactionHistory = {}
-  //   const latest = await this.L2Provider.eth.getBlockNumber()
-  //   const blockNumbers = Array.from(Array(latest).keys())
-
-  //   for (let blockNumber of blockNumbers) {
-  //     const blockData = await this.L2Provider.eth.getBlock(blockNumber)
-  //     const transactionsArray = blockData.transactions
-  //     if (transactionsArray.length === 0) {
-  //       transactionHistory.push({
-  //         /*ToDo*/
-  //       })
-  //     }
-  //   }
-  // }
 
   async checkAllowance(
     currencyAddress,
@@ -1036,7 +1129,8 @@ class NetworkService {
       })
     }
   }
-
+  
+  /*Used when people want to fast exit - they have to deposit funds into the L2LP*/
   async approveERC20_L2LP(
     depositAmount_string,
     currencyAddress
@@ -1060,17 +1154,43 @@ class NetworkService {
       if (depositAmount_BN.gt(allowance_BN)) {
         const approveStatus = await L2ERC20Contract.approve(
           this.L2LPAddress,
-          depositAmount_string,
-          //{ gasPrice: 0 } //this can be hardcoded here because, by definition, I'm always on L2
+          depositAmount_string
         )
         await approveStatus.wait()
       }
 
-      allowance_BN = await L2ERC20Contract.allowance(
-        this.account,
-        this.L2LPAddress
-      )
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
+  async approveERC20_L1LP(
+    depositAmount_string,
+    currencyAddress
+  ) {
+    
+    try {
+
+      console.log("approveERC20_L1LP")
       
+      const ERC20Contract = new ethers.Contract(
+        currencyAddress,
+        L1ERC20Json.abi,
+        this.provider.getSigner()
+      )
+
+      const approveStatus = await ERC20Contract.approve(
+        this.L1LPAddress,
+        depositAmount_string
+      )
+      await approveStatus.wait()
+
+      // let allowance_BN = await ERC20Contract.allowance(
+      //   this.account,
+      //   this.L1LPAddress
+      // )
+
       return true
     } catch (error) {
       return false
@@ -1086,6 +1206,8 @@ class NetworkService {
     
     try {
 
+      console.log("approveERC20")
+      
       const ERC20Contract = new ethers.Contract(
         currency,
         contractABI,
@@ -1148,8 +1270,7 @@ class NetworkService {
 
       const approveStatus = await L1_TEST_Contract.approve(
         this.L1StandardBridgeAddress, //this is the spender
-        value, //and this is how much the spender will be able to spend 
-        //this.L1orL2 === 'L1' ? {} : { gasPrice: 0 }
+        value
       )
       await approveStatus.wait()
 
@@ -1216,8 +1337,7 @@ class NetworkService {
       currencyAddress,
       parseUnits(value, decimals),
       this.L1GasLimit,
-      utils.formatBytes32String(new Date().getTime().toString()),
-      { gasPrice: 0 }
+      utils.formatBytes32String(new Date().getTime().toString())
     )
     await tx.wait()
 
@@ -1272,16 +1392,29 @@ class NetworkService {
     const userInfo = {}
 
     for (let tokenAddress of tokenAddressList) {
+      
       let tokenBalance
-      let isETH = false
+      let tokenSymbol
+      let tokenName
+      
+      console.log(tokenAddress)
+      console.log(this.L1_ETH_Address)
 
       if (tokenAddress === this.L1_ETH_Address) {
         tokenBalance = await this.L1Provider.getBalance(this.L1LPAddress)
-        isETH = true
+        console.log('Match')
+        tokenSymbol = 'ETH'
+        tokenName = 'Ethereum'
       } else if (tokenAddress === this.L1_TEST_Address) {
         tokenBalance = await this.L1_TEST_Contract.connect(
           this.L1Provider
         ).balanceOf(this.L1LPAddress)
+        tokenSymbol = await this.L2_TEST_Contract.connect(
+          this.L2Provider
+        ).symbol()
+        tokenName = await this.L2_TEST_Contract.connect(
+          this.L2Provider
+        ).name()
       }
       // Add new LPs here
       // else if (tokenAddress === __________) {
@@ -1297,6 +1430,8 @@ class NetworkService {
       ])
 
       poolInfo[tokenAddress] = {
+        symbol: tokenSymbol,
+        name: tokenName,
         l1TokenAddress: poolTokenInfo.l1TokenAddress,
         l2TokenAddress: poolTokenInfo.l2TokenAddress,
         accUserReward: poolTokenInfo.accUserReward.toString(),
@@ -1320,8 +1455,7 @@ class NetworkService {
                 ),
                 100
               ), // ( accUserReward - userDepositAmount ) / timeDuration
-        tokenBalance: tokenBalance.toString(),
-        isETH
+        tokenBalance: tokenBalance.toString()
       }
       userInfo[tokenAddress] = {
         l1TokenAddress: tokenAddress,
@@ -1352,15 +1486,23 @@ class NetworkService {
     for (let tokenAddress of tokenAddressList) {
       
       let tokenBalance
-      let isETH = false
+      let tokenSymbol
+      let tokenName
 
       if (tokenAddress === this.L2_ETH_Address) {
         tokenBalance = await this.L2Provider.getBalance(this.L2LPAddress)
-        isETH = true
+        tokenSymbol = 'oETH'
+        tokenName = 'Ethereum'
       } else if (tokenAddress === this.L2_TEST_Address) {
         tokenBalance = await this.L2_TEST_Contract.connect(
           this.L2Provider
         ).balanceOf(this.L2LPAddress)
+        tokenSymbol = await this.L2_TEST_Contract.connect(
+          this.L2Provider
+        ).symbol()
+         tokenName = await this.L2_TEST_Contract.connect(
+          this.L2Provider
+        ).name()
       }
       // Add new LPs here
       // else if (tokenAddress === __________) {
@@ -1376,6 +1518,8 @@ class NetworkService {
       ])
 
       poolInfo[tokenAddress] = {
+        symbol: tokenSymbol,
+        name: tokenName,
         l1TokenAddress: poolTokenInfo.l1TokenAddress,
         l2TokenAddress: poolTokenInfo.l2TokenAddress,
         accUserReward: poolTokenInfo.accUserReward.toString(),
@@ -1399,8 +1543,7 @@ class NetworkService {
                 ),
                 100
               ), // ( accUserReward - userDepositAmount ) / timeDuration
-        tokenBalance: tokenBalance.toString(),
-        isETH
+        tokenBalance: tokenBalance.toString()
       }
       userInfo[tokenAddress] = {
         l2TokenAddress: tokenAddress,
@@ -1417,6 +1560,7 @@ class NetworkService {
   /*****            Add Liquidity            *****/
   /***********************************************/
   async addLiquidity(currency, value, L1orL2Pool) {
+    
     const decimals = 18 //should not assume?
     let depositAmount = powAmount(value, decimals)
 
@@ -1428,12 +1572,7 @@ class NetworkService {
       ).addLiquidity(
         depositAmount,
         currency,
-        // deposit ETH or not
-        currency === this.L1_ETH_Address
-          ? { value: depositAmount }
-          : L1orL2Pool === 'L1LP'
-          ? {}
-          : { gasPrice: 0 }
+        currency === this.L1_ETH_Address ? { value: depositAmount } : {}
       )
       await addLiquidityTX.wait()
       return true
@@ -1452,8 +1591,7 @@ class NetworkService {
       const withdrawRewardTX = await this.L1LPContract.withdrawReward(
         userReward_BN,
         currencyL1Address,
-        this.account,
-        //{ gasPrice: 0 }
+        this.account
       )
       await withdrawRewardTX.wait()
       return true
@@ -1471,8 +1609,7 @@ class NetworkService {
       const withdrawRewardTX = await this.L2LPContract.withdrawReward(
         userReward_BN,
         currencyL2Address,
-        this.account,
-        //{ gasPrice: 0 }
+        this.account
       )
       await withdrawRewardTX.wait()
       return true
@@ -1489,14 +1626,13 @@ class NetworkService {
     let withdrawAmount = powAmount(value, decimals)
     try {
       // Deposit
-      const withdrawLiquidityTX = await await (L1orL2Pool === 'L1LP'
+      const withdrawLiquidityTX = await (L1orL2Pool === 'L1LP'
         ? this.L1LPContract
         : this.L2LPContract
       ).withdrawLiquidity(
         withdrawAmount,
         currency,
-        this.account,
-        L1orL2Pool === 'L1LP' ? {} : { gasPrice: 0 }
+        this.account
       )
       await withdrawLiquidityTX.wait()
       return true
@@ -1618,8 +1754,7 @@ class NetworkService {
     if (depositAmount_BN.gt(allowance_BN)) {
       const approveStatus = await L2ERC20Contract.approve(
         this.L2LPAddress,
-        depositAmount_string,
-        //{ gasPrice: 0 } //this can be hardcoded here because, by definition, I'm always on L2
+        depositAmount_string
       )
       await approveStatus.wait()
       if (!approveStatus) return false
@@ -1627,8 +1762,7 @@ class NetworkService {
 
     const depositTX = await this.L2LPContract.clientDepositL2(
       depositAmount_string,
-      currencyAddress,
-      //{ gasPrice: 0 }
+      currencyAddress
     )
     await depositTX.wait()
 
@@ -1646,93 +1780,105 @@ class NetworkService {
     return L1Receipt
   }
 
-  async getPriorityTokens() {
-    try {
+  // async getPriorityTokens() {
+  //   try {
 
-      return priorityTokens.map((token) => {
+  //     return priorityTokens.map((token) => {
 
-        let L1 = ''
-        let L2 = ''
+  //       let L1 = ''
+  //       let L2 = ''
 
-        if (token.symbol === 'ETH') {
-          L1 = this.L1_ETH_Address
-          L2 = this.L2_ETH_Address
-        } else {
-          L1 = this.tokenAddresses[token.symbol].L1
-          L2 = this.tokenAddresses[token.symbol].L2
-        }
+  //       if (token.symbol === 'ETH') {
+  //         L1 = this.L1_ETH_Address
+  //         L2 = this.L2_ETH_Address
+  //       } else {
+  //         L1 = this.tokenAddresses[token.symbol].L1
+  //         L2 = this.tokenAddresses[token.symbol].L2
+  //       }
 
-        return {
-          symbol: token.symbol,
-          icon: token.icon,
-          name: token.name,
-          L1,
-          L2,
-        }
+  //       return {
+  //         symbol: token.symbol,
+  //         icon: token.icon,
+  //         name: token.name,
+  //         L1,
+  //         L2,
+  //       }
 
-      })
+  //     })
 
-    } catch (error) {
-      return error
-    }
-  }
+  //   } catch (error) {
+  //     return error
+  //   }
+  // }
 
-  async getSwapTokens() {
-    try {
+  // async getSwapTokens() {
+  //   try {
 
-      return swapTokens.map((token) => {
+  //     return swapTokens.map((token) => {
 
-        let L1 = ''
-        let L2 = ''
+  //       let L1 = ''
+  //       let L2 = ''
 
-        if (token.symbol === 'ETH') {
-          L1 = this.L1_ETH_Address
-          L2 = this.L2_ETH_Address
-        } else {
-          L1 = this.tokenAddresses[token.symbol].L1
-          L2 = this.tokenAddresses[token.symbol].L2
-        }
+  //       if (token.symbol === 'ETH') {
+  //         L1 = this.L1_ETH_Address
+  //         L2 = this.L2_ETH_Address
+  //       } else {
+  //         L1 = this.tokenAddresses[token.symbol].L1
+  //         L2 = this.tokenAddresses[token.symbol].L2
+  //       }
 
-        return {
-          symbol: token.symbol,
-          icon: token.icon,
-          name: token.name,
-          L1,
-          L2,
-        }
-      })
+  //       return {
+  //         symbol: token.symbol,
+  //         icon: token.icon,
+  //         name: token.name,
+  //         L1,
+  //         L2,
+  //       }
+  //     })
 
-    } catch (error) {
-      return error
-    }
-  }
+  //   } catch (error) {
+  //     return error
+  //   }
+  // }
 
-  async getDropdownTokens() {
-    try {
+  // async getDropdownTokens() {
+  //   try {
       
-      return dropdownTokens.map((token) => {
+  //     return dropdownTokens.map((token) => {
 
-        let L1 = ''
-        let L2 = ''
+  //       let L1 = ''
+  //       let L2 = ''
 
-        if (token.symbol === 'ETH') {
-          L1 = this.L1_ETH_Address
-          L2 = this.L2_ETH_Address
-        } else {
-          L1 = this.tokenAddresses[token.symbol].L1
-          L2 = this.tokenAddresses[token.symbol].L2
-        }
+  //       if (token.symbol === 'ETH') {
+  //         L1 = this.L1_ETH_Address
+  //         L2 = this.L2_ETH_Address
+  //       } else {
+  //         L1 = this.tokenAddresses[token.symbol].L1
+  //         L2 = this.tokenAddresses[token.symbol].L2
+  //       }
 
-        return {
-          symbol: token.symbol,
-          icon: token.icon,
-          name: token.name,
-          L1,
-          L2,
-        }
-      })
+  //       return {
+  //         symbol: token.symbol,
+  //         icon: token.icon,
+  //         name: token.name,
+  //         L1,
+  //         L2,
+  //       }
+  //     })
 
-    } catch (error) {
+  //   } catch (error) {
+  //     return error
+  //   }
+  // }
+
+  async fetchLookUpPrice(params) {
+    try {
+       // fetching only the prices compare to usd.
+       const res = await coinGeckoAxiosInstance.get(
+         `simple/price?ids=${params.join()}&vs_currencies=usd`
+       )
+       return res.data;
+    } catch(error) {
       return error
     }
   }
