@@ -1,5 +1,6 @@
-# build in 2 steps
-function build_images() {
+function build() {
+    yarn
+    yarn build
     docker-compose build -- builder
     docker-compose build -- l2geth 
     docker-compose build -- l1_chain
@@ -13,11 +14,6 @@ function build_images() {
     docker-compose build -- gas_oracle
 }
 
-function build_dependencies() {
-    yarn
-    yarn build
-}
-
-build_dependencies && build_images
+build 
 
 wait
