@@ -1,11 +1,11 @@
 
-## 1. Compiling, running, and deploying.
-
-For example, to compile, test, and then deploy the contract on OMGX Rinkeby:
+## 1. Configuring `.env` file.
 
 First create `.env` file similar to `.env.example`, replace the private key with your private key. 
 
-Then execute the following commands:
+## 2. Compiling, running, and deploying.
+For example, to compile, and test the contract on OMGX Rinkeby:
+
 
 ```bash
 $ yarn
