@@ -1,7 +1,7 @@
 version: "3"
 
 services:
-  
+
   # base service builder
   builder:
     image: omgx/builder:latest
@@ -311,7 +311,6 @@ services:
       #GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL: http://l2geth:8545 # Defined in the upstream ethereum-optimism .yml file
       L1_NODE_WEB3_URL: http://l1_chain:8545
       L2_NODE_WEB3_URL: http://l2geth:8545
-      GAS_PRICE_ORACLE_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       GAS_PRICE_ORACLE_ADDRESS: "0x420000000000000000000000000000000000000F"
       DEPLOYER_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       SEQUENCER_PRIVATE_KEY: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
