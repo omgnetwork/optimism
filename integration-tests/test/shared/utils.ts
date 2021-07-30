@@ -35,7 +35,7 @@ const env = cleanEnv(process.env, {
     default: '0x4c5859f0F772848b2D91F1D83E2Fe57935348029',
   }),
   L2_LIQUIDITY_POOL_ADDRESS: str({
-    default: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+    default: '0x202CCe504e04bEd6fC0521238dDf04Bc9E8E15aB',
   }),
   VERIFIER_URL: str({ default: 'http://localhost:8547' }),
   REPLICA_URL: str({ default: 'http://localhost:8549' }),
