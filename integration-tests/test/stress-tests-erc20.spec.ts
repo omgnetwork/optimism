@@ -18,8 +18,6 @@ import L2LiquidityPoolJson from '../artifacts-ovm/contracts/LP/L2LiquidityPool.s
 // For some reason I can't figure out how to set the timeout on a per-suite basis
 // so I'm instead setting it for every test.
 const STRESS_TEST_TIMEOUT = 300_000
-const L1LiquidityPoolAddress = '0x4c5859f0F772848b2D91F1D83E2Fe57935348029'
-const L2LiquidityPoolAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
 
 describe('stress tests', () => {
   const initialAmount = 1000
@@ -56,13 +54,13 @@ describe('stress tests', () => {
     await l2ERC20.deployTransaction.wait()
 
     const L1LiquidityPool = new ethers.Contract(
-      L1LiquidityPoolAddress,
+      env.l1LiquidityPoolAddress,
       L1LiquidityPoolJson.abi,
       env.l1Wallet
     )
 
     const L2LiquidityPool = new ethers.Contract(
-      L2LiquidityPoolAddress,
+      env.l2LiquidityPoolAddress,
       L2LiquidityPoolJson.abi,
       env.l2Wallet
     )
@@ -70,12 +68,8 @@ describe('stress tests', () => {
     await L1LiquidityPool.registerPool(l1ERC20.address, l2ERC20.address)
     await L2LiquidityPool.registerPool(l1ERC20.address, l2ERC20.address)
 
-    // console.log('Done registerPool')
-
     await l2ERC20.transfer(L2LiquidityPool.address, 500)
     await l1ERC20.transfer(L1LiquidityPool.address, 500)
-
-    // console.log('Done transferToken')
   })
 
   describe('ERC20 stress tests', () => {
@@ -94,11 +88,9 @@ describe('stress tests', () => {
       const preL2Balance: BigNumber = await l2ERC20.balanceOf(
         env.l2Wallet.address
       )
-      // console.log('preL1Balance:', preL1Balance.toString())
-      // console.log('preL2Balance:', preL2Balance.toString())
 
       const L1LiquidityPool = new ethers.Contract(
-        L1LiquidityPoolAddress,
+        env.l1LiquidityPoolAddress,
         L1LiquidityPoolJson.abi,
         env.l1Wallet
       )
@@ -117,8 +109,6 @@ describe('stress tests', () => {
       const postL2Balance: BigNumber = await l2ERC20.balanceOf(
         env.l2Wallet.address
       )
-      // console.log('postL1Balance:', postL1Balance.toString())
-      // console.log('postL2Balance:', postL2Balance.toString())
 
       expect(postL1Balance).to.deep.eq(
         BigNumber.from(preL1Balance.sub(depositAmount * numTransactions))
@@ -143,11 +133,9 @@ describe('stress tests', () => {
       const preL2Balance: BigNumber = await l2ERC20.balanceOf(
         env.l2Wallet.address
       )
-      // console.log('preL1Balance:', preL1Balance.toString())
-      // console.log('preL2Balance:', preL2Balance.toString())
 
       const L2LiquidityPool = new ethers.Contract(
-        L2LiquidityPoolAddress, // hardcoded
+        env.l2LiquidityPoolAddress, // hardcoded
         L2LiquidityPoolJson.abi,
         env.l2Wallet
       )
@@ -166,8 +154,6 @@ describe('stress tests', () => {
       const postL2Balance: BigNumber = await l2ERC20.balanceOf(
         env.l2Wallet.address
       )
-      // console.log('postL1Balance:', postL1Balance.toString())
-      // console.log('postL2Balance:', postL2Balance.toString())
 
       expect(postL1Balance).to.deep.eq(
         BigNumber.from(preL1Balance.add(depositAmount * numTransactions))

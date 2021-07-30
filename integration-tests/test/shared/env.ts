@@ -17,6 +17,8 @@ import {
   getL1Bridge,
   getL2Bridge,
   IS_LIVE_NETWORK,
+  L1_LIQUIDITY_POOL_ADDRESS,
+  L2_LIQUIDITY_POOL_ADDRESS,
   sleep,
 } from './utils'
 import {
@@ -50,6 +52,10 @@ export class OptimismEnv {
   l1Wallet: Wallet
   l2Wallet: Wallet
 
+  // Liquidity pool address
+  l1LiquidityPoolAddress: string
+  l2LiquidityPoolAddress: string
+
   constructor(args: any) {
     this.addressManager = args.addressManager
     this.l1Bridge = args.l1Bridge
@@ -62,6 +68,8 @@ export class OptimismEnv {
     this.watcherFast = args.watcherFast
     this.l1Wallet = args.l1Wallet
     this.l2Wallet = args.l2Wallet
+    this.l1LiquidityPoolAddress = args.l1LiquidityPoolAddress
+    this.l2LiquidityPoolAddress = args.l2LiquidityPoolAddress
     this.ctc = args.ctc
     this.scc = args.scc
   }
@@ -122,6 +130,8 @@ export class OptimismEnv {
       watcherFast,
       l1Wallet,
       l2Wallet,
+      l1LiquidityPoolAddress: L1_LIQUIDITY_POOL_ADDRESS,
+      l2LiquidityPoolAddress: L2_LIQUIDITY_POOL_ADDRESS,
     })
   }
 

@@ -97,33 +97,25 @@ export const executeDepositErc20 = async (
 ) => {
   for (const depositAmount of txs) {
     // Move tokens from L1 to L2
-    // console.log('Approve')
     const approveL1TX = await l1ERC20.approve(
       L1LiquidityPool.address,
       depositAmount
     )
-    // console.log('Await approve')
     await approveL1TX.wait()
 
-    // console.log('Deposit L1')
     const depositTX = await L1LiquidityPool.clientDepositL1(
       depositAmount,
       l1ERC20.address,
       { gasLimit: DEFAULT_TEST_GAS_L1 }
     )
 
-    // console.log('wait Deposit L1')
     await depositTX.wait()
 
-    // console.log('wait Deposit L1')
     const [l1ToL2msgHash] = await env.watcher.getMessageHashesFromL1Tx(
       depositTX.hash
     )
 
-    // console.log(' got L1->L2 message hash', l1ToL2msgHash)
-    const l2Receipt = await env.watcher.getL2TransactionReceipt(l1ToL2msgHash)
-
-    // console.log(' completed Deposit! L2 tx hash:', l2Receipt.transactionHash)
+    await env.watcher.getL2TransactionReceipt(l1ToL2msgHash)
   }
 }
 
@@ -139,27 +131,19 @@ export const executeWithdrawErc20 = async (
       L2LiquidityPool.address,
       depositAmount
     )
-    // console.log('Await approve')
     await approveL2TX.wait()
 
-    // console.log('Deposit L2')
     const withdrawTX = await L2LiquidityPool.clientDepositL2(
       depositAmount,
       l2ERC20.address
     )
-    // console.log('wait Deposit L2')
     await withdrawTX.wait()
 
-    // console.log('Wait tx L2 -> L1')
     const [l2ToL1msgHash] = await env.watcherFast.getMessageHashesFromL2Tx(
       withdrawTX.hash
     )
-    // console.log(' got L2->L1 message hash', l2ToL1msgHash)
 
-    const l1Receipt = await env.watcherFast.getL1TransactionReceipt(
-      l2ToL1msgHash
-    )
-    // console.log(' completed Withdraw! L1 tx hash:', l1Receipt.transactionHash)
+    await env.watcherFast.getL1TransactionReceipt(l2ToL1msgHash)
   }
 }
 
