@@ -51,6 +51,8 @@ jobs:
       L2_NODE_WEB3_URL: http://localhost:8545
       URL: http://127.0.0.1:8080/addresses.json
       OMGX_URL: http://127.0.0.1:8078/addresses.json
+      TARGET_GAS_LIMIT: 9000000000
+      CHAIN_ID: 28
 
     steps:
       # Monorepo tests
