@@ -10,7 +10,6 @@ import Input from 'components/input/Input'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import Select from '@material-ui/core/Select'
 import InputLabel from '@material-ui/core/InputLabel'
-import FormHelperText from '@material-ui/core/FormHelperText'
 import FormControl from '@material-ui/core/FormControl'
 import MenuItem from '@material-ui/core/MenuItem'
 

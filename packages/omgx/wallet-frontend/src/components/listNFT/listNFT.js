@@ -8,14 +8,8 @@ import Button from 'components/button/Button'
 import Input from 'components/input/Input'
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-import Select from '@material-ui/core/Select'
-import InputLabel from '@material-ui/core/InputLabel'
-import FormHelperText from '@material-ui/core/FormHelperText'
-import FormControl from '@material-ui/core/FormControl'
-import MenuItem from '@material-ui/core/MenuItem'
 
 import networkService from 'services/networkService'
-import root from 'images/root.png'
 
 import { transfer } from 'actions/networkAction'
 
@@ -58,7 +52,6 @@ class listNFT extends React.Component {
       UUID,
       time,
       URL,
-      receiverAddress: '',
       tokenURI: '',
       ownerName: '',
       //drop down box
@@ -248,14 +241,9 @@ class listNFT extends React.Component {
       dropDownBox, 
       dropDownBoxInit,
       loading,
-      receiverAddress,
-      tokenURI,
-      ownerName,
       newNFTsymbol,
       newNFTname,
-      haveRights,
       type,
-      typeNew,
       oriFeeRecipient 
     } = this.state;
 
