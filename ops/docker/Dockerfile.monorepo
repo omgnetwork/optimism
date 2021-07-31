@@ -42,6 +42,7 @@ COPY packages/omgx/message-relayer-fast/package.json ./packages/omgx/message-rel
 COPY integration-tests/package.json ./integration-tests/package.json
 
 # copy over the patches, if any...
+# needs to happen before `yarn` otherwise patch-packages does not apply the patches
 COPY ./patches ./patches
 
 # RUN yarn install
