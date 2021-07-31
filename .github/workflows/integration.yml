@@ -39,7 +39,6 @@ jobs:
   integration:
     needs: start-runner
     runs-on: ${{ needs.start-runner.outputs.label }}
-    env:
     steps:
       # Monorepo tests
       - uses: actions/checkout@v2
