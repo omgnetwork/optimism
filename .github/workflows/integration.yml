@@ -64,7 +64,7 @@ jobs:
 
       - name: Bring the stack up
         working-directory: ./ops
-        run: docker-compose -f docker-compose-base.yml up -d
+        run: docker-compose -f docker-compose-base.yml up --no-build -d
 
       - name: Wait for the Sequencer node
         working-directory: ./ops
