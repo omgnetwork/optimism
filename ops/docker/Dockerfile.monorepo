@@ -41,6 +41,9 @@ COPY packages/omgx/message-relayer-fast/package.json ./packages/omgx/message-rel
 
 COPY integration-tests/package.json ./integration-tests/package.json
 
+# copy over the patches, if any...
+COPY ./patches ./patches
+
 # RUN yarn install
 RUN yarn install --frozen-lockfile
 
@@ -60,15 +63,14 @@ COPY --from=prebuilder /optimism/integration-tests ./integration-tests
 COPY *.json yarn.lock ./
 
 # copy over the source
-COPY ./patches ./patches
 COPY ./packages ./packages
 COPY ./integration-tests ./integration-tests
 
-WORKDIR /optimism/packages/omgx/message-relayer-fast
-RUN yarn build
+# WORKDIR /optimism/packages/omgx/message-relayer-fast
+# RUN yarn build
 
-WORKDIR /optimism/packages/omgx/contracts
-RUN yarn build
+# WORKDIR /optimism/packages/omgx/contracts
+# RUN yarn build
 
 # copy over solc to save time building (35+ seconds vs not doing this step)
 COPY --from=downloader solc /root/.cache/hardhat-nodejs/compilers/linux-amd64/solc-linux-amd64-v0.7.6+commit.7338295f
