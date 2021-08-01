@@ -69,9 +69,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Install yq
-        run: sudo snap install yq
-
       - name: Check the .envs
         run: printenv
 
