@@ -68,7 +68,7 @@ export const fastExit = async () => {
   const approveL2TX = await L2ETHGateway.connect(l2Wallet).approve(
     L2LiquidityPool.address,
     fastExitAmount,
-    { gasLimit: 800000, gasPrice: 0 }
+    { gasLimit: configs.l2GasLimit }
   )
   await approveL2TX.wait()
   logger.info('Approve TX... Done')
@@ -79,7 +79,7 @@ export const fastExit = async () => {
     L2LiquidityPool.connect(l2Wallet).clientDepositL2(
       fastExitAmount,
       L2ETHGateway.address,
-      { gasLimit: configs.l2GasLimit, gasPrice: 0 }
+      { gasLimit: configs.l2GasLimit }
     ),
     Direction.L2ToL1
   )

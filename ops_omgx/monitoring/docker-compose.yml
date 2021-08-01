@@ -2,7 +2,7 @@ version: "3.4"
 
 services:
   monitoring:
-    image: enyalabs/omgx-monitor:v1.3.5
+    image: enyalabs/omgx-monitor:v1.3.6
     env_file:
       - .env
     labels:
