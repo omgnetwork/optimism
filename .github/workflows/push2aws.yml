@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - develop
-      - 'memory_and_omg-monitor'
 
 jobs:
   push2aws:
