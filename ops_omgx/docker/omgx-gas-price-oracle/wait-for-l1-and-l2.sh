@@ -1,6 +1,4 @@
 #!/bin/sh
-export L1_NODE_WEB3_URL=`/opt/secret2env -name $SECRETNAME|grep -w L1_NODE_WEB3_URL|sed 's/L1_NODE_WEB3_URL=//g'`
-export L2_NODE_WEB3_URL=`/opt/secret2env -name $SECRETNAME|grep -w L2_NODE_WEB3_URL|sed 's/L2_NODE_WEB3_URL=//g'`
 export GAS_PRICE_ORACLE_ADDRESS=`/opt/secret2env -name $SECRETNAME|grep -w GAS_PRICE_ORACLE_ADDRESS|sed 's/GAS_PRICE_ORACLE_ADDRESS=//g'`
 export DEPLOYER_PRIVATE_KEY=`/opt/secret2env -name $SECRETNAME|grep -w DEPLOYER_PRIVATE_KEY|sed 's/DEPLOYER_PRIVATE_KEY=//g'`
 export SEQUENCER_PRIVATE_KEY=`/opt/secret2env -name $SECRETNAME|grep -w SEQUENCER_PRIVATE_KEY|sed 's/SEQUENCER_PRIVATE_KEY=//g'`
