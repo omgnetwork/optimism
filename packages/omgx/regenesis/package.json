@@ -9,10 +9,13 @@
     "test/**/*.ts"
   ],
   "scripts": {
-    "build": "./scripts/build.sh",
+    "start:service": "node ./exec/run-message-relayer-regenesis.js",
+    "start": "yarn start:service",
+    "build": "tsc -p ./tsconfig.build.json",
     "build:contracts": "hardhat compile",
     "build:contracts:ovm": "hardhat compile --network optimism",
     "deploy": "ts-node \"./bin/deploy.ts\"",
+    "test": "hardhat --network optimism test",
     "postinstall": "patch-package",
     "clean": "rm -rf ./dist ./artifacts ./artifacts-ovm ./cache ./cache-ovm ./tsconfig.build.tsbuildinfo"
   },

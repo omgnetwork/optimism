@@ -73,6 +73,8 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     Lib_AddressManager: Contract
     OVM_StateCommitmentChain: Contract
     OVM_L1CrossDomainMessenger: Contract
+    OVM_L1CrossDomainMessengerFast: Contract
+    OVM_L1CrossDomainMessengerRegenesis: Contract
     OVM_L2CrossDomainMessenger: Contract
     OVM_L2ToL1MessagePasser: Contract
     filter: Array<any>
@@ -110,17 +112,46 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       address: this.state.OVM_StateCommitmentChain.address,
     })
 
+    // Connect to Standard OVM_L1CrossDomainMessenger
     this.logger.info('Connecting to OVM_L1CrossDomainMessenger...')
-    const l1MessengerAddress = this.options.l1MessengerFast || await this.state.Lib_AddressManager.getAddress(
-      'Proxy__OVM_L1CrossDomainMessengerFast'
+    const OVM_L1CrossDomainMessenger = await this.state.Lib_AddressManager.getAddress(
+      'OVM_L1CrossDomainMessengerOrigin'
     )
     this.state.OVM_L1CrossDomainMessenger = loadContract(
       'OVM_L1CrossDomainMessenger',
-      l1MessengerAddress,
+      OVM_L1CrossDomainMessenger,
       this.options.l1RpcProvider
     )
     this.logger.info('Connected to OVM_L1CrossDomainMessenger', {
       address: this.state.OVM_L1CrossDomainMessenger.address,
+    })
+
+    // Connect to new OVM_L1CrossDomainMessenger without 7-days check
+    this.logger.info('Connecting to OVM_L1CrossDomainMessengerRegenesis...')
+    const l1MessengerRegenesisAddress = await this.state.Lib_AddressManager.getAddress(
+      'Proxy__OVM_L1CrossDomainMessenger'
+    )
+    this.state.OVM_L1CrossDomainMessengerRegenesis = loadContract(
+      'OVM_L1CrossDomainMessenger',
+      l1MessengerRegenesisAddress,
+      this.options.l1RpcProvider
+    )
+    this.logger.info('Connected to OVM_L1CrossDomainMessengerRegenesis', {
+      address: this.state.OVM_L1CrossDomainMessengerRegenesis.address,
+    })
+
+    // Connect to OVM_L1CrossDomainMessengerFast
+    this.logger.info('Connecting to OVM_L1CrossDomainMessengerFast...')
+    const l1MessengerFastAddress = this.options.l1MessengerFast || await this.state.Lib_AddressManager.getAddress(
+      'Proxy__OVM_L1CrossDomainMessengerFast'
+    )
+    this.state.OVM_L1CrossDomainMessengerFast = loadContract(
+      'OVM_L1CrossDomainMessenger',
+      l1MessengerFastAddress,
+      this.options.l1RpcProvider
+    )
+    this.logger.info('Connected to OVM_L1CrossDomainMessengerFast', {
+      address: this.state.OVM_L1CrossDomainMessengerFast.address,
     })
 
     this.logger.info('Connecting to OVM_L2CrossDomainMessenger...')
@@ -229,11 +260,6 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           })
           if (await this._wasMessageRelayed(message)) {
             this.logger.info('Message has already been relayed, skipping.')
-            continue
-          }
-
-          if (!this.state.filter.includes(message.target)) {
-            this.logger.info('Message not intended for target, skipping.')
             continue
           }
 
@@ -425,9 +451,12 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   }
 
   private async _wasMessageRelayed(message: SentMessage): Promise<boolean> {
-    return this.state.OVM_L1CrossDomainMessenger.successfulMessages(
+    return this.state.OVM_L1CrossDomainMessengerRegenesis.successfulMessages(
+      message.encodedMessageHash
+    ) || this.state.OVM_L1CrossDomainMessengerFast.successfulMessages(
       message.encodedMessageHash
     )
+
   }
 
   private async _getMessageProof(
@@ -502,10 +531,19 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     message: SentMessage,
     proof: SentMessageProof
   ): Promise<void> {
+    let targetContract: Contract
+    if (!this.state.filter.includes(message.target)) {
+      this.logger.info('Target at cross domain messenger regenesis contract...');
+      targetContract = this.state.OVM_L1CrossDomainMessengerRegenesis
+    } else {
+      this.logger.info('Target at cross domain messenger fast contract...');
+      targetContract = this.state.OVM_L1CrossDomainMessengerFast
+    }
+
     try {
       this.logger.info('Dry-run, checking to make sure proof would succeed...')
 
-      await this.state.OVM_L1CrossDomainMessenger.connect(
+      await targetContract.connect(
         this.options.l1Wallet
       ).callStatic.relayMessage(
         message.target,
@@ -528,7 +566,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       return
     }
 
-    const result = await this.state.OVM_L1CrossDomainMessenger.connect(
+    const result = await targetContract.connect(
       this.options.l1Wallet
     ).relayMessage(
       message.target,

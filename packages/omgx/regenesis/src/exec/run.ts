@@ -49,7 +49,7 @@ const main = async () => {
     parseInt(env.FROM_L2_TRANSACTION_INDEX, 10) || 0
   )
   const FILTER_ENDPOINT = config.str(
-    'filter-endpoint', 
+    'filter-endpoint',
     env.FILTER_ENDPOINT
   ) || ''
   const FILTER_POLLING_INTERVAL = config.uint(
