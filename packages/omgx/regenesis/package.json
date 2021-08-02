@@ -20,6 +20,7 @@
     "clean": "rm -rf ./dist ./artifacts ./artifacts-ovm ./cache ./cache-ovm ./tsconfig.build.tsbuildinfo"
   },
   "devDependencies": {
+    "@eth-optimism/contracts": "^0.4.1",
     "@eth-optimism/core-utils": "^0.4.2",
     "@eth-optimism/hardhat-ovm": "^0.0.2",
     "@ethersproject/providers": "^5.0.24",
