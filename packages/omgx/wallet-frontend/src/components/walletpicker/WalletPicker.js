@@ -33,9 +33,9 @@ import { getAllNetworks } from 'util/masterConfig';
 import logo from 'images/omgx.png';
 import chevron from 'images/chevron.svg';
 
-import * as styles from './WalletPicker.module.scss';
 import { isChangingChain } from 'util/changeChain';
 import Button from 'components/button/Button';
+import * as S from "./WalletPicker.styles"
 
 function WalletPicker ({ onEnable, enabled }) {
   const dispatch = useDispatch();
@@ -135,44 +135,37 @@ function WalletPicker ({ onEnable, enabled }) {
   for (var prop in networks) allNetworks.push(prop)
 
   if (!wrongNetwork && !enabled && isChangingChain) {
-    return <div className={styles.loading}>Switching Chain...</div>
+    return <S.Loading>Switching Chain...</S.Loading>
   }
 
   return (
     <>
-
       <WrongNetworkModal
         open={wrongNetworkModalState}
         onClose={resetSelection}
       />
 
-      <div className={styles.WalletPicker}>
-        <div className={styles.title}>
-          <div className={styles.menu}>
-
-            <div
+      <S.WalletPickerContainer>
+        <S.WallerPickerWrapper>
+          <S.Menu>
+            <S.NetWorkStyle
               onClick={()=>setShowAllNetworks(prev => !prev)}
-              className={styles.network}
             >
-              <div className={styles.indicator} />
+              <S.Indicator />
               <div>
                 OMGX {masterConfig}
               </div>
               {!!allNetworks.length && (
-                <img
+                <S.Chevron
+                  open={showAllNetworks}
                   src={chevron}
                   alt='chevron'
-                  className={[
-                    styles.chevron,
-                    showAllNetworks ? styles.open : ''
-                  ].join(' ')}
                 />
               )}
-            </div>
+            </S.NetWorkStyle>
 
-            <div
+            <S.Dropdown
               ref={dropdownNode}
-              className={styles.dropdown}
             >
               {!!allNetworks.length && showAllNetworks && allNetworks.map((network, index) => (
                 <div
@@ -183,41 +176,40 @@ function WalletPicker ({ onEnable, enabled }) {
                   {network}
                 </div>))
               }
-            </div>
+            </S.Dropdown>
 
-          </div>
-        </div>
-      </div>
+          </S.Menu>
+        </S.WallerPickerWrapper>
+      </S.WalletPickerContainer>
 
-      <div className={styles.MainBar} >
-        <div className={styles.MainLeft}>
-          OMGX Gateway<br/>
-          90 Second Swap-On and Swap-Off<br/>
-          Traditional Deposits and 7 Day Exits<br/>
-        </div>
-        <div className={styles.MainRightContainer}>
+      <S.MainBar>
+        <S.MainLeft>
+          <h2>Connect a Wallet to access your assets on the network</h2>
+          <p>Select the wallet that u use to connect it to OMGx system! Don’t worry more wallets support is coming soon</p>
+        </S.MainLeft>
+        <S.MainRightContainer>
           <Button
             type="primary"
             disabled={!browserEnabled}
             pulsate={true}
-            className={styles.ButtonConnect}
+            // className={styles.ButtonConnect}
             onClick={() => dispatchSetWalletMethod('browser')}
           >
             Connect to MetaMask
           </Button>
           {!browserEnabled &&
-            <div className={styles.disabledMM}>Your browser does not have a web3 provider.</div>
+            <S.DisabledMM>Your browser does not have a web3 provider.</S.DisabledMM>
           }
 
           <Button
             type="primary"
-            className={styles.ButtonAdd}
+            // className={styles.ButtonAdd}
             onClick={() => networkService.addL2Network()}
           >
             Add OMGX L2 Provider
           </Button>
-        </div>
-      </div>
+        </S.MainRightContainer>
+      </S.MainBar>
     </>
   );
 }
