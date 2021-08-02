@@ -65,11 +65,18 @@ describe('stress tests', () => {
       env.l2Wallet
     )
 
-    await L1LiquidityPool.registerPool(l1ERC20.address, l2ERC20.address)
-    await L2LiquidityPool.registerPool(l1ERC20.address, l2ERC20.address)
+    await L1LiquidityPool
+      // Deployer PRIVATE KEY
+      .connect(new Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", env.l1Wallet.provider))
+      .registerPool(l1ERC20.address, l2ERC20.address)
+
+    await L2LiquidityPool
+      .connect(new Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", env.l2Wallet.provider))
+      .registerPool(l1ERC20.address, l2ERC20.address)
 
     await l2ERC20.transfer(L2LiquidityPool.address, 500)
     await l1ERC20.transfer(L1LiquidityPool.address, 500)
+    console.log("DONE beforeEach")
   })
 
   describe('ERC20 stress tests', () => {
