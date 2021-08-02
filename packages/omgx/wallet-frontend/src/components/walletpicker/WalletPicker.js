@@ -148,7 +148,6 @@ function WalletPicker ({ onEnable, enabled }) {
 
       <div className={styles.WalletPicker}>
         <div className={styles.title}>
-          <img src={logo} alt='logo' />
           <div className={styles.menu}>
 
             <div
@@ -218,29 +217,6 @@ function WalletPicker ({ onEnable, enabled }) {
             Add OMGX L2 Provider
           </Button>
         </div>
-      </div>
-
-      <div className={styles.WalletPicker}>
-
-        <div className={styles.directive}>
-
-          <div className={styles.Title}>
-            <span className={styles.B}>Traditional Deposit and Exit.</span><br/><br/>
-            <span className={styles.B}>NEW.</span>{' '}Fast (90 second) Swap-On and Swap-Off, from L1 to L2, and back from L2 to L1. Depositing ETH on L1
-            transfers oETH to you on the L2, and vice versa. No more waiting to exit.<br/><br/>
-            <span className={styles.B}>Staking and Community-provided Liquidity.</span>{' '}This fast on/off capability is
-            based on paired Liquidity Pools on L1 and L2 provided by the operator and the broader community,
-            who can earn rewards for providing liquidity.<br/><br/>
-            <span className={styles.B}>Easy to customize.</span>{' '}We have tried to keep the code simple to make it easy to customize and modify.<br/><br/>
-            <span className={styles.B}>Requirements.</span>{' '}You will need Metamask and,
-            if you want to test on the Rinkeby testnet, some Rinkeby ETH.<br/><br/>
-            <span className={styles.B}>MetaMask L2 Setup.</span>{' '}Click 'Add OMGX L2 Provider', or, if want to add it manually, go to <span className={styles.B}>MetaMask&#62;Settings&#62;Networks&#62;Add Network</span>.{' '}Specify `https://rinkeby.omgx.network` as the New RPC URL.<br/><br/>
-            <br/>
-            <br/>
-          </div>
-
-        </div>
-
       </div>
     </>
   );

@@ -15,10 +15,10 @@ limitations under the License. */
 
 import React from 'react';
 import { Snackbar } from '@material-ui/core';
-import MuiAlert from '@material-ui/lab/Alert';
+import MuiAlert from '@material-ui/core/Alert';
 
 function _Alert ({ children, open, onClose, type = 'success', duration = 3000, position = 0 }) {
-  
+
   const alertStyle = {
     marginTop: position,
   };
@@ -29,7 +29,7 @@ function _Alert ({ children, open, onClose, type = 'success', duration = 3000, p
 
   let autohide = 0;
   if(type === 'success') {
-    autohide = 2000; //autohide all the green alerts 
+    autohide = 2000; //autohide all the green alerts
   } else {
     autohide = duration;
   }
@@ -45,7 +45,7 @@ function _Alert ({ children, open, onClose, type = 'success', duration = 3000, p
       }}
       style={alertStyle}
     >
-      <Alert 
+      <Alert
         onClose={onClose}
         severity={type}>
         {children}

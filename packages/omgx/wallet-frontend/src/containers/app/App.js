@@ -15,6 +15,8 @@ limitations under the License. */
 
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { createTheme, ThemeProvider } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
 
 import {
   BrowserRouter as Router,
@@ -35,15 +37,35 @@ import Alert from 'components/alert/Alert';
 import * as styles from './App.module.scss';
 import { setWalletMethod } from 'actions/setupAction';
 import { isChangingChain } from 'util/changeChain';
+import styled from '@emotion/styled';
+import MainMenu from 'components/mainMenu/MainMenu';
+
+const themeLight = createTheme({
+  palette: {}
+});
+
+const themeDark = createTheme({
+  palette: {
+    primary: {
+      main: '#F0A000',
+    },
+    background: {
+      default: "#061122"
+    },
+    text: {
+      primary: '#fff'
+    }
+  }
+});
 
 function App () {
-
   const dispatch = useDispatch();
 
   const errorMessage = useSelector(selectError);
   const alertMessage = useSelector(selectAlert);
 
   const [ enabled, setEnabled ] = useState(false);
+  const [light, setLight] = useState(false);
 
   const handleErrorClose=()=>dispatch(closeError());
   const handleAlertClose=()=>dispatch(closeAlert());
@@ -59,39 +81,46 @@ function App () {
   }, [dispatch, enabled])
 
   return (
-    <Router>
-      <div className={styles.App}>
+    <ThemeProvider theme={light ? themeLight : themeDark}>
+      <CssBaseline />
+      <Router>
+        <div style={{display: 'flex'}}>
+          <MainMenu light={light} setLight={setLight} />
+          <div>
+            <div className={styles.App}>
 
-        <Alert
-          type='error'
-          duration={0}
-          open={!!errorMessage}
-          onClose={handleErrorClose}
-          position={50}
-        >
-          {errorMessage}
-        </Alert>
+              <Alert
+                type='error'
+                duration={0}
+                open={!!errorMessage}
+                onClose={handleErrorClose}
+                position={50}
+              >
+                {errorMessage}
+              </Alert>
 
-        <Alert
-          type='success'
-          duration={0}
-          open={!!alertMessage}
-          onClose={handleAlertClose}
-          position={0}
-        >
-          {alertMessage}
-        </Alert>
+              <Alert
+                type='success'
+                duration={0}
+                open={!!alertMessage}
+                onClose={handleAlertClose}
+                position={0}
+              >
+                {alertMessage}
+              </Alert>
 
-        <Notification/>
+              <Notification/>
 
-        <Switch>
-          <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />}>
-          </Route>
-        </Switch>
+              <Switch>
+                <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />}>
+                </Route>
+              </Switch>
 
-      </div>
-
-    </Router>
+            </div>
+          </div>
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 
