@@ -5,7 +5,7 @@ import chalk from 'chalk';
 
 require('dotenv').config()
 
-import L1_MessengerJson from '..//artifacts/contracts/OVM_L1CrossDomainMessengerRegenesis.sol/OVM_L1CrossDomainMessengerRegenesis.json'
+import L1_MessengerJson from '../artifacts/contracts/OVM_L1CrossDomainMessengerRegenesis.sol/OVM_L1CrossDomainMessengerRegenesis.json'
 
 let Factory__L1_Messenger: ContractFactory
 
@@ -43,16 +43,22 @@ const deployFn: DeployFunction = async (hre) => {
   // initialize with address_manager
   const L1MessagerTX = await L1_Messenger_Deployed.initialize(
     addressManager.address,
-    (hre as any).deployConfig.OVM_L1CrossDomainMessengerAddress,
   )
   console.log(`⭐️ ${chalk.blue('OVM_L1CrossDomainMessengerRegenesis initialized:')} ${chalk.green(L1MessagerTX.hash)}`)
 
   //this will fail for non deployer account
-  const L1MessagerTXreg = await addressManager.setAddress(
+  const L1MessagerTXReg1 = await addressManager.setAddress(
     'OVM_L1CrossDomainMessenger',
     L1_Messenger.address
   )
-  console.log(`⭐️ ${chalk.blue('OVM_L1CrossDomainMessengerRegenesis registered:')} ${chalk.green(L1MessagerTXreg.hash)}`)
+  console.log(`⭐️ ${chalk.blue('OVM_L1CrossDomainMessengerRegenesis registered:')} ${chalk.green(L1MessagerTXReg1.hash)}`)
+
+  //this will fail for non deployer account
+  const L1MessagerTXReg2 = await addressManager.setAddress(
+    'OVM_L1CrossDomainMessengerOrigin',
+    (hre as any).deployConfig.OVM_L1CrossDomainMessengerAddress
+  )
+  console.log(`⭐️ ${chalk.blue('OVM_L1CrossDomainMessengerOrigin registered:')} ${chalk.green(L1MessagerTXReg2.hash)}`)
 
 }
 

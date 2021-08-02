@@ -7,12 +7,12 @@ import './tasks/deploy'
 
 const config: HardhatUserConfig = {
   mocha: {
-    timeout: 300000,
+    timeout: 3000000,
   },
   networks: {
     optimism: {
       url: 'http://localhost:8545',
-      gasPrice: 15000000,
+      gasPrice: 0,
       saveDeployments: false,
       ovm: true,
     },

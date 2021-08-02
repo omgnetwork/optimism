@@ -55,20 +55,11 @@ contract OVM_L1CrossDomainMessengerRegenesis is iOVM_L1CrossDomainMessenger, Lib
      * Contract Variables *
      **********************/
 
-    struct L2ToL1Message {
-        address target;
-        address sender;
-        bytes message;
-        uint256 messageNonce;
-        iOVM_L1CrossDomainMessenger.L2MessageInclusionProof proof;
-    }
-
     mapping (bytes32 => bool) public blockedMessages;
     mapping (bytes32 => bool) public relayedMessages;
     mapping (bytes32 => bool) public successfulMessages;
 
     address internal xDomainMsgSender = DEFAULT_XDOMAIN_SENDER;
-    address public OVM_L1CrossDomainMessengerAddress;
 
     /***************
      * Constructor *
@@ -109,11 +100,9 @@ contract OVM_L1CrossDomainMessengerRegenesis is iOVM_L1CrossDomainMessenger, Lib
 
     /**
      * @param _libAddressManager Address of the Address Manager.
-     * @param _OVM_L1CrossDomainMessengerAddress Address of OVM_L1CrossDomainMessenger
      */
     function initialize(
-        address _libAddressManager,
-        address _OVM_L1CrossDomainMessengerAddress
+        address _libAddressManager
     )
         public
     {
@@ -123,7 +112,6 @@ contract OVM_L1CrossDomainMessengerRegenesis is iOVM_L1CrossDomainMessenger, Lib
         );
         libAddressManager = Lib_AddressManager(_libAddressManager);
         xDomainMsgSender = DEFAULT_XDOMAIN_SENDER;
-        OVM_L1CrossDomainMessengerAddress = _OVM_L1CrossDomainMessengerAddress;
     }
 
     /**
@@ -209,13 +197,17 @@ contract OVM_L1CrossDomainMessengerRegenesis is iOVM_L1CrossDomainMessenger, Lib
         );
 
         require(
-            OVM_L1CrossDomainMessenger(OVM_L1CrossDomainMessengerAddress).successfulMessages(xDomainCalldataHash) == false,
-            "Provided message has already been received in OVM_L1CrossDomainMessenger."
+            OVM_L1CrossDomainMessenger(
+                Lib_AddressManager(libAddressManager).getAddress('Proxy__OVM_L1CrossDomainMessengerFast')
+            ).successfulMessages(xDomainCalldataHash) == false,
+            "Provided message has already been received in OVM_L1CrossDomainMessengerFast."
         );
 
         require(
-            OVM_L1CrossDomainMessenger(OVM_L1CrossDomainMessengerAddress).blockedMessages(xDomainCalldataHash) == false,
-            "Provided message has been blocked in OVM_L1CrossDomainMessenger."
+            OVM_L1CrossDomainMessenger(
+                Lib_AddressManager(libAddressManager).getAddress('Proxy__OVM_L1CrossDomainMessengerFast')
+            ).blockedMessages(xDomainCalldataHash) == false,
+            "Provided message has been blocked in OVM_L1CrossDomainMessengerFast."
         );
 
         require(
@@ -398,27 +390,6 @@ contract OVM_L1CrossDomainMessengerRegenesis is iOVM_L1CrossDomainMessenger, Lib
             _proof.storageTrieWitness,
             account.storageRoot
         );
-    }
-
-    /**
-     * @notice Forwards multiple cross domain messages to the L1 Cross Domain Messenger for relaying
-     * @param _messages An array of L2 to L1 messages
-     */
-    function batchRelayMessages(
-        L2ToL1Message[] calldata _messages
-    )
-        external
-    {
-        for (uint256 i = 0; i < _messages.length; i++) {
-            L2ToL1Message memory message = _messages[i];
-            relayMessage(
-                message.target,
-                message.sender,
-                message.message,
-                message.messageNonce,
-                message.proof
-            );
-        }
     }
 
     /**
