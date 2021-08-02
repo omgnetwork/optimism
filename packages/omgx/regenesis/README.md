@@ -1,6 +1,6 @@
 # Regenesis
 
-The regenesis means that we upgrade the OMGX network by regenerating the genesis block. During the regenesis, the state dump of the latest block is generated (including all user's nonces, token balances, contract code, and contract storage) and a new chain is spun up from this latest state sump. Since the new chain is started from the new genesis block, we have to remove all transactions historys and logs. The transaction historys and logs will be inaccessible from the new chain execept under extreme circumstances.
+The regenesis means that we upgrade the OMGX network by regenerating the genesis block. During the regenesis, the state dump of the latest block is generated (including all user's nonces, token balances, contract code, and contract storage) and a new chain is spun up from this latest state sump. Since the new chain is started from the new genesis block, we have to remove all transaction history and logs. The transaction history and logs will be inaccessible from the new chain except under extreme circumstances.
 
 ## Upcoming
 
