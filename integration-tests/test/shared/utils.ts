@@ -39,12 +39,12 @@ const env = cleanEnv(process.env, {
   REPLICA_POLLING_INTERVAL: num({ default: 10 }),
   PRIVATE_KEY: str({
     default:
-      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
+      '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6',
   }),
   ADDRESS_MANAGER: str({
     default: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
   }),
-  L2_CHAINID: num({ default: 420 }),
+  L2_CHAINID: num({ default: 28 }),
   IS_LIVE_NETWORK: bool({ default: false }),
 })
 

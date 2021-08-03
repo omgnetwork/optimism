@@ -31,9 +31,8 @@ Use .env.example for quick tests
 ADDRESS_MANAGER_ADDRESS= <address manager contract address>
 L1_NODE_WEB3_URL= <l1 node url>
 L2_NODE_WEB3_URL= <l2 node url>
-L1_WALLET_KEY= <l1 wallet key>
 L1_MESSENGER_ADDRESS= <l1 custom messenger address>
-L1_WALLET_KEY= <private_key account for relayer>
+FAST_RELAYER_PRIVATE_KEY= <private_key account for relayer>
 L1_TARGET= <target contract to allow relays to, set to 0x0 to skip>
 
 ```
@@ -71,14 +70,3 @@ yarn start:service
 ```
 
 This starts the service for the registered custom messenger. Specify L1_MESSENGER_FAST=<messenger> to spin up the relayer for your messenger
-
-## Build a DockerHub Message Relayer Fast
-
-To build the Message Relayer Fast docker image:
-
-```bash
-
-docker build . --file Dockerfile.message-relayer-fast --tag omgx/message-relayer-fast:latest
-docker push omgx/message-relayer-fast:latest
-
-```
