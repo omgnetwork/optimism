@@ -20,7 +20,7 @@ Since we start from the block #0 after the regenesis, the Graph will have to re-
 
 ## How do we make a Regenesis?
 
-> This part is for someone who understands the optimism infrasture.
+> This part is for someone who understands the optimism infrastructure.
 
 ### Step 0: make the L2 endpoint private
 
