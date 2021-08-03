@@ -3,6 +3,8 @@
 # Copyright Optimism PBC 2020
 # MIT License
 # github.com/ethereum-optimism
+export ROLLUP_ENFORCE_FEES=`/opt/secret2env -name $SECRETNAME|grep -w ROLLUP_ENFORCE_FEES|sed 's/ROLLUP_ENFORCE_FEES=//g'`
+export ROLLUP_GAS_PRICE_ORACLE_OWNER_ADDRESS=`/opt/secret2env -name $SECRETNAME|grep -w ROLLUP_GAS_PRICE_ORACLE_OWNER_ADDRESS|sed 's/ROLLUP_GAS_PRICE_ORACLE_OWNER_ADDRESS=//g'`
 export ETH1_L1_FEE_WALLET_ADDRESS=`/opt/secret2env -name $SECRETNAME|grep -w ETH1_L1_FEE_WALLET_ADDRESS|sed 's/ETH1_L1_FEE_WALLET_ADDRESS=//g'`
 export CHAIN_ID=`/opt/secret2env -name $SECRETNAME|grep -w CHAIN_ID|sed 's/CHAIN_ID=//g'`
 export DATADIR=`/opt/secret2env -name $SECRETNAME|grep -w DATADIR|sed 's/DATADIR=//g'`
