@@ -72,7 +72,6 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     eventCache: ethers.Event[]
     Lib_AddressManager: Contract
     OVM_StateCommitmentChain: Contract
-    OVM_L1CrossDomainMessenger: Contract
     OVM_L1CrossDomainMessengerFast: Contract
     OVM_L1CrossDomainMessengerRegenesis: Contract
     OVM_L2CrossDomainMessenger: Contract
@@ -110,20 +109,6 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     })
     this.logger.info('Connected to OVM_StateCommitmentChain', {
       address: this.state.OVM_StateCommitmentChain.address,
-    })
-
-    // Connect to Standard OVM_L1CrossDomainMessenger
-    this.logger.info('Connecting to OVM_L1CrossDomainMessenger...')
-    const OVM_L1CrossDomainMessenger = await this.state.Lib_AddressManager.getAddress(
-      'OVM_L1CrossDomainMessengerOrigin'
-    )
-    this.state.OVM_L1CrossDomainMessenger = loadContract(
-      'OVM_L1CrossDomainMessenger',
-      OVM_L1CrossDomainMessenger,
-      this.options.l1RpcProvider
-    )
-    this.logger.info('Connected to OVM_L1CrossDomainMessenger', {
-      address: this.state.OVM_L1CrossDomainMessenger.address,
     })
 
     // Connect to new OVM_L1CrossDomainMessenger without 7-days check
