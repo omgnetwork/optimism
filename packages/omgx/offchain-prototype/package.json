@@ -17,26 +17,18 @@
     "test:omgx": "hardhat --network omgx test"
   },
   "devDependencies": {
-    "@eth-optimism/hardhat-ovm": "^0.0.2",
-    "@ethersproject/providers": "^5.2.0",
+    "@eth-optimism/hardhat-ovm": "^0.2.2",
+    "@ethersproject/providers": "^5.0.24",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@types/mocha": "^8.2.2",
     "chai": "^4.3.3",
-    "directory-tree": "^2.2.7",
-    "ethers": "^5.2.0",
-    "hardhat": "^2.1.2",
+    "ethers": "^5.0.32",
+    "hardhat": "^2.2.1",
     "mocha": "^8.3.1",
-    "omgx_core-utils": "git+https://github.com/omgnetwork/omgx_core-utils",
     "ts-node": "^9.1.1",
-    "typescript": "^4.2.4"
+    "typescript": "^4.2.3"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^3.3.0",
-    "dotenv": "^8.2.0",
-    "ethereum-waffle": "^3.3.0",
-    "glob": "^7.1.6",
-    "ip": "^1.1.5",
-    "omgx_contracts": "git+https://github.com/omgnetwork/omgx_contracts",
-    "patch-package": "^6.4.7"
+    "ip": "^1.1.5"
   }
 }
