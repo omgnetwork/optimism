@@ -12,9 +12,7 @@ module.exports = {
     optimism: {
       url: 'http://127.0.0.1:8545',
       // instantiate with a mnemonic so that you have >1 accounts available
-      accounts: {
-        mnemonic: env.mnemonic
-      },
+      accounts: [env.privateKey1, env.privateKey2],
       // accounts: [env.privateKey1, env.privateKey2],
       gasPrice: 15000000,
       ovm: true // This sets the network as using the ovm and ensure contract will be compiled against that.
@@ -23,9 +21,7 @@ module.exports = {
     omgx_rinkeby: {
       url: 'https://rinkeby.omgx.network',
       // instantiate with a mnemonic so that you have >1 accounts available
-      accounts: {
-        mnemonic: env.mnemonic
-      },
+      accounts: [env.privateKey1, env.privateKey2],
       // accounts: [env.privateKey1, env.privateKey2],
       gasPrice: 15000000,
       ovm: true // This sets the network as using the ovm and ensure contract will be compiled against that.

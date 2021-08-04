@@ -43,16 +43,15 @@ describe(`StableSwap`, () => {
   })
 
   it(`A should be 0 for initialization`, async () => {
-    const AAmount = await StableSwap.a()
+    const AAmount = await StableSwap.A()
     expect(AAmount).to.equal(0)
   })
 
   describe(`change A(...)`, () => {
     it(`should change A from 0 to 1`, async () => {
-      const tx = StableSwap.connect(account1).changeA(1)
-      await tx.wait()
+      const tx = await StableSwap.connect(account1).changeA(1)
 
-      const AAmount = await StableSwap.a()
+      const AAmount = await StableSwap.A()
       expect(AAmount).to.equal(1)
     })
 
@@ -67,8 +66,7 @@ describe(`StableSwap`, () => {
 
   describe(`add liquidity(...)`, () => {
     it(`should add x_add & y_add to total liquidity`, async () => {
-      const tx = StableSwap.connect(account1).addLiquidity(X_ADD, Y_ADD)
-      await tx.wait()
+      const tx = await StableSwap.connect(account1).addLiquidity(X_ADD, Y_ADD)
     })
 
     it(`x should equal (x_supply + x_add)`, async () => {
@@ -87,7 +85,7 @@ describe(`StableSwap`, () => {
     })
 
     it(`A should remain 1`, async () => {
-      const AAmount = await StableSwap.a()
+      const AAmount = await StableSwap.A()
       expect(AAmount).to.equal(1)
     })
 
@@ -122,7 +120,7 @@ describe(`StableSwap`, () => {
     })
 
     it(`A should remain 1`, async () => {
-      const AAmount = await StableSwap.a()
+      const AAmount = await StableSwap.A()
       expect(AAmount).to.equal(1)
     })
 
@@ -157,7 +155,7 @@ describe(`StableSwap`, () => {
     })
 
     it(`A should remain 1`, async () => {
-      const AAmount = await StableSwap.a()
+      const AAmount = await StableSwap.A()
       expect(AAmount).to.equal(1)
     })
 
@@ -199,7 +197,7 @@ describe(`StableSwap`, () => {
     })
 
     it(`A should remain 1`, async () => {
-      const AAmount = await StableSwap.a()
+      const AAmount = await StableSwap.A()
       expect(AAmount).to.equal(1)
     })
 
