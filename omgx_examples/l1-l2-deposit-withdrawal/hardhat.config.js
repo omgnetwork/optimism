@@ -28,6 +28,7 @@ module.exports = {
       },
       // accounts: [env.privateKey1, env.privateKey2],
       gasPrice: 15000000,
+      gas: 8000000,
       ovm: true // This sets the network as using the ovm and ensure contract will be compiled against that.
     },
   },
