@@ -136,6 +136,7 @@ function info {
 }
 
 function verify_images_in_ecr {
+  set -x
 # cached old docker images makes docker refuse to pull latest!
   #docker system prune -a -f --volumes
   info "Login to AWS ECR and start building image"
@@ -179,18 +180,10 @@ function verify_images_in_ecr {
         cd ${PATH_TO_DOCKER}/${SERVICE_NAME}
         cp -fRv ../../secret2env .
         if [ -z ${FROMTAG} ]; then
-          if [[ ${image} == "omgx-gas-price-oracle" ]]; then
-              docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/omgx_gas-price-oracle" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-          else
           docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-          fi
           docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
         else
-          if [[ ${image} == "omgx-gas-price-oracle" ]]; then
-              docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/omgx_gas-price-oracle" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-          else
           docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${SERVICE_NAME}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
-          fi
           docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
         fi
         cd ../..
