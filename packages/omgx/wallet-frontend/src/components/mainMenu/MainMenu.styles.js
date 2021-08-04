@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 
 export const Menu = styled.div`
+  flex: 1;
   width: 300px;
   padding-top: 70px;
   padding-left: 40px;

@@ -1,61 +1,5 @@
 import styled from '@emotion/styled';
-
-export const MainBar = styled.div`
-  display: flex;
-  width: 100%;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-around;
-  margin-top: 30px;
-  margin-bottom: 15px;
-  @include mobile {
-    flex-direction: column;
-    align-items: center;
-    margin-top: 0px;
-  }
-`;
-
-export const MainLeft = styled.div`
-  width: 520px;
-  font-size: 1.3em;
-  color: $gray3;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  padding: 3px;
-  @include mobile {
-    width: unset;
-    font-size: 1.2em;
-    padding-bottom: 20px;
-    padding-left: 20px;
-  }
-
-  h2 {
-    font-size: 62px;
-    line-height: 62px;
-    color: #fff;
-    font-weight: 700;
-  }
-
-  p {
-    font-size: 24px;
-    line-height: 38px;
-    font-weight: 300;
-  }
-`;
-
-export const MainRightContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-`;
-
-export const DisabledMM = styled.div`
-  padding-top: 20px;
-  font-size: 0.9em;
-  color: $red;
-`;
-
+import BgWallet from "../../images/backgrounds/bg-wallet.png";
 
 export const WalletPickerContainer = styled.div`
   display: flex;
@@ -157,4 +101,42 @@ export const Loading = styled.div`
   height: 100vh;
   font-size: 20px;
   color: $gray4;
+`;
+
+export const WalletCard = styled.div`
+  border-top-right-radius: 16px;
+  border-bottom-left-radius: 16px;
+  padding: 40px;
+  background: url(${BgWallet});
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+`;
+
+export const WalletCardHeading = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  div {
+    background-color: #091426;
+    border-radius: 50%;
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  h4 {
+    font-size: 38px;
+    font-weight: 200;
+    margin: 0px;
+  }
+`;
+
+export const DescriptionContent = styled.div`
+  display: flex;
+  align-items: center;
 `;

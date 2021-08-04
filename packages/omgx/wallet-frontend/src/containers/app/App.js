@@ -39,6 +39,7 @@ import { setWalletMethod } from 'actions/setupAction';
 import { isChangingChain } from 'util/changeChain';
 import styled from '@emotion/styled';
 import MainMenu from 'components/mainMenu/MainMenu';
+import { Box } from '@material-ui/core';
 
 const themeLight = createTheme({
   palette: {}
@@ -55,6 +56,26 @@ const themeDark = createTheme({
     text: {
       primary: '#fff'
     }
+  },
+  typography: {
+    fontFamily: ["MrEavesXL", 'Roboto'].join(','),
+    h1: {
+      color: '#fff',
+      fontSize: 42,
+      fontWeight: 700,
+    },
+    h2: {
+      fontSize: 32,
+      fontWeight: 300,
+    },
+    h3: {
+      fontSize: 24,
+      fontWeight: 300,
+    },
+    body1: {
+      fontSize: 18,
+    }
+    // fontSize:
   }
 });
 
@@ -84,7 +105,7 @@ function App () {
     <ThemeProvider theme={light ? themeLight : themeDark}>
       <CssBaseline />
       <Router>
-        <div style={{display: 'flex'}}>
+        <Box sx={{ display: 'flex' }}>
           <MainMenu light={light} setLight={setLight} />
           <div>
             <div className={styles.App}>
@@ -118,7 +139,7 @@ function App () {
 
             </div>
           </div>
-        </div>
+        </Box>
       </Router>
     </ThemeProvider>
   );

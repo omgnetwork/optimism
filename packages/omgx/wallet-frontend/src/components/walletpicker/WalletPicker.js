@@ -36,6 +36,11 @@ import chevron from 'images/chevron.svg';
 import { isChangingChain } from 'util/changeChain';
 import Button from 'components/button/Button';
 import * as S from "./WalletPicker.styles"
+import { ReactComponent as Arrow } from './../../images/icons/arrow-right.svg';
+import { ReactComponent as Fox } from './../../images/icons/fox-icon.svg';
+import { Box, Container, Grid, Link } from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
+import { grey } from '@material-ui/core/colors';
 
 function WalletPicker ({ onEnable, enabled }) {
   const dispatch = useDispatch();
@@ -144,7 +149,54 @@ function WalletPicker ({ onEnable, enabled }) {
         open={wrongNetworkModalState}
         onClose={resetSelection}
       />
-
+      <Box sx={{ py: 10 }}>
+        <Container maxWidth="md">
+            <Grid container spacing={8}>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="h1" component="h1" gutterBottom>
+                    Connect a Wallet to access your assets on the network
+                  </Typography>
+                  <Box sx={{ mt: 4, mb: 8, mr: 10 }}>
+                    <Typography variant="body1" component="p" gutterBottom paragraph={true} style={{ color: grey[500] }}>
+                      Select the wallet that u use to connect it to OMGx system! Don’t worry more wallets support is coming soon
+                    </Typography>
+                  </Box>
+                  <S.DescriptionContent>
+                    <Link
+                      style={{ color: grey[500] }}
+                      color= '#fff'
+                      href="#"
+                      underline="hover"
+                      variant="body1"
+                      onClick={() => {
+                        console.info("I'm a button.");
+                      }}
+                    >
+                      More about OMGX and how L2 work
+                    </Link>
+                    <Arrow />
+                  </S.DescriptionContent>
+                </Grid>
+              <Grid item xs={12} md={6}>
+                <S.WalletCard>
+                  <S.WalletCardHeading>
+                    <div>+</div>
+                    <Typography variant="h2" component="h2" paragraph={true} mb={0}>
+                      Metamask
+                    </Typography>
+                  </S.WalletCardHeading>
+                  {/* <S.WalletCardIcon> */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <Typography variant="body1" component="p" gutterBottom paragraph={true} mt={4} mr={4}>
+                      Connect using <strong>browser </strong>wallet
+                    </Typography>
+                    <Fox width={50} />
+                    </Box>
+                  {/* </S.WalletCardIcon> */}
+                </S.WalletCard>
+              </Grid>
+          </Grid>
+        </Container>
       <S.WalletPickerContainer>
         <S.WallerPickerWrapper>
           <S.Menu>
@@ -167,10 +219,10 @@ function WalletPicker ({ onEnable, enabled }) {
             <S.Dropdown
               ref={dropdownNode}
             >
-              {!!allNetworks.length && showAllNetworks && allNetworks.map((network, index) => (
+              {!!allNetworks.length && showAllNetworks && allNetworks.map((network,   ) => (
                 <div
                   style={{background: '#2A308E', color: 'white', marginTop: 5, padding: 5, borderRadius: 3, cursor: 'pointer'}}
-                  key={index}
+                  // key={index}
                   onClick={()=>dispatchSetNetwork(network)}
                 >
                   {network}
@@ -181,35 +233,28 @@ function WalletPicker ({ onEnable, enabled }) {
           </S.Menu>
         </S.WallerPickerWrapper>
       </S.WalletPickerContainer>
+      </Box>
 
-      <S.MainBar>
-        <S.MainLeft>
-          <h2>Connect a Wallet to access your assets on the network</h2>
-          <p>Select the wallet that u use to connect it to OMGx system! Don’t worry more wallets support is coming soon</p>
-        </S.MainLeft>
-        <S.MainRightContainer>
-          <Button
-            type="primary"
-            disabled={!browserEnabled}
-            pulsate={true}
-            // className={styles.ButtonConnect}
-            onClick={() => dispatchSetWalletMethod('browser')}
-          >
-            Connect to MetaMask
-          </Button>
-          {!browserEnabled &&
-            <S.DisabledMM>Your browser does not have a web3 provider.</S.DisabledMM>
-          }
+            {/* <Button
+              type="primary"
+              disabled={!browserEnabled}
+              pulsate={true}
+              // className={styles.ButtonConnect}
+              onClick={() => dispatchSetWalletMethod('browser')}
+            >
+              Connect to MetaMask
+            </Button>
+            {!browserEnabled &&
+              <S.DisabledMM>Your browser does not have a web3 provider.</S.DisabledMM>
+            }
 
-          <Button
-            type="primary"
-            // className={styles.ButtonAdd}
-            onClick={() => networkService.addL2Network()}
-          >
-            Add OMGX L2 Provider
-          </Button>
-        </S.MainRightContainer>
-      </S.MainBar>
+            <Button
+              type="primary"
+              // className={styles.ButtonAdd}
+              onClick={() => networkService.addL2Network()}
+            >
+              Add OMGX L2 Provider
+            </Button> */}
     </>
   );
 }
