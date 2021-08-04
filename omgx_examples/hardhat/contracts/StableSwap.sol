@@ -3,6 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SignedSafeMath.sol";
 
 
 /**
@@ -13,7 +14,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
  contract StableSwap {
 
     using SafeMath for uint256;
-    using SafeMath for int256;
+    using SignedSafeMath for int256;
 
     uint256 public x;
     uint256 public y;
@@ -146,7 +147,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
         require(y > 0 && y <= k);
         uint256 rootK = sqrt(k);
         uint256 LHS = (A.mul(4)).mul(x.add(y)).add(rootK.mul(2));
-        uint256 RHS = (A.mul(4)).mul(rootK.mul(2)).add((pow((rootK.mul(2)),3))).div((x.mul(4)).mul(y));
+        uint256 RHS = (A.mul(4)).mul(rootK.mul(2)).add(uint256(pow(int256(rootK.mul(2)),3))).div((x.mul(4)).mul(y));
         pass = (LHS == RHS);
     }
 
@@ -161,7 +162,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
         uint256 newY;
 
         int256 alpha = int256((a.mul(4)).mul(newX));
-        int256 beta = int256((a.mul(4)).mul(pow(newX,2))).add(int256((newX.mul(4)).mul(K))).sub(int256(((a.mul(4)).mul(K).mul(newX))));
+        int256 beta = int256((a.mul(4)).mul(uint256(pow(int256(newX),2)))).add(int256((newX.mul(4)).mul(K))).sub(int256(((a.mul(4)).mul(K).mul(newX))));
         int256 gamma = -(pow(int256(K),3));
 
         // Solving quadratic
@@ -196,7 +197,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
         uint256 newX;
 
         int256 alpha = int256((a.mul(4)).mul(newY));
-        int256 beta = int256((a.mul(4)).mul(pow(newY,2))).add(int256((newY.mul(4)).mul(K))).sub(int256(((a.mul(4)).mul(K).mul(newY))));
+        int256 beta = int256((a.mul(4)).mul(uint256(pow(int256(newY),2)))).add(int256((newY.mul(4)).mul(K))).sub(int256(((a.mul(4)).mul(K).mul(newY))));
         int256 gamma = -(pow(int256(K),3));
 
         // Solving quadratic
