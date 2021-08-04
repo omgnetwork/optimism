@@ -2,12 +2,18 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+import "@openzeppelin/contracts/math/SafeMath.sol";
+
+
 /**
  * @title Storage
  * @dev Store & retrieve value in a variable
  */
 
  contract StableSwap {
+
+    using SafeMath for uint256;
+    using SafeMath for int256;
 
     uint256 public x;
     uint256 public y;
@@ -63,7 +69,7 @@ pragma solidity >=0.7.0 <0.9.0;
     function removeLiquidity(uint256 percOut) public returns (uint256 x_back, uint256 y_back) {
         require(percOut > 0 && percOut <= 100);
         x_back = (x.mul(percOut)).div(100);
-        y_back = (x.mul(percOut)).div(100);
+        y_back = (y.mul(percOut)).div(100);
         x = x.sub(x_back);
         y = y.sub(y_back);
         k = x.mul(y);
@@ -110,14 +116,37 @@ pragma solidity >=0.7.0 <0.9.0;
     }
 
     /**
+     * @dev Safe Power function
+     * @param base, exponent to find base^(exponent)
+     * Adapted from https://forum.openzeppelin.com/t/does-safemath-library-need-a-safe-power-function/871/8
+     */
+    function pow(int256 base, int256 exponent) public pure returns (int256) {
+        if (exponent == 0) {
+            return 1;
+        }
+        else if (exponent == 1) {
+            return base;
+        }
+        else if (base == 0 && exponent != 0) {
+            return 0;
+        }
+        else {
+            int256 z = base;
+            for (int256 i = 1; i < exponent; i++)
+                z = z.mul(base);
+            return z;
+        }
+    }
+
+    /**
      * @dev Boolean function enforcing stable swap invariant
      */
     function invariant() public view returns (bool pass){
         require(x > 0 && x <= k);
         require(y > 0 && y <= k);
         uint256 rootK = sqrt(k);
-        uint256 LHS = 4.mul(A).mul(x.add(y)) + 2.mul(rootK);
-        uint256 RHS = 4.mul(A).mul(2.mul(rootK)).add((2.mul((rootK).pow(3))).div(4.mul(x).mul(y)));
+        uint256 LHS = (A.mul(4)).mul(x.add(y)).add(rootK.mul(2));
+        uint256 RHS = (A.mul(4)).mul(rootK.mul(2)).add((pow((rootK.mul(2)),3))).div((x.mul(4)).mul(y));
         pass = (LHS == RHS);
     }
 
@@ -127,22 +156,22 @@ pragma solidity >=0.7.0 <0.9.0;
      */
     function swap_x(uint256 x_in) public returns (uint256 y_out){
         uint256 newX = x.add(x_in);
-        uint256 a = 4.mul(A);
-        uint256 K = 2.mul(sqrt(k));
+        uint256 a = A.mul(4);
+        uint256 K = sqrt(k).mul(2);
         uint256 newY;
 
-        int256 alpha = int256(4.mul(a).mul(newX));
-        int256 beta = int256(4.mul(a).mul(newX.pow(2))).add(int256(4.mul(newX).mul(K))).sub(int256((4.mul(a).mul(K).mul(newX))));
-        int256 gamma = -(int256(K).pow(3));
+        int256 alpha = int256((a.mul(4)).mul(newX));
+        int256 beta = int256((a.mul(4)).mul(pow(newX,2))).add(int256((newX.mul(4)).mul(K))).sub(int256(((a.mul(4)).mul(K).mul(newX))));
+        int256 gamma = -(pow(int256(K),3));
 
         // Solving quadratic
 
-        int256 d = (beta.mul(beta)).sub(4.mul(alpha).mul(gamma));
+        int256 d = (beta.mul(beta)).sub((alpha.mul(4)).mul(gamma));
         int256 sqrtD = int256(sqrt(uint256(abs(d))));
 
         if(d >= 0){
-            int256 root1 = (-beta.add(sqrtD)).div(2.mul(alpha));
-            int256 root2 = (-beta.sub(sqrtD)).div(2.mul(alpha));
+            int256 root1 = (-beta.add(sqrtD)).div(alpha.mul(2));
+            int256 root2 = (-beta.sub(sqrtD)).div(alpha.mul(2));
             newY = uint256((root1 > 0 && root1 <= int256(k))? root1 : root2);
             y_out = y.sub(newY);
 
@@ -162,22 +191,22 @@ pragma solidity >=0.7.0 <0.9.0;
      */
     function swap_y(uint256 y_in) public returns (uint256 x_out){
         uint256 newY = y.add(y_in);
-        uint256 a = 4.mul(A);
-        uint256 K = 2.mul(sqrt(k));
+        uint256 a = (A.mul(4));
+        uint256 K = sqrt(k).mul(2);
         uint256 newX;
 
-        int256 alpha = int256(4.mul(a).mul(newY));
-        int256 beta = int256(4.mul(a).mul(newY.pow(2))).add(int256(4.mul(newY).mul(K))).sub(int256((4.mul(a).mul(K).mul(newY))));
-        int256 gamma = -(int256(K).pow(3));
+        int256 alpha = int256((a.mul(4)).mul(newY));
+        int256 beta = int256((a.mul(4)).mul(pow(newY,2))).add(int256((newY.mul(4)).mul(K))).sub(int256(((a.mul(4)).mul(K).mul(newY))));
+        int256 gamma = -(pow(int256(K),3));
 
         // Solving quadratic
 
-        int256 d = (beta.mul(beta)).sub(4.mul(alpha).mul(gamma));
+        int256 d = (beta.mul(beta)).sub((alpha.mul(4)).mul(gamma));
         int256 sqrtD = int256(sqrt(uint256(abs(d))));
 
         if(d >= 0){
-            int256 root1 = (-beta.add(sqrtD)).div(2.mul(alpha));
-            int256 root2 = (-beta.sub(sqrtD)).div(2.mul(alpha));
+            int256 root1 = (-beta.add(sqrtD)).div(alpha.mul(2));
+            int256 root2 = (-beta.sub(sqrtD)).div(alpha.mul(2));
             newX = uint256((root1 > 0 && root1 <= int256(k))? root1 : root2);
             x_out = x.sub(newX);
 
