@@ -30,7 +30,10 @@ def watcher_getCrossDomainMessage(event, context):
   with con:
     try:
       cur = con.cursor()
-      cur.execute("""SELECT hash, blockNumber, `from`, `to`, timestamp, crossDomainMessage, crossDomainMessageFinalize, fastRelay, crossDomainMessageEstimateFinalizedTime FROM receipt WHERE hash=%s""", (receiptHash))
+      cur.execute("""SELECT hash, blockNumber, `from`, `to`, timestamp, crossDomainMessage, crossDomainMessageFinalize, fastRelay, crossDomainMessageEstimateFinalizedTime,
+        l1Hash, l1BlockNumber, l1BlockHash, l1From, l1To
+        FROM receipt WHERE hash=%s""", (receiptHash)
+      )
       transactionDataRaw = cur.fetchall()[0]
       transactionData = {
         "hash": transactionDataRaw[0],
@@ -41,7 +44,12 @@ def watcher_getCrossDomainMessage(event, context):
         "crossDomainMessage": transactionDataRaw[5],
         "crossDomainMessageFinalize": transactionDataRaw[6],
         "fastRelay": transactionDataRaw[7],
-        "crossDomainMessageEstimateFinalizedTime": transactionDataRaw[8]
+        "crossDomainMessageEstimateFinalizedTime": transactionDataRaw[8],
+        "l1Hash": transactionDataRaw[9],
+        "l1BlockNumber": transactionDataRaw[10],
+        "l1BlockHash": transactionDataRaw[11],
+        "l1From": transactionDataRaw[12],
+        "l1To": transactionDataRaw[13]
       }
     except Exception as e:
       transactionData = {}
