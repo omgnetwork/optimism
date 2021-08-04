@@ -161,8 +161,8 @@ services:
       # This is who pays for the fast message relayer
       FAST_RELAYER_PRIVATE_KEY: "0xde9be858da4a475276426320d5e9262ecfc3ba460bfac56360bfa6c4c28b4ee0"
       RETRIES: 70
-      POLLING_INTERVAL: 1500
-      GET_LOGS_INTERVAL: 500
+      POLLING_INTERVAL: 4500
+      GET_LOGS_INTERVAL: 1500
       FILTER_ENDPOINT: http://omgx_deployer:8079/addresses.json
       FILTER_POLLING_INTERVAL: 30000
 
