@@ -307,6 +307,7 @@ func (b *EthAPIBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 // a lock can be used around the remotes for when the sequencer is reorganizing.
 func (b *EthAPIBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
 	if b.UsingOVM {
+//log.Debug("MMDBG api_backend.go SendTx", "signedTx", signedTx)
 		to := signedTx.To()
 		if to != nil {
 			if *to == (common.Address{}) {

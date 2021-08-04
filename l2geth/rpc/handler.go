@@ -25,7 +25,14 @@ import (
 	"sync"
 	"time"
 
+        // The following are needed for the Turing off-chain mechanism
+	//"fmt"
+	//"bytes"
 	"github.com/ethereum/go-ethereum/log"
+	//"github.com/ethereum/go-ethereum/common/hexutil"
+	//"github.com/ethereum/go-ethereum/rlp"
+	//"math/big"
+
 )
 
 // handler handles JSON-RPC messages. There is one handler per connection. Note that
@@ -136,10 +143,18 @@ func (h *handler) handleMsg(msg *jsonrpcMessage) {
 		return
 	}
 	h.startCallProc(func(cp *callProc) {
+// MMDBG 3
+
+		if msg.Method != "eth_chainId" && msg.Method != "eth_blockNumber" && msg.Method != "eth_getBlockByNumber" && msg.Method != "rollup_getInfo" {
+			log.Debug("MMDBG handler.go incoming RPC", "msg", msg)
+		}
 		answer := h.handleCallMsg(cp, msg)
 		h.addSubscriptions(cp.notifiers)
 		if answer != nil {
 			h.conn.writeJSON(cp.ctx, answer)
+			if msg.Method != "eth_chainId" && msg.Method != "eth_blockNumber" && msg.Method != "rollup_getInfo" {
+				//log.Debug("MMDBG writeJSON", "ans", answer)
+			}
 		}
 		for _, n := range cp.notifiers {
 			n.activate()
@@ -219,10 +234,12 @@ func (h *handler) cancelServerSubscriptions(err error) {
 // startCallProc runs fn in a new goroutine and starts tracking it in the h.calls wait group.
 func (h *handler) startCallProc(fn func(*callProc)) {
 	h.callWG.Add(1)
+//MMDBG 1
 	go func() {
 		ctx, cancel := context.WithCancel(h.rootCtx)
 		defer h.callWG.Done()
 		defer cancel()
+// MMDBG 2
 		fn(&callProc{ctx: ctx})
 	}()
 }
@@ -295,7 +312,17 @@ func (h *handler) handleCallMsg(ctx *callProc, msg *jsonrpcMessage) *jsonrpcMess
 		h.log.Debug("Served "+msg.Method, "t", time.Since(start))
 		return nil
 	case msg.isCall():
-		resp := h.handleCall(ctx, msg)
+// MMDBG 4
+                var resp *jsonrpcMessage
+
+                if msg.Method == "eth_call" {
+		  //log.Debug("MMDBG4", "msg", msg, "PT", reflect.TypeOf(msg.Params))
+
+		  resp = h.handleCall(ctx, msg)
+	          //log.Debug("MMDBG4 wJ", "resp", resp)
+                } else {
+		  resp = h.handleCall(ctx, msg)
+		}
 		if resp.Error != nil {
 			h.log.Warn("Served "+msg.Method, "reqid", idForLog{msg.ID}, "t", time.Since(start), "err", resp.Error.Message)
 		} else {
@@ -324,11 +351,17 @@ func (h *handler) handleCall(cp *callProc, msg *jsonrpcMessage) *jsonrpcMessage 
 		return msg.errorResponse(&methodNotFoundError{method: msg.Method})
 	}
 	args, err := parsePositionalArguments(msg.Params, callb.argTypes)
+
+	if msg.Method == "eth_call" || msg.Method == "eth_estimateGas" {
+	  log.Debug("MMDBG handler.go handleCall starting", "Method", msg.Method) // , "CallArgs", args[0].Interface())
+	}
 	if err != nil {
 		return msg.errorResponse(&invalidParamsError{err.Error()})
 	}
 
-	return h.runMethod(cp.ctx, msg, callb, args)
+// MMDBG 5
+	rMsg := h.runMethod(cp.ctx, msg, callb, args)
+	return rMsg
 }
 
 // handleSubscribe processes *_subscribe method calls.
@@ -366,7 +399,13 @@ func (h *handler) handleSubscribe(cp *callProc, msg *jsonrpcMessage) *jsonrpcMes
 
 // runMethod runs the Go callback for an RPC method.
 func (h *handler) runMethod(ctx context.Context, msg *jsonrpcMessage, callb *callback, args []reflect.Value) *jsonrpcMessage {
+// MMDBG 6
 	result, err := callb.call(ctx, msg.Method, args)
+
+	//if msg.Method == "eth_call" && err != nil {
+	//  log.Debug("MMDBG handler.go check for Turing request:", "err", err, "result", result, "args", args)
+	//}
+
 	if err != nil {
 		return msg.errorResponse(err)
 	}

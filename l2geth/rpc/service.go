@@ -27,6 +27,8 @@ import (
 	"unicode"
 
 	"github.com/ethereum/go-ethereum/log"
+//	"github.com/ethereum/go-ethereum/accounts/abi"
+//	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 var (
@@ -203,6 +205,7 @@ func (c *callback) call(ctx context.Context, method string, args []reflect.Value
 		}
 	}()
 	// Run the callback.
+// MMDBG 7
 	results := c.fn.Call(fullargs)
 	if len(results) == 0 {
 		return nil, nil
@@ -210,6 +213,7 @@ func (c *callback) call(ctx context.Context, method string, args []reflect.Value
 	if c.errPos >= 0 && !results[c.errPos].IsNil() {
 		// Method has returned non-nil error value.
 		err := results[c.errPos].Interface().(error)
+		//log.Debug("MMDBG non-Turing error result in service.go", "results", results[0].Interface(), "err", err)
 		return reflect.Value{}, err
 	}
 	return results[0].Interface(), nil
