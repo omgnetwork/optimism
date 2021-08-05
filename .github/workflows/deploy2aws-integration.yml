@@ -26,6 +26,8 @@ jobs:
       run: |
             cd ops_omgx
             ./cfn-devenv.sh stop --stack-name integration
+            ./cfn-devenv.sh restart --stack-name integration --service-name l1-proxy
+            ./cfn-devenv.sh restart --stack-name integration --service-name deployer
 
     - name: Update All other services
       run: |
