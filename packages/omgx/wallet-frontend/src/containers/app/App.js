@@ -17,6 +17,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import * as S from './App.styles.js';
 
 import {
   BrowserRouter as Router,
@@ -39,6 +40,7 @@ import { setWalletMethod } from 'actions/setupAction';
 import { isChangingChain } from 'util/changeChain';
 import styled from '@emotion/styled';
 import MainMenu from 'components/mainMenu/MainMenu';
+import { Box } from '@material-ui/core';
 
 const themeLight = createTheme({
   palette: {}
@@ -55,6 +57,26 @@ const themeDark = createTheme({
     text: {
       primary: '#fff'
     }
+  },
+  typography: {
+    fontFamily: ["MrEavesXL", 'Roboto'].join(','),
+    h1: {
+      color: '#fff',
+      fontSize: 42,
+      fontWeight: 700,
+    },
+    h2: {
+      fontSize: 32,
+      fontWeight: 300,
+    },
+    h3: {
+      fontSize: 24,
+      fontWeight: 300,
+    },
+    body1: {
+      fontSize: 18,
+    }
+    // fontSize:
   }
 });
 
@@ -84,9 +106,9 @@ function App () {
     <ThemeProvider theme={light ? themeLight : themeDark}>
       <CssBaseline />
       <Router>
-        <div style={{display: 'flex'}}>
+        <Box sx={{ display: 'flex' }}>
           <MainMenu light={light} setLight={setLight} />
-          <div>
+          <S.Content>
             <div className={styles.App}>
 
               <Alert
@@ -117,8 +139,8 @@ function App () {
               </Switch>
 
             </div>
-          </div>
-        </div>
+          </S.Content>
+        </Box>
       </Router>
     </ThemeProvider>
   );
