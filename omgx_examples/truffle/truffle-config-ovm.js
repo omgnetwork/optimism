@@ -17,8 +17,8 @@ module.exports = {
       network_id: 28,
       host: '127.0.0.1',
       port: 8545,
-      gasPrice: 0,
-      gas: 11000000,
+      gasPrice: 15000000,
+      gas: 54190000,
     },
     omgx_rinkeby: {
       provider: function () {
@@ -32,8 +32,8 @@ module.exports = {
       network_id: 28,
       host: 'http://rinkeby.omgx.network',
       gasPrice: 15000000,
-      gas: 8000000
-    }
+      gas: 8000000,
+    },
   },
   compilers: {
     solc: {
