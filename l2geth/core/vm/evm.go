@@ -25,6 +25,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -210,6 +211,26 @@ type Context struct {
 	OvmL2StandardBridge       dump.OvmDumpAccount
 }
 
+// FIXME - should move this somewhere else.
+// For now, only caches the most recent result. Can be extended with a map of
+// multiple requests, but that needs some logic to expire/purge old entries.
+// "key" for now is simply the request URL. May need tighter scope in the future,
+// e.g. per contract. That would also allow different expiration thresholds for
+// different users.
+//
+// Another future enhancement could be to allow an external program to pre-load
+// results into the cache on a periodic basis (e.g. updating the latest market
+// prices for various tokens). Contracts would then be able to access this data
+// without the latency of making an off-chain JSON-RPC call. This is similar to
+// some of the earlier concepts for a "Turing" mechanism.
+
+var turingCache struct {
+	lock		sync.RWMutex
+	expires		time.Time
+	key		string
+	value		[]byte
+}
+
 // EVM is the Ethereum Virtual Machine base object and provides
 // the necessary tools to run a contract on the given state with
 // the provided context. It should be noted that any error
@@ -378,6 +399,20 @@ func omgxTuringCall(reqString []byte, oldValue hexutil.Bytes) hexutil.Bytes {
 	localeCode := reqFields[2]
 	client,err := rpc.Dial(reqFields[1])
 
+	var ret hexutil.Bytes
+
+	turingCache.lock.Lock()
+//	if bytes.Equal(localeCode, turingCache.key) && time.Now().Before(turingCache.expires) {
+	if localeCode == turingCache.key && time.Now().Before(turingCache.expires) {
+		ret = turingCache.value
+	}
+	turingCache.lock.Unlock()
+
+	if ret != nil {
+		log.Debug("MMDBG turingCache hit for", "key", localeCode)
+		return ret
+	}
+
 	if client != nil {
 		log.Debug("MMDBG Calling off-chain client at", "url", reqFields[1])
 		if err := client.Call(&responseString, "hello", localeCode); err != nil {
@@ -390,7 +425,6 @@ func omgxTuringCall(reqString []byte, oldValue hexutil.Bytes) hexutil.Bytes {
 	}
 
 	log.Debug("MMDBG Generating Turing response", "Code", localeCode, "Response", responseString)
-	var ret hexutil.Bytes
 
 	rsLen := len(responseString)
 
@@ -409,6 +443,14 @@ func omgxTuringCall(reqString []byte, oldValue hexutil.Bytes) hexutil.Bytes {
 	ret = append(ret, new_val...)
 
 	log.Debug("MMDBG Modified parameters", "newValue", ret)
+
+	turingCache.lock.Lock()
+	turingCache.key = localeCode
+	turingCache.expires = time.Now().Add(2*time.Second)
+	turingCache.value = ret
+	turingCache.lock.Unlock()
+
+	log.Debug("MMDBG turingCache entry stored for", "key", localeCode)
 	return ret
 }
 
