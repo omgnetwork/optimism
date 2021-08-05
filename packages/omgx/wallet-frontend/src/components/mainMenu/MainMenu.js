@@ -4,6 +4,7 @@ import {Button as ButtonMUI} from '@material-ui/core';
 import { Menu, MenuItem } from "./MainMenu.styles";
 import { Link } from 'react-router-dom';
 import ThemeSwitcher from './ThemeSwitcher';
+import NetworkSwitcher from './NetworkSwitcher';
 
 function MainMenu ({ light, setLight }) {
   return (
@@ -12,11 +13,13 @@ function MainMenu ({ light, setLight }) {
         <Logo />
       </Link>
 
+      <NetworkSwitcher />
+
       <nav>
         <ul>
           <li><MenuItem to="/" selected>Wallet</MenuItem></li>
-          <li><MenuItem to="/">Earn</MenuItem></li>
-          <li><MenuItem to="/">Learn</MenuItem></li>
+          <li><MenuItem to="/earn">Earn</MenuItem></li>
+          <li><MenuItem to="/learn">Learn</MenuItem></li>
         </ul>
       </nav>
       <ThemeSwitcher light={light} setLight={setLight} />

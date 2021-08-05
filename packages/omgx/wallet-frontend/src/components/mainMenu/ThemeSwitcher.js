@@ -1,3 +1,7 @@
+// TODO
+// 1. Persist theme on localStorage
+// 2. Testing
+
 import React from 'react';
 import * as S from './ThemeSwitcher.styles.js'
 import { ReactComponent as DarkIcon } from './../../images/icons/dark-icon.svg';

@@ -205,42 +205,6 @@ function WalletPicker ({ onEnable, enabled }) {
               </Grid>
           </Grid>
         </Container>
-      <S.WalletPickerContainer>
-        <S.WallerPickerWrapper>
-          <S.Menu>
-            <S.NetWorkStyle
-              onClick={()=>setShowAllNetworks(prev => !prev)}
-            >
-              <S.Indicator />
-              <div>
-                OMGX {masterConfig}
-              </div>
-              {!!allNetworks.length && (
-                <S.Chevron
-                  open={showAllNetworks}
-                  src={chevron}
-                  alt='chevron'
-                />
-              )}
-            </S.NetWorkStyle>
-
-            <S.Dropdown
-              ref={dropdownNode}
-            >
-              {!!allNetworks.length && showAllNetworks && allNetworks.map((network,   ) => (
-                <div
-                  style={{background: '#2A308E', color: 'white', marginTop: 5, padding: 5, borderRadius: 3, cursor: 'pointer'}}
-                  // key={index}
-                  onClick={()=>dispatchSetNetwork(network)}
-                >
-                  {network}
-                </div>))
-              }
-            </S.Dropdown>
-
-          </S.Menu>
-        </S.WallerPickerWrapper>
-      </S.WalletPickerContainer>
       </Box>
     </>
   );
