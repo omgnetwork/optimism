@@ -146,9 +146,9 @@ import "@openzeppelin/contracts/math/SignedSafeMath.sol";
         require(x > 0 && x <= k);
         require(y > 0 && y <= k);
         uint256 rootK = sqrt(k);
-        uint256 LHS = (A.mul(4)).mul(x.add(y)).add(rootK.mul(2));
-        uint256 RHS = (A.mul(4)).mul(rootK.mul(2)).add(uint256(pow(int256(rootK.mul(2)),3))).div((x.mul(4)).mul(y));
-        pass = (LHS == RHS);
+        uint256 LHS = ((A.mul(4)).mul(x.add(y))).add(rootK.mul(2));
+        uint256 RHS = ((A.mul(4)).mul(rootK.mul(2))).add((uint256(pow(int256(rootK.mul(2)),3))).div((x.mul(4)).mul(y)));
+        pass = (abs(int256(LHS) - int256(RHS)) < 50);
     }
 
     /**
@@ -158,11 +158,11 @@ import "@openzeppelin/contracts/math/SignedSafeMath.sol";
     function swap_x(uint256 x_in) public returns (uint256 y_out){
         uint256 newX = x.add(x_in);
         uint256 a = A.mul(4);
-        uint256 K = sqrt(k).mul(2);
+        uint256 K = (sqrt(k)).mul(2);
         uint256 newY;
 
         int256 alpha = int256((a.mul(4)).mul(newX));
-        int256 beta = int256((a.mul(4)).mul(uint256(pow(int256(newX),2)))).add(int256((newX.mul(4)).mul(K))).sub(int256(((a.mul(4)).mul(K).mul(newX))));
+        int256 beta = (int256((a.mul(4)).mul(uint256(pow(int256(newX),2))))).add(int256((newX.mul(4)).mul(K))).sub(int256(((a.mul(4)).mul(K).mul(newX))));
         int256 gamma = -(pow(int256(K),3));
 
         // Solving quadratic
@@ -171,15 +171,14 @@ import "@openzeppelin/contracts/math/SignedSafeMath.sol";
         int256 sqrtD = int256(sqrt(uint256(abs(d))));
 
         if(d >= 0){
-            int256 root1 = (-beta.add(sqrtD)).div(alpha.mul(2));
-            int256 root2 = (-beta.sub(sqrtD)).div(alpha.mul(2));
+            int256 root1 = ((-beta).add(sqrtD)).div(alpha.mul(2));
+            int256 root2 = ((-beta).sub(sqrtD)).div(alpha.mul(2));
             newY = uint256((root1 > 0 && root1 <= int256(k))? root1 : root2);
-            y_out = y.sub(newY);
-
             //Changing variables for future
-            x = newY;
-            y = newX;
+            x = newX;
+            y = newY;
             assert(invariant());
+            y_out = y.sub(newY);
         }
         else{
             revert("Wrong swap amount provided");
@@ -197,7 +196,7 @@ import "@openzeppelin/contracts/math/SignedSafeMath.sol";
         uint256 newX;
 
         int256 alpha = int256((a.mul(4)).mul(newY));
-        int256 beta = int256((a.mul(4)).mul(uint256(pow(int256(newY),2)))).add(int256((newY.mul(4)).mul(K))).sub(int256(((a.mul(4)).mul(K).mul(newY))));
+        int256 beta = (int256((a.mul(4)).mul(uint256(pow(int256(newY),2))))).add(int256((newY.mul(4)).mul(K))).sub(int256(((a.mul(4)).mul(K).mul(newY))));
         int256 gamma = -(pow(int256(K),3));
 
         // Solving quadratic
@@ -206,15 +205,15 @@ import "@openzeppelin/contracts/math/SignedSafeMath.sol";
         int256 sqrtD = int256(sqrt(uint256(abs(d))));
 
         if(d >= 0){
-            int256 root1 = (-beta.add(sqrtD)).div(alpha.mul(2));
-            int256 root2 = (-beta.sub(sqrtD)).div(alpha.mul(2));
+            int256 root1 = ((-beta).add(sqrtD)).div(alpha.mul(2));
+            int256 root2 = ((-beta).sub(sqrtD)).div(alpha.mul(2));
             newX = uint256((root1 > 0 && root1 <= int256(k))? root1 : root2);
-            x_out = x.sub(newX);
 
             //Changing variables for future
-            x = newY;
-            y = newX;
+            x = newX;
+            y = newY;
             assert(invariant());
+            x_out = x.sub(newX);
         }
         else{
             revert("Wrong swap amount provided");

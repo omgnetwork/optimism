@@ -17,7 +17,7 @@ describe(`StableSwap`, () => {
   })
 
   let StableSwap
-  beforeEach(`initialize token balances for x and y`, async () => {
+  before(`initialize token balances for x and y`, async () => {
     const Factory__StableSwap = await ethers.getContractFactory('StableSwap')
     StableSwap = await Factory__StableSwap.connect(account1).deploy(
       X_SUPPLY,
@@ -96,12 +96,14 @@ describe(`StableSwap`, () => {
   })
 
   const X_SWAP_IN = 500
-  const EXPECTED_Y_OUT = 447
+  const EXPECTED_Y_OUT = 448
 
   describe(`swap x for y(...)`, () => {
     it(`should add x_swap_in to liquidity of x and remove y_swap_in from liquidity of y`, async () => {
-      const Y_SWAP_OUT = await StableSwap.connect(account1).swap_x(X_SWAP_IN) // Does this work??
-      expect(Y_SWAP_OUT).to.equal(EXPECTED_Y_OUT)
+      // const Y_SWAP_OUT = await StableSwap.callStatic.swap_x(X_SWAP_IN)
+      // expect(Y_SWAP_OUT).to.equal(EXPECTED_Y_OUT)
+      const tx = await StableSwap.swap_x(X_SWAP_IN)
+      const receipt = await tx.wait()
     })
 
     it(`x should equal (x_supply + x_add + x_swap_in)`, async () => {
@@ -111,7 +113,7 @@ describe(`StableSwap`, () => {
 
     it(`y should equal (y_supply + y_add - y_swap_out)`, async () => {
       const yAmount = await StableSwap.y()
-      expect(yAmount).to.equal(Y_SUPPLY + Y_ADD - Y_SWAP_OUT)
+      expect(yAmount).to.equal(Y_SUPPLY + Y_ADD - EXPECTED_Y_OUT)
     })
 
     it(`k should remain same, equal (x_supply + x_add) * (y_supply + y_add)`, async () => {
@@ -130,23 +132,25 @@ describe(`StableSwap`, () => {
     })
   })
 
-  const Y_SWAP_IN = 447
+  const Y_SWAP_IN = 448
   const EXPECTED_X_OUT = 500
 
   describe(`swap y for x(...)`, () => {
     it(`should add y_swap_in to liquidity of y and remove x_swap_out from liquidity of y`, async () => {
-      const X_SWAP_OUT = await StableSwap.connect(account1).swap_y(Y_SWAP_IN) // Does this work??
-      expect(X_SWAP_OUT).to.equal(EXPECTED_X_OUT)
+      // const X_SWAP_OUT = await StableSwap.callStatic.swap_y(Y_SWAP_IN)
+      // expect(X_SWAP_OUT).to.equal(EXPECTED_X_OUT)
+      const tx = await StableSwap.swap_y(Y_SWAP_IN)
+      const receipt = await tx.wait()
     })
 
     it(`x should equal (x_supply + x_add + x_swap_in - x_swap_out)`, async () => {
       const xAmount = await StableSwap.x()
-      expect(xAmount).to.equal(X_SUPPLY + X_ADD + X_SWAP_IN - X_SWAP_OUT)
+      expect(xAmount).to.equal(X_SUPPLY + X_ADD + X_SWAP_IN - EXPECTED_X_OUT)
     })
 
     it(`y should equal (y_supply + y_add - y_swap_out + y_swap_in)`, async () => {
       const yAmount = await StableSwap.y()
-      expect(yAmount).to.equal(Y_SUPPLY + Y_ADD - Y_SWAP_OUT + Y_SWAP_IN)
+      expect(yAmount).to.equal(Y_SUPPLY + Y_ADD - EXPECTED_Y_OUT + Y_SWAP_IN)
     })
 
     it(`k should remain same, equal (x_supply + x_add) * (y_supply + y_add)`, async () => {
@@ -172,27 +176,30 @@ describe(`StableSwap`, () => {
 
   describe(`remove liquidity(...)`, () => {
     it(`should remove x_back & y_back to total liquidity`, async () => {
-      const { X_BACK, Y_BACK } = await StableSwap.connect(
-        account1
-      ).removeLiquidity(LIQUIDITY_PERCENT_OUT) // Does this work??
-      expect(X_BACK).to.equal(EXPECTED_X_BACK)
-      expect(Y_BACK).to.equal(EXPECTED_Y_BACK)
+      // const { X_BACK, Y_BACK } = await StableSwap.callStatic.removeLiquidity(
+      //   LIQUIDITY_PERCENT_OUT
+      // )
+      // expect(X_BACK).to.equal(EXPECTED_X_BACK)
+      // expect(Y_BACK).to.equal(EXPECTED_Y_BACK)
+
+      const tx = await StableSwap.removeLiquidity(LIQUIDITY_PERCENT_OUT)
+      const receipt = await tx.wait()
     })
 
     it(`x should equal (x_supply + x_add - x_back)`, async () => {
       const xAmount = await StableSwap.x()
-      expect(xAmount).to.equal(X_SUPPLY + X_ADD - X_BACK)
+      expect(xAmount).to.equal(X_SUPPLY + X_ADD - EXPECTED_X_BACK)
     })
 
     it(`y should equal (y_supply + y_add - y_back)`, async () => {
       const yAmount = await StableSwap.y()
-      expect(yAmount).to.equal(Y_SUPPLY + Y_ADD - Y_BACK)
+      expect(yAmount).to.equal(Y_SUPPLY + Y_ADD - EXPECTED_Y_BACK)
     })
 
     it(`k should equal (x_supply + x_add - x_back) * (y_supply + y_add - y_back)`, async () => {
       const kAmount = await StableSwap.k()
       expect(kAmount).to.equal(
-        (X_SUPPLY + X_ADD - X_BACK) * (Y_SUPPLY + Y_ADD - Y_BACK)
+        (X_SUPPLY + X_ADD - EXPECTED_X_BACK) * (Y_SUPPLY + Y_ADD - EXPECTED_Y_BACK)
       )
     })
 
