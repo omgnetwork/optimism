@@ -32,7 +32,7 @@ function InputStep({ handleClose, token }) {
     if(token.symbol === 'ETH') {
       console.log("Depositing ETH")
       if (value > 0) {
-        res = await dispatch(depositETHL2(value))
+        res = await dispatch(depositETHL2(value, gasPrice))
         if (res) {
           dispatch(setActiveHistoryTab1('Deposits'))
           dispatch(openAlert('ETH deposit submitted'))
@@ -111,6 +111,7 @@ function InputStep({ handleClose, token }) {
           loading={depositLoading}
           tooltip="Your swap is still pending. Please wait for confirmation."
           disabled={disabledSubmit}
+          triggerTime={new Date()}
         >
           DEPOSIT
         </Button>

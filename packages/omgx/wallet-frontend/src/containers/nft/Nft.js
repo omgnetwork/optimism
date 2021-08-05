@@ -3,12 +3,7 @@ import { connect } from 'react-redux'
 import { isEqual } from 'lodash'
 
 import ListNFT from 'components/listNFT/listNFT'
-
-import Button from 'components/button/Button'
-import Input from 'components/input/Input'
-import networkService from 'services/networkService'
-import { openError } from 'actions/uiAction'
-import { addNFTContract } from 'actions/nftAction'
+import ListNFTfactory from 'components/listNFTfactory/listNFTfactory'
 
 import * as styles from './Nft.module.scss'
 
@@ -51,41 +46,19 @@ class Nft extends React.Component {
  
   }
 
-  async addNewNFT() {
-
-    const { newAddress  } = this.state;
-
-    const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
-    
-    if (!networkStatus) {
-      this.props.dispatch(openError('Please use L2 network.'));
-      return;
-    }
-
-    this.setState({ loading: true })
-
-    await addNFTContract( newAddress) 
-    await networkService.addNFTFactoryNS( newAddress )
-
-    this.setState({ newAddress: '' });
-
-    this.setState({ loading: false })
-
-  }
-
   render() {
 
     const { 
       list,
-      factories,
-      newAddress,
-      loading 
+      factories
     } = this.state;
 
-    //console.log("Factories:",factories)
-
     const numberOfNFTs = Object.keys(list).length
-    const numberOfFactories = Object.keys(factories).length
+    //const numberOfFactories = Object.keys(factories).length
+
+    let rights = Object.keys(factories).map((v, i) => {
+      return factories[v].haveRights
+    }).filter(Boolean).length
 
     return (
 
@@ -93,26 +66,29 @@ class Nft extends React.Component {
         
         <div className={styles.boxContainer}>
 
-          <h2>Your NFT Factories</h2>
+          <h2>NFT Factories</h2>
 
-          {numberOfFactories > 0 && 
+          {rights > 0 && 
             <div className={styles.note}>
-              Status: You have owner permissions and are authorized to mint new NFTs. 
-              Select the desired NFT factory and click "Actions" to mint NFTs.
+              Status: You have owner permissions for one or more NFT factories 
+              and are authorized to mint new NFTs. Select the desired NFT factory 
+              and click "Actions" to mint NFTs.
             </div> 
           }
-          {numberOfFactories === 0 &&
+
+          {rights === 0 &&
             <div className={styles.note}>
               Status: You do not have owner permissions and you not 
-              are authorized to mint new NFTs. 
-              Obtain an NFT, and then you can derive new NFTs from it.
+              are authorized to mint new NFTs. To create you own NFT 
+              factory, obtain an NFT first.
             </div> 
           }
 
           <div className={styles.TableContainer}>
             {Object.keys(factories).map((v, i) => {
+              if(factories[v].haveRights) {
               return (
-                <ListNFT 
+                <ListNFTfactory 
                   key={i}
                   name={factories[v].name}
                   symbol={factories[v].symbol}
@@ -123,44 +99,22 @@ class Nft extends React.Component {
                   oriChain={factories[v].originChain}
                   oriAddress={factories[v].originAddress}
                   oriID={factories[v].originID}
+                  oriFeeRecipient={factories[v].originFeeRecipient}
                   haveRights={factories[v].haveRights}
                 />
               )
+              } else {
+                return (<></>)
+              }
             })}
           </div>
         </div>
 
-        <div className={styles.nftContainer}>
+        <div 
+          className={styles.nftContainer}
+        >
           
           <h2>Your NFTs</h2>
-
-            <div className={styles.note}>
-              To add an NFT, please fill in its contract address and click "Add".
-            </div> 
-
-            <div className={styles.ListNFT}>
-              
-              <div style={{fontSize: '1em', fontWeight: 700, paddingBottom: '5px'}}>Add NFT</div>
-
-              <Input
-                small={false}
-                style={{width: '90%'}}
-                placeholder="New NFT contract address (0x...)"
-                onChange={i=>{this.setState({newAddress: i.target.value})}}
-                value={newAddress}
-              />
-              
-              <Button
-                type='primary'
-                size='small'
-                disabled={!newAddress}
-                onClick={()=>{this.addNewNFT()}}
-                loading={loading}
-              >
-                Add NFT
-              </Button>
-              
-          </div>
 
           {numberOfNFTs === 1 && 
             <div className={styles.note}>You have one NFT and it should be shown below.</div> 
@@ -169,29 +123,32 @@ class Nft extends React.Component {
             <div className={styles.note}>You have {numberOfNFTs} NFTs and they should be shown below.</div> 
           }
           {numberOfNFTs < 1 &&
-            <div className={styles.note}>You do not have any NFTs.</div> 
+            <div className={styles.note}>Scanning the blockchain for your NFTs...</div> 
           }
-
-            {Object.keys(list).map((v, i) => {
-              return (
-                <ListNFT 
-                  key={i}
-                  name={list[v].name}
-                  symbol={list[v].symbol}
-                  owner={list[v].owner}
-                  address={list[v].address}
-                  layer={list[v].layer}
-                  icon={cellIcon}
-                  UUID={list[v].UUID}
-                  URL={list[v].url}
-                  time={list[v].mintedTime}
-                  oriChain={list[v].originChain}
-                  oriAddress={list[v].originAddress}
-                  oriID={list[v].originID}
-                />
-              )
-            })
+          <div className={styles.nftTiles} >
+          {Object.keys(list).map((v, i) => {
+            return (
+              <ListNFT 
+                key={i}
+                name={list[v].name}
+                symbol={list[v].symbol}
+                owner={list[v].owner}
+                address={list[v].address}
+                layer={list[v].layer}
+                icon={cellIcon}
+                UUID={list[v].UUID}
+                URL={list[v].url}
+                time={list[v].mintedTime}
+                oriChain={list[v].originChain}
+                oriAddress={list[v].originAddress}
+                oriID={list[v].originID}
+                oriFeeRecipient={list[v].originFeeRecipient}
+                type={list[v].type}
+              />
+            )
+          })
           }
+          </div>
 
         </div>
 

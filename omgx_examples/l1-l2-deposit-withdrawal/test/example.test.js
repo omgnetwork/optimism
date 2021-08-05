@@ -8,6 +8,9 @@ const factory = (name, ovm = false) => {
   const artifact = require(`../artifacts${ovm ? '-ovm' : ''}/contracts/${name}.sol/${name}.json`)
   return new ethers.ContractFactory(artifact.abi, artifact.bytecode)
 }
+require('dotenv').config();
+const env = process.env;
+
 const factory__L1_ERC20 = factory('ERC20')
 const factory__L2_ERC20 = factory('L2StandardERC20', true)
 const factory__L1StandardBridge = factory('OVM_L1StandardBridge')
@@ -15,8 +18,8 @@ const factory__L2StandardBridge = factory('OVM_L2StandardBridge', true)
 
 describe(`L1 <> L2 Deposit and Withdrawal`, () => {
   // Set up our RPC provider connections.
-  const l1RpcProvider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:9545')
-  const l2RpcProvider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545')
+  const l1RpcProvider = new ethers.providers.JsonRpcProvider(env.L1_NODE_WEB3_URL);
+  const l2RpcProvider = new ethers.providers.JsonRpcProvider(env.L2_NODE_WEB3_URL);
 
   // Constructor arguments for `ERC20.sol`
   const INITIAL_SUPPLY = 1234
@@ -24,11 +27,11 @@ describe(`L1 <> L2 Deposit and Withdrawal`, () => {
   const L1_ERC20_SYMBOL = 'L1 ERC20'
 
   // L1 standard bridge address depends on the deployment, this is default for our local deployment.
-  const L1StandardBridgeAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
+  const L1StandardBridgeAddress = '0xDe085C82536A06b40D20654c2AbA342F2abD7077'
   // L2 standard bridge address is always the same.
   const L2StandardBridgeAddress = '0x4200000000000000000000000000000000000010'
   // L1 messenger address depends on the deployment, this is default for our local deployment.
-  const l1MessengerAddress = '0x59b670e9fA9D0A427751Af201D676719a970857b'
+  const l1MessengerAddress = '0xF10EEfC14eB5b7885Ea9F7A631a21c7a82cf5D76'
   // L2 messenger address is always the same.
   const l2MessengerAddress = '0x4200000000000000000000000000000000000007'
 
@@ -38,9 +41,10 @@ describe(`L1 <> L2 Deposit and Withdrawal`, () => {
   // Set up our wallets (using a default private key with 10k ETH allocated to it).
   // Need two wallets objects, one for interacting with L1 and one for interacting with L2.
   // Both will use the same private key.
-  const key = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-  const l1Wallet = new ethers.Wallet(key, l1RpcProvider)
-  const l2Wallet = new ethers.Wallet(key, l2RpcProvider)
+  const key1 = env.privateKey1;
+  const key2 =env.privateKey2;
+  const l1Wallet = new ethers.Wallet(key1, l1RpcProvider);
+  const l2Wallet = new ethers.Wallet(key2, l2RpcProvider);
 
   // Tool that helps watches and waits for messages to be relayed between L1 and L2.
   const watcher = new Watcher({
@@ -56,17 +60,14 @@ describe(`L1 <> L2 Deposit and Withdrawal`, () => {
 
   const L1StandardBridge = factory__L1StandardBridge.connect(l1Wallet).attach(L1StandardBridgeAddress)
   const L2StandardBridge = factory__L2StandardBridge.connect(l2Wallet).attach(L2StandardBridgeAddress)
-  let L1_ERC20, L2_ERC20, L1GasLimit = 9999999, L2GasLimit = 9999999;
+  let L1_ERC20, L2_ERC20, L1GasLimit = 8000000, L2GasLimit = 8000000;
 
   before(`deploy contracts`, async () => {
     // Deploy an ERC20 token on L1.
     L1_ERC20 = await factory__L1_ERC20.connect(l1Wallet).deploy(
       INITIAL_SUPPLY,
       L1_ERC20_NAME,
-      L1_ERC20_SYMBOL,
-      {
-        gasPrice: 0
-      }
+      L1_ERC20_SYMBOL
     )
 
     await L1_ERC20.deployTransaction.wait()
@@ -76,10 +77,7 @@ describe(`L1 <> L2 Deposit and Withdrawal`, () => {
       L2StandardBridgeAddress,
       L1_ERC20.address,
       L2_ERC20_NAME,
-      L2_ERC20_SYMBOL,
-      {
-        gasPrice: 0
-      }
+      L2_ERC20_SYMBOL
     )
 
     await L2_ERC20.deployTransaction.wait()
@@ -110,8 +108,7 @@ describe(`L1 <> L2 Deposit and Withdrawal`, () => {
         L2_ERC20.address,
         1234,
         L2GasLimit,
-        ethers.utils.formatBytes32String('0'),
-        { gasPrice: 0 }
+        ethers.utils.formatBytes32String('0')
       )
       await l1Tx1.wait()
       const txHashPrefix = l1Tx1.hash.slice(0, 2)
@@ -149,10 +146,9 @@ describe(`L1 <> L2 Deposit and Withdrawal`, () => {
         L2_ERC20.address,
         1234,
         L1GasLimit,
-        ethers.utils.formatBytes32String('0'),
-        { gasPrice: 0 }
+        ethers.utils.formatBytes32String('0')
       )
-      await l2Tx1.wait()
+      await l2Tx1.wait();
       const txHashPrefix = l2Tx1.hash.slice(0, 2)
       expect(txHashPrefix).to.eq('0x')
     })

@@ -41,3 +41,15 @@ $ hardhat test --network omgx_rinkeby
 ✨  Done in 48.41s.
 
 ```
+
+## 3. Deployment
+
+ ```bash
+ $ yarn deploy:omgx
+yarn run v1.22.10
+$ hardhat deploy
+Compiling 1 file with 0.7.6
+Compilation finished successfully
+deploying "ERC20" (tx: 0x046c44db3a20fd96d2ae4ba722378511ba007d4c91921f7fbec49891d59aaa88)...: deployed at 0x5FbDB2315678afecb367f032d93F642f64180aa3 with 787426 gas
+✨  Done in 2.51s.
+ ```
