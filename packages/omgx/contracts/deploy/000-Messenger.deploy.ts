@@ -22,8 +22,9 @@ const deployFn: DeployFunction = async (hre) => {
       L1_MessengerJson.bytecode,
       (hre as any).deployConfig.deployer_l1
     )
-
+    console.log(`In 000-Messenger.deploy.ts`)
     L1_Messenger = await Factory__L1_Messenger.deploy()
+    console.log(`Made it here!`);
 
     await L1_Messenger.deployTransaction.wait()
 

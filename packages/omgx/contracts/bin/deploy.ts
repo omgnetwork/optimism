@@ -12,6 +12,8 @@ const main = async () => {
   //const config = parseEnv()
   //not clear if the output is used anywhere?
 
+
+
   const network = process.env.NETWORK || 'local'
 
   const l1Provider = new providers.JsonRpcProvider(process.env.L1_NODE_WEB3_URL)
@@ -25,6 +27,8 @@ const main = async () => {
       .connect(provider)
       .attach(addressManagerAddress) as any
   }
+  console.log(`Gas price of l1: ${await l1Provider.getGasPrice()}`)
+  console.log(`Gas price of l2: ${await l2Provider.getGasPrice()}`)
 
   console.log(`ADDRESS_MANAGER_ADDRESS was set to ${process.env.ADDRESS_MANAGER_ADDRESS}`)
   const addressManager = getAddressManager(deployer_l1, process.env.ADDRESS_MANAGER_ADDRESS);
@@ -44,6 +48,7 @@ const main = async () => {
     .attach(L1StandardBridgeAddress)
 
   const L2StandardBridgeAddress = await L1StandardBridge.l2TokenBridge()
+
 
   await hre.run('deploy', {
     l1MessengerAddress,
