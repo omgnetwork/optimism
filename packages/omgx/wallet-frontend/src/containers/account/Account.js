@@ -38,6 +38,7 @@ import * as styles from './Account.module.scss'
 import { selectTokens } from 'selectors/tokenSelector'
 import { fetchLookUpPrice } from 'actions/networkAction'
 import WalletAddress from 'components/walletAddress/WalletAddress'
+import PageHeader from 'components/pageHeader/PageHeader'
 
 function Account () {
   const dispatch = useDispatch();
@@ -87,14 +88,9 @@ function Account () {
 
   return (
     <div className={styles.Account}>
-      <WalletAddress />
+      <PageHeader title="Wallet" />
 
-      <div className={styles.wallet}>
-        <span className={styles.address}>{`Wallet Address : ${wAddress}`}</span>
-        <Copy value={networkService.account} />
-      </div>
-
-      {balances['oETH']['have'] &&
+      {/* {balances['oETH']['have'] &&
         <div className={styles.RabbitBox}>
           <img className={styles.bunny} src={bunny_happy} alt='Happy Bunny' />
           <div className={styles.RabbitRight}>
@@ -117,7 +113,7 @@ function Account () {
             </div>
           </div>
         </div>
-      }
+      } */}
 
       {!balances['oETH']['have'] &&
         <div className={styles.RabbitBox}>

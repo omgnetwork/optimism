@@ -68,7 +68,7 @@ function Home () {
 
   const [ mobileMenuOpen, setMobileMenuOpen ] = useState(false)
 
-  const [ pageDisplay, setPageDisplay ] = useState("History");
+  const [ pageDisplay, setPageDisplay ] = useState("AccountNow");
 
   const depositModalState = useSelector(selectModalState('depositModal'))
   const transferModalState = useSelector(selectModalState('transferModal'))
@@ -97,7 +97,7 @@ function Home () {
   useEffect(() => {
     window.scrollTo(0, 0);
     dispatch(fetchDeposits());
-    setPageDisplay("History");
+    setPageDisplay("AccountNow");
   }, [ dispatch ]);
 
   useInterval(() => {
