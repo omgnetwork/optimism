@@ -42,44 +42,6 @@ import styled from '@emotion/styled';
 import MainMenu from 'components/mainMenu/MainMenu';
 import { Box } from '@material-ui/core';
 
-const themeLight = createTheme({
-  palette: {}
-});
-
-const themeDark = createTheme({
-  palette: {
-    primary: {
-      main: '#F0A000',
-    },
-    background: {
-      default: "#061122"
-    },
-    text: {
-      primary: '#fff'
-    }
-  },
-  typography: {
-    fontFamily: ["MrEavesXL", 'Roboto'].join(','),
-    h1: {
-      color: '#fff',
-      fontSize: 42,
-      fontWeight: 700,
-    },
-    h2: {
-      fontSize: 32,
-      fontWeight: 300,
-    },
-    h3: {
-      fontSize: 24,
-      fontWeight: 300,
-    },
-    body1: {
-      fontSize: 18,
-    }
-    // fontSize:
-  }
-});
-
 function App () {
   const dispatch = useDispatch();
 
@@ -92,6 +54,42 @@ function App () {
   const handleErrorClose=()=>dispatch(closeError());
   const handleAlertClose=()=>dispatch(closeAlert());
 
+  const theme = createTheme({
+    palette: {
+      mode: light ? 'light' : 'dark',
+      primary: {
+        main: '#F0A000',
+      },
+      background: {
+        default: light ? "#fff" : "#061122"
+      },
+      // text: {
+      //   primary: '#fff'
+      // }
+    },
+    typography: {
+      fontFamily: ["MrEavesXL", 'Roboto'].join(','),
+      h1: {
+        fontSize: 42,
+        fontWeight: 700,
+      },
+      h2: {
+        fontSize: 32,
+        fontWeight: 300,
+      },
+      h3: {
+        fontSize: 24,
+        fontWeight: 300,
+      },
+      body1: {
+        fontSize: 18,
+      }
+      // fontSize:
+    }
+  });
+
+  console.log('theme is', theme)
+
   useEffect(() => {
     //dispatch(oracleService.initialize());
     if (isChangingChain) {
@@ -103,7 +101,7 @@ function App () {
   }, [dispatch, enabled])
 
   return (
-    <ThemeProvider theme={light ? themeLight : themeDark}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
         <Box sx={{ display: 'flex' }}>

@@ -8,15 +8,12 @@ import { ReactComponent as DarkIcon } from './../../images/icons/dark-icon.svg';
 import { ReactComponent as LightIcon } from './../../images/icons/light-icon.svg';
 
 function ThemeSwitcher ({ light, setLight }) {
-  const toggleTheme = () => {
-    setLight(!light);
-  }
   return (
     <S.ThemeSwitcherTag>
-      <S.Button onClick={toggleTheme} selected={!light}>
+      <S.Button onClick={() => setLight(false)} selected={!light}>
         <DarkIcon />
       </S.Button>
-      <S.Button onClick={toggleTheme} selected={light}>
+      <S.Button onClick={() => setLight(true)} selected={light}>
         <LightIcon />
       </S.Button>
     </S.ThemeSwitcherTag>
