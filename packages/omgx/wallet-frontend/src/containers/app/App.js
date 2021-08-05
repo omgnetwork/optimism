@@ -132,8 +132,7 @@ function App () {
               <Notification/>
 
               <Switch>
-                <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />}>
-                </Route>
+                <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />} />
               </Switch>
 
             </div>

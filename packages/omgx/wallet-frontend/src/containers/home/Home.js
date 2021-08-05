@@ -58,6 +58,7 @@ import Farm from 'containers/farm/Farm';
 import logo from 'images/omgx.png';
 
 import * as styles from './Home.module.scss';
+import { Container } from '@material-ui/core';
 
 const POLL_INTERVAL = 5000; //milliseconds
 
@@ -66,13 +67,13 @@ function Home () {
   const dispatch = useDispatch();
 
   const [ mobileMenuOpen, setMobileMenuOpen ] = useState(false)
-  
-  const [ pageDisplay, setPageDisplay ] = useState("AccountNow");
-  
+
+  const [ pageDisplay, setPageDisplay ] = useState("History");
+
   const depositModalState = useSelector(selectModalState('depositModal'))
   const transferModalState = useSelector(selectModalState('transferModal'))
   const exitModalState = useSelector(selectModalState('exitModal'))
-  
+
   const fast = useSelector(selectModalState('fast'))
   const token = useSelector(selectModalState('token'))
 
@@ -84,7 +85,7 @@ function Home () {
 
   const walletMethod = useSelector(selectWalletMethod())
   //const transactions = useSelector(selectlayer2Transactions, isEqual);
-  
+
   useEffect(() => {
     const body = document.getElementsByTagName('body')[0];
     mobileMenuOpen
@@ -96,7 +97,7 @@ function Home () {
   useEffect(() => {
     window.scrollTo(0, 0);
     dispatch(fetchDeposits());
-    setPageDisplay("AccountNow");
+    setPageDisplay("History");
   }, [ dispatch ]);
 
   useInterval(() => {
@@ -121,7 +122,7 @@ function Home () {
   useEffect(() => {
     checkVersion()
   }, [])
-  
+
   const handleSetPage = async (page) => {
     setPageDisplay(page)
   }
@@ -129,11 +130,11 @@ function Home () {
   return (
 
     <>
-      
+
       <DepositModal  open={depositModalState}  token={token} fast={fast} />
       <TransferModal open={transferModalState} token={token} fast={fast} />
       <ExitModal     open={exitModalState}     token={token} fast={fast} />
-      
+
       <AddTokenModal open={addTokenModalState} />
       <FarmDepositModal open={farmDepositModalState} />
       <FarmWithdrawModal open={farmWithdrawModalState} />
@@ -145,55 +146,54 @@ function Home () {
         }
       />
 
-      <div className={styles.Home}>
-        <div className={styles.sidebar}>
-          <img className={styles.logo} src={logo} alt='omgx' />
-          <Status />
-        </div>
+      <Container>
+
+
         <div className={styles.main}>
           <MobileHeader
             mobileMenuOpen={mobileMenuOpen}
             onHamburgerClick={()=>setMobileMenuOpen(open=>!open)}
           />
-          <MobileMenu 
+          <MobileMenu
             mobileMenuOpen={mobileMenuOpen}
           />
 
           {/* The Top SubMenu Bar, non-mobile */}
 
-          <div className={styles.secondtab}>
+          {/* <div className={styles.secondtab}>
             <h2
               className={pageDisplay === "AccountNow" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("AccountNow")}}
-            >  
+            >
               Wallet
             </h2>
             <h2
               className={pageDisplay === "History" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("History")}}
-            >  
+            >
               History
             </h2>
             <h2
               className={pageDisplay === "Farm" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("Farm")}}
-            >  
+            >
               Earn
             </h2>
             <h2
               className={pageDisplay === "NFT" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("NFT")}}
-            >  
+            >
               NFT
             </h2>
           </div>
+          */}
           {pageDisplay === "AccountNow" &&
-          <>  
+          <>
             <Account/>
           </>
           }
           {pageDisplay === "History" &&
-          <>  
+          <>
             <Transactions/>
           </>
           }
@@ -204,7 +204,7 @@ function Home () {
             <Farm/>
           }
         </div>
-      </div>
+      </Container>
     </>
   );
 }

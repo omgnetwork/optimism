@@ -27,12 +27,11 @@
     padding: 15px;
     width: 100%;
   }
-}   
+}
 
 .Account {
   padding: 10px;
   padding-top: 0px;
-  background: white;
 }
 
 .logo {
@@ -140,18 +139,18 @@
   @include mobile {
     flex-direction: column;
   }
-  
+
   .boxWrapper {
 
     padding: 0px;
     display: flex;
     flex-direction: column;
-    
+
     @include mobile {
       font-size: 0.8em;
       padding: 15px;
     }
-    
+
     /*this is the red/pink data box*/
     .box {
 
@@ -248,13 +247,13 @@
     }
 
     .boxActions {
-      
+
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      
+
       @include mobile {
         font-size: 0.8rem;
         padding: 15px;
