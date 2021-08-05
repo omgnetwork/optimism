@@ -160,33 +160,33 @@ function Home () {
 
           {/* The Top SubMenu Bar, non-mobile */}
 
-          {/* <div className={styles.secondtab}>
-            <h2
+          <div className={styles.secondtab}>
+            <span
               className={pageDisplay === "AccountNow" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("AccountNow")}}
             >
               Wallet
-            </h2>
-            <h2
+            </span>
+            <span
               className={pageDisplay === "History" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("History")}}
             >
               History
-            </h2>
-            <h2
+            </span>
+            <span
               className={pageDisplay === "Farm" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("Farm")}}
             >
               Earn
-            </h2>
-            <h2
+            </span>
+            <span
               className={pageDisplay === "NFT" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("NFT")}}
             >
               NFT
-            </h2>
+            </span>
           </div>
-          */}
+
           {pageDisplay === "AccountNow" &&
           <>
             <Account/>
