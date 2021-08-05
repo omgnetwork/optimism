@@ -22,9 +22,8 @@ export const executeL1ToL2Transactions = async (
   txs: TransactionParams[]
 ) => {
   for (const tx of txs) {
-    const signer = ethers.Wallet.createRandom().connect(
-      env.l1Wallet.provider
-    )
+    const signer = env.l1Wallet //ethers.Wallet.createRandom().connect(env.l1Wallet.provider)
+
     const receipt = await env.l1Messenger
       .connect(signer)
       .sendMessage(
@@ -35,7 +34,7 @@ export const executeL1ToL2Transactions = async (
         ),
         MESSAGE_GAS,
         {
-          gasPrice: 0
+          //gasPrice: 0,
         }
       )
 
@@ -48,9 +47,8 @@ export const executeL2ToL1Transactions = async (
   txs: TransactionParams[]
 ) => {
   for (const tx of txs) {
-    const signer = ethers.Wallet.createRandom().connect(
-      env.l2Wallet.provider
-    )
+    const signer = env.l2Wallet
+
     const receipt = await env.l2Messenger
       .connect(signer)
       .sendMessage(
@@ -61,7 +59,7 @@ export const executeL2ToL1Transactions = async (
         ),
         MESSAGE_GAS,
         {
-          gasPrice: 0
+          //gasPrice: 0,
         }
       )
 
@@ -75,13 +73,11 @@ export const executeL2Transactions = async (
   txs: TransactionParams[]
 ) => {
   for (const tx of txs) {
-    const signer = ethers.Wallet.createRandom().connect(
-      env.l2Wallet.provider
-    )
+    const signer = env.l2Wallet
     const result = await tx.contract
       .connect(signer)
       .functions[tx.functionName](...tx.functionParams, {
-        gasPrice: 0
+        //gasPrice: 0,
       })
     await result.wait()
   }
@@ -303,8 +299,8 @@ export const executeL1ToL2TransactionsParallel = async (
   txs: TransactionParams[]
 ) => {
   await Promise.all(
-    txs.map(async (tx, index) => {
-      const signer = ethers.Wallet.createRandom().connect(env.l1Wallet.provider)
+    txs.map(async (tx) => {
+      const signer = env.l1Wallet
       const receipt = await env.l1Messenger
         .connect(signer)
         .sendMessage(
@@ -329,8 +325,8 @@ export const executeL2ToL1TransactionsParallel = async (
   txs: TransactionParams[]
 ) => {
   await Promise.all(
-    txs.map(async (tx, index) => {
-      const signer = ethers.Wallet.createRandom().connect(env.l2Wallet.provider)
+    txs.map(async (tx) => {
+      const signer = env.l2Wallet
       const receipt = await env.l2Messenger
         .connect(signer)
         .sendMessage(
@@ -341,7 +337,7 @@ export const executeL2ToL1TransactionsParallel = async (
           ),
           MESSAGE_GAS,
           {
-            gasPrice: 0
+            //gasPrice: 0,
           }
         )
 
@@ -356,12 +352,12 @@ export const executeL2TransactionsParallel = async (
   txs: TransactionParams[]
 ) => {
   await Promise.all(
-    txs.map(async (tx, index) => {
-      const signer = ethers.Wallet.createRandom().connect(env.l2Wallet.provider)
+    txs.map(async (tx) => {
+      const signer = env.l2Wallet
       const result = await tx.contract
         .connect(signer)
         .functions[tx.functionName](...tx.functionParams, {
-          gasPrice: 0
+          //gasPrice: 0,
         })
       await result.wait()
     })
