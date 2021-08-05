@@ -72,7 +72,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 7
-      LogGroupName: !Sub "/omgx/${EnvironmentName}/batch-submitter/${ImageTag}"
+      LogGroupName: !Sub "/omgx/${EnvironmentName}/omgx-gas-price-oracle/${ImageTag}"
 
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
