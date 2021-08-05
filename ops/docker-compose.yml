@@ -158,7 +158,6 @@ services:
     depends_on:
       - l1_chain
       - deployer
-      - l2geth
     image: omgx/data-transport-layer:latest
     build:
       context: ..
@@ -184,6 +183,7 @@ services:
     depends_on:
       - l1_chain
       - deployer
+      - dtl
     image: omgx/l2geth:latest
     build:
       context: ..
