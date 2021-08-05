@@ -1,13 +1,14 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as S from './NetworkSwitcher.styles.js';
-import logo from 'images/omgx.png';
 import chevron from 'images/chevron.svg';
 import {
   selectNetwork,
 } from 'selectors/setupSelector';
 import { setNetwork } from 'actions/setupAction';
 import { getAllNetworks } from 'util/masterConfig';
+import { ReactComponent as NetworkSwitcherIcon } from "../../../images/icons/menuIcons/network-switcher-icon.svg"
+import { Box } from '@material-ui/system';
 
 function NetworkSwitcher() {
   const dispatch = useDispatch();
@@ -35,10 +36,10 @@ function NetworkSwitcher() {
           <S.NetWorkStyle
             onClick={()=>setShowAllNetworks(prev => !prev)}
           >
-            <S.Indicator />
-            <div>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
+              <NetworkSwitcherIcon />
               OMGX {masterConfig}
-            </div>
+            </Box>
             {!!allNetworks.length && (
               <S.Chevron
                 open={showAllNetworks}
@@ -53,7 +54,7 @@ function NetworkSwitcher() {
           >
             {!!allNetworks.length && showAllNetworks && allNetworks.map((network,   ) => (
               <div
-                style={{background: '#2A308E', color: 'white', marginTop: 5, padding: 5, borderRadius: 3, cursor: 'pointer'}}
+                style={{background: `linear-gradient(90deg, rgba(237, 72, 240, 0.09) 1.32%, rgba(237, 72, 236, 0.0775647) 40.2%`, color: 'white', marginTop: 5, paddingTop: 5, paddingBottom: 5, paddingLeft: 12, paddingRight: 5, borderRadius: 3, cursor: 'pointer'}}
                 // key={index}
                 onClick={()=>dispatchSetNetwork(network)}
               >

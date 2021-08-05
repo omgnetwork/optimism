@@ -1,10 +1,6 @@
 import styled from '@emotion/styled';
 import BgWallet from "../../images/backgrounds/bg-wallet.png";
 
-
-
-
-
 export const Loading = styled.div`
   display: flex;
   justify-content: center;
@@ -27,12 +23,7 @@ export const WalletCard = styled.div`
   cursor: pointer;
 `;
 
-export const WalletCardHeading = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  div {
+export const PlusIcon = styled.div`
     background-color: #091426;
     border-radius: 50%;
     font-size: 16px;
@@ -41,13 +32,6 @@ export const WalletCardHeading = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  h4 {
-    font-size: 38px;
-    font-weight: 200;
-    margin: 0px;
-  }
 `;
 
 export const DescriptionContent = styled.div`

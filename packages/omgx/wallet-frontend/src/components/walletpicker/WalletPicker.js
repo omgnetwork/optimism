@@ -179,20 +179,18 @@ function WalletPicker ({ onEnable, enabled }) {
                 </Grid>
               <Grid item xs={12} md={6}>
                 <S.WalletCard onClick={() => dispatchSetWalletMethod('browser')}>
-                  <S.WalletCardHeading>
-                    <div>+</div>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <S.PlusIcon>+</S.PlusIcon>
                     <Typography variant="h2" component="h2" paragraph={true} mb={0}>
                       Metamask
                     </Typography>
-                  </S.WalletCardHeading>
-                  {/* <S.WalletCardIcon> */}
+                  </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                     <Typography variant="body1" component="p" gutterBottom paragraph={true} mt={4} mr={4}>
                       Connect using <strong>browser </strong>wallet
                     </Typography>
                     <Fox width={50} />
                     </Box>
-                  {/* </S.WalletCardIcon> */}
                 </S.WalletCard>
                 <br />
                 <Button

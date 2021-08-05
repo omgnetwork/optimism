@@ -4,8 +4,8 @@
 
 import React from 'react';
 import * as S from './ThemeSwitcher.styles.js'
-import { ReactComponent as DarkIcon } from './../../images/icons/dark-icon.svg';
-import { ReactComponent as LightIcon } from './../../images/icons/light-icon.svg';
+import { ReactComponent as DarkIcon } from './../../../images/icons/dark-icon.svg';
+import { ReactComponent as LightIcon } from './../../../images/icons/light-icon.svg';
 
 function ThemeSwitcher ({ light, setLight }) {
   return (
