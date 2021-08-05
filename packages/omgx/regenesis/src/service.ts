@@ -436,12 +436,13 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   }
 
   private async _wasMessageRelayed(message: SentMessage): Promise<boolean> {
-    return this.state.OVM_L1CrossDomainMessengerRegenesis.successfulMessages(
-      message.encodedMessageHash
-    ) || this.state.OVM_L1CrossDomainMessengerFast.successfulMessages(
+    const regenesisStatus = await this.state.OVM_L1CrossDomainMessengerRegenesis.successfulMessages(
       message.encodedMessageHash
     )
-
+    const fastStatus = await this.state.OVM_L1CrossDomainMessengerFast.successfulMessages(
+      message.encodedMessageHash
+    )
+    return regenesisStatus || fastStatus
   }
 
   private async _getMessageProof(

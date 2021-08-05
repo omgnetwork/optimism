@@ -53,7 +53,6 @@ const deployFn: DeployFunction = async (hre) => {
   )
   console.log(`⭐️ ${chalk.blue('OVM_L1CrossDomainMessengerRegenesis registered:')} ${chalk.green(L1MessagerTXReg1.hash)}`)
 
-  //this will fail for non deployer account
   const L1MessagerTXReg2 = await addressManager.setAddress(
     'OVM_L1CrossDomainMessengerOrigin',
     (hre as any).deployConfig.OVM_L1CrossDomainMessengerAddress

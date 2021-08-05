@@ -12,7 +12,6 @@ const config: HardhatUserConfig = {
   networks: {
     optimism: {
       url: 'http://localhost:8545',
-      gasPrice: 0,
       saveDeployments: false,
       ovm: true,
     },

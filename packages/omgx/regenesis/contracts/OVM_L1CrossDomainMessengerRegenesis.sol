@@ -197,20 +197,6 @@ contract OVM_L1CrossDomainMessengerRegenesis is iOVM_L1CrossDomainMessenger, Lib
         );
 
         require(
-            OVM_L1CrossDomainMessenger(
-                Lib_AddressManager(libAddressManager).getAddress('Proxy__OVM_L1CrossDomainMessengerFast')
-            ).successfulMessages(xDomainCalldataHash) == false,
-            "Provided message has already been received in OVM_L1CrossDomainMessengerFast."
-        );
-
-        require(
-            OVM_L1CrossDomainMessenger(
-                Lib_AddressManager(libAddressManager).getAddress('Proxy__OVM_L1CrossDomainMessengerFast')
-            ).blockedMessages(xDomainCalldataHash) == false,
-            "Provided message has been blocked in OVM_L1CrossDomainMessengerFast."
-        );
-
-        require(
             _target != resolve("OVM_CanonicalTransactionChain"),
             "Cannot send L2->L1 messages to L1 system contracts."
         );
