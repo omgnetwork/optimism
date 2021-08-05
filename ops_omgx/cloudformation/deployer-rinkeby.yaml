@@ -143,7 +143,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "deployer", "service": "deployer"}]'
           Essential: true
-          Memory: "512"
+          Memory: "64"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
       Family: !Sub "deployer"
