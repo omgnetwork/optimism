@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+      "resolveJsonModule": true
+  },
+  "include": ["./test", "./artifacts/**/*.json", "./artifacts-ovm/**/*.json"],
+  "files": ["./hardhat.config.ts"]
+}
+
+
