@@ -52,6 +52,9 @@ import NFT from 'containers/nft/Nft';
 import MobileHeader from 'components/mobileheader/MobileHeader';
 import MobileMenu from 'components/mobilemenu/MobileMenu';
 
+//DAU Page
+import DAU from 'containers/dau/dau';
+
 // Farm
 import Farm from 'containers/farm/Farm';
 
@@ -186,6 +189,12 @@ function Home () {
             >  
               NFT
             </h2>
+            <h2
+              className={pageDisplay === "DAU" ? styles.subtitletextActive : styles.subtitletext}
+              onClick={()=>{handleSetPage("DAU")}}
+            >  
+              DAU
+            </h2>
           </div>
           {pageDisplay === "AccountNow" &&
           <>  
@@ -199,6 +208,9 @@ function Home () {
           }
           {pageDisplay === "NFT" &&
             <NFT/>
+          }
+          {pageDisplay === "DAU" &&
+            <DAU/>
           }
           {pageDisplay === "Farm" &&
             <Farm/>

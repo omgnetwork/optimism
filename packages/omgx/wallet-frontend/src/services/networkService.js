@@ -55,6 +55,8 @@ import L2ERC721RegJson from '../deployment/artifacts-ovm/contracts/ERC721Registr
 import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol/TokenPool.json'
 import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
 
+import DAUJson from '../deployment/artifacts-ovm/contracts/Comp.json'
+
 import { powAmount, logAmount } from 'util/amountConvert'
 import { accDiv, accMul } from 'util/calculation'
 
@@ -111,6 +113,9 @@ class NetworkService {
 
     this.L1LPAddress = null
     this.L2LPAddress = null
+
+    this.L2_DAU_Address = null
+    this.DAUContract = null
 
     this.L1_ETH_Address = '0x0000000000000000000000000000000000000000'
     this.L2_ETH_Address = '0x4200000000000000000000000000000000000006'
@@ -548,6 +553,13 @@ class NetworkService {
         AtomicSwapJson.abi,
         this.provider.getSigner()
       )
+
+      this.L2_DAU_Address = addresses.DAUmain
+      this.DAUContract = new ethers.Contract(
+        this.L2_DAU_Address,
+        DAUJson.abi,
+        this.provider.getSigner()
+      )
       
       //this one is always there...
       await addNFTContract(this.ERC721Contract.address)
@@ -772,6 +784,20 @@ class NetworkService {
       }
     }
   }
+
+  async fetchDAUCurrentVotes( account ) {
+    
+    //how many votes are there for this proposal?
+    const votes = await this.DAUContract.connect(
+      this.L2Provider
+    ).getCurrentVotes(account)
+
+    console.log("Checking votes for:",account)
+    console.log("votes:",votes.toString())
+
+    return votes.toString()
+  }
+
 
   async fetchNFTs() {
 
