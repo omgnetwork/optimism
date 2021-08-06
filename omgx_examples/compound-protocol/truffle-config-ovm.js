@@ -18,7 +18,7 @@ module.exports = {
       host: '127.0.0.1',
       port: 8545,
       gasPrice: 15000000,
-      gas: 293670000,
+      gas: 306150000,
     },
     omgx_rinkeby: {
       provider: function () {

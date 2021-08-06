@@ -22,7 +22,6 @@ contract GovernorBravoDelegator is GovernorBravoDelegatorStorage, GovernorBravoE
                                                             votingPeriod_,
                                                             votingDelay_,
                                                             proposalThreshold_));
-
         _setImplementation(implementation_);
 
 		admin = admin_;

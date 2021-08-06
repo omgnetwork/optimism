@@ -46,20 +46,20 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV1, GovernorBravoE
       * @param votingDelay_ The initial voting delay
       * @param proposalThreshold_ The initial proposal threshold
       */
-    function initialize(address timelock_, address comp_, uint votingPeriod_, uint votingDelay_, uint proposalThreshold_) public {
+    constructor(address timelock_, address comp_, uint votingPeriod_, uint votingDelay_, uint proposalThreshold_) public {
         require(address(timelock) == address(0), "GovernorBravo::initialize: can only initialize once");
-        require(msg.sender == admin, "GovernorBravo::initialize: admin only");
         require(timelock_ != address(0), "GovernorBravo::initialize: invalid timelock address");
         require(comp_ != address(0), "GovernorBravo::initialize: invalid comp address");
         require(votingPeriod_ >= MIN_VOTING_PERIOD && votingPeriod_ <= MAX_VOTING_PERIOD, "GovernorBravo::initialize: invalid voting period");
         require(votingDelay_ >= MIN_VOTING_DELAY && votingDelay_ <= MAX_VOTING_DELAY, "GovernorBravo::initialize: invalid voting delay");
         require(proposalThreshold_ >= MIN_PROPOSAL_THRESHOLD && proposalThreshold_ <= MAX_PROPOSAL_THRESHOLD, "GovernorBravo::initialize: invalid proposal threshold");
-
         timelock = TimelockInterface(timelock_);
         comp = CompInterface(comp_);
         votingPeriod = votingPeriod_;
         votingDelay = votingDelay_;
         proposalThreshold = proposalThreshold_;
+        initialProposalId = 1;
+        admin = msg.sender;
     }
 
     /**
@@ -192,7 +192,7 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV1, GovernorBravoE
       * @return Proposal state
       */
     function state(uint proposalId) public view returns (ProposalState) {
-        require(proposalCount >= proposalId && proposalId > initialProposalId, "GovernorBravo::state: invalid proposal id");
+        require(proposalCount >= proposalId && proposalId >= initialProposalId, "GovernorBravo::state: invalid proposal id");
         Proposal storage proposal = proposals[proposalId];
         if (proposal.canceled) {
             return ProposalState.Canceled;

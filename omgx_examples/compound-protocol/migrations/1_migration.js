@@ -27,82 +27,88 @@ Private Keys
  */
 let user0Address = '0xde034D4336E819ffE0A6F1A041125E6bb6F51091'
 
-
 // var EIP20NonStandardInterface = artifacts.require("EIP20NonStandardInterface");
 // var ComptrollerInterface = artifacts.require("ComptrollerInterface");
 
-var ComptrollerG1 = artifacts.require("ComptrollerG1");
-var ComptrollerG3 = artifacts.require("ComptrollerG3");
-var Comptroller = artifacts.require("Comptroller");
-var CErc20 = artifacts.require("CErc20");
-var ComptrollerG2 = artifacts.require("ComptrollerG2");
-var ComptrollerG6 = artifacts.require("ComptrollerG6");
-var Exponential = artifacts.require("Exponential");
+var ComptrollerG1 = artifacts.require('ComptrollerG1')
+var ComptrollerG3 = artifacts.require('ComptrollerG3')
+var Comptroller = artifacts.require('Comptroller')
+var CErc20 = artifacts.require('CErc20')
+var ComptrollerG2 = artifacts.require('ComptrollerG2')
+var ComptrollerG6 = artifacts.require('ComptrollerG6')
+var Exponential = artifacts.require('Exponential')
 
 // var PriceOracle = artifacts.require("PriceOracle");
 // var LegacyInterestRateModel = artifacts.require("LegacyInterestRateModel");
 // var CToken = artifacts.require("CToken");
 
-var ComptrollerG5 = artifacts.require("ComptrollerG5");
-var LegacyJumpRateModelV2 = artifacts.require("LegacyJumpRateModelV2");
-var ComptrollerG4 = artifacts.require("ComptrollerG4");
-var CErc20Delegator = artifacts.require("CErc20Delegator");
-var CErc20Delegate = artifacts.require("CErc20Delegate");
-var CDaiDelegate = artifacts.require("CDaiDelegate");
-var ExponentialNoError = artifacts.require("ExponentialNoError");
-var SafeMath = artifacts.require("SafeMath");
+var ComptrollerG5 = artifacts.require('ComptrollerG5')
+var LegacyJumpRateModelV2 = artifacts.require('LegacyJumpRateModelV2')
+var ComptrollerG4 = artifacts.require('ComptrollerG4')
+var CErc20Delegator = artifacts.require('CErc20Delegator')
+var CErc20Delegate = artifacts.require('CErc20Delegate')
+var CDaiDelegate = artifacts.require('CDaiDelegate')
+var ExponentialNoError = artifacts.require('ExponentialNoError')
+var SafeMath = artifacts.require('SafeMath')
 
 /**
  * Error: Could not find artifacts for ErrorReporter from any sources
  */
 // var ErrorReporter = artifacts.require("ErrorReporter");
 
-
-
-var Unitroller = artifacts.require("Unitroller");
-var Migrations = artifacts.require("Migrations");
-var CarefulMath = artifacts.require("CarefulMath");
-var JumpRateModel = artifacts.require("JumpRateModel");
-var Timelock = artifacts.require("Timelock");
-var EIP20Interface = artifacts.require("EIP20Interface");
-var InterestRateModel = artifacts.require("InterestRateModel");
-var JumpRateModelV2 = artifacts.require("JumpRateModelV2");
+var Unitroller = artifacts.require('Unitroller')
+var Migrations = artifacts.require('Migrations')
+var CarefulMath = artifacts.require('CarefulMath')
+var JumpRateModel = artifacts.require('JumpRateModel')
+var Timelock = artifacts.require('Timelock')
+var EIP20Interface = artifacts.require('EIP20Interface')
+var InterestRateModel = artifacts.require('InterestRateModel')
+var JumpRateModelV2 = artifacts.require('JumpRateModelV2')
 
 /**
  * Error: Could not find artifacts for ComptrollerStorage from any sources
  */
 // var ComptrollerStorage = artifacts.require("ComptrollerStorage");
 
-var WhitePaperInterestRateModel = artifacts.require("WhitePaperInterestRateModel");
-var Reservoir = artifacts.require("Reservoir");
-var CCompLikeDelegate = artifacts.require("CCompLikeDelegate");
-var CErc20Immutable = artifacts.require("CErc20Immutable");
-var CEther = artifacts.require("CEther");
-var DAIInterestRateModelV3 = artifacts.require("DAIInterestRateModelV3");
-var Maximillion = artifacts.require("Maximillion");
-var SimplePriceOracle = artifacts.require("SimplePriceOracle");
-var BaseJumpRateModelV2 = artifacts.require("BaseJumpRateModelV2");
-var GovernorBravoDelegate = artifacts.require("GovernorBravoDelegate");
-var GovernorBravoDelegator = artifacts.require("GovernorBravoDelegator");
-var Comp = artifacts.require("Comp");
+var WhitePaperInterestRateModel = artifacts.require(
+  'WhitePaperInterestRateModel'
+)
+var Reservoir = artifacts.require('Reservoir')
+var CCompLikeDelegate = artifacts.require('CCompLikeDelegate')
+var CErc20Immutable = artifacts.require('CErc20Immutable')
+var CEther = artifacts.require('CEther')
+var DAIInterestRateModelV3 = artifacts.require('DAIInterestRateModelV3')
+var Maximillion = artifacts.require('Maximillion')
+var SimplePriceOracle = artifacts.require('SimplePriceOracle')
+var BaseJumpRateModelV2 = artifacts.require('BaseJumpRateModelV2')
+var GovernorBravoDelegate = artifacts.require('GovernorBravoDelegate')
+var GovernorBravoDelegator = artifacts.require('GovernorBravoDelegator')
+var Comp = artifacts.require('Comp')
 
-
-let adminAddress = '0x3a6C1f6C2de6c47e45d1Fd2d04C0F2601CF5979C';
+let adminAddress = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
 
 /**
  * Error: Could not find artifacts for CTokenInterfaces from any sources
  */
 // var CTokenInterfaces = artifacts.require("CTokenInterfaces");
 
-module.exports = function(deployer, network, accounts) {
+module.exports = function (deployer, network, accounts) {
   deployer.then(async () => {
-  await deployer.deploy(GovernorBravoDelegate);
-  await deployer.deploy(SafeMath);
-  await deployer.deploy(Comp, adminAddress);
-  await deployer.deploy(Timelock, adminAddress, 172800);
-  await deployer.deploy(GovernorBravoDelegator, Timelock.address, Comp.address, Timelock.address, GovernorBravoDelegate.address, 17280, 1, "100000000000000000000000"); 
-  });
-};
-
-
-
+    await deployer.deploy(SafeMath)
+    await deployer.deploy(Comp, adminAddress)
+    await deployer.deploy(Timelock, adminAddress, 172800)
+    const governorBravoDelegator = await GovernorBravoDelegator.deployed()
+    const comp = await Comp.deployed()
+    const safeMath = await SafeMath.deployed()
+    const timelock = await Timelock.deployed()
+    await deployer.deploy(
+      GovernorBravoDelegate,
+      timelock.address,
+      comp.address,
+      17280,
+      1,
+      '100000000000000000000000'
+    )
+    const governorBravoDelegate = await GovernorBravoDelegate.deployed()
+  })
+}
