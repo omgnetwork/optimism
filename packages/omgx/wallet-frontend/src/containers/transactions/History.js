@@ -42,7 +42,6 @@ import * as styles from './Transactions.module.scss';
 
 import { getAllNetworks } from 'util/masterConfig';
 import useInterval from 'util/useInterval';
-import { Typography } from '@material-ui/core';
 import PageHeader from 'components/pageHeader/PageHeader';
 
 const POLL_INTERVAL = 5000; //milliseconds

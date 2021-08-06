@@ -17,7 +17,6 @@ import React,{useEffect,useCallback} from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { isEqual } from 'lodash'
-import truncate from 'truncate-middle'
 
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectIsSynced } from 'selectors/statusSelector'
@@ -26,18 +25,14 @@ import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelec
 
 import ListAccount from 'components/listAccount/listAccount';
 
-import Copy from 'components/copy/Copy'
-
 import { logAmount } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
-import bunny_happy from 'images/bunny_happy.svg'
 import bunny_sad from 'images/bunny_sad.svg'
 
 import * as styles from './Account.module.scss'
 import { selectTokens } from 'selectors/tokenSelector'
 import { fetchLookUpPrice } from 'actions/networkAction'
-import WalletAddress from 'components/walletAddress/WalletAddress'
 import PageHeader from 'components/pageHeader/PageHeader'
 
 function Account () {
@@ -83,11 +78,10 @@ function Account () {
     return acc;
   }, balances)
 
-  const wAddress = networkService.account ? truncate(networkService.account, 6, 4, '...') : '';
   const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
 
   return (
-    <div className={styles.Account}>
+    <>
       <PageHeader title="Wallet" />
 
       {/* {balances['oETH']['have'] &&
@@ -140,48 +134,47 @@ function Account () {
         </div>
       }
 
-  <div className={styles.BalanceWrapper}>
-    <div>
-      <div className={styles.title}>
-        <span style={{fontSize: '0.8em'}}>Balance on L1</span><br/>
-        <span>Ethereum Network</span><br/>
+      <div className={styles.BalanceWrapper}>
+        <div>
+          <div className={styles.title}>
+            <span style={{fontSize: '0.8em'}}>Balance on L1</span><br/>
+            <span>Ethereum Network</span><br/>
+          </div>
+          <div className={styles.TableContainer}>
+            {rootBalance.map((i, index) => {
+              return (
+                <ListAccount
+                  key={i.currency}
+                  token={i}
+                  chain={'L1'}
+                  networkLayer={networkLayer}
+                  disabled={disabled}
+                />
+              )
+            })}
+          </div>
+        </div>
+        <div>
+          <div className={styles.title}>
+            <span style={{fontSize: '0.8em'}}>Balance on L2</span><br/>
+            <span>OMGX</span><br/>
+          </div>
+          <div className={styles.TableContainer}>
+            {childBalance.map((i, index) => {
+              return (
+                <ListAccount
+                  key={i.currency}
+                  token={i}
+                  chain={'L2'}
+                  networkLayer={networkLayer}
+                  disabled={disabled}
+                />
+              )
+            })}
+          </div>
+        </div>
       </div>
-      <div className={styles.TableContainer}>
-        {rootBalance.map((i, index) => {
-          return (
-            <ListAccount
-              key={i.currency}
-              token={i}
-              chain={'L1'}
-              networkLayer={networkLayer}
-              disabled={disabled}
-            />
-          )
-        })}
-      </div>
-    </div>
-    <div>
-      <div className={styles.title}>
-        <span style={{fontSize: '0.8em'}}>Balance on L2</span><br/>
-        <span>OMGX</span><br/>
-      </div>
-      <div className={styles.TableContainer}>
-        {childBalance.map((i, index) => {
-          return (
-            <ListAccount
-              key={i.currency}
-              token={i}
-              chain={'L2'}
-              networkLayer={networkLayer}
-              disabled={disabled}
-            />
-          )
-        })}
-      </div>
-    </div>
-  </div>
-
-  </div>
+    </>
   );
 
 }

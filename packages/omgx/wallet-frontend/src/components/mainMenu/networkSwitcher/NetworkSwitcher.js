@@ -1,13 +1,16 @@
 import React, { useState, useRef, useCallback } from 'react';
+import { Box } from '@material-ui/system';
 import { useSelector, useDispatch } from 'react-redux';
 import * as S from './NetworkSwitcher.styles.js';
-import logo from 'images/omgx.png';
 import chevron from 'images/chevron.svg';
 import {
   selectNetwork,
 } from 'selectors/setupSelector';
 import { setNetwork } from 'actions/setupAction';
 import { getAllNetworks } from 'util/masterConfig';
+import networkService from 'services/networkService'
+import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon.js';
+import { Typography } from '@material-ui/core';
 
 function NetworkSwitcher() {
   const dispatch = useDispatch();
@@ -18,6 +21,8 @@ function NetworkSwitcher() {
   // defines the set of possible networks
   const networks = getAllNetworks();
 
+  const networkLayer = networkService.L1orL2
+
   let allNetworks = [];
   for (var prop in networks) allNetworks.push(prop)
 
@@ -27,6 +32,8 @@ function NetworkSwitcher() {
     dispatch(setNetwork(network));
   }, [ dispatch ])
 
+  console.log('networkLayer', networkLayer)
+
 
   return (
     <S.WalletPickerContainer>
@@ -35,10 +42,10 @@ function NetworkSwitcher() {
           <S.NetWorkStyle
             onClick={()=>setShowAllNetworks(prev => !prev)}
           >
-            <S.Indicator />
-            <div>
-              OMGX {masterConfig}
-            </div>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
+              <NetworkSwitcherIcon active={networkLayer === 'L1'} />
+              <Typography variant="body1">OMGX {masterConfig}</Typography>
+            </Box>
             {!!allNetworks.length && (
               <S.Chevron
                 open={showAllNetworks}
@@ -53,7 +60,7 @@ function NetworkSwitcher() {
           >
             {!!allNetworks.length && showAllNetworks && allNetworks.map((network,   ) => (
               <div
-                style={{background: '#2A308E', color: 'white', marginTop: 5, padding: 5, borderRadius: 3, cursor: 'pointer'}}
+                style={{background: `linear-gradient(90deg, rgba(237, 72, 240, 0.09) 1.32%, rgba(237, 72, 236, 0.0775647) 40.2%`, color: 'white', marginTop: 5, paddingTop: 5, paddingBottom: 5, paddingLeft: 12, paddingRight: 5, borderRadius: 3, cursor: 'pointer'}}
                 // key={index}
                 onClick={()=>dispatchSetNetwork(network)}
               >

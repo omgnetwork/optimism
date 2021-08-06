@@ -43,7 +43,6 @@ import FarmDepositModal from 'containers/modals/farm/FarmDepositModal';
 import FarmWithdrawModal from 'containers/modals/farm/FarmWithdrawModal';
 
 //Wallet Functions
-import Status from 'containers/status/Status';
 import Account from 'containers/account/Account';
 import Transactions from 'containers/transactions/History';
 
@@ -54,8 +53,6 @@ import MobileMenu from 'components/mobilemenu/MobileMenu';
 
 // Farm
 import Farm from 'containers/farm/Farm';
-
-import logo from 'images/omgx.png';
 
 import * as styles from './Home.module.scss';
 import { Container } from '@material-ui/core';

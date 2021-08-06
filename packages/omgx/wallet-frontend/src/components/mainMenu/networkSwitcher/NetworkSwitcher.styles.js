@@ -79,11 +79,3 @@ export const NetWorkStyle = styled.div`
   align-items: center;
   cursor: pointer;
 `;
-
-export const Indicator = styled.div`
-  margin-right: 5px;
-  width: 5px;
-  height: 13px;
-  background-color: #2a308e;
-  border-radius: 4px;
-`;
