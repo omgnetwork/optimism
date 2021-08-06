@@ -18,18 +18,18 @@ import networkService from 'services/networkService';
 import * as styles from './listFarm.module.scss';
 
 class ListFarm extends React.Component {
-  
+
   constructor(props) {
-    
+
     super(props);
-    
-    const { 
+
+    const {
       logo,
-      poolInfo, 
-      userInfo, 
+      poolInfo,
+      userInfo,
       L1orL2Pool,
-      balance, 
-      decimals 
+      balance,
+      decimals
     } = this.props;
 
     this.state = {
@@ -38,7 +38,7 @@ class ListFarm extends React.Component {
       decimals,
       L1orL2Pool,
       // data
-      poolInfo, 
+      poolInfo,
       userInfo,
       //drop down box
       dropDownBox: false,
@@ -47,7 +47,7 @@ class ListFarm extends React.Component {
       loading: false,
     }
   }
-  
+
   componentDidUpdate(prevState) {
 
     const { poolInfo, userInfo, balance, decimals } = this.props;
@@ -71,9 +71,9 @@ class ListFarm extends React.Component {
   }
 
   handleStakeToken() {
-    
+
     const { poolInfo, L1orL2Pool, balance, decimals } = this.state
-    
+
     this.props.dispatch(updateStakeToken({
       symbol: poolInfo.symbol,
       currency: L1orL2Pool === 'L1LP' ? poolInfo.l1TokenAddress : poolInfo.l2TokenAddress,
@@ -82,14 +82,14 @@ class ListFarm extends React.Component {
       balance,
       decimals
     }))
-    
+
     this.props.dispatch(openModal('farmDepositModal'))
   }
 
   handleWithdrawToken() {
-    
+
     const { poolInfo, L1orL2Pool, balance, decimals } = this.state;
-    
+
     this.props.dispatch(updateWithdrawToken({
       symbol: poolInfo.symbol,
       currency: L1orL2Pool === 'L1LP' ? poolInfo.l1TokenAddress : poolInfo.l2TokenAddress,
@@ -98,12 +98,12 @@ class ListFarm extends React.Component {
       balance,
       decimals
     }))
-    
+
     this.props.dispatch(openModal('farmWithdrawModal'));
   }
 
   async handleHarvest() {
-    
+
     const { poolInfo, userInfo } = this.state;
 
     this.setState({ loading: true })
@@ -144,7 +144,7 @@ class ListFarm extends React.Component {
 
   render() {
 
-    const { 
+    const {
       logo,
       poolInfo, userInfo,
       dropDownBox, dropDownBoxInit,
@@ -170,8 +170,8 @@ class ListFarm extends React.Component {
 
     return (
       <div className={styles.ListFarm}>
-        <div 
-          className={styles.topContainer} 
+        <div
+          className={styles.topContainer}
           style={disabled ? {pointerEvents: 'none'} : {}}
           onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
         >
@@ -182,7 +182,7 @@ class ListFarm extends React.Component {
           <div className={styles.Table2}>
             <div className={styles.BasicText}>Earned</div>
             <div className={styles.BasicLightText}>
-              {userReward ? 
+              {userReward ?
                 `${logAmount(userReward, 18, 2)} ${symbol}` : `0 ${symbol}`
               }
             </div>
@@ -190,7 +190,7 @@ class ListFarm extends React.Component {
           <div className={styles.Table3}>
             <div className={styles.BasicText}>Share</div>
             <div className={styles.BasicLightText}>
-              {userInfo.amount ? 
+              {userInfo.amount ?
                 `${logAmount(userInfo.amount, 18, 2)} ${symbol}` : `0 ${symbol}`
               }
             </div>
@@ -204,8 +204,16 @@ class ListFarm extends React.Component {
           <div className={styles.Table5}>
             <div className={styles.BasicText}>Liquidity</div>
             <div className={styles.BasicLightText}>
-              {poolInfo.userDepositAmount ? 
+              {poolInfo.userDepositAmount ?
                 `${logAmount(poolInfo.userDepositAmount, 18, 2)} ${symbol}` : `0 ${symbol}`
+              }
+            </div>
+          </div>
+          <div className={styles.Table5}>
+            <div className={styles.BasicText}>Balance</div>
+            <div className={styles.BasicLightText}>
+              {poolInfo.tokenBalance ?
+                `${logAmount(poolInfo.tokenBalance, 18, 2)} ${symbol}` : `0 ${symbol}`
               }
             </div>
           </div>
@@ -227,8 +235,8 @@ class ListFarm extends React.Component {
         /**************  Drop Down Box ****************/
         /**********************************************/
         }
-        <div 
-          className={dropDownBox ? 
+        <div
+          className={dropDownBox ?
             styles.dropDownContainer: dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
         >
           <div className={styles.boxContainer}>
@@ -247,9 +255,9 @@ class ListFarm extends React.Component {
               </Button>
             </div>
           </div>
-          
+
           <div className={styles.boxContainer}>
-            {logAmount(userInfo.amount, 18) === '0' ? 
+            {logAmount(userInfo.amount, 18) === '0' ?
               <>
                 <div className={styles.BasicText}>Stake {`${name}`}</div>
                 <div className={styles.boxRowContainer}>
@@ -268,13 +276,13 @@ class ListFarm extends React.Component {
                 <div className={styles.boxRowContainer}>
                   <div className={styles.LargeBlueText}>{logAmount(userInfo.amount, 18)}</div>
                   <div className={styles.AdjustButtonsContainer}>
-                    <div 
+                    <div
                       className={disabled ? styles.AdjustButtonContainerDisabled : styles.AdjustButtonContainer}
                       onClick={() => {!disabled && this.handleStakeToken()}}
                     >
                       <AddIcon className={styles.AdjustButton} />
                     </div>
-                    <div 
+                    <div
                       className={disabled ? styles.AdjustButtonContainerDisabled : styles.AdjustButtonContainer}
                       onClick={() => {!disabled && this.handleWithdrawToken()}}
                     >
@@ -293,7 +301,7 @@ class ListFarm extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({ 
+const mapStateToProps = state => ({
   login: state.login,
   sell: state.sell,
   sellTask: state.sellTask,

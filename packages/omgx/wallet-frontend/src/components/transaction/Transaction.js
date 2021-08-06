@@ -40,7 +40,7 @@ function Transaction ({
   const [dropDownBoxInit, setDropDownBoxInit] = useState(true);
 
   function renderValue () {
-    
+
     if (button) {
       return (
         <div className={styles.statusContainer}>
@@ -54,7 +54,7 @@ function Transaction ({
         </div>
       )
     }
-    
+
     return (
       <div className={styles.statusContainer}>
         <div className={styles.status}>
@@ -81,10 +81,11 @@ function Transaction ({
   }
 
   function renderDetail() {
+    console.log(detail)
     if (!detail) {
       return null;
     }
-    return <> 
+    return <>
       <div className={`${styles.subTitle} ${styles.viewMore}`} style={{ cursor: 'pointer' }}
         onClick={() => {
           setDropDownBox(!dropDownBox)
@@ -99,7 +100,10 @@ function Transaction ({
           styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
       >
         <div className={styles.title}>
-          <div>{detail.l1Hash}</div></div>
+          <a className={styles.href} href={`https://rinkeby.etherscan.io/tx/${detail.detailedL1Hash}`} target="_blank" rel="noopener noreferrer">
+            {detail.l1Hash}
+          </a>
+        </div>
         <div className={styles.content}>
           <div>L1 Block : {detail.l1BlockNumber}</div>
         </div>
@@ -123,26 +127,26 @@ function Transaction ({
           <div>{chain}</div>
           <div>{title}</div>
         </div>
-        {(midTitle || status) && 
+        {(midTitle || status) &&
           <div className={styles.subTitle}>
             <div>{midTitle}</div>
             <div>{blockNumber}</div>
           </div>
         }
-        {subTitle && 
+        {subTitle &&
           <div className={styles.subTitle}>
             {subTitle}
           </div>
         }
         <div className={styles.content}>
           <div>{typeTX}</div>
-          {link && 
-            <a 
+          {link &&
+            <a
               href={link}
               target={'_blank'}
               rel='noopener noreferrer'
               className={styles.button}
-            >View Details</a>  
+            >View Details</a>
           }
         </div>
         {renderDetail()}
