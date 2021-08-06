@@ -8,7 +8,6 @@ function LearnIcon({ color }) {
       viewBox="0 0 26 21"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      // {...props}
     >
       <path
         d="M12.666 12.064l.334.167.335-.167 6.509-3.248v8.283l-5.95 2.574a2.25 2.25 0 01-1.787 0L6.157 17.1V8.821l6.509 3.242z"

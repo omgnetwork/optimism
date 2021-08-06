@@ -66,7 +66,7 @@ function MainMenu ({ light, setLight }) {
                         return (
                             <li>
                               <MenuItem to={children.url}>
-                                <ChildrenIcon />{children.title}
+                                <ChildrenIcon color={activeItem === index ? theme.palette.primary.main : "#fff"} />{children.title}
                               </MenuItem>
                             </li>
                         )
