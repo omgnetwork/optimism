@@ -36,23 +36,25 @@ Network : __rinkeby (chain id: 4)__
 
 |Contract|Address|
 |--|--|
-|Lib_AddressManager|[0x8d861028479b1AFFa83b5eAD1DE8547D26962a4b](https://rinkeby.etherscan.io/address/0x8d861028479b1AFFa83b5eAD1DE8547D26962a4b)|
-|OVM_CanonicalTransactionChain|[0x957E8cbEC48E8bc25Ff9fBB8a5366055F4E9d2BC](https://rinkeby.etherscan.io/address/0x957E8cbEC48E8bc25Ff9fBB8a5366055F4E9d2BC)|
-|OVM_ChainStorageContainer-CTC-batches|[0xdF5123d374B24Ab48A115CCB69F73Da959565f1C](https://rinkeby.etherscan.io/address/0xdF5123d374B24Ab48A115CCB69F73Da959565f1C)|
-|OVM_ChainStorageContainer-CTC-queue|[0xBDdFF6223b9445a0930d082C034bD51A0da6ECBa](https://rinkeby.etherscan.io/address/0xBDdFF6223b9445a0930d082C034bD51A0da6ECBa)|
-|OVM_ChainStorageContainer-SCC-batches|[0x69789A6F0B63C2fb321dbD47F730a3139Ea71Ef7](https://rinkeby.etherscan.io/address/0x69789A6F0B63C2fb321dbD47F730a3139Ea71Ef7)|
-|OVM_ExecutionManager|[0x9747f406564c684d6A5C772817e9956bAEAA8485](https://rinkeby.etherscan.io/address/0x9747f406564c684d6A5C772817e9956bAEAA8485)|
-|OVM_FraudVerifier|[0x2F19C03B098C7271EA3684a05Ab83Ea452465771](https://rinkeby.etherscan.io/address/0x2F19C03B098C7271EA3684a05Ab83Ea452465771)|
-|OVM_L1MultiMessageRelayer|[0x0C667E092512FE23cD96620332DB221F70DB3a31](https://rinkeby.etherscan.io/address/0x0C667E092512FE23cD96620332DB221F70DB3a31)|
-|OVM_SafetyChecker|[0xf30323E48e29eb9bF985291C3ba01f18A152060F](https://rinkeby.etherscan.io/address/0xf30323E48e29eb9bF985291C3ba01f18A152060F)|
-|OVM_StateCommitmentChain|[0x2d3b5E0B2543937Ab44C1912844df107f98899AA](https://rinkeby.etherscan.io/address/0x2d3b5E0B2543937Ab44C1912844df107f98899AA)|
-|OVM_StateManagerFactory|[0x2166344F1104185679CA01124d4764B74958d532](https://rinkeby.etherscan.io/address/0x2166344F1104185679CA01124d4764B74958d532)|
-|OVM_StateTransitionerFactory|[0x17bb926250F6e8d50c95EFB1A3ab2c5A2b548228](https://rinkeby.etherscan.io/address/0x17bb926250F6e8d50c95EFB1A3ab2c5A2b548228)|
-|mockOVM_BondManager|[0x3A1e88bD9d3e07d09927631683188C3CB87f0068](https://rinkeby.etherscan.io/address/0x3A1e88bD9d3e07d09927631683188C3CB87f0068)|
+|Lib_AddressManager|[0x4e57A993D14FF6f2BCA23d9B174faA9c7AdC4A5A](https://rinkeby.etherscan.io/address/0x4e57A993D14FF6f2BCA23d9B174faA9c7AdC4A5A)|
+|OVM_CanonicalTransactionChain|[0x0027cDa16D83D08978012c224181c6AED363511d](https://rinkeby.etherscan.io/address/0x0027cDa16D83D08978012c224181c6AED363511d)|
+|OVM_ChainStorageContainer-CTC-batches|[0x9BfFeFEcbEC3dd539DF633E0866c038D4F28CF16](https://rinkeby.etherscan.io/address/0x9BfFeFEcbEC3dd539DF633E0866c038D4F28CF16)|
+|OVM_ChainStorageContainer-CTC-queue|[0x578778B1D677ded84706646eEb11Ea85079f7bf5](https://rinkeby.etherscan.io/address/0x578778B1D677ded84706646eEb11Ea85079f7bf5)|
+|OVM_ChainStorageContainer-SCC-batches|[0x5379688588024A4E0c20f359241eD7A3D81AFB8f](https://rinkeby.etherscan.io/address/0x5379688588024A4E0c20f359241eD7A3D81AFB8f)|
+|OVM_ExecutionManager|[0xA407cf34159190d84BfC6675bbFd81BAF3a81Bb3](https://rinkeby.etherscan.io/address/0xA407cf34159190d84BfC6675bbFd81BAF3a81Bb3)|
+|OVM_FraudVerifier|[0x06BE1fDdA4d709f92B825F19879f4299947295A7](https://rinkeby.etherscan.io/address/0x06BE1fDdA4d709f92B825F19879f4299947295A7)|
+|OVM_SafetyChecker|[0x44c95B39F4530eAc622Cdad372bD6CF3A144a92f](https://rinkeby.etherscan.io/address/0x44c95B39F4530eAc622Cdad372bD6CF3A144a92f)|
+|OVM_StateCommitmentChain|[0x4621811E837633022E4F4ABadAaE8a4F301C5D1C](https://rinkeby.etherscan.io/address/0x4621811E837633022E4F4ABadAaE8a4F301C5D1C)|
+|OVM_StateManagerFactory|[0xD78bc1f70cbbD236D2185daA6e1191B26677FF77](https://rinkeby.etherscan.io/address/0xD78bc1f70cbbD236D2185daA6e1191B26677FF77)|
+|OVM_StateTransitionerFactory|[0xe9b231835Ec4C34E57E27770350FA4111Dd899cd](https://rinkeby.etherscan.io/address/0xe9b231835Ec4C34E57E27770350FA4111Dd899cd)|
+|mockOVM_BondManager|[0xFE182AE17F06e024a1a81E4DE79205c527020436](https://rinkeby.etherscan.io/address/0xFE182AE17F06e024a1a81E4DE79205c527020436)|
 <!--
 Implementation addresses. DO NOT use these addresses directly.
 Use their proxied counterparts seen above.
 
+OVM_L1CrossDomainMessenger: 
+ - 0x37c82b55A507085787A17A3a24158C0Aa646f4A3
+ - https://rinkeby.etherscan.io/address/0x37c82b55A507085787A17A3a24158C0Aa646f4A3)
 -->
 ---
 ## RINKEBY-INTEGRATION
