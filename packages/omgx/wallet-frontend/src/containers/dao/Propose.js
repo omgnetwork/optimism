@@ -6,19 +6,24 @@ function Propose() {
   const [contracts, setContracts] = useState(["select"]);
   const [values, setValues] = useState([0]);
   const [description, setDescription] = useState("");
-  const [cnt, setCnt] = useState(1);
+  const [cnt, setCnt] = useState(0);
 
   let actionsMarkup = actions.map((action, i) => (
-    <Proposal
-      actions={actions}
-      contracts={contracts}
-      values={values}
-      i={i}
-      setActions={setActions}
-      setContracts={setContracts}
-      setValues={setValues}
-      key={i}
-    />
+    <div>
+      <Proposal
+        actions={actions}
+        contracts={contracts}
+        values={values}
+        i={i}
+        setValues={setValues}
+        setActions={setActions}
+        setContracts={setContracts}
+        key={cnt}
+      />
+      <button className="removeAction" onClick={(e) => removeAction(e, i)}>
+        + Remove
+      </button>
+    </div>
   ));
 
   const addAction = (e) => {
@@ -29,10 +34,41 @@ function Propose() {
     setCnt(cnt + 1);
   };
 
+  const removeAction = (e, i) => {
+    e.preventDefault();
+    if (actions.length <= 1) return;
+    setActions((actions) =>
+      (function (actions, i) {
+        let nActions = [...actions];
+        actions.splice(i, 1);
+        nActions.splice(i, 1);
+        actions = nActions;
+        return nActions;
+      })(actions, i)
+    );
+    setContracts((contracts) =>
+      (function (contracts, i) {
+        let nContracts = [...contracts];
+        contracts.splice(i, 1);
+        nContracts.splice(i, 1);
+        contracts = nContracts;
+        return nContracts;
+      })(contracts, i)
+    );
+    setValues((values) =>
+      (function (values, i) {
+        let nValues = [...values];
+        values.splice(i, 1);
+        nValues.splice(i, 1);
+        values = nValues;
+        return nValues;
+      })(values, i)
+    );
+    setCnt(cnt - 1);
+  };
+
   const submitProposal = async (e) => {
     e.preventDefault();
-    // const tx = gov.methods.propose(targets, values, signatures, calldatas, description).send({ from: sender });
-    
     console.log(description);
     console.log(actions);
     console.log(contracts);

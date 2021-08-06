@@ -54,6 +54,8 @@ import MobileMenu from 'components/mobilemenu/MobileMenu';
 
 //DAU Page
 import DAU from 'containers/dau/dau';
+// DAO Page
+import DAO from 'containers/dao/Dao';
 
 // Farm
 import Farm from 'containers/farm/Farm';
@@ -195,6 +197,14 @@ function Home () {
             >  
               DAU
             </h2>
+            <h2
+              className={pageDisplay === "DAO" ? styles.subtitletextActive : styles.subtitletext}
+              onClick={()=>{handleSetPage("DAO")}}
+            >  <div>
+              DAO
+            </div>
+              
+            </h2>
           </div>
           {pageDisplay === "AccountNow" &&
           <>  
@@ -214,6 +224,8 @@ function Home () {
           }
           {pageDisplay === "Farm" &&
             <Farm/>
+          }{pageDisplay === "DAO" &&
+            <DAO/>
           }
         </div>
       </div>
