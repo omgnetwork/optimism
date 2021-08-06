@@ -12,7 +12,6 @@ import {
   l2Provider,
   l1Wallet,
   l2Wallet,
-  fundUser,
   getOvmEth,
   getL1Bridge,
   getL2Bridge,
@@ -64,15 +63,11 @@ export class OptimismEnv {
   }
 
   static async new(): Promise<OptimismEnv> {
+    
     const addressManager = getAddressManager(l1Wallet)
     const watcher = await initWatcher(l1Provider, l2Provider, addressManager)
     const l1Bridge = await getL1Bridge(l1Wallet, addressManager)
 
-    // fund the user if needed
-    const balance = await l2Wallet.getBalance()
-    if (balance.isZero()) {
-      await fundUser(watcher, l1Bridge, utils.parseEther('20'))
-    }
     const l1Messenger = getContractFactory('iOVM_L1CrossDomainMessenger')
       .connect(l1Wallet)
       .attach(watcher.l1.messengerAddress)

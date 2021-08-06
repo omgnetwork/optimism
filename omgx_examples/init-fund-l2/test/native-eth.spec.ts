@@ -9,7 +9,6 @@ import { Direction } from './shared/watcher-utils'
 
 import {
   expectApprox,
-  fundUser,
   PROXY_SEQUENCER_ENTRYPOINT_ADDRESS,
   l1Provider,
   l2Provider
@@ -18,56 +17,109 @@ import { OptimismEnv, useDynamicTimeoutForWithdrawals } from './shared/env'
 
 const DEFAULT_TEST_GAS_L1 = 330_000
 const DEFAULT_TEST_GAS_L2 = 1_300_000
-// TX size enforced by CTC:
-const MAX_ROLLUP_TX_SIZE = 50_000
+const MAX_ROLLUP_TX_SIZE = 50_000 // TX size enforced by CTC
 
 describe('Fund Initial L2 Account', async () => {
   
   let env: OptimismEnv
 
+  it('Check connectivity and initial balances', async () => {
+
+    //env = await OptimismEnv.new()
+    //const l1Wallet = env.l1Wallet
+    //const l2Wallet = l1Wallet.connect(l2Provider)
+
+    console.log('Check connectivity and initial balances')
+
+    const l1Balance = await env.l1Wallet.getBalance()
+    const l2Balance = await env.l2Wallet.getBalance()
+
+    console.log("\nInitial L1 ETH balance:", ethers.utils.formatEther(l1Balance))
+    console.log("Initial L2 ETH balance:", ethers.utils.formatEther(l2Balance))
+
+  })
+
   it('depositETH', async () => {
 
     env = await OptimismEnv.new()
-    
-   // # l1_chain_1 | Account #9: 0xa0ee7a142d267c1f36714e4a8f75612f20a79720 (10000 ETH)
-   // # l1_chain_1 | Private Key: 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
-
-    //This wallet needs to have ETH in it
-    //const L1WalletPK = '0x0f2b8a26f2ddec8444c0ca412659a338d46d05963b72a72ccee34552e611269f'
-    const L1WalletPK = '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6'
-
-    // The private key which is funded on L1
-    const l1Wallet = new Wallet(L1WalletPK, l1Provider)
-    
-    // The L2 account you will be using to pay for OMGX deployment on the L2
-    // if it's using non-0 gas price
+    const l1Wallet = env.l1Wallet
     const l2Wallet = l1Wallet.connect(l2Provider)
 
-    const l1Balance = await l1Wallet.getBalance()
-    const l2Balance = await l2Wallet.getBalance()
-
-    console.log("Initial L1 ETH balance is:", ethers.utils.formatEther(l1Balance))
-    console.log("Initial L2 ETH balance is:", ethers.utils.formatEther(l2Balance))
-
-    const depositAmount = ethers.utils.parseEther('5.0')
+    const depositAmount = ethers.utils.parseEther('0.01')
 
     console.log("\nAmount to transfer:", ethers.utils.formatEther(depositAmount))
 
-    const { tx, receipt } = await env.waitForXDomainTransaction(
-      env.l1Bridge.depositETH(DEFAULT_TEST_GAS_L2, '0xFFFF', {
-        value: depositAmount,
-        gasLimit: DEFAULT_TEST_GAS_L1,
-      }),
-      Direction.L1ToL2
+    const depositTxStatus = await env.l1Bridge.depositETH(
+      DEFAULT_TEST_GAS_L2,
+      utils.formatBytes32String(new Date().getTime().toString()),
+        { 
+          value: depositAmount,
+          gasPrice: DEFAULT_TEST_GAS_L1,
+        }
     )
+    await depositTxStatus.wait()
+    console.log(' depositTxStatus', depositTxStatus)
+
+    const [l1ToL2msgHash] = await env.watcher.getMessageHashesFromL1Tx(
+      depositTxStatus.hash
+    )
+    console.log(' got L1->L2 message hash', l1ToL2msgHash)
+
+    const l2Receipt = await env.watcher.getL2TransactionReceipt(
+      l1ToL2msgHash
+    )
+    console.log(' completed Deposit! L2 tx hash:', l2Receipt.transactionHash)
+
+    // const { tx, receipt } = await env.waitForXDomainTransaction(
+    //   env.l1Bridge.depositETH(
+    //     DEFAULT_TEST_GAS_L2, 
+    //     '0xFFFF', 
+    //     {
+    //       value: depositAmount,
+    //       gasLimit: DEFAULT_TEST_GAS_L1,
+    //     }
+    //   ),
+    //   Direction.L1ToL2
+    // )
 
     const l1Balance1 = await l1Wallet.getBalance()
     const l2Balance1 = await l2Wallet.getBalance()
 
-    console.log("/nFinal L1 ETH balance is:", ethers.utils.formatEther(l1Balance1))
-    console.log("Final L2 ETH balance is:", ethers.utils.formatEther(l2Balance1))
+    console.log("\nFinal L1 ETH balance:", ethers.utils.formatEther(l1Balance1))
+    console.log("Final L2 ETH balance:", ethers.utils.formatEther(l2Balance1))
 
   })
 
 })
  
+
+ /*
+ depositETHL2 = async (value = '1', gasPrice) => {
+    try {
+      const depositTxStatus = await this.L1StandardBridgeContract.depositETH(
+        this.L2GasLimit,
+        utils.formatBytes32String(new Date().getTime().toString()),
+        { 
+          value: parseEther(value),
+          gasPrice: ethers.utils.parseUnits(`${gasPrice}`, 'wei'),
+        }
+      )
+      await depositTxStatus.wait()
+
+      const [l1ToL2msgHash] = await this.watcher.getMessageHashesFromL1Tx(
+        depositTxStatus.hash
+      )
+      console.log(' got L1->L2 message hash', l1ToL2msgHash)
+
+      const l2Receipt = await this.watcher.getL2TransactionReceipt(
+        l1ToL2msgHash
+      )
+      console.log(' completed Deposit! L2 tx hash:', l2Receipt.transactionHash)
+
+      return l2Receipt
+    } catch(error) {
+      console.log(error)
+      return false
+    }
+  }
+  */

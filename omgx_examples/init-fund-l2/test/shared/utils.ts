@@ -9,6 +9,7 @@ import {
   BigNumberish,
   BigNumber,
   utils,
+  ethers,
 } from 'ethers'
 import {
   getContractFactory,
@@ -125,19 +126,19 @@ export const getOvmEth = (wallet: Wallet) => {
   return OVM_ETH
 }
 
-export const fundUser = async (
-  watcher: Watcher,
-  bridge: Contract,
-  amount: BigNumberish,
-  recipient?: string
-) => {
-  const value = BigNumber.from(amount)
-  const tx = recipient
-    ? bridge.depositETHTo(recipient, 1_300_000, '0x', { value })
-    : bridge.depositETH(1_300_000, '0x', { value })
+// export const fundUser = async (
+//   watcher: Watcher,
+//   bridge: Contract,
+//   amount: BigNumberish,
+//   recipient?: string
+// ) => {
+//   const value = BigNumber.from(amount)
+//   const tx = recipient
+//     ? bridge.depositETHTo(recipient, 1_300_000, '0x', { value })
+//     : bridge.depositETH(1_300_000, '0x', { value })
 
-  await waitForXDomainTransaction(watcher, tx, Direction.L1ToL2)
-}
+//   await waitForXDomainTransaction(watcher, tx, Direction.L1ToL2)
+// }
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 

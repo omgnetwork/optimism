@@ -53,21 +53,28 @@ export const waitForXDomainTransaction = async (
       : { src: watcher.l2, dest: watcher.l1 }
 
   // await it if needed
+  console.log("Waiting for transaction...")
   tx = await tx
+  console.log("Got tx...", tx)
   // get the receipt and the full transaction
   const receipt = await tx.wait()
+  console.log("Got receipt...", receipt)
   const fullTx = await src.provider.getTransaction(tx.hash)
+  console.log("Got fullTx...", fullTx)
 
   // get the message hash which was created on the SentMessage
   const [xDomainMsgHash] = await watcher.getMessageHashesFromTx(src, tx.hash)
+  console.log("Got xDomainMsgHash...", xDomainMsgHash)
   // Get the transaction and receipt on the remote layer
   const remoteReceipt = await watcher.getTransactionReceipt(
     dest,
     xDomainMsgHash
   )
+  console.log("Got remoteReceipt...", remoteReceipt)
   const remoteTx = await dest.provider.getTransaction(
     remoteReceipt.transactionHash
   )
+  console.log("Got remoteTx...", remoteTx)
 
   return {
     tx: fullTx,
