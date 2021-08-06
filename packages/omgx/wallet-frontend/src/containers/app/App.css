@@ -1,0 +1,309 @@
+* {
+  padding: 0;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+}
+
+*:focus {
+  outline: none !important;
+}
+
+body {
+  background-color: black;
+}
+
+.nav {
+  min-height: 12vh;
+}
+
+nav {
+  background-color: black;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 12vh;
+  position: fixed;
+  transition: 0.6s;
+  z-index: 2;
+}
+
+.logo {
+  align-items: center;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  width: 40vw;
+  z-index: 1;
+
+  transition: 0.6s;
+}
+
+.logo img {
+  height: 6vh;
+}
+
+.nav-links {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 60%;
+  z-index: 1;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  letter-spacing: 3px;
+  font-size: 3vh;
+}
+
+.nav-links li {
+  border-radius: 5px;
+  font-size: calc(1vw + 2vh);
+  list-style: none;
+  text-align: center;
+  width: 20%;
+  line-height: 5vh;
+}
+
+.home {
+  align-items: center;
+  background-color: black;
+  box-sizing: border-box;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  height: 88vh;
+  overflow-y: scroll;
+  padding-bottom: 8vh;
+  width: 100vw;
+}
+
+.home h1 {
+  font-size: 7vh;
+  margin-top: 3vh;
+}
+
+.home .info {
+  align-items: center;
+  border-radius: 20px;
+  border-style: solid;
+  display: flex;
+  justify-content: space-around;
+  margin-top: 5vh;
+  padding: 3vh;
+  width: 60%;
+}
+
+.home .info p {
+  background-color: white;
+  border-radius: 2vh;
+  color: black;
+  font-size: 1.7vh;
+  padding: 1vh 2vh;
+}
+
+.home .info > div h3 {
+  font-size: 3vh;
+}
+
+.home .info > div h4 {
+  font-size: 2vh;
+}
+
+.home .info .delegate {
+  background-color: white;
+  border-radius: 10px;
+  border-style: none;
+  cursor: pointer;
+  font-size: 2.2vh;
+  padding: 1.5vh 3vh;
+}
+
+.home .info .modal {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  margin-top: 30vh;
+  position: absolute;
+  justify-content: center;
+  width: 100%;
+  z-index: 6;
+}
+
+.home p {
+  background-color: white;
+  border-radius: 2vh;
+  color: black;
+  font-size: 1.7vh;
+  margin-top: 2vh;
+  padding: 1vh 2vh;
+}
+
+.home .info .modal .delegateVotes {
+  align-items: center;
+  background-color: white;
+  border-radius: 20px;
+  border-style: solid;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  height: 40vh;
+  padding: 5vh;
+  width: 30vw;
+  position: relative;
+}
+
+.home .info .modal .close {
+  background-color: white;
+  border-style: none;
+  color: red;
+  cursor: pointer;
+  font-size: 3vh;
+  right: 20px;
+  top: 10px;
+  position: absolute;
+}
+
+.home .info .modal .delegateVotes h2 {
+  font-size: 4vh;
+}
+
+.home .info .modal .delegateVotes input {
+  border-color: black;
+  border-radius: 5px;
+  border-style: solid;
+  box-sizing: border-box;
+  margin-top: 3vh;
+  padding: 1vh 2vh;
+  width: 100%;
+}
+
+.home .info .modal .delegateVotes .submit {
+  border-color: black;
+  border-radius: 5px;
+  border-style: solid;
+  cursor: pointer;
+  margin-top: 3vh;
+  padding: 1vh;
+  width: 100%;
+}
+
+.home .info .tint {
+  background-color: white;
+  height: 100%;
+  left: 0;
+  opacity: 0.7;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 5;
+}
+
+.home .proposalForm {
+  align-items: center;
+  border-radius: 20px;
+  border-style: solid;
+  display: flex;
+  flex-direction: column;
+  margin-top: 5vh;
+  padding: 3vh;
+  width: 60%;
+}
+
+.home .proposalForm h2 {
+  font-size: 4vh;
+}
+
+.home .proposalForm .createProposal {
+  display: flex;
+  margin-top: 3vh;
+  justify-content: space-between;
+  text-align: center;
+  width: 90%;
+}
+
+.home .proposalForm .createProposal > div {
+  width: 48%;
+}
+
+.home .proposalForm .createProposal > div h3 {
+  font-size: 3vh;
+}
+
+.home .proposalForm .proposal {
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 1px;
+  box-sizing: border-box;
+  display: flex;
+  margin-top: 3vh;
+  padding: 2vh 2vh 0 0;
+  width: 100%;
+}
+
+.home .proposalForm .proposal h3 {
+  font-size: 3vh;
+  width: 15%;
+}
+
+.home .column {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  width: 85%;
+}
+
+.proposal .column select {
+  border-radius: 5px;
+  border-style: none;
+  margin-bottom: 2vh;
+  padding: 1vh;
+  width: 100%;
+}
+
+.proposal .column input {
+  background-color: black;
+  border-radius: 5px;
+  border-color: white;
+  border-style: solid;
+  box-sizing: border-box;
+  color: white;
+  font-size: 1.7vh;
+  margin-bottom: 2vh;
+  padding: 1vh 2vh;
+  width: 100%;
+}
+
+.proposalForm .createProposal .addAction {
+  background-color: black;
+  border-color: white;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 1px;
+  color: white;
+  cursor: pointer;
+  margin-top: 2.2vh;
+  padding: 1vh;
+  width: 100%;
+}
+
+.proposalForm .createProposal .description {
+  border-radius: 5px;
+  border-style: none;
+  height: 15vh;
+  margin-top: 3vh;
+  padding: 1vh;
+  width: 100%;
+}
+
+.proposalForm .submit {
+  background-color: white;
+  border-radius: 5px;
+  border-style: none;
+  cursor: pointer;
+  font-size: 2.2vh;
+  margin-top: 3vh;
+  padding: 1.5vh 3vh;
+}

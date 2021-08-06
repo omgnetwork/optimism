@@ -69,11 +69,20 @@ import addressOMGXAxiosInstance from 'api/addressOMGXAxios'
 import coinGeckoAxiosInstance from 'api/coinGeckoAxios'
 import ethGasStationAxiosInstance from 'api/ethGasStationAxios'
 
+// May need to be modified for wallet
+import Comp from "../deployment/artifacts-ovm/contracts/Comp.json";
+import GovernorBravoDelegate from "../deployment/artifacts-ovm/contracts/GovernorBravoDelegate.json";
+import GovernorBravoDelegator from "../deployment/artifacts-ovm/contracts/GovernorBravoDelegator.json";
+import SafeMath from "../deployment/artifacts-ovm/contracts/SafeMath.json";
+import Timelock from "../deployment/artifacts-ovm/contracts/Timelock.json";
+
 //All the current addresses for fallback purposes only
 //These may or may not be present
 //Generally, the wallet will get these from the two HTTP deployment servers
 const localAddresses = require(`../deployment/local/addresses.json`)
 const rinkebyAddresses = require(`../deployment/rinkeby/addresses.json`)
+
+
 
 class NetworkService {
 
@@ -135,6 +144,12 @@ class NetworkService {
     // gas
     this.L1GasLimit = 9999999
     this.L2GasLimit = 10000000
+
+    this.CompContract = null;
+		this.GovernorBravoDelegateContract = null;
+		this.GovernorBravoDelegatorContract = null;
+		this.SafeMathContract = null;
+		this.TimelockContract = null;
   }
 
   async enableBrowserWallet() {
@@ -1948,6 +1963,94 @@ class NetworkService {
       fast: 10000000000
     }
   }
+  async initializeDaoAccounts() {
+		let addresses = null;
+		this.CompAddress = addresses.Comp;
+		this.GovernorBravoDelegateAddress =
+			addresses.GovernorBravoDelegate;
+		this.GovernorBravoDelegatorAddress =
+			addresses.GovernorBravoDelegator;
+		this.TimelockAddress = addresses.Timelock;
+		this.SafeMathAddress = addresses.SafeMath;
+		try {
+			addresses = rinkebyAddresses;
+			this.CompContract = new ethers.Contract(
+				this.CompAddress, Comp.abi,
+				this.provider.getSigner()
+				);
+
+			this.GovernorBravoDelegatorContract = new ethers.Contract(
+				this.GovernorBravoDelegatorAddress,
+				GovernorBravoDelegator.abi,
+				this.provider.getSigner()
+				);
+
+			this.GovernorBravoDelegateContract = new ethers.Contract(
+				this.GovernorBravoDelegateAddress,
+				GovernorBravoDelegate.abi,
+				this.provider.getSigner()
+				);
+
+			this.TimelockContract = new ethers.Contract(
+				this.TimelockAddress,
+				Timelock.abi,
+				this.provider.getSigner()
+				);
+
+			this.SafeMathContract = new ethers.Contract(
+				this.SafeMathAddress,
+				SafeMath.abi,
+				this.provider.getSigner()
+				);
+		} catch(error){
+      console.log(`Here is the error: ${error}`);
+    }
+    finally {
+      console.log(`Finally!`);
+    }
+	}
+
+	async enableBrowserWallet() {
+		console.log("NS: enableBrowserWallet()");
+		try {
+			// connect to the wallet
+			await window.ethereum.enable();
+			this.provider = new ethers.providers.Web3Provider(
+				window.ethereum
+			);
+			await window.ethereum.request({
+				method: "eth_requestAccounts",
+			});
+			return true;
+		} catch (error) {
+			return false;
+		}
+	}
+
+	async propose(proposalId) {
+		// const { addresses, values, signatures, calldatas, description } =
+		// 	await getDaoProposal(proposalId);
+		// const proposalIDGov =
+		// 	await this.GovernorBravoDelegateContract.propose(
+		// 		addresses,
+		// 		values,
+		// 		signatures,
+		// 		calldatas,
+		// 		description
+		// 	);
+    const testing = true;
+	}
+
+	async queue(proposalId) {
+		await this.GovernorBravoDelegateContract.queue(proposalId);
+	}
+
+	async execute(proposalId) {
+		await this.GovernorBravoDelegateContract.execute(proposalId);
+	}
+	async cancel(proposalId) {
+		await this.GovernorBravoDelegateContract.cancel(proposalId);
+	}
 
 }
 
