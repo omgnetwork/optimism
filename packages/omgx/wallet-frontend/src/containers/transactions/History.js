@@ -42,6 +42,8 @@ import * as styles from './Transactions.module.scss';
 
 import { getAllNetworks } from 'util/masterConfig';
 import useInterval from 'util/useInterval';
+import { Typography } from '@material-ui/core';
+import PageHeader from 'components/pageHeader/PageHeader';
 
 const POLL_INTERVAL = 5000; //milliseconds
 
@@ -62,10 +64,10 @@ function History () {
   const unorderedTransactions = useSelector(selectTransactions, isEqual)
 
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
-    
+
   const transactions = orderedTransactions.filter((i)=>{
     return (moment.unix(i.timeStamp).isSameOrAfter(startDate) && moment.unix(i.timeStamp).isSameOrBefore(endDate));
-  })  
+  })
 
   const currentNetwork = useSelector(selectNetwork());
 
@@ -89,6 +91,7 @@ function History () {
 
   return (
     <div className={styles.container}>
+      <PageHeader title="Wallet" />
 
       <div className={styles.header}>
         <h2>Search</h2>
@@ -133,17 +136,17 @@ function History () {
           />
 
           {activeTab1 === 'Transactions' && (
-           <Transactions 
-             searchHistory={searchHistory} 
-             transactions={transactions} 
+           <Transactions
+             searchHistory={searchHistory}
+             transactions={transactions}
              chainLink={chainLink}
            />
           )}
 
           {activeTab1=== 'Deposits' && <
-            Deposits 
-              searchHistory={searchHistory} 
-              transactions={transactions} 
+            Deposits
+              searchHistory={searchHistory}
+              transactions={transactions}
               chainLink={chainLink}
             />
           }
@@ -159,10 +162,10 @@ function History () {
             tabs={[ 'Exits', 'TBD' ]}
           />
 
-          {activeTab2 === 'Exits' && 
-            <Exits 
+          {activeTab2 === 'Exits' &&
+            <Exits
               searchHistory={searchHistory}
-              transactions={transactions}  
+              transactions={transactions}
               chainLink={chainLink}
             />
           }

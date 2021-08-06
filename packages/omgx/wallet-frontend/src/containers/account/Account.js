@@ -37,10 +37,12 @@ import bunny_sad from 'images/bunny_sad.svg'
 import * as styles from './Account.module.scss'
 import { selectTokens } from 'selectors/tokenSelector'
 import { fetchLookUpPrice } from 'actions/networkAction'
+import WalletAddress from 'components/walletAddress/WalletAddress'
+import PageHeader from 'components/pageHeader/PageHeader'
 
 function Account () {
   const dispatch = useDispatch();
-  
+
   const childBalance = useSelector(selectlayer2Balance, isEqual);
   const rootBalance = useSelector(selectlayer1Balance, isEqual);
 
@@ -86,13 +88,9 @@ function Account () {
 
   return (
     <div className={styles.Account}>
+      <PageHeader title="Wallet" />
 
-      <div className={styles.wallet}>
-        <span className={styles.address}>{`Wallet Address : ${wAddress}`}</span>
-        <Copy value={networkService.account} />
-      </div>
-
-      {balances['oETH']['have'] &&
+      {/* {balances['oETH']['have'] &&
         <div className={styles.RabbitBox}>
           <img className={styles.bunny} src={bunny_happy} alt='Happy Bunny' />
           <div className={styles.RabbitRight}>
@@ -106,16 +104,16 @@ function Account () {
               oETH
             </div>
             <div className={styles.RabbitRightBottomNote}>
-            {networkLayer === 'L1' && 
+            {networkLayer === 'L1' &&
               <span>You are on L1. To use the L2, please switch to L2 in MetaMask.</span>
             }
-            {networkLayer === 'L2' && 
+            {networkLayer === 'L2' &&
               <span>You are on L2. To use the L1, please switch to L1 in MetaMask.</span>
             }
             </div>
           </div>
         </div>
-      }
+      } */}
 
       {!balances['oETH']['have'] &&
         <div className={styles.RabbitBox}>
@@ -131,10 +129,10 @@ function Account () {
               oETH
             </div>
             <div className={styles.RabbitRightBottomNote}>
-            {networkLayer === 'L1' && 
+            {networkLayer === 'L1' &&
               <span>You are on L1. To use the L2, please switch to L2 in MetaMask.</span>
             }
-            {networkLayer === 'L2' && 
+            {networkLayer === 'L2' &&
               <span>You are on L2. To use the L1, please switch to L1 in MetaMask.</span>
             }
             </div>
@@ -151,7 +149,7 @@ function Account () {
       <div className={styles.TableContainer}>
         {rootBalance.map((i, index) => {
           return (
-            <ListAccount 
+            <ListAccount
               key={i.currency}
               token={i}
               chain={'L1'}
@@ -170,7 +168,7 @@ function Account () {
       <div className={styles.TableContainer}>
         {childBalance.map((i, index) => {
           return (
-            <ListAccount 
+            <ListAccount
               key={i.currency}
               token={i}
               chain={'L2'}
