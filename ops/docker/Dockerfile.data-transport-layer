@@ -26,6 +26,7 @@ COPY --from=builder /optimism/packages/contracts/artifacts-ovm ./packages/contra
 # copy the service
 WORKDIR /opt/optimism/packages/data-transport-layer
 COPY --from=builder /optimism/packages/data-transport-layer/dist ./dist
+COPY --from=builder /optimism/packages/contracts/dist/dumps ./state-dumps
 COPY --from=builder /optimism/packages/data-transport-layer/package.json .
 COPY --from=builder /optimism/packages/data-transport-layer/node_modules ./node_modules
 
