@@ -39,7 +39,6 @@ import { useMediaQuery } from '@material-ui/core';
 import * as styles from './App.module.scss';
 import { setWalletMethod } from 'actions/setupAction';
 import { isChangingChain } from 'util/changeChain';
-import styled from '@emotion/styled';
 import MainMenu from 'components/mainMenu/MainMenu';
 import { Box } from '@material-ui/core';
 import MobileNav from 'components/mainMenu/mobileNav/MobileNav';

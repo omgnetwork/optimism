@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import WrongNetworkModal from 'containers/modals/wrongnetwork/WrongNetworkModal';
@@ -27,11 +27,8 @@ import {
 } from 'selectors/setupSelector';
 
 import { openModal } from 'actions/uiAction';
-import { setWalletMethod, setNetwork } from 'actions/setupAction';
+import { setWalletMethod } from 'actions/setupAction';
 import { getAllNetworks } from 'util/masterConfig';
-
-import logo from 'images/omgx.png';
-import chevron from 'images/chevron.svg';
 
 import { isChangingChain } from 'util/changeChain';
 import Button from 'components/button/Button';
@@ -44,12 +41,10 @@ import { grey } from '@material-ui/core/colors';
 
 function WalletPicker ({ onEnable, enabled }) {
   const dispatch = useDispatch();
-  const dropdownNode = useRef(null);
 
   const [ walletEnabled, setWalletEnabled ] = useState(false);
   const [ accountsEnabled, setAccountsEnabled ] = useState(false);
   const [ wrongNetwork, setWrongNetwork ] = useState(false);
-  const [ showAllNetworks, setShowAllNetworks ] = useState(false);
 
   const walletMethod = useSelector(selectWalletMethod())
   const masterConfig = useSelector(selectNetwork())
@@ -58,12 +53,6 @@ function WalletPicker ({ onEnable, enabled }) {
 
   const dispatchSetWalletMethod = useCallback((methodName) => {
     dispatch(setWalletMethod(methodName));
-  }, [ dispatch ])
-
-  const dispatchSetNetwork = useCallback((network) => {
-    //console.log("dispatchSetNetwork:",network)
-    setShowAllNetworks(false);
-    dispatch(setNetwork(network));
   }, [ dispatch ])
 
   useEffect(() => {
@@ -130,8 +119,6 @@ function WalletPicker ({ onEnable, enabled }) {
     setWalletEnabled(false);
     setAccountsEnabled(false);
   }
-
-  const browserEnabled = !!window.ethereum;
 
   // defines the set of possible networks
   const networks = getAllNetworks();

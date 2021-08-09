@@ -1,5 +1,4 @@
 import React from 'react';
-import Copy from 'components/copy/Copy';
 import { Box } from '@material-ui/core';
 import networkService from 'services/networkService';
 import truncate from 'truncate-middle';

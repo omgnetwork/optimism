@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
+import { Box } from '@material-ui/system';
 import { useSelector, useDispatch } from 'react-redux';
 import * as S from './NetworkSwitcher.styles.js';
 import chevron from 'images/chevron.svg';
@@ -7,8 +8,9 @@ import {
 } from 'selectors/setupSelector';
 import { setNetwork } from 'actions/setupAction';
 import { getAllNetworks } from 'util/masterConfig';
-import { ReactComponent as NetworkSwitcherIcon } from "../../../images/icons/menuIcons/network-switcher-icon.svg"
-import { Box } from '@material-ui/system';
+import networkService from 'services/networkService'
+import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon.js';
+import { Typography } from '@material-ui/core';
 
 function NetworkSwitcher() {
   const dispatch = useDispatch();
@@ -19,6 +21,8 @@ function NetworkSwitcher() {
   // defines the set of possible networks
   const networks = getAllNetworks();
 
+  const networkLayer = networkService.L1orL2
+
   let allNetworks = [];
   for (var prop in networks) allNetworks.push(prop)
 
@@ -27,6 +31,8 @@ function NetworkSwitcher() {
     setShowAllNetworks(false);
     dispatch(setNetwork(network));
   }, [ dispatch ])
+
+  console.log('networkLayer', networkLayer)
 
 
   return (
@@ -37,8 +43,8 @@ function NetworkSwitcher() {
             onClick={()=>setShowAllNetworks(prev => !prev)}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
-              <NetworkSwitcherIcon />
-              OMGX {masterConfig}
+              <NetworkSwitcherIcon active={networkLayer === 'L1'} />
+              <Typography variant="body1">OMGX {masterConfig}</Typography>
             </Box>
             {!!allNetworks.length && (
               <S.Chevron
