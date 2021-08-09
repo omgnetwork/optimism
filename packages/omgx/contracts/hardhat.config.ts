@@ -19,9 +19,9 @@ const config: HardhatUserConfig = {
       // gas: 9000000000,
       accounts: ['0x72d4661f26f9c837d179558ef6b079d021cd0f91cc0ac557870eec14ac12783e']
     },
-    localhost: {
+    local: {
       url: "https://integration.omgx.network:8081",
-      allowUnlimitedContractSize: true,
+      allowUnlimitedContractSize: false,
       gasPrice: 1000000008,
       timeout: 1800000,
       // gas: 9000000000,

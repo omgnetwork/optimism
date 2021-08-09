@@ -1,7 +1,7 @@
 import { getContractFactory } from '@eth-optimism/contracts'
 import { DeployFunction, DeploymentSubmission } from 'hardhat-deploy/dist/types'
 import { Contract, ContractFactory} from 'ethers'
-import chalk from 'chalk';
+import chalk from 'chalk'
 
 require('dotenv').config()
 
@@ -22,9 +22,9 @@ const deployFn: DeployFunction = async (hre) => {
     L1_MessengerJson.bytecode,
     (hre as any).deployConfig.deployer_l1
   )
-  console.log(`In 000-Messenger.deploy.ts`)
-  L1_Messenger = await Factory__L1_Messenger.deploy({gasLimit:800000, gasPrice:1500000000 })
-  console.log(`Made it here!`);
+
+  L1_Messenger = await Factory__L1_Messenger.deploy()
+
 
   await L1_Messenger.deployTransaction.wait()
 
@@ -34,8 +34,11 @@ const deployFn: DeployFunction = async (hre) => {
     address: L1_Messenger.address,
     abi: L1_MessengerJson.abi,
   };
+
+
   await hre.deployments.save('OVM_L1CrossDomainMessengerFast', L1_MessengerDeploymentSubmission)
   console.log(`🌕 ${chalk.red('L1_CrossDomainMessenger_Fast deployed to:')} ${chalk.green(L1_Messenger.address)}`)
+
 
   const L1_Messenger_Deployed = await Factory__L1_Messenger.attach(L1_Messenger.address)
 
