@@ -8,6 +8,8 @@ import logger from './logger'
 let l1PoolBalance: number
 let l1RelayerBalance: number
 let l1SequencerBalance: number
+let l1ProposerBalance: number
+let l1FastRelayerBalance: number
 let l1BlockNumber: number
 let l1GasPrice: number
 let l2PoolBalance: number
@@ -60,6 +62,8 @@ const logBalance = (provider: WebSocketProvider, blockNumber: number, networkNam
     provider.getBalance(configs.l1PoolAddress),
     provider.getBalance(configs.relayerAddress),
     provider.getBalance(configs.sequencerAddress),
+    provider.getBalance(configs.proposerAddress),
+    provider.getBalance(configs.fastRelayerAddress),
     provider.getGasPrice(),
   ] : [
     provider.getBalance(configs.l2PoolAddress),
@@ -68,11 +72,13 @@ const logBalance = (provider: WebSocketProvider, blockNumber: number, networkNam
 
   Promise.all(promiseData)
   .then((values) => {
-    if (values.length === 4) {
+    if (values.length === 6) {
       l1PoolBalance = convertWeiToEther(values[0])
       l1RelayerBalance = convertWeiToEther(values[1])
       l1SequencerBalance = convertWeiToEther(values[2])
-      l1GasPrice = parseFloat(values[3].toString())
+      l1ProposerBalance = convertWeiToEther(values[3])
+      l1FastRelayerBalance = convertWeiToEther(values[4])
+      l1GasPrice = parseFloat(values[5].toString())
       l1BlockNumber = blockNumber
     } else {
       l2PoolBalance = convertWeiToEther(values[0])
@@ -89,7 +95,9 @@ const logBalance = (provider: WebSocketProvider, blockNumber: number, networkNam
           poolAddress: configs.l1PoolAddress,
           poolBalance: l1PoolBalance,
           relayerBalance: l1RelayerBalance,
+          fastRerlayerBalance: l1FastRelayerBalance,
           sequencerBalance: l1SequencerBalance,
+          proposerBalance: l1ProposerBalance,
           gasPrice: l1GasPrice,
           blockNumber: l1BlockNumber,
         }

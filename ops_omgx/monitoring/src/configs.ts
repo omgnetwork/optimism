@@ -13,6 +13,8 @@ export const l2PoolAddress = process.env.L2_LIQUIDITY_POOL_ADDRESS
 
 export const relayerAddress = process.env.RELAYER_ADDRESS
 export const sequencerAddress = process.env.SEQUENCER_ADDRESS
+export const proposerAddress = process.env.PROPOSER_ADDRESS
+export const fastRelayerAddress = process.env.FAST_RELAYER_ADDRESS
 
 export const walletPKey = process.env.WALLET_PRIVATE_KEY
 export const l2GasLimit = process.env.L2_GAS_LIMIT
