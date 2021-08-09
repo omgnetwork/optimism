@@ -35,7 +35,7 @@ module.exports = {
    * $ truffle test --network <network-name>
    */
 
-   networks: {
+  networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
     // You should run a client (like ganache-cli, geth or parity) in a separate terminal
@@ -43,19 +43,19 @@ module.exports = {
     // options below to some value.
     //
     develop: {
-     host: "127.0.0.1",     // Localhost (default: none)
-     port: 8545,            // Standard Ethereum port (default: none)
-     network_id: "1234",       // Any network (default: none)
-     gas:  0x9896a6,
-     gasPrice: 0x01
-   },
-   development: {
-     host: "127.0.0.1",     // Localhost (default: none)
-     port: 8545,            // Standard Ethereum port (default: none)
-     network_id: "1234",       // Any network (default: none)
-     gas:  0x9896a6,
-     gasPrice: 0x01
-   }
+      host: '127.0.0.1', // Localhost (default: none)
+      port: 1628537590546, // Standard Ethereum port (default: none)
+      network_id: '1628537881028', // Any network (default: none)
+      gas: 0x9896a6,
+      gasPrice: 0x01,
+    },
+    development: {
+      host: '127.0.0.1', // Localhost (default: none)
+      port: 8545, // Standard Ethereum port (default: none)
+      network_id: '1628537881028', // Any network (default: none)
+      gas: 0x9896a6,
+      gasPrice: 0x01,
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
@@ -86,8 +86,8 @@ module.exports = {
   solc: {
     optimizer: {
       enabled: true,
-      runs: 200
-    }
+      runs: 200,
+    },
   },
 
   // Set default mocha options here, use special reporters etc.
@@ -107,7 +107,7 @@ module.exports = {
       //  },
       //  evmVersion: "byzantium"
       // }
-    }
+    },
   },
 
   // Truffle DB is currently disabled by default; to enable it, change enabled: false to enabled: true
@@ -117,10 +117,8 @@ module.exports = {
   // $ truffle migrate --reset --compile-all
 
   db: {
-    enabled: false
+    enabled: false,
   },
 
-  plugins: [
-        'truffle-contract-size'
-      ]
-};
+  plugins: ['truffle-contract-size'],
+}
