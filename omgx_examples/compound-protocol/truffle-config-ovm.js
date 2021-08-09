@@ -34,6 +34,21 @@ module.exports = {
       gasPrice: 0,
       gas: 54180127,
     },
+    L1: {
+      provider: function () {
+        return new HDWalletProvider({
+          mnemonic: {
+            phrase: mnemonicPhrase,
+          },
+          providerOrUrl: 'http://127.0.0.1:9545',
+        })
+      },
+      network_id: 31337,
+      host: '127.0.0.1',
+      port: 9545,
+      gasPrice: 15000000,
+      gas: 306150000,
+    },
   },
   compilers: {
     solc: {

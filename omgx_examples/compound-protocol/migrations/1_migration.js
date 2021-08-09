@@ -105,7 +105,7 @@ module.exports = function (deployer, network, accounts) {
       GovernorBravoDelegate,
       timelock.address,
       comp.address,
-      17280,
+      1,
       1,
       '100000000000000000000000'
     )
