@@ -25,7 +25,7 @@ describe('Fund Initial L2 Account', async () => {
 
   it('Check connectivity and initial balances', async () => {
 
-    //env = await OptimismEnv.new()
+    env = await OptimismEnv.new()
     //const l1Wallet = env.l1Wallet
     //const l2Wallet = l1Wallet.connect(l2Provider)
 
