@@ -13,44 +13,44 @@ let L1_Messenger: Contract
 
 const deployFn: DeployFunction = async (hre) => {
 
-    const addressManager = getContractFactory('Lib_AddressManager')
-      .connect((hre as any).deployConfig.deployer_l1)
-      .attach(process.env.ADDRESS_MANAGER_ADDRESS) as any
+  const addressManager = getContractFactory('Lib_AddressManager')
+    .connect((hre as any).deployConfig.deployer_l1)
+    .attach(process.env.ADDRESS_MANAGER_ADDRESS) as any
 
-    Factory__L1_Messenger = new ContractFactory(
-      L1_MessengerJson.abi,
-      L1_MessengerJson.bytecode,
-      (hre as any).deployConfig.deployer_l1
-    )
-    console.log(`In 000-Messenger.deploy.ts`)
-    L1_Messenger = await Factory__L1_Messenger.deploy()
-    console.log(`Made it here!`);
+  Factory__L1_Messenger = new ContractFactory(
+    L1_MessengerJson.abi,
+    L1_MessengerJson.bytecode,
+    (hre as any).deployConfig.deployer_l1
+  )
+  console.log(`In 000-Messenger.deploy.ts`)
+  L1_Messenger = await Factory__L1_Messenger.deploy({gasLimit:800000, gasPrice:1500000000 })
+  console.log(`Made it here!`);
 
-    await L1_Messenger.deployTransaction.wait()
+  await L1_Messenger.deployTransaction.wait()
 
-    const L1_MessengerDeploymentSubmission: DeploymentSubmission = {
-      ...L1_Messenger,
-      receipt: L1_Messenger.receipt,
-      address: L1_Messenger.address,
-      abi: L1_MessengerJson.abi,
-    };
-    await hre.deployments.save('OVM_L1CrossDomainMessengerFast', L1_MessengerDeploymentSubmission)
-    console.log(`🌕 ${chalk.red('L1_CrossDomainMessenger_Fast deployed to:')} ${chalk.green(L1_Messenger.address)}`)
+  const L1_MessengerDeploymentSubmission: DeploymentSubmission = {
+    ...L1_Messenger,
+    receipt: L1_Messenger.receipt,
+    address: L1_Messenger.address,
+    abi: L1_MessengerJson.abi,
+  };
+  await hre.deployments.save('OVM_L1CrossDomainMessengerFast', L1_MessengerDeploymentSubmission)
+  console.log(`🌕 ${chalk.red('L1_CrossDomainMessenger_Fast deployed to:')} ${chalk.green(L1_Messenger.address)}`)
 
-    const L1_Messenger_Deployed = await Factory__L1_Messenger.attach(L1_Messenger.address)
+  const L1_Messenger_Deployed = await Factory__L1_Messenger.attach(L1_Messenger.address)
 
-    // initialize with address_manager
-    const L1MessagerTX = await L1_Messenger_Deployed.initialize(
-      addressManager.address
-    )
-    console.log(`⭐️ ${chalk.blue('Fast L1 Messager initialized:')} ${chalk.green(L1MessagerTX.hash)}`)
+  // initialize with address_manager
+  const L1MessagerTX = await L1_Messenger_Deployed.initialize(
+    addressManager.address
+  )
+  console.log(`⭐️ ${chalk.blue('Fast L1 Messager initialized:')} ${chalk.green(L1MessagerTX.hash)}`)
 
-    //this will fail for non deployer account
-    const L1MessagerTXreg = await addressManager.setAddress(
-      'OVM_L1CrossDomainMessengerFast',
-      L1_Messenger.address
-    )
-    console.log(`⭐️ ${chalk.blue('Fast L1 Messager registered:')} ${chalk.green(L1MessagerTXreg.hash)}`)
+  //this will fail for non deployer account
+  const L1MessagerTXreg = await addressManager.setAddress(
+    'OVM_L1CrossDomainMessengerFast',
+    L1_Messenger.address
+  )
+  console.log(`⭐️ ${chalk.blue('Fast L1 Messager registered:')} ${chalk.green(L1MessagerTXreg.hash)}`)
 
 }
 

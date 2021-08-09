@@ -12,20 +12,21 @@ const config: HardhatUserConfig = {
   },
   networks: {
     optimism: {
-      url: 'http://localhost:8545',
+      url: 'https://integration.omgx.network:8081',
       gasPrice: 1000000008,
       saveDeployments: false,
       ovm: true,
-      gas: 9000000000,
-      accounts: ['0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80']
+      // gas: 9000000000,
+      accounts: ['0x72d4661f26f9c837d179558ef6b079d021cd0f91cc0ac557870eec14ac12783e']
     },
     localhost: {
       url: "https://integration.omgx.network:8081",
       allowUnlimitedContractSize: true,
       gasPrice: 1000000008,
       timeout: 1800000,
-      gas: 9000000000,
-      accounts: ['0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80']
+      // gas: 9000000000,
+      accounts: ['0x72d4661f26f9c837d179558ef6b079d021cd0f91cc0ac557870eec14ac12783e'],
+      ovm: true
     },
   },
   solidity: '0.7.6',
