@@ -2,20 +2,24 @@ import styled from "@emotion/styled";
 import { Link } from 'react-router-dom';
 
 export const Nav = styled.nav`
- ul {
-  list-style-type: none;
-  @media (max-width: 960px) {
-    padding-left: 0;
-  }
-   ul {
-     list-style-type: none;
-     padding-left: 70px;
-     margin-top: -20px;
-     @media (max-width: 960px) {
-    padding-left: 0;
-    margin-top: 0;
-  }
-   }
+  width: 220px;
+  max-width: 50vw;
+  ul {
+    list-style-type: none;
+    @media (max-width: 960px) {
+      padding-left: 0;
+    }
+    ul {
+      margin-left: 0;
+      list-style-type: none;
+      @media (max-width: 960px) {
+        padding-left: 0;
+        margin-top: 0;
+      }
+      li a {
+        padding-left: 80px;
+      }
+    }
  }
  @media (max-width: 960px) {
     background: ${props => props.theme.palette.background.default};
@@ -23,7 +27,7 @@ export const Nav = styled.nav`
 `;
 
 export const MenuItem = styled(Link)`
-  color: ${props => props.selected ? props.theme.palette.primary.main : "inherit"};
+  color: ${props => props.selected ? props.theme.palette.secondary.main : "inherit"};
   background: ${props => props.selected ? 'linear-gradient(90deg, rgba(237, 72, 240, 0.09) 1.32%, rgba(237, 72, 236, 0.0775647) 40.2%, rgba(240, 71, 213, 0) 71.45%)' : 'none'};
   display: flex;
   align-items: center;
@@ -34,7 +38,7 @@ export const MenuItem = styled(Link)`
   margin-bottom: 1px;
   font-weight: ${props => props.selected ? 700 : 'normal'};
   &:hover {
-    color: ${props => props.theme.palette.primary.main};
+    color: ${props => props.theme.palette.secondary.main};
   }
   &:before {
     width: 5px;
@@ -46,7 +50,6 @@ export const MenuItem = styled(Link)`
     background-color: #506DFA;
     opacity: 0.6;
     display: ${props => props.selected ? 'block' : 'none'};
-
   }
 `
 export const Chevron = styled.img`
@@ -56,5 +59,3 @@ export const Chevron = styled.img`
   margin-bottom: 0;
 `;
 
-
-//pallete.background.default

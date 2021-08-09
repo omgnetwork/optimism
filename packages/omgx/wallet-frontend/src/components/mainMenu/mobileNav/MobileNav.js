@@ -3,12 +3,10 @@ import { ReactComponent as Logo } from './../../../images/logo-omgx.svg';
 import * as S from './MobileNav.styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import { Link } from 'react-router-dom';
-import { Box, useTheme } from '@material-ui/core';
 import MenuItems from '../menuItems/MenuItems';
 import { Drawer } from '@material-ui/core';
 import { useState } from 'react';
 import { createStyles, makeStyles } from '@material-ui/styles';
-// import { useTheme } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -25,13 +23,13 @@ function MobileNav () {
 
   return (
     <S.MobileNavTag>
-      <MenuIcon fontSize="medium" onClick={() => setOpen(!open)} cursor/>
+      <MenuIcon fontSize="medium" onClick={() => setOpen(!open)} />
 
       <Drawer open={open} onClose={() => setOpen(false)} classes={{ paper: classes.paper }}>
         <MenuItems/>
       </Drawer>
 
-      <Link to="/">
+      <Link to="/" style={{ display: "flex"}}>
         <Logo width={100} />
       </Link>
     </S.MobileNavTag>

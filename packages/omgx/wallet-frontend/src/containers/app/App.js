@@ -59,6 +59,12 @@ function App () {
     palette: {
       mode: light ? 'light' : 'dark',
       primary: {
+        // light: '#757ce8',
+        main: '#506DFA',
+        // dark: '#002884',
+        contrastText: '#fff',
+      },
+      secondary: {
         main: '#F0A000',
       },
       background: {
@@ -85,13 +91,10 @@ function App () {
       body1: {
         fontSize: 18,
       }
-      // fontSize:
     }
   });
 
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-  console.log('theme is', theme)
 
   useEffect(() => {
     //dispatch(oracleService.initialize());

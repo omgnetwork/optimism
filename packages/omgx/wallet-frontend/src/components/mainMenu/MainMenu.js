@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ReactComponent as Logo } from './../../images/logo-omgx.svg';
-import {Box} from '@material-ui/core';
-import { Menu, MenuItem } from "./MainMenu.styles";
+import { Menu } from "./MainMenu.styles";
 import { Link } from 'react-router-dom';
 import ThemeSwitcher from './themeSwitcher/ThemeSwitcher';
 import NetworkSwitcher from './networkSwitcher/NetworkSwitcher';
 import MenuItems from './menuItems/MenuItems';
-
 
 function MainMenu ({ light, setLight }) {
   return (
