@@ -57,7 +57,7 @@ module.exports = async function main(callback) {
 		let calldatas = [
 			'0x000000000000000000000000000000000000000000000dc3a8351f3d86a00000',
 		]
-		let description = 'Testing out a proposal'
+		let description = '#Changing Proposal Threshold to 65000 Comp'
 
 		await comp.delegate(accounts[0])
 
@@ -65,8 +65,6 @@ module.exports = async function main(callback) {
 			'current votes: ',
 			(await comp.getCurrentVotes(accounts[0])).toString()
 		)
-
-		await comp.transfer(accounts[1], 10)
 
 		await sleep(500)
 
@@ -119,6 +117,8 @@ module.exports = async function main(callback) {
 		console.log('WEB3 : ', await web3.eth.getBlockNumber())
 		const proposalThreshold = await GovernorBravo.proposalThreshold()
 		console.log('Proposal Threshold : ', proposalThreshold.toString())
+		const proposalId = await GovernorBravo.initialProposalId()
+		console.log('proposalId : ', proposalId.toString())
 	} catch (error) {
 		console.log(error)
 		callback(1)

@@ -24,7 +24,7 @@ module.exports = async function (deployer) {
   console.log('deployed comp')
 
   // Deploy Timelock
-  await deployer.deploy(Timelock, user, 0)
+  await deployer.deploy(Timelock, user, 172800)
   const timelock = await Timelock.deployed()
   console.log('deployed timelock')
 
@@ -40,68 +40,14 @@ module.exports = async function (deployer) {
     comp.address,
     timelock.address,
     delegate.address,
-    10,
-    10,
-    ethers.utils.parseEther('100000')
+    17280,
+    1,
+    '100000000000000000000000'
   )
   const delegator = await GovernorBravoDelegator.deployed()
   console.log('deployed delegator')
 
   const GovernorBravo = await GovernorBravoDelegate.at(delegator.address)
-  // Set Delegator as pending admin
-  var provider = new ethers.providers.JsonRpcProvider()
-  var blockNumber = await provider.getBlockNumber()
-  var block = await provider.getBlock(blockNumber)
-  var eta = block.timestamp + 3
-  var data = ethers.utils.defaultAbiCoder.encode(
-    ['address'],
-    [delegator.address]
-  )
-  await timelock.queueTransaction(
-    timelock.address,
-    0,
-    'setPendingAdmin(address)',
-    data,
-    eta
-  )
-
-  // Wait for timelock delay
-
-  console.log('Waiting for timelock...')
-  await sleep(5000)
-
-  // Execute transaction
-  await timelock.executeTransaction(
-    timelock.address,
-    0,
-    'setPendingAdmin(address)',
-    data,
-    eta
-  )
-
-  await sleep(5000)
-
-  blockNumber = await provider.getBlockNumber()
-  block = await provider.getBlock(blockNumber)
-  eta = block.timestamp + 10
-
-  await timelock.queueTransaction(
-    GovernorBravo.address,
-    0,
-    '_initiate()',
-    0,
-    eta
-  )
-
-  await sleep(5000)
-
-  await timelock.executeTransaction(
-    GovernorBravo.address,
-    0,
-    '_initiate()',
-    0,
-    eta
-  )
 
   // Initiate GovernorBravo
 
