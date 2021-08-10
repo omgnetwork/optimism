@@ -9,12 +9,11 @@ import "../libraries/OVM_CrossDomainEnabledFast.sol";
 /* External Imports */
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
 
 /**
  * @dev An L1 LiquidityPool implementation
  */
-contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
+contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -77,7 +76,8 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
     // Info of each user that stakes tokens.
     mapping(address => mapping(address => UserInfo)) public userInfo;
 
-    address L2LiquidityPoolAddress;
+    address public owner;
+    address public L2LiquidityPoolAddress;
     uint256 public totalFeeRate;
     uint256 public userRewardFeeRate;
     uint256 public ownerRewardFeeRate;
@@ -85,6 +85,8 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
     uint32 public DEFAULT_FINALIZE_DEPOSIT_L2_GAS = 1200000;
     uint32 public SETTLEMENT_L2_GAS = 1400000;
     uint256 constant internal SAFE_GAS_STIPEND = 2300;
+    // cdm address
+    address public l1CrossDomainMessenger;
 
     /********************
      *       Events     *
@@ -144,23 +146,19 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
     /********************
      *    Constructor   *
      ********************/
-    /**
-     * @param _l1CrossDomainMessenger L1 Messenger address being used for sending the cross-chain message.
-     * @param _l1CrossDomainMessengerFast L1 Messenger address being used for relaying cross-chain messages quickly.
-     */
-    constructor (
-        address _l1CrossDomainMessenger,
-        address _l1CrossDomainMessengerFast
-    )
-        OVM_CrossDomainEnabledFast(
-            _l1CrossDomainMessenger,
-            _l1CrossDomainMessengerFast
-        )
+
+    constructor()
+        OVM_CrossDomainEnabledFast(address(0), address(0))
     {}
 
     /**********************
      * Function Modifiers *
      **********************/
+
+    modifier onlyOwner() {
+        require(msg.sender == owner || owner == address(0), 'caller is not the owner');
+        _;
+    }
 
     modifier onlyInitialized() {
         require(address(L2LiquidityPoolAddress) != address(0), "Contract has not yet been initialized");
@@ -171,15 +169,46 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
      * Public Functions *
      ********************/
 
+    /**
+     * @dev transfer ownership
+     *
+     * @param _newOwner new owner of this contract
+     */
+    function transferOwnership(
+        address _newOwner
+    )
+        public
+        onlyOwner()
+    {
+        owner = _newOwner;
+    }
 
     /**
      * @dev Initialize this contract.
+     *
+     * @param _l1CrossDomainMessenger L1 Messenger address being used for sending the cross-chain message.
+     * @param _l1CrossDomainMessengerFast L1 Messenger address being used for relaying cross-chain messages quickly.
+     */
+    function initialize(
+        address _l1CrossDomainMessenger,
+        address _l1CrossDomainMessengerFast
+    )
+        public
+        onlyOwner()
+    {
+        senderMessenger = _l1CrossDomainMessenger;
+        relayerMessenger = _l1CrossDomainMessengerFast;
+        owner = msg.sender;
+    }
+
+    /**
+     * @dev Configure this contract.
      *
      * @param _userRewardFeeRate fee rate that users get
      * @param _ownerRewardFeeRate fee rate that contract owner gets
      * @param _L2LiquidityPoolAddress Address of the corresponding L2 LP deployed to the L2 chain
      */
-    function init(
+    function configure(
         uint256 _userRewardFeeRate,
         uint256 _ownerRewardFeeRate,
         address _L2LiquidityPoolAddress
@@ -193,7 +222,6 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
         L2LiquidityPoolAddress = _L2LiquidityPoolAddress;
     }
 
-
     /***
      * @dev Add the new token pair to the pool
      * DO NOT add the same LP token more than once. Rewards will be messed up if you do.
@@ -202,7 +230,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
      * @param _l2TokenAddress
      *
      */
-    function registerPool (
+    function registerPool(
         address _l1TokenAddress,
         address _l2TokenAddress
     )

@@ -9,13 +9,12 @@ import "@eth-optimism/contracts/contracts/optimistic-ethereum/libraries/bridge/O
 /* External Imports */
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
 
 /**
  * @dev An L2 LiquidityPool implementation
  */
 
-contract L2LiquidityPool is OVM_CrossDomainEnabled, Ownable {
+contract L2LiquidityPool is OVM_CrossDomainEnabled {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -78,7 +77,8 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled, Ownable {
     // Info of each user that stakes tokens.
     mapping(address => mapping(address => UserInfo)) public userInfo;
 
-    address L1LiquidityPoolAddress;
+    address public owner;
+    address public L1LiquidityPoolAddress;
     uint256 public totalFeeRate;
     uint256 public userRewardFeeRate;
     uint256 public ownerRewardFeeRate;
@@ -144,18 +144,18 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled, Ownable {
      * Constructor & Initialization *
      ********************************/
 
-    /**
-     * @param _l2CrossDomainMessenger L1 Messenger address being used for cross-chain communications.
-     */
-    constructor (
-        address _l2CrossDomainMessenger
-    )
-        OVM_CrossDomainEnabled(_l2CrossDomainMessenger)
+    constructor ()
+        OVM_CrossDomainEnabled(address(0))
     {}
 
     /**********************
      * Function Modifiers *
      **********************/
+
+    modifier onlyOwner() {
+        require(msg.sender == owner || owner == address(0), 'caller is not the owner');
+        _;
+    }
 
     modifier onlyInitialized() {
         require(address(L1LiquidityPoolAddress) != address(0), "Contract has not yet been initialized");
@@ -167,13 +167,42 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled, Ownable {
      ********************/
 
     /**
+     * @dev transfer ownership
+     *
+     * @param _newOwner new owner of this contract
+     */
+    function transferOwnership(
+        address _newOwner
+    )
+        public
+        onlyOwner()
+    {
+        owner = _newOwner;
+    }
+
+    /**
      * @dev Initialize this contract.
+     *
+     * @param _l2CrossDomainMessenger L2 Messenger address being used for sending the cross-chain message.
+     */
+    function initialize(
+        address _l2CrossDomainMessenger
+    )
+        public
+        onlyOwner()
+    {
+        messenger = _l2CrossDomainMessenger;
+        owner = msg.sender;
+    }
+
+    /**
+     * @dev Configure this contract.
      *
      * @param _userRewardFeeRate fee rate that users get
      * @param _ownerRewardFeeRate fee rate that contract owner gets
      * @param _L1LiquidityPoolAddress Address of the corresponding L1 LP deployed to the main chain
      */
-    function init(
+    function configure(
         uint256 _userRewardFeeRate,
         uint256 _ownerRewardFeeRate,
         address _L1LiquidityPoolAddress
