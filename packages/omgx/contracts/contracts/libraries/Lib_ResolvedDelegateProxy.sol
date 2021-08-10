@@ -10,7 +10,7 @@ contract Lib_ResolvedDelegateProxy {
      * Variables *
      *************/
 
-    mapping(string => address) addressManager;
+    mapping(string => address) public addressManager;
 
     /***************
      * Constructor *
@@ -91,7 +91,7 @@ contract Lib_ResolvedDelegateProxy {
             "Target address must be initialized."
         );
 
-        (bool success, bytes memory returndata) = addressManager["proxyOwner"].delegatecall(msg.data);
+        (bool success, bytes memory returndata) = addressManager["proxyTarget"].delegatecall(msg.data);
 
         if (success == true) {
             assembly {
