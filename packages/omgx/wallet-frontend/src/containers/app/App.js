@@ -32,6 +32,7 @@ import Home from 'containers/home/Home';
 import Notification from 'containers/notification/Notification';
 import WalletPicker from 'components/walletpicker/WalletPicker';
 import Alert from 'components/alert/Alert';
+import { useMediaQuery } from '@material-ui/core';
 
 //import oracleService from 'services/oracleService';
 
@@ -40,6 +41,7 @@ import { setWalletMethod } from 'actions/setupAction';
 import { isChangingChain } from 'util/changeChain';
 import MainMenu from 'components/mainMenu/MainMenu';
 import { Box } from '@material-ui/core';
+import MobileNav from 'components/mainMenu/mobileNav/MobileNav';
 
 function App () {
   const dispatch = useDispatch();
@@ -57,6 +59,12 @@ function App () {
     palette: {
       mode: light ? 'light' : 'dark',
       primary: {
+        // light: '#757ce8',
+        main: '#506DFA',
+        // dark: '#002884',
+        contrastText: '#fff',
+      },
+      secondary: {
         main: '#F0A000',
       },
       background: {
@@ -83,11 +91,10 @@ function App () {
       body1: {
         fontSize: 18,
       }
-      // fontSize:
     }
   });
 
-  console.log('theme is', theme)
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     //dispatch(oracleService.initialize());
@@ -104,7 +111,11 @@ function App () {
       <CssBaseline />
       <Router>
         <Box sx={{ display: 'flex' }}>
-          <MainMenu light={light} setLight={setLight} />
+          {isMobile ? (
+            <MobileNav />
+          ) : (
+            <MainMenu light={light} setLight={setLight} />
+          )}
           <S.Content>
             <div className={styles.App}>
 
