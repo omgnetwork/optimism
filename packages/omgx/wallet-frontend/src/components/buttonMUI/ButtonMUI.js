@@ -1,29 +1,11 @@
 import React from 'react';
-import { styled } from '@material-ui/styles';
 import Button from '@material-ui/core/Button';
 
-const ButtonM = styled(({ outlined, ...other }) => <Button {...other} />)({
-  background: (props) => props.outlined ? 'none' : '#4A6FEF',
-  border: (props) =>
-    props.outlined
-      ? '1px solid #fff'
-      : 'none',
-  color: "#FFF",
-  textTransform: "none",
-  borderRadius: "8px",
-  padding: "8px 32px",
-  filter: "drop-shadow(0px 0px 7px rgba(73, 107, 239, 0.35))",
-
-  '&:hover': {
-    background: (props) => props.outlined ? '#4A6FEF' : 'none',
-  },
-});
-
-function ButtonMUI ({ children, outlined }) {
+function ButtonMUI ({ children, variant, color, size, disabled, onClick}) {
   return (
-    <ButtonM outlined={outlined}>
+    <Button variant={variant} color={color} size={size} disabled={disabled} onClick={onClick}>
       {children}
-    </ButtonM>
+    </Button>
   )
 }
 

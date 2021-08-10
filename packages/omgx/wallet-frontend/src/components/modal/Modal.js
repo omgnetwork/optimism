@@ -58,16 +58,14 @@ function _Modal ({
       className={classes.modal}
       open={open}
       onClose={onClose}
-      closeAfterTransition
-      BackdropComponent={Backdrop}
-      BackdropProps={{
-        timeout: 500
-      }}
+      // closeAfterTransition
+      // BackdropComponent={Backdrop}
+      // BackdropProps={{
+      //   timeout: 500
+      // }}
     >
       <Fade in={open}>
-        <div
-          className={classes.paper}
-        >
+        <div className={classes.paper}>
           {children}
         </div>
       </Fade>

@@ -19,7 +19,7 @@ import * as styles from './Button.module.scss';
 
 function Button ({
   children,
-  style,
+  style, // no
   onClick,
   type,
   disabled,
@@ -27,7 +27,7 @@ function Button ({
   pulsate,
   tooltip = '',
   size,
-  className,
+  className, // no
   triggerTime,
 }) {
 
@@ -41,7 +41,7 @@ function Button ({
   }
 
   // Save the current date to be able to trigger an update
-  const [now, setTime] = React.useState(new Date()); 
+  const [now, setTime] = React.useState(new Date());
 
   React.useEffect(() => {
     const timer = setInterval(()=>{setTime(new Date())}, 1000);
@@ -76,7 +76,7 @@ function Button ({
           {waitTime}s ago
         </div>
       }
-      {loading && 
+      {loading &&
         <div style={{paddingTop: '4px', marginLeft: '10px'}}>
           <CircularProgress size={14} color='inherit' />
         </div>
