@@ -464,8 +464,8 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       this.L1_TEST_Address = addresses.TOKENS.TEST.L1
       this.L2_TEST_Address = addresses.TOKENS.TEST.L2
 
-      this.L1LPAddress = addresses.L1LiquidityPool
-      this.L2LPAddress = addresses.L2LiquidityPool
+      this.L1LPAddress = addresses.Proxy__L1LiquidityPool
+      this.L2LPAddress = addresses.Proxy__L2LiquidityPool
 
       this.L1Message = addresses.L1Message
       this.L2Message = addresses.L2Message
