@@ -113,7 +113,7 @@ function App () {
             textTransform: "none",
             boxShadow: "box-shadow: 0px 0px 7px rgba(73, 107, 239, 0.35)",
           },
-          disabled: {
+          "&.Mui-disabled": {
             color: 'red',
             fontSize: '30px'
           }

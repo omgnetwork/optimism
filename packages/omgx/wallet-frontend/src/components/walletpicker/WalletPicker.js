@@ -55,7 +55,7 @@ function WalletPicker ({ onEnable, enabled }) {
   const [ walletEnabled, setWalletEnabled ] = useState(false);
   const [ accountsEnabled, setAccountsEnabled ] = useState(false);
   const [ wrongNetwork, setWrongNetwork ] = useState(false);
-  const [openModal, setOpenModal] = useState(false)
+  const [openModal, setOpenModal] = useState(true)
   console.log("openModal", openModal)
   const walletMethod = useSelector(selectWalletMethod())
   const masterConfig = useSelector(selectNetwork())
@@ -199,7 +199,8 @@ function WalletPicker ({ onEnable, enabled }) {
                   Add OMGX L2 Provider
                 </Button>
                 <ButtonMUI onClick={() => setOpenModal(!openModal)}>Open modal</ButtonMUI>
-                <_Modal open={openModal}>Hello</_Modal>
+                <_Modal open={openModal} title="Create transaction" onClose={() => setOpenModal(false)}>
+                </_Modal>
               </Grid>
           </Grid>
         </Container>
