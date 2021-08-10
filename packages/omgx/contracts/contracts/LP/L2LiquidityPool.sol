@@ -83,7 +83,7 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
     uint256 public userRewardFeeRate;
     uint256 public ownerRewardFeeRate;
     // Default gas value which can be overridden if more complex logic runs on L1.
-    uint32 internal constant DEFAULT_FINALIZE_WITHDRAWAL_L1_GAS = 100000;
+    uint32 public DEFAULT_FINALIZE_WITHDRAWAL_L1_GAS;
 
     /********************
      *       Event      *
@@ -196,13 +196,13 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
     }
 
     /**
-     * @dev Configure this contract.
+     * @dev Configure fee of this contract.
      *
      * @param _userRewardFeeRate fee rate that users get
      * @param _ownerRewardFeeRate fee rate that contract owner gets
      * @param _L1LiquidityPoolAddress Address of the corresponding L1 LP deployed to the main chain
      */
-    function configure(
+    function configureFee(
         uint256 _userRewardFeeRate,
         uint256 _ownerRewardFeeRate,
         address _L1LiquidityPoolAddress
@@ -214,6 +214,20 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
         userRewardFeeRate = _userRewardFeeRate;
         ownerRewardFeeRate = _ownerRewardFeeRate;
         L1LiquidityPoolAddress = _L1LiquidityPoolAddress;
+    }
+
+    /**
+     * @dev Configure gas.
+     *
+     * @param _l1GasFee default finalized withdraw L1 Gas
+     */
+    function configureGas(
+        uint32 _l1GasFee
+    )
+        public
+        onlyOwner()
+    {
+        DEFAULT_FINALIZE_WITHDRAWAL_L1_GAS = _l1GasFee;
     }
 
     /***

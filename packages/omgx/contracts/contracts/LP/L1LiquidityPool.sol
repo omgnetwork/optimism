@@ -82,9 +82,8 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
     uint256 public userRewardFeeRate;
     uint256 public ownerRewardFeeRate;
     // Default gas value which can be overridden if more complex logic runs on L2.
-    uint32 public DEFAULT_FINALIZE_DEPOSIT_L2_GAS = 1200000;
-    uint32 public SETTLEMENT_L2_GAS = 1400000;
-    uint256 constant internal SAFE_GAS_STIPEND = 2300;
+    uint32 public SETTLEMENT_L2_GAS;
+    uint256 public SAFE_GAS_STIPEND;
     // cdm address
     address public l1CrossDomainMessenger;
 
@@ -202,13 +201,13 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
     }
 
     /**
-     * @dev Configure this contract.
+     * @dev Configure fee of this contract.
      *
      * @param _userRewardFeeRate fee rate that users get
      * @param _ownerRewardFeeRate fee rate that contract owner gets
      * @param _L2LiquidityPoolAddress Address of the corresponding L2 LP deployed to the L2 chain
      */
-    function configure(
+    function configureFee(
         uint256 _userRewardFeeRate,
         uint256 _ownerRewardFeeRate,
         address _L2LiquidityPoolAddress
@@ -220,6 +219,23 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
         userRewardFeeRate = _userRewardFeeRate;
         ownerRewardFeeRate = _ownerRewardFeeRate;
         L2LiquidityPoolAddress = _L2LiquidityPoolAddress;
+    }
+
+    /**
+     * @dev Configure gas.
+     *
+     * @param _l2GasFee default finalized deposit L2 Gas
+     * @param _safeGas safe gas stipened
+     */
+    function configureGas(
+        uint32 _l2GasFee,
+        uint256 _safeGas
+    )
+        public
+        onlyOwner()
+    {
+        SETTLEMENT_L2_GAS = _l2GasFee;
+        SAFE_GAS_STIPEND = _safeGas;
     }
 
     /***
@@ -571,7 +587,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
 
              sendCrossDomainMessage(
                  address(L2LiquidityPoolAddress),
-                 DEFAULT_FINALIZE_DEPOSIT_L2_GAS,
+                 SETTLEMENT_L2_GAS,
                  data
              );
          } else {

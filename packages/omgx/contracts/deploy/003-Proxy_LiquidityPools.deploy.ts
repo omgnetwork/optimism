@@ -76,13 +76,20 @@ const deployFn: DeployFunction = async (hre) => {
   await initL1LPTX.wait()
   console.log(`⭐️ ${chalk.red('Proxy__L1LiquidityPool initialized:')} ${chalk.green(initL1LPTX.hash)}`)
 
-  const confL1LPTX = await Proxy__L1LiquidityPool.configure(
+  const confL1LPFeeTX = await Proxy__L1LiquidityPool.configureFee(
     /* userRewardFeeRate 3.5% */ 35,
     /* ownerRewardFeeRate 1.5% */ 15,
     Proxy__L2LiquidityPool.address,
   )
-  await confL1LPTX.wait()
-  console.log(`⭐️ ${chalk.red('Proxy__L1LiquidityPool configured:')} ${chalk.green(confL1LPTX.hash)}`)
+  await confL1LPFeeTX.wait()
+  console.log(`⭐️ ${chalk.red('Proxy__L1LiquidityPool fee configured:')} ${chalk.green(confL1LPFeeTX.hash)}`)
+
+  const confL1LPGasTX = await Proxy__L1LiquidityPool.configureGas(
+    /* SETTLEMENT_L2_GAS */ 1400000,
+    /* SAFE_GAS_STIPEND */ 2300
+  )
+  await confL1LPGasTX.wait()
+  console.log(`⭐️ ${chalk.red('Proxy__L1LiquidityPool gas configured:')} ${chalk.green(confL1LPGasTX.hash)}`)
 
   Proxy__L2LiquidityPool = new ethers.Contract(
     Proxy__L2LiquidityPool.address,
@@ -97,13 +104,19 @@ const deployFn: DeployFunction = async (hre) => {
   await initL2LPTX.wait()
   console.log(`⭐️ ${chalk.red('Proxy__L2LiquidityPool initialized:')} ${chalk.green(initL2LPTX.hash)}`)
 
-  const confL2LPTX = await Proxy__L2LiquidityPool.configure(
+  const confL2LPFeeTX = await Proxy__L2LiquidityPool.configureFee(
     /* userRewardFeeRate 3.5% */ 35,
     /* ownerRewardFeeRate 1.5% */ 15,
     Proxy__L1LiquidityPool.address
   )
-  await confL2LPTX.wait()
-  console.log(`⭐️ ${chalk.red('Proxy__L2LiquidityPool configured:')} ${chalk.green(confL2LPTX.hash)}`)
+  await confL2LPFeeTX.wait()
+  console.log(`⭐️ ${chalk.red('Proxy__L2LiquidityPool fee configured:')} ${chalk.green(confL2LPFeeTX.hash)}`)
+
+  const confL2LPGasTX = await Proxy__L2LiquidityPool.configureGas(
+    /* DEFAULT_FINALIZE_WITHDRAWAL_L1_GAS */ 100000
+  )
+  await confL2LPGasTX.wait()
+  console.log(`⭐️ ${chalk.red('Proxy__L2LiquidityPool gas configured:')} ${chalk.green(confL2LPGasTX.hash)}`)
 
   const registerL1LPETHTX = await Proxy__L1LiquidityPool.registerPool(
     "0x0000000000000000000000000000000000000000",
