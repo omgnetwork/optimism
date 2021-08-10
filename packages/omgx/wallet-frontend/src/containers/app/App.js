@@ -60,8 +60,9 @@ function App () {
       mode: light ? 'light' : 'dark',
       primary: {
         // light: '#757ce8',
-        main: '#506DFA',
         // dark: '#002884',
+        main: '#506DFA',
+        gradient: 'linear-gradient(131.81deg, #4A6FEF 2.66%, #4251F0 124.21%)',
         contrastText: '#fff',
       },
       secondary: {
@@ -73,6 +74,10 @@ function App () {
       // text: {
       //   primary: '#fff'
       // }
+      neutral: {
+        main: '#fff',
+        contrastText: '#506DFA',
+      },
     },
     typography: {
       fontFamily: ["MrEavesXL", 'Roboto'].join(','),
@@ -88,8 +93,65 @@ function App () {
         fontSize: 24,
         fontWeight: 300,
       },
+      h4: {
+        fontSize: 18,
+        fontWeight: 300,
+      },
       body1: {
         fontSize: 18,
+      },
+      body2: {
+        fontSize: 18,
+        fontWeight: 400,
+      },
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: "8px",
+            textTransform: "none",
+            boxShadow: "box-shadow: 0px 0px 7px rgba(73, 107, 239, 0.35)",
+          },
+          disabled: {
+            color: 'red',
+            fontSize: '30px'
+          }
+        },
+        variants: [
+          {
+            props: { variant: 'contained', color: 'primary' },
+            style: {
+              background: 'linear-gradient(131.81deg, #4A6FEF 2.66%, #4251F0 124.21%)',
+              "&:hover": {
+                boxShadow: 'inset 0px 0px 0px 2px rgba(255, 255, 255, 0.2)',
+                transition: 'box-shadow 0.3s ease-in-out',
+              }
+            },
+          },
+          {
+            props: { variant: 'outlined', color: 'primary' },
+            style: {
+              color: '#fff',
+              borderWidth: '1.4px',
+              filter: "drop-shadow(0px 0px 7px rgba(73, 107, 239, 0.35))",
+              "&:hover": {
+                backgroundColor: "#506DFA",
+                borderWidth: '1.4px',
+                boxShadow: 'inset 2px 2px 13px rgba(0, 0, 0, 0.15)',
+              }
+            },
+          },
+          {
+            props: { variant: 'contained', color: 'neutral' },
+            style: {
+              "&:hover": {
+                opacity: 0.9,
+                transition: 'opacity 0.3s ease-in-out',
+              }
+            },
+          },
+        ],
       }
     }
   });

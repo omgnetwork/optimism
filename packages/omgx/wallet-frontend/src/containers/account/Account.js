@@ -34,6 +34,8 @@ import * as styles from './Account.module.scss'
 import { selectTokens } from 'selectors/tokenSelector'
 import { fetchLookUpPrice } from 'actions/networkAction'
 import PageHeader from 'components/pageHeader/PageHeader'
+import ButtonMUI from 'components/buttonMUI/ButtonMUI'
+import _Modal from 'components/modal/Modal'
 
 function Account () {
   const dispatch = useDispatch();
@@ -82,8 +84,7 @@ function Account () {
 
   return (
     <>
-      <PageHeader title="Wallet" />
-
+      <PageHeader title="Wallet"/>
       {/* {balances['oETH']['have'] &&
         <div className={styles.RabbitBox}>
           <img className={styles.bunny} src={bunny_happy} alt='Happy Bunny' />
