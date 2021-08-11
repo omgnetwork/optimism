@@ -15,19 +15,21 @@ limitations under the License. */
 
 import React from 'react';
 import { CircularProgress } from '@material-ui/core';
-import * as styles from './Button.module.scss';
+import { Button as ButtonMUI } from '@material-ui/core';
 
 function Button ({
   children,
-  style, // no
+  style,
   onClick,
-  type,
+  color,
+  variant,
+  fullWidth,
   disabled,
   loading,
   pulsate,
   tooltip = '',
   size,
-  className, // no
+  className,
   triggerTime,
 }) {
 
@@ -52,23 +54,16 @@ function Button ({
   if(waitTime < 0) waitTime = 0;
   waitTime = Math.round(waitTime);
 
+  const muiProps = {
+    color,
+    variant,
+    fullWidth,
+    onClick,
+    disabled
+  }
+
   return (
-    <div
-      style={style}
-      className={[
-        styles.Button,
-        type === 'primary' ? styles.primary : '',
-        type === 'secondary' ? styles.secondary : '',
-        type === 'outline' ? styles.outline : '',
-        size === 'small' ? styles.small : '',
-        size === 'tiny' ? styles.tiny : '',
-        loading ? styles.disabled : '',
-        disabled ? styles.disabled : '',
-        pulsate ? styles.pulsate : '',
-        className
-      ].join(' ')}
-      onClick={loading || disabled ? null : onClick}
-    >
+    <ButtonMUI {...muiProps}>
       {children}
       {(disabled || loading) && timeDefined && (waitTime > 3) &&
         <div style={{marginLeft: '10px'}}
@@ -81,8 +76,40 @@ function Button ({
           <CircularProgress size={14} color='inherit' />
         </div>
       }
-    </div>
-  );
+    </ButtonMUI>
+  )
+
+  // return (
+  //   <div
+  //     style={style}
+  //     className={[
+  //       styles.Button,
+  //       type === 'primary' ? styles.primary : '',
+  //       type === 'secondary' ? styles.secondary : '',
+  //       type === 'outline' ? styles.outline : '',
+  //       size === 'small' ? styles.small : '',
+  //       size === 'tiny' ? styles.tiny : '',
+  //       loading ? styles.disabled : '',
+  //       disabled ? styles.disabled : '',
+  //       pulsate ? styles.pulsate : '',
+  //       className
+  //     ].join(' ')}
+  //     onClick={loading || disabled ? null : onClick}
+  //   >
+  //     {children}
+  //     {(disabled || loading) && timeDefined && (waitTime > 3) &&
+  //       <div style={{marginLeft: '10px'}}
+  //       >
+  //         {waitTime}s ago
+  //       </div>
+  //     }
+  //     {loading &&
+  //       <div style={{paddingTop: '4px', marginLeft: '10px'}}>
+  //         <CircularProgress size={14} color='inherit' />
+  //       </div>
+  //     }
+  //   </div>
+  // );
 }
 
 export default React.memo(Button);
