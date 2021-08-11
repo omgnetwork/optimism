@@ -57,6 +57,10 @@ import DAU from 'containers/dau/dau';
 // DAO Page
 import DAO from 'containers/dao/Dao';
 
+// DAO2 Page
+import DAO2 from 'containers/dao-restructure/Dao';
+
+
 // Farm
 import Farm from 'containers/farm/Farm';
 
@@ -71,13 +75,13 @@ function Home () {
   const dispatch = useDispatch();
 
   const [ mobileMenuOpen, setMobileMenuOpen ] = useState(false)
-  
+
   const [ pageDisplay, setPageDisplay ] = useState("AccountNow");
-  
+
   const depositModalState = useSelector(selectModalState('depositModal'))
   const transferModalState = useSelector(selectModalState('transferModal'))
   const exitModalState = useSelector(selectModalState('exitModal'))
-  
+
   const fast = useSelector(selectModalState('fast'))
   const token = useSelector(selectModalState('token'))
 
@@ -89,7 +93,7 @@ function Home () {
 
   const walletMethod = useSelector(selectWalletMethod())
   //const transactions = useSelector(selectlayer2Transactions, isEqual);
-  
+
   useEffect(() => {
     const body = document.getElementsByTagName('body')[0];
     mobileMenuOpen
@@ -126,7 +130,7 @@ function Home () {
   useEffect(() => {
     checkVersion()
   }, [])
-  
+
   const handleSetPage = async (page) => {
     setPageDisplay(page)
   }
@@ -134,11 +138,11 @@ function Home () {
   return (
 
     <>
-      
+
       <DepositModal  open={depositModalState}  token={token} fast={fast} />
       <TransferModal open={transferModalState} token={token} fast={fast} />
       <ExitModal     open={exitModalState}     token={token} fast={fast} />
-      
+
       <AddTokenModal open={addTokenModalState} />
       <FarmDepositModal open={farmDepositModalState} />
       <FarmWithdrawModal open={farmWithdrawModalState} />
@@ -160,7 +164,7 @@ function Home () {
             mobileMenuOpen={mobileMenuOpen}
             onHamburgerClick={()=>setMobileMenuOpen(open=>!open)}
           />
-          <MobileMenu 
+          <MobileMenu
             mobileMenuOpen={mobileMenuOpen}
           />
 
@@ -170,31 +174,31 @@ function Home () {
             <h2
               className={pageDisplay === "AccountNow" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("AccountNow")}}
-            >  
+            >
               Wallet
             </h2>
             <h2
               className={pageDisplay === "History" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("History")}}
-            >  
+            >
               History
             </h2>
             <h2
               className={pageDisplay === "Farm" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("Farm")}}
-            >  
+            >
               Earn
             </h2>
             <h2
               className={pageDisplay === "NFT" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("NFT")}}
-            >  
+            >
               NFT
             </h2>
             <h2
               className={pageDisplay === "DAU" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("DAU")}}
-            >  
+            >
               DAU
             </h2>
             <h2
@@ -203,16 +207,25 @@ function Home () {
             >  <div>
               DAO
             </div>
-              
+
+            </h2>
+            <h2
+              className={pageDisplay === "DAO2" ? styles.subtitletextActive : styles.subtitletext}
+              onClick={()=>{handleSetPage("DAO2")}}
+            >
+              <div>
+              DAO2
+              </div>
+
             </h2>
           </div>
           {pageDisplay === "AccountNow" &&
-          <>  
+          <>
             <Account/>
           </>
           }
           {pageDisplay === "History" &&
-          <>  
+          <>
             <Transactions/>
           </>
           }
@@ -226,7 +239,9 @@ function Home () {
             <Farm/>
           }{pageDisplay === "DAO" &&
             <DAO/>
-          }
+          }{pageDisplay === "DAO2" &&
+          <DAO2/>
+        }
         </div>
       </div>
     </>

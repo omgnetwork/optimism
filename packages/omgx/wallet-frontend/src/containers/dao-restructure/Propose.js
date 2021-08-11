@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Proposal from "./Proposal";
+import networkService from 'services/networkService'
+import { ethers } from "ethers";
 
 function Propose() {
   const [actions, setActions] = useState(["select"]);
@@ -35,7 +37,6 @@ function Propose() {
   };
 
   const removeAction = (e, i) => {
-    console.log(`Values: ${values}`);
     e.preventDefault();
     if (actions.length <= 1) return;
     setActions((actions) =>
@@ -65,16 +66,28 @@ function Propose() {
         return nValues;
       })(values, i)
     );
-
     setCnt(cnt - 1);
   };
-
+  // signatures ~ actions
+  // contracts ~ targets
+  // values ~ calldatas
   const submitProposal = async (e) => {
     e.preventDefault();
-    console.log(`description: ${description}`);
-    console.log(`actions: ${actions}`);
-    console.log(`contracts: ${contracts}`);
-    console.log(`values: ${values}`);
+    let calldataTypes = [];
+    let proposeValues = [];
+    for(let i = 0; i <actions.length; i++) calldataTypes.push('uint'); proposeValues.push(0);
+
+
+    networkService.propose(contracts,
+                          values,
+                          actions,
+                          ethers.utils.defaultAbiCoder.encode(calldataTypes, values),
+                          description);
+
+    console.log(description);
+    console.log(actions);
+    console.log(contracts);
+    console.log(values);
   };
 
   const handleChange = (e) => {
