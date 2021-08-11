@@ -13,17 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React from 'react';
+import { Home } from '@material-ui/icons';
+import WalletPicker from 'components/walletpicker/WalletPicker';
+import React, { useState } from 'react';
 
 function WalletPage() {
- 
+  const [ enabled, setEnabled ] = useState(false);
+
+  if (enabled) {
+    return <Home />;
+  }
+
   return (
-    <>
-      <h1>Wallet page</h1>
-    </>
+    <WalletPicker enabled={enabled} onEnable={setEnabled} />
   );
 
 }
 
 export default React.memo(WalletPage);
-

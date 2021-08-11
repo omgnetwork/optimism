@@ -28,9 +28,7 @@ import {
 import { closeAlert, closeError } from 'actions/uiAction';
 import { selectAlert, selectError } from 'selectors/uiSelector';
 
-import Home from 'containers/home/Home';
 import Notification from 'containers/notification/Notification';
-import WalletPicker from 'components/walletpicker/WalletPicker';
 import Alert from 'components/alert/Alert';
 import { useMediaQuery } from '@material-ui/core';
 
@@ -46,12 +44,13 @@ import { routeConfig } from './route.config';
 
 function App () {
   const dispatch = useDispatch();
+  const themeFromLocalStorage = localStorage.getItem('theme');
 
   const errorMessage = useSelector(selectError);
   const alertMessage = useSelector(selectAlert);
 
   const [ enabled, setEnabled ] = useState(false);
-  const [light, setLight] = useState(false);
+  const [light, setLight] = useState(themeFromLocalStorage === 'light');
 
   const handleErrorClose=()=>dispatch(closeError());
   const handleAlertClose=()=>dispatch(closeAlert());
@@ -61,8 +60,9 @@ function App () {
       mode: light ? 'light' : 'dark',
       primary: {
         // light: '#757ce8',
-        main: '#506DFA',
         // dark: '#002884',
+        main: '#506DFA',
+        gradient: 'linear-gradient(131.81deg, #4A6FEF 2.66%, #4251F0 124.21%)',
         contrastText: '#fff',
       },
       secondary: {
@@ -74,6 +74,10 @@ function App () {
       // text: {
       //   primary: '#fff'
       // }
+      neutral: {
+        main: '#fff',
+        contrastText: '#506DFA',
+      },
     },
     typography: {
       fontFamily: ["MrEavesXL", 'Roboto'].join(','),
@@ -89,8 +93,74 @@ function App () {
         fontSize: 24,
         fontWeight: 300,
       },
+      h4: {
+        fontSize: 18,
+        fontWeight: 300,
+      },
       body1: {
         fontSize: 18,
+      },
+      body2: {
+        fontSize: 18,
+        fontWeight: 400,
+      },
+    },
+    components: {
+      MuiPaper: {
+        defaultProps: {
+          elevation: 0,
+        },
+        styleOverrides: {
+          root: {
+            background: light ? 'rgba(0,0,0,0.06)' : "rgba(255,255,255,0.06)",
+            borderRadius: 10,
+          }
+        }
+      },
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: "8px",
+            textTransform: "none",
+            boxShadow: "box-shadow: 0px 0px 7px rgba(73, 107, 239, 0.35)",
+          },
+          "&.Mui-disabled": {
+          }
+        },
+        variants: [
+          {
+            props: { variant: 'contained', color: 'primary' },
+            style: {
+              background: 'linear-gradient(131.81deg, #4A6FEF 2.66%, #4251F0 124.21%)',
+              "&:hover": {
+                boxShadow: 'inset 0px 0px 0px 2px rgba(255, 255, 255, 0.2)',
+                transition: 'box-shadow 0.3s ease-in-out',
+              }
+            },
+          },
+          {
+            props: { variant: 'outlined', color: 'primary' },
+            style: {
+              color: '#fff',
+              borderWidth: '1.4px',
+              filter: "drop-shadow(0px 0px 7px rgba(73, 107, 239, 0.35))",
+              "&:hover": {
+                backgroundColor: "#506DFA",
+                borderWidth: '1.4px',
+                boxShadow: 'inset 2px 2px 13px rgba(0, 0, 0, 0.15)',
+              }
+            },
+          },
+          {
+            props: { variant: 'contained', color: 'neutral' },
+            style: {
+              "&:hover": {
+                opacity: 0.9,
+                transition: 'opacity 0.3s ease-in-out',
+              }
+            },
+          },
+        ],
       }
     }
   });
@@ -145,7 +215,7 @@ function App () {
                 <Switch>
                   {
                     routeConfig.map((routeProps)=> {
-                      return <Route {...routeProps} />
+                      return <Route {...routeProps} enabled={enabled} onEnable={setEnabled} />
                     })
                   }
                   {/* <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />} /> */}

@@ -59,7 +59,7 @@ function _Modal ({
       open={open}
       onClose={onClose}
       // closeAfterTransition
-      // BackdropComponent={Backdrop}
+      BackdropComponent={Backdrop}
       // BackdropProps={{
       //   timeout: 500
       // }}
