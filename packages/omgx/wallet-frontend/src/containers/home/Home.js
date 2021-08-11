@@ -143,7 +143,7 @@ function Home () {
         }
       />
 
-      <Container>
+      <Container maxWidth="md">
 
 
         <div className={styles.main}>
