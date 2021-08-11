@@ -1366,7 +1366,11 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       L2LPJson.abi,
       this.L2Provider
     )
-    const feeRate = await L2LPContract.totalFeeRate()
+    const [userRewardFeeRate, ownerRewardFeeRate] = await Promise.all([
+      L2LPContract.userRewardFeeRate(),
+      L2LPContract.ownerRewardFeeRate()
+    ])
+    const feeRate = userRewardFeeRate + ownerRewardFeeRate;
     return ((feeRate / 1000) * 100).toFixed(0)
   }
 

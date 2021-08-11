@@ -79,7 +79,6 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
 
     address public owner;
     address public L1LiquidityPoolAddress;
-    uint256 public totalFeeRate;
     uint256 public userRewardFeeRate;
     uint256 public ownerRewardFeeRate;
     // Default gas value which can be overridden if more complex logic runs on L1.
@@ -157,6 +156,11 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
         _;
     }
 
+    modifier onlyNotInitialized() {
+        require(address(L1LiquidityPoolAddress) == address(0), "Contract has been initialized");
+        _;
+    }
+
     modifier onlyInitialized() {
         require(address(L1LiquidityPoolAddress) != address(0), "Contract has not yet been initialized");
         _;
@@ -184,15 +188,21 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
      * @dev Initialize this contract.
      *
      * @param _l2CrossDomainMessenger L2 Messenger address being used for sending the cross-chain message.
+     * @param _L1LiquidityPoolAddress Address of the corresponding L1 LP deployed to the main chain
      */
     function initialize(
-        address _l2CrossDomainMessenger
+        address _l2CrossDomainMessenger,
+        address _L1LiquidityPoolAddress
     )
         public
         onlyOwner()
+        onlyNotInitialized()
     {
         messenger = _l2CrossDomainMessenger;
+        L1LiquidityPoolAddress = _L1LiquidityPoolAddress;
         owner = msg.sender;
+        configureFee(35, 15);
+        configureGas(100000);
     }
 
     /**
@@ -200,20 +210,17 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
      *
      * @param _userRewardFeeRate fee rate that users get
      * @param _ownerRewardFeeRate fee rate that contract owner gets
-     * @param _L1LiquidityPoolAddress Address of the corresponding L1 LP deployed to the main chain
      */
     function configureFee(
         uint256 _userRewardFeeRate,
-        uint256 _ownerRewardFeeRate,
-        address _L1LiquidityPoolAddress
+        uint256 _ownerRewardFeeRate
     )
         public
         onlyOwner()
+        onlyInitialized()
     {
-        totalFeeRate = _userRewardFeeRate + _ownerRewardFeeRate;
         userRewardFeeRate = _userRewardFeeRate;
         ownerRewardFeeRate = _ownerRewardFeeRate;
-        L1LiquidityPoolAddress = _L1LiquidityPoolAddress;
     }
 
     /**
@@ -226,6 +233,7 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
     )
         public
         onlyOwner()
+        onlyInitialized()
     {
         DEFAULT_FINALIZE_WITHDRAWAL_L1_GAS = _l1GasFee;
     }
@@ -445,9 +453,9 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
         require(pool.l2TokenAddress != address(0), "Token Address Not Register");
         require(pool.accOwnerReward >= _amount, "Owner Reward Withdraw Error");
 
-        IERC20(_tokenAddress).safeTransfer(_to, _amount);
-
         pool.accOwnerReward = pool.accOwnerReward.sub(_amount);
+
+        IERC20(_tokenAddress).safeTransfer(_to, _amount);
 
         emit OwnerRecoverFee(
             msg.sender,

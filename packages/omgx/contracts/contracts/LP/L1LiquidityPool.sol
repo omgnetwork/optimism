@@ -78,7 +78,6 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
 
     address public owner;
     address public L2LiquidityPoolAddress;
-    uint256 public totalFeeRate;
     uint256 public userRewardFeeRate;
     uint256 public ownerRewardFeeRate;
     // Default gas value which can be overridden if more complex logic runs on L2.
@@ -159,10 +158,16 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
         _;
     }
 
+    modifier onlyNotInitialized() {
+        require(address(L2LiquidityPoolAddress) == address(0), "Contract has been initialized");
+        _;
+    }
+
     modifier onlyInitialized() {
         require(address(L2LiquidityPoolAddress) != address(0), "Contract has not yet been initialized");
         _;
     }
+
 
     /********************
      * Public Functions *
@@ -187,17 +192,23 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
      *
      * @param _l1CrossDomainMessenger L1 Messenger address being used for sending the cross-chain message.
      * @param _l1CrossDomainMessengerFast L1 Messenger address being used for relaying cross-chain messages quickly.
+     * @param _L2LiquidityPoolAddress Address of the corresponding L2 LP deployed to the L2 chain
      */
     function initialize(
         address _l1CrossDomainMessenger,
-        address _l1CrossDomainMessengerFast
+        address _l1CrossDomainMessengerFast,
+        address _L2LiquidityPoolAddress
     )
         public
         onlyOwner()
+        onlyNotInitialized()
     {
         senderMessenger = _l1CrossDomainMessenger;
         relayerMessenger = _l1CrossDomainMessengerFast;
+        L2LiquidityPoolAddress = _L2LiquidityPoolAddress;
         owner = msg.sender;
+        configureFee(35, 15);
+        configureGas(1400000, 2300);
     }
 
     /**
@@ -205,20 +216,17 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
      *
      * @param _userRewardFeeRate fee rate that users get
      * @param _ownerRewardFeeRate fee rate that contract owner gets
-     * @param _L2LiquidityPoolAddress Address of the corresponding L2 LP deployed to the L2 chain
      */
     function configureFee(
         uint256 _userRewardFeeRate,
-        uint256 _ownerRewardFeeRate,
-        address _L2LiquidityPoolAddress
+        uint256 _ownerRewardFeeRate
     )
         public
         onlyOwner()
+        onlyInitialized()
     {
-        totalFeeRate = _userRewardFeeRate + _ownerRewardFeeRate;
         userRewardFeeRate = _userRewardFeeRate;
         ownerRewardFeeRate = _ownerRewardFeeRate;
-        L2LiquidityPoolAddress = _L2LiquidityPoolAddress;
     }
 
     /**
@@ -233,6 +241,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
     )
         public
         onlyOwner()
+        onlyInitialized()
     {
         SETTLEMENT_L2_GAS = _l2GasFee;
         SAFE_GAS_STIPEND = _safeGas;
@@ -463,14 +472,14 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
         require(pool.l2TokenAddress != address(0), "Token Address Not Register");
         require(pool.accOwnerReward >= _amount, "Owner Reward Withdraw Error");
 
+        pool.accOwnerReward = pool.accOwnerReward.sub(_amount);
+
         if (_tokenAddress != address(0)) {
             IERC20(_tokenAddress).safeTransfer(_to, _amount);
         } else {
             (bool sent,) = _to.call{gas: SAFE_GAS_STIPEND, value: _amount}("");
             require(sent, "Failed to send Ether");
         }
-
-        pool.accOwnerReward = pool.accOwnerReward.sub(_amount);
 
         emit OwnerRecoverFee(
             msg.sender,
