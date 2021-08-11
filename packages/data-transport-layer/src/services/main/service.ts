@@ -103,12 +103,12 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
         let aList
         try {
           aList = JSON.parse(await this.state.db.get("address-list"))
-	} catch(e) {
-	  if (e.notFound) {
-	    this.logger.warn("Address Registry is not yet ready to serve addresses (db notFound)")
-	    return res.status(503).json({error: "Address Registry is not yet populated"})
-	  } else { throw e }
-	}
+        } catch(e) {
+          if (e.notFound) {
+            this.logger.warn("Address Registry is not yet ready to serve addresses (db notFound)")
+            return res.status(503).json({error: "Address Registry is not yet populated"})
+          } else { throw e }
+        }
 
         return res.json(aList)
       } catch (e) {
@@ -122,12 +122,12 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
         let aList
         try {
           aList = JSON.parse(await this.state.db.get("omgx-addr"))
-	} catch(e) {
-	  if (e.notFound) {
-	    this.logger.warn("Address Registry is not yet ready to serve OMGX addresses (db notFound)")
-	    return res.status(503).json({error: "Address Registry is not yet populated"})
-	  } else { throw e }
-	}
+        } catch(e) {
+          if (e.notFound) {
+            this.logger.warn("Address Registry is not yet ready to serve OMGX addresses (db notFound)")
+            return res.status(503).json({error: "Address Registry is not yet populated"})
+          } else { throw e }
+        }
 
         return res.json(aList)
       } catch (e) {
@@ -140,30 +140,30 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
       try {
         const rb = req.body
 
-	this.logger.info("addressRegistry PUT request for base addresses", {rb})
+        this.logger.info("addressRegistry PUT request for base addresses", {rb})
 
-	let addrList = {}
+        let addrList = {}
 
-	/* Future - if there's an existing list, compare it with the new one and reject
-	   any attempts to change certain critical addresses. For now, only cares about
-	   AddressManager since that's used directly by dtl */
+        /* Future - if there's an existing list, compare it with the new one and reject
+           any attempts to change certain critical addresses. For now, only cares about
+           AddressManager since that's used directly by dtl */
 
-	try {
-	  const _addrList = await this.state.db.get("address-list")
-	  addrList = JSON.parse(_addrList)
+        try {
+          const _addrList = await this.state.db.get("address-list")
+          addrList = JSON.parse(_addrList)
 
-	  if (rb['AddressManager'] && addrList['AddressManager'] && rb['AddressManager'] !== addrList['AddressManager']) {
-	    this.logger.error("Can't overwrite saved addressManager value", { old: addrList['AddressManager'], new:rb['AddressManager']})
-	    return res.status(400).json({error:"Can't overwrite saved AddressManager value"})
-	  }
-	} catch(e) {
-	  if (e.notFound) {
-	    this.logger.info("No previous address list was found")
-	  } else { throw e; }
-	}
+          if (rb['AddressManager'] && addrList['AddressManager'] && rb['AddressManager'] !== addrList['AddressManager']) {
+            this.logger.error("Can't overwrite saved addressManager value", { old: addrList['AddressManager'], new:rb['AddressManager']})
+            return res.status(400).json({error:"Can't overwrite saved AddressManager value"})
+          }
+        } catch(e) {
+          if (e.notFound) {
+            this.logger.info("No previous address list was found")
+          } else { throw e; }
+        }
 
-	this.logger.info("MMDBG Will store", rb)
-	await this.state.db.put("address-list", JSON.stringify(rb))
+        this.logger.info("MMDBG Will store", rb)
+        await this.state.db.put("address-list", JSON.stringify(rb))
         this.logger.info("MMDBG Stored")
         return res.sendStatus(201).end()
       } catch (e) {
@@ -181,8 +181,8 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
         // As with the base list, we could add future restrictions on changing
         // certain critical addresses. For now we allow anything.
 
-	this.logger.info("MMDBG Will store", rb)
-	await this.state.db.put("omgx-addr", JSON.stringify(rb))
+        this.logger.info("MMDBG Will store", rb)
+        await this.state.db.put("omgx-addr", JSON.stringify(rb))
         this.logger.info("MMDBG Stored")
         return res.sendStatus(201).end()
       } catch (e) {
@@ -196,7 +196,7 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
       try {
         //const sd = await this.state.db.get("state-dump")
         //return res.send()
-	return res.sendFile("/opt/optimism/packages/data-transport-layer/state-dumps/state-dump.latest.json")
+        return res.sendFile("/opt/optimism/packages/data-transport-layer/state-dumps/state-dump.latest.json")
 
       } catch (e) {
         return res.status(400).json({
@@ -215,7 +215,7 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
     do {
      let addrList
      try {
-	addrList = JSON.parse(await this.state.db.get("address-list"))
+        addrList = JSON.parse(await this.state.db.get("address-list"))
         this.state.addressManager = addrList['AddressManager']
       } catch(e) {
         if (! e.notFound) { throw e }
@@ -241,7 +241,7 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
         ...this.options,
         metrics: this.state.metrics,
         db: this.state.db,
-	addressManager: this.state.addressManager
+        addressManager: this.state.addressManager
       })
     }
 
