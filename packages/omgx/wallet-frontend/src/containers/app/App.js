@@ -44,13 +44,14 @@ import { Box } from '@material-ui/core';
 import MobileNav from 'components/mainMenu/mobileNav/MobileNav';
 
 function App () {
+  const themeFromLocalStorage = localStorage.getItem('theme');
   const dispatch = useDispatch();
 
   const errorMessage = useSelector(selectError);
   const alertMessage = useSelector(selectAlert);
 
   const [ enabled, setEnabled ] = useState(false);
-  const [light, setLight] = useState(false);
+  const [light, setLight] = useState(themeFromLocalStorage === 'light');
 
   const handleErrorClose=()=>dispatch(closeError());
   const handleAlertClose=()=>dispatch(closeAlert());
@@ -106,6 +107,17 @@ function App () {
       },
     },
     components: {
+      MuiPaper: {
+        defaultProps: {
+          elevation: 0,
+        },
+        styleOverrides: {
+          root: {
+            background: light ? 'rgba(0,0,0,0.06)' : "rgba(255,255,255,0.06)",
+            borderRadius: 10,
+          }
+        }
+      },
       MuiButton: {
         styleOverrides: {
           root: {
@@ -166,7 +178,7 @@ function App () {
     if (enabled) {
       localStorage.setItem('changeChain', false)
     }
-  }, [dispatch, enabled])
+  }, [dispatch, enabled]);
 
   return (
     <ThemeProvider theme={theme}>
