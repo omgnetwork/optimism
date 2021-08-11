@@ -9,13 +9,14 @@ import Button from 'components/button/Button';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import * as styles from './listAccount.module.scss';
+import { Grid } from '@material-ui/core';
 
 class ListAccount extends React.Component {
-  
+
   constructor(props) {
-    
+
     super(props);
-    
+
     const { token, chain, networkLayer, disabled } = this.props;
 
     this.state = {
@@ -27,7 +28,7 @@ class ListAccount extends React.Component {
       disabled
     }
   }
-  
+
   componentDidUpdate(prevState) {
 
     const { token, chain, networkLayer, disabled } = this.props;
@@ -56,10 +57,10 @@ class ListAccount extends React.Component {
 
   render() {
 
-    const { 
-      token, 
+    const {
+      token,
       chain,
-      dropDownBox, 
+      dropDownBox,
       dropDownBoxInit,
       networkLayer,
       disabled
@@ -69,14 +70,14 @@ class ListAccount extends React.Component {
 
     return (
       <div className={styles.ListAccount}>
-        
-        <div 
+
+        <div
           className={styles.topContainer}
-          disabled={true} 
+          disabled={true}
           onClick={()=>{
-              this.setState({ 
-                dropDownBox: !dropDownBox, 
-                dropDownBoxInit: false 
+              this.setState({
+                dropDownBox: !dropDownBox,
+                dropDownBoxInit: false
               })
           }}
         >
@@ -87,14 +88,14 @@ class ListAccount extends React.Component {
             <div className={styles.BasicLightText}>{`${logAmount(token.balance, 18, 2)}`}</div>
           </div>
           <div className={styles.Table3}>
-            {chain === 'L1' && 
+            {chain === 'L1' &&
               <div className={enabled ? styles.LinkText : styles.LinkTextOff}>Deposit</div>
             }
-            {chain === 'L2' && 
+            {chain === 'L2' &&
               <div className={enabled ? styles.LinkText : styles.LinkTextOff}>Transact</div>
             }
-            <ExpandMoreIcon 
-              className={enabled ? styles.LinkButton : styles.LinkButtonOff} 
+            <ExpandMoreIcon
+              className={enabled ? styles.LinkButton : styles.LinkButtonOff}
             />
           </div>
         </div>
@@ -103,49 +104,55 @@ class ListAccount extends React.Component {
         /**************  Drop Down Box ****************/
         /**********************************************/
         }
-        <div 
-          className={dropDownBox ? 
+        <div
+          className={dropDownBox ?
             styles.dropDownContainer: dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
         >
-          
-          {!enabled && chain === 'L1' && 
+
+          {!enabled && chain === 'L1' &&
             <div className={styles.boxContainer}>
               <div className={styles.underRed}>MetaMask is set to L2. To transact on L1, please change the chain in MetaMask to L1.</div>
             </div>
           }
 
-          {!enabled && chain === 'L2' && 
+          {!enabled && chain === 'L2' &&
             <div className={styles.boxContainer}>
               <div className={styles.underRed}>MetaMask is set to L1. To transact on L2, please change the chain in MetaMask to L2.</div>
             </div>
           }
 
-          {enabled && chain === 'L1' && 
+          {enabled && chain === 'L1' &&
           <>
-            <div className={styles.boxContainer}>
-              <Button
-                onClick={()=>{this.handleModalClick('depositModal', token, false)}}
-                type='secondary'
-                disabled={disabled}
-                style={{width: '100px', padding: '6px', borderRadius: '5px'}}
-              >
-                DEPOSIT
-              </Button>
-            </div>
-            <div className={styles.boxContainer}>
-              <Button
-                onClick={()=>{this.handleModalClick('depositModal', token, true)}}
-                type='primary'
-                disabled={disabled}
-                style={{width: '120px', padding: '6px', borderRadius: '5px'}}
-              >
-                FAST DEPOSIT
-              </Button>
-            </div>
+            <Grid container spacing={1}>
+              <Grid item xs={6}>
+                <Button
+                  onClick={()=>{this.handleModalClick('depositModal', token, false)}}
+                  color='neutral'
+                  variant="outlined"
+                  disabled={disabled}
+                  fullWidth
+                  // style={{width: '100px', padding: '6px', borderRadius: '5px'}}
+                >
+                  Deposit
+                </Button>
+              </Grid>
+              <Grid item xs={6}>
+                <Button
+                  onClick={()=>{this.handleModalClick('depositModal', token, true)}}
+                  color='primary'
+                  disabled={disabled}
+                  variant="contained"
+                  fullWidth
+                  // style={{width: '120px', padding: '6px', borderRadius: '5px'}}
+                >
+                  Fast Deposit
+                </Button>
+              </Grid>
+            </Grid>
           </>
           }
 
-          {enabled && chain === 'L2' && 
+          {enabled && chain === 'L2' &&
           <>
             <div className={styles.boxContainer}>
               <Button
@@ -187,7 +194,7 @@ class ListAccount extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({ 
+const mapStateToProps = state => ({
   //login: state.login,
   //sell: state.sell,
   //sellTask: state.sellTask,
