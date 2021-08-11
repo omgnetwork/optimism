@@ -59,8 +59,6 @@ function App () {
     palette: {
       mode: light ? 'light' : 'dark',
       primary: {
-        // light: '#757ce8',
-        // dark: '#002884',
         main: '#506DFA',
         gradient: 'linear-gradient(131.81deg, #4A6FEF 2.66%, #4251F0 124.21%)',
         contrastText: '#fff',
@@ -71,9 +69,6 @@ function App () {
       background: {
         default: light ? "#fff" : "#061122"
       },
-      // text: {
-      //   primary: '#fff'
-      // }
       neutral: {
         main: '#fff',
         contrastText: '#506DFA',
