@@ -91,7 +91,8 @@ class ProposalCard extends React.Component {
 							<div className="proposal-title">Threshold to 65,000 BOBA</div>
 							<div className="proposal-details">
 								<div className="proposal-voting-state">
-									For Votes:{forVotes.toString()}
+									For Votes:
+									{ethers.utils.formatEther(forVotes).toLocaleString()}
 								</div>
 								<div className="proposal-text-details">
 									<span>{id.toString()}</span>
