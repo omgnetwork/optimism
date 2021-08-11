@@ -16,7 +16,7 @@ limitations under the License. */
 import React,{useEffect,useCallback} from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { isEqual } from 'lodash'
+import { isEqual, truncate } from 'lodash'
 
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectIsSynced } from 'selectors/statusSelector'
