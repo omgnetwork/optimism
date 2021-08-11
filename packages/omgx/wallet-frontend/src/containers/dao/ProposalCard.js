@@ -110,6 +110,11 @@ class ProposalCard extends React.Component {
 						<>
 							<div className="modal">
 								<div className="castVotes">
+									<h2>Actions</h2>
+									<div className="actions">
+										{signatures} <br /> {calldatas} <br /> {targets} <br />
+										{endBlock.toString()}
+									</div>
 									<h2>Cast Vote</h2>
 									<button className="forVotes" onClick={() => this.vote(1)}>
 										For
@@ -120,6 +125,7 @@ class ProposalCard extends React.Component {
 									<button className="abstain" onClick={() => this.vote(2)}>
 										Abstain
 									</button>
+
 									<button className="close" onClick={() => this.handleShow()}>
 										x
 									</button>
