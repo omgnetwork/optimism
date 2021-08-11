@@ -53,7 +53,7 @@ function WalletPicker ({ onEnable, enabled }) {
   const [ walletEnabled, setWalletEnabled ] = useState(false);
   const [ accountsEnabled, setAccountsEnabled ] = useState(false);
   const [ wrongNetwork, setWrongNetwork ] = useState(false);
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const walletMethod = useSelector(selectWalletMethod())
   const masterConfig = useSelector(selectNetwork())
 

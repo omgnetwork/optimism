@@ -59,7 +59,8 @@ function Button ({
     variant,
     fullWidth,
     onClick,
-    disabled
+    disabled,
+    size,
   }
 
   return (
