@@ -95,6 +95,9 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
     this.state.addressRegistry.use(cors())
     this.state.addressRegistry.use(bodyParser.json())
 
+    // Could refactor this to reduce code duplication. For now the goal is just to
+    // have something which works reliably.
+
     this.state.addressRegistry['get']("/addresses.json", async (req, res) => {
       try {
         let aList
@@ -114,13 +117,30 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
         })
       }
     })
+    this.state.addressRegistry['get']("/omgx-addr.json", async (req, res) => {
+      try {
+        let aList
+        try {
+          aList = JSON.parse(await this.state.db.get("omgx-addr"))
+	} catch(e) {
+	  if (e.notFound) {
+	    this.logger.warn("Address Registry is not yet ready to serve OMGX addresses (db notFound)")
+	    return res.status(503).json({error: "Address Registry is not yet populated"})
+	  } else { throw e }
+	}
+
+        return res.json(aList)
+      } catch (e) {
+        return res.status(400).json({
+          error: e.toString(),
+        })
+      }
+    })
     this.state.addressRegistry['put']("/addresses.json", async (req, res) => {
       try {
         const rb = req.body
-	//const k = rb['key']
-	//const v = rb['value']
 
-	this.logger.info("addressRegistry PUT request", {rb})
+	this.logger.info("addressRegistry PUT request for base addresses", {rb})
 
 	let addrList = {}
 
@@ -144,6 +164,25 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
 
 	this.logger.info("MMDBG Will store", rb)
 	await this.state.db.put("address-list", JSON.stringify(rb))
+        this.logger.info("MMDBG Stored")
+        return res.sendStatus(201).end()
+      } catch (e) {
+        return res.status(400).json({
+          error: e.toString(),
+        })
+      }
+    })
+    this.state.addressRegistry['put']("/omgx-addr.json", async (req, res) => {
+      try {
+        const rb = req.body
+
+        this.logger.info("addressRegistry PUT request for OMGX addresses", {rb})
+
+        // As with the base list, we could add future restrictions on changing
+        // certain critical addresses. For now we allow anything.
+
+	this.logger.info("MMDBG Will store", rb)
+	await this.state.db.put("omgx-addr", JSON.stringify(rb))
         this.logger.info("MMDBG Stored")
         return res.sendStatus(201).end()
       } catch (e) {

@@ -152,6 +152,7 @@ services:
       # DO NOT use in production
       << : *deployer_pk
       RETRIES: 70
+      DTL_REGISTRY_URL: http://dtl:8081/omgx-addr.json
     ports:
         # expose the service to the host for getting the contract addrs
       - ${OMGX_DEPLOYER_PORT:-8078}:8079
@@ -223,7 +224,7 @@ services:
       RETRIES: 60
       POLLING_INTERVAL: 500
       GET_LOGS_INTERVAL: 500
-      FILTER_ENDPOINT: http://omgx_deployer:8079/addresses.json #this will fail early, but then start to work when the omgx_deployer comes up
+      FILTER_ENDPOINT: http://dtl:8081/omgx-addr.json #this will fail early, but then start to work
       FILTER_POLLING_INTERVAL: 30000
 
   # a second relay system for messages that need to get to L1 quickly
@@ -232,7 +233,6 @@ services:
     depends_on:
       - l1_chain
       - dtl
-      - omgx_deployer
       - l2geth
     image: omgx/omgx_message-relayer-fast
     build:
@@ -242,13 +242,13 @@ services:
       L1_NODE_WEB3_URL: http://l1_chain:8545
       L2_NODE_WEB3_URL: http://l2geth:8545
       URL: http://dtl:8081/addresses.json
-      OMGX_URL: http://omgx_deployer:8079/addresses.json
+      OMGX_URL: http://dtl:8081/omgx-addr.json
       # This is who pays for the fast message relayer
       << : *fast-relayer_pk
       RETRIES: 70
       POLLING_INTERVAL: 1500
       GET_LOGS_INTERVAL: 500
-      FILTER_ENDPOINT: http://omgx_deployer:8079/addresses.json
+      FILTER_ENDPOINT: http://dtl:8081/omgx-addr.json
       FILTER_POLLING_INTERVAL: 30000
 
   batch_submitter:
