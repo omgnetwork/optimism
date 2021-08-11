@@ -22,6 +22,11 @@ export const menuItems = [
     ]
   },
   {
+    icon: "HistoryIcon",
+    title: "Transaction History",
+    url: "/history"
+  },
+  {
     icon: "LearnIcon",
     title: "Learn",
     url: "/learn"

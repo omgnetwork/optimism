@@ -39,9 +39,7 @@ import { Box, Container, Grid, Link } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
-import { useTheme } from '@material-ui/core/styles';
-import ButtonMUI from 'components/buttonMUI/ButtonMUI';
-import _Modal from 'components/modal/Modal';
+import Modal from 'components/modal/Modal';
 
 const Root = styled('div')(({ theme }) => ({
   paddingTop: theme.spacing(10),
@@ -50,18 +48,15 @@ const Root = styled('div')(({ theme }) => ({
 
 function WalletPicker ({ onEnable, enabled }) {
   const dispatch = useDispatch();
-  const theme = useTheme();
 
   const [ walletEnabled, setWalletEnabled ] = useState(false);
   const [ accountsEnabled, setAccountsEnabled ] = useState(false);
   const [ wrongNetwork, setWrongNetwork ] = useState(false);
-  const [openModal, setOpenModal] = useState(true)
-  console.log("openModal", openModal)
+  const [open, setOpen] = useState(false)
   const walletMethod = useSelector(selectWalletMethod())
   const masterConfig = useSelector(selectNetwork())
 
   const wrongNetworkModalState = useSelector(selectModalState('wrongNetworkModal'));
-
   const dispatchSetWalletMethod = useCallback((methodName) => {
     dispatch(setWalletMethod(methodName));
   }, [ dispatch ])
@@ -198,9 +193,8 @@ function WalletPicker ({ onEnable, enabled }) {
                 >
                   Add OMGX L2 Provider
                 </Button>
-                <ButtonMUI onClick={() => setOpenModal(!openModal)}>Open modal</ButtonMUI>
-                <_Modal open={openModal} title="Create transaction" onClose={() => setOpenModal(false)}>
-                </_Modal>
+                <Button onClick={() => setOpen(!open)}>Open modal</Button>
+                <Modal open={open}>Hello</Modal>
               </Grid>
           </Grid>
         </Container>

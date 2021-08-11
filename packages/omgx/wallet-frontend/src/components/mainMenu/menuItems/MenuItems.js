@@ -8,6 +8,7 @@ import FarmIcon from 'components/icons/FarmIcon';
 import PoolIcon from 'components/icons/PoolIcon';
 import EarnIcon from 'components/icons/EarnIcon';
 import WalletIcon from 'components/icons/WalletIcon';
+import HistoryIcon from 'components/icons/HistoryIcon';
 import chevron from 'images/chevron.svg';
 
 function MenuItems () {
@@ -21,6 +22,7 @@ function MenuItems () {
     LearnIcon,
     FarmIcon,
     PoolIcon,
+    HistoryIcon
   }
 
   return (

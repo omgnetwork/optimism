@@ -34,8 +34,7 @@ import * as styles from './Account.module.scss'
 import { selectTokens } from 'selectors/tokenSelector'
 import { fetchLookUpPrice } from 'actions/networkAction'
 import PageHeader from 'components/pageHeader/PageHeader'
-import ButtonMUI from 'components/buttonMUI/ButtonMUI'
-import _Modal from 'components/modal/Modal'
+import { Box, Grid, Paper, Typography } from '@material-ui/core'
 
 function Account () {
   const dispatch = useDispatch();
@@ -135,46 +134,44 @@ function Account () {
         </div>
       }
 
-      <div className={styles.BalanceWrapper}>
-        <div>
-          <div className={styles.title}>
-            <span style={{fontSize: '0.8em'}}>Balance on L1</span><br/>
-            <span>Ethereum Network</span><br/>
-          </div>
-          <div className={styles.TableContainer}>
-            {rootBalance.map((i, index) => {
-              return (
-                <ListAccount
-                  key={i.currency}
-                  token={i}
-                  chain={'L1'}
-                  networkLayer={networkLayer}
-                  disabled={disabled}
-                />
-              )
-            })}
-          </div>
-        </div>
-        <div>
-          <div className={styles.title}>
-            <span style={{fontSize: '0.8em'}}>Balance on L2</span><br/>
-            <span>OMGX</span><br/>
-          </div>
-          <div className={styles.TableContainer}>
-            {childBalance.map((i, index) => {
-              return (
-                <ListAccount
-                  key={i.currency}
-                  token={i}
-                  chain={'L2'}
-                  networkLayer={networkLayer}
-                  disabled={disabled}
-                />
-              )
-            })}
-          </div>
-        </div>
-      </div>
+      <Grid container spacing={4}>
+        <Grid item xs={6}>
+          <Paper sx={{ p: 4 }}>
+            <Typography variant="h3">Ethereum Mainnet - L1</Typography>
+            <Box>
+              {rootBalance.map((i, index) => {
+                return (
+                  <ListAccount
+                    key={i.currency}
+                    token={i}
+                    chain={'L1'}
+                    networkLayer={networkLayer}
+                    disabled={disabled}
+                  />
+                )
+              })}
+            </Box>
+          </Paper>
+        </Grid>
+        <Grid item xs={6}>
+          <Paper sx={{ p: 4 }}>
+            <Typography variant="h3">OMGX Mainnet - L2</Typography>
+            <Box>
+              {childBalance.map((i, index) => {
+                return (
+                  <ListAccount
+                    key={i.currency}
+                    token={i}
+                    chain={'L2'}
+                    networkLayer={networkLayer}
+                    disabled={disabled}
+                  />
+                )
+              })}
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
     </>
   );
 

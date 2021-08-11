@@ -13,23 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import store from 'store';
+import { Home } from '@material-ui/icons';
+import WalletPicker from 'components/walletpicker/WalletPicker';
+import React, { useState } from 'react';
 
-// import App from 'containers/app/App';
-import App from 'layout'
-import './index.scss';
+function WalletPage() {
+  const [ enabled, setEnabled ] = useState(false);
 
-// https://docs.metamask.io/guide/ethereum-provider.html#ethereum-autorefreshonnetworkchange
-if (window.ethereum) {
-  window.ethereum.autoRefreshOnNetworkChange = false;
+  if (enabled) {
+    return <Home />;
+  }
+
+  return (
+    <WalletPicker enabled={enabled} onEnable={setEnabled} />
+  );
+
 }
 
-ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-  document.getElementById('root')
-);
+export default React.memo(WalletPage);

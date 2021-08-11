@@ -13,11 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense,useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import * as S from './App.styles.js';
+import * as S from './layout.style';
 
 import {
   BrowserRouter as Router,
@@ -28,29 +28,29 @@ import {
 import { closeAlert, closeError } from 'actions/uiAction';
 import { selectAlert, selectError } from 'selectors/uiSelector';
 
-import Home from 'containers/home/Home';
 import Notification from 'containers/notification/Notification';
-import WalletPicker from 'components/walletpicker/WalletPicker';
 import Alert from 'components/alert/Alert';
 import { useMediaQuery } from '@material-ui/core';
 
 //import oracleService from 'services/oracleService';
 
-import * as styles from './App.module.scss';
+import * as styles from './layout.module.scss';
 import { setWalletMethod } from 'actions/setupAction';
 import { isChangingChain } from 'util/changeChain';
 import MainMenu from 'components/mainMenu/MainMenu';
 import { Box } from '@material-ui/core';
 import MobileNav from 'components/mainMenu/mobileNav/MobileNav';
+import { routeConfig } from './route.config';
 
 function App () {
   const dispatch = useDispatch();
+  const themeFromLocalStorage = localStorage.getItem('theme');
 
   const errorMessage = useSelector(selectError);
   const alertMessage = useSelector(selectAlert);
 
   const [ enabled, setEnabled ] = useState(false);
-  const [light, setLight] = useState(false);
+  const [light, setLight] = useState(themeFromLocalStorage === 'light');
 
   const handleErrorClose=()=>dispatch(closeError());
   const handleAlertClose=()=>dispatch(closeAlert());
@@ -106,6 +106,17 @@ function App () {
       },
     },
     components: {
+      MuiPaper: {
+        defaultProps: {
+          elevation: 0,
+        },
+        styleOverrides: {
+          root: {
+            background: light ? 'rgba(0,0,0,0.06)' : "rgba(255,255,255,0.06)",
+            borderRadius: 10,
+          }
+        }
+      },
       MuiButton: {
         styleOverrides: {
           root: {
@@ -114,8 +125,6 @@ function App () {
             boxShadow: "box-shadow: 0px 0px 7px rgba(73, 107, 239, 0.35)",
           },
           "&.Mui-disabled": {
-            color: 'red',
-            fontSize: '30px'
           }
         },
         variants: [
@@ -202,10 +211,16 @@ function App () {
               </Alert>
 
               <Notification/>
-
-              <Switch>
-                <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />} />
-              </Switch>
+              <Suspense fallback={()=> (<>Loading...</>)}>
+                <Switch>
+                  {
+                    routeConfig.map((routeProps)=> {
+                      return <Route {...routeProps} enabled={enabled} onEnable={setEnabled} />
+                    })
+                  }
+                  {/* <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />} /> */}
+                </Switch>
+              </Suspense>
 
             </div>
           </S.Content>
