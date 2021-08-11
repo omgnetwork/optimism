@@ -136,11 +136,14 @@ class NetworkService {
     console.log('NS: enableBrowserWallet()')
     try {
       // connect to the wallet
-      await window.ethereum.enable()
+      //await window.ethereum.enable()
+/*
+inpage.js:1 MetaMask: 'ethereum.enable()' is deprecated and may be removed in the future. Please use the 'eth_requestAccounts' RPC method instead.
+For more information, see: https://eips.ethereum.org/EIPS/eip-1102
+*/
+
+      await window.ethereum.request({method: 'eth_requestAccounts'})
       this.provider = new ethers.providers.Web3Provider(window.ethereum)
-      await window.ethereum.request({
-        method: 'eth_requestAccounts',
-      })
       return true
     } catch (error) {
       return false
@@ -461,8 +464,8 @@ class NetworkService {
       this.L1_TEST_Address = addresses.TOKENS.TEST.L1
       this.L2_TEST_Address = addresses.TOKENS.TEST.L2
 
-      this.L1LPAddress = addresses.L1LiquidityPool
-      this.L2LPAddress = addresses.L2LiquidityPool
+      this.L1LPAddress = addresses.Proxy__L1LiquidityPool
+      this.L2LPAddress = addresses.Proxy__L2LiquidityPool
 
       this.L1Message = addresses.L1Message
       this.L2Message = addresses.L2Message
@@ -1363,7 +1366,11 @@ class NetworkService {
       L2LPJson.abi,
       this.L2Provider
     )
-    const feeRate = await L2LPContract.totalFeeRate()
+    const [userRewardFeeRate, ownerRewardFeeRate] = await Promise.all([
+      L2LPContract.userRewardFeeRate(),
+      L2LPContract.ownerRewardFeeRate()
+    ])
+    const feeRate = userRewardFeeRate + ownerRewardFeeRate;
     return ((feeRate / 1000) * 100).toFixed(0)
   }
 
