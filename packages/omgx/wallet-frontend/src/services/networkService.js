@@ -1058,8 +1058,13 @@ class NetworkService {
 
   //Move ETH from L1 to L2 using the standard deposit system
   depositETHL2 = async (value = '1', gasPrice) => {
+
+    console.log("this.L2GasLimit:",this.L2GasLimit)
+    console.log("GasPrice:",gasPrice)
+    console.log(this.L1StandardBridgeContract.address)
+    
     try {
-      const depositTxStatus = await this.L1StandardBridgeContract.depositETH(
+      let depositTxStatus = await this.L1StandardBridgeContract.depositETH(
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString()),
         { 
@@ -1067,7 +1072,15 @@ class NetworkService {
           gasPrice: ethers.utils.parseUnits(`${gasPrice}`, 'wei'),
         }
       )
-      await depositTxStatus.wait()
+      console.log("Waiting for transaction...")
+      depositTxStatus = await depositTxStatus
+      console.log("Got tx:", depositTxStatus)
+
+      console.log("Waiting for receipt...")
+      const receipt = await depositTxStatus.wait()
+      console.log('Got receipt:', receipt)
+
+      //await depositTxStatus.wait()
 
       const [l1ToL2msgHash] = await this.watcher.getMessageHashesFromL1Tx(
         depositTxStatus.hash
