@@ -29,7 +29,7 @@ class ProposalList extends React.Component {
 
 	renderProposals = async () => {
 		var proposals = []
-		for (var i = 0; i < this.state.proposalCount; i++) {
+		for (var i = 1; i <= this.state.proposalCount; i++) {
 			proposals.push(
 				<ProposalCard id={i} GovernorBravo={this.state.GovernorBravo} />
 			)

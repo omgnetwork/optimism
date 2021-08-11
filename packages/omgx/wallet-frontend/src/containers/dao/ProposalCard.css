@@ -1,0 +1,104 @@
+.proposal-card {
+	display: flex;
+	align-items: center;
+	width: 667px;
+	border-color: white;
+	border-radius: 20px;
+	border: solid;
+	padding: 3vh;
+	margin-top: 3vh;
+	font-family: 'Inter', sans-serif;
+}
+
+.proposal-content {
+	display: flex;
+	flex-direction: column;
+}
+
+.proposal-title {
+	font-style: normal;
+	font-weight: normal;
+	font-size: 1.25rem;
+	line-height: 1.35;
+	color: white;
+}
+
+.proposal-details {
+	align-items: center;
+	display: flex;
+	font-size: 0.75rem;
+	margin-top: 0.5625rem;
+}
+
+.proposal-voting-state {
+	border: solid;
+	color: green;
+	padding-right: 0.5vh;
+	padding-left: 0.5vh;
+	border-radius: 10px;
+}
+
+.proposal-text-details {
+	font-style: normal;
+	font-weight: 600;
+	color: #aab8c1;
+	margin-left: 0.625rem;
+	display: flex;
+}
+
+.proposal-state {
+	cursor: pointer;
+	display: flex;
+	position: relative;
+	align-items: center;
+	align-content: center;
+	flex-direction: column;
+	float: right;
+	margin-left: auto;
+}
+
+.tint {
+	background-color: white;
+	height: 100%;
+	left: 0;
+	opacity: 0.7;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	z-index: 5;
+}
+
+.modal {
+	/*align-items: center;*/
+	/*justify-content: center;*/
+	z-index: 6;
+	position: absolute;
+	top: 25%;
+	left: 25%;
+	margin: -25px 0 0 -25px;
+}
+
+.modal .castVotes {
+	align-items: center;
+	background-color: white;
+	border-radius: 20px;
+	border-style: solid;
+	color: black;
+	display: flex;
+	flex-direction: column;
+	height: 40vh;
+	padding: 5vh;
+	width: 30vw;
+	position: relative;
+}
+
+.modal .close {
+	background-color: white;
+	border-style: none;
+	color: red;
+	cursor: pointer;
+	font-size: 3vh;
+	right: 20px;
+	top: 10px;
+	position: absolute;
+}
