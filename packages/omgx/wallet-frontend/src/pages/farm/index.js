@@ -1,3 +1,4 @@
+
 /*
 Copyright 2019-present OmiseGO Pte Ltd
 
@@ -13,23 +14,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+
+// NOTE: Farm is nothing but the stack
+
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import store from 'store';
 
-// import App from 'containers/app/App';
-import App from 'layout'
-import './index.scss';
+function FarmPage() {
+ 
+  return (
+    <>
+      <h1>Stacking page</h1>
+    </>
+  );
 
-// https://docs.metamask.io/guide/ethereum-provider.html#ethereum-autorefreshonnetworkchange
-if (window.ethereum) {
-  window.ethereum.autoRefreshOnNetworkChange = false;
 }
 
-ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-  document.getElementById('root')
-);
+export default React.memo(FarmPage);
+

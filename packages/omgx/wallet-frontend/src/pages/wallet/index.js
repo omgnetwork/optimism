@@ -14,22 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import store from 'store';
 
-// import App from 'containers/app/App';
-import App from 'layout'
-import './index.scss';
+function WalletPage() {
+ 
+  return (
+    <>
+      <h1>Wallet page</h1>
+    </>
+  );
 
-// https://docs.metamask.io/guide/ethereum-provider.html#ethereum-autorefreshonnetworkchange
-if (window.ethereum) {
-  window.ethereum.autoRefreshOnNetworkChange = false;
 }
 
-ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-  document.getElementById('root')
-);
+export default React.memo(WalletPage);
+
