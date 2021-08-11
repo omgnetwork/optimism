@@ -1,58 +1,52 @@
 @import 'index.scss';
 
-$dropDownHeight: 340px;
+$dropDownHeight: 92px;
 
 .ListNFT {
 
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   border-radius: 10px;
-  width: 500px;
+  width: 250px;
   margin-top: 10px;
-  padding: 10px;
+  margin-left: 10px;
+  border: 2px solid $blue;
+  overflow: hidden;
+
+  .Image {
+    width: 250px;
+    overflow: hidden;
+  }
 
   .topContainer {
 
     cursor: pointer;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: flex-start;
+    padding: 10px;
 
-    .Table1 {
-      display: flex;
-      justify-content: center;
-      align-items: center;    
-      .Image {
-        width: 80px;
-        height: 80px;
-        border-radius: 10px;
-        margin: 10px;
-      }
-    }
     .Table2 {
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
       align-items: flex-start;
-      padding: 10px;
-      padding-left: 0px;
-      min-width: 250px;
     }
     .Table3 {
       display: flex;
-      padding: 10px;
+      flex-direction: row;
       justify-content: center;
       align-items: center;
     }
   }
 
   .dropDownContainer {
-    height: $dropDownHeight;
     animation: openDropDown 1s;
     overflow: hidden;
     background-color: $gray7;
     display: flex;
+    padding-top: 10px;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
   }
 
@@ -77,26 +71,18 @@ $dropDownHeight: 340px;
     flex-direction: column;
     width: 90%;
     padding: 0px;
-    margin: 8px;
+    margin: 0px;
+    padding-bottom: 10px;
   }
 
   .boxOrigin {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
     width: 90%;
     padding: 0px;
     margin: 0px;
-    .Image {
-        width: 70px;
-        height: 70px;
-        border-radius: 10px;
-        padding: 0px;
-    }
-    .originRight {
-        flex-direction: column;
-        padding-top: 6px;
-        padding-left: 6px;
-    }
   }
 
   /*************************/
@@ -125,7 +111,7 @@ $dropDownHeight: 340px;
   }
 
   .BasicLightText {
-    font-size: 0.7em;
+    font-size: 0.6em;
     font-weight: 700;
     color: $gray4;
     padding-top: 2px;
@@ -140,11 +126,18 @@ $dropDownHeight: 340px;
   .LinkText {
     font-size: 1em;
     font-weight: 700;
-    color: $green;
+    color: $blue;
   }
 
   .LinkButton {
-    color: $green;
+    color: $blue;
+  }
+
+  .URILink {
+    color: $blue;
+    padding-top: 2px; 
+    font-size: 0.7em; 
+    font-weight: 700
   }
   /************************/
 
@@ -166,14 +159,4 @@ $dropDownHeight: 340px;
     padding-bottom: 10px;
   }
 
-  .DD{
-    border: 1px solid $gray3;
-    width: 50%;
-    padding: 5px;
-    margin-top: 0px;
-    margin-bottom: 10px;
-    font-size: 0.8em;
-    color: $gray4;
-    background: white;
-  }
 }

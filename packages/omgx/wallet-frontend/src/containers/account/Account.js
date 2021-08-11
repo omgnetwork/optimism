@@ -32,9 +32,10 @@ import bunny_sad from 'images/bunny_sad.svg'
 
 import * as styles from './Account.module.scss'
 import { selectTokens } from 'selectors/tokenSelector'
-import { fetchLookUpPrice } from 'actions/networkAction'
 import PageHeader from 'components/pageHeader/PageHeader'
 import { Box, Grid, Paper, Typography } from '@material-ui/core'
+import { fetchGas, fetchLookUpPrice } from 'actions/networkAction'
+import { selectNetwork } from 'selectors/setupSelector'
 
 function Account () {
   const dispatch = useDispatch();
@@ -45,6 +46,11 @@ function Account () {
   const isSynced = useSelector(selectIsSynced);
   const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]));
   const tokenList = useSelector(selectTokens);
+
+  const network = useSelector(selectNetwork());
+
+  const wAddress = networkService.account ? truncate(networkService.account, 6, 4, '...') : '';
+  const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
 
   const getLookupPrice = useCallback(()=>{
     const symbolList = Object.values(tokenList).map((i)=> {
@@ -59,10 +65,17 @@ function Account () {
     dispatch(fetchLookUpPrice(symbolList));
   },[tokenList,dispatch])
 
+  const getGasPrice = useCallback(() => {
+    dispatch(fetchGas({
+      network: network || 'local',
+      networkLayer
+    }));
+  }, [dispatch, network, networkLayer])
+
   useEffect(()=>{
     getLookupPrice();
-  },[childBalance, rootBalance,getLookupPrice])
-
+    getGasPrice()
+  },[childBalance, rootBalance,getLookupPrice,getGasPrice])
 
   const disabled = criticalTransactionLoading || !isSynced
 
@@ -78,8 +91,6 @@ function Account () {
     }
     return acc;
   }, balances)
-
-  const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
 
   return (
     <>

@@ -18,12 +18,14 @@ ARG OVM_SOLC_UPSTREAM=https://github.com/ethereum-optimism/solc-bin/raw/gh-pages
 ADD $SOLC_UPSTREAM ./solc
 ADD $OVM_SOLC_UPSTREAM ./ovm-solc
 
-FROM node as builder
+FROM node as prebuilder
 # copy over the needed configs to run the dep installation
 # note: this approach can be a bit unhandy to maintain, but it allows
 # us to cache the installation steps
 WORKDIR /optimism
+
 COPY *.json yarn.lock ./
+
 COPY packages/core-utils/package.json ./packages/core-utils/package.json
 COPY packages/common-ts/package.json ./packages/common-ts/package.json
 COPY packages/hardhat-ovm/package.json ./packages/hardhat-ovm/package.json
@@ -32,40 +34,45 @@ COPY packages/contracts/package.json ./packages/contracts/package.json
 COPY packages/data-transport-layer/package.json ./packages/data-transport-layer/package.json
 COPY packages/batch-submitter/package.json ./packages/batch-submitter/package.json
 COPY packages/message-relayer/package.json ./packages/message-relayer/package.json
+COPY packages/replica-healthcheck/package.json ./packages/replica-healthcheck/package.json
 
 COPY packages/omgx/contracts/package.json ./packages/omgx/contracts/package.json
+COPY packages/omgx/gas-price-oracle/package.json ./packages/omgx/gas-price-oracle/package.json
 COPY packages/omgx/message-relayer-fast/package.json ./packages/omgx/message-relayer-fast/package.json
 
 COPY integration-tests/package.json ./integration-tests/package.json
 
-RUN yarn install
-RUN yarn build
+# copy over the patches, if any...
+# needs to happen before `yarn` otherwise patch-packages does not apply the patches
+COPY ./patches ./patches
+
+# RUN yarn install
+RUN yarn install --frozen-lockfile
 
 ### BUILDER: Builds the typescript
-FROM node
+FROM node as builder
 
 WORKDIR /optimism
 
 # cache the node_modules copying step since it's expensive
 # we run this before copying over any source files to avoid re-copying anytime the
 # code changes
-COPY --from=builder /optimism/node_modules ./node_modules
-COPY --from=builder /optimism/packages ./packages
-COPY --from=builder /optimism/packages/omgx ./packages/omgx
-COPY --from=builder /optimism/integration-tests ./integration-tests
+COPY --from=prebuilder /optimism/node_modules ./node_modules
+COPY --from=prebuilder /optimism/packages ./packages
+COPY --from=prebuilder /optimism/integration-tests ./integration-tests
 
 # the following steps are cheap
 COPY *.json yarn.lock ./
 
 # copy over the source
-COPY ./patches ./patches
 COPY ./packages ./packages
-COPY ./packages/omgx ./packages/omgx
 COPY ./integration-tests ./integration-tests
 
 # copy over solc to save time building (35+ seconds vs not doing this step)
 COPY --from=downloader solc /root/.cache/hardhat-nodejs/compilers/linux-amd64/solc-linux-amd64-v0.7.6+commit.7338295f
 COPY --from=downloader ovm-solc /root/.cache/hardhat-nodejs/compilers/ovm/0.7.6.js
+
+WORKDIR /optimism
 
 # build it!
 RUN yarn build
@@ -76,7 +83,5 @@ RUN yarn workspace @eth-optimism/integration-tests build:integration
 # get the dump
 RUN yarn --cwd ./packages/contracts ts-node bin/take-dump.ts
 
-# TODO: Consider thinning up the container by trimming non-production
-# dependencies
 # so that it can be used in docker-compose
 CMD ["true"]
