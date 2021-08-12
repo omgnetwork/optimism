@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
-import getBlockchain from "../../services/ethereum.js";
-import networkService from 'services/networkService'
 import Transfer from "./Transfer";
 import Delegate from "./Delegate";
 import Propose from "./Propose";
-import { openAlert, openError } from 'actions/uiAction'
 import { ethers } from "ethers";
+import networkService from "services/networkService.js";
 
 function Dao() {
   const [comp, setComp] = useState(undefined);
@@ -15,20 +13,17 @@ function Dao() {
 
   useEffect(() => {
     const init = async () => {
-      if(!networkService.CompContract) networkService.initializeDaoAccounts();
-
-      // const { address  } = this.state;
-
-      // const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
-
-      // if (!networkStatus) {
-      //   this.props.dispatch(openError('Please use L2 network.'));
-      //   return;
-      // }
-      const signer  = networkService.provider.getSigner();
+      await networkService.initializeDaoAccounts();
+      const comp = await networkService.getCompContract();
+      const signer = await networkService.getSigner();
       const address = await signer.getAddress();
-      const balance = networkService.getBalance(address);
-      const votes = await networkService.fetchDaoCurrentVotes(address);
+      const balance = ethers.utils.formatEther(
+        await comp.balanceOf(address)
+      );
+      const votes = ethers.utils.formatEther(
+        await comp.getCurrentVotes(address)
+      );
+      setComp(comp);
       setAddress(address);
       setBalance(balance);
       setVotes(votes);
@@ -49,6 +44,7 @@ function Dao() {
   };
 
   if (
+    typeof comp === "undefined" ||
     typeof balance === "undefined" ||
     typeof votes === "undefined"
   ) {
@@ -68,15 +64,19 @@ function Dao() {
             minimumFractionDigits: 0,
             maxiumFractionDigits: 18,
           })}
+          comp={comp}
           setBalance={setBalance}
         />
         <Delegate
           address={address}
+          comp={comp}
           setVotes={setVotes}
           votes={votes}
         />
       </div>
-      <Propose />
+      <Propose
+        comp={comp}
+        />
     </div>
   );
 }

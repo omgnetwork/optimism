@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { ethers } from "ethers";
-import networkService from "services/networkService";
 
 function Transfer(props) {
   const { address, comp, setVotes, votes } = props;
@@ -12,9 +11,11 @@ function Transfer(props) {
   const updateVotes = async (e) => {
     e.preventDefault();
     const recipient = e.target.elements[0].value;
-    const tx = await networkService.CompContract.delegate(recipient);
+    const tx = await comp.delegate(recipient);
     await tx.wait();
-    const votes = await networkService.fetchDaoCurrentVotes(address);
+    const votes = ethers.utils.formatEther(
+      await comp.getCurrentVotes(address)
+    );
     setVotes(votes);
   };
   return (

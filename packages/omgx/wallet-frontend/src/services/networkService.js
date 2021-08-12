@@ -146,6 +146,8 @@ class NetworkService {
     this.L1GasLimit = 9999999
     this.L2GasLimit = 10000000
 
+    this.GovernorBravo = null;
+
     this.CompContract = null;
     this.L2_CompContract_Address = null;
 
@@ -2029,7 +2031,12 @@ class NetworkService {
 				TimelockJson.abi,
 				this.provider.getSigner()
 				);
-		} catch(error){
+
+      this.GovernorBravo = await this.GovernorBravoDelegateContract.attach(this.GovernorBravoDelegatorContract.address)
+        if(!this.GovernorBravo){
+          throw `Error initializing GovernorBravo!`;
+        }
+    } catch(error){
       console.log(`Here is the error: ${error}`);
     }
     finally {
@@ -2070,7 +2077,7 @@ class NetworkService {
                 signatures,
                 calldatas,
                 description){
-    await this.GovernorBravoDelegateContract.connect(this.provider.getSigner()).propose( // connects needs to have an account
+    await this.GovernorBravo.connect(this.provider.getSigner()).propose( // connects needs to have an account
     targets,
     values,
     signatures,
@@ -2102,6 +2109,21 @@ class NetworkService {
   async getBalance(address) {
     const balance = await this.CompContract.balanceOf(address);
     return balance;
+  }
+  async getCompContract(){
+    return this.CompContract;
+  }
+  async getGovernorBravoDelegatorContract(){
+    return this.GovernorBravoDelegatorContract;
+  }
+  async getGovernorBravoDelegateContract(){
+    return this.GovernorBravoDelegateContract;
+  }
+  async getTimelockContract(){
+    return this.TimelockContract;
+  }
+  async getSigner(){
+    return this.provider.getSigner();
   }
 }
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import networkService from "services/networkService.js";
 import getBlockchain from "../../services/ethereum.js";
 
 function Proposal(props) {
@@ -18,7 +19,8 @@ function Proposal(props) {
 
   useEffect(() => {
     const init = async () => {
-      const { delegate, timelock } = await getBlockchain();
+      const delegate = await networkService.getGovernorBravoDelegateContract();
+      const timelock = await networkService.getTimelockContract();
       setDelegateAddress(delegate.address);
       setTimelockAddress(timelock.address);
     };
@@ -62,14 +64,14 @@ function Proposal(props) {
           <>
             <select value={action} onChange={(e) => updateActions(e)}>
               <option value="select">Select an Action</option>
-              <option value="_setProposalThreshold">
+              <option value="_setProposalThreshold(uint256)">
                 _setProposalThreshold
               </option>
-              <option value="_setVotingDelay">_setVotingDelay</option>
-              <option value="_setVotingPeriod">_setVotingPeriod</option>
-              <option value="_grantComp">Grant BOBA</option>
+              <option value="_setVotingDelay(uint256)">_setVotingDelay</option>
+              <option value="_setVotingPeriod(uint256)">_setVotingPeriod</option>
+              <option value="_grantComp(uint256)">Grant BOBA</option>
             </select>
-            {action === "select" ? null : action === "_grantComp" ? (
+            {action === "select" ? null : action === "_grantComp(uint256)" ? (
               <>
                 <input type="text" placeholder="Recipient Address"></input>
                 <input type="text" placeholder="Grant Amount"></input>
@@ -77,7 +79,7 @@ function Proposal(props) {
             ) : (
               <input
                 type="text"
-                placeholder={`new ${action} (uint)`}
+                placeholder={`new ${action} (uint256)`}
                 onChange={(e) => updateValues(e)}
               ></input>
             )}

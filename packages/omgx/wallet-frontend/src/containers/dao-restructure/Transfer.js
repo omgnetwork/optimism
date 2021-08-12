@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { ethers, BigNumber } from "ethers";
-import networkService from "services/networkService";
 
 function Delegate(props) {
   const { address, balance, comp, setBalance } = props;
@@ -22,7 +21,7 @@ function Delegate(props) {
     );
     await tx.wait();
     const newBalance = ethers.utils.formatEther(
-      await networkService.CompContract.balanceOf(`0x21A235cf690798ee052f54888297Ad8F46D3F389`)
+      await comp.balanceOf(address)
     );
     setBalance(newBalance);
   };

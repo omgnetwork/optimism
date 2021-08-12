@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import Proposal from "./Proposal";
-import networkService from 'services/networkService'
+import networkService from "services/networkService.js";
 import { ethers } from "ethers";
+/* global BigInt */
 
 function Propose() {
   const [actions, setActions] = useState(["select"]);
@@ -9,6 +10,7 @@ function Propose() {
   const [values, setValues] = useState([0]);
   const [description, setDescription] = useState("");
   const [cnt, setCnt] = useState(0);
+  const delegate = networkService.getGovernorBravoDelegateContract();
 
   let actionsMarkup = actions.map((action, i) => (
     <div>
@@ -37,6 +39,7 @@ function Propose() {
   };
 
   const removeAction = (e, i) => {
+    console.log(`Values: ${values}`);
     e.preventDefault();
     if (actions.length <= 1) return;
     setActions((actions) =>
@@ -66,28 +69,32 @@ function Propose() {
         return nValues;
       })(values, i)
     );
+
     setCnt(cnt - 1);
   };
-  // signatures ~ actions
-  // contracts ~ targets
-  // values ~ calldatas
+
   const submitProposal = async (e) => {
     e.preventDefault();
+    const decimals  = BigInt(10**18);
     let calldataTypes = [];
+    let callData = [];
     let proposeValues = [];
-    for(let i = 0; i <actions.length; i++) calldataTypes.push('uint'); proposeValues.push(0);
+    for(let i = 0; i <actions.length; i++){
+      calldataTypes.push('uint256');
+      proposeValues.push(0);
+      callData.push(ethers.utils.defaultAbiCoder.encode(
+        ['uint256'],
+        [BigInt(values[i]) * decimals]
+      ));
+    }
 
+    await networkService.propose(
+      [networkService.GovernorBravo.address],
+      proposeValues,
+      actions,
+      callData,
+      description);
 
-    networkService.propose(contracts,
-                          values,
-                          actions,
-                          ethers.utils.defaultAbiCoder.encode(calldataTypes, values),
-                          description);
-
-    console.log(description);
-    console.log(actions);
-    console.log(contracts);
-    console.log(values);
   };
 
   const handleChange = (e) => {

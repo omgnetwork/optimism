@@ -21,7 +21,7 @@ function Propose() {
         key={cnt}
       />
       <button className="removeAction" onClick={(e) => removeAction(e, i)}>
-        + Remove
+        - Remove
       </button>
     </div>
   ));
