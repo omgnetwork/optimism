@@ -14,7 +14,7 @@ function Dao() {
 
   useEffect(() => {
     const init = async () => {
-      const { signer, comp } = await getBlockchain()
+      const { signer, comp} = await getBlockchain()
       const address = await signer.getAddress()
       const balance = ethers.utils.formatEther(await comp.balanceOf(address))
       const votes = ethers.utils.formatEther(

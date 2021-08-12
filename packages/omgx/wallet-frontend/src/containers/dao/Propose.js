@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import getBlockchain from "services/ethereum";
 import Proposal from "./Proposal";
+import { ethers } from "ethers";
+/* global BigInt */
 
 function Propose() {
   const [actions, setActions] = useState(["select"]);
@@ -7,6 +10,15 @@ function Propose() {
   const [values, setValues] = useState([0]);
   const [description, setDescription] = useState("");
   const [cnt, setCnt] = useState(0);
+  const [GovernorBravo, setGovernorBravo] = useState(undefined);
+
+  useEffect(() => {
+    const init = async () => {
+      const { GovernorBravo} = await getBlockchain()
+      setGovernorBravo(GovernorBravo)
+    }
+    init()
+  }, [])
 
   let actionsMarkup = actions.map((action, i) => (
     <div>
@@ -71,6 +83,26 @@ function Propose() {
 
   const submitProposal = async (e) => {
     e.preventDefault();
+    const decimals  = BigInt(10**18);
+    let calldataTypes = [];
+    let callData = [];
+    let proposeValues = [];
+    for(let i = 0; i <actions.length; i++){
+      calldataTypes.push('uint256');
+      proposeValues.push(0);
+      callData.push(ethers.utils.defaultAbiCoder.encode(
+        ['uint256'],
+        [BigInt(values[i]) * decimals]
+      ));
+    }
+
+    await GovernorBravo.propose(
+      [GovernorBravo.address],
+      proposeValues,
+      actions,
+      callData,
+      description);
+
     console.log(`description: ${description}`);
     console.log(`actions: ${actions}`);
     console.log(`contracts: ${contracts}`);
