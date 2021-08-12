@@ -27,7 +27,6 @@ class ProposalCard extends React.Component {
 		this.setState({ state: proposalStates[index] })
 		this.setState({ proposal })
 		this.setState({ actions })
-		console.log(proposal)
 	}
 
 	async componentDidMount() {
@@ -68,6 +67,38 @@ class ProposalCard extends React.Component {
 		await GovernorBravo.castVote(this.props.id, vote)
 	}
 
+	getTargets(targets) {
+		console.log('HERE')
+		const { comp, delegate, delegator, timelock, GovernorBravo } = this.props
+		for (var i = 0; i < targets.length; i++) {
+			console.log(targets[i])
+			console.log(comp.address)
+			switch (targets[i]) {
+				case comp.address:
+					var link = `https://blockexplorer.rinkeby.omgx.network/address/${comp.address}`
+					return <a href={link}>Targets: BOBA</a>
+				case delegate.address:
+					var link = `https://blockexplorer.rinkeby.omgx.network/address/${delegate.address}`
+					return <a href={link}>Targets: GovernorBravoDelegate</a>
+
+				case delegator.address:
+					var link = `https://blockexplorer.rinkeby.omgx.network/address/${delegator.address}`
+					return <a href={link}>Targets: GovernorBravoDelegator</a>
+
+				case timelock.address:
+					var link = `https://blockexplorer.rinkeby.omgx.network/address/${timelock.address}`
+					return <a href={link}>Targets: Timelock</a>
+
+				case GovernorBravo.address:
+			}
+		}
+	}
+
+	getDate(endBlock) {
+		var link = `https://rinkeby.etherscan.io/block/countdown/${endBlock}`
+		return <a href={link}>Voting Ends On</a>
+	}
+
 	render() {
 		if (this.state.actions !== null) {
 			const {
@@ -97,7 +128,7 @@ class ProposalCard extends React.Component {
 								<div className="proposal-text-details">
 									<span>{id.toString()}</span>
 									<span> • </span>
-									<span>Date</span>
+									<span>{this.getDate(endBlock.toString())}</span>
 								</div>
 							</div>
 						</div>
@@ -112,8 +143,8 @@ class ProposalCard extends React.Component {
 								<div className="castVotes">
 									<h2>Actions</h2>
 									<div className="actions">
-										{signatures} <br /> {calldatas} <br /> {targets} <br />
-										{endBlock.toString()}
+										{signatures} <br /> {calldatas} <br />
+										{this.getTargets(targets)} <br />
 									</div>
 									<h2>Cast Vote</h2>
 									<button className="forVotes" onClick={() => this.vote(1)}>
