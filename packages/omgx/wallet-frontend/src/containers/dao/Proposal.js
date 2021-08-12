@@ -9,17 +9,17 @@ function Proposal(props) {
     i,
     setActions,
     setContracts,
-    setValues,
+    setValues
   } = props;
   const [action, setAction] = useState(actions[i]);
   const [contract, setContract] = useState(contracts[i]);
-  const [delegateAddress, setDelegateAddress] = useState(undefined);
+  const [GBAddress, setGBAddress] = useState(undefined);
   const [timelockAddress, setTimelockAddress] = useState(undefined);
 
   useEffect(() => {
     const init = async () => {
-      const { delegate, timelock } = await getBlockchain();
-      setDelegateAddress(delegate.address);
+      const { timelock, GovernorBravo } = await getBlockchain();
+      setGBAddress(GovernorBravo.address);
       setTimelockAddress(timelock.address);
     };
     init();
@@ -55,10 +55,10 @@ function Proposal(props) {
         <select value={contract} onChange={(e) => updateContracts(e)}>
           <option value="select">Select a Contract</option>
           <option value="boba">Boba Fees</option>
-          <option value={delegateAddress}>Governor Bravo Delegate</option>
+          <option value={GBAddress}>Governor Bravo</option>
           <option value={timelockAddress}>Timelock</option>
         </select>
-        {contract === "select" ? null : contract === delegateAddress ? (
+        {contract === "select" ? null : contract === GBAddress ? (
           <>
             <select value={action} onChange={(e) => updateActions(e)}>
               <option value="select">Select an Action</option>

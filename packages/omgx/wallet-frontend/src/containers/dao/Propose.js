@@ -31,6 +31,7 @@ function Propose() {
         setActions={setActions}
         setContracts={setContracts}
         key={cnt}
+        GovernorBravo={GovernorBravo}
       />
       <button className="removeAction" onClick={(e) => removeAction(e, i)}>
         - Remove
@@ -96,17 +97,20 @@ function Propose() {
       ));
     }
 
+    console.log(`Governor bravo address: ${GovernorBravo.address}`)
+    console.log(`description: ${description}`);
+    console.log(`actions: ${actions}`);
+    console.log(`contracts: ${contracts}`);
+    console.log(`values: ${values}`);
+
     await GovernorBravo.propose(
-      [GovernorBravo.address],
+      contracts,
       proposeValues,
       actions,
       callData,
       description);
 
-    console.log(`description: ${description}`);
-    console.log(`actions: ${actions}`);
-    console.log(`contracts: ${contracts}`);
-    console.log(`values: ${values}`);
+
   };
 
   const handleChange = (e) => {

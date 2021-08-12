@@ -57,8 +57,6 @@ import DAU from 'containers/dau/dau';
 // DAO Page
 import DAO from 'containers/dao/Dao';
 
-// DAO2 Page
-import DAO2 from 'containers/dao-restructure/Dao';
 
 
 // Farm
@@ -209,15 +207,6 @@ function Home () {
             </div>
 
             </h2>
-            <h2
-              className={pageDisplay === "DAO2" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("DAO2")}}
-            >
-              <div>
-              DAO2
-              </div>
-
-            </h2>
           </div>
           {pageDisplay === "AccountNow" &&
           <>
@@ -239,9 +228,7 @@ function Home () {
             <Farm/>
           }{pageDisplay === "DAO" &&
             <DAO/>
-          }{pageDisplay === "DAO2" &&
-          <DAO2/>
-        }
+          }
         </div>
       </div>
     </>
