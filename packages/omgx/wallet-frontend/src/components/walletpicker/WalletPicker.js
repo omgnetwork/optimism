@@ -196,7 +196,7 @@ function WalletPicker ({ onEnable, enabled }) {
                 </Button>
                 <Button onClick={() => setOpen(!open)}>Open modal</Button>
                 <Modal open={open} title="Create transaction" onClose={() => setOpen(false)} transparent>
-                  <CreateTransactions />
+                  <CreateTransactions setOpen={setOpen}/>
                 </Modal>
               </Grid>
           </Grid>

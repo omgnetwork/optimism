@@ -118,9 +118,11 @@ function App () {
             borderRadius: "8px",
             textTransform: "none",
             boxShadow: "box-shadow: 0px 0px 7px rgba(73, 107, 239, 0.35)",
+            "&.Mui-disabled": {
+              background: 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)',
+              color: 'rgba(255, 255, 255, 0.5)',
+            }
           },
-          "&.Mui-disabled": {
-          }
         },
         variants: [
           {
@@ -152,6 +154,20 @@ function App () {
               "&:hover": {
                 opacity: 0.9,
                 transition: 'opacity 0.3s ease-in-out',
+              }
+            },
+          },
+          {
+            props: { variant: 'small'},
+            style: {
+              fontSize: '14px',
+              background: 'linear-gradient(131.81deg, #4A6FEF 2.66%, #4251F0 124.21%)',
+              textTransform: 'uppercase',
+              borderRadius: '4px',
+              minWidth: '0',
+              "&:hover": {
+                boxShadow: 'inset 0px 0px 0px 2px rgba(255, 255, 255, 0.2)',
+                transition: 'box-shadow 0.3s ease-in-out',
               }
             },
           },

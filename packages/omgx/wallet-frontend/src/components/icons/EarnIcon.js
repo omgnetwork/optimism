@@ -1,4 +1,3 @@
-import { useTheme } from "@material-ui/core/styles";
 import * as React from "react"
 
 function EarnIcon({ color }) {
