@@ -16,7 +16,7 @@ limitations under the License. */
 import React,{useEffect,useCallback} from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { isEqual, truncate } from 'lodash'
+import { isEqual } from 'lodash'
 
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectIsSynced } from 'selectors/statusSelector'
@@ -49,7 +49,6 @@ function Account () {
 
   const network = useSelector(selectNetwork());
 
-  const wAddress = networkService.account ? truncate(networkService.account, 6, 4, '...') : '';
   const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
 
   const getLookupPrice = useCallback(()=>{

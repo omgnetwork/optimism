@@ -211,11 +211,11 @@ function App () {
               </Alert>
 
               <Notification/>
-              <Suspense fallback={()=> (<>Loading...</>)}>
+              <Suspense fallback={<>Loading...</>}>
                 <Switch>
                   {
                     routeConfig.map((routeProps)=> {
-                      return <Route {...routeProps} enabled={enabled} onEnable={setEnabled} />
+                      return <Route {...routeProps} enabled={enabled} onEnable={setEnabled} key={routeProps.path} />
                     })
                   }
                   {/* <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />} /> */}
