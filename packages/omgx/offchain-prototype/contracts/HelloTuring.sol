@@ -5,14 +5,14 @@ pragma solidity ^0.7.0;
 import "hardhat/console.sol";
 
 interface Helper {
-  function TuringCall(bytes memory) view external returns (string memory);
+  function TuringCall(uint32 method_idx, bytes memory) view external returns (bytes memory);
 }
 
 contract HelloTuring {
   address helperAddr;
   Helper myHelper;
 
-  mapping (address => bytes) locales;
+  mapping (address => string) locales;
   mapping (address => string) cachedGreetings;
 
   constructor(address _helper) {
@@ -28,7 +28,8 @@ contract HelloTuring {
   function CustomGreetingFor(string memory locale)
     public view returns (string memory) {
 
-    return myHelper.TuringCall(bytes(locale));
+    bytes memory response = myHelper.TuringCall(0, abi.encode(locale));
+    return abi.decode(response,(string));
   }
 
   /* This tests the eth_sendRawTransaction pathway by fetching
@@ -45,8 +46,9 @@ contract HelloTuring {
     require(localebytes.length <= 5 && localebytes.length > 0,
        "Invalid Locale"); // Example uses "EN_US" etc
 
-    locales[msg.sender] = localebytes;
-    cachedGreetings[msg.sender] = myHelper.TuringCall(localebytes);
+    locales[msg.sender] = locale;
+    bytes memory response =  myHelper.TuringCall(0, abi.encode(locale));
+    cachedGreetings[msg.sender] = abi.decode(response,(string));
   }
 
   /* Return the value set by a previous call to SetMyLocale() */
@@ -56,5 +58,14 @@ contract HelloTuring {
     require (bytes(greeting).length > 0, "No cached greeting string for this user");
 
     return greeting;
+  }
+  
+  /* Example of performing off-chain calculations on numeric data types */
+  function AddNumbers(uint112 a, uint112 b) public view returns (uint256) {
+    uint256 c;
+    bytes memory encRequest = abi.encode(a, b);
+    bytes memory encResponse = myHelper.TuringCall(1, encRequest);
+    c = abi.decode(encResponse,(uint256));
+    return c;
   }
 }

@@ -3,6 +3,7 @@ import { ethers } from 'hardhat'
 import chai, { expect } from 'chai'
 import { solidity } from 'ethereum-waffle'
 chai.use(solidity)
+const abiDecoder = require('web3-eth-abi')
 
 import hre from 'hardhat'
 const cfg = hre.network.config
@@ -44,36 +45,58 @@ describe("HelloTest", function() {
 	req.on('end', function () {
 
 	  var jBody = JSON.parse(body)
-	  //console.log ("id", jBody.id, "loc", jBody.params[0])
+	  //console.log ("jBody", jBody)
 
-	  res.writeHead(200, {'Content-Type': 'text/plain'});
+          if (jBody.method === "hello") {
+	    res.writeHead(200, {'Content-Type': 'application/json'});
+	    var answer = "(UNDEFINED)"
+	    var v3=jBody.params[0]
+	    var v4 = abiDecoder.decodeParameter('string',v3)
+	    
+	    switch(v4) {
+              case 'EN_US':
+		answer = "Hello World"
+		break;
+	      case 'EN_GB':
+		answer = "Top of the Morning"
+		break;
+	      case 'FR':
+		answer = "Bonjour le monde"
+		break;
+	      default:
+		answer = "(UNDEFINED)"  // FIXME This should return an error.
+		break;
+	    }
+	    console.log ("      (HTTP) Returning off-chain response:", v4, "->", answer)
+	    var jResp = {
+              "jsonrpc": "2.0",
+	      "id": jBody.id,
+	      "result": abiDecoder.encodeParameter('string',answer)
+	    }
+	    res.end(JSON.stringify(jResp))
+	    server.emit('success', body);
+          } else if (jBody.method === "add2") {
+	  
+	    let v1 = jBody.params[0]
 
-	  var answer = "(UNDEFINED)"
-
-	  switch(jBody.params[0]) {
-            case 'EN_US':
-	      answer = "Hello World"
-	      break;
-	    case 'EN_GB':
-	      answer = "Top of the Morning"
-	      break;
-	    case 'FR':
-	      answer = "Bonjour le monde"
-	      break;
-	    default:
-	      answer = "(UNDEFINED)"  // FIXME This should return an error.
-	      break;
+	    const args = abiDecoder.decodeParameters(['uint256','uint256'], v1)
+	       
+	    let sum = Number(args['0']) + Number(args['1'])
+	  
+	    res.writeHead(200, {'Content-Type': 'application/json'});
+	    console.log ("      (HTTP) Returning off-chain response:", args, "->", sum)
+	    var jResp2 = {
+              "jsonrpc": "2.0",
+	      "id": jBody.id,
+	      "result": abiDecoder.encodeParameter('uint256', sum)
+	    }
+	    res.end(JSON.stringify(jResp2))
+	    server.emit('success', body);
+	  } else {
+	    res.writeHead(400, {'Content-Type': 'text/plain'});
+	    res.end('Unknown method');
 	  }
 
-	  var jResp = {
-            "jsonrpc": "2.0",
-	    "id": jBody.id,
-	    "result": answer
-	  }
-	  console.log ("      (HTTP) Returning off-chain response:", jBody.params[0], "->", answer)
-
-	  res.end(JSON.stringify(jResp))
-	  server.emit('success', body);
 	});
 
       } else {
@@ -94,6 +117,9 @@ describe("HelloTest", function() {
     helper = await Factory__Helper.deploy(urlStr, L1, gasOverride)
     console.log("    Helper contract deployed as", helper.address, "on", (L1 ? "L1" : "L2"))
 
+    await(helper.RegisterMethod(ethers.utils.toUtf8Bytes("hello")));
+    await(helper.RegisterMethod(ethers.utils.toUtf8Bytes("add2")));
+
     Factory__Hello = new ContractFactory(
       (L1 ? HelloTuringJson_1.abi : HelloTuringJson_2.abi),
       (L1 ? HelloTuringJson_1.bytecode : HelloTuringJson_2.bytecode),
@@ -101,11 +127,6 @@ describe("HelloTest", function() {
 
     hello = await Factory__Hello.deploy(helper.address, gasOverride)
     console.log("    Test contract deployed as", hello.address)
-  })
-
-  it("should get a response from the Helper contract", async() => {
-    let t = helper.TuringCall([70,82]) // "FR" as a byte array
-    expect (await t).to.equal((L1 ? "Mock-L1" : "Bonjour le monde"))
   })
 
   it("should return the EN_US greeting via eth_call", async() => {
@@ -131,5 +152,10 @@ describe("HelloTest", function() {
   it("should now return a different personal greeting", async() => {
     let msg2 = hello.PersonalGreeting(gasOverride)
     expect (await msg2).to.equal((L1 ? "Mock-L1" : "Top of the Morning"))
+  })
+  
+  it("should support numerical datatypes", async() => {
+    let sum = hello.AddNumbers(20, 22)
+    expect (await sum).to.equal(42)
   })
 })

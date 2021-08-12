@@ -344,9 +344,9 @@ func (evm *EVM) Interpreter() Interpreter {
 // be called a second time with the original parameters. 2nd failure is not intercepted.
 
 func omgxTuringCall(reqString []byte, oldValue hexutil.Bytes) hexutil.Bytes {
-	var responseString string
-	responseString = "(UNSET)"  // For debugging; should never see this
-	var reqFields [3]string
+	var responseStringEnc string
+	var responseString []byte
+	var reqFields [4]string
 
 	prefix := make([]byte, 4)
 	copy(prefix,oldValue[0:4])
@@ -355,30 +355,25 @@ func omgxTuringCall(reqString []byte, oldValue hexutil.Bytes) hexutil.Bytes {
 	// "require" in the contract without generating another OMGX_TURING marker.
 	// FIXME - would be cleaner to return nil here and put better error handling
 	// into l2geth to avoid that second call into the contract.
-	bad := append(prefix, hexutil.MustDecode(fmt.Sprintf("0x%064x", 0))...)
 
 	// Some other consistency checks. Probably OK to remove these at some point.
-	rest := oldValue[4:]
+	rest := oldValue[4:]	
 	rlen := len(rest)
+	method_idx := rest[0:32] // This value is preserved and passed back on the 2nd call
+	bad := append(prefix, method_idx...)
+	bad = append(bad, hexutil.MustDecode(fmt.Sprintf("0x%064x", 0))...)
+	
 	log.Debug ("MMDBG decode oldValue", "prefix", prefix, "rest", rest, "rlen", rlen)
 
-	if (rlen < 96) {
-		log.Warn("MMDBG Unexpected oldValue in omgxTuringTester", "len < 96", rlen)
+	if (rlen < 128) {
+		log.Warn("MMDBG Unexpected oldValue in omgxTuringCall", "len < 128", rlen)
 		return bad
 	}
 
-	rType_big := new(big.Int).SetBytes(rest[0:32]) // 1 for Request, 2 for Response
+	rType_big := new(big.Int).SetBytes(rest[32:64]) // 1 for Request, 2 for Response
 	rType := int(rType_big.Uint64())
 	if (rType != 1) {
 		log.Warn("MMDBG unexpected oldValue in omgxTuringCall", "rType", rType)
-		return bad
-	}
-
-	offset_big := new(big.Int).SetBytes(rest[32:64])
-	offset := int(offset_big.Uint64())
-
-	if (offset + 64) != rlen {
-		log.Warn("MMDBG Unexpected oldValue in omgxTuringCall", "offset", offset, "rlen", rlen)
 		return bad
 	}
 
@@ -395,28 +390,33 @@ func omgxTuringCall(reqString []byte, oldValue hexutil.Bytes) hexutil.Bytes {
 		log.Warn("MMDBG Unexpected request version", "ver", hexutil.Bytes(reqVer))
 		return bad
 	}
-
-	localeCode := reqFields[2]
-	client,err := rpc.Dial(reqFields[1])
+	reqUrl := reqFields[1]
+	reqMethod := reqFields[2]
+	reqValue := reqFields[3]
 
 	var ret hexutil.Bytes
 
 	turingCache.lock.Lock()
-//	if bytes.Equal(localeCode, turingCache.key) && time.Now().Before(turingCache.expires) {
-	if localeCode == turingCache.key && time.Now().Before(turingCache.expires) {
+	if reqValue == turingCache.key && time.Now().Before(turingCache.expires) {
 		ret = turingCache.value
 	}
 	turingCache.lock.Unlock()
 
 	if ret != nil {
-		log.Debug("MMDBG turingCache hit for", "key", localeCode)
+		log.Debug("MMDBG turingCache hit for", "key", reqValue)
 		return ret
 	}
 
+	client,err := rpc.Dial(reqUrl)
 	if client != nil {
 		log.Debug("MMDBG Calling off-chain client at", "url", reqFields[1])
-		if err := client.Call(&responseString, "hello", localeCode); err != nil {
+		if err := client.Call(&responseStringEnc, reqMethod, hexutil.Bytes(reqValue)); err != nil {
 			log.Warn("MMDBG client error", "err", err)
+			return bad
+		}
+		responseString, err = hexutil.Decode(responseStringEnc)
+		if err != nil {
+			log.Warn("MMDBG error decoding responseString", "err", err)
 			return bad
 		}
 	} else {
@@ -424,7 +424,7 @@ func omgxTuringCall(reqString []byte, oldValue hexutil.Bytes) hexutil.Bytes {
 		return bad
 	}
 
-	log.Debug("MMDBG Generating Turing response", "Code", localeCode, "Response", responseString)
+	log.Debug("MMDBG Generating Turing response", "Request", reqValue, "Response", responseString)
 
 	rsLen := len(responseString)
 
@@ -437,20 +437,20 @@ func omgxTuringCall(reqString []byte, oldValue hexutil.Bytes) hexutil.Bytes {
 		pad := bytes.Repeat([]byte{0}, 32 - tmpLen)
 		new_val = append(new_val, pad...)
 	}
-
-	ret = append(prefix, hexutil.MustDecode(fmt.Sprintf("0x%064x", 2))...)
-	ret = append(ret, hexutil.MustDecode(fmt.Sprintf("0x%064x", 64))...)
+	ret = append(prefix, method_idx...)
+	ret = append(ret, hexutil.MustDecode(fmt.Sprintf("0x%064x", 2))...)
+	ret = append(ret, hexutil.MustDecode(fmt.Sprintf("0x%064x", 96))...)
 	ret = append(ret, new_val...)
 
 	log.Debug("MMDBG Modified parameters", "newValue", ret)
 
 	turingCache.lock.Lock()
-	turingCache.key = localeCode
+	turingCache.key = reqValue
 	turingCache.expires = time.Now().Add(2*time.Second)
 	turingCache.value = ret
 	turingCache.lock.Unlock()
 
-	log.Debug("MMDBG turingCache entry stored for", "key", localeCode)
+	log.Debug("MMDBG turingCache entry stored for", "key", reqValue)
 	return ret
 }
 
