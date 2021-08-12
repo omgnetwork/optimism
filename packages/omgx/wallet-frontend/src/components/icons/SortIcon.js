@@ -1,6 +1,10 @@
 import * as React from "react"
+import { useTheme } from "@material-ui/core/styles";
 
-function SearchIcon({ color }) {
+function SortIcon() {
+    const theme = useTheme();
+    const isLight = theme.palette.mode === 'light';
+    const color = theme.palette.common[isLight ? 'black' : 'white'];
     return (
         <svg
             width="7"
@@ -11,16 +15,16 @@ function SearchIcon({ color }) {
             <path
                 d="M3.5 0.5L7 4.5H0L3.5 0.5Z"
                 fill={color}
-                fill-opacity="0.7"
+                fillOpacity="0.7"
             />
             <path
                 d="M3.5 11.5L7 7.5H0L3.5 11.5Z"
                 fill={color}
-                fill-opacity="0.7"
+                fillOpacity="0.7"
             />
         </svg>
     )
 
 }
 
-export default SearchIcon
+export default SortIcon
