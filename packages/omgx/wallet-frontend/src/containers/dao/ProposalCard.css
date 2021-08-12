@@ -38,6 +38,22 @@
 	border-radius: 10px;
 }
 
+.proposal-against-votes {
+	border: solid;
+	color: red;
+	padding-right: 0.5vh;
+	padding-left: 0.5vh;
+	border-radius: 10px;
+}
+
+.proposal-abstain-votes {
+	border: solid;
+	color: gray;
+	padding-right: 0.5vh;
+	padding-left: 0.5vh;
+	border-radius: 10px;
+}
+
 .proposal-text-details {
 	font-style: normal;
 	font-weight: 600;

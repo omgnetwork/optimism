@@ -6,7 +6,13 @@ import './ProposalCard.css'
 class ProposalCard extends React.Component {
 	constructor(props) {
 		super(props)
-		this.state = { proposal: null, state: '', actions: null, show: false }
+		this.state = {
+			proposal: null,
+			state: '',
+			actions: null,
+			show: false,
+			signerAddress: '',
+		}
 	}
 
 	getProposal = async (i) => {
@@ -24,9 +30,11 @@ class ProposalCard extends React.Component {
 		const proposal = await GovernorBravo.proposals(i)
 		const index = await GovernorBravo.state(i)
 		const actions = await GovernorBravo.getActions(i)
+		const signerAddress = await this.props.signer.getAddress()
 		this.setState({ state: proposalStates[index] })
 		this.setState({ proposal })
 		this.setState({ actions })
+		this.setState({ signerAddress })
 	}
 
 	async componentDidMount() {
@@ -67,6 +75,21 @@ class ProposalCard extends React.Component {
 		await GovernorBravo.castVote(this.props.id, vote)
 	}
 
+	async queue() {
+		const GovernorBravo = this.props.GovernorBravo
+		await GovernorBravo.queue(this.props.id)
+	}
+
+	async execute() {
+		const GovernorBravo = this.props.GovernorBravo
+		await GovernorBravo.execute(this.props.id)
+	}
+
+	async cancel() {
+		const GovernorBravo = this.props.GovernorBravo
+		await GovernorBravo.cancel(this.props.id)
+	}
+
 	getTargets(targets) {
 		console.log('HERE')
 		const { comp, delegate, delegator, timelock, GovernorBravo } = this.props
@@ -99,6 +122,50 @@ class ProposalCard extends React.Component {
 		return <a href={link}>Voting Ends On</a>
 	}
 
+	proposalActions(state) {
+		if (state == 'Active') {
+			return (
+				<div>
+					<h2>Cast Vote</h2>
+					<button className="forVotes" onClick={() => this.vote(1)}>
+						For
+					</button>
+					<button className="againstVotes" onClick={() => this.vote(0)}>
+						Against
+					</button>
+					<button className="abstain" onClick={() => this.vote(2)}>
+						Abstain
+					</button>
+				</div>
+			)
+		} else if (state == 'Succeeded') {
+			return (
+				<div>
+					<h2>Queue</h2>
+					<button onClick={() => this.queue()}>Queue</button>
+				</div>
+			)
+		} else if (state == 'Queued') {
+			return (
+				<div>
+					<h2>Queue</h2>
+					<button onClick={() => this.execute()}>Execute</button>
+				</div>
+			)
+		}
+	}
+
+	cancelProposal(proposer) {
+		if (this.state.signerAddress == proposer) {
+			return (
+				<div>
+					<h2>Cancel</h2>
+					<button onClick={() => this.cancel()}>Cancel</button>
+				</div>
+			)
+		}
+	}
+
 	render() {
 		if (this.state.actions !== null) {
 			const {
@@ -119,11 +186,22 @@ class ProposalCard extends React.Component {
 				<>
 					<div className="proposal-card">
 						<div className="proposal-content">
-							<div className="proposal-title">Threshold to 65,000 BOBA</div>
+							<div className="proposal-title">
+								{signatures[0]}
+								{parseInt(calldatas[0], 16) / 1000000000000000000}
+							</div>
 							<div className="proposal-details">
 								<div className="proposal-voting-state">
 									For Votes:
 									{ethers.utils.formatEther(forVotes).toLocaleString()}
+								</div>
+								<div className="proposal-against-votes">
+									Against Votes:{' '}
+									{ethers.utils.formatEther(againstVotes).toLocaleString()}
+								</div>
+								<div className="proposal-abstain-votes">
+									Abstain Votes:{' '}
+									{ethers.utils.formatEther(abstainVotes).toLocaleString()}
 								</div>
 								<div className="proposal-text-details">
 									<span>{id.toString()}</span>
@@ -138,32 +216,33 @@ class ProposalCard extends React.Component {
 					</div>
 
 					{this.state.show ? (
-						<>
-							<div className="modal">
-								<div className="castVotes">
-									<h2>Actions</h2>
-									<div className="actions">
-										{signatures} <br /> {calldatas} <br />
-										{this.getTargets(targets)} <br />
-									</div>
-									<h2>Cast Vote</h2>
-									<button className="forVotes" onClick={() => this.vote(1)}>
-										For
-									</button>
-									<button className="againstVotes" onClick={() => this.vote(0)}>
-										Against
-									</button>
-									<button className="abstain" onClick={() => this.vote(2)}>
-										Abstain
-									</button>
+						<div>
+							{
+								<>
+									<div className="modal">
+										<div className="castVotes">
+											<h2>Actions</h2>
+											<div className="actions">
+												{signatures} <br /> {calldatas} <br />
+												{this.getTargets(targets)} <br />
+											</div>
 
-									<button className="close" onClick={() => this.handleShow()}>
-										x
-									</button>
-								</div>
-							</div>
-							<div className="tint" />
-						</>
+											{this.proposalActions(state)}
+
+											<div>{this.cancelProposal(proposer)}</div>
+
+											<button
+												className="close"
+												onClick={() => this.handleShow()}
+											>
+												x
+											</button>
+										</div>
+									</div>
+									<div className="tint" />
+								</>
+							}
+						</div>
 					) : null}
 				</>
 			)

@@ -10,6 +10,7 @@ class ProposalList extends React.Component {
 			proposals: null,
 			comp: null,
 			delegate: null,
+			signer: null,
 			delegator: null,
 			timelock: null,
 			GovernorBravo: null,
@@ -17,9 +18,10 @@ class ProposalList extends React.Component {
 	}
 
 	getGovBravo = async () => {
-		const { comp, delegate, delegator, timelock, GovernorBravo } =
+		const { signer, comp, delegate, delegator, timelock, GovernorBravo } =
 			await getBlockchain()
 		this.setState({
+			signer,
 			comp,
 			delegate,
 			delegator,
@@ -44,11 +46,13 @@ class ProposalList extends React.Component {
 
 	renderProposals = async () => {
 		var proposals = []
-		const { comp, delegate, delegator, timelock, GovernorBravo } = this.state
+		const { comp, delegate, delegator, signer, timelock, GovernorBravo } =
+			this.state
 		for (var i = 1; i <= this.state.proposalCount; i++) {
 			proposals.push(
 				<ProposalCard
 					id={i}
+					signer={signer}
 					comp={comp}
 					delegate={delegate}
 					delegator={delegator}
