@@ -1,23 +1,21 @@
-import React, { useState } from "react";
-import { ethers } from "ethers";
+import React, { useState } from 'react'
+import { ethers } from 'ethers'
 
 function Transfer(props) {
-  const { address, comp, setVotes, votes } = props;
-  const [show, setShow] = useState(false);
+  const { address, comp, setVotes, votes } = props
+  const [show, setShow] = useState(false)
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const handleClose = () => setShow(false)
+  const handleShow = () => setShow(true)
 
   const updateVotes = async (e) => {
-    e.preventDefault();
-    const recipient = e.target.elements[0].value;
-    const tx = await comp.delegate(recipient);
-    await tx.wait();
-    const votes = ethers.utils.formatEther(
-      await comp.getCurrentVotes(address)
-    );
-    setVotes(votes);
-  };
+    e.preventDefault()
+    const recipient = e.target.elements[0].value
+    const tx = await comp.delegate(recipient)
+    await tx.wait()
+    const votes = ethers.utils.formatEther(await comp.getCurrentVotes(address))
+    setVotes(votes)
+  }
   return (
     <>
       <div>
@@ -30,10 +28,7 @@ function Transfer(props) {
       {show ? (
         <>
           <div className="modal">
-            <form
-              className="delegateVotes"
-              onSubmit={(e) => updateVotes(e)}
-            >
+            <form className="delegateVotes" onSubmit={(e) => updateVotes(e)}>
               <h2>Delegate Votes</h2>
               <input
                 type="text"
@@ -52,7 +47,7 @@ function Transfer(props) {
         </>
       ) : null}
     </>
-  );
+  )
 }
 
-export default Transfer;
+export default Transfer
