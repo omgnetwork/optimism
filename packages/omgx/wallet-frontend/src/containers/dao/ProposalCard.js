@@ -93,28 +93,29 @@ class ProposalCard extends React.Component {
 	getTargets(targets) {
 		console.log('HERE')
 		const { comp, delegate, delegator, timelock, GovernorBravo } = this.props
+		console.log(targets)
+		var targetHTML = []
 		for (var i = 0; i < targets.length; i++) {
 			console.log(targets[i])
 			console.log(comp.address)
 			switch (targets[i]) {
 				case comp.address:
 					var link = `https://blockexplorer.rinkeby.omgx.network/address/${comp.address}`
-					return <a href={link}>Targets: BOBA</a>
+					targetHTML.push(<a href={link}>Targets: BOBA</a>)
 				case delegate.address:
 					var link = `https://blockexplorer.rinkeby.omgx.network/address/${delegate.address}`
-					return <a href={link}>Targets: GovernorBravoDelegate</a>
+					targetHTML.push(<a href={link}>Targets: GovernorBravoDelegate</a>)
 
 				case delegator.address:
 					var link = `https://blockexplorer.rinkeby.omgx.network/address/${delegator.address}`
-					return <a href={link}>Targets: GovernorBravoDelegator</a>
+					targetHTML.push(<a href={link}>Targets: GovernorBravoDelegator</a>)
 
 				case timelock.address:
 					var link = `https://blockexplorer.rinkeby.omgx.network/address/${timelock.address}`
-					return <a href={link}>Targets: Timelock</a>
-
-				case GovernorBravo.address:
+					targetHTML.push(<a href={link}>Targets: Timelock</a>)
 			}
 		}
+		return targetHTML
 	}
 
 	getDate(endBlock) {
