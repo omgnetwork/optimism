@@ -39,8 +39,6 @@ import { Box, Container, Grid, Link } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
-import Modal from 'components/modal/Modal';
-import CreateTransactions from 'components/modal/createTransactions/CreateTransactions';
 
 const Root = styled('div')(({ theme }) => ({
   paddingTop: theme.spacing(10),
@@ -195,9 +193,6 @@ function WalletPicker ({ onEnable, enabled }) {
                   Add OMGX L2 Provider
                 </Button>
                 <Button onClick={() => setOpen(!open)}>Open modal</Button>
-                <Modal open={open} title="Create transaction" onClose={() => setOpen(false)} transparent>
-                  <CreateTransactions setOpen={setOpen}/>
-                </Modal>
               </Grid>
           </Grid>
         </Container>

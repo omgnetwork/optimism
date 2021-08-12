@@ -87,16 +87,18 @@ function _Modal ({
         <Container maxWidth="lg" sx={{border: 'none'}}>
           <Grid container>
             <Grid item xs={12} md={3}>
-              <Typography variant="h1" component="h3">{title}</Typography>
+              <Box sx={{mr: 8}}>
+                <Typography variant="h1" component="h3">{title}</Typography>
+              </Box>
             </Grid>
 
-            <Grid item xs={12} md={7}>
+            <Grid item xs={12} md={8}>
               <Style transparent={transparent}>
                 {children}
               </Style>
             </Grid>
 
-            <Grid item xs={12} md={2}>
+            <Grid item xs={12} md={1}>
               <IconButton onClick={onClose}>
                 <CloseIcon />
               </IconButton>

@@ -29,13 +29,17 @@ import networkService from 'services/networkService';
 
 import * as styles from './TransferModal.module.scss';
 import Input from 'components/input/Input';
+import { Box, Grid, Typography } from '@material-ui/core';
+import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon';
+import * as S from './TransferModal.style';
+import BoxConfirmation from './boxConfirmation/BoxConfirmation';
 
 function TransferModal ({ open, token }) {
-
   const dispatch = useDispatch()
 
   const [ value, setValue ] = useState('')
   const [ recipient, setRecipient ] = useState('')
+  const [ showFeedback, setShowFeedback] = useState(false);
 
   const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]));
 
@@ -73,57 +77,92 @@ function TransferModal ({ open, token }) {
 
     return (
       <>
-        <h2>Transfer</h2>
-        
-        <div className={styles.address}>
-          {`From address: ${networkService.account}`}
-        </div>
+        <S.StyleCreateTransactions>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px"}}>
+                <Typography variant="h2" component="h2">From ETH Mainnet</Typography>
+                <NetworkSwitcherIcon active />
+              </Box>
+              <Typography variant="body1" component="span" sx={{opacity: 0.5}}>Select Token</Typography>
+              <div className={styles.address}>
+                {`From address: ${networkService.account}`}
+              </div>
+            </Grid>
 
-        <Input
-          label='To Address'
-          placeholder='Hash or ENS name'
-          paste
-          value={recipient}
-          onChange={i => setRecipient(i.target.value)}
-        />
+            <Grid item xs={6}>
+              <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px"}}>
+                <Typography variant="h2" component="h2">To OMGX Mainnet</Typography>
+                <NetworkSwitcherIcon active />
+              </Box>
+              <Typography variant="body1" component="span" sx={{opacity: 0.5}}>Enter Adress</Typography>
+              <Input
+                label='To Address'
+                placeholder='Hash or ENS name'
+                paste
+                value={recipient}
+                onChange={i => setRecipient(i.target.value)}
+              />
+            </Grid>
+          </Grid>
+{/*
+          <Input
+            placeholder={`Amount to transfer`}
+            value={value}
+            type="number"
+            onChange={(i) => {setValue(i.target.value)}}
+            unit={token.symbol}
+            maxValue={logAmount(token.balance, token.decimals)}
+          /> */}
+          <Grid container spacing={2}>
+            <S.Balance>
+              <Grid item xs={6}>
+                <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
+                  <Typography>0,3142</Typography>
+                  <Button variant="small">Use all</Button>
+                </Box>
+              </Grid>
 
-        <Input
-          placeholder={`Amount to transfer`}
-          value={value}
-          type="number"
-          onChange={(i) => {setValue(i.target.value)}}
-          unit={token.symbol}
-          maxValue={logAmount(token.balance, token.decimals)}
-        />
+              <Grid item xs={6}>
+                <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
+                  <Typography>Current Balance</Typography>
+                  <Typography>+ 0,3142</Typography>
+                </Box>
+              </Grid>
+            </S.Balance>
+          </Grid>
 
-        <div className={styles.buttons}>
-          <Button
-            onClick={handleClose}
-            type='secondary'
-            className={styles.button}
-          >
-            CANCEL
-          </Button>
+          <div className={styles.buttons}>
+            <Button
+              onClick={handleClose}
+              type='secondary'
+              className={styles.button}
+            >
+              CANCEL
+            </Button>
 
-          <Button
-            className={styles.button}
-            onClick={()=>{submit({useLedgerSign: false})}}
-            type='primary'
-            loading={loading}
-            tooltip='Your transfer is still pending. Please wait for confirmation.'
-            disabled={disabledTransfer}
-            triggerTime={new Date()}
-          >
-            TRANSFER
-          </Button>
-        </div>
+            <Button
+              className={styles.button}
+              onClick={()=>{submit({useLedgerSign: false})}}
+              type='primary'
+              loading={loading}
+              tooltip='Your transfer is still pending. Please wait for confirmation.'
+              disabled={disabledTransfer}
+              triggerTime={new Date()}
+            >
+              TRANSFER
+            </Button>
+          </div>
+          <Button onClick={() => setShowFeedback(true)}>Bridge</Button>
+        </S.StyleCreateTransactions>
       </>
     );
   }
 
   return (
-    <Modal open={open}>
+    <Modal title="Create bridging transaction" open={open} transparent onClose={handleClose}>
       {renderTransferScreen()}
+      <BoxConfirmation showFeedback={showFeedback} setShowFeedback={setShowFeedback} handleClose={handleClose} />
     </Modal>
   );
 }

@@ -1,12 +1,9 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Fade, Typography } from '@material-ui/core';
 import Button from 'components/button/Button';
-import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon';
-import {ReactComponent as AlertMessage} from '../../../images/icons/alert-message.svg';
-import {ReactComponent as SuccessMessage} from '../../../images/icons/success-message.svg';
-import React from 'react';
-import { useState } from 'react';
-import { useEffect } from 'react';
-import * as S from './CreateTransactions.style';
+import {ReactComponent as AlertMessage} from '../../../../images/icons/alert-message.svg';
+import {ReactComponent as SuccessMessage} from '../../../../images/icons/success-message.svg';
+import React, { useState, useEffect } from 'react';
+import * as S from './BoxConfirmation.styles';
 
 
 const Stage0 = ({ setStep, setShowFeedback }) => {
@@ -31,7 +28,7 @@ const Stage1 = ({ setStep, setShowFeedback }) => {
     <>
       <Box sx={{display: 'flex', alignItems: 'center', gap: 3}}>
         <AlertMessage width={60} />
-        <Box>
+        <Box sx={{flex: '1'}}>
           <Typography variant="body1" component="p" sx={{fontSize: '16px', fontWeight: "700"}}>
             Send funds to the bridge
           </Typography>
@@ -54,7 +51,7 @@ const Stage1 = ({ setStep, setShowFeedback }) => {
   )
 }
 
-const Stage2 = ({setOpen}) => {
+const Stage2 = ({ handleClose }) => {
   return (
     <>
       <Box sx={{display: 'flex', alignItems: 'center' }}>
@@ -77,15 +74,14 @@ const Stage2 = ({setOpen}) => {
         </Box>
       </Box>
       <Box sx={{whiteSpace: 'nowrap'}}>
-        <Button variant="contained" color="primary" size="large" onClick={() => setOpen(false)}>Finish and Hide</Button>
+        <Button variant="contained" color="primary" size="large" onClick={() => handleClose()}>Finish and Hide</Button>
       </Box>
     </>
   )
 }
 
-function CreateTransactions ({ setOpen }) {
+function BoxConfirmation ({ showFeedback, setShowFeedback, handleClose }) {
   const [ step, setStep ] = useState(0);
-  const [ showFeedback, setShowFeedback] = useState(false);
 
   useEffect(() => {
     setStep(0);
@@ -93,39 +89,21 @@ function CreateTransactions ({ setOpen }) {
 
   return (
     <>
-      <S.StyleCreateTransactions>
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-              <Typography variant="h3" component="h3">From ETH Mainnet</Typography>
-              <NetworkSwitcherIcon active />
-            </Box>
-            <Typography variant="body1" component="span" sx={{opacity: 0.5}}>Select Token</Typography>
-          </Grid>
-          <Grid item xs={6}>
-            <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-              <Typography variant="h3" component="h3">To OMGX Mainnet</Typography>
-              <NetworkSwitcherIcon active />
-            </Box>
-            <Typography variant="body1" component="span" sx={{opacity: 0.5}}>Enter Adress</Typography>
-          </Grid>
-        </Grid>
-        <Button onClick={() => setShowFeedback(true)}>Bridge</Button>
-      </S.StyleCreateTransactions>
-
       {showFeedback ? (
-        <S.StyleStages>
-          {step === 0 ? (
-            <Stage0 setShowFeedback={setShowFeedback} setStep={setStep}/>
-          ) : step === 1 ? (
-            <Stage1 setShowFeedback={setShowFeedback} setStep={setStep} />
-          ) : (
-            <Stage2 setOpen={setOpen} setStep={setStep} />
-          )}
-        </S.StyleStages>
+        <Fade in={showFeedback}>
+          <S.StyleStages>
+            {step === 0 ? (
+              <Stage0 setShowFeedback={setShowFeedback} setStep={setStep}/>
+            ) : step === 1 ? (
+              <Stage1 setShowFeedback={setShowFeedback} setStep={setStep} />
+            ) : (
+              <Stage2 setStep={setStep} handleClose={handleClose} />
+            )}
+          </S.StyleStages>
+        </Fade>
       ) : null }
     </>
   );
 }
 
-export default CreateTransactions;
+export default BoxConfirmation;
