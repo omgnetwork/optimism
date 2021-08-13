@@ -169,6 +169,9 @@ function verify_images_in_ecr {
           cp -fRv ../../secret2env .
           if [[ ${image} == "omgx-gas-price-oracle" ]]; then
               docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/omgx_gas-price-oracle" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+	  elif
+	     [[ ${image} == "message-relayer-fast" ]]; then 
+	     docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/omgx_message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
           else
           docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
           fi
