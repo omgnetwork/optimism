@@ -262,17 +262,33 @@ func (s *SyncService) Start() error {
 	if s.verifier {
 		go s.VerifierLoop()
 	} else {
-context, err := s.client.GetLatestEthContext()
-log.Debug("MMDBG init context", "context", context, "err", err)
+		context, err := s.client.GetLatestEthContext()
+		log.Debug("Startup - GetLatestEthContext", "context", context, "err", err)
+		inf, err := s.client.GetLatestEnqueueInfo()
+		log.Debug("Startup - GetLatestEnqueueInfo", "info", inf, "err", err)
+
 		// The sequencer must sync the transactions to the tip and the
 		// pending queue transactions on start before setting sync status
 		// to false and opening up the RPC to accept transactions.
 		if err := s.syncTransactionsToTip(); err != nil {
 			return fmt.Errorf("Sequencer cannot sync transactions to tip: %w", err)
 		}
-		if err := s.syncQueueToTip(); err != nil {
+
+		// FIXME - adding a retry loop as a potential workaround for startup failures
+		// due to a nil queueIndex.
+		log.Debug("Startup - synced transactions, about to sync queue")
+		err = s.syncQueueToTip();
+
+		for i := 0; err != nil && i < 10; i++ {
+			log.Warn("s.syncQueueToTip failed, will retry", "err", err)
+			time.Sleep(10 * time.Second)
+			err = s.syncQueueToTip();
+		}
+		if err != nil {
 			return fmt.Errorf("Sequencer cannot sync queue to tip: %w", err)
 		}
+
+		log.Debug("Startup - synced queue, about to start SequencerLoop")
 		s.setSyncStatus(false)
 		go s.SequencerLoop()
 	}
