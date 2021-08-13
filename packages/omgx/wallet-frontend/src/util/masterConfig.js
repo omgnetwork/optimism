@@ -25,14 +25,14 @@ const NETWORKS = {
       chainId: 31337,
       rpcUrl: `http://${window.location.hostname}:9545`,
       blockExplorer: null,//does not exist on local
-      transaction: null, //TODO: ❓ @jan please provide the valid url here for local
+      transaction: null,  //does not exist on local
     },
     L2: {
       name: "Local L2",
       chainId: 28,
       rpcUrl: `http://${window.location.hostname}:8545`,
-      blockExplorer: null,//does not exist on local
-      transaction: null, //TODO: ❓ @jan please provide the valid url here for local
+      blockExplorer: null, //does not exist on local
+      transaction: null,   //does not exist on local
     },
   },
   rinkeby: {
@@ -54,14 +54,13 @@ const NETWORKS = {
       transaction: `https://blockexplorer.rinkeby.omgx.network/tx/`,
     }
   },
-/*
   mainnet: {
     addressUrl:       `https://mainnet.omgx.network:8080/addresses.json`,
     addressOMGXUrl:   `https://mainnet.omgx.network:8078/addresses.json`,
     OMGX_WATCHER_URL: `https://api-watcher.mainnet.omgx.network/`,
     L1: {
       name: "Mainnet L1",
-      chainId: 4,
+      chainId: 1,
       rpcUrl: `https://mainnet.infura.io/v3/${process.env.REACT_APP_INFURA_ID}`,
       blockExplorer: `https://api-mainnet.etherscan.io/api?module=account&action=txlist&startblock=0&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_ETHERSCAN_API}`,
     },
@@ -72,7 +71,6 @@ const NETWORKS = {
       blockExplorer: `https://blockexplorer.mainnet.omgx.network`,
     }
   }
-*/
 }
 
 const BaseServices = {
