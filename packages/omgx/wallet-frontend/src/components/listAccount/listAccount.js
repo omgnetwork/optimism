@@ -11,11 +11,11 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import * as styles from './listAccount.module.scss';
 
 class ListAccount extends React.Component {
-  
+
   constructor(props) {
-    
+
     super(props);
-    
+
     const { token, chain, networkLayer, disabled } = this.props;
 
     this.state = {
@@ -27,7 +27,7 @@ class ListAccount extends React.Component {
       disabled
     }
   }
-  
+
   componentDidUpdate(prevState) {
 
     const { token, chain, networkLayer, disabled } = this.props;
@@ -56,27 +56,29 @@ class ListAccount extends React.Component {
 
   render() {
 
-    const { 
-      token, 
+    const {
+      token,
       chain,
-      dropDownBox, 
+      dropDownBox,
       dropDownBoxInit,
       networkLayer,
       disabled
     } = this.state;
 
+    this.props.dispatch(openModal('transferModal', token, true))
+
     const enabled = (networkLayer === chain) ? true : false
 
     return (
       <div className={styles.ListAccount}>
-        
-        <div 
+
+        <div
           className={styles.topContainer}
-          disabled={true} 
+          disabled={true}
           onClick={()=>{
-              this.setState({ 
-                dropDownBox: !dropDownBox, 
-                dropDownBoxInit: false 
+              this.setState({
+                dropDownBox: !dropDownBox,
+                dropDownBoxInit: false
               })
           }}
         >
@@ -87,14 +89,14 @@ class ListAccount extends React.Component {
             <div className={styles.BasicLightText}>{`${logAmount(token.balance, 18, 2)}`}</div>
           </div>
           <div className={styles.Table3}>
-            {chain === 'L1' && 
+            {chain === 'L1' &&
               <div className={enabled ? styles.LinkText : styles.LinkTextOff}>Deposit</div>
             }
-            {chain === 'L2' && 
+            {chain === 'L2' &&
               <div className={enabled ? styles.LinkText : styles.LinkTextOff}>Transact</div>
             }
-            <ExpandMoreIcon 
-              className={enabled ? styles.LinkButton : styles.LinkButtonOff} 
+            <ExpandMoreIcon
+              className={enabled ? styles.LinkButton : styles.LinkButtonOff}
             />
           </div>
         </div>
@@ -103,24 +105,24 @@ class ListAccount extends React.Component {
         /**************  Drop Down Box ****************/
         /**********************************************/
         }
-        <div 
-          className={dropDownBox ? 
+        <div
+          className={dropDownBox ?
             styles.dropDownContainer: dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
         >
-          
-          {!enabled && chain === 'L1' && 
+
+          {!enabled && chain === 'L1' &&
             <div className={styles.boxContainer}>
               <div className={styles.underRed}>MetaMask is set to L2. To transact on L1, please change the chain in MetaMask to L1.</div>
             </div>
           }
 
-          {!enabled && chain === 'L2' && 
+          {!enabled && chain === 'L2' &&
             <div className={styles.boxContainer}>
               <div className={styles.underRed}>MetaMask is set to L1. To transact on L2, please change the chain in MetaMask to L2.</div>
             </div>
           }
 
-          {enabled && chain === 'L1' && 
+          {enabled && chain === 'L1' &&
           <>
             <div className={styles.boxContainer}>
               <Button
@@ -145,7 +147,7 @@ class ListAccount extends React.Component {
           </>
           }
 
-          {enabled && chain === 'L2' && 
+          {enabled && chain === 'L2' &&
           <>
             <div className={styles.boxContainer}>
               <Button
@@ -187,7 +189,7 @@ class ListAccount extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({ 
+const mapStateToProps = state => ({
   //login: state.login,
   //sell: state.sell,
   //sellTask: state.sellTask,

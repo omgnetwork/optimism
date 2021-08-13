@@ -89,14 +89,14 @@ function App () {
         fontWeight: 300,
       },
       h4: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 300,
       },
       body1: {
         fontSize: 18,
       },
       body2: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 400,
       },
     },
@@ -172,6 +172,9 @@ function App () {
             },
           },
         ],
+      },
+      MuiInputBase: {
+        backgroundColor: "#f00",
       }
     }
   });

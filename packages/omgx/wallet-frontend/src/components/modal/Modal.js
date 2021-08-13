@@ -86,13 +86,13 @@ function _Modal ({
       <Fade in={open}>
         <Container maxWidth="lg" sx={{border: 'none'}}>
           <Grid container>
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={2}>
               <Box sx={{mr: 8}}>
-                <Typography variant="h1" component="h3">{title}</Typography>
+                <Typography variant="h2" component="h3" sx={{ fontWeight: "700"}}>{title}</Typography>
               </Box>
             </Grid>
 
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12} md={9}>
               <Style transparent={transparent}>
                 {children}
               </Style>

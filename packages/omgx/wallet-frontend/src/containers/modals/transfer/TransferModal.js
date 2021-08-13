@@ -29,10 +29,17 @@ import networkService from 'services/networkService';
 
 import * as styles from './TransferModal.module.scss';
 import Input from 'components/input/Input';
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, TextField, Typography } from '@material-ui/core';
 import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon';
 import * as S from './TransferModal.style';
 import BoxConfirmation from './boxConfirmation/BoxConfirmation';
+import { styled } from '@material-ui/core/styles';
+
+const CssTextField = styled(TextField)({
+  '& .MuiTextField-root': {
+    color: '#f00',
+  },
+});
 
 function TransferModal ({ open, token }) {
   const dispatch = useDispatch()
@@ -105,8 +112,8 @@ function TransferModal ({ open, token }) {
               />
             </Grid>
           </Grid>
-{/*
-          <Input
+
+          {/* <Input
             placeholder={`Amount to transfer`}
             value={value}
             type="number"
@@ -114,23 +121,51 @@ function TransferModal ({ open, token }) {
             unit={token.symbol}
             maxValue={logAmount(token.balance, token.decimals)}
           /> */}
-          <Grid container spacing={2}>
-            <S.Balance>
-              <Grid item xs={6}>
-                <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
-                  <Typography>0,3142</Typography>
+          <S.Balance>
+            <Grid container>
+              <Grid item xs={5}>
+                <S.ContentBalance>
+                  <Box>
+                    <CssTextField
+                      id="standard-number"
+                      label="Enter amount"
+                      type="number"
+                      size="small"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      variant="standard"
+                    />
+                    <Typography variant="body2" component="p" sx={{opacity: 0.5, mt: '5px'}}>($25,213)</Typography>
+                  </Box>
                   <Button variant="small">Use all</Button>
-                </Box>
+                </S.ContentBalance>
               </Grid>
 
-              <Grid item xs={6}>
-                <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
-                  <Typography>Current Balance</Typography>
-                  <Typography>+ 0,3142</Typography>
-                </Box>
+              <Grid item xs={2} sx={{margin: 'auto'}}>
+                <S.TransactionsButton>
+                  <Button>Fast</Button>
+                  <Box>
+                    <NetworkSwitcherIcon />
+                  </Box>
+                    <Button>Slow</Button>
+                </S.TransactionsButton>
               </Grid>
-            </S.Balance>
-          </Grid>
+
+              <Grid item xs={5}>
+                <S.ContentBalance>
+                  <Box>
+                    <Typography variant="body2" component="p"sx={{opacity: 0.5}}>Current Balance</Typography>
+                    <Typography variant="body2" component="p" sx={{opacity: 0.5}}>0,0224</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="h3" component="span">+ 0,3142</Typography>
+                    <Typography variant="body2" component="p" sx={{opacity: 0.5}}>New Balance: 0,3364</Typography>
+                  </Box>
+                </S.ContentBalance>
+              </Grid>
+            </Grid>
+          </S.Balance>
 
           <div className={styles.buttons}>
             <Button
