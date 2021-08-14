@@ -25,16 +25,12 @@ const NETWORKS = {
       chainId: 31337,
       rpcUrl: `http://${window.location.hostname}:9545`,
       blockExplorer: null, //does not exist on local
-      transaction: null, //does not exist on local
-      suffix: `/?network=Local`
     },
     L2: {
       name: "Local L2",
       chainId: 28,
       rpcUrl: `http://${window.location.hostname}:8545`,
       blockExplorer: null, //does not exist on local
-      transaction: null, //does not exist on local
-      suffix: `/?network=Local`
     },
   },
   rinkeby: {
@@ -46,16 +42,12 @@ const NETWORKS = {
       chainId: 4,
       rpcUrl: `https://rinkeby.infura.io/v3/${process.env.REACT_APP_INFURA_ID}`,
       blockExplorer: `https://api-rinkeby.etherscan.io/api?module=account&action=txlist&startblock=0&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_ETHERSCAN_API}`,
-      transaction: `https://rinkeby.etherscan.io/tx/`,
-      suffix: `/?network=Rinkeby`
     },
     L2: {
       name: "Rinkeby L2",
       chainId: 28,
       rpcUrl: `https://rinkeby.omgx.network`,
       blockExplorer: `https://blockexplorer.omgx.network/?network=Rinkeby`,
-      transaction: `https://blockexplorer.omgx.network/tx/`,
-      suffix: `/?network=Rinkeby`
     }
   },
   mainnet: {
@@ -67,16 +59,12 @@ const NETWORKS = {
       chainId: 1,
       rpcUrl: `https://mainnet.infura.io/v3/${process.env.REACT_APP_INFURA_ID}`,
       blockExplorer: `https://api-mainnet.etherscan.io/api?module=account&action=txlist&startblock=0&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_ETHERSCAN_API}`,
-      transaction: `https://mainnet.etherscan.io/tx/`,
-      suffix: `/?network=Mainnet`
     },
     L2: {
       name: "Mainnet L2",
       chainId: 288,
       rpcUrl: `https://mainnet.omgx.network`,
       blockExplorer: `https://blockexplorer.omgx.network/?network=Mainnet`,
-      transaction: `https://blockexplorer.omgx.network/tx/`,
-      suffix: `/?network=Mainnet`
     }
   }
 }

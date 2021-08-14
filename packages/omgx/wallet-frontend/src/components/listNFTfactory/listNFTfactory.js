@@ -249,7 +249,7 @@ class listNFTfactory extends React.Component {
       newNFTname,
       address,
       UUID,
-      'OMGX_Rinkeby_28'
+      'OMGX_Rinkeby_28' //will also have to change 
     )
     
     if (deployTX) {
