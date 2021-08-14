@@ -125,6 +125,7 @@ class NetworkService {
 
     // chain ID
     this.chainID = null
+    this.networkName = null
 
     // gas
     this.L1GasLimit = 9999999
@@ -135,13 +136,6 @@ class NetworkService {
     console.log('NS: enableBrowserWallet()')
     try {
       // connect to the wallet
-      //await window.ethereum.enable()
-      
-      /*
-      inpage.js:1 MetaMask: 'ethereum.enable()' is deprecated and may be removed in the future. Please use the 'eth_requestAccounts' RPC method instead.
-      For more information, see: https://eips.ethereum.org/EIPS/eip-1102
-      */
-
       await window.ethereum.request({method: 'eth_requestAccounts'})
       this.provider = new ethers.providers.Web3Provider(window.ethereum)
       return true
@@ -370,16 +364,20 @@ class NetworkService {
       //at this point, the wallet should be connected
       this.account = await this.provider.getSigner().getAddress()
       console.log('this.account', this.account)
+      
       const network = await this.provider.getNetwork()
-
+      
       this.chainID = network.chainId
+      this.networkName = network.name
+      
       this.masterSystemConfig = masterSystemConfig
 
       this.tokenAddresses = addresses.TOKENS
 
+      console.log('NS: network:', network)
       console.log('NS: masterConfig:', this.masterSystemConfig)
       console.log('NS: this.chainID:', this.chainID)
-      console.log('NS: network:', network)
+      console.log('NS: this.networkName:', this.networkName)
 
       //there are numerous possible chains we could be on
       //either local, rinkeby etc

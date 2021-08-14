@@ -63,22 +63,32 @@ class Nft extends React.Component {
     const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
     
     if (!networkStatus) {
-      this.props.dispatch(openError('Please use L2 network.'))
+      this.props.dispatch(openError('Please use L2 network'))
       return;
     }
 
     this.setState({ loading: true })
+
+    let originName = ''
+
+    if(networkService.chainID === 28) {
+      originName = 'OMGX_Rinkeby_28'
+    } else if (networkService.chainID === 288) {
+      originName = 'OMGX_Mainnet_288'
+    } else {
+      originName = 'OMGX_Other'
+    }
 
     const deployTX = await networkService.deployNewNFTContract(
       newNFTsymbol,
       newNFTname,
       '0x0000000000000000000000000000000000000042',
       'simple',
-      'OMGX_Rinkeby_28' // will also need to change 
+      originName
     )
     
     if (deployTX) {
-      this.props.dispatch(openAlert(`You have deployed a new NFT contract.`))
+      this.props.dispatch(openAlert(`You have deployed a new NFT contract`))
     } else {
       this.props.dispatch(openError('NFT contract deployment error'))
     }
