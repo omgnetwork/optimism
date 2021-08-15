@@ -151,6 +151,8 @@ type BlockChain struct {
 
 	chainmu sync.RWMutex // blockchain insertion lock
 
+	currentTimestamp atomic.Value // Timestamp to be used when mining the current block.
+
 	currentBlock     atomic.Value // Current head of the block chain
 	currentFastBlock atomic.Value // Current head of the fast-sync chain (may be above the block chain!)
 
@@ -246,6 +248,13 @@ func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, chainConfig *par
 	// the head block (ethash cache or clique voting snapshot). Might as well do
 	// it in advance.
 	bc.engine.VerifyHeader(bc, bc.CurrentHeader(), true)
+
+	if currentHeader := bc.CurrentHeader(); currentHeader != nil {
+		log.Debug("Read timestamp from last block. ", "timestamp", bc.CurrentHeader().Time)
+		bc.SetCurrentTimestamp(int64(bc.CurrentHeader().Time))
+	} else {
+		bc.SetCurrentTimestamp(int64(0))
+	}
 
 	if frozen, err := bc.db.Ancients(); err == nil && frozen > 0 {
 		var (
@@ -493,6 +502,17 @@ func (bc *BlockChain) FastSyncCommitHead(hash common.Hash) error {
 // GasLimit returns the gas limit of the current HEAD block.
 func (bc *BlockChain) GasLimit() uint64 {
 	return bc.CurrentBlock().GasLimit()
+}
+
+// SetCurrentTimestamp sets the timestamp for blocks added to the canonical chain.
+func (bc *BlockChain) SetCurrentTimestamp(timestamp int64) {
+	bc.currentTimestamp.Store(&timestamp)
+}
+
+// CurrentTimestamp retrieves the timestamp used for blocks added to the canonical chain.
+func (bc *BlockChain) CurrentTimestamp() int64 {
+	// Note: Can never be nil
+	return *bc.currentTimestamp.Load().(*int64)
 }
 
 // CurrentBlock retrieves the current head block of the canonical chain. The
