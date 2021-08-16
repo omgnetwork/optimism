@@ -92,8 +92,6 @@ const Stage2 = ({ handleClose }) => {
 function BoxConfirmation ({ showFeedback, setShowFeedback, handleClose, onSubmit }) {
   const [ step, setStep ] = useState(0);
 
-  const Circles = []
-
   useEffect(() => {
     setStep(0);
   }, [showFeedback]);
