@@ -1,0 +1,38 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/BobaChef.sol": {
+      "content": "pragma solidity ^0.7.6;\n\npragma experimental ABIEncoderV2;\n\nimport \"./BobaRecipes.sol\";\n\ncontract BobaChef {\n\n    event NewAdmin(address indexed newAdmin);\n    event NewPendingAdmin(address indexed newPendingAdmin);\n    event newFlavorAdded(flavor indexed new_flavor);\n    event newToppingAdded(topping indexed new_topping);\n    event flavorReplaced(flavor indexed old_flavor, flavor indexed new_flavor);\n    event toppingReplaced(topping indexed old_topping, topping indexed new_topping);\n    event lockChanged(bool indexed newLocked);\n\n    struct flavor {\n        bytes32 flavor;\n        uint[3] color;\n        uint commonScore;\n        uint[3] gradient;\n    }\n\n    struct topping{\n        bytes32 topping;\n        uint[3] color;\n        uint commonScore;\n    }\n\n\n    topping[10] public toppings;\n    flavor[10] public flavors;\n\n    topping public first_topping;\n    flavor public first_flavor;\n\n    uint toppingIndex = 0;\n    uint flavorIndex = 0;\n\n    bool public locked = false;\n\n    address public admin;\n    address public pendingAdmin;\n\n    mapping (bytes32 => bool) public queuedTransactions;\n\n\n    constructor(address admin_, topping memory _first_topping, flavor memory _first_flavor) public  {\n        toppings[toppingIndex] = first_topping;\n        flavors[flavorIndex] = first_flavor;\n        first_flavor = _first_flavor;\n        first_topping = _first_topping;\n        toppingIndex += 1;\n        flavorIndex += 1;\n        admin = admin_;\n    }\n\n    function addFlavor(flavor memory new_flavor) public {\n        require(msg.sender == admin, \"BobaChef::addFlavor: Call must come from Timelock.\");\n        require(flavorIndex < 10, \"BobaChef::addFlavor: Flavors can no longer be added.\");\n        require(locked == false, \"BobaChef::addFlavor: Kitchen locked.\");\n        flavors[flavorIndex] = new_flavor;\n        flavorIndex += 1;\n        emit newFlavorAdded(new_flavor);\n    }\n\n    function replaceFlavor(uint indexOfOld, flavor memory new_flavor) public{\n        require(msg.sender == admin, \"BobaChef::replaceFlavor: Call must come from Timelock.\");\n        require(locked == false, \"BobaChef::replaceFlavor: Kitchen locked.\");\n        flavor memory old_flavor = flavors[indexOfOld];\n        require(old_flavor.flavor != bytes32(0), \"BobaChef::replaceFlavor: Old flavor does not exist.\");\n        flavors[indexOfOld] = new_flavor;\n        emit flavorReplaced(old_flavor, new_flavor);\n    }\n\n    function addTopping(topping memory new_topping) public{\n        require(msg.sender == admin, \"BobaChef::addFlavor: Call must come from Timelock.\");\n        require(toppingIndex < 10, \"BobaChef::addTopping: Toppings can no longer be added.\");\n        require(locked == false, \"BobaChef::addTopping: Kitchen locked.\");\n        toppings[toppingIndex] = new_topping;\n        toppingIndex += 1;\n        emit newToppingAdded(new_topping);\n    }\n\n    function replaceTopping(uint indexOfOld, topping memory new_topping) public{\n        require(msg.sender == admin, \"BobaChef::replaceTopping: Call must come from Timelock.\");\n        require(locked == false, \"BobaChef::replaceTopping: Kitchen locked.\");\n        topping memory old_topping = toppings[indexOfOld];\n        require(old_topping.topping != bytes32(0), \"BobaChef::replaceTopping: Old topping does not exist.\");\n        toppings[indexOfOld] = new_topping;\n        emit toppingReplaced(old_topping, new_topping);\n    }\n\n    function acceptAdmin() public {\n        require(msg.sender == pendingAdmin, \"Timelock::acceptAdmin: Call must come from pendingAdmin.\");\n        admin = msg.sender;\n        pendingAdmin = address(0);\n        emit NewAdmin(admin);\n    }\n\n    function changeLock(bool newLocked) public{\n        require(msg.sender == admin, \"BobaChef::changeLock: Call must come from Timelock.\");\n        require(locked != newLocked, \"BobaChef::changeLock: Old locked status.\");\n        locked = newLocked;\n        emit lockChanged(locked);\n    }\n\n    function setPendingAdmin(address pendingAdmin_) public {\n        require(msg.sender == admin, \"Timelock::setPendingAdmin: Call must come from Timelock.\");\n        pendingAdmin = pendingAdmin_;\n\n        emit NewPendingAdmin(pendingAdmin);\n    }\n}\n"
+    },
+    "contracts/BobaRecipes.sol": {
+      "content": "pragma solidity ^0.7.6;\n\npragma experimental ABIEncoderV2;\n\n/**\n * @title BobaRecipes\n */\nlibrary BobaRecipes {\n\n    struct flavor {\n        bytes32 flavor;\n        uint[3] color;\n        uint commonScore;\n        uint[3] gradient;\n    }\n\n    struct topping {\n        bytes32 topping;\n        uint[3] color;\n        uint256 commonScore;\n    }\n}"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

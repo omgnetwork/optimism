@@ -8,9 +8,6 @@ const { runOrCatchError } = require('@codechecks/client/dist/utils');
 require('dotenv').config();
 const env = process.env;
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 /* Internal Imports */
 const factory = (name) => {
@@ -384,7 +381,6 @@ describe('Testing BobaChef Contract', () => {
                 await tx1.wait();
                 const txHashPrefix1 = tx1.hash.slice(0, 2);
                 expect(txHashPrefix1).to.eq('0x');
-                sleep(1000);
             }
             const flavorIndex = await BobaChef.connect(wallet1).flavorIndex();
             expect(flavorIndex).to.eq(10);
@@ -405,7 +401,6 @@ describe('Testing BobaChef Contract', () => {
                 await tx1.wait();
                 const txHashPrefix1 = tx1.hash.slice(0, 2);
                 expect(txHashPrefix1).to.eq('0x');
-                sleep(1000);
             }
             const toppingIndex = await BobaChef.connect(wallet1).toppingIndex();
             expect(toppingIndex).to.eq(10);

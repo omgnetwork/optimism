@@ -1,9 +1,9 @@
 {
-  "name": "@omgx/hardhat-example",
+  "name": "@omgx/BobaChef",
   "private": true,
   "version": "1.0.0",
   "main": "index.js",
-  "author": "Optimism PBC",
+  "author": "OMGX BC",
   "license": "MIT",
   "scripts": {
     "clean": "rimraf ./cache-ovm ./cache ./artifacts-ovm ./artifacts ./deployments",
