@@ -16,28 +16,10 @@ limitations under the License. */
 import React from 'react'
 import { Search } from '@material-ui/icons'
 import BN from 'bignumber.js'
-
 import * as styles from './Input.module.scss'
+import { CssTextField } from './Input.styles'
 import Button from 'components/button/Button'
 import { Box, Grid, TextField, Typography } from '@material-ui/core'
-import { styled } from '@material-ui/core/styles';
-
-
-const CssTextField = styled(TextField)({
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    '& fieldset': {
-      borderColor: 'transparent',
-    },
-    '&:hover fieldset': {
-      // borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-    '&.Mui-focused fieldset': {
-      // borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-  },
-});
-
 
 function Input({
   placeholder,
