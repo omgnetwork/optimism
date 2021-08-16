@@ -150,7 +150,7 @@ class listNFT extends React.Component {
     const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
     
     if (!networkStatus) {
-      this.props.dispatch(openError('Please use L2 network.'))
+      this.props.dispatch(openError('Please use L2 network'))
       return
     }
 
@@ -201,24 +201,34 @@ class listNFT extends React.Component {
     const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
     
     if (!networkStatus) {
-      this.props.dispatch(openError('Please use L2 network.'));
-      return;
+      this.props.dispatch(openError('Please use L2 network'))
+      return
     }
 
-    this.setState({ loading: true });
+    this.setState({ loading: true })
+
+    let originName = ''
+
+    if(networkService.chainID === 28) {
+      originName = 'OMGX_Rinkeby_28'
+    } else if (networkService.chainID === 288) {
+      originName = 'OMGX_Mainnet_288'
+    } else {
+      originName = 'OMGX_Other'
+    }
 
     const deployTX = await networkService.deployNewNFTContract(
       newNFTsymbol,
       newNFTname,
       address,
       UUID,
-      'OMGX_Rinkeby_28'
+      originName
     )
     
     if (deployTX) {
-      this.props.dispatch(openAlert(`You have deployed a new NFT factory.`));
+      this.props.dispatch(openAlert(`You have deployed a new NFT factory`))
     } else {
-      this.props.dispatch(openError('NFT factory deployment error'));
+      this.props.dispatch(openError('NFT factory deployment error'))
     }
 
     this.setState({ loading: false })
@@ -264,23 +274,38 @@ class listNFT extends React.Component {
           className={styles.topContainer}
         >
           
-          <div className={styles.Table2}>
-            <div className={styles.BasicText}>{name} ({symbol})</div>
-            <div className={styles.BasicLightText}>Owner: {owner}</div>
-            <div className={styles.BasicLightText}>UUID: {UUID}</div>
-            <div className={styles.BasicLightText}>Address: {truncate(address, 6, 4, '...')}</div>
-            <div className={styles.BasicLightText}>Time minted: {time}</div>
-            <div className={styles.BasicLightText}>Type: {typeString}</div>
-            <a className={styles.URILink} href={URL}>DATASHEET</a>
-          </div>
+          {oriID === 'simple' && 
+            <div className={styles.Table2}>
+              <div className={styles.BasicText}>{name} ({symbol})</div>
+              <div className={styles.BasicLightText}>Owner: {owner}</div>
+              <div className={styles.BasicLightText}>UUID: {UUID}</div>
+              <div className={styles.BasicLightText}>Address: {truncate(address, 6, 4, '...')}</div>
+              <div className={styles.BasicLightText}>Time minted: {time}</div>
+              <a className={styles.URILink} href={URL}>Link</a>
+            </div>
+          }
 
-          <div 
-            className={styles.Table3}
-            onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
-          >
-            <div className={styles.LinkText}>Actions</div>
-            <ExpandMoreIcon className={styles.LinkButton} />
-          </div>
+          {oriID !== 'simple' && <>
+            <div className={styles.Table2}>
+              <div className={styles.BasicText}>{name} ({symbol})</div>
+              <div className={styles.BasicLightText}>Owner: {owner}</div>
+              <div className={styles.BasicLightText}>UUID: {UUID}</div>
+              <div className={styles.BasicLightText}>Address: {truncate(address, 6, 4, '...')}</div>
+              <div className={styles.BasicLightText}>Time minted: {time}</div>
+              <div className={styles.BasicLightText}>Type: {typeString}</div>
+              <a className={styles.URILink} href={URL}>DATASHEET</a>
+            </div>
+          
+            <div 
+              className={styles.Table3}
+              onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
+            >
+              <div className={styles.LinkText}>Actions</div>
+              <ExpandMoreIcon className={styles.LinkButton} />
+            </div>
+          </>
+          }
+
         </div>
 
         {/*********************************************/
