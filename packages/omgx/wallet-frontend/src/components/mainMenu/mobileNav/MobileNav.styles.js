@@ -5,6 +5,6 @@ export const MobileNavTag = styled.div`
   padding-left: 20px;
   display: flex;
   gap: 20px;
-  position: absolute;
+  /* position: absolute; */
   align-items: center;
 `;

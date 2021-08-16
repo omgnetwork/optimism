@@ -15,6 +15,9 @@ function MenuItems () {
   const [ openDropdown, setOpenDropdown ] = useState(['/pool', '/farm'].includes(window.location.pathname));
   const [ activeItem, setActiveItem ] = useState(false);
   const theme = useTheme();
+  const isLight = theme.palette.mode === 'light';
+  const colorIcon = theme.palette.common[isLight ? 'black' : 'white'];
+
 
   const iconObj = {
     WalletIcon,
@@ -41,7 +44,7 @@ function MenuItems () {
                 to={item.url}
                 selected={isActive}
               >
-                <Icon color={isActive || activeItem === title ? theme.palette.secondary.main : "#fff"} />{item.title}
+                <Icon color={isActive || activeItem === title ? theme.palette.secondary.main : colorIcon} />{item.title}
 
                 {item.items && item.items.length ? (
                   <Box sx={{display: 'flex'}}>
@@ -70,7 +73,7 @@ function MenuItems () {
                               to={children.url}
                               selected={isActive}
                             >
-                              <ChildrenIcon color={isActive || activeItem === title ? theme.palette.secondary.main : "#fff"} />{children.title}
+                              <ChildrenIcon color={isActive || activeItem === title ? theme.palette.secondary.main : colorIcon} />{children.title}
                             </S.MenuItem>
                           </li>
                       )

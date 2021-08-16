@@ -30,17 +30,24 @@ import networkService from 'services/networkService';
 import * as styles from './TransferModal.module.scss';
 import Input from 'components/input/Input';
 import { selectLookupPrice } from 'selectors/lookupSelector';
+import { Box, Grid, TextField, Typography } from '@material-ui/core';
+import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon';
+import * as S from './TransferModal.style';
+import BoxConfirmation from './boxConfirmation/BoxConfirmation';
+import { styled } from '@material-ui/core/styles';
+import { useTheme } from '@emotion/react';
 
 function TransferModal ({ open, token }) {
-
   const dispatch = useDispatch()
 
   const [ value, setValue ] = useState('')
   const [ recipient, setRecipient ] = useState('')
+  const [ showFeedback, setShowFeedback] = useState(false);
 
   const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]));
 
   const lookupPrice = useSelector(selectLookupPrice);
+  const theme = useTheme();
 
   async function submit () {
     if (
@@ -76,63 +83,108 @@ function TransferModal ({ open, token }) {
 
     return (
       <>
-        <h2>Transfer</h2>
-        
-        <div className={styles.address}>
-          {`From address: ${networkService.account}`}
-        </div>
+        <S.StyleCreateTransactions>
+          <Grid container spacing={8}>
+            <Grid item xs={6}>
+              <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px"}}>
+                <Typography variant="h2" component="h2">From ETH Mainnet</Typography>
+                <NetworkSwitcherIcon active />
+              </Box>
+              <Typography variant="body1" component="span" sx={{opacity: 0.5}}>Select Token</Typography>
+              <div className={styles.address}>
+                {`From address: ${networkService.account}`}
+              </div>
+            </Grid>
 
-        <Input
-          label='To Address'
-          placeholder='Hash or ENS name'
-          paste
-          value={recipient}
-          onChange={i => setRecipient(i.target.value)}
-        />
+            <Grid item xs={6}>
+              <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px"}}>
+                <Typography variant="h2" component="h2">To OMGX Mainnet</Typography>
+                <NetworkSwitcherIcon />
+              </Box>
+              <Input
+                label='Enter Adress'
+                placeholder='Enter adress to send to...'
+                value={recipient}
+                onChange={i => setRecipient(i.target.value)}
+                fullWidth
+                // size="small"
+              />
+            </Grid>
 
-        <Input
-          placeholder={`Amount to transfer`}
-          value={value}
-          type="number"
-          onChange={(i) => {setValue(i.target.value)}}
-          unit={token.symbol}
-          maxValue={logAmount(token.balance, token.decimals)}
-        />
+          </Grid>
 
-        {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+          <S.Balance>
+            <Box display="flex">
+              <Box sx={{ flexGrow: 1, flexBasis: 1 }}>
+                <S.ContentBalance>
+                  <Box>
+                    <Input
+                      label="Enter Amount"
+                      placeholder="0,00"
+                      value={value}
+                      type="number"
+                      onChange={(i) => {setValue(i.target.value)}}
+                      unit={token.symbol}
+                      maxValue={logAmount(token.balance, token.decimals)}
+                      size="small"
+                    />
+                  </Box>
+                </S.ContentBalance>
+              </Box>
+
+              <Box sx={{ flexGrow: 0, flexShrink: 0 }}>
+                <S.TransactionsButton>
+                  <Button>Fast</Button>
+                  <Button onClick={() => setShowFeedback(true)}>
+                    <NetworkSwitcherIcon />
+                    <span>Bridge</span>
+                  </Button>
+                  <Button>Slow</Button>
+                </S.TransactionsButton>
+              </Box>
+
+              <Box sx={{ flexGrow: 1, flexBasis: 1 }}>
+                <S.ContentBalance>
+                  <Box>
+                    <Typography variant="body2" component="p"sx={{opacity: 0.5}}>Current Balance</Typography>
+                    <Typography variant="body2" component="p" sx={{opacity: 0.5}}>0,0224</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="h3" component="span" sx={{color: theme.palette.secondary.main}}>+ 0,3142</Typography>
+                    <Typography variant="body2" component="p" sx={{opacity: 0.5}}>New Balance: 0,3364</Typography>
+                  </Box>
+                </S.ContentBalance>
+              </Box>
+            </Box>
+          </S.Balance>
+
+          {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
           <h3>
             {`Amount to transfer ($${amountToUsd(value, lookupPrice, token).toFixed(2)})`}
           </h3>
         )}
 
-        <div className={styles.buttons}>
-          <Button
-            onClick={handleClose}
-            type='secondary'
-            className={styles.button}
-          >
-            CANCEL
-          </Button>
+        {/* <Button
+          className={styles.button}
+          onClick={()=>{submit({useLedgerSign: false})}}
+          type='primary'
+          loading={loading}
+          tooltip='Your transfer is still pending. Please wait for confirmation.'
+          disabled={disabledTransfer}
+          triggerTime={new Date()}
+        >
+          TRANSFER
+        </Button> */}
 
-          <Button
-            className={styles.button}
-            onClick={()=>{submit({useLedgerSign: false})}}
-            type='primary'
-            loading={loading}
-            tooltip='Your transfer is still pending. Please wait for confirmation.'
-            disabled={disabledTransfer}
-            triggerTime={new Date()}
-          >
-            TRANSFER
-          </Button>
-        </div>
+        </S.StyleCreateTransactions>
       </>
     );
   }
 
   return (
-    <Modal open={open}>
+    <Modal title="Create bridging transaction" open={open} transparent onClose={handleClose}>
       {renderTransferScreen()}
+      <BoxConfirmation showFeedback={showFeedback} setShowFeedback={setShowFeedback} handleClose={handleClose} onSubmit={() => { submit({useLedgerSign: false}) }} />
     </Modal>
   );
 }

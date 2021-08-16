@@ -4,29 +4,28 @@ import * as S from './MobileNav.styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import { Link } from 'react-router-dom';
 import MenuItems from '../menuItems/MenuItems';
-import { Drawer } from '@material-ui/core';
+import { Box, Drawer } from '@material-ui/core';
 import { useState } from 'react';
-import { createStyles, makeStyles } from '@material-ui/styles';
+import { styled } from '@material-ui/system';
+import { useTheme } from '@emotion/react';
 
-const useStyles = makeStyles((theme) =>
-  createStyles({
-    paper: {
-      background: "#061122",
-      backgroundImage: 'none'
-    }
-  })
-);
+const Style = styled(Box)`
+  background-color: ${(props) => props.theme.palette.mode === 'light' ? 'white' : '#061122' };
+  height: 100%;
+`;
 
 function MobileNav () {
   const [ open, setOpen ] = useState(false);
-  const classes = useStyles();
+  const theme = useTheme();
 
   return (
     <S.MobileNavTag>
       <MenuIcon fontSize="medium" onClick={() => setOpen(!open)} />
 
-      <Drawer open={open} onClose={() => setOpen(false)} classes={{ paper: classes.paper }}>
-        <MenuItems/>
+      <Drawer open={open} onClose={() => setOpen(false)}>
+        <Style theme={theme}>
+          <MenuItems/>
+        </Style>
       </Drawer>
 
       <Link to="/" style={{ display: "flex"}}>
