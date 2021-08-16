@@ -12,8 +12,6 @@
     "build": "yarn build:contracts ; yarn build:contracts:ovm",
     "build:contracts": "hardhat compile",
     "build:contracts:ovm": "hardhat compile --network omgx",
-    "test:integration": "yarn test:l1 ; yarn test:omgx",
-    "test:l1": "hardhat --network l1 test",
     "test:omgx": "hardhat --network omgx test"
   },
   "devDependencies": {

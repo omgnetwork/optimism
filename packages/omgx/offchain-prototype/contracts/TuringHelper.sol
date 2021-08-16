@@ -7,14 +7,12 @@ import "hardhat/console.sol";
 contract TuringHelper {
   bytes data_URL;
   TuringHelper Self;
-  bool mock_L1;
   bytes[] methods; 
   
-  constructor(string memory _url, bool _mock_L1) {
+  constructor(string memory _url) {
     console.log("Deploying a helper contract with data source:", _url);
     data_URL = bytes(_url);
     Self = TuringHelper(address(this));
-    mock_L1 = _mock_L1;
   }
 
   function RegisterMethod(bytes memory methodName) public {
@@ -162,15 +160,6 @@ contract TuringHelper {
     require (rType == 1 || rType == 2); // l2geth can pass 0 here to indicate an error
     require (_slot.length > 0);
 
-    // If we don't have a modified l2geth, fake it locally.
-    if (mock_L1 && rType == 1) {
-      // exercise the RLP encoder even though we won't send a request
-      bytes memory req =  genRequestRLP(methods[method_idx], _slot);
-      console.log("Generated request, length", req.length);
-
-      string memory fake_response = "Mock-L1";
-      return Self.GetResponse(method_idx, 2, bytes(fake_response));
-    }
     if (rType != 2) {
     	// The if() avoids calling genRequestRLP unnecessarily
     	require (rType == 2, string(genRequestRLP(methods[method_idx], _slot)));

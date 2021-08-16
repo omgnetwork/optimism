@@ -29,6 +29,15 @@ const testPrivateKey = '0x47c99abed3324a2707c28affff1267e45918ec8c3f20b8aa892e8b
 const testWallet = new Wallet(testPrivateKey, local_provider)
 const L1 = !cfg['ovm']
 
+describe("L2_Only", function() {
+  // It is no longer feasible to mock out enough of the l2geth functionality to support
+  // an L1 version of these tests. 
+
+  it("should not be run on an L1 chain", async() => {
+    expect(L1).to.be.false
+  })
+})
+
 describe("HelloTest", function() {
 
   before(async () => {
@@ -114,8 +123,8 @@ describe("HelloTest", function() {
       (L1 ? TuringHelper_1.bytecode :  TuringHelper_2.bytecode),
       testWallet)
 
-    helper = await Factory__Helper.deploy(urlStr, L1, gasOverride)
-    console.log("    Helper contract deployed as", helper.address, "on", (L1 ? "L1" : "L2"))
+    helper = await Factory__Helper.deploy(urlStr, gasOverride)
+    console.log("    Helper contract deployed as", helper.address, "on","L2")
 
     await(helper.RegisterMethod(ethers.utils.toUtf8Bytes("hello")));
     await(helper.RegisterMethod(ethers.utils.toUtf8Bytes("add2")));
@@ -131,7 +140,7 @@ describe("HelloTest", function() {
 
   it("should return the EN_US greeting via eth_call", async() => {
     let us_greeting = hello.CustomGreetingFor("EN_US", gasOverride)
-    expect (await us_greeting).to.equal((L1 ? "Mock-L1" : "Hello World"))
+    expect (await us_greeting).to.equal("Hello World")
   })
 
   it("should allow the user to set a locale via eth_sendRawTransaction", async() => {
@@ -141,7 +150,7 @@ describe("HelloTest", function() {
 
   it("should return the expected personal greeting", async() => {
     let msg1 = hello.PersonalGreeting(gasOverride)
-    expect (await msg1).to.equal((L1 ? "Mock-L1" : "Bonjour le monde"))
+    expect (await msg1).to.equal("Bonjour le monde")
   })
 
   it("should allow the user to change their locale", async() => {
@@ -151,7 +160,7 @@ describe("HelloTest", function() {
 
   it("should now return a different personal greeting", async() => {
     let msg2 = hello.PersonalGreeting(gasOverride)
-    expect (await msg2).to.equal((L1 ? "Mock-L1" : "Top of the Morning"))
+    expect (await msg2).to.equal("Top of the Morning")
   })
   
   it("should support numerical datatypes", async() => {
