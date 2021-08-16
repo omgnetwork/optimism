@@ -2,7 +2,7 @@ pragma solidity ^0.7.6;
 
 pragma experimental ABIEncoderV2;
 
-import { topping, flavor } from "./BobaRecipes.sol";
+import "./BobaRecipes.sol";
 
 contract BobaChef {
 
@@ -14,25 +14,25 @@ contract BobaChef {
     event toppingReplaced(topping indexed old_topping, topping indexed new_topping);
     event lockChanged(bool indexed newLocked);
 
-    // struct flavor {
-    //     bytes32 flavor;
-    //     uint[3] color;
-    //     uint commonScore;
-    //     uint[3] gradient;
-    // }
+    struct flavor {
+        bytes32 flavor;
+        uint[3] color;
+        uint commonScore;
+        uint[3] gradient;
+    }
 
-    // struct topping{
-    //     bytes32 topping;
-    //     uint[3] color;
-    //     uint256 commonScore;
-    // }
+    struct topping{
+        bytes32 topping;
+        uint[3] color;
+        uint commonScore;
+    }
 
 
     topping[10] public toppings;
     flavor[10] public flavors;
 
-    uint toppingIndex = 0;
-    uint flavorIndex = 0;
+    uint public toppingIndex = 0;
+    uint public flavorIndex = 0;
 
     bool public locked = false;
 
@@ -42,9 +42,11 @@ contract BobaChef {
     mapping (bytes32 => bool) public queuedTransactions;
 
 
-    constructor(address admin_, topping memory first_topping, flavor memory first_flavor) public  {
-        toppings[toppingIndex] = first_topping;
-        flavors[flavorIndex] = first_flavor;
+    constructor(address admin_, topping memory _first_topping, flavor memory _first_flavor)  {
+        toppings[toppingIndex] = _first_topping;
+        flavors[flavorIndex] = _first_flavor;
+        toppingIndex += 1;
+        flavorIndex += 1;
         admin = admin_;
     }
 
@@ -103,5 +105,16 @@ contract BobaChef {
         pendingAdmin = pendingAdmin_;
 
         emit NewPendingAdmin(pendingAdmin);
+    }
+
+    function getColorOrGradient(uint index, bool isFlavor, bool isColor) public view returns (uint[3] memory){
+        if(isFlavor){
+            if(isColor){
+                return flavors[index].color;
+            }
+            return flavors[index].gradient;
+        } else {
+            return toppings[index].color;
+        }
     }
 }
