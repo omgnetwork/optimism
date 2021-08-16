@@ -16,7 +16,7 @@ const func = async (hre) => {
                                             30 // common score
 ];
 
-    await deploy('BobaChef', {
+    await deploy('BobaMenu', {
       from: deployer,
       args: ['0x21A235cf690798ee052f54888297Ad8F46D3F389', topping, flavor],
       log: true

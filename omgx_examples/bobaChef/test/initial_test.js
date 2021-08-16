@@ -15,9 +15,9 @@ const factory = (name) => {
     return new ethers.ContractFactory(artifact.abi, artifact.bytecode);
 }
 
-const BobaChefFactory = factory('BobaChef');
+const BobaMenuFactory = factory('BobaMenu');
 
-describe('Testing BobaChef Contract', () => {
+describe('Testing BobaMenu Contract', () => {
     // Set up
     const l2_provider = new ethers.providers.JsonRpcProvider(env.l2_provider);
     const wallet1 = new ethers.Wallet(env.privateKey1, l2_provider);
@@ -97,25 +97,25 @@ describe('Testing BobaChef Contract', () => {
 
 // 186, 149, 114
 
-    let BobaChef;
+    let BobaMenu;
 
-    before('Deploying BobaChef', async () => {
-        BobaChef = await BobaChefFactory.connect(wallet1).deploy(
+    before('Deploying BobaMenu', async () => {
+        BobaMenu = await BobaMenuFactory.connect(wallet1).deploy(
             wallet1.address,
             toppingStruct1,
             flavorStruct1
         )
-        await BobaChef.deployTransaction.wait();
+        await BobaMenu.deployTransaction.wait();
     });
 
     describe('Initialization and initial state', async () => {
         it(`Should have first topping and flavor initialized correctly`, async () => {
             // getting struct info
-            const first_topping = await BobaChef.toppings(0);
-            const first_flavor = await BobaChef.flavors(0);
-            const first_flavor_color = await BobaChef.getColorOrGradient(0, true, true);
-            const first_flavor_gradient = await BobaChef.getColorOrGradient(0, true, false);
-            const first_topping_color = await BobaChef.getColorOrGradient(0, false, true);
+            const first_topping = await BobaMenu.toppings(0);
+            const first_flavor = await BobaMenu.flavors(0);
+            const first_flavor_color = await BobaMenu.getColorOrGradient(0, true, true);
+            const first_flavor_gradient = await BobaMenu.getColorOrGradient(0, true, false);
+            const first_topping_color = await BobaMenu.getColorOrGradient(0, false, true);
 
             // checking flavor and commonScore
             expect(ethers.utils.parseBytes32String(first_topping.topping)).to.eq(topping1);
@@ -140,7 +140,7 @@ describe('Testing BobaChef Contract', () => {
         it(`Should not allow non admin users to add flavors or toppings`, async () =>{
             let failed = false;
             try {
-                await BobaChef.connect(wallet2).addFlavor(flavorStruct2);
+                await BobaMenu.connect(wallet2).addFlavor(flavorStruct2);
             } catch (error) {
                 failed = true;
             } finally{
@@ -148,7 +148,7 @@ describe('Testing BobaChef Contract', () => {
             }
             failed = false;
             try {
-                await BobaChef.connect(wallet2).addTopping(toppingStruct2);
+                await BobaMenu.connect(wallet2).addTopping(toppingStruct2);
             } catch (error) {
                 failed = true;
             } finally{
@@ -158,7 +158,7 @@ describe('Testing BobaChef Contract', () => {
         it(`Should not allow non admin users to replace falvors or toppings`, async () => {
             let failed = false;
             try{
-                await BobaChef.connect(wallet2).replaceFlavor(0, flavorStruct2);
+                await BobaMenu.connect(wallet2).replaceFlavor(0, flavorStruct2);
             }catch(error){
                 failed = true;
             }finally{
@@ -166,7 +166,7 @@ describe('Testing BobaChef Contract', () => {
             }
             failed = false;
             try{
-                await BobaChef.connect(wallet2).replaceTopping(0, flavorStruct2);
+                await BobaMenu.connect(wallet2).replaceTopping(0, flavorStruct2);
             }catch(error){
                 failed = true;
             }finally{
@@ -177,7 +177,7 @@ describe('Testing BobaChef Contract', () => {
         it(`Should not allow non admin users to lock contract state`, async () => {
             let failed = false;
             try{
-                await BobaChef.connect(wallet2).changeLock(true);
+                await BobaMenu.connect(wallet2).changeLock(true);
             }catch(error){
                 failed = true;
             }finally{
@@ -187,7 +187,7 @@ describe('Testing BobaChef Contract', () => {
         it(`Should not allow non admin users to set new admin`, async () => {
             let failed = false;
             try{
-                await BobaChef.connect(wallet2).setPendingAdmin(wallet2.address);
+                await BobaMenu.connect(wallet2).setPendingAdmin(wallet2.address);
             }catch(error){
                 failed = true;
             }finally{
@@ -198,8 +198,8 @@ describe('Testing BobaChef Contract', () => {
     });
     describe('Trivial Functionality Test', () => {
         it(`Should Allow admin to add flavors and toppings`, async () => {
-            const tx1 = await BobaChef.connect(wallet1).addFlavor(flavorStruct2);
-            const tx2 = await BobaChef.connect(wallet1).addTopping(toppingStruct2);
+            const tx1 = await BobaMenu.connect(wallet1).addFlavor(flavorStruct2);
+            const tx2 = await BobaMenu.connect(wallet1).addTopping(toppingStruct2);
 
             await tx1.wait();
             const txHashPrefix1 = tx1.hash.slice(0, 2);
@@ -210,11 +210,11 @@ describe('Testing BobaChef Contract', () => {
         });
         it(`Should have added the right flavors and toppings`, async () => {
             // getting struct info
-            const second_topping = await BobaChef.toppings(1);
-            const second_flavor = await BobaChef.flavors(1);
-            const second_flavor_color = await BobaChef.getColorOrGradient(1, true, true);
-            const second_flavor_gradient = await BobaChef.getColorOrGradient(1, true, false);
-            const second_topping_color = await BobaChef.getColorOrGradient(1, false, true);
+            const second_topping = await BobaMenu.toppings(1);
+            const second_flavor = await BobaMenu.flavors(1);
+            const second_flavor_color = await BobaMenu.getColorOrGradient(1, true, true);
+            const second_flavor_gradient = await BobaMenu.getColorOrGradient(1, true, false);
+            const second_topping_color = await BobaMenu.getColorOrGradient(1, false, true);
 
             // checking flavor and commonScore
             expect(ethers.utils.parseBytes32String(second_topping.topping)).to.eq(topping2);
@@ -234,8 +234,8 @@ describe('Testing BobaChef Contract', () => {
             });
         });
         it(`Should allow flavors to be replaced by admin`, async () => {
-            const tx1 = await BobaChef.connect(wallet1).replaceFlavor(1, flavorStruct3);
-            const tx2 = await BobaChef.connect(wallet1).replaceTopping(1, toppingStruct3);
+            const tx1 = await BobaMenu.connect(wallet1).replaceFlavor(1, flavorStruct3);
+            const tx2 = await BobaMenu.connect(wallet1).replaceTopping(1, toppingStruct3);
 
             await tx1.wait();
             const txHashPrefix1 = tx1.hash.slice(0, 2);
@@ -245,11 +245,11 @@ describe('Testing BobaChef Contract', () => {
             expect(txHashPrefix2).to.eq('0x');
 
             // getting struct info
-            const second_topping = await BobaChef.toppings(1);
-            const second_flavor = await BobaChef.flavors(1);
-            const second_flavor_color = await BobaChef.getColorOrGradient(1, true, true);
-            const second_flavor_gradient = await BobaChef.getColorOrGradient(1, true, false);
-            const second_topping_color = await BobaChef.getColorOrGradient(1, false, true);
+            const second_topping = await BobaMenu.toppings(1);
+            const second_flavor = await BobaMenu.flavors(1);
+            const second_flavor_color = await BobaMenu.getColorOrGradient(1, true, true);
+            const second_flavor_gradient = await BobaMenu.getColorOrGradient(1, true, false);
+            const second_topping_color = await BobaMenu.getColorOrGradient(1, false, true);
 
             // checking flavor and commonScore
             expect(ethers.utils.parseBytes32String(second_topping.topping)).to.eq(topping3);
@@ -271,7 +271,7 @@ describe('Testing BobaChef Contract', () => {
         it(`Should not allow admin to replace flavors that have not been set`, async () => {
             let failed = false;
             try{
-                await BobaChef.connect(wallet1).replaceFlavor(2, flavorStruct3);
+                await BobaMenu.connect(wallet1).replaceFlavor(2, flavorStruct3);
             }catch(error){
                 failed = true;
             }finally{
@@ -279,7 +279,7 @@ describe('Testing BobaChef Contract', () => {
             }
             failed = false;
             try{
-                await BobaChef.connect(wallet1).replaceTopping(2, toppingStruct3);
+                await BobaMenu.connect(wallet1).replaceTopping(2, toppingStruct3);
             }catch(error){
                 failed = true;
             }finally{
@@ -287,7 +287,7 @@ describe('Testing BobaChef Contract', () => {
             }
         });
         it(`Should allow admin to lock contract`, async () => {
-            const tx1 = await BobaChef.connect(wallet1).changeLock(true);
+            const tx1 = await BobaMenu.connect(wallet1).changeLock(true);
             await tx1.wait();
             const txHashPrefix1 = tx1.hash.slice(0, 2);
             expect(txHashPrefix1).to.eq('0x');
@@ -295,7 +295,7 @@ describe('Testing BobaChef Contract', () => {
         it(`Should not allow changes to be made when contract is locked`, async () => {
             let failed = false;
             try{
-                await BobaChef.connect(wallet1).addFlavor(flavorStruct3);
+                await BobaMenu.connect(wallet1).addFlavor(flavorStruct3);
             }catch(error){
                 failed = true;
             }finally{
@@ -303,7 +303,7 @@ describe('Testing BobaChef Contract', () => {
             }
             failed = false;
             try{
-                await BobaChef.connect(wallet1).addTopping(toppingStruct3);
+                await BobaMenu.connect(wallet1).addTopping(toppingStruct3);
             }catch(error){
                 failed = true;
             }finally{
@@ -311,7 +311,7 @@ describe('Testing BobaChef Contract', () => {
             }
             failed = false;
             try{
-                await BobaChef.connect(wallet1).replaceFlavor(1, toppingStruct3);
+                await BobaMenu.connect(wallet1).replaceFlavor(1, toppingStruct3);
             }catch(error){
                 failed = true;
             }finally{
@@ -319,7 +319,7 @@ describe('Testing BobaChef Contract', () => {
             }
             failed = false;
             try{
-                await BobaChef.connect(wallet1).replaceTopping(1, toppingStruct3);
+                await BobaMenu.connect(wallet1).replaceTopping(1, toppingStruct3);
             }catch(error){
                 failed = true;
             }finally{
@@ -327,14 +327,14 @@ describe('Testing BobaChef Contract', () => {
             }
         });
         it(`Should allow admin to unlock contract`, async () => {
-            const tx = await BobaChef.connect(wallet1).changeLock(false);
+            const tx = await BobaMenu.connect(wallet1).changeLock(false);
             await tx.wait();
             const txHashPrefix = tx.hash.slice(0, 2);
             expect(txHashPrefix).to.eq('0x');
         });
         it(`Should allow admin to add toppings, flavors after contract is unlocked`, async () => {
-            const tx1 = await BobaChef.connect(wallet1).addFlavor(flavorStruct2);
-            const tx2 = await BobaChef.connect(wallet1).addTopping(toppingStruct2);
+            const tx1 = await BobaMenu.connect(wallet1).addFlavor(flavorStruct2);
+            const tx2 = await BobaMenu.connect(wallet1).addTopping(toppingStruct2);
 
             await tx1.wait();
             const txHashPrefix1 = tx1.hash.slice(0, 2);
@@ -343,11 +343,11 @@ describe('Testing BobaChef Contract', () => {
             const txHashPrefix2 = tx2.hash.slice(0, 2);
             expect(txHashPrefix2).to.eq('0x');
 
-            const third_topping = await BobaChef.toppings(2);
-            const third_flavor = await BobaChef.flavors(2);
-            const third_flavor_color = await BobaChef.getColorOrGradient(2, true, true);
-            const third_flavor_gradient = await BobaChef.getColorOrGradient(2, true, false);
-            const third_topping_color = await BobaChef.getColorOrGradient(2, false, true);
+            const third_topping = await BobaMenu.toppings(2);
+            const third_flavor = await BobaMenu.flavors(2);
+            const third_flavor_color = await BobaMenu.getColorOrGradient(2, true, true);
+            const third_flavor_gradient = await BobaMenu.getColorOrGradient(2, true, false);
+            const third_topping_color = await BobaMenu.getColorOrGradient(2, false, true);
 
             // checking flavor and commonScore
             expect(ethers.utils.parseBytes32String(third_topping.topping)).to.eq(topping2);
@@ -365,8 +365,8 @@ describe('Testing BobaChef Contract', () => {
             third_topping_color.forEach((element,index)=>{
                 expect(parseInt(element._hex)).to.eq(topping_color2[index]);
             });
-            const toppingIndex = await BobaChef.connect(wallet1).toppingIndex();
-            const flavorIndex =  await BobaChef.connect(wallet1).flavorIndex();
+            const toppingIndex = await BobaMenu.connect(wallet1).toppingIndex();
+            const flavorIndex =  await BobaMenu.connect(wallet1).flavorIndex();
             expect(toppingIndex).to.eq(3);
             expect(flavorIndex).to.eq(3);
         });
@@ -377,17 +377,17 @@ describe('Testing BobaChef Contract', () => {
         it(`Should only be able to add ten flavors`, async () => {
             const existing_flavors = [flavorStruct2, flavorStruct4, flavorStruct3, flavorStruct1];
             for(let i = 0; i < 7; i++){
-                const tx1 = await BobaChef.connect(wallet1).addFlavor(existing_flavors[i % existing_flavors.length]);
+                const tx1 = await BobaMenu.connect(wallet1).addFlavor(existing_flavors[i % existing_flavors.length]);
                 await tx1.wait();
                 const txHashPrefix1 = tx1.hash.slice(0, 2);
                 expect(txHashPrefix1).to.eq('0x');
             }
-            const flavorIndex = await BobaChef.connect(wallet1).flavorIndex();
+            const flavorIndex = await BobaMenu.connect(wallet1).flavorIndex();
             expect(flavorIndex).to.eq(10);
 
             let failed = false;
             try {
-                await BobaChef.connect(wallet1).addFlavor(flavorStruct1);
+                await BobaMenu.connect(wallet1).addFlavor(flavorStruct1);
             } catch (error) {
                 failed = true;
             } finally{
@@ -397,16 +397,16 @@ describe('Testing BobaChef Contract', () => {
         it(`Should only be able to add ten toppings`, async () => {
             const existing_toppings = [toppingStruct3, toppingStruct4, toppingStruct1, toppingStruct3];
             for(let i = 0; i < 7; i++){
-                const tx1 = await BobaChef.connect(wallet1).addTopping(existing_toppings[i % existing_toppings.length]);
+                const tx1 = await BobaMenu.connect(wallet1).addTopping(existing_toppings[i % existing_toppings.length]);
                 await tx1.wait();
                 const txHashPrefix1 = tx1.hash.slice(0, 2);
                 expect(txHashPrefix1).to.eq('0x');
             }
-            const toppingIndex = await BobaChef.connect(wallet1).toppingIndex();
+            const toppingIndex = await BobaMenu.connect(wallet1).toppingIndex();
             expect(toppingIndex).to.eq(10);
             let failed = false;
             try {
-                await BobaChef.connect(wallet1).addTopping(toppingStruct1);
+                await BobaMenu.connect(wallet1).addTopping(toppingStruct1);
             } catch (error) {
                 failed = true;
             } finally{

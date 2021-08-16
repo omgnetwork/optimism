@@ -2,9 +2,7 @@ pragma solidity ^0.7.6;
 
 pragma experimental ABIEncoderV2;
 
-import "./BobaRecipes.sol";
-
-contract BobaChef {
+contract BobaMenu {
 
     event NewAdmin(address indexed newAdmin);
     event NewPendingAdmin(address indexed newPendingAdmin);
