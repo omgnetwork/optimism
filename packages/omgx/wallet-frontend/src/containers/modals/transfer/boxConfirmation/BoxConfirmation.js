@@ -92,6 +92,8 @@ const Stage2 = ({ handleClose }) => {
 function BoxConfirmation ({ showFeedback, setShowFeedback, handleClose, onSubmit }) {
   const [ step, setStep ] = useState(0);
 
+  const Circles = []
+
   useEffect(() => {
     setStep(0);
   }, [showFeedback]);
@@ -100,15 +102,20 @@ function BoxConfirmation ({ showFeedback, setShowFeedback, handleClose, onSubmit
     <>
       {showFeedback ? (
         <Fade in={showFeedback}>
-          <S.StyleStages>
-            {step === 0 ? (
-              <Stage0 setShowFeedback={setShowFeedback} setStep={setStep}/>
-            ) : step === 1 ? (
-              <Stage1 setShowFeedback={setShowFeedback} setStep={setStep} onSubmit={onSubmit} />
-            ) : (
-              <Stage2 setStep={setStep} handleClose={handleClose} />
-            )}
-          </S.StyleStages>
+          <Box sx={{ position: 'relative'}}>
+            <S.StyleStages>
+              {step === 0 ? (
+                <Stage0 setShowFeedback={setShowFeedback} setStep={setStep}/>
+              ) : step === 1 ? (
+                <Stage1 setShowFeedback={setShowFeedback} setStep={setStep} onSubmit={onSubmit} />
+              ) : (
+                <Stage2 setStep={setStep} handleClose={handleClose} />
+              )}
+            </S.StyleStages>
+            <S.ContentCircles>
+              {[0, 1, 2].map((item) => <S.Circle active={item === step}/> )}
+            </S.ContentCircles>
+          </Box>
         </Fade>
       ) : null }
     </>

@@ -30,10 +30,10 @@ const CssTextField = styled(TextField)({
       borderColor: 'transparent',
     },
     '&:hover fieldset': {
-      borderColor: 'rgba(255, 255, 255, 0.2)',
+      // borderColor: 'rgba(255, 255, 255, 0.2)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: 'rgba(255, 255, 255, 0.2)',
+      // borderColor: 'rgba(255, 255, 255, 0.2)',
     },
   },
 });
@@ -48,15 +48,14 @@ function Input({
   unit,
   value,
   onChange,
-  paste,
-  className,
+  // paste,
+  // className,
   maxValue,
-  small,
+  // small,
   fullWidth,
   size,
-  variant
+  variant,
 }) {
-  console.log("fullWidth", fullWidth)
   async function handlePaste() {
     try {
       const text = await navigator.clipboard.readText()
@@ -94,21 +93,24 @@ function Input({
               size={size}
               id="custom-css-outlined-input"
               variant={variant}
+              error={overMax}
             />
             {/* </div> */}
         </Grid>
         {unit && (
           <Grid item xs={6}>
-            <Box sx={{display: 'flex', flexDirection: 'column', gap: '5px'}}>
+            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px'}}>
                 {/* {unit} */}
-              <Typography variant="body2" component="p" sx={{opacity: 0.5}}>
+              <Typography variant="body2" component="p" sx={{opacity: 0.5, textAlign: "end"}}>
                 Available: {Number(maxValue).toFixed(3)}
               </Typography>
 
               {maxValue && value !== maxValue && (
-                <Button onClick={handleMaxClick} variant="small" >
-                  Use All
-                </Button>
+                <Box>
+                  <Button onClick={handleMaxClick} variant="small" >
+                    Use All
+                  </Button>
+                </Box>
               )}
             </Box>
           </Grid>
