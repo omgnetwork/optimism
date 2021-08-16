@@ -37,5 +37,7 @@ module.exports = {
   },
   namedAccounts: {
     deployer: 0
-  },
+  },mocha: {
+    timeout: 300000
+  }
 }

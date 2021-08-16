@@ -8,6 +8,10 @@ const { runOrCatchError } = require('@codechecks/client/dist/utils');
 require('dotenv').config();
 const env = process.env;
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 /* Internal Imports */
 const factory = (name) => {
     const artifact = require(`../artifacts-ovm/contracts/${name}.sol/${name}.json`);
@@ -380,6 +384,7 @@ describe('Testing BobaChef Contract', () => {
                 await tx1.wait();
                 const txHashPrefix1 = tx1.hash.slice(0, 2);
                 expect(txHashPrefix1).to.eq('0x');
+                sleep(1000);
             }
             const flavorIndex = await BobaChef.connect(wallet1).flavorIndex();
             expect(flavorIndex).to.eq(10);
@@ -394,12 +399,13 @@ describe('Testing BobaChef Contract', () => {
             }
         });
         it(`Should only be able to add ten toppings`, async () => {
-            const existing_toppings = [toppingStruct3, toppingStruct4, topping1, topping3];
+            const existing_toppings = [toppingStruct3, toppingStruct4, toppingStruct1, toppingStruct3];
             for(let i = 0; i < 7; i++){
                 const tx1 = await BobaChef.connect(wallet1).addTopping(existing_toppings[i % existing_toppings.length]);
                 await tx1.wait();
                 const txHashPrefix1 = tx1.hash.slice(0, 2);
                 expect(txHashPrefix1).to.eq('0x');
+                sleep(1000);
             }
             const toppingIndex = await BobaChef.connect(wallet1).toppingIndex();
             expect(toppingIndex).to.eq(10);
