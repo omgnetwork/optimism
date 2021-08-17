@@ -16,6 +16,12 @@ limitations under the License. */
 import PageHeader from 'components/pageHeader/PageHeader';
 import StyledTabs from 'components/tabs';
 import StyledTable from 'components/table';
+import { Typography, Grid, Box } from '@material-ui/core';
+import Input from 'components/input/Input';
+
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+
 import React, { useState } from 'react';
 import {
   PageContent,
@@ -44,18 +50,19 @@ function HistoryPage() {
   const [selectedTab, setSelectedTab] = useState(0);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const tabList = ['All', 'Deposits', 'Exits']
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual);
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
-    
-  const transactions = orderedTransactions.filter((i)=>{
-    if(startDate && endDate) {
+
+  const transactions = orderedTransactions.filter((i) => {
+    if (startDate && endDate) {
       return (moment.unix(i.timeStamp).isSameOrAfter(startDate) && moment.unix(i.timeStamp).isSameOrBefore(endDate));
     }
     return true;
-  })  
+  })
 
   const currentNetwork = useSelector(selectNetwork());
 
@@ -76,7 +83,7 @@ function HistoryPage() {
     });
   }, POLL_INTERVAL * 2);
 
-  console.log(transactions);
+  console.log(['transactions', transactions]);
 
   const onTabChagne = (event, newValue) => {
     console.log([event, newValue]);
@@ -86,13 +93,44 @@ function HistoryPage() {
   return (
     <PageContent>
       <PageHeader title="Transaction History" />
-      <StyledTabs
-        selectedTab={selectedTab}
-        onChange={onTabChagne}
-        optionList={tabList}
-        isSearch={true}
-      />
-      {tabList[selectedTab] === 'All' ?
+      <Grid
+        justifyContent="space-between"
+        display="flex"
+      >
+        <StyledTabs
+          selectedTab={selectedTab}
+          onChange={onTabChagne}
+          optionList={tabList}
+          isSearch={true}
+        />
+        <Box display="flex" 
+          alignItems="center"
+          justifyContent="space-around"
+          >
+          <Box style={{marginRight:'10px'}}>
+            <span style={{marginRight: '10px'}}> Show period from</span>
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              selectsStart
+              startDate={startDate}
+              endDate={endDate}
+            />
+          </Box>
+          <Box>
+          <span style={{marginRight: '10px'}}> To </span>
+            <DatePicker
+              selected={endDate}
+              onChange={(date) => setEndDate(date)}
+              selectsEnd
+              startDate={startDate}
+              endDate={endDate}
+              minDate={startDate}
+            />
+          </Box>
+        </Box>
+      </Grid>
+      {tabList[selectedTab] === 'All' && transactions && transactions.length > 0 ?
         <Transactions
           transactions={transactions}
           chainLink={chainLink}
@@ -100,14 +138,14 @@ function HistoryPage() {
       }
       {tabList[selectedTab] === 'Deposits' ?
         <Deposits
-        transactions={transactions}
-        chainLink={chainLink}
+          transactions={transactions}
+          chainLink={chainLink}
         /> : null
       }
       {tabList[selectedTab] === 'Exits' ?
-        <Exits 
-        transactions={transactions}
-        chainLink={chainLink}
+        <Exits
+          transactions={transactions}
+          chainLink={chainLink}
         /> : null
       }
     </PageContent>

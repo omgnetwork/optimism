@@ -41,6 +41,7 @@ import MainMenu from 'components/mainMenu/MainMenu';
 import { Box } from '@material-ui/core';
 import MobileNav from 'components/mainMenu/mobileNav/MobileNav';
 import { routeConfig } from './route.config';
+import Layout from './layout';
 
 function App () {
   const dispatch = useDispatch();
@@ -230,7 +231,9 @@ function App () {
                 <Switch>
                   {
                     routeConfig.map((routeProps)=> {
-                      return <Route {...routeProps} enabled={enabled} onEnable={setEnabled} key={routeProps.path} />
+                      return <Layout enabled={enabled} onEnable={setEnabled} {...routeProps}/>;
+                      
+                      // <Route {...routeProps} enabled={enabled} onEnable={setEnabled} key={routeProps.path} />
                     })
                   }
                   {/* <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />} /> */}

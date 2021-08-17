@@ -27,6 +27,7 @@ function StyledTabs({
         <Box
             sx={{
                 display: 'flex',
+                flex:1,
                 justifyContent: 'flex-start',
                 alignItems: 'center'
             }}
