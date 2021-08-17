@@ -12,7 +12,6 @@ import UpIcon from 'components/icons/UpIcon';
 import moment from 'moment';
 import truncate from 'truncate-middle';
 
-
 import {
     CellSubTitle, CellTitle,
     StyledTableCell,
@@ -21,7 +20,6 @@ import {
 
 
 function TransactionTableRow({ ...data }) {
-
     // console.log(data);
 
     const [expandRow, setExpandRow] = useState(false);
@@ -208,7 +206,7 @@ function TransactionTableRow({ ...data }) {
 export default TransactionTableRow;
 
 
-/* 
+/*
 blockHash: "0xacae9c9e92199ece44055bca7340c6df267b5aaa51c0b88eaa14b163667ef24c"
 blockNumber: "9128892"
 chain: "L1"

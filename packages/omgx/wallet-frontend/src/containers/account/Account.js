@@ -30,12 +30,16 @@ import networkService from 'services/networkService'
 
 import bunny_sad from 'images/bunny_sad.svg'
 
-import * as styles from './Account.module.scss'
+import * as S from './Account.styles'
 import { selectTokens } from 'selectors/tokenSelector'
 import PageHeader from 'components/pageHeader/PageHeader'
 import { Box, Grid, Paper, Typography } from '@material-ui/core'
 import { fetchGas, fetchLookUpPrice } from 'actions/networkAction'
 import { selectNetwork } from 'selectors/setupSelector'
+import SearchIcon from 'components/icons/SearchIcon'
+import { WrapperHeading } from './Account.styles'
+import { useTheme } from '@emotion/react'
+import { tableHeadList } from './tableHeadList'
 
 function Account () {
   const dispatch = useDispatch();
@@ -74,7 +78,7 @@ function Account () {
   useEffect(()=>{
     getLookupPrice();
     getGasPrice()
-  },[childBalance, rootBalance,getLookupPrice,getGasPrice])
+  },[childBalance, rootBalance, getLookupPrice, getGasPrice])
 
   const disabled = criticalTransactionLoading || !isSynced
 
@@ -91,6 +95,7 @@ function Account () {
     return acc;
   }, balances)
 
+  const theme = useTheme();
   return (
     <>
       <PageHeader title="Wallet"/>
@@ -120,10 +125,22 @@ function Account () {
         </div>
       } */}
 
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         <Grid item xs={6}>
-          <Paper sx={{ p: 4 }}>
-            <Typography variant="h3">Ethereum Mainnet - L1</Typography>
+          <Paper elevation={1} sx={{ p: 3 }}>
+            <S.WrapperHeading>
+              <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>Ethereum Mainnet - L1</Typography>
+              <SearchIcon color={theme.palette.secondary.main}/>
+            </S.WrapperHeading>
+
+            <S.TableHeading>
+              {tableHeadList.map((item) => {
+                return (
+                  <S.TableHeadingItem variant="body2" component="div" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2"}}>{item.label}</S.TableHeadingItem>
+                )
+              })}
+            </S.TableHeading>
+
             <Box>
               {rootBalance.map((i, index) => {
                 return (
@@ -139,9 +156,22 @@ function Account () {
             </Box>
           </Paper>
         </Grid>
+
         <Grid item xs={6}>
-          <Paper sx={{ p: 4 }}>
-            <Typography variant="h3">OMGX Mainnet - L2</Typography>
+          <Paper sx={{ p: 3 }}>
+            <S.WrapperHeading>
+              <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.2", fontWeight: "700"}}>OMGX Mainnet - L2</Typography>
+              <SearchIcon color={theme.palette.secondary.main}/>
+            </S.WrapperHeading>
+
+            <S.TableHeading sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.2"}}>
+              {tableHeadList.map((item) => {
+                return (
+                  <S.TableHeadingItem variant="body2" component="div">{item.label}</S.TableHeadingItem>
+                )
+              })}
+            </S.TableHeading>
+
             <Box>
               {childBalance.map((i, index) => {
                 return (

@@ -2,7 +2,6 @@ import React from 'react';
 import StyledTable from 'components/table'
 import L2ToL1Icon from 'components/icons/L2ToL1Icon';
 
-
 const tableHeadList = [
     {
         label: 'Transactions',
@@ -34,8 +33,9 @@ function Transactions({
     console.log(['FROM TRANSACTIONS TABS', transactions]);
     console.log(transactions[0]);
 
-    return (<>
-        <StyledTable  
+    return (
+    <>
+        <StyledTable
             chainLink
             tableHeadList={tableHeadList}
             isTransaction={true}
@@ -50,7 +50,7 @@ export default Transactions;
 
 
 
-/* 
+/*
 blockHash: "0xacae9c9e92199ece44055bca7340c6df267b5aaa51c0b88eaa14b163667ef24c"
 blockNumber: "9128892"
 chain: "L1"

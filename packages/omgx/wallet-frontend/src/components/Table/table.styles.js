@@ -17,7 +17,6 @@ color: rgba(255, 255, 255, 0.7);
 opacity: 0.9;
 `
 
-
 export const StyledTableRow = styled(TableRow)`
     padding: 0px 30px;
     &.expand{
@@ -34,7 +33,7 @@ export const StyledTableRow = styled(TableRow)`
         }
     }
     &.header{
-        
+
         th {
             box-shadow: none;
         }

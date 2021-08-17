@@ -8,17 +8,13 @@ import Button from 'components/button/Button';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-import * as styles from './listAccount.module.scss';
-import { Grid } from '@material-ui/core';
-
+import { Box, Typography } from '@material-ui/core';
+import * as S from './ListAccount.styles'
+import EthereumIcon from 'components/icons/EthereumIcon';
 class ListAccount extends React.Component {
-
   constructor(props) {
-
     super(props);
-
     const { token, chain, networkLayer, disabled } = this.props;
-
     this.state = {
       token,
       chain,
@@ -69,127 +65,141 @@ class ListAccount extends React.Component {
     const enabled = (networkLayer === chain) ? true : false
 
     return (
-      <div className={styles.ListAccount}>
+      <>
+        <S.Content>
+            <S.TableBody disabled={true}>
 
-        <div
-          className={styles.topContainer}
-          disabled={true}
-          onClick={()=>{
-              this.setState({
-                dropDownBox: !dropDownBox,
-                dropDownBoxInit: false
-              })
-          }}
-        >
-          <div className={styles.Table1}>
-            <div className={styles.BasicText}>{token.symbol}</div>
-          </div>
-          <div className={styles.Table2}>
-            <div className={styles.BasicLightText}>{`${logAmount(token.balance, 18, 2)}`}</div>
-          </div>
-          <div className={styles.Table3}>
-            {chain === 'L1' &&
-              <div className={enabled ? styles.LinkText : styles.LinkTextOff}>Deposit</div>
-            }
-            {chain === 'L2' &&
-              <div className={enabled ? styles.LinkText : styles.LinkTextOff}>Transact</div>
-            }
-            <ExpandMoreIcon
-              className={enabled ? styles.LinkButton : styles.LinkButtonOff}
-            />
-          </div>
-        </div>
+              <S.TableCell sx={{gap: "5px"}}>
+                <EthereumIcon width={42} height={42}/>
+                <Typography variant="body2" component="div">
+                  {token.symbol}
+                </Typography>
+              </S.TableCell>
 
-        {/*********************************************/
-        /**************  Drop Down Box ****************/
-        /**********************************************/
-        }
-        <div
-          className={dropDownBox ?
-            styles.dropDownContainer: dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
-        >
+              <S.TableCell>
+                <Typography variant="body2" component="div" sx={{fontWeight:"700"}}>
+                  {`${logAmount(token.balance, 18, 2)}`}
+                </Typography>
+              </S.TableCell>
 
-          {!enabled && chain === 'L1' &&
-            <div className={styles.boxContainer}>
-              <div className={styles.underRed}>MetaMask is set to L2. To transact on L1, please change the chain in MetaMask to L1.</div>
-            </div>
+              <S.TableCell>
+                <Typography variant="body2" component="div" sx={{fontWeight:"700"}}>
+                  $ 26.43
+                </Typography>
+              </S.TableCell>
+
+              <S.TableCell>
+                <Typography variant="body2" component="div" sx={{fontWeight:"700"}}>
+                  $ 1,556,43
+                </Typography>
+              </S.TableCell>
+
+              <S.TableCell
+                onClick={() => {
+                  this.setState({
+                    dropDownBox: !dropDownBox,
+                    dropDownBoxInit: false
+                  })
+                }}
+                sx={{cursor: "pointer"}}
+              >
+                {chain === 'L1' &&
+                  <Typography variant="body2" component="div" sx={{opacity: !enabled ? "0.2" : "1.0"}}>
+                    Deposit
+                  </Typography>
+                }
+                {chain === 'L2' &&
+                  <Typography variant="body2" component="div" sx={{opacity: !enabled ? "0.2" : "1.0"}}>
+                    Transact
+                  </Typography>
+                }
+                <Box sx={{display: "flex", opacity: !enabled ? "0.2" : "1.0", transform: dropDownBox ? "rotate(-180deg)" : ""}}>
+                  <ExpandMoreIcon sx={{width: "12px"}}/>
+                </Box>
+              </S.TableCell>
+            </S.TableBody>
+
+          {/*********************************************/
+          /**************  Drop Down Box ****************/
+          /**********************************************/
           }
 
-          {!enabled && chain === 'L2' &&
-            <div className={styles.boxContainer}>
-              <div className={styles.underRed}>MetaMask is set to L1. To transact on L2, please change the chain in MetaMask to L2.</div>
-            </div>
-          }
+          {dropDownBox ? (
+          <S.DropdownWrapper>
+            {!enabled && chain === 'L1' &&
+              <Box>
+                <Typography variant="body2" component="p">
+                    MetaMask is set to L2. To transact on L1, please change the chain in MetaMask to L1.
+                </Typography>
+            </Box>
+            }
 
-          {enabled && chain === 'L1' &&
-          <>
-            <Grid container spacing={1}>
-              <Grid item xs={6}>
+            {!enabled && chain === 'L2' &&
+              <Box>
+                <Typography variant="body2" component="p">
+                  MetaMask is set to L1. To transact on L2, please change the chain in MetaMask to L2.
+                </Typography>
+              </Box>
+            }
+
+            {enabled && chain === 'L1' &&
+            <>
+              <Button
+                onClick={()=>{this.handleModalClick('depositModal', token, false)}}
+                color='neutral'
+                variant="outlined"
+                disabled={disabled}
+                fullWidth
+              >
+                Deposit
+              </Button>
+
+              <Button
+                onClick={()=>{this.handleModalClick('depositModal', token, true)}}
+                color='primary'
+                disabled={disabled}
+                variant="contained"
+                fullWidth
+              >
+                Fast Deposit
+              </Button>
+            </>
+            }
+
+            {enabled && chain === 'L2' &&
+              <>
                 <Button
-                  onClick={()=>{this.handleModalClick('depositModal', token, false)}}
-                  color='neutral'
+                  onClick={()=>{this.handleModalClick('exitModal', token, false)}}
                   variant="outlined"
                   disabled={disabled}
                   fullWidth
-                  // style={{width: '100px', padding: '6px', borderRadius: '5px'}}
                 >
-                  Deposit
+                  Standart Exit
                 </Button>
-              </Grid>
-              <Grid item xs={6}>
+
                 <Button
-                  onClick={()=>{this.handleModalClick('depositModal', token, true)}}
-                  color='primary'
-                  disabled={disabled}
+                  onClick={()=>{this.handleModalClick('exitModal', token, true)}}
                   variant="contained"
+                  disabled={disabled}
                   fullWidth
-                  // style={{width: '120px', padding: '6px', borderRadius: '5px'}}
                 >
-                  Fast Deposit
+                  Fast Exit
                 </Button>
-              </Grid>
-            </Grid>
-          </>
-          }
 
-          {enabled && chain === 'L2' &&
-          <>
-            <div className={styles.boxContainer}>
-              <Button
-                onClick={()=>{this.handleModalClick('transferModal', token, false)}}
-                type='primary'
-                disabled={disabled}
-                style={{width: '90px', padding: '6px',borderRadius: '5px'}}
-              >
-                TRANSFER
-              </Button>
-            </div>
-            <div className={styles.boxContainer}>
-              <Button
-                onClick={()=>{this.handleModalClick('exitModal', token, false)}}
-                type='secondary'
-                disabled={disabled}
-                style={{width: '100px', padding: '6px',borderRadius: '5px'}}
-              >
-                7 DAY EXIT
-              </Button>
-            </div>
-            <div className={styles.boxContainer}>
-              <Button
-                onClick={()=>{this.handleModalClick('exitModal', token, true)}}
-                type='primary'
-                disabled={disabled}
-                style={{width: '90px', padding: '6px',borderRadius: '5px'}}
-              >
-                FAST EXIT
-              </Button>
-            </div>
-          </>
-          }
-
-        </div>
-
-      </div>
+                <Button
+                  onClick={()=>{this.handleModalClick('transferModal', token, false)}}
+                  variant="contained"
+                  disabled={disabled}
+                  fullWidth
+                >
+                  Transfer
+                </Button>
+              </>
+            }
+          </S.DropdownWrapper>
+          ) : null}
+        </S.Content>
+      </>
     )
   }
 }
