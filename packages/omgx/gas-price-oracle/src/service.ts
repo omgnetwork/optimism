@@ -1,5 +1,5 @@
 /* Imports: External */
-import { Contract, Wallet, BigNumber, providers } from 'ethers'
+import { Contract, Wallet, BigNumber, providers, utils } from 'ethers'
 import fs, { promises as fsPromise } from 'fs';
 import path from 'path'
 
@@ -185,7 +185,7 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
       network: "L1",
       data: {
         L1ETHBalance: this.state.L1ETHBalance.toString(),
-        L1ETHCostFee: this.state.L1ETHCostFee.toString(),
+        L1ETHCostFee: Number(utils.formatEther(this.state.L1ETHCostFee.toString()).slice(0, 8)),
         latestQueriedL1Block: this.state.lastQueriedL1Block,
       }
     })
@@ -218,7 +218,7 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
     this.logger.info("Got L2 Gas Cost", {
       network: "L2",
       data: {
-        L2ETHCollectFee: this.state.L2ETHCollectFee.toString(),
+        L2ETHCollectFee: Number(utils.formatEther(this.state.L2ETHCollectFee.toString()).slice(0, 8)),
         lastQueriedL2Block: this.state.lastQueriedL2Block,
         avgL2GasUsagePerBlock: this.state.avgL2GasLimitPerBlock.toString(),
         numberOfBlocksInterval: this.state.numberOfBlocksInterval,
