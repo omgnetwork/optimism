@@ -217,7 +217,14 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     }
     this.metrics.numTxPerBatch.observe(endBlock - startBlock)
     const l1tipHeight = await this.signer.provider.getBlockNumber()
-    this.logger.debug('Submitting batch.', {
+    this.logger.info('Submitting tx_chain batch', {
+      startBlock,
+      endBlock,
+      l1tipHeight,
+      batchStart:batchParams.shouldStartAtElement,
+      batchElements:batchParams.totalElementsToAppend
+    })
+    this.logger.info('Submitting batch.', {
       calldata: batchParams,
       l1tipHeight,
     })
