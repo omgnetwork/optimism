@@ -13,851 +13,103 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import {
-  Box, Button, Collapse, Grid, Tab, Table, TableBody, TableContainer, TableHead, Tabs, Typography
-} from '@material-ui/core';
-import DownIcon from 'components/icons/DownIcon';
-import L2ToL1Icon from 'components/icons/L2ToL1Icon';
-import LinkIcon from 'components/icons/LinkIcon';
-import SearchIcon from 'components/icons/SearchIcon';
-import SortIcon from 'components/icons/SortIcon';
-import UpIcon from 'components/icons/UpIcon';
 import PageHeader from 'components/pageHeader/PageHeader';
+import StyledTabs from 'components/tabs';
+import StyledTable from 'components/table';
 import React, { useState } from 'react';
 import {
-  CellSubTitle, CellTitle, PageContent, StyledTableCell,
-  StyledTableRow
+  PageContent,
 } from '../page.style';
+import { batch, useDispatch } from 'react-redux';
+import { isEqual, orderBy } from 'lodash';
+import { useSelector } from 'react-redux';
+import moment from 'moment';
+import { setActiveHistoryTab1 } from 'actions/uiAction'
+import { setActiveHistoryTab2 } from 'actions/uiAction'
+import { fetchTransactions } from 'actions/networkAction';
 
+import { selectActiveHistoryTab1 } from 'selectors/uiSelector'
+import { selectActiveHistoryTab2 } from 'selectors/uiSelector'
+import { selectTransactions } from 'selectors/transactionSelector';
+import { selectNetwork } from 'selectors/setupSelector'
+import { getAllNetworks } from 'util/masterConfig';
+import useInterval from 'util/useInterval';
+import Transactions from 'containers/history/transactions';
+import Deposits from 'containers/history/deposits';
+import Exits from 'containers/history/exits';
+import { POLL_INTERVAL } from 'util/constant';
 
 function HistoryPage() {
+  const dispatch = useDispatch();
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
-  const [currentTab, setCurrentTab] = useState(0);
-  const [expandRow, setExpandRow] = useState(false);
+  const tabList = ['All', 'Deposits', 'Exits']
 
-  const historyTabs = ['All', 'Deposits', 'Exits']
+  const unorderedTransactions = useSelector(selectTransactions, isEqual);
+  const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
+    
+  const transactions = orderedTransactions.filter((i)=>{
+    if(startDate && endDate) {
+      return (moment.unix(i.timeStamp).isSameOrAfter(startDate) && moment.unix(i.timeStamp).isSameOrBefore(endDate));
+    }
+    return true;
+  })  
 
-  const handleTabChange = (event, newValue) => {
+  const currentNetwork = useSelector(selectNetwork());
+
+  const nw = getAllNetworks();
+
+  const chainLink = (item) => {
+    let network = nw[currentNetwork];
+    if (!!network && !!network[item.chain]) {
+      // network object should have L1 & L2
+      return `${network[item.chain].transaction}${item.hash}`;
+    }
+    return '';
+  }
+
+  useInterval(() => {
+    batch(() => {
+      dispatch(fetchTransactions());
+    });
+  }, POLL_INTERVAL * 2);
+
+  console.log(transactions);
+
+  const onTabChagne = (event, newValue) => {
     console.log([event, newValue]);
-    setCurrentTab(newValue);
+    setSelectedTab(newValue);
   }
 
   return (
     <PageContent>
       <PageHeader title="Transaction History" />
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-start',
-          alignItems: 'center'
-        }}
-      >
-
-        <Tabs value={currentTab}
-          indicatorColor="primary"
-          textColor="primary"
-          onChange={handleTabChange}
-          aria-label="transaction tabs"
-        >
-          {historyTabs.map((label) => (<Tab
-            sx={{
-              maxWidth: 'unset',
-              minWidth: 'unset',
-              alignItems: 'flex-start',
-              margin: '0px 5px',
-              height: '24px',
-              fontWeight: 'normal',
-              fontSize: '24px',
-              lineHeight: '24px',
-              textTransform: 'capitalize'
-            }}
-            label={label} />))}
-        </Tabs>
-        <SearchIcon color="#F0A000" />
-      </Box>
-
-      <TableContainer
-        sx={{
-          marginTop: '30px',
-          textAlign: 'left',
-          width: '100%',
-          background: 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)',
-          borderRadius: '8px',
-          padding: '20px 0px'
-        }}
-      >
-        <Table>
-          <TableHead
-            sx={{
-              padding: '0px 55px',
-            }}
-          >
-            <StyledTableRow
-              className="header"
-            >
-              <StyledTableCell color="rgba(255, 255, 255, 0.7)">
-                <Grid
-                  container
-                  direction='row'
-                  justify='space-between'
-                  alignItems='center'
-                >
-                  <span>Transaction</span>
-                </Grid>
-              </StyledTableCell>
-              <StyledTableCell color="rgba(255, 255, 255, 0.7)">
-                <Grid
-                  container
-                  direction='row'
-                  justify='space-around'
-                  alignItems='center'
-                >
-                  <span
-                    style={{
-                      marginRight: '5px'
-                    }}
-                  >Result</span>
-                  <SortIcon />
-                </Grid>
-              </StyledTableCell>
-              <StyledTableCell color="rgba(255, 255, 255, 0.7)">
-                <Grid
-                  container
-                  direction='row'
-                  justify='space-around'
-                  alignItems='center'
-                >
-                  <span
-                    style={{
-                      marginRight: '5px'
-                    }}
-                  >My Deposits</span>
-                  <SortIcon />
-                </Grid>
-              </StyledTableCell>
-              <StyledTableCell color="rgba(255, 255, 255, 0.7)">
-                <Grid
-                  container
-                  direction='row'
-                  justify='space-around'
-                  alignItems='center'
-                >
-                  <span
-                    style={{
-                      marginRight: '5px'
-                    }}
-                  >External Information</span>
-                  <SortIcon />
-                </Grid>
-              </StyledTableCell>
-              <StyledTableCell color="rgba(255, 255, 255, 0.7)">
-                <Grid
-                  container
-                  direction='row'
-                  justify='space-between'
-                  alignItems='center'
-                >
-                  <span>More</span>
-                </Grid>
-              </StyledTableCell>
-            </StyledTableRow>
-          </TableHead>
-          <TableBody>
-            <>
-              <StyledTableRow
-                className={!!expandRow ? 'expand' : ''}
-              >
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <L2ToL1Icon />
-                    <Box
-                      sx={{
-                        marginLeft: '30px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <CellTitle> L2 - L1 Exit </CellTitle>
-                      <CellSubTitle> Fast Offramp </CellSubTitle>
-                    </Box>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <CellTitle color="#06D3D3"> Swapped </CellTitle>
-                      <CellSubTitle> Aug 6, 2021 11:56 AM </CellSubTitle>
-                    </Box>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <CellTitle> Block 9066690 </CellTitle>
-                      <CellSubTitle> Block 9066690 </CellSubTitle>
-                    </Box>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <Button
-                      startIcon={<LinkIcon />}
-                      variant="outlined"
-                      color="primary">
-                      Advanced Details
-                    </Button>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    sx={{
-                      cursor: 'pointer'
-                    }}
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                    onClick={() => setExpandRow(!expandRow)}
-                  >
-
-                    {
-                      !!expandRow ?
-                        <UpIcon /> : <DownIcon />
-                    }
-                  </Grid>
-                </StyledTableCell>
-              </StyledTableRow>
-
-              <StyledTableRow
-                className={!!expandRow ? "detail" : 'hidden'}
-              >
-                <StyledTableCell
-                  colSpan="5"
-                >
-                  <Collapse
-                    in={expandRow}
-                  >
-
-                    <Box
-                      sx={{
-                        background: 'rgba(9, 22, 43, 0.5)',
-                        borderRadius: '12px',
-                        padding: '30px',
-                      }}
-                    >
-
-                      <Grid container>
-                        <Grid item xs={12}>
-                          <Typography variant="body1">
-                            0xb62379...de1be9
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            L1 Block
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            9066690
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            Block Has
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            0xb62379edc2c76cbe24a01885ce92dd3c3690b5f3a425ba2955abfbae60de1be9
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            L1 From
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            0xbfcea3b73312c77edf5158812fac88871c50004c
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            L1 To
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            0x2c12649a5a4fc61f146e0a3409f3e4c7fbed15dc
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  </Collapse>
-                </StyledTableCell>
-              </StyledTableRow>
-            </>
-            <>
-              <StyledTableRow
-                className={!!expandRow ? 'expand' : ''}
-              >
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <L2ToL1Icon />
-                    <Box
-                      sx={{
-                        marginLeft: '30px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <CellTitle> L2 - L1 Exit </CellTitle>
-                      <CellSubTitle> Fast Offramp </CellSubTitle>
-                    </Box>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <CellTitle color="#06D3D3"> Swapped </CellTitle>
-                      <CellSubTitle> Aug 6, 2021 11:56 AM </CellSubTitle>
-                    </Box>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <CellTitle> Block 9066690 </CellTitle>
-                      <CellSubTitle> Block 9066690 </CellSubTitle>
-                    </Box>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <Button
-                      startIcon={<LinkIcon />}
-                      variant="outlined"
-                      color="primary">
-                      Advanced Details
-                    </Button>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    sx={{
-                      cursor: 'pointer'
-                    }}
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                    onClick={() => setExpandRow(!expandRow)}
-                  >
-
-                    {
-                      !!expandRow ?
-                        <UpIcon /> : <DownIcon />
-                    }
-                  </Grid>
-                </StyledTableCell>
-              </StyledTableRow>
-
-              <StyledTableRow
-                className={!!expandRow ? "detail" : 'hidden'}
-              >
-                <StyledTableCell
-                  colSpan="5"
-                >
-                  <Collapse
-                    in={expandRow}
-                  >
-
-                    <Box
-                      sx={{
-                        background: 'rgba(9, 22, 43, 0.5)',
-                        borderRadius: '12px',
-                        padding: '30px',
-                      }}
-                    >
-
-                      <Grid container>
-                        <Grid item xs={12}>
-                          <Typography variant="body1">
-                            0xb62379...de1be9
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            L1 Block
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            9066690
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            Block Has
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            0xb62379edc2c76cbe24a01885ce92dd3c3690b5f3a425ba2955abfbae60de1be9
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            L1 From
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            0xbfcea3b73312c77edf5158812fac88871c50004c
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            L1 To
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            0x2c12649a5a4fc61f146e0a3409f3e4c7fbed15dc
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  </Collapse>
-                </StyledTableCell>
-              </StyledTableRow>
-            </>
-            <>
-              <StyledTableRow
-                className={!!expandRow ? 'expand' : ''}
-              >
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <L2ToL1Icon />
-                    <Box
-                      sx={{
-                        marginLeft: '30px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <CellTitle> L2 - L1 Exit </CellTitle>
-                      <CellSubTitle> Fast Offramp </CellSubTitle>
-                    </Box>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <CellTitle color="#06D3D3"> Swapped </CellTitle>
-                      <CellSubTitle> Aug 6, 2021 11:56 AM </CellSubTitle>
-                    </Box>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <CellTitle> Block 9066690 </CellTitle>
-                      <CellSubTitle> Block 9066690 </CellSubTitle>
-                    </Box>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <Button
-                      startIcon={<LinkIcon />}
-                      variant="outlined"
-                      color="primary">
-                      Advanced Details
-                    </Button>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    sx={{
-                      cursor: 'pointer'
-                    }}
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                    onClick={() => setExpandRow(!expandRow)}
-                  >
-
-                    {
-                      !!expandRow ?
-                        <UpIcon /> : <DownIcon />
-                    }
-                  </Grid>
-                </StyledTableCell>
-              </StyledTableRow>
-
-              <StyledTableRow
-                className={!!expandRow ? "detail" : 'hidden'}
-              >
-                <StyledTableCell
-                  colSpan="5"
-                >
-                  <Collapse
-                    in={expandRow}
-                  >
-
-                    <Box
-                      sx={{
-                        background: 'rgba(9, 22, 43, 0.5)',
-                        borderRadius: '12px',
-                        padding: '30px',
-                      }}
-                    >
-
-                      <Grid container>
-                        <Grid item xs={12}>
-                          <Typography variant="body1">
-                            0xb62379...de1be9
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            L1 Block
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            9066690
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            Block Has
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            0xb62379edc2c76cbe24a01885ce92dd3c3690b5f3a425ba2955abfbae60de1be9
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            L1 From
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            0xbfcea3b73312c77edf5158812fac88871c50004c
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            L1 To
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            0x2c12649a5a4fc61f146e0a3409f3e4c7fbed15dc
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  </Collapse>
-                </StyledTableCell>
-              </StyledTableRow>
-            </>
-            <>
-              <StyledTableRow
-                className={!!expandRow ? 'expand' : ''}
-              >
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <L2ToL1Icon />
-                    <Box
-                      sx={{
-                        marginLeft: '30px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <CellTitle> L2 - L1 Exit </CellTitle>
-                      <CellSubTitle> Fast Offramp </CellSubTitle>
-                    </Box>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <CellTitle color="#06D3D3"> Swapped </CellTitle>
-                      <CellSubTitle> Aug 6, 2021 11:56 AM </CellSubTitle>
-                    </Box>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <CellTitle> Block 9066690 </CellTitle>
-                      <CellSubTitle> Block 9066690 </CellSubTitle>
-                    </Box>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                  >
-                    <Button
-                      startIcon={<LinkIcon />}
-                      variant="outlined"
-                      color="primary">
-                      Advanced Details
-                    </Button>
-                  </Grid>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <Grid
-                    sx={{
-                      cursor: 'pointer'
-                    }}
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                    onClick={() => setExpandRow(!expandRow)}
-                  >
-
-                    {
-                      !!expandRow ?
-                        <UpIcon /> : <DownIcon />
-                    }
-                  </Grid>
-                </StyledTableCell>
-              </StyledTableRow>
-
-              <StyledTableRow
-                className={!!expandRow ? "detail" : 'hidden'}
-              >
-                <StyledTableCell
-                  colSpan="5"
-                >
-                  <Collapse
-                    in={expandRow}
-                  >
-
-                    <Box
-                      sx={{
-                        background: 'rgba(9, 22, 43, 0.5)',
-                        borderRadius: '12px',
-                        padding: '30px',
-                      }}
-                    >
-
-                      <Grid container>
-                        <Grid item xs={12}>
-                          <Typography variant="body1">
-                            0xb62379...de1be9
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            L1 Block
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            9066690
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            Block Has
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            0xb62379edc2c76cbe24a01885ce92dd3c3690b5f3a425ba2955abfbae60de1be9
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            L1 From
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            0xbfcea3b73312c77edf5158812fac88871c50004c
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={2}>
-                          <Typography variant="body1">
-                            L1 To
-                          </Typography>
-                        </Grid>
-                        <Grid xs={10}>
-                          <Typography variant="body1" className="value" >
-                            0x2c12649a5a4fc61f146e0a3409f3e4c7fbed15dc
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  </Collapse>
-                </StyledTableCell>
-              </StyledTableRow>
-            </>
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <StyledTabs
+        selectedTab={selectedTab}
+        onChange={onTabChagne}
+        optionList={tabList}
+        isSearch={true}
+      />
+      {tabList[selectedTab] === 'All' ?
+        <Transactions
+          transactions={transactions}
+          chainLink={chainLink}
+        /> : null
+      }
+      {tabList[selectedTab] === 'Deposits' ?
+        <Deposits
+        transactions={transactions}
+        chainLink={chainLink}
+        /> : null
+      }
+      {tabList[selectedTab] === 'Exits' ?
+        <Exits 
+        transactions={transactions}
+        chainLink={chainLink}
+        /> : null
+      }
     </PageContent>
   );
 

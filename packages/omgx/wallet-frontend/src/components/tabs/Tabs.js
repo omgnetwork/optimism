@@ -17,6 +17,9 @@ import React from 'react';
 
 import * as styles from './Tabs.module.scss';
 
+
+// TODO @deprecated;
+// @deprecated;
 function Tabs ({ tabs, activeTab, onClick, className }) {
   return (
     <div className={[ styles.Tabs, className ].join(' ')}>

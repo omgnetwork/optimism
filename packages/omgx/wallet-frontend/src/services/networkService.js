@@ -622,7 +622,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
   }
 
   async getTransactions() {
-
+    console.log(['calling transactions', this.masterSystemConfig]);
     if (this.masterSystemConfig === 'rinkeby') {
       
       let txL1
