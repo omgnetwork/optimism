@@ -36,6 +36,9 @@ import * as S from './TransferModal.style';
 import BoxConfirmation from './boxConfirmation/BoxConfirmation';
 import { styled } from '@material-ui/core/styles';
 import { useTheme } from '@emotion/react';
+import AdressDisabled from 'components/adressDisabled/AdressDisabled';
+import truncate from 'truncate-middle';
+import SwapIcon from 'components/icons/SwapIcon';
 
 function TransferModal ({ open, token }) {
   const dispatch = useDispatch()
@@ -43,8 +46,10 @@ function TransferModal ({ open, token }) {
   const [ value, setValue ] = useState('')
   const [ recipient, setRecipient ] = useState('')
   const [ showFeedback, setShowFeedback] = useState(false);
+  const [ activeButton, setActiveButton ] = useState("slow");
 
   const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]));
+  const wAddress = networkService.account ? truncate(networkService.account, 6, 14, '.') : '';
 
   const lookupPrice = useSelector(selectLookupPrice);
   const theme = useTheme();
@@ -78,25 +83,44 @@ function TransferModal ({ open, token }) {
     !recipient
 
   function renderTransferScreen () {
-
     if(typeof(token) === 'undefined') return
 
     return (
       <>
         <S.StyleCreateTransactions>
-          <Grid container spacing={8}>
-            <Grid item xs={6}>
+          <Grid container>
+            <Grid item xs={5}>
               <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px"}}>
                 <Typography variant="h2" component="h2">From ETH Mainnet</Typography>
                 <NetworkSwitcherIcon active />
               </Box>
-              <Typography variant="body1" component="span" sx={{opacity: 0.5}}>Select Token</Typography>
-              <div className={styles.address}>
-                {`From address: ${networkService.account}`}
-              </div>
+              <Typography variant="body2" component="div" sx={{opacity: 0.5}}>Select Token</Typography>
+
+              <Grid container>
+                <Grid item xs={4}>
+                  <Box sx={{ background: "#121e30", borderRight: "1px solid #2F2E40", height: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
+                    {token.symbol}
+                  </Box>
+                </Grid>
+
+                <Grid item xs={8}>
+                  <AdressDisabled>
+                    <Typography variant="body1" component="p">
+                      {wAddress}
+                    </Typography>
+                  </AdressDisabled>
+                </Grid>
+              </Grid>
             </Grid>
 
-            <Grid item xs={6}>
+            <Grid item xs={2}>
+              <S.SwapCircle>
+                <SwapIcon />
+              </S.SwapCircle>
+              <S.Line />
+            </Grid>
+
+            <Grid item xs={5}>
               <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px"}}>
                 <Typography variant="h2" component="h2">To OMGX Mainnet</Typography>
                 <NetworkSwitcherIcon />
@@ -110,7 +134,6 @@ function TransferModal ({ open, token }) {
                 // size="small"
               />
             </Grid>
-
           </Grid>
 
           <S.Balance>
@@ -128,18 +151,22 @@ function TransferModal ({ open, token }) {
                       maxValue={logAmount(token.balance, token.decimals)}
                       size="small"
                     />
+                    {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+                      <Typography variant="body2" component="p" sx={{opacity: 0.5, position: 'absolute'}}>
+                        {`($${amountToUsd(value, lookupPrice, token).toFixed(2)})`}
+                      </Typography>
+                    )}
                   </Box>
                 </S.ContentBalance>
               </Box>
 
               <Box sx={{ flexGrow: 0, flexShrink: 0 }}>
                 <S.TransactionsButton>
-                  <Button>Fast</Button>
-                  <Button onClick={() => setShowFeedback(true)}>
-                    <NetworkSwitcherIcon />
-                    <span>Bridge</span>
-                  </Button>
-                  <Button>Slow</Button>
+                  <S.FastButton active={activeButton} onClick={() => setActiveButton("fast")}>Fast</S.FastButton>
+                  <S.BridgeButton onClick={() => setShowFeedback(true)} >
+                    <Typography variant="body2" component="span">Bridge</Typography>
+                  </S.BridgeButton>
+                  <S.SlowButton active={activeButton} onClick={() => setActiveButton("slow")}>Slow</S.SlowButton>
                 </S.TransactionsButton>
               </Box>
 
@@ -158,12 +185,6 @@ function TransferModal ({ open, token }) {
             </Box>
           </S.Balance>
 
-          {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
-          <h3>
-            {`Amount to transfer ($${amountToUsd(value, lookupPrice, token).toFixed(2)})`}
-          </h3>
-        )}
-
         {/* <Button
           className={styles.button}
           onClick={()=>{submit({useLedgerSign: false})}}
@@ -175,7 +196,6 @@ function TransferModal ({ open, token }) {
         >
           TRANSFER
         </Button> */}
-
         </S.StyleCreateTransactions>
       </>
     );
@@ -184,7 +204,13 @@ function TransferModal ({ open, token }) {
   return (
     <Modal title="Create bridging transaction" open={open} transparent onClose={handleClose}>
       {renderTransferScreen()}
-      <BoxConfirmation showFeedback={showFeedback} setShowFeedback={setShowFeedback} handleClose={handleClose} onSubmit={() => { submit({useLedgerSign: false}) }} />
+      <BoxConfirmation
+        recipient={recipient}
+        value={value}
+        showFeedback={showFeedback}
+        setShowFeedback={setShowFeedback}
+        handleClose={handleClose}
+        onSubmit={() => {submit({useLedgerSign: false})}} />
     </Modal>
   );
 }

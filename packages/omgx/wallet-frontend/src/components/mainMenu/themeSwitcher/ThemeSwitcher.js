@@ -5,15 +5,7 @@ import React, { useEffect } from 'react';
 import * as S from './ThemeSwitcher.styles.js'
 import DarkIcon from 'components/icons/DarkIcon.js';
 import LightIcon from 'components/icons/LightIcon.js';
-import { Box } from '@material-ui/core';
 import { ReactComponent as ShadowMenu } from './../../../images/backgrounds/shadow-menu.svg';
-import { styled } from '@material-ui/system';
-
-const Style = styled(Box)`
-  position: absolute;
-  bottom: -40px;
-  left: -290px;
-`;
 
 function ThemeSwitcher ({ light, setLight }) {
   useEffect(() => {
@@ -28,9 +20,9 @@ function ThemeSwitcher ({ light, setLight }) {
       <S.Button onClick={() => setLight(true)} selected={light}>
         <LightIcon />
       </S.Button>
-      <Style>
+      <S.Shadow>
         <ShadowMenu height={250}/>
-      </Style>
+      </S.Shadow>
     </S.ThemeSwitcherTag>
   );
 }

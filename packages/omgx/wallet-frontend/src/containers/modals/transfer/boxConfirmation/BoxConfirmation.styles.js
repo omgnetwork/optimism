@@ -12,3 +12,21 @@ export const StyleStages = styled(Box)`
   padding: 20px 40px;
   margin-top: 30px;
 `;
+
+export const ContentCircles = styled(Box)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  bottom: 30px;
+  right: 70px;
+  gap: 5px;
+`;
+
+export const Circle = styled(Box)`
+  height: 7px;
+  width: 7px;
+  border-radius: 50%;
+  background-color: #fff;
+  opacity: ${props => props.active ? 0.8 : 0.2};
+`;

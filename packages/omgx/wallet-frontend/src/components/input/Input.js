@@ -16,28 +16,10 @@ limitations under the License. */
 import React from 'react'
 import { Search } from '@material-ui/icons'
 import BN from 'bignumber.js'
-
 import * as styles from './Input.module.scss'
+import { CssTextField } from './Input.styles'
 import Button from 'components/button/Button'
 import { Box, Grid, TextField, Typography } from '@material-ui/core'
-import { styled } from '@material-ui/core/styles';
-
-
-const CssTextField = styled(TextField)({
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    '& fieldset': {
-      borderColor: 'transparent',
-    },
-    '&:hover fieldset': {
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-  },
-});
-
 
 function Input({
   placeholder,
@@ -48,15 +30,14 @@ function Input({
   unit,
   value,
   onChange,
-  paste,
-  className,
+  // paste,
+  // className,
   maxValue,
-  small,
+  // small,
   fullWidth,
   size,
-  variant
+  variant,
 }) {
-  console.log("fullWidth", fullWidth)
   async function handlePaste() {
     try {
       const text = await navigator.clipboard.readText()
@@ -94,21 +75,23 @@ function Input({
               size={size}
               id="custom-css-outlined-input"
               variant={variant}
+              error={overMax}
             />
             {/* </div> */}
         </Grid>
         {unit && (
           <Grid item xs={6}>
-            <Box sx={{display: 'flex', flexDirection: 'column', gap: '5px'}}>
-                {/* {unit} */}
-              <Typography variant="body2" component="p" sx={{opacity: 0.5}}>
+            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px'}}>
+              <Typography variant="body2" component="p" sx={{opacity: 0.5, textAlign: "end"}}>
                 Available: {Number(maxValue).toFixed(3)}
               </Typography>
 
               {maxValue && value !== maxValue && (
-                <Button onClick={handleMaxClick} variant="small" >
-                  Use All
-                </Button>
+                <Box>
+                  <Button onClick={handleMaxClick} variant="small" >
+                    Use All
+                  </Button>
+                </Box>
               )}
             </Box>
           </Grid>
