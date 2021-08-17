@@ -26,7 +26,8 @@ export const Nav = styled.nav`
   }
 `;
 
-export const MenuItem = styled(Link)`
+// export const MenuItem = styled(Link)`
+export const MenuItem = styled.div`
   color: ${props => props.selected ? props.theme.palette.secondary.main : "inherit"};
   background: ${props => props.selected ? 'linear-gradient(90deg, rgba(237, 72, 240, 0.09) 1.32%, rgba(237, 72, 236, 0.0775647) 40.2%, rgba(240, 71, 213, 0) 71.45%)' : 'none'};
   display: flex;
@@ -37,6 +38,7 @@ export const MenuItem = styled(Link)`
   position: relative;
   margin-bottom: 1px;
   font-weight: ${props => props.selected ? 700 : 'normal'};
+  cursor: pointer;
   &:hover {
     color: ${props => props.theme.palette.secondary.main};
   }
@@ -58,4 +60,3 @@ export const Chevron = styled.img`
   height: 20px;
   margin-bottom: 0;
 `;
-

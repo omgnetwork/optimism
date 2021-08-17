@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 export const Menu = styled.div`
   flex: 0 0 260px;
   width: 260px;
-  padding-top: 70px;
+  padding-top: 40px;
   padding-left: 40px;
   ul {
     list-style-type: none;

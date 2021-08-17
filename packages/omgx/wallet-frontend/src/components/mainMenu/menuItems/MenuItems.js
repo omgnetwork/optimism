@@ -11,7 +11,7 @@ import WalletIcon from 'components/icons/WalletIcon';
 import HistoryIcon from 'components/icons/HistoryIcon';
 import chevron from 'images/chevron.svg';
 
-function MenuItems () {
+function MenuItems ({handleSetPage, pageDisplay}) {
   const [ openDropdown, setOpenDropdown ] = useState(['/pool', '/farm'].includes(window.location.pathname));
   const [ activeItem, setActiveItem ] = useState(false);
   const theme = useTheme();
@@ -33,15 +33,17 @@ function MenuItems () {
       <ul>
         {menuItems.map((item) => {
           const Icon = iconObj[item.icon];
-          const isActive = window.location.pathname === item.url;
+          // const isActive = window.location.pathname === item.url;
+          const isActive = pageDisplay === item.key;
           const title = item.title;
           return (
             <li key={title}>
               <S.MenuItem
-                onClick={() => item.items ? setOpenDropdown(!openDropdown) : null}
+                // onClick={() => item.items ? setOpenDropdown(!openDropdown) : null}
+                onClick={() => handleSetPage(item.key)}
                 onMouseEnter={() => setActiveItem(title)}
                 onMouseLeave={() => setActiveItem(false)}
-                to={item.url}
+                // to={item.url}
                 selected={isActive}
               >
                 <Icon color={isActive || activeItem === title ? theme.palette.secondary.main : colorIcon} />{item.title}

@@ -8,9 +8,7 @@ import LightIcon from 'components/icons/LightIcon.js';
 import { ReactComponent as ShadowMenu } from './../../../images/backgrounds/shadow-menu.svg';
 
 function ThemeSwitcher ({ light, setLight }) {
-  useEffect(() => {
-    localStorage.setItem('theme', light ? 'light' : 'dark');
-  }, [light]);
+  console.log('ThemeSwitcher', light, setLight)
 
   return (
     <S.ThemeSwitcherTag>

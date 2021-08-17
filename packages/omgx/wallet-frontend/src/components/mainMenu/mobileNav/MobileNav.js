@@ -1,6 +1,5 @@
 import React from 'react';
-import { ReactComponent as LogoDark } from './../../../images/logo-dark-omgx.svg';
-import { ReactComponent as LogoLight } from './../../../images/logo-light-omgx.svg';
+import { ReactComponent as Logo } from './../../../images/logo-boba.svg';
 import * as S from './MobileNav.styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import { Link } from 'react-router-dom';
@@ -24,11 +23,7 @@ function MobileNav ({ light }) {
       </Drawer>
 
       <Link to="/" style={{ display: "flex"}}>
-        {light ? (
-          <LogoDark width={100} />
-        ) : (
-          <LogoLight width={100} />
-        )}
+        <Logo width={100} />
       </Link>
     </S.MobileNavTag>
   );

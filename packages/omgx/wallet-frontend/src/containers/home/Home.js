@@ -55,13 +55,18 @@ import MobileMenu from 'components/mobilemenu/MobileMenu';
 import Farm from 'containers/farm/Farm';
 
 import * as styles from './Home.module.scss';
-import { Container } from '@material-ui/core';
+import { useTheme } from '@material-ui/core/styles';
+import { Box, Container, useMediaQuery } from '@material-ui/core';
+import MobileNav from 'components/mainMenu/mobileNav/MobileNav';
+import MainMenu from 'components/mainMenu/MainMenu';
 
 const POLL_INTERVAL = 5000; //milliseconds
 
 function Home () {
 
   const dispatch = useDispatch();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [ mobileMenuOpen, setMobileMenuOpen ] = useState(false)
 
@@ -124,10 +129,10 @@ function Home () {
     setPageDisplay(page)
   }
 
+
+
   return (
-
     <>
-
       <DepositModal  open={depositModalState}  token={token} fast={fast} />
       <TransferModal open={transferModalState} token={token} fast={fast} />
       <ExitModal     open={exitModalState}     token={token} fast={fast} />
@@ -143,11 +148,16 @@ function Home () {
         }
       />
 
-      <Container maxWidth="md">
-        <div className={styles.main}>
+      <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
+        {isMobile ? (
+          <MobileNav light={false} />
+        ) : (
+          <MainMenu pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
+        )}
+        <Box sx={{ flex: 1 }}>
           {/* The Top SubMenu Bar, non-mobile */}
 
-          <div className={styles.secondtab}>
+          {/* <div className={styles.secondtab}>
             <span
               className={pageDisplay === "AccountNow" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("AccountNow")}}
@@ -172,26 +182,28 @@ function Home () {
             >
               NFT
             </span>
-          </div>
+          </div> */}
 
-          {pageDisplay === "AccountNow" &&
-          <>
-            <Account/>
-          </>
-          }
-          {pageDisplay === "History" &&
-          <>
-            <Transactions/>
-          </>
-          }
-          {pageDisplay === "NFT" &&
-            <NFT/>
-          }
-          {pageDisplay === "Farm" &&
-            <Farm/>
-          }
-        </div>
-      </Container>
+          <Container maxWidth="md">
+            {pageDisplay === "AccountNow" &&
+            <>
+              <Account/>
+            </>
+            }
+            {pageDisplay === "History" &&
+            <>
+              <Transactions/>
+            </>
+            }
+            {pageDisplay === "NFT" &&
+              <NFT/>
+            }
+            {pageDisplay === "Farm" &&
+              <Farm/>
+            }
+          </Container>
+        </Box>
+      </Box>
     </>
   );
 }

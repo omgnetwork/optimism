@@ -9,6 +9,8 @@ import * as styles from './Nft.module.scss'
 
 import cellIcon from 'images/hela.jpg'
 import factoryIcon from 'images/factory.png'
+import { Alert, Box, Typography } from '@material-ui/core'
+import PageHeader from 'components/pageHeader/PageHeader'
 
 class Nft extends React.Component {
 
@@ -35,7 +37,7 @@ class Nft extends React.Component {
   componentDidUpdate(prevState) {
 
     const { list, factories } = this.props.nft;
-    
+
     if (!isEqual(prevState.nft.list, list)) {
      this.setState({ list });
     }
@@ -43,12 +45,12 @@ class Nft extends React.Component {
     if (!isEqual(prevState.nft.factories, factories)) {
      this.setState({ factories });
     }
- 
+
   }
 
   render() {
 
-    const { 
+    const {
       list,
       factories
     } = this.state;
@@ -62,33 +64,32 @@ class Nft extends React.Component {
 
     return (
 
-      <div className={styles.container}>
-        
+      <Box>
+        <PageHeader title="NFT" />
+
         <div className={styles.boxContainer}>
 
-          <h2>NFT Factories</h2>
-
-          {rights > 0 && 
-            <div className={styles.note}>
-              Status: You have owner permissions for one or more NFT factories 
-              and are authorized to mint new NFTs. Select the desired NFT factory 
+          <Typography variant="h2" marginBottom>Factories</Typography>
+          {rights > 0 &&
+            <Alert severity="success">
+              Status: You have owner permissions for one or more NFT factories
+              and are authorized to mint new NFTs. Select the desired NFT factory
               and click "Actions" to mint NFTs.
-            </div> 
+            </Alert>
           }
-
           {rights === 0 &&
-            <div className={styles.note}>
-              Status: You do not have owner permissions and you not 
-              are authorized to mint new NFTs. To create you own NFT 
+            <Alert severity="error">
+              Status: You do not have owner permissions and you not
+              are authorized to mint new NFTs. To create you own NFT
               factory, obtain an NFT first.
-            </div> 
+            </Alert>
           }
 
-          <div className={styles.TableContainer}>
+          <Box>
             {Object.keys(factories).map((v, i) => {
               if(factories[v].haveRights) {
               return (
-                <ListNFTfactory 
+                <ListNFTfactory
                   key={i}
                   name={factories[v].name}
                   symbol={factories[v].symbol}
@@ -107,28 +108,26 @@ class Nft extends React.Component {
                 return (<></>)
               }
             })}
-          </div>
+          </Box>
         </div>
 
-        <div 
-          className={styles.nftContainer}
-        >
-          
-          <h2>Your NFTs</h2>
+        <Box sx={{ my: 4 }}>
+          <Typography variant="h2">Your NFTs ({numberOfNFTs})</Typography>
 
-          {numberOfNFTs === 1 && 
-            <div className={styles.note}>You have one NFT and it should be shown below.</div> 
+          {/* {numberOfNFTs === 1 &&
+            <Alert severity="success">You have one NFT and it should be shown below.</Alert>
           }
-          {numberOfNFTs > 1 && 
-            <div className={styles.note}>You have {numberOfNFTs} NFTs and they should be shown below.</div> 
+          {numberOfNFTs > 1 &&
+            <Alert severity="success">You have {numberOfNFTs} NFTs and they should be shown below.</Alert>
           }
           {numberOfNFTs < 1 &&
-            <div className={styles.note}>Scanning the blockchain for your NFTs...</div> 
-          }
-          <div className={styles.nftTiles} >
+            <Alert severity="info">Scanning the blockchain for your NFTs...</Alert>
+          } */}
+
+          <div className={styles.nftTiles}>
           {Object.keys(list).map((v, i) => {
             return (
-              <ListNFT 
+              <ListNFT
                 key={i}
                 name={list[v].name}
                 symbol={list[v].symbol}
@@ -150,14 +149,14 @@ class Nft extends React.Component {
           }
           </div>
 
-        </div>
+        </Box>
 
-      </div>
+      </Box>
     )
   }
 }
 
-const mapStateToProps = state => ({ 
+const mapStateToProps = state => ({
   nft: state.nft,
   setup: state.setup
 });

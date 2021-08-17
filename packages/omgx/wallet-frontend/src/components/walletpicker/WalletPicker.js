@@ -182,17 +182,12 @@ function WalletPicker ({ onEnable, enabled }) {
                       Connect using <strong>browser </strong>wallet
                     </Typography>
                     <Fox width={50} />
-                    </Box>
+                  </Box>
                 </S.WalletCard>
                 <br />
-                <Button
-                  // type="primary"
-                  // className={styles.ButtonAdd}
-                  onClick={() => networkService.addL2Network()}
-                >
+                <Button onClick={() => networkService.addL2Network()}>
                   Add OMGX L2 Provider
                 </Button>
-                <Button onClick={() => setOpen(!open)}>Open modal</Button>
               </Grid>
           </Grid>
         </Container>

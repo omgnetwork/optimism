@@ -36,13 +36,13 @@ import Input from 'components/input/Input'
 
 import Exits from './Exits';
 import Deposits from './Deposits';
-import Transactions from './Transactions';
 
 import * as styles from './Transactions.module.scss';
 
 import { getAllNetworks } from 'util/masterConfig';
 import useInterval from 'util/useInterval';
 import PageHeader from 'components/pageHeader/PageHeader';
+import Transactions from './Transactions';
 
 const POLL_INTERVAL = 5000; //milliseconds
 
@@ -89,10 +89,10 @@ function History () {
   }, POLL_INTERVAL * 2);
 
   return (
-    <div className={styles.container}>
-      <PageHeader title="Wallet" />
+    <>
+      <PageHeader title="Transaction History" />
 
-      <div className={styles.header}>
+      <div className={styles.header} style={{display: 'none'}}>
         <h2>Search</h2>
         <div className={styles.actions}>
           <div>Start: </div>
@@ -170,7 +170,7 @@ function History () {
           }
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

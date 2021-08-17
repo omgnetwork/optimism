@@ -44,7 +44,7 @@ function NetworkSwitcher() {
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
               <NetworkSwitcherIcon active={networkLayer === 'L1'} />
-              <Typography variant="body1">OMGX {masterConfig}</Typography>
+              <Typography variant="body1">BOBA {masterConfig}</Typography>
             </Box>
             {!!allNetworks.length && (
               <S.Chevron

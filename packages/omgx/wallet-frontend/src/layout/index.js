@@ -21,11 +21,14 @@ import { closeAlert, closeError } from 'actions/uiAction';
 import Alert from 'components/alert/Alert';
 import MainMenu from 'components/mainMenu/MainMenu';
 import MobileNav from 'components/mainMenu/mobileNav/MobileNav';
+import WalletPicker from 'components/walletpicker/WalletPicker';
+import Home from 'containers/home/Home';
 import Notification from 'containers/notification/Notification';
 import React, { Suspense, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   BrowserRouter as Router,
+  Route,
   Switch
 } from "react-router-dom";
 import { selectAlert, selectError } from 'selectors/uiSelector';
@@ -192,11 +195,11 @@ function App () {
       <CssBaseline />
       <Router>
         <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row' }}>
-          {isMobile ? (
+          {/* {isMobile ? (
             <MobileNav light={light} />
           ) : (
             <MainMenu light={light} setLight={setLight} />
-          )}
+          )} */}
           <S.Content>
             <div className={styles.App}>
 
@@ -223,14 +226,14 @@ function App () {
               <Notification/>
               <Suspense fallback={<>Loading...</>}>
                 <Switch>
-                  {
+                  {/* {
                     routeConfig.map((routeProps)=> {
                       return <Layout enabled={enabled} onEnable={setEnabled} {...routeProps}/>;
-                      
+
                       // <Route {...routeProps} enabled={enabled} onEnable={setEnabled} key={routeProps.path} />
                     })
-                  }
-                  {/* <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />} /> */}
+                  } */}
+                  <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />} />
                 </Switch>
               </Suspense>
 
