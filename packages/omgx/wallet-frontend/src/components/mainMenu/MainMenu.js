@@ -1,5 +1,6 @@
 import React from 'react';
-import { ReactComponent as Logo } from './../../images/logo-omgx.svg';
+import { ReactComponent as LogoLight } from './../../images/logo-light-omgx.svg';
+import { ReactComponent as LogoDark } from './../../images/logo-dark-omgx.svg';
 import { Menu } from "./MainMenu.styles";
 import { Link } from 'react-router-dom';
 import ThemeSwitcher from './themeSwitcher/ThemeSwitcher';
@@ -10,7 +11,11 @@ function MainMenu ({ light, setLight }) {
   return (
     <Menu>
       <Link to="/">
-        <Logo />
+        {light ? (
+          <LogoDark />
+          ) : (
+          <LogoLight />
+        )}
       </Link>
       <NetworkSwitcher />
       <MenuItems />

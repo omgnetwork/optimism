@@ -144,17 +144,7 @@ function Home () {
       />
 
       <Container maxWidth="md">
-
-
         <div className={styles.main}>
-          <MobileHeader
-            mobileMenuOpen={mobileMenuOpen}
-            onHamburgerClick={()=>setMobileMenuOpen(open=>!open)}
-          />
-          <MobileMenu
-            mobileMenuOpen={mobileMenuOpen}
-          />
-
           {/* The Top SubMenu Bar, non-mobile */}
 
           <div className={styles.secondtab}>

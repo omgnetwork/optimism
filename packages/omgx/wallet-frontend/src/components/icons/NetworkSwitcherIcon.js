@@ -1,7 +1,11 @@
+import { useTheme } from "@emotion/react";
 import * as React from "react"
 
 function NetworkSwitcherIcon({ active }) {
-  const color = active ? '#506DFA' : 'white';
+  const theme = useTheme();
+  const isLight = theme.palette.mode === 'light';
+  const color = active ? '#506DFA' : isLight ? 'black' : 'white';
+
   return (
     <svg
       width={26}

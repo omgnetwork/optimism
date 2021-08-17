@@ -14,8 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React from 'react';
-import { styled } from '@material-ui/system';
-import ModalUnstyled from '@material-ui/unstyled/ModalUnstyled';
 import {
   Fade,
   Typography,
@@ -25,45 +23,7 @@ import {
   Box
 } from '@material-ui/core';
 import { ReactComponent as CloseIcon } from './../../images/icons/close-modal.svg';
-
-const StyledModal = styled(ModalUnstyled)`
-  position: fixed;
-  z-index: 1300;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  left: 0;
-  z-index: 1300;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const Backdrop = styled('div')`
-  z-index: -1;
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  left: 0;
-  background-color: rgba(8, 22, 44, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-tap-highlight-color: transparent;
-`;
-
-const Style = styled(Box)`
-  background: ${(props) => props.transparent ? 'transparent' : 'rgba(32, 29, 49, 0.8)'};
-  box-shadow: ${(props) => props.transparent ? 'none' : '-13px 15px 39px rgba(0, 0, 0, 0.16), inset 123px 116px 230px rgba(255, 255, 255, 0.03)'};
-  backdrop-filter: ${(props) => props.transparent ? 'none' :'blur(66px)'};
-  padding: ${(props) => props.transparent ? '0' : '60px'};
-  border: 0;
-  outline: 0;
-  // width: '500px',
-  box-sizing: border-box;
-  max-width: 100%;
-  border-radius: 12px;
-`;
-
+import * as S from "./Modal.styles"
 
 function _Modal ({
   children,
@@ -75,13 +35,13 @@ function _Modal ({
 }) {
 
   return (
-    <StyledModal
+    <S.StyledModal
       aria-labelledby='transition-modal-title'
       aria-describedby='transition-modal-description'
       open={open}
       onClose={onClose}
       // closeAfterTransition
-      BackdropComponent={Backdrop}
+      BackdropComponent={S.Backdrop}
     >
       <Fade in={open}>
         <Container maxWidth="lg" sx={{border: 'none'}}>
@@ -93,9 +53,9 @@ function _Modal ({
             </Grid>
 
             <Grid item xs={12} md={9}>
-              <Style transparent={transparent}>
+              <S.Style transparent={transparent}>
                 {children}
-              </Style>
+              </S.Style>
             </Grid>
 
             <Grid item xs={12} md={1}>
@@ -106,7 +66,7 @@ function _Modal ({
           </Grid>
         </Container>
       </Fade>
-    </StyledModal>
+    </S.StyledModal>
   );
 }
 

@@ -49,6 +49,7 @@ function TransferModal ({ open, token }) {
   const [ activeButton, setActiveButton ] = useState("slow");
 
   const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]));
+  const wAddress = networkService.account ? truncate(networkService.account, 6, 14, '.') : '';
 
   const lookupPrice = useSelector(selectLookupPrice);
   const theme = useTheme();
@@ -82,8 +83,6 @@ function TransferModal ({ open, token }) {
     !recipient
 
   function renderTransferScreen () {
-  const wAddress = networkService.account ? truncate(networkService.account, 6, 14, '.') : '';
-
     if(typeof(token) === 'undefined') return
 
     return (
@@ -206,6 +205,8 @@ function TransferModal ({ open, token }) {
     <Modal title="Create bridging transaction" open={open} transparent onClose={handleClose}>
       {renderTransferScreen()}
       <BoxConfirmation
+        recipient={recipient}
+        value={value}
         showFeedback={showFeedback}
         setShowFeedback={setShowFeedback}
         handleClose={handleClose}

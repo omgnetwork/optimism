@@ -198,7 +198,7 @@ function App () {
       <Router>
         <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row' }}>
           {isMobile ? (
-            <MobileNav />
+            <MobileNav light={light} />
           ) : (
             <MainMenu light={light} setLight={setLight} />
           )}

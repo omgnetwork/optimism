@@ -82,7 +82,6 @@ function Input({
         {unit && (
           <Grid item xs={6}>
             <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px'}}>
-                {/* {unit} */}
               <Typography variant="body2" component="p" sx={{opacity: 0.5, textAlign: "end"}}>
                 Available: {Number(maxValue).toFixed(3)}
               </Typography>
