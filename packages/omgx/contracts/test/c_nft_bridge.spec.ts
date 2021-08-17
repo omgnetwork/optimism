@@ -16,8 +16,6 @@ import * as fs from 'fs'
 
 describe('NFT Bridge Test', async () => {
 
-  let Factory__L1Bridge: ContractFactory
-  let Factory__L2Bridge: ContractFactory
   let Factory__L1ERC721: ContractFactory
   let Factory__L2ERC721: ContractFactory
   let L1Bridge: Contract
@@ -33,18 +31,6 @@ describe('NFT Bridge Test', async () => {
 
     env = await OptimismEnv.new()
 
-    Factory__L1Bridge = new ContractFactory(
-        L1NFTBridge.abi,
-        L1NFTBridge.bytecode,
-        env.bobl1Wallet
-    )
-
-    Factory__L2Bridge = new ContractFactory(
-        L2NFTBridge.abi,
-        L2NFTBridge.bytecode,
-        env.bobl2Wallet
-    )
-
     Factory__L1ERC721 = new ContractFactory(
         L1ERC721Json.abi,
         L1ERC721Json.bytecode,
@@ -57,19 +43,17 @@ describe('NFT Bridge Test', async () => {
         env.bobl2Wallet
     )
 
-    L1Bridge = await Factory__L1Bridge.deploy()
-    await L1Bridge.deployTransaction.wait()
-    console.log("L1Bridge deployed to:", L1Bridge.address)
+    L1Bridge = new Contract(
+        env.addressesOMGX.Proxy__L1NFTBridge,
+        L1NFTBridge.abi,
+        env.bobl1Wallet
+    )
 
-    L2Bridge = await Factory__L2Bridge.deploy()
-    await L2Bridge.deployTransaction.wait()
-    console.log("L2Bridge deployed to:", L2Bridge.address)
-
-    const initTx = await L2Bridge.initialize(env.watcher.l2.messengerAddress, L1Bridge.address)
-    await initTx.wait()
-
-    const tx = await L1Bridge.initialize(env.watcher.l1.messengerAddress, L2Bridge.address)
-    await tx.wait()
+    L2Bridge = new Contract(
+        env.addressesOMGX.Proxy__L2NFTBridge,
+        L2NFTBridge.abi,
+        env.bobl2Wallet
+    )
 
 
     // deploy a test token each time if existing contracts are used for tests
