@@ -182,9 +182,12 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
     this._writeL1ETHFee();
 
     this.logger.info("Got L1 ETH balances", {
-      L1ETHBalance: this.state.L1ETHBalance.toString(),
-      L1ETHCostFee: this.state.L1ETHCostFee.toString(),
-      latestQueriedL1Block: this.state.lastQueriedL1Block,
+      network: "L1",
+      data: {
+        L1ETHBalance: this.state.L1ETHBalance.toString(),
+        L1ETHCostFee: this.state.L1ETHCostFee.toString(),
+        latestQueriedL1Block: this.state.lastQueriedL1Block,
+      }
     })
   }
 
@@ -213,10 +216,13 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
     this.state.numberOfBlocksInterval = numberOfBlocksInterval
 
     this.logger.info("Got L2 Gas Cost", {
-      L2ETHCollectFee: this.state.L2ETHCollectFee.toString(),
-      lastQueriedL2Block: this.state.lastQueriedL2Block,
-      avgL2GasUsagePerBlock: this.state.avgL2GasLimitPerBlock.toString(),
-      numberOfBlocksInterval: this.state.numberOfBlocksInterval,
+      network: "L2",
+      data: {
+        L2ETHCollectFee: this.state.L2ETHCollectFee.toString(),
+        lastQueriedL2Block: this.state.lastQueriedL2Block,
+        avgL2GasUsagePerBlock: this.state.avgL2GasLimitPerBlock.toString(),
+        numberOfBlocksInterval: this.state.numberOfBlocksInterval,
+      }
     })
   }
 
