@@ -57,6 +57,9 @@ import DAU from 'containers/dau/dau';
 // DAO Page
 import DAO from 'containers/dao/Dao';
 
+// Boring Boba Preview
+import BoringBobaShop from 'containers/boringBobaPreviews/boringBobaShop';
+
 
 
 // Farm
@@ -203,8 +206,16 @@ function Home () {
               className={pageDisplay === "DAO" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("DAO")}}
             >  <div>
-              DAO
-            </div>
+                DAO
+              </div>
+
+            </h2>
+            <h2
+              className={pageDisplay === "BoringBobaShop" ? styles.subtitletextActive : styles.subtitletext}
+              onClick={()=>{handleSetPage("BoringBobaShop")}}
+            >  <div>
+                BoringBobaShop
+              </div>
 
             </h2>
           </div>
@@ -228,6 +239,9 @@ function Home () {
             <Farm/>
           }{pageDisplay === "DAO" &&
             <DAO/>
+          }{
+            pageDisplay ==="BoringBobaShop" &&
+            <BoringBobaShop/>
           }
         </div>
       </div>

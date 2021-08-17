@@ -1,10 +1,6 @@
 /* External Imports */
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
-const { Watcher } = require('@eth-optimism/watcher');
-const common = require('mocha/lib/interfaces/common');
-const { isCall } = require('hardhat/internal/hardhat-network/stack-traces/opcodes');
-const { runOrCatchError } = require('@codechecks/client/dist/utils');
 require('dotenv').config();
 const env = process.env;
 
@@ -118,6 +114,8 @@ describe('Testing BobaMenu Contract', () => {
             const first_topping_color = await BobaMenu.getColorOrGradient(0, false, true);
 
             // checking flavor and commonScore
+            console.log(first_topping);
+            console.log(first_flavor);
             expect(ethers.utils.parseBytes32String(first_topping.topping)).to.eq(topping1);
             expect(ethers.utils.parseBytes32String(first_flavor.flavor)).to.eq(flavor1);
             expect(first_flavor.commonScore).to.eq(commonScore1);
@@ -414,5 +412,11 @@ describe('Testing BobaMenu Contract', () => {
             }
         });
 
+    });
+    describe(`Testing access data access to non admin users`, () =>{
+        it(`Should allow anyone to see the toppings`, async () => {
+            console.log(await BobaMenu.connect(wallet2).toppings(2));
+            console.log(await BobaMenu.connect(wallet2).getColorOrGradient(2, true, false));
+        });
     });
 });

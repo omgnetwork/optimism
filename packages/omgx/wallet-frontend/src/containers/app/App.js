@@ -24,6 +24,7 @@ import {
 
 import { closeAlert, closeError } from 'actions/uiAction';
 import { selectAlert, selectError } from 'selectors/uiSelector';
+import BoringBobaShop from 'containers/boringBobaPreviews/boringBobaShop';
 
 import Home from 'containers/home/Home';
 import DAU from 'containers/dau/dau.js';
@@ -38,8 +39,6 @@ import { setWalletMethod } from 'actions/setupAction';
 import { isChangingChain } from 'util/changeChain';
 
 import "./App.css";
-import DAO from "../dao/Dao";
-import NavBar from "../../components/NavBar";
 
 function App () {
 
@@ -92,10 +91,10 @@ function App () {
           <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />}>
           </Route>
           <Route path="/dau" component={DAU} />
-          <Route path="/dao" component={DAO} />
-          
+          <Route path="/boringBobaShop" component={BoringBobaShop}/>
+
         </Switch>
-        
+
 
       </div>
       <div></div>
