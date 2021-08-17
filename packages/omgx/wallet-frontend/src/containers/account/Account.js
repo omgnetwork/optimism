@@ -94,32 +94,8 @@ function Account () {
   return (
     <>
       <PageHeader title="Wallet"/>
-      {/* {balances['oETH']['have'] &&
-        <div className={styles.RabbitBox}>
-          <img className={styles.bunny} src={bunny_happy} alt='Happy Bunny' />
-          <div className={styles.RabbitRight}>
-            <div className={styles.RabbitRightTop}>
-              OMGX Balance
-            </div>
-            <div className={styles.RabbitRightMiddle}>
-              <div className={styles.happy}>{balances['oETH']['amountShort']}</div>
-            </div>
-            <div className={styles.RabbitRightBottom}>
-              oETH
-            </div>
-            <div className={styles.RabbitRightBottomNote}>
-            {networkLayer === 'L1' &&
-              <span>You are on L1. To use the L2, please switch to L2 in MetaMask.</span>
-            }
-            {networkLayer === 'L2' &&
-              <span>You are on L2. To use the L1, please switch to L1 in MetaMask.</span>
-            }
-            </div>
-          </div>
-        </div>
-      } */}
 
-      {!balances['oETH']['have'] &&
+      {/* {!balances['oETH']['have'] &&
         <div className={styles.RabbitBox}>
           <img className={styles.bunny} src={bunny_sad} alt='Sad Bunny' />
           <div className={styles.RabbitRight}>
@@ -142,7 +118,7 @@ function Account () {
             </div>
           </div>
         </div>
-      }
+      } */}
 
       <Grid container spacing={4}>
         <Grid item xs={6}>

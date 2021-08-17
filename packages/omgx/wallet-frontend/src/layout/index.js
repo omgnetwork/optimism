@@ -15,7 +15,7 @@ limitations under the License. */
 
 import React, { Suspense,useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createTheme, ThemeProvider } from '@material-ui/core/styles';
+import { createTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import * as S from './layout.style';
 
@@ -55,12 +55,10 @@ function App () {
   const handleErrorClose=()=>dispatch(closeError());
   const handleAlertClose=()=>dispatch(closeAlert());
 
-  const theme = createTheme({
+  let theme = createTheme({
     palette: {
       mode: light ? 'light' : 'dark',
       primary: {
-        // light: '#757ce8',
-        // dark: '#002884',
         main: '#506DFA',
         gradient: 'linear-gradient(131.81deg, #4A6FEF 2.66%, #4251F0 124.21%)',
         contrastText: '#fff',
@@ -71,9 +69,6 @@ function App () {
       background: {
         default: light ? "#fff" : "#061122"
       },
-      // text: {
-      //   primary: '#fff'
-      // }
       neutral: {
         main: '#fff',
         contrastText: '#506DFA',
@@ -94,14 +89,14 @@ function App () {
         fontWeight: 300,
       },
       h4: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 300,
       },
       body1: {
         fontSize: 18,
       },
       body2: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 400,
       },
     },
@@ -123,9 +118,11 @@ function App () {
             borderRadius: "8px",
             textTransform: "none",
             boxShadow: "box-shadow: 0px 0px 7px rgba(73, 107, 239, 0.35)",
+            "&.Mui-disabled": {
+              background: 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)',
+              color: 'rgba(255, 255, 255, 0.5)',
+            }
           },
-          "&.Mui-disabled": {
-          }
         },
         variants: [
           {
@@ -160,10 +157,28 @@ function App () {
               }
             },
           },
+          {
+            props: { variant: 'small'},
+            style: {
+              fontSize: '14px',
+              background: 'linear-gradient(131.81deg, #4A6FEF 2.66%, #4251F0 124.21%)',
+              textTransform: 'uppercase',
+              borderRadius: '4px',
+              minWidth: '0',
+              "&:hover": {
+                boxShadow: 'inset 0px 0px 0px 2px rgba(255, 255, 255, 0.2)',
+                transition: 'box-shadow 0.3s ease-in-out',
+              }
+            },
+          },
         ],
+      },
+      MuiInputBase: {
+        backgroundColor: "#f00",
       }
     }
   });
+  theme = responsiveFontSizes(theme);
 
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -181,7 +196,7 @@ function App () {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row' }}>
           {isMobile ? (
             <MobileNav />
           ) : (

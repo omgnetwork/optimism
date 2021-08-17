@@ -21,7 +21,8 @@ import {
   Typography,
   Grid,
   Container,
-  IconButton
+  IconButton,
+  Box
 } from '@material-ui/core';
 import { ReactComponent as CloseIcon } from './../../images/icons/close-modal.svg';
 
@@ -36,7 +37,7 @@ const StyledModal = styled(ModalUnstyled)`
   display: flex;
   align-items: center;
   justify-content: center;
-  `;
+`;
 
 const Backdrop = styled('div')`
   z-index: -1;
@@ -50,25 +51,27 @@ const Backdrop = styled('div')`
   -webkit-tap-highlight-color: transparent;
 `;
 
-const style = {
-  background: 'rgba(32, 29, 49, 0.8)',
-  boxShadow: '-13px 15px 39px rgba(0, 0, 0, 0.16), inset 123px 116px 230px rgba(255, 255, 255, 0.03)',
-  backdropFilter: 'blur(66px)',
-  padding: '60px',
-  border: 'none',
-  outline: 'none',
-  width: '500px',
-  boxSizing: 'border-box',
-  maxWidth: '100%',
-  borderRadius: '12px',
-};
+const Style = styled(Box)`
+  background: ${(props) => props.transparent ? 'transparent' : 'rgba(32, 29, 49, 0.8)'};
+  box-shadow: ${(props) => props.transparent ? 'none' : '-13px 15px 39px rgba(0, 0, 0, 0.16), inset 123px 116px 230px rgba(255, 255, 255, 0.03)'};
+  backdrop-filter: ${(props) => props.transparent ? 'none' :'blur(66px)'};
+  padding: ${(props) => props.transparent ? '0' : '60px'};
+  border: 0;
+  outline: 0;
+  // width: '500px',
+  box-sizing: border-box;
+  max-width: 100%;
+  border-radius: 12px;
+`;
+
 
 function _Modal ({
   children,
   open,
   onClose,
   light,
-  title
+  title,
+  transparent
 }) {
 
   return (
@@ -81,22 +84,24 @@ function _Modal ({
       BackdropComponent={Backdrop}
     >
       <Fade in={open}>
-        <Container maxWidth="lg">
+        <Container maxWidth="lg" sx={{border: 'none'}}>
           <Grid container>
-            <Grid item xs={12} md={3}>
-              <Typography variant="h1" component="h3" sx={{ marginRight: 4}}>{title}</Typography>
+            <Grid item xs={12} md={2}>
+              <Box sx={{mr: 8}}>
+                <Typography variant="h2" component="h3" sx={{ fontWeight: "700"}}>{title}</Typography>
+              </Box>
             </Grid>
 
-            <Grid item xs={12} md={6} sx={style}>
-              {children}
+            <Grid item xs={12} md={9}>
+              <Style transparent={transparent}>
+                {children}
+              </Style>
             </Grid>
 
-            <Grid item xs={12} md={3}>
-              {/* <Box sx={{ display: "flex", marginLeft: 2 }}> */}
-                <IconButton onClick={onClose}>
-                  <CloseIcon />
-                </IconButton>
-              {/* </Box> */}
+            <Grid item xs={12} md={1}>
+              <IconButton onClick={onClose}>
+                <CloseIcon />
+              </IconButton>
             </Grid>
           </Grid>
         </Container>

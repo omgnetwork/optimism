@@ -18,6 +18,26 @@ import { Search } from '@material-ui/icons'
 import BN from 'bignumber.js'
 
 import * as styles from './Input.module.scss'
+import Button from 'components/button/Button'
+import { Box, Grid, TextField, Typography } from '@material-ui/core'
+import { styled } from '@material-ui/core/styles';
+
+
+const CssTextField = styled(TextField)({
+  '& .MuiOutlinedInput-root': {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    '& fieldset': {
+      borderColor: 'transparent',
+    },
+    '&:hover fieldset': {
+      borderColor: 'rgba(255, 255, 255, 0.2)',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: 'rgba(255, 255, 255, 0.2)',
+    },
+  },
+});
+
 
 function Input({
   placeholder,
@@ -32,7 +52,11 @@ function Input({
   className,
   maxValue,
   small,
+  fullWidth,
+  size,
+  variant
 }) {
+  console.log("fullWidth", fullWidth)
   async function handlePaste() {
     try {
       const text = await navigator.clipboard.readText()
@@ -51,38 +75,84 @@ function Input({
   const overMax = new BN(value).gt(new BN(maxValue))
 
   return (
-    <div className={[styles.Input, className].join(' ')}>
-      {label && <div className={styles.label}>{label}</div>}
-      <div className={[styles.field, overMax ? styles.error : ''].join(' ')}>
-        {icon && <Search className={styles.icon} />}
-        <input
-          className={[styles.input, small ? styles.small : ''].join(' ')}
-          placeholder={placeholder}
-          type={type}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-        />
+    <>
+      <Grid container spacing={2}>
+        <Grid item xs={unit ? 6 : 12}>
+          <Typography variant="body2" component="div" sx={{opacity: 0.5}}>
+            {label}
+          </Typography>
+          {/* <div className={[styles.field, overMax ? styles.error : ''].join(' ')}> */}
+          {icon && <Search className={styles.icon} />}
+            <CssTextField
+              // className={[styles.input, small ? styles.small : ''].join(' ')} // todo
+              placeholder={placeholder}
+              type={type}
+              value={value}
+              onChange={onChange}
+              disabled={disabled}
+              fullWidth={fullWidth}
+              size={size}
+              id="custom-css-outlined-input"
+              variant={variant}
+            />
+            {/* </div> */}
+        </Grid>
         {unit && (
-          <div className={`${styles.unit} ${!maxValue ? styles.isPaste : ''}`}>
-            {maxValue && value !== maxValue && (
-              <div onClick={handleMaxClick} className={styles.maxValue}>
-                MAX
-              </div>
-            )}
-            <div style={{display: 'flex', flexDirection: 'column'}}>
-              {unit}
-              <span style={{fontSize: '0.7em'}}>Balance: {Number(maxValue).toFixed(3)}</span>
+          <Grid item xs={6}>
+            <Box sx={{display: 'flex', flexDirection: 'column', gap: '5px'}}>
+                {/* {unit} */}
+              <Typography variant="body2" component="p" sx={{opacity: 0.5}}>
+                Available: {Number(maxValue).toFixed(3)}
+              </Typography>
+
+              {maxValue && value !== maxValue && (
+                <Button onClick={handleMaxClick} variant="small" >
+                  Use All
+                </Button>
+              )}
+            </Box>
+          </Grid>
+        )}
+      </Grid>
+
+      {/* <div className={[styles.Input, className].join(' ')}>
+        {label &&
+          <Typography variant="body1" component="div" sx={{opacity: 0.5}}>
+            {label}
+          </Typography>
+        }
+        <div className={[styles.field, overMax ? styles.error : ''].join(' ')}>
+          {icon && <Search className={styles.icon} />}
+          <input
+            className={[styles.input, small ? styles.small : ''].join(' ')}
+            placeholder={placeholder}
+            type={type}
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+          />
+          {unit && (
+            <Box sx={{display: 'flex', flexDirection: 'column', gap: '5px'}}>
+                {unit}
+              <Typography variant="body2" component="p" sx={{opacity: 0.5}}>
+                Available: {Number(maxValue).toFixed(3)}
+              </Typography>
+
+              {maxValue && value !== maxValue && (
+                <Button onClick={handleMaxClick} variant="small" >
+                  Use All
+                </Button>
+              )}
+            </Box>
+          )}
+          {paste && (
+            <div onClick={handlePaste} className={styles.paste}>
+              Paste
             </div>
-          </div>
-        )}
-        {paste && (
-          <div onClick={handlePaste} className={styles.paste}>
-            Paste
-          </div>
-        )}
-      </div>
-    </div>
+          )}
+        </div>
+      </div> */}
+    </>
   )
 }
 
