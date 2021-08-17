@@ -12,7 +12,6 @@ import UpIcon from 'components/icons/UpIcon';
 import moment from 'moment';
 import truncate from 'truncate-middle';
 
-
 import {
     CellSubTitle, CellTitle,
     StyledTableCell,

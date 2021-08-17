@@ -1,7 +1,6 @@
 import StyledTable from 'components/table';
 import React from 'react';
 
-
 const tableHeadList = [
     {
         label: 'Transactions',

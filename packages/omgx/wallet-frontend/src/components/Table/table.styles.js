@@ -17,7 +17,6 @@ color: rgba(255, 255, 255, 0.7);
 opacity: 0.9;
 `
 
-
 export const StyledTableRow = styled(TableRow)`
     padding: 0px 30px;
     &.expand{
@@ -34,7 +33,7 @@ export const StyledTableRow = styled(TableRow)`
         }
     }
     &.header{
-        
+
         th {
             box-shadow: none;
         }
@@ -71,5 +70,5 @@ export const StyledTableCell = styled(TableCell)`
     border: none;
     padding-top: 20px;
     color: ${props => props.color ? props.color : '#fff'};
-    box-shadow: 0px 1px 0px rgb(255 255 255 / 5%);
+    box-shadow: 0px 1px 0px rgb(255 255 255 / 5%)
 `
