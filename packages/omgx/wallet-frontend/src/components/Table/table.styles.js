@@ -71,5 +71,5 @@ export const StyledTableCell = styled(TableCell)`
     border: none;
     padding-top: 20px;
     color: ${props => props.color ? props.color : '#fff'};
-    box-shadow: 0px 1px 0px rgb(255 255 255 / 5%)
+    box-shadow: 0px 1px 0px rgb(255 255 255 / 5%);
 `

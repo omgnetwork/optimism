@@ -13,35 +13,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { Suspense,useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { createTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
+import { Box, useMediaQuery } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import * as S from './layout.style';
-
+import { createTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
+import { setWalletMethod } from 'actions/setupAction';
+import { closeAlert, closeError } from 'actions/uiAction';
+import Alert from 'components/alert/Alert';
+import MainMenu from 'components/mainMenu/MainMenu';
+import MobileNav from 'components/mainMenu/mobileNav/MobileNav';
+import Notification from 'containers/notification/Notification';
+import React, { Suspense, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   BrowserRouter as Router,
-  Switch,
-  Route,
+  Switch
 } from "react-router-dom";
-
-import { closeAlert, closeError } from 'actions/uiAction';
 import { selectAlert, selectError } from 'selectors/uiSelector';
-
-import Notification from 'containers/notification/Notification';
-import Alert from 'components/alert/Alert';
-import { useMediaQuery } from '@material-ui/core';
-
-//import oracleService from 'services/oracleService';
-
-import * as styles from './layout.module.scss';
-import { setWalletMethod } from 'actions/setupAction';
 import { isChangingChain } from 'util/changeChain';
-import MainMenu from 'components/mainMenu/MainMenu';
-import { Box } from '@material-ui/core';
-import MobileNav from 'components/mainMenu/mobileNav/MobileNav';
-import { routeConfig } from './route.config';
 import Layout from './layout';
+//import oracleService from 'services/oracleService';
+import * as styles from './layout.module.scss';
+import * as S from './layout.style';
+import { routeConfig } from './route.config';
+
 
 function App () {
   const dispatch = useDispatch();

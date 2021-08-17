@@ -13,37 +13,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+import { Box, Grid } from '@material-ui/core';
+import { fetchTransactions } from 'actions/networkAction';
 import PageHeader from 'components/pageHeader/PageHeader';
 import StyledTabs from 'components/tabs';
-import StyledTable from 'components/table';
-import { Typography, Grid, Box } from '@material-ui/core';
-import Input from 'components/input/Input';
-
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
-
-import React, { useState } from 'react';
-import {
-  PageContent,
-} from '../page.style';
-import { batch, useDispatch } from 'react-redux';
-import { isEqual, orderBy } from 'lodash';
-import { useSelector } from 'react-redux';
-import moment from 'moment';
-import { setActiveHistoryTab1 } from 'actions/uiAction'
-import { setActiveHistoryTab2 } from 'actions/uiAction'
-import { fetchTransactions } from 'actions/networkAction';
-
-import { selectActiveHistoryTab1 } from 'selectors/uiSelector'
-import { selectActiveHistoryTab2 } from 'selectors/uiSelector'
-import { selectTransactions } from 'selectors/transactionSelector';
-import { selectNetwork } from 'selectors/setupSelector'
-import { getAllNetworks } from 'util/masterConfig';
-import useInterval from 'util/useInterval';
-import Transactions from 'containers/history/transactions';
 import Deposits from 'containers/history/deposits';
 import Exits from 'containers/history/exits';
+import Transactions from 'containers/history/transactions';
+import { isEqual, orderBy } from 'lodash';
+import moment from 'moment';
+import React, { useState } from 'react';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { batch, useDispatch, useSelector } from 'react-redux';
+import { selectNetwork } from 'selectors/setupSelector';
+import { selectTransactions } from 'selectors/transactionSelector';
 import { POLL_INTERVAL } from 'util/constant';
+import { getAllNetworks } from 'util/masterConfig';
+import useInterval from 'util/useInterval';
+import {
+  PageContent
+} from '../page.style';
 
 function HistoryPage() {
   const dispatch = useDispatch();

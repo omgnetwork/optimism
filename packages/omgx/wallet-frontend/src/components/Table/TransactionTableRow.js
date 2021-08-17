@@ -20,14 +20,12 @@ import {
 } from './table.styles';
 
 
-function TransactionTableRow({ ...data }) {
-
-    // console.log(data);
+function TransactionTableRow({ chainLink, index, ...data }) {
 
     const [expandRow, setExpandRow] = useState(false);
 
     return <React.Fragment
-        key={data.blockHash}
+        key={index}
     >
         <StyledTableRow
             className={!!expandRow ? 'expand' : ''}
@@ -95,12 +93,16 @@ function TransactionTableRow({ ...data }) {
                     justify='space-between'
                     alignItems='center'
                 >
-                    <Button
+                    <a
+                        href={chainLink(data)}
+                        target={'_blank'}
+                        rel='noopener noreferrer'
+                    ><Button
                         startIcon={<LinkIcon />}
                         variant="outlined"
                         color="primary">
-                        Advanced Details
-                    </Button>
+                            Advanced Details
+                        </Button></a>
                 </Grid>
             </StyledTableCell>
             <StyledTableCell>
@@ -145,7 +147,7 @@ function TransactionTableRow({ ...data }) {
                                 <Grid container>
                                     <Grid item xs={12}>
                                         <Typography variant="body1">
-                                            0xb62379...de1be9
+                                            {truncate(data.l1Hash, 8, 6, '...')}
                                         </Typography>
                                     </Grid>
                                 </Grid>
@@ -157,7 +159,7 @@ function TransactionTableRow({ ...data }) {
                                     </Grid>
                                     <Grid item xs={10}>
                                         <Typography variant="body1" className="value" >
-                                            9066690
+                                            {data.l1BlockNumber}
                                         </Typography>
                                     </Grid>
                                 </Grid>
@@ -169,7 +171,7 @@ function TransactionTableRow({ ...data }) {
                                     </Grid>
                                     <Grid item xs={10}>
                                         <Typography variant="body1" className="value" >
-                                            0xb62379edc2c76cbe24a01885ce92dd3c3690b5f3a425ba2955abfbae60de1be9
+                                            {data.l1BlockHash}
                                         </Typography>
                                     </Grid>
                                 </Grid>
@@ -181,7 +183,7 @@ function TransactionTableRow({ ...data }) {
                                     </Grid>
                                     <Grid item xs={10}>
                                         <Typography variant="body1" className="value" >
-                                            0xbfcea3b73312c77edf5158812fac88871c50004c
+                                            {data.l1From}
                                         </Typography>
                                     </Grid>
                                 </Grid>
@@ -193,7 +195,7 @@ function TransactionTableRow({ ...data }) {
                                     </Grid>
                                     <Grid item xs={10}>
                                         <Typography variant="body1" className="value" >
-                                            0x2c12649a5a4fc61f146e0a3409f3e4c7fbed15dc
+                                            {data.l1To}
                                         </Typography>
                                     </Grid>
                                 </Grid>
@@ -208,7 +210,7 @@ function TransactionTableRow({ ...data }) {
 export default TransactionTableRow;
 
 
-/* 
+/*
 blockHash: "0xacae9c9e92199ece44055bca7340c6df267b5aaa51c0b88eaa14b163667ef24c"
 blockNumber: "9128892"
 chain: "L1"
