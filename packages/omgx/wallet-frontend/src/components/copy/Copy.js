@@ -16,14 +16,10 @@ limitations under the License. */
 import React, { useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { FileCopyOutlined } from '@material-ui/icons';
-
-import Alert from 'components/alert/Alert';
-
-import * as styles from './Copy.module.scss';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useEffect } from 'react';
 
-function Copy ({ value, light }) {
+function Copy ({ value }) {
   const [ open, setOpen ] = useState(false);
 
   useEffect(() => {

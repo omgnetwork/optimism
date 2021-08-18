@@ -154,7 +154,7 @@ function Home () {
         ) : (
           <MainMenu pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
         )}
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, px: 5 }}>
           {/* The Top SubMenu Bar, non-mobile */}
 
           {/* <div className={styles.secondtab}>
@@ -184,7 +184,7 @@ function Home () {
             </span>
           </div> */}
 
-          <Container maxWidth="md">
+          <Container maxWidth="lg">
             {pageDisplay === "AccountNow" &&
             <>
               <Account/>
