@@ -15,6 +15,7 @@ Script'll subscribe l1 and l2. Every new block, callback'll get balance of l1 po
     PROPOSER_ADDRESS=0x7f3cDbe9906Fd57373e8d18AaA159Fc713f379b0
     FAST_RELAYER_ADDRESS=0x81922840527936c3453c99a81dBd4b13d7363722
     MONITORING_RECONNECT_SECS=10 // delay time to reconect provider
+    MONITORING_HANG_TIMEOUT_MINS=4 // hang timeout before restart service
     ```
 2. run `npm start`
 

@@ -15,6 +15,9 @@ let l1GasPrice: number
 let l2PoolBalance: number
 let l2BlockNumber: number
 let l2GasPrice: number
+let hangTimeout = setTimeout(() => {
+  process.exit(1)
+}, configs.monitoringHangTimeoutMins * 60 * 1000)
 
 // logger.info({ key: 'config', data: 'config.parsed' })
 // console.log(parseInt('0x51cff8d9', 16))
@@ -70,7 +73,7 @@ const logBalance = (provider: WebSocketProvider, blockNumber: number, networkNam
     provider.getGasPrice(),
   ]
 
-  Promise.all(promiseData)
+  return Promise.all(promiseData)
   .then((values) => {
     if (values.length === 6) {
       l1PoolBalance = convertWeiToEther(values[0])
@@ -168,7 +171,7 @@ const logData = (socket: WebSocketProvider, blockNumber: string, networkName: co
     poolAddress,
   }
 
-  socket.getBlockWithTransactions(blockNumber)
+  return socket.getBlockWithTransactions(blockNumber)
   .then((block) => {
     block.transactions.forEach((trans) => {
       logTransaction(socket, trans, networkName, metadata)
@@ -206,6 +209,13 @@ const onError = (networkName: configs.OMGXNetwork, provider: WebSocketProvider) 
   }
 }
 
+const resetHangTimeout = () => {
+  clearTimeout(hangTimeout)
+  hangTimeout = setTimeout(() => {
+    process.exit(1)
+  }, configs.monitoringHangTimeoutMins * 60 * 1000)
+}
+
 export const setupProvider = (networkName: configs.OMGXNetwork, url: string) => {
   const provider = new WebSocketProvider(url)
   provider._websocket.addEventListener('open', onConnected(networkName))
@@ -215,9 +225,15 @@ export const setupProvider = (networkName: configs.OMGXNetwork, url: string) => 
 
     // log transactions and events
     logData(provider, result.number, networkName)
+    .then(() => {
+      resetHangTimeout()
+    })
 
     // log balances
     logBalance(provider, blockNumber, networkName)
+    .then(() => {
+      resetHangTimeout()
+    })
   }).catch()
 }
 

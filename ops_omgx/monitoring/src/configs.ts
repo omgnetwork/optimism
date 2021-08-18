@@ -23,6 +23,7 @@ export const dummyEthAmount = process.env.DUMMY_ETH_AMOUNT || '0.0005'
 export const dummyDelayMins = parseInt(process.env.DUMMY_DELAY_MINS, 10) || 30
 export const dummyWathcherTimeoutMins = parseInt(process.env.DUMMY_WATCHER_TIMEOUT_MINS, 10) || 15
 export const monitoringReconnectSecs = parseInt(process.env.MONITORING_RECONNECT_SECS, 10) || 15
+export const monitoringHangTimeoutMins = parseInt(process.env.MONITORING_HANG_TIMEOUT_MINS, 10) || 4
 
 export const addressOvmEth = '0x4200000000000000000000000000000000000006'
 export const l1AddressManager = process.env.L1_ADDRESS_MANAGER
