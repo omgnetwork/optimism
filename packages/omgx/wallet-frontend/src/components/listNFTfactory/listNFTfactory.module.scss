@@ -3,7 +3,6 @@
 $dropDownHeight: 92px;
 
 .ListNFT {
-
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   border-radius: 5px;
   margin-top: 10px;
@@ -11,7 +10,6 @@ $dropDownHeight: 92px;
   border: 1px solid $green;
 
   .topContainer {
-
     cursor: pointer;
     display: flex;
     flex-direction: row;
@@ -20,7 +18,7 @@ $dropDownHeight: 92px;
     .Table1 {
       display: flex;
       justify-content: center;
-      align-items: center;    
+      align-items: center;
       .Image {
         width: 80px;
         height: 80px;
@@ -48,7 +46,7 @@ $dropDownHeight: 92px;
   .dropDownContainer {
     animation: openDropDown 1s;
     overflow: hidden;
-    background-color: $gray7;
+    background-color: #152132;
     display: flex;
     padding-top: 10px;
     flex-direction: column;
@@ -60,7 +58,7 @@ $dropDownHeight: 92px;
     height: 0px;
     animation: closeDropDown 1s;
     overflow: hidden;
-    background-color: $gray7;
+    background-color: #152132;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -88,14 +86,14 @@ $dropDownHeight: 92px;
     margin: 0px;
     align-items: center;
     .Image {
-        width: 75px;
-        height: 75px;
-        border-radius: 10px;
-        padding: 0px;
+      width: 75px;
+      height: 75px;
+      border-radius: 10px;
+      padding: 0px;
     }
     .originRight {
-        flex-direction: column;
-        padding-left: 6px;
+      flex-direction: column;
+      padding-left: 6px;
     }
   }
 
@@ -148,7 +146,7 @@ $dropDownHeight: 92px;
   }
   /************************/
 
-  .smallButton{
+  .smallButton {
     border-radius: 10px;
     width: 100px !important;
     flex: none;
@@ -156,8 +154,8 @@ $dropDownHeight: 92px;
     padding-top: 10px;
     padding-bottom: 10px;
   }
-  
-  .largeButton{
+
+  .largeButton {
     border-radius: 10px;
     width: calc(100% - 30px);
     flex: none;
@@ -165,5 +163,4 @@ $dropDownHeight: 92px;
     padding-top: 10px;
     padding-bottom: 10px;
   }
-
 }
