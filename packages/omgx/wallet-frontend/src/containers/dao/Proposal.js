@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import getBlockchain from "../../services/ethereum.js";
 // import GovernorBravoDelegate from '../../deployment/artifacts-ovm/contracts/GovernorBravoDelegate.json'
 // import Timelock from '../../deployment/artifacts-ovm/contracts/Timelock.json'
-// import BobaMenu from '../../deployment/artifacts-ovm/contracts/BobaMenu.json'
+import BobaMenu from '../../deployment/artifacts-ovm/contracts/BobaMenu.json'
 // import { functions } from "lodash";
 
 function Proposal(props) {
@@ -54,57 +54,75 @@ function Proposal(props) {
     setValues(newValues);
   };
 
-  // function generateInputs(funcInputs, funcInputTypes){
-  //   let funcInputsMarkup = funcInputs.map((input, index) => (
-  //               <input type={text} placeholder={`${input}(${funcInputTypes[index]})`}></input>
-  //   ));
-        // return (<>{funcInputsMarkup}</>)
-  // }
+  function generateInputs(funcInputs, funcInputTypes){
+    let funcInputsMarkup = funcInputs.map((input, index) => (
+                <input type={"text"} placeholder={`${input}(${funcInputTypes[index]})`}></input>
+    ));
+    return (<>{funcInputsMarkup}</>);
+  }
 
-  // function getFunctionInputs(contractABI){
-  //   functions = [];
-  //   inputs = [];
-  //   inputTypes = []
-  //   contractABI.forEach((func, index) => {
-  //     // if type is function
-  //     if(func.type === 'function'){
-  //       func.push[func.name];
-  //       // if the function has inputs
-  //       if(func.inputs.length > 0){
-  //         // make an array of all the inputs and input types the function has
-  //         funcInputs = [];
-  //         funcInputTypes = [];
+  function generateFunctions(funcs){
+    let funcsMarkup = funcs.map((func) => (
+      <option value={func}>{func}</option>
+    ));
+    return (
+          <>
+            <option value="select">Select an Action</option>
+            {funcsMarkup}
+          </>);
 
-  //         // for each input
-  //         func.inputs.forEach((input, index) =>{
-  //           if('components' in input){
-  //             let typeStr = input.type + '(';
-  //             let nameStr = input.name + '(';
-  //             input.components.forEach((component, index) => {
-  //               typeStr += component.type + ',';
-  //               nameStr += component.name + ',';
-  //             });
-  //             typeStr[-1] = ')';
-  //             nameStr[-1] = ')';
-  //             funcInputs.push(nameStr);
-  //             funcInputTypes.push(typeStr);
-  //           } else {
-  //             funcInputs.push(input.name);
-  //             funcInputTypes.push(input.type);
-  //           }
-  //         });
-  //         // push the array of function inputs to the larger input array
-  //         inputs.push(funcInputs);
-  //         inputTypes.push(funcInputTypes);
-  //       }
-  //     }
-  //   });
-  //   let functionMarkup = functions.map((func, index) => {
+  }
 
-  //   });
+  function getFunctionInputs(contractABI){
+    let functions = [];
+    let inputs = [];
+    let inputTypes = []
+    contractABI.forEach((func, index) => {
+      // if type is function
+      if(func.type === 'function' && func.stateMutability !== "view"){
+        functions.push(func.name);
+        // if the function has inputs
+        if(func.inputs.length > 0){
+          // make an array of all the inputs and input types the function has
+          let funcInputs = [];
+          let funcInputTypes = [];
 
+          // for each input
+          func.inputs.forEach((input, index) => {
+            if('components' in input){
+              let typeStr = input.type + '(';
+              let nameStr = input.name + '(';
+              input.components.forEach((component, index) => {
+                typeStr += component.type + ',';
+                nameStr += component.name + ',';
+              });
+              typeStr = typeStr.substring(0, typeStr.length - 1) + ')';
+              nameStr = nameStr.substring(0, nameStr.length - 1) + ')';
+              funcInputs.push(nameStr);
+              funcInputTypes.push(typeStr);
+            } else {
+              funcInputs.push(input.name);
+              funcInputTypes.push(input.type);
+            }
+          });
 
-  // }
+          // push the array of function inputs to the larger input array
+          inputs.push(funcInputs);
+          inputTypes.push(funcInputTypes);
+        }else{
+          inputs.push(null);
+          inputTypes.push(null);
+        }
+      }
+    });
+    return [functions, inputs, inputTypes];
+  }
+
+  let bobaMenuFuncs, bobaMenuInputs, bobaMenuInputTypes;
+  [bobaMenuFuncs, bobaMenuInputs, bobaMenuInputTypes] = getFunctionInputs(BobaMenu.abi);
+  console.log('Boba Menu', bobaMenuFuncs);
+  console.log('Boba Menu Inputs',bobaMenuInputs);
+  console.log('Boba Menu Input Types', bobaMenuInputTypes);
 
   function contractFunctions(contract){
     switch(contract){
@@ -138,22 +156,11 @@ function Proposal(props) {
         return (
           <>
             <select value={action} onChange={(e) => updateActions(e)}>
-              <option value="select">Select an Action</option>
-              <option value="addFlavor">
-              addFlavor
-              </option>
-              <option value="addTopping">addTopping</option>
-              <option value="replaceFlavor">replaceFlavor</option>
-              <option value="replaceTopping">replaceTopping</option>
-              <option value="changeLock">changeLock</option>
-              <option value="acceptAdmin">acceptAdmin</option>
-              <option value="setPendingAdmin">setPendingAdmin</option>
+              {generateFunctions(bobaMenuFuncs)}
             </select>
-              <input
-                type="text"
-                placeholder={`new ${action}`}
-                onChange={(e) => updateValues(e)}
-              ></input>
+              {(action === 'select' || bobaMenuInputs[bobaMenuFuncs.indexOf(action)] == null)?
+              null :
+              generateInputs(bobaMenuInputs[bobaMenuFuncs.indexOf(action)], bobaMenuInputTypes[bobaMenuFuncs.indexOf(action)])}
           </>
         );
       default:
