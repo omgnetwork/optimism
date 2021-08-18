@@ -7,14 +7,14 @@ export const tableHeadList = [
       label: 'Amount',
       isSort: false,
   },
-  {
-      label: 'Price',
-      isSort: false,
-  },
-  {
-      label: 'Total Price',
-      isSort: false,
-  },
+  // {
+  //     label: 'Price',
+  //     isSort: false,
+  // },
+  // {
+  //     label: 'Total Price',
+  //     isSort: false,
+  // },
   {
       label: '',
       isSort: false,

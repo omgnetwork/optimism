@@ -125,6 +125,7 @@ function App () {
             borderRadius: "8px",
             textTransform: "none",
             boxShadow: "box-shadow: 0px 0px 7px rgba(73, 107, 239, 0.35)",
+            minWidth: "0",
             "&.Mui-disabled": {
               background: 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)',
               color: 'rgba(255, 255, 255, 0.5)',

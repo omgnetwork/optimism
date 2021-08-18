@@ -8,7 +8,7 @@ import Button from 'components/button/Button';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography, Fade } from '@material-ui/core';
 import * as S from './ListAccount.styles'
 import EthereumIcon from 'components/icons/EthereumIcon';
 class ListAccount extends React.Component {
@@ -69,30 +69,31 @@ class ListAccount extends React.Component {
         <S.Content>
             <S.TableBody disabled={true}>
 
-              <S.TableCell sx={{gap: "5px"}}>
+              <S.TableCell sx={{gap: "10px", justifyContent: "flex-start"}}>
                 <EthereumIcon width={42} height={42}/>
-                <Typography variant="body2" component="div">
+
+                <S.TextTableCell enabled={enabled} variant="body2" component="div">
                   {token.symbol}
-                </Typography>
+                </S.TextTableCell>
               </S.TableCell>
 
               <S.TableCell>
-                <Typography variant="body2" component="div" sx={{fontWeight:"700"}}>
+                <S.TextTableCell enabled={enabled} variant="body2" component="div" sx={{fontWeight:"700"}}>
                   {`${logAmount(token.balance, 18, 2)}`}
-                </Typography>
+                </S.TextTableCell>
               </S.TableCell>
-
+{/*
               <S.TableCell>
-                <Typography variant="body2" component="div" sx={{fontWeight:"700"}}>
+                <S.TextTableCell enabled={enabled} variant="body2" component="div" sx={{fontWeight:"700"}}>
                   $ 26.43
-                </Typography>
+                </S.TextTableCell>
               </S.TableCell>
 
               <S.TableCell>
-                <Typography variant="body2" component="div" sx={{fontWeight:"700"}}>
+                <S.TextTableCell enabled={enabled} variant="body2" component="div" sx={{fontWeight:"700"}}>
                   $ 1,556,43
-                </Typography>
-              </S.TableCell>
+                </S.TextTableCell>
+              </S.TableCell> */}
 
               <S.TableCell
                 onClick={() => {
@@ -101,19 +102,19 @@ class ListAccount extends React.Component {
                     dropDownBoxInit: false
                   })
                 }}
-                sx={{cursor: "pointer"}}
+                sx={{cursor: "pointer", gap: "5px", justifyContent: "flex-end"}}
               >
                 {chain === 'L1' &&
-                  <Typography variant="body2" component="div" sx={{opacity: !enabled ? "0.2" : "1.0"}}>
+                  <S.TextTableCell enabled={enabled} variant="body2" component="div">
                     Deposit
-                  </Typography>
+                  </S.TextTableCell>
                 }
                 {chain === 'L2' &&
-                  <Typography variant="body2" component="div" sx={{opacity: !enabled ? "0.2" : "1.0"}}>
+                  <S.TextTableCell enabled={enabled} variant="body2" component="div">
                     Transact
-                  </Typography>
+                  </S.TextTableCell>
                 }
-                <Box sx={{display: "flex", opacity: !enabled ? "0.2" : "1.0", transform: dropDownBox ? "rotate(-180deg)" : ""}}>
+                <Box sx={{display: "flex", opacity: !enabled ? "0.4" : "1.0", transform: dropDownBox ? "rotate(-180deg)" : ""}}>
                   <ExpandMoreIcon sx={{width: "12px"}}/>
                 </Box>
               </S.TableCell>
@@ -125,78 +126,80 @@ class ListAccount extends React.Component {
           }
 
           {dropDownBox ? (
-          <S.DropdownWrapper>
-            {!enabled && chain === 'L1' &&
-              <Box>
-                <Typography variant="body2" component="p">
-                    MetaMask is set to L2. To transact on L1, please change the chain in MetaMask to L1.
-                </Typography>
-            </Box>
-            }
-
-            {!enabled && chain === 'L2' &&
-              <Box>
-                <Typography variant="body2" component="p">
-                  MetaMask is set to L1. To transact on L2, please change the chain in MetaMask to L2.
-                </Typography>
+          <Fade in={dropDownBox}>
+            <S.DropdownWrapper>
+              {!enabled && chain === 'L1' &&
+                <Box>
+                  <Typography variant="body2" component="p">
+                      MetaMask is set to L2. To transact on L1, please change the chain in MetaMask to L1.
+                  </Typography>
               </Box>
-            }
+              }
 
-            {enabled && chain === 'L1' &&
-            <>
-              <Button
-                onClick={()=>{this.handleModalClick('depositModal', token, false)}}
-                color='neutral'
-                variant="outlined"
-                disabled={disabled}
-                fullWidth
-              >
-                Deposit
-              </Button>
+              {!enabled && chain === 'L2' &&
+                <Box>
+                  <Typography variant="body2" component="p">
+                    MetaMask is set to L1. To transact on L2, please change the chain in MetaMask to L2.
+                  </Typography>
+                </Box>
+              }
 
-              <Button
-                onClick={()=>{this.handleModalClick('depositModal', token, true)}}
-                color='primary'
-                disabled={disabled}
-                variant="contained"
-                fullWidth
-              >
-                Fast Deposit
-              </Button>
-            </>
-            }
-
-            {enabled && chain === 'L2' &&
+              {enabled && chain === 'L1' &&
               <>
                 <Button
-                  onClick={()=>{this.handleModalClick('exitModal', token, false)}}
+                  onClick={()=>{this.handleModalClick('depositModal', token, false)}}
+                  color='neutral'
                   variant="outlined"
                   disabled={disabled}
                   fullWidth
                 >
-                  Standart Exit
+                  Deposit
                 </Button>
 
                 <Button
-                  onClick={()=>{this.handleModalClick('exitModal', token, true)}}
-                  variant="contained"
+                  onClick={()=>{this.handleModalClick('depositModal', token, true)}}
+                  color='primary'
                   disabled={disabled}
+                  variant="contained"
                   fullWidth
                 >
-                  Fast Exit
-                </Button>
-
-                <Button
-                  onClick={()=>{this.handleModalClick('transferModal', token, false)}}
-                  variant="contained"
-                  disabled={disabled}
-                  fullWidth
-                >
-                  Transfer
+                  Fast Deposit
                 </Button>
               </>
-            }
-          </S.DropdownWrapper>
+              }
+
+              {enabled && chain === 'L2' &&
+                <>
+                  <Button
+                    onClick={()=>{this.handleModalClick('exitModal', token, false)}}
+                    variant="outlined"
+                    disabled={disabled}
+                    fullWidth
+                  >
+                    Standart Exit
+                  </Button>
+
+                  <Button
+                    onClick={()=>{this.handleModalClick('exitModal', token, true)}}
+                    variant="contained"
+                    disabled={disabled}
+                    fullWidth
+                  >
+                    Fast Exit
+                  </Button>
+
+                  <Button
+                    onClick={()=>{this.handleModalClick('transferModal', token, false)}}
+                    variant="contained"
+                    disabled={disabled}
+                    fullWidth
+                  >
+                    Transfer
+                  </Button>
+                </>
+              }
+            </S.DropdownWrapper>
+          </Fade>
           ) : null}
         </S.Content>
       </>

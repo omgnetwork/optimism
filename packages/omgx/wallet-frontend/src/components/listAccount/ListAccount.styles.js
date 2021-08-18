@@ -1,5 +1,5 @@
 import { styled } from '@material-ui/core/styles'
-import { Box } from '@material-ui/core';
+import { Box, Typography } from '@material-ui/core';
 
 export const Content = styled(Box)`
   display: flex;
@@ -23,7 +23,12 @@ export const TableCell = styled(Box)`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20%;
+  width: 33.33%;
+`;
+
+export const TextTableCell = styled(Typography)`
+  opacity: ${(props) => !props.enabled ? "0.4" : "1.0"};
+  font-weight: 700;
 `;
 
 export const TableBody = styled(Box)`

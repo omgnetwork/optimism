@@ -26,6 +26,7 @@ function Button ({
   fullWidth,
   disabled,
   loading,
+  sx,
   pulsate,
   tooltip = '',
   size,
@@ -61,6 +62,7 @@ function Button ({
     onClick,
     disabled,
     size,
+    sx,
   }
 
   return (

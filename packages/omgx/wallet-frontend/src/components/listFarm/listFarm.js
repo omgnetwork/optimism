@@ -10,13 +10,13 @@ import { getFarmInfo, updateStakeToken, updateWithdrawToken } from 'actions/farm
 import Button from 'components/button/Button';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 
 import networkService from 'services/networkService';
 
 import * as styles from './listFarm.module.scss';
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Typography, Fade } from '@material-ui/core';
+import * as S from "./ListFarm.styles"
 
 class ListFarm extends React.Component {
 
@@ -176,59 +176,59 @@ class ListFarm extends React.Component {
           style={disabled ? {pointerEvents: 'none'} : {}}
           onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
         >
-          <div className={styles.Table1}>
-            <img className={styles.Image} src={logo} alt="logo"/>
+          <S.ListItems>
+            <img className={styles.Image} src={logo} alt="logo" />
             <Typography variant="overline">{name}</Typography>
-          </div>
-          <div className={styles.Table2}>
+          </S.ListItems>
+          <S.ListItems>
             <Typography variant="overline">Earned</Typography>
             <Typography variant="body1">
               {userReward ?
                 `${logAmount(userReward, 18, 2)} ${symbol}` : `0 ${symbol}`
               }
             </Typography>
-          </div>
-          <div className={styles.Table3}>
+          </S.ListItems>
+          <S.ListItems>
             <Typography variant="overline">Share</Typography>
             <Typography variant="body1">
               {userInfo.amount ?
                 `${logAmount(userInfo.amount, 18, 2)} ${symbol}` : `0 ${symbol}`
               }
             </Typography>
-          </div>
-          <div className={styles.Table4}>
+          </S.ListItems>
+          <S.ListItems>
             <Typography variant="overline">APR</Typography>
             <Typography variant="body1">
               {`${poolInfo.APR ? poolInfo.APR.toFixed(2) : 0}%`}
             </Typography>
-          </div>
-          <div className={styles.Table5}>
+          </S.ListItems>
+          <S.ListItems>
             <Typography variant="overline">Liquidity</Typography>
             <Typography variant="body1">
               {poolInfo.userDepositAmount ?
                 `${logAmount(poolInfo.userDepositAmount, 18, 2)} ${symbol}` : `0 ${symbol}`
               }
             </Typography>
-          </div>
-          <div className={styles.Table5}>
+          </S.ListItems>
+          <S.ListItems>
             <Typography variant="overline">Balance</Typography>
             <Typography variant="body1">
               {poolInfo.tokenBalance ?
                 `${logAmount(poolInfo.tokenBalance, 18, 2)} ${symbol}` : `0 ${symbol}`
               }
             </Typography>
-          </div>
+          </S.ListItems>
           {disabled &&
-            <div className={styles.Table6}>
+            <S.ListItems>
               <div className={styles.LinkTextOff}>Staking</div>
               <ExpandMoreIcon className={styles.LinkButtonOff} />
-            </div>
+            </S.ListItems>
           }
           {!disabled &&
-            <div className={styles.Table6}>
+            <S.ListItems>
               <div className={styles.LinkText}>Staking</div>
               <ExpandMoreIcon className={styles.LinkButton} />
-            </div>
+            </S.ListItems>
           }
         </div>
 
@@ -236,76 +236,59 @@ class ListFarm extends React.Component {
         /**************  Drop Down Box ****************/
         /**********************************************/
         }
-        <div
-          className={dropDownBox ?
-            styles.dropDownContainer: dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
-        >
-          <Box display="flex" sx={{ p: 4, justifyContent: 'center' }}>
-            <Paper sx={{ minWidth: 300, p: 2, mr: 2 }}>
-              <Typography variant="subtitle1">{`${name}`} Earned</Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={6}>
-                  <Typography variant="h5" color="secondary">{logAmount(userReward, 18, 2)}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Button
-                    variant='primary'
-                    size='small'
-                    // className={styles.smallButton}
-                    disabled={logAmount(userReward, 18) === '0' || disabled}
-                    onClick={()=>{this.handleHarvest()}}
-                    loading={loading}
-                  >
-                    Harvest
-                  </Button>
-                </Grid>
-              </Grid>
-            </Paper>
+        {dropDownBox ? (
+          <Fade in={dropDownBox}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", gap: "16px" }}>
+              <S.DropdownWrapper>
+                <Typography sx={{flex: 1}} variant="body2" component="div">{`${name}`} Earned</Typography>
+                <Typography sx={{flex: 1}} variant="body2" component="div" color="secondary">{logAmount(userReward, 18, 2)}</Typography>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  disabled={logAmount(userReward, 18) === '0' || disabled}
+                  onClick={()=>{this.handleHarvest()}}
+                  loading={loading}
+                  sx={{flex: 1}}
+                >
+                  Harvest
+                </Button>
+              </S.DropdownWrapper>
 
-            <Paper sx={{ minWidth: 300, p: 2 }}>
-              {logAmount(userInfo.amount, 18) === '0' ?
-                <>
-                  <Typography variant="subtitle1">Stake {`${name}`}</Typography>
-                  <Box>
+              <S.DropdownWrapper>
+                {logAmount(userInfo.amount, 18) === '0' ?
+                  <>
+                    <Typography sx={{flex: 1}} variant="body2" component="div">Stake {`${name}`}</Typography>
                     <Button
-                      type='primary'
-                      className={styles.largeButton}
+                      variant="contained"
                       onClick={() => {this.handleStakeToken()}}
                       disabled={disabled}
+                      fullWidth
+                      sx={{flex: 1}}
                     >
                       Stake
                     </Button>
-                  </Box>
-                </> :
-                <>
-                  <Typography variant="subtitle1">{`${name}`} Staked</Typography>
-                  <Grid container spacing={3}>
-                    <Grid item xs={6}>
-                      <Typography variant="h5" color="secondary">{logAmount(userInfo.amount, 18)}</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box>
-                        <div
-                          className={disabled ? styles.AdjustButtonContainerDisabled : styles.AdjustButtonContainer}
-                          onClick={() => {!disabled && this.handleStakeToken()}}
-                        >
-                          <AddIcon className={styles.AdjustButton} />
-                        </div>
-                        <div
-                          className={disabled ? styles.AdjustButtonContainerDisabled : styles.AdjustButtonContainer}
-                          onClick={() => {!disabled && this.handleWithdrawToken()}}
-                        >
-                          <RemoveIcon className={styles.AdjustButton} />
-                        </div>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </>
-              }
-            </Paper>
-          </Box>
-
-        </div>
+                  </> :
+                  <>
+                    <Typography variant="body2" component="div">{`${name}`} Staked</Typography>
+                    <Typography variant="body2" component="div" color="secondary">{logAmount(userInfo.amount, 18)}</Typography>
+                    <Box sx={{display: "flex", alignItems: "center", gap: "5px"}}>
+                      <Button
+                        variant="outlined"
+                        color="neutral"
+                        onClick={() => {!disabled && this.handleWithdrawToken()}}
+                      >
+                        <RemoveIcon/>
+                      </Button>
+                      <Button variant="contained" onClick={() => {!disabled && this.handleStakeToken()}}>
+                        Stake More
+                      </Button>
+                    </Box>
+                  </>
+                }
+              </S.DropdownWrapper>
+            </Box>
+          </Fade>
+        ) : null }
 
       </div>
     )

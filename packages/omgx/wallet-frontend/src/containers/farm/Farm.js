@@ -198,7 +198,7 @@ class Farm extends React.Component {
                 Note: MetaMask is set to L2. To interact with the L1 liquidity pool, please switch MetaMask to L1.
               </Alert>
             }
-            <Box>
+            <Box xs={{backgroundColor: "#f00"}}>
               {Object.keys(poolInfo.L1LP).map((v, i) => {
                 const ret = this.getBalance(v, 'L1')
                 return (
@@ -215,6 +215,7 @@ class Farm extends React.Component {
               })}
             </Box>
           </TabPanel>
+
           <TabPanel value={value} index={1}>
             {networkLayer === 'L1' &&
               <Alert severity="info">
