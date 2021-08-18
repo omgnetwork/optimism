@@ -31,9 +31,9 @@ function _Modal ({
   onClose,
   light,
   title,
-  transparent
+  transparent,
+  maxWidth
 }) {
-
   return (
     <S.StyledModal
       aria-labelledby='transition-modal-title'
@@ -44,7 +44,7 @@ function _Modal ({
       BackdropComponent={S.Backdrop}
     >
       <Fade in={open}>
-        <Container maxWidth="lg" sx={{border: 'none'}}>
+        <Container maxWidth={maxWidth || "lg"} sx={{border: 'none'}}>
           <Grid container>
             <Grid item xs={12} md={2}>
               <Box sx={{mr: 8}}>

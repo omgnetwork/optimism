@@ -14,6 +14,7 @@ import { amountToUsd, logAmount, powAmount } from 'util/amountConvert'
 
 import * as styles from '../DepositModal.module.scss'
 import { selectLookupPrice } from 'selectors/lookupSelector'
+import { Grid, Typography } from '@material-ui/core'
 
 function InputStep({ handleClose, token }) {
 
@@ -75,12 +76,13 @@ function InputStep({ handleClose, token }) {
 
   return (
     <>
-      <h2>
+      <Typography variant="h3" gutterBottom>
         {`Deposit ${token && token.symbol ? token.symbol : ''}`}
-      </h2>
+      </Typography>
 
       <Input
-        placeholder={'Amount to deposit'}
+        label={'Amount to deposit'}
+        placeholder="0.0"
         value={value}
         type="number"
         onChange={(i)=>setAmount(i.target.value)}
@@ -96,26 +98,29 @@ function InputStep({ handleClose, token }) {
 
       {renderGasPicker}
 
-      <div className={styles.buttons}>
-        <Button 
-          onClick={handleClose} 
-          type="outline" 
-          style={{ flex: 0 }}
-        >
-          CANCEL
-        </Button>
-        <Button
-          onClick={doDeposit}
-          type="primary"
-          style={{flex: 0, minWidth: 200}}
-          loading={depositLoading}
-          tooltip="Your swap is still pending. Please wait for confirmation."
-          disabled={disabledSubmit}
-          triggerTime={new Date()}
-        >
-          DEPOSIT
-        </Button>
-      </div>
+      <Grid justifyContent="flex-end" container spacing={2}>
+        <Grid item>
+          <Button
+            onClick={handleClose}
+            color="neutral"
+          >
+            Cancel
+          </Button>
+        </Grid>
+        <Grid item>
+          <Button
+            onClick={doDeposit}
+            color='primary'
+            variant="contained"
+            loading={depositLoading}
+            tooltip='Your swap is still pending. Please wait for confirmation.'
+            disabled={disabledSubmit}
+            triggerTime={new Date()}
+          >
+            Deposit
+          </Button>
+        </Grid>
+      </Grid>
     </>
   )
 }

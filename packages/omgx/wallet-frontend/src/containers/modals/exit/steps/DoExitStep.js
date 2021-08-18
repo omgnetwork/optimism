@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+import { Box, Grid, Typography } from '@material-ui/core'
 import { exitOMGX } from 'actions/networkAction'
 import { openAlert, openError } from 'actions/uiAction'
 import Button from 'components/button/Button'
@@ -40,14 +41,14 @@ function DoExitStep({ handleClose, token }) {
     //person will receive ETH on the L1, not oETH
     let currencyL1 = token.symbol
 
-    if (currencyL1 === 'oETH') 
+    if (currencyL1 === 'oETH')
       currencyL1 = 'ETH'
-    
+
     if (res) {
       dispatch(
         openAlert(
-          `${token.symbol} was exited to L1. You will receive 
-          ${Number(value).toFixed(2)} ${currencyL1} 
+          `${token.symbol} was exited to L1. You will receive
+          ${Number(value).toFixed(2)} ${currencyL1}
           on L1 in 7 days.`
         )
       )
@@ -68,25 +69,29 @@ function DoExitStep({ handleClose, token }) {
 
   return (
     <>
-      <h2>
-        Standard Exit : {` ${token ? token.symbol : ''}`}
-      </h2>
+      <Typography variant="h3" gutterBottom>
+        Standard Exit ({` ${token ? token.symbol : ''}`})
+      </Typography>
 
-      <Input
-        placeholder={'Amount to exit'}
-        value={value}
-        type="number"
-        onChange={(i)=>{setExitAmount(i.target.value)}}
-        unit={token.symbol}
-        maxValue={logAmount(token.balance, token.decimals)}
-      />
-      
+      <Box display="block">
+        <Input
+          label={'Amount to exit'}
+          placeholder="0.0"
+          value={value}
+          type="number"
+          onChange={(i)=>{setExitAmount(i.target.value)}}
+          unit={token.symbol}
+          maxValue={logAmount(token.balance, token.decimals)}
+        />
+      </Box>
+
+
       {token && token.symbol === 'oETH' && (
         <h3>
           {value &&
-            `You will receive ${Number(value).toFixed(2)} ETH 
+            `You will receive ${Number(value).toFixed(2)} ETH
             ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
-            on L1. 
+            on L1.
             Your funds will be available on L1 in 7 days.`}
         </h3>
       )}
@@ -94,38 +99,40 @@ function DoExitStep({ handleClose, token }) {
       {token && token.symbol !== 'oETH' && (
         <h3>
           {value &&
-            `You will receive ${Number(value).toFixed(2)} 
+            `You will receive ${Number(value).toFixed(2)}
             ${token.symbol}
             ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
-            on L1. 
+            on L1.
             Your funds will be available on L1 in 7 days.`}
         </h3>
       )}
 
-      <div className={styles.buttons}>
-        <Button
-          onClick={handleClose}
-          className={styles.button}
-          type="outline"
-          style={{ flex: 0 }}
-        >
-          CANCEL
-        </Button>
-        {token && (
+      <Grid justifyContent="flex-end" container spacing={2}>
+        <Grid item>
           <Button
-            onClick={doExit}
-            type="primary"
+            onClick={handleClose}
+            color="neutral"
             style={{ flex: 0 }}
-            loading={exitLoading}
-            className={styles.button}
-            tooltip="Your exit is still pending. Please wait for confirmation."
-            disabled={disabledSubmit}
-            triggerTime={new Date()}
           >
-            EXIT
+            Cancel
           </Button>
-        )}
-      </div>
+        </Grid>
+        <Grid item>
+          {token && (
+            <Button
+              onClick={doExit}
+              color="primary"
+              variant="contained"
+              loading={exitLoading}
+              tooltip="Your exit is still pending. Please wait for confirmation."
+              disabled={disabledSubmit}
+              triggerTime={new Date()}
+            >
+              Exit
+            </Button>
+          )}
+        </Grid>
+      </Grid>
     </>
   )
 }

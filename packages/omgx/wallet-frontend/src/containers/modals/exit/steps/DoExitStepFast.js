@@ -27,11 +27,12 @@ import networkService from 'services/networkService'
 import * as styles from '../ExitModal.module.scss'
 import Input from 'components/input/Input'
 import { selectLookupPrice } from 'selectors/lookupSelector'
+import { Grid, Typography } from '@material-ui/core'
 
 function DoExitStepFast({ handleClose, token }) {
 
   const dispatch = useDispatch()
-    
+
   const [value, setValue] = useState('')
   const [LPBalance, setLPBalance] = useState(0)
   const [feeRate, setFeeRate] = useState(0)
@@ -74,7 +75,7 @@ function DoExitStepFast({ handleClose, token }) {
     }
 
     if (res) {
-      dispatch(openAlert(`${token.symbol} was deposited into the L2 liquidity pool. 
+      dispatch(openAlert(`${token.symbol} was deposited into the L2 liquidity pool.
         You will receive ${receivableAmount(value)} ${currencyL1} on L1.`));
       handleClose();
     } else {
@@ -98,8 +99,10 @@ function DoExitStepFast({ handleClose, token }) {
 
   return (
     <>
-      <h2>Fast Exit</h2>
-      
+      <Typography variant="h3" gutterBottom>
+        Fast Exit
+      </Typography>
+
       <Input
         label={label}
         placeholder={`Amount to exit`}
@@ -113,9 +116,9 @@ function DoExitStepFast({ handleClose, token }) {
       {token && token.symbol === 'oETH' && (
         <h3>
           {value &&
-            `You will receive 
-            ${receivableAmount(value)} 
-            ETH 
+            `You will receive
+            ${receivableAmount(value)}
+            ETH
             ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
             on L1.`
           }
@@ -125,9 +128,9 @@ function DoExitStepFast({ handleClose, token }) {
       {token && token.symbol !== 'oETH' && (
         <h3>
           {value &&
-            `You will receive 
-            ${receivableAmount(value)} 
-            ${token.symbol} 
+            `You will receive
+            ${receivableAmount(value)}
+            ${token.symbol}
             ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
             on L1.`
           }
@@ -141,28 +144,29 @@ function DoExitStepFast({ handleClose, token }) {
         </h3>
       )}
 
-      <div className={styles.buttons}>
-        <Button
-          onClick={handleClose}
-          className={styles.button}
-          type="outline"
-          style={{flex: 0}}
-        >
-          CANCEL
-        </Button>        
-        <Button
-          onClick={doExit}
-          type='primary'
-          style={{flex: 0, minWidth: 200}}
-          loading={exitLoading}
-          className={styles.button}
-          tooltip='Your exit is still pending. Please wait for confirmation.'
-          disabled={disabledSubmit}
-          triggerTime={new Date()}
-        >
-          FAST EXIT
-        </Button>
-      </div>
+      <Grid justifyContent="flex-end" container spacing={2}>
+        <Grid item>
+          <Button
+            onClick={handleClose}
+            color="neutral"
+          >
+            Cancel
+          </Button>
+        </Grid>
+        <Grid item>
+          <Button
+            onClick={doExit}
+            color='primary'
+            variant="contained"
+            loading={exitLoading}
+            tooltip='Your exit is still pending. Please wait for confirmation.'
+            disabled={disabledSubmit}
+            triggerTime={new Date()}
+          >
+            Fast Exit
+          </Button>
+        </Grid>
+      </Grid>
     </>
   )
 }
