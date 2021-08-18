@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   margin-bottom: 5px;
-  
+
   .label {
     font-size: 0.7em;
     margin-bottom: 5px;
@@ -13,15 +13,12 @@
 
   .field {
     position: relative;
-    padding: 5px;
-    border: 1px solid $gray4;
     transition: all 200ms ease-in-out;
     display: flex;
     flex-direction: row;
     align-items: center;
-    &:focus-within {
-      border: 1px solid $blue;
-    }
+    margin-bottom: 5px;
+
     .icon {
       margin-right: 10px;
       position: absolute;
@@ -45,7 +42,10 @@
       border-radius: 8px;
       font-size: 16px;
       background: rgba(9, 22, 43, 0.5);
-      box-shadow: -13px 15px 19px rgb(0 0 0 / 15%), inset 53px 36px 120px rgb(255 255 255 / 6%);
+      // box-shadow: -13px 15px 19px rgb(0 0 0 / 15%), inset 53px 36px 120px rgb(255 255 255 / 6%);
+      &:focus-within {
+        box-shadow: 0 0 0 1px $blue inset;
+      }
     }
     .small {
       font-size: 0.7em;

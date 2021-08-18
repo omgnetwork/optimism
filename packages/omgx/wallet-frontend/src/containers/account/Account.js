@@ -41,7 +41,7 @@ import { selectNetwork } from 'selectors/setupSelector'
 
 function Account () {
   const dispatch = useDispatch();
-  
+
   const childBalance = useSelector(selectlayer2Balance, isEqual);
   const rootBalance = useSelector(selectlayer1Balance, isEqual);
 
@@ -66,7 +66,7 @@ function Account () {
     });
     dispatch(fetchLookUpPrice(symbolList));
   },[tokenList,dispatch])
-  
+
   const getGasPrice = useCallback(() => {
     dispatch(fetchGas({
       network: network || 'local',
@@ -93,7 +93,7 @@ function Account () {
     }
     return acc;
   }, balances)
-  
+
   return (
     <div className={styles.Account}>
 
@@ -104,7 +104,6 @@ function Account () {
 
       {balances['oETH']['have'] &&
         <div className={styles.RabbitBox}>
-          <img className={styles.bunny} src={bunny_happy} alt='Happy Bunny' />
           <div className={styles.RabbitRight}>
             <div className={styles.RabbitRightTop}>
             BOBA Balance
@@ -116,10 +115,10 @@ function Account () {
               oETH
             </div>
             <div className={styles.RabbitRightBottomNote}>
-            {networkLayer === 'L1' && 
+            {networkLayer === 'L1' &&
               <span>You are on L1. To use the L2, please switch to L2 in MetaMask.</span>
             }
-            {networkLayer === 'L2' && 
+            {networkLayer === 'L2' &&
               <span>You are on L2. To use the L1, please switch to L1 in MetaMask.</span>
             }
             </div>
@@ -129,7 +128,6 @@ function Account () {
 
       {!balances['oETH']['have'] &&
         <div className={styles.RabbitBox}>
-          <img className={styles.bunny} src={bunny_sad} alt='Sad Bunny' />
           <div className={styles.RabbitRight}>
             <div className={styles.RabbitRightTop}>
               BOBA Balance
@@ -141,10 +139,10 @@ function Account () {
               oETH
             </div>
             <div className={styles.RabbitRightBottomNote}>
-            {networkLayer === 'L1' && 
+            {networkLayer === 'L1' &&
               <span>You are on L1. To use the L2, please switch to L2 in MetaMask.</span>
             }
-            {networkLayer === 'L2' && 
+            {networkLayer === 'L2' &&
               <span>You are on L2. To use the L1, please switch to L1 in MetaMask.</span>
             }
             </div>
@@ -160,7 +158,7 @@ function Account () {
       <div className={styles.TableContainer}>
         {rootBalance.map((i, index) => {
           return (
-            <ListAccount 
+            <ListAccount
               key={i.currency}
               token={i}
               chain={'L1'}
@@ -178,7 +176,7 @@ function Account () {
       <div className={styles.TableContainer}>
         {childBalance.map((i, index) => {
           return (
-            <ListAccount 
+            <ListAccount
               key={i.currency}
               token={i}
               chain={'L2'}
