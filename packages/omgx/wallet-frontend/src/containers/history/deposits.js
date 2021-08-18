@@ -1,5 +1,5 @@
 import React from 'react';
-import StyledTable from 'components/table'
+import StyledTable from 'components/Table'
 
 
 function Deposits({

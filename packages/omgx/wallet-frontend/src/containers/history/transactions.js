@@ -1,4 +1,4 @@
-import StyledTable from 'components/table';
+import StyledTable from 'components/Table';
 import React from 'react';
 
 const tableHeadList = [
