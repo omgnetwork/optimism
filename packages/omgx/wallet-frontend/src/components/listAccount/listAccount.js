@@ -132,7 +132,12 @@ class ListAccount extends React.Component {
                 onClick={()=>{this.handleModalClick('depositModal', token, false)}}
                 type='secondary'
                 disabled={disabled}
-                style={{width: '100px', padding: '6px', borderRadius: '5px'}}
+                style={{
+                  width: '185px', 
+                  padding: '5px 10px', 
+                  borderRadius: '8px',
+                  height: '40px'
+                }}
               >
                 DEPOSIT
               </Button>
@@ -142,7 +147,12 @@ class ListAccount extends React.Component {
                 onClick={()=>{this.handleModalClick('depositModal', token, true)}}
                 type='primary'
                 disabled={disabled}
-                style={{width: '120px', padding: '6px', borderRadius: '5px'}}
+                style={{
+                  width: '185px', 
+                  padding: '5px 10px', 
+                  borderRadius: '8px',
+                  height: '40px'
+                }}
               >
                 FAST DEPOSIT
               </Button>
@@ -157,7 +167,12 @@ class ListAccount extends React.Component {
                 onClick={()=>{this.handleModalClick('transferModal', token, false)}}
                 type='primary'
                 disabled={disabled}
-                style={{width: '90px', padding: '6px',borderRadius: '5px'}}
+                style={{
+                  width: '120px', 
+                  padding: '5px 10px', 
+                  borderRadius: '8px',
+                  height: '40px'
+                }}
               >
                 TRANSFER
               </Button>
@@ -167,7 +182,12 @@ class ListAccount extends React.Component {
                 onClick={()=>{this.handleModalClick('exitModal', token, false)}}
                 type='secondary'
                 disabled={disabled}
-                style={{width: '100px', padding: '6px',borderRadius: '5px'}}
+                style={{
+                  width: '120px', 
+                  padding: '5px 10px', 
+                  borderRadius: '8px',
+                  height: '40px'  
+                }}
               >
                 7 DAY EXIT
               </Button>
@@ -177,7 +197,12 @@ class ListAccount extends React.Component {
                 onClick={()=>{this.handleModalClick('exitModal', token, true)}}
                 type='primary'
                 disabled={disabled}
-                style={{width: '90px', padding: '6px',borderRadius: '5px'}}
+                style={{
+                  width: '120px', 
+                  padding: '5px 10px', 
+                  borderRadius: '8px',
+                  height: '40px'
+                }}
               >
                 FAST EXIT
               </Button>
