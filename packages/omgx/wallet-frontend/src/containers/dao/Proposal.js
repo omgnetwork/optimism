@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import getBlockchain from "../../services/ethereum.js";
+// import GovernorBravoDelegate from '../../deployment/artifacts-ovm/contracts/GovernorBravoDelegate.json'
+// import Timelock from '../../deployment/artifacts-ovm/contracts/Timelock.json'
+// import BobaMenu from '../../deployment/artifacts-ovm/contracts/BobaMenu.json'
+// import { functions } from "lodash";
 
 function Proposal(props) {
   const {
@@ -15,12 +19,14 @@ function Proposal(props) {
   const [contract, setContract] = useState(contracts[i]);
   const [GBAddress, setGBAddress] = useState(undefined);
   const [timelockAddress, setTimelockAddress] = useState(undefined);
+  const [bobaMenuAddress, setBobaMenuAddress] = useState(undefined);
 
   useEffect(() => {
     const init = async () => {
-      const { timelock, GovernorBravo } = await getBlockchain();
+      const { timelock, GovernorBravo, bobaMenu } = await getBlockchain();
       setGBAddress(GovernorBravo.address);
       setTimelockAddress(timelock.address);
+      setBobaMenuAddress(bobaMenu.address);
     };
     init();
   }, []);
@@ -48,17 +54,62 @@ function Proposal(props) {
     setValues(newValues);
   };
 
-  return (
-    <div className="proposal">
-      <h3>{i + 1}.</h3>
-      <div className="column">
-        <select value={contract} onChange={(e) => updateContracts(e)}>
-          <option value="select">Select a Contract</option>
-          <option value="boba">Boba Fees</option>
-          <option value={GBAddress}>Governor Bravo</option>
-          <option value={timelockAddress}>Timelock</option>
-        </select>
-        {contract === "select" ? null : contract === GBAddress ? (
+  // function generateInputs(funcInputs, funcInputTypes){
+  //   let funcInputsMarkup = funcInputs.map((input, index) => (
+  //               <input type={text} placeholder={`${input}(${funcInputTypes[index]})`}></input>
+  //   ));
+        // return (<>{funcInputsMarkup}</>)
+  // }
+
+  // function getFunctionInputs(contractABI){
+  //   functions = [];
+  //   inputs = [];
+  //   inputTypes = []
+  //   contractABI.forEach((func, index) => {
+  //     // if type is function
+  //     if(func.type === 'function'){
+  //       func.push[func.name];
+  //       // if the function has inputs
+  //       if(func.inputs.length > 0){
+  //         // make an array of all the inputs and input types the function has
+  //         funcInputs = [];
+  //         funcInputTypes = [];
+
+  //         // for each input
+  //         func.inputs.forEach((input, index) =>{
+  //           if('components' in input){
+  //             let typeStr = input.type + '(';
+  //             let nameStr = input.name + '(';
+  //             input.components.forEach((component, index) => {
+  //               typeStr += component.type + ',';
+  //               nameStr += component.name + ',';
+  //             });
+  //             typeStr[-1] = ')';
+  //             nameStr[-1] = ')';
+  //             funcInputs.push(nameStr);
+  //             funcInputTypes.push(typeStr);
+  //           } else {
+  //             funcInputs.push(input.name);
+  //             funcInputTypes.push(input.type);
+  //           }
+  //         });
+  //         // push the array of function inputs to the larger input array
+  //         inputs.push(funcInputs);
+  //         inputTypes.push(funcInputTypes);
+  //       }
+  //     }
+  //   });
+  //   let functionMarkup = functions.map((func, index) => {
+
+  //   });
+
+
+  // }
+
+  function contractFunctions(contract){
+    switch(contract){
+      case GBAddress:
+        return (
           <>
             <select value={action} onChange={(e) => updateActions(e)}>
               <option value="select">Select an Action</option>
@@ -82,13 +133,53 @@ function Proposal(props) {
               ></input>
             )}
           </>
-        ) : (
+        );
+      case bobaMenuAddress:
+        return (
+          <>
+            <select value={action} onChange={(e) => updateActions(e)}>
+              <option value="select">Select an Action</option>
+              <option value="addFlavor">
+              addFlavor
+              </option>
+              <option value="addTopping">addTopping</option>
+              <option value="replaceFlavor">replaceFlavor</option>
+              <option value="replaceTopping">replaceTopping</option>
+              <option value="changeLock">changeLock</option>
+              <option value="acceptAdmin">acceptAdmin</option>
+              <option value="setPendingAdmin">setPendingAdmin</option>
+            </select>
+              <input
+                type="text"
+                placeholder={`new ${action}`}
+                onChange={(e) => updateValues(e)}
+              ></input>
+          </>
+        );
+      default:
+        return (
           <input
             type="text"
-            placeholder={`new ${action}`}
+            placeholder={`${action}`}
             onChange={(e) => updateValues(e)}
           ></input>
-        )}
+        );
+    }
+
+  }
+
+  return (
+    <div className="proposal">
+      <h3>{i + 1}.</h3>
+      <div className="column">
+        <select value={contract} onChange={(e) => updateContracts(e)}>
+          <option value="select">Select a Contract</option>
+          <option value="boba">Boba Fees</option>
+          <option value={GBAddress}>Governor Bravo</option>
+          <option value={timelockAddress}>Timelock</option>
+          <option value={bobaMenuAddress}>Boba Menu</option>
+        </select>
+        {contractFunctions(contract)}
       </div>
     </div>
   );

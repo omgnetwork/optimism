@@ -8,11 +8,11 @@ const main = async () => {
     const l2_provider = new ethers.providers.JsonRpcProvider(env.l2_provider);
     const wallet1 = new ethers.Wallet(env.privateKey1, l2_provider);
 
-    const flavor3 = "Black Milk Tea";
-    const topping3 = "Tapioca Pearls";
+    const flavor3 = "Thai Milk Tea";
+    const topping3 = "Lychee Jelly";
     const commonScore3 = 15;
-    const topping_color3 = [24, 31, 26];
-    const flavor_color3 = [230, 172, 115];
+    const topping_color3 = [220, 83, 73];
+    const flavor_color3 = [237, 146, 36];
     const flavor_gradient3 = [3, 2, 3];
 
     const flavorStruct3 = [ethers.utils.formatBytes32String(flavor3), // flavor

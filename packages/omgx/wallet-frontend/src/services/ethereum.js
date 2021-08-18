@@ -5,7 +5,7 @@ import GovernorBravoDelegate from '../deployment/artifacts-ovm/contracts/Governo
 import GovernorBravoDelegator from '../deployment/artifacts-ovm/contracts/GovernorBravoDelegator.json'
 import SafeMath from '../deployment/artifacts-ovm/contracts/SafeMath.json'
 import Timelock from '../deployment/artifacts-ovm/contracts/Timelock.json'
-const BobaMenu = require('../deployment/artifacts-ovm/contracts/BobaMenu.json')
+import BobaMenu from '../deployment/artifacts-ovm/contracts/BobaMenu.json'
 const Comp = require('../deployment/artifacts-ovm/contracts/Comp.json')
 
 const getBlockchain = () =>
