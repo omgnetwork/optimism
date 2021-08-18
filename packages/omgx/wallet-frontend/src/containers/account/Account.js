@@ -107,7 +107,7 @@ function Account () {
           <img className={styles.bunny} src={bunny_happy} alt='Happy Bunny' />
           <div className={styles.RabbitRight}>
             <div className={styles.RabbitRightTop}>
-              OMGX Balance
+            BOBA Balance
             </div>
             <div className={styles.RabbitRightMiddle}>
               <div className={styles.happy}>{balances['oETH']['amountShort']}</div>
@@ -132,7 +132,7 @@ function Account () {
           <img className={styles.bunny} src={bunny_sad} alt='Sad Bunny' />
           <div className={styles.RabbitRight}>
             <div className={styles.RabbitRightTop}>
-              OMGX Balance
+              BOBA Balance
             </div>
             <div className={styles.RabbitRightMiddle}>
                 <div className={styles.sad}>0</div>
@@ -173,7 +173,7 @@ function Account () {
     </div>
     <div className={styles.balanceContent}>
       <div className={styles.title}>
-        <p> <span className={styles.muted}>Balance on L2</span> OMGX </p>
+        <p> <span className={styles.muted}>Balance on L2</span> BOBA </p>
       </div>
       <div className={styles.TableContainer}>
         {childBalance.map((i, index) => {
