@@ -31,7 +31,7 @@ export const Style = styled(Box)`
   background: ${(props) => props.transparent ? 'transparent' : 'rgba(32, 29, 49, 0.8)'};
   box-shadow: ${(props) => props.transparent ? 'none' : '-13px 15px 39px rgba(0, 0, 0, 0.16), inset 123px 116px 230px rgba(255, 255, 255, 0.03)'};
   backdrop-filter: ${(props) => props.transparent ? 'none' :'blur(66px)'};
-  padding: ${(props) => props.transparent ? '0' : '60px'};
+  padding: ${(props) => props.transparent ? '0' : '40px'};
   border: 0;
   outline: 0;
   // width: '500px',

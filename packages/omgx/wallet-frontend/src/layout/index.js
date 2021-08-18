@@ -107,8 +107,17 @@ function App () {
           root: {
             background: light ? 'rgba(0,0,0,0.06)' : "rgba(255,255,255,0.06)",
             borderRadius: 10,
-          }
-        }
+          },
+        },
+        variants: [
+          {
+            props: { variant: 'selected' },
+            style: {
+              border: '1px solid #506DFA',
+              boxShadow: '0 0 0 1px #506DFA inset'
+            },
+          },
+        ],
       },
       MuiButton: {
         styleOverrides: {
@@ -173,6 +182,17 @@ function App () {
       },
       MuiInputBase: {
         backgroundColor: "#f00",
+      },
+      MuiAlert: {
+        variants: [
+          {
+            props: { variant: 'simple' },
+            style: {
+              padding: 0,
+              backgroundColor: 'transparent'
+            }
+          }
+        ]
       }
     }
   });

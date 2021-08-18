@@ -35,9 +35,9 @@ export const menuItems = [
     title: "NFT",
     url: "/learn"
   },
-  {
-    icon: "LearnIcon",
-    title: "Learn",
-    url: "/learn"
-  }
+  // {
+  //   icon: "LearnIcon",
+  //   title: "Learn",
+  //   url: "/learn"
+  // }
 ]

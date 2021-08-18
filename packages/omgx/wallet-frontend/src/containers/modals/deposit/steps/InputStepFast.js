@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+import { Alert, Box, Grid, Typography } from '@material-ui/core'
 import { depositL1LP, approveERC20 } from 'actions/networkAction'
 import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
 import Button from 'components/button/Button'
@@ -27,7 +28,7 @@ import { powAmount, logAmount, amountToUsd } from 'util/amountConvert'
 import * as styles from '../DepositModal.module.scss'
 
 function InputStepFast({ handleClose, token }) {
-  
+
   const dispatch = useDispatch()
 
   const [value, setValue] = useState('')
@@ -57,17 +58,17 @@ function InputStepFast({ handleClose, token }) {
     let res
 
     if(token.symbol === 'ETH') {
-      
+
       console.log("ETH Fast swap on")
-      
+
       if (value > 0) {
         res = await dispatch(depositL1LP(token.address, value))
         if (res) {
           dispatch(setActiveHistoryTab1('Deposits'))
           dispatch(
             openAlert(
-              `ETH was deposited into the L1LP. You will receive 
-              ${((Number(value) * (100 - Number(feeRate)))/100).toFixed(2)} 
+              `ETH was deposited into the L1LP. You will receive
+              ${((Number(value) * (100 - Number(feeRate)))/100).toFixed(2)}
               oETH on L2`
             )
           )
@@ -78,15 +79,15 @@ function InputStepFast({ handleClose, token }) {
           return
         }
       }
-    } 
-    
+    }
+
     //at this point we know it's not ETH
     console.log("ERC20 Fast swap on")
 
     res = await dispatch(
       approveERC20(
-        powAmount(value, token.decimals), 
-        token.address, 
+        powAmount(value, token.decimals),
+        token.address,
         networkService.L1LPAddress
       )
     )
@@ -103,7 +104,7 @@ function InputStepFast({ handleClose, token }) {
       dispatch(setActiveHistoryTab1('Deposits'))
       dispatch(
         openAlert(
-          `${token.symbol} was deposited to the L1LP. You will receive 
+          `${token.symbol} was deposited to the L1LP. You will receive
            ${receivableAmount(value)} ${token.symbol} on L2`
         )
       )
@@ -130,7 +131,7 @@ function InputStepFast({ handleClose, token }) {
   }, [token])
 
   const label = 'There is a ' + feeRate + '% fee.'
-  
+
   let buttonLabel = 'DEPOSIT'
 
   if(depositLoading) {
@@ -141,57 +142,69 @@ function InputStepFast({ handleClose, token }) {
 
   return (
     <>
-      <h2>Fast Deposit</h2>
+      <Typography variant="h3" gutterBottom>
+        Fast Deposit
+      </Typography>
 
-      <Input
-        label={label}
-        placeholder={`Amount to deposit`}
-        value={value}
-        type="number"
-        onChange={(i)=>{setAmount(i.target.value)}}
-        unit={token.symbol}
-        maxValue={logAmount(token.balance, token.decimals)}
-      />
-      
-      {token && token.symbol === 'ETH' && (
-        <h3>
-          {value && `You will receive ${receivableAmount(value)} oETH ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
-        </h3>
-      )}
+      <Alert severity="info" variant="simple">
+        {label}
+      </Alert>
 
-      {token && token.symbol !== 'ETH' && (
-        <h3>
-          {value && `You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
-        </h3>
-      )}
+      <Box sx={{ mt: 3 }}>
 
-      {Number(LPBalance) < Number(value) && (
-        <h3 style={{ color: 'red' }}>
-          The liquidity pool balance (of {LPBalance}) is too low to cover your fast deposit. Please
-          use the traditional deposit or reduce the amount.
-        </h3>
-      )}
+        <Input
+          label={`Amount to deposit`}
+          placeholder="0.0"
+          value={value}
+          type="number"
+          onChange={(i)=>{setAmount(i.target.value)}}
+          unit={token.symbol}
+          maxValue={logAmount(token.balance, token.decimals)}
+        />
 
-      <div className={styles.buttons}>
-        <Button 
-          onClick={handleClose} 
-          type="outline" 
-          style={{flex: 0}}
-        >
-          CANCEL
-        </Button>        
-        <Button
-          onClick={doDeposit}
-          type="primary"
-          style={{flex: 0, minWidth: 200}}
-          loading={depositLoading || approvalLoading}
-          tooltip="Your deposit is still pending. Please wait for confirmation."
-          disabled={disabledSubmit}
-          triggerTime={new Date()}
-        >
-          {buttonLabel}
-        </Button>       
-      </div>
+        {token && token.symbol === 'ETH' && (
+          <h3>
+            {value && `You will receive ${receivableAmount(value)} oETH ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
+          </h3>
+        )}
+
+        {token && token.symbol !== 'ETH' && (
+          <h3>
+            {value && `You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
+          </h3>
+        )}
+
+        {Number(LPBalance) < Number(value) && (
+          <h3 style={{ color: 'red' }}>
+            The liquidity pool balance (of {LPBalance}) is too low to cover your fast deposit. Please
+            use the traditional deposit or reduce the amount.
+          </h3>
+        )}
+      </Box>
+
+      <Grid justifyContent="flex-end" container spacing={2}>
+        <Grid item>
+          <Button
+            onClick={handleClose}
+            color="neutral"
+          >
+            Cancel
+          </Button>
+        </Grid>
+        <Grid item>
+          <Button
+            onClick={doDeposit}
+            color='primary'
+            variant="contained"
+            loading={depositLoading || approvalLoading}
+            tooltip="Your deposit is still pending. Please wait for confirmation."
+            disabled={disabledSubmit}
+            triggerTime={new Date()}
+          >
+            {buttonLabel}
+          </Button>
+        </Grid>
+      </Grid>
     </>
   )
 }
