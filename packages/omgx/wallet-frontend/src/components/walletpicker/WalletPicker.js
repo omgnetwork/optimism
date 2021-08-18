@@ -170,7 +170,9 @@ function WalletPicker ({ onEnable, enabled }) {
                   </S.DescriptionContent>
                 </Grid>
               <Grid item xs={12} md={6}>
-                <S.WalletCard onClick={() => dispatchSetWalletMethod('browser')}>
+                <S.WalletCard
+                  // disabled={!browserEnabled}
+                  pulsate={true} onClick={() => dispatchSetWalletMethod('browser')}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <S.PlusIcon>+</S.PlusIcon>
                     <Typography variant="h2" component="h2" paragraph={true} mb={0}>
