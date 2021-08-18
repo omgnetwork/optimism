@@ -31,8 +31,8 @@ function BoringBobaShop() {
         </div>)
     }
 
-    console.log(`Toppings: ${JSON.stringify(toppings)}`);
-    console.log(`Flavors: ${JSON.stringify(flavors)}`);
+    // console.log(`Toppings: ${JSON.stringify(toppings)}`);
+    // console.log(`Flavors: ${JSON.stringify(flavors)}`);
     let toppingsMarkup = toppings.map((topping) => (
             <h2>
                 ---{topping.topping}

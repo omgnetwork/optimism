@@ -211,10 +211,10 @@ function Home () {
 
             </h2>
             <h2
-              className={pageDisplay === "BoringBobaShop" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("BoringBobaShop")}}
+              className={pageDisplay === "BBS" ? styles.subtitletextActive : styles.subtitletext}
+              onClick={()=>{handleSetPage("BBS")}}
             >  <div>
-                BoringBobaShop
+                BBS
               </div>
 
             </h2>
@@ -240,7 +240,7 @@ function Home () {
           }{pageDisplay === "DAO" &&
             <DAO/>
           }{
-            pageDisplay ==="BoringBobaShop" &&
+            pageDisplay ==="BBS" &&
             <BoringBobaShop/>
           }
         </div>
