@@ -31,9 +31,6 @@ import Copy from 'components/copy/Copy'
 import { logAmount } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
-import bunny_happy from 'images/bunny_happy.svg'
-import bunny_sad from 'images/bunny_sad.svg'
-
 import * as styles from './Account.module.scss'
 import { selectTokens } from 'selectors/tokenSelector'
 import { fetchGas, fetchLookUpPrice } from 'actions/networkAction'
