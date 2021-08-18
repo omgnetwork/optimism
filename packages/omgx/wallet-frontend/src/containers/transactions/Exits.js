@@ -28,6 +28,8 @@ import networkService from 'services/networkService'
 
 import * as styles from './Transactions.module.scss'
 
+import * as S from './history.styles';
+
 const PER_PAGE = 8;
 
 function Exits ({ searchHistory, transactions,chainLink }) {
@@ -127,7 +129,7 @@ function Exits ({ searchHistory, transactions,chainLink }) {
       />
       <div className={styles.section}>
         <div className={styles.transactionSection}>
-          <div className={styles.transactions}>
+          <S.HistoryContainer>
             <Pager
               currentPage={page}
               isLastPage={paginatedExits.length < PER_PAGE}
@@ -142,7 +144,7 @@ function Exits ({ searchHistory, transactions,chainLink }) {
               <div className={styles.disclaimer}>Loading...</div>
             )}
             {React.Children.toArray(paginatedExits)}
-          </div>
+          </S.HistoryContainer>
         </div>
       </div>
     </>

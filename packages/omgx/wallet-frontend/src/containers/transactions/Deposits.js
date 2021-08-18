@@ -27,6 +27,8 @@ import networkService from 'services/networkService'
 
 import * as styles from './Transactions.module.scss'
 
+import * as S from './history.styles';
+
 const PER_PAGE = 10;
 
 function Deposits ({ searchHistory, transactions,chainLink }) {
@@ -61,7 +63,7 @@ function Deposits ({ searchHistory, transactions,chainLink }) {
 
   return (
     <div className={styles.transactionSection}>
-      <div className={styles.transactions}>
+      <S.HistoryContainer>
         <Pager
           currentPage={page}
           isLastPage={paginatedDeposits.length < PER_PAGE}
@@ -89,7 +91,7 @@ function Deposits ({ searchHistory, transactions,chainLink }) {
             />
           )
         })}
-      </div>
+      </S.HistoryContainer>
     </div>
   );
 }

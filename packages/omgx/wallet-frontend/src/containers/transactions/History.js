@@ -92,28 +92,8 @@ function History () {
     <>
       <PageHeader title="Transaction History" />
 
-      <div className={styles.header} style={{display: 'none'}}>
-        <h2>Search</h2>
-        <div className={styles.actions}>
-          <div>Start: </div>
-          <DatePicker
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
-            selectsStart
-            startDate={startDate}
-            endDate={endDate}
-          />
-
-          <div>End: </div>
-          <DatePicker
-            selected={endDate}
-            onChange={(date) => setEndDate(date)}
-            selectsEnd
-            startDate={startDate}
-            endDate={endDate}
-            minDate={startDate}
-          />
-          <Input
+    {/* 
+    <Input
             icon
             placeholder='Search by hash'
             value={searchHistory}
@@ -121,6 +101,31 @@ function History () {
               setSearchHistory(i.target.value);
             }}
             className={styles.searchBar}
+          />
+    
+    */}
+
+      <div className={styles.header}>
+        <div className={styles.actions}>
+          <div className={styles.actionLabel}>Show period from </div>
+          <DatePicker
+            wrapperClassName={styles.datePickerInput}
+            selected={startDate}
+            onChange={(date) => setStartDate(date)}
+            selectsStart
+            startDate={startDate}
+            endDate={endDate}
+          />
+
+          <div> to </div>
+          <DatePicker
+            wrapperClassName={styles.datePickerInput}
+            selected={endDate}
+            onChange={(date) => setEndDate(date)}
+            selectsEnd
+            startDate={startDate}
+            endDate={endDate}
+            minDate={startDate}
           />
         </div>
       </div>
@@ -131,28 +136,34 @@ function History () {
               dispatch(setActiveHistoryTab1(tab));
             }}
             activeTab={activeTab1}
-            tabs={[ 'Transactions', 'Deposits' ]}
+            tabs={['All', 'Deposits', 'Exits']}
           />
 
-          {activeTab1 === 'Transactions' && (
-           <Transactions
-             searchHistory={searchHistory}
-             transactions={transactions}
-             chainLink={chainLink}
-           />
+          {activeTab1 === 'All' && (
+            <Transactions
+              searchHistory={searchHistory}
+              transactions={transactions}
+              chainLink={chainLink}
+            />
           )}
 
-          {activeTab1=== 'Deposits' && <
+          {activeTab1 === 'Deposits' && <
             Deposits
+            searchHistory={searchHistory}
+            transactions={transactions}
+            chainLink={chainLink}
+          />}
+
+          {activeTab1 === 'Exits' &&
+            <Exits
               searchHistory={searchHistory}
               transactions={transactions}
               chainLink={chainLink}
             />
           }
-
         </div>
 
-        <div className={styles.section}>
+        {/* <div className={styles.section}>
           <Tabs
             onClick={tab => {
               dispatch(setActiveHistoryTab2(tab));
@@ -168,7 +179,7 @@ function History () {
               chainLink={chainLink}
             />
           }
-        </div>
+        </div> */}
       </div>
     </>
   );

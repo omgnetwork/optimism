@@ -16,9 +16,43 @@ limitations under the License. */
 import React from 'react';
 import { NavigateNext, NavigateBefore } from '@material-ui/icons';
 
+import Button from 'components/button/Button';
+
 import * as styles from './Pager.module.scss';
+import * as S from './Pager.styles';
 
 function Pager ({ currentPage, totalPages, isLastPage, onClickNext, onClickBack, label }) {
+
+  return (
+    <S.PagerContainer>
+      <div className={styles.numberLeft}>{label}</div>
+      <S.PagerContent>
+        <S.PagerLabel>
+        {`Page ${currentPage} of ${totalPages}`}
+        </S.PagerLabel>
+
+        <S.PagerNavigation
+          variant="outlined"
+          size="small"
+          color='primary'
+          disabled={currentPage === 1}
+          onClick={onClickBack}
+        >
+          <NavigateBefore className={styles.icon} />
+        </S.PagerNavigation>
+        <S.PagerNavigation
+          variant="outlined"
+          size="small"
+          color='primary'
+          disabled={isLastPage}
+          onClick={onClickNext}
+        >
+          <NavigateNext className={styles.icon} />
+        </S.PagerNavigation>
+      </S.PagerContent>
+    </S.PagerContainer>
+  )
+
   return (
     <div className={styles.Pager}>
       <div className={styles.numberLeft}>{label}</div>
