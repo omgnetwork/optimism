@@ -153,10 +153,9 @@ function Account () {
       }
 
   <div className={styles.BalanceWrapper}>
-    <div>
+    <div className={styles.balanceContent}>
       <div className={styles.title}>
-        <span style={{fontSize: '0.8em'}}>Balance on L1</span><br/>
-        <span>Ethereum Network</span><br/>
+        <p> <span className={styles.muted}>Balance on L1</span> Ethereum Network </p>
       </div>
       <div className={styles.TableContainer}>
         {rootBalance.map((i, index) => {
@@ -172,10 +171,9 @@ function Account () {
         })}
       </div>
     </div>
-    <div>
+    <div className={styles.balanceContent}>
       <div className={styles.title}>
-        <span style={{fontSize: '0.8em'}}>Balance on L2</span><br/>
-        <span>OMGX</span><br/>
+        <p> <span className={styles.muted}>Balance on L2</span> OMGX </p>
       </div>
       <div className={styles.TableContainer}>
         {childBalance.map((i, index) => {

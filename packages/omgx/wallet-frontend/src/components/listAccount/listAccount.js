@@ -68,7 +68,12 @@ class ListAccount extends React.Component {
     const enabled = (networkLayer === chain) ? true : false
 
     return (
-      <div className={styles.ListAccount}>
+      <div className={styles.ListAccount}
+        style={{
+          background: `${!!dropDownBox ? 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)': 'none'}`,
+          borderRadius: `${!!dropDownBox? '12px': ''}`
+        }}
+      >
         
         <div 
           className={styles.topContainer}
@@ -181,6 +186,8 @@ class ListAccount extends React.Component {
           }
 
         </div>
+
+        <div className={styles.divider}></div>
 
       </div>
     )
