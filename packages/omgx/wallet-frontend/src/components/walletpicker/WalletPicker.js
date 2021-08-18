@@ -39,6 +39,7 @@ import { Box, Container, Grid, Link } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
+import NetworkSwitcher from 'components/mainMenu/networkSwitcher/NetworkSwitcher';
 
 const Root = styled('div')(({ theme }) => ({
   paddingTop: theme.spacing(10),
@@ -142,6 +143,13 @@ function WalletPicker ({ onEnable, enabled }) {
         onClose={resetSelection}
       />
       <Root>
+        <Box sx={{
+          position: 'absolute',
+          top: '10px',
+          right: '20px'
+        }}>
+          <NetworkSwitcher />
+        </Box>
         <Container maxWidth="md">
             <Grid container spacing={8}>
                 <Grid item xs={12} md={6}>
