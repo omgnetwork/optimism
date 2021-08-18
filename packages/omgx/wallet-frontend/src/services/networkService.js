@@ -25,13 +25,13 @@ import BN from 'bn.js'
 
 import { getToken } from 'actions/tokenAction'
 
-import { 
-  addNFT, 
-  getNFTs, 
-  addNFTFactory, 
+import {
+  addNFT,
+  getNFTs,
+  addNFTFactory,
   getNFTFactories,
   addNFTContract,
-  getNFTContracts, 
+  getNFTContracts,
 } from 'actions/nftAction'
 
 import { WebWalletError } from 'services/errorService'
@@ -44,7 +44,7 @@ import L2StandardBridgeJson from '../deployment/artifacts-ovm/optimistic-ethereu
 import L1LPJson from '../deployment/artifacts/contracts/LP/L1LiquidityPool.sol/L1LiquidityPool.json'
 import L2LPJson from '../deployment/artifacts-ovm/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
 
-//Standard ERC20 jsons - should be very similar? 
+//Standard ERC20 jsons - should be very similar?
 import L1ERC20Json from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.json'
 import L2ERC20Json from '../deployment/artifacts-ovm/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
 
@@ -67,11 +67,10 @@ import addressOMGXAxiosInstance from 'api/addressOMGXAxios'
 import coinGeckoAxiosInstance from 'api/coinGeckoAxios'
 import ethGasStationAxiosInstance from 'api/ethGasStationAxios'
 
-//All the current addresses for fallback purposes only
-//These may or may not be present
-//Generally, the wallet will get these from the two HTTP deployment servers
+//All the current addresses for fallback purposes, or live network
 const localAddresses = require(`../deployment/local/addresses.json`)
 const rinkebyAddresses = require(`../deployment/rinkeby/addresses.json`)
+const mainnetAddresses = require(`../deployment/mainnet/addresses.json`)
 
 class NetworkService {
 
@@ -126,6 +125,7 @@ class NetworkService {
 
     // chain ID
     this.chainID = null
+    this.networkName = null
 
     // gas
     this.L1GasLimit = 9999999
@@ -136,12 +136,6 @@ class NetworkService {
     console.log('NS: enableBrowserWallet()')
     try {
       // connect to the wallet
-      //await window.ethereum.enable()
-/*
-inpage.js:1 MetaMask: 'ethereum.enable()' is deprecated and may be removed in the future. Please use the 'eth_requestAccounts' RPC method instead.
-For more information, see: https://eips.ethereum.org/EIPS/eip-1102
-*/
-
       await window.ethereum.request({method: 'eth_requestAccounts'})
       this.provider = new ethers.providers.Web3Provider(window.ethereum)
       return true
@@ -164,10 +158,10 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
   }
 
   async mintAndSendNFT(receiverAddress, contractAddress, ownerName, tokenURI, type) {
-    
+
     try {
 
-      let meta = ownerName + '#' + Date.now().toString() + '#' + tokenURI + '#' + type 
+      let meta = ownerName + '#' + Date.now().toString() + '#' + tokenURI + '#' + type
 
       console.log('meta:', meta)
       console.log('receiverAddress:', receiverAddress)
@@ -181,12 +175,12 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       let nft = await contract.connect(
         this.provider.getSigner()
       ).mintNFT(
-        receiverAddress, 
+        receiverAddress,
         meta
       )
 
       await nft.wait()
-            
+
       const registry = new ethers.Contract(
         this.ERC721RegAddress,
         L2ERC721RegJson.abi,
@@ -209,7 +203,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
         let reg = await registry.connect(
           this.provider.getSigner()
         ).registerAddress(
-          receiverAddress, 
+          receiverAddress,
           contractAddress
         )
         console.log("Reg:",reg)
@@ -238,9 +232,9 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       let owner = await contract.owner()
       owner = owner.toLowerCase()
 
-      if ( this.account.toLowerCase() === owner ) 
+      if ( this.account.toLowerCase() === owner )
         haveRights = true
-      
+
       let nftName = await contract.name()
       let nftSymbol = await contract.symbol()
       let genesis = await contract.getGenesis()
@@ -251,15 +245,20 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
         //special case - this is the default NFT factory....
         genesisContractAddress = this.ERC721Address
       }
-      
-      //wallet address of whomever owns the parent
-      const genesisContract = new ethers.Contract(
-        genesisContractAddress,
-        L2ERC721Json.abi,
-        this.L2Provider
-      )
-      
-      const feeRecipient = await genesisContract.owner()
+
+      let simpleAddress = '0x0000000000000000000000000000000000000042'
+      let feeRecipient = simpleAddress
+
+      if( genesisContractAddress !== simpleAddress) {
+        //this is a derived NFT
+        //wallet address of whomever owns the parent
+        const genesisContract = new ethers.Contract(
+          genesisContractAddress,
+          L2ERC721Json.abi,
+          this.L2Provider
+        )
+        feeRecipient = await genesisContract.owner()
+      }
 
       addNFTFactory({
         name: nftName,
@@ -270,7 +269,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
         originAddress: genesis[0],
         originID: genesis[1],
         originChain: genesis[2],
-        originFeeRecipient: feeRecipient, 
+        originFeeRecipient: feeRecipient,
         haveRights
       })
 
@@ -285,11 +284,11 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       nftName,
       oriAddress,
       oriID,
-      oriChain) 
+      oriChain)
   {
-    
+
     try {
-      
+
       console.log("Deploying new NFT factory")
 
       let Factory__L2ERC721 = new ContractFactory(
@@ -310,7 +309,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       await contract.deployTransaction.wait()
 
       this.addNFTFactoryNS( contract.address )
-      
+
       console.log('New NFT ERC721 deployed to:', contract.address)
 
       return true
@@ -334,6 +333,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       console.log('Loading OMGX contract addresses')
 
       if (masterSystemConfig === 'local') {
+
         try {
           resOMGX = await addressOMGXAxiosInstance('local').get()
         } catch (error) {
@@ -354,43 +354,30 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
 
         console.log('Final Local Addresses:', addresses)
       } else if (masterSystemConfig === 'rinkeby') {
-        /*these endpoints do not exist yet*/
-        // try {
-        //   resOMGX = await addressOMGXAxiosInstance('rinkeby').get()
-        // }
-        // catch (error) {
-        //   console.log(error)
-        // }
-
-        // try {
-        //   resBase = await addressAxiosInstance('rinkeby').get()
-        // }
-        // catch (error) {
-        //   console.log(error)
-        // }
-
-        // if ( resOMGX !== null && resBase !== null ) {
-        //   addresses = {...resBase.data, ...resOMGX.data }
-        // } else {
-        addresses = rinkebyAddresses //emergency fallback
-        // }
-
-        console.log('Final Rinkeby Addresses:', addresses)
+        addresses = rinkebyAddresses
+        console.log('Rinkeby Addresses:', addresses)
+      } else if (masterSystemConfig === 'mainnet') {
+        addresses = mainnetAddresses
+        console.log('Mainnet Addresses:', addresses)
       }
 
       //at this point, the wallet should be connected
       this.account = await this.provider.getSigner().getAddress()
       console.log('this.account', this.account)
+
       const network = await this.provider.getNetwork()
 
       this.chainID = network.chainId
+      this.networkName = network.name
+
       this.masterSystemConfig = masterSystemConfig
 
       this.tokenAddresses = addresses.TOKENS
 
+      console.log('NS: network:', network)
       console.log('NS: masterConfig:', this.masterSystemConfig)
       console.log('NS: this.chainID:', this.chainID)
-      console.log('NS: network:', network)
+      console.log('NS: this.networkName:', this.networkName)
 
       //there are numerous possible chains we could be on
       //either local, rinkeby etc
@@ -410,6 +397,14 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
         //rinkeby, L1
         this.L1orL2 = 'L1'
       } else if (masterSystemConfig === 'rinkeby' && network.chainId === 28) {
+        //ok, that's reasonable
+        //rinkeby, L2
+        this.L1orL2 = 'L2'
+      } else if (masterSystemConfig === 'mainnet' && network.chainId === 1) {
+        //ok, that's reasonable
+        //rinkeby, L2
+        this.L1orL2 = 'L1'
+      } else if (masterSystemConfig === 'mainnet' && network.chainId === 288) {
         //ok, that's reasonable
         //rinkeby, L2
         this.L1orL2 = 'L2'
@@ -436,12 +431,6 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       if (addresses.hasOwnProperty('Proxy__OVM_L1CrossDomainMessenger')) {
         this.L1MessengerAddress = addresses.Proxy__OVM_L1CrossDomainMessenger
         console.log('L1MessengerAddress set to:', this.L1MessengerAddress)
-      } else {
-        this.L1MessengerAddress = addresses.L1MessengerAddress
-        console.log(
-          'LEGACY: L1MessengerAddress set to:',
-          this.L1MessengerAddress
-        )
       }
 
       if(addresses.hasOwnProperty('Proxy__OVM_L1CrossDomainMessengerFast')) {
@@ -449,7 +438,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       }
       else if (addresses.hasOwnProperty('OVM_L1CrossDomainMessengerFast')) {
         this.L1FastMessengerAddress = addresses.OVM_L1CrossDomainMessengerFast
-      } 
+      }
       else {
         this.L1FastMessengerAddress = addresses.L1FastMessengerAddress
       }
@@ -458,14 +447,14 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       //backwards compat
       if (addresses.hasOwnProperty('Proxy__OVM_L1StandardBridge'))
         this.L1StandardBridgeAddress = addresses.Proxy__OVM_L1StandardBridge
-      else 
+      else
         this.L1StandardBridgeAddress = addresses.L1StandardBridge
 
       this.L1_TEST_Address = addresses.TOKENS.TEST.L1
       this.L2_TEST_Address = addresses.TOKENS.TEST.L2
 
-      this.L1LPAddress = addresses.L1LiquidityPool
-      this.L2LPAddress = addresses.L2LiquidityPool
+      this.L1LPAddress = addresses.Proxy__L1LiquidityPool
+      this.L2LPAddress = addresses.Proxy__L2LiquidityPool
 
       this.L1Message = addresses.L1Message
       this.L2Message = addresses.L2Message
@@ -473,13 +462,13 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       //backwards compat
       if (addresses.hasOwnProperty('L2ERC721'))
         this.ERC721Address = addresses.L2ERC721
-      else 
+      else
         this.ERC721Address = addresses.ERC721
 
       //backwards compat
       if (addresses.hasOwnProperty('L2ERC721Reg'))
         this.ERC721RegAddress = addresses.L2ERC721Reg
-      else 
+      else
         this.ERC721RegAddress = addresses.ERC721Reg
 
       this.L2TokenPoolAddress = addresses.L2TokenPool
@@ -551,22 +540,22 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
         AtomicSwapJson.abi,
         this.provider.getSigner()
       )
-      
+
       //this one is always there...
       await addNFTContract(this.ERC721Contract.address)
 
       //yes, this looks weird, but think before you change it...
-      //there may be some in the cache, and this makes sure we get them all, and if not, 
+      //there may be some in the cache, and this makes sure we get them all, and if not,
       //we at least have the basic one
       const NFTcontracts = Object.values(await getNFTContracts())
-      
-      //Add factories based on cached contract addresses 
+
+      //Add factories based on cached contract addresses
       //this information is also used for the balance lookup
       for(var i = 0; i < NFTcontracts.length; i++) {
         const address = NFTcontracts[i]
         console.log("Adding NFT contract:",address)
         this.addNFTFactoryNS( address )
-      } 
+      }
 
       this.watcher = new Watcher({
         l1: {
@@ -608,11 +597,11 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
     }
   }
 
-  async addL2Network() {
+  async addL2NetworkRinkeby() {
     const nw = getAllNetworks()
     const chainParam = {
       chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
-      chainName: 'OMGX L2',
+      chainName: 'OMGX L2 Rinkeby',
       rpcUrls: [nw.rinkeby.L2.rpcUrl],
     }
 
@@ -621,164 +610,177 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
     this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
   }
 
+  async addL2NetworkMainnet() {
+    const nw = getAllNetworks()
+    const chainParam = {
+      chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
+      chainName: 'OMGX L2 Mainnet',
+      rpcUrls: [nw.mainnet.L2.rpcUrl],
+    }
+
+    // connect to the wallet
+    this.provider = new ethers.providers.Web3Provider(window.ethereum)
+    this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
+  }
+
   async getTransactions() {
-    if (this.masterSystemConfig === 'rinkeby') {
-      
-      let txL1
-      let txL2
 
-      const responseL1 = await etherScanInstance(
-        this.masterSystemConfig,
-        /*this.L1orL2*/ 'L1'
-      ).get(`&address=${this.account}`)
-      if (responseL1.status === 200) {
-        const transactionsL1 = await responseL1.data
-        if (transactionsL1.status === '1') {
-          //thread in ChainID
-          txL1 = transactionsL1.result.map(v => ({...v, chain: 'L1'}))
-          //return transactions.result
-        }
-      }
+    // NOT SUPPORTED on LOCAL
+    if (this.masterSystemConfig === 'local') return
 
-      const responseL2 = await omgxWatcherAxiosInstance(
-        this.masterSystemConfig
-      ).post('get.transaction', {
-        address: this.account,
-        fromRange: 0,
-        toRange: 1000,
-      })
-      if (responseL2.status === 201) {
-        txL2 = responseL2.data.map(v => ({...v, chain: 'L2'}))
-        const annotated = await this.parseTransaction( [...txL1, ...txL2] )
-        return annotated
+    let txL1
+    let txL2
+
+    const responseL1 = await etherScanInstance(
+      this.masterSystemConfig,
+      /*this.L1orL2*/ 'L1'
+    ).get(`&address=${this.account}`)
+    if (responseL1.status === 200) {
+      const transactionsL1 = await responseL1.data
+      if (transactionsL1.status === '1') {
+        //thread in ChainID
+        txL1 = transactionsL1.result.map(v => ({...v, chain: 'L1'}))
+        //return transactions.result
       }
+    }
+
+    const responseL2 = await omgxWatcherAxiosInstance(
+      this.masterSystemConfig
+    ).post('get.transaction', {
+      address: this.account,
+      fromRange: 0,
+      toRange: 1000,
+    })
+    if (responseL2.status === 201) {
+      txL2 = responseL2.data.map(v => ({...v, chain: 'L2'}))
+      const annotated = await this.parseTransaction( [...txL1, ...txL2] )
+      return annotated
     }
 
   }
 
-  /* Where possible, annotate the transactions 
+  /* Where possible, annotate the transactions
   based on contract addresses */
   async parseTransaction( transactions ) {
 
-    var annotatedTX
+    // NOT SUPPORTED on LOCAL
+    if (this.masterSystemConfig === 'local') return
 
-    if (this.masterSystemConfig === 'rinkeby') {
-      
-      annotatedTX = transactions.map(item => {
-        
-        let to = item.to
-        
-        if ( to === null || to === '') {
-          return item
+    var annotatedTX = transactions.map(item => {
+
+      let to = item.to
+
+      if ( to === null || to === '') {
+        return item
+      }
+
+      to = to.toLowerCase()
+
+      if (to === this.L2LPAddress.toLowerCase()) {
+        //console.log("L2->L1 Swap Off")
+        return Object.assign({}, item, { typeTX: 'Fast Offramp' })
+      }
+
+      if (to === this.L1LPAddress.toLowerCase()) {
+        //console.log("L1->L2 Swap On")
+        return Object.assign({}, item, { typeTX: 'Fast Onramp' })
+      }
+
+      if (to === this.L1StandardBridgeAddress.toLowerCase()) {
+        //console.log("L1->L2 Traditional Deposit")
+        return Object.assign({}, item, { typeTX: 'Traditional' })
+      }
+
+      if (to === this.L1_TEST_Address.toLowerCase()) {
+        //console.log("L1 ERC20 Amount Approval")
+        return Object.assign({}, item, { typeTX: 'L1 ERC20 Amount Approval' })
+      }
+
+      if (to === this.L2StandardBridgeAddress.toLowerCase()) {
+        //0x4200000000000000000000000000000000000010
+        //console.log("L2 Standard Bridge")
+        return Object.assign({}, item, { typeTX: 'L2 Standard Bridge' })
+      }
+
+      if (to === this.L1Message.toLowerCase()) {
+        //console.log("L1 Message")
+        return Object.assign({}, item, { typeTX: 'L1 Message' })
+      }
+
+      if (to === this.L2Message.toLowerCase()) {
+        //console.log("L2 Message")
+        return Object.assign({}, item, { typeTX: 'L2 Message' })
+      }
+
+      if (to === this.L2_TEST_Address.toLowerCase()) {
+        //console.log("L2 TEST Message")
+        return Object.assign({}, item, { typeTX: 'L2 TEST Token' })
+      }
+
+      if (to === this.L2_ETH_Address.toLowerCase()) {
+        //console.log("L2 ETH Message")
+        return Object.assign({}, item, { typeTX: 'L2 ETH Ops (such as a L2->L2 Transfer)' })
+      }
+
+      // if (to === this.L2_ETH_Address.toLowerCase()) {
+      //   //console.log("L2 ETH Message")
+      //   return Object.assign({}, item, { typeTX: 'L2 ETH Token' })
+      // }
+
+      if (item.crossDomainMessage) {
+        if(to === this.L2LPAddress.toLowerCase()) {
+          //console.log("Found EXIT: L2LPAddress")
+          return Object.assign({}, item, { typeTX: 'FAST EXIT via L2LP' })
         }
-
-        to = to.toLowerCase()
-
-        if (to === this.L2LPAddress.toLowerCase()) {
-          //console.log("L2->L1 Swap Off")
-          return Object.assign({}, item, { typeTX: 'Fast Offramp' })
-        } 
-
-        if (to === this.L1LPAddress.toLowerCase()) {
-          //console.log("L1->L2 Swap On")
-          return Object.assign({}, item, { typeTX: 'Fast Onramp' })
-        } 
-
-        if (to === this.L1StandardBridgeAddress.toLowerCase()) {
-          //console.log("L1->L2 Traditional Deposit")
-          return Object.assign({}, item, { typeTX: 'Traditional' })
-        } 
-
-        if (to === this.L1_TEST_Address.toLowerCase()) {
-          //console.log("L1 ERC20 Amount Approval")
-          return Object.assign({}, item, { typeTX: 'L1 ERC20 Amount Approval' })
-        } 
-
-        if (to === this.L2StandardBridgeAddress.toLowerCase()) {
-          //0x4200000000000000000000000000000000000010
-          //console.log("L2 Standard Bridge")
-          return Object.assign({}, item, { typeTX: 'L2 Standard Bridge' })
-        } 
-
-        if (to === this.L1Message.toLowerCase()) {
-          //console.log("L1 Message")
-          return Object.assign({}, item, { typeTX: 'L1 Message' })
-        } 
-
-        if (to === this.L2Message.toLowerCase()) {
-          //console.log("L2 Message")
-          return Object.assign({}, item, { typeTX: 'L2 Message' })
-        } 
-
-        if (to === this.L2_TEST_Address.toLowerCase()) {
-          //console.log("L2 TEST Message")
-          return Object.assign({}, item, { typeTX: 'L2 TEST Token' })
-        } 
-
-        if (to === this.L2_ETH_Address.toLowerCase()) {
-          //console.log("L2 ETH Message")
-          return Object.assign({}, item, { typeTX: 'L2 ETH Ops (such as a L2->L2 Transfer)' })
+        else if (to === this.L2_TEST_Address.toLowerCase()) {
+          //console.log("Found EXIT: L2_TEST_Address")
+          return Object.assign({}, item, { typeTX: 'EXIT (TEST Token)' })
         }
-
-        // if (to === this.L2_ETH_Address.toLowerCase()) {
-        //   //console.log("L2 ETH Message")
-        //   return Object.assign({}, item, { typeTX: 'L2 ETH Token' })
-        // } 
-
-        if (item.crossDomainMessage) {
-          if(to === this.L2LPAddress.toLowerCase()) {
-            //console.log("Found EXIT: L2LPAddress")
-            return Object.assign({}, item, { typeTX: 'FAST EXIT via L2LP' })
-          } 
-          else if (to === this.L2_TEST_Address.toLowerCase()) {
-            //console.log("Found EXIT: L2_TEST_Address")
-            return Object.assign({}, item, { typeTX: 'EXIT (TEST Token)' })
-          } 
-          else if (to === this.L2_ETH_Address.toLowerCase()) {
-            //console.log("Found EXIT: L2_ETH_Address")
-            return Object.assign({}, item, { typeTX: 'EXIT ETH' })
-          }
+        else if (to === this.L2_ETH_Address.toLowerCase()) {
+          //console.log("Found EXIT: L2_ETH_Address")
+          return Object.assign({}, item, { typeTX: 'EXIT ETH' })
         }
+      }
 
-        return Object.assign({}, item, { typeTX: to })
+      return Object.assign({}, item, { typeTX: to })
 
-      }) //map
-    
-    } //if rinkeby
+    }) //map
 
     return annotatedTX
 
   }
 
   async getExits() {
-    //this is NOT SUPPORTED on LOCAL
-    if (this.masterSystemConfig === 'rinkeby') {
-      const response = await omgxWatcherAxiosInstance(
-        this.masterSystemConfig
-      ).post('get.transaction', {
-        address: this.account,
-        fromRange: 0,
-        toRange: 100,
-      })
-      if (response.status === 201) {
-        const transactions = response.data
-        const filteredTransactions = transactions.filter(
-          (i) =>
-            [
-              this.L2LPAddress.toLowerCase(),
-              this.L2_TEST_Address.toLowerCase(),
-              this.L2_ETH_Address.toLowerCase(),
-            ].includes(i.to ? i.to.toLowerCase() : null) && i.crossDomainMessage
-        )
-        return { exited: filteredTransactions }
-      }
+
+    // NOT SUPPORTED on LOCAL
+    if (this.masterSystemConfig === 'local') return
+
+    const response = await omgxWatcherAxiosInstance(
+      this.masterSystemConfig
+    ).post('get.transaction', {
+      address: this.account,
+      fromRange: 0,
+      toRange: 100,
+    })
+    if (response.status === 201) {
+      const transactions = response.data
+      const filteredTransactions = transactions.filter(
+        (i) =>
+          [
+            this.L2LPAddress.toLowerCase(),
+            this.L2_TEST_Address.toLowerCase(),
+            this.L2_ETH_Address.toLowerCase(),
+          ].includes(i.to ? i.to.toLowerCase() : null) && i.crossDomainMessage
+      )
+      return { exited: filteredTransactions }
     }
+
   }
 
   async fetchNFTs() {
 
     /*
-      Metacomment on how this is coded: 
+      Metacomment on how this is coded:
       Is it messy? Yes.
       Does it use arrow functions well? No.
       Is it elegant? No.
@@ -787,16 +789,19 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
     */
 
     //console.log('fetchNFTs')
-    
+
+    //the current list of factories we know about
+    //based in part on the cahce, and anything we recently generated in this session
     let NFTfactories = Object.entries(await getNFTFactories())
 
+    //list of NFT factory addresses we know about, locally
     const localCache = NFTfactories.map(item => {return item[0].toLowerCase()})
 
-    //check user's blockchain NFT registry
+    //the user's blockchain NFT registry
     const registry = new ethers.Contract(this.ERC721RegAddress,L2ERC721RegJson.abi,this.L2Provider)
     const addresses = await registry.lookupAddress(this.account)
     //console.log("Blockchain NFT wallet:", addresses)
-    
+
     //make sure we have all the factories relevant to this user
     for(let i = 0; i < addresses.length; i++) {
       const newAddress = addresses[i]
@@ -807,15 +812,15 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
         this.addNFTFactoryNS( newAddress )
       }
     }
-    
+
     //How many NFTs do you have right now?
     let numberOfNFTS = 0
 
-    //need to call this again because it might have changed
+    //need to call this again because it might have changed since the iniital call
     NFTfactories = Object.entries(await getNFTFactories())
-    
+
     for(let i = 0; i < NFTfactories.length; i++) {
-      
+
       let contract = new ethers.Contract(
         NFTfactories[i][1].address,
         L2ERC721Json.abi,
@@ -827,6 +832,22 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
         this.L2Provider
       ).balanceOf(this.account)
 
+      const rights = NFTfactories[i][1].haveRights
+      //console.log("NFT Rights:", rights)
+
+      let owner = await contract.owner()
+      owner = owner.toLowerCase()
+
+      if ( this.account.toLowerCase() === owner && rights === false ) {
+        //we need to give rights
+        //haveRights = true
+        //ToDo
+      } else if ( this.account.toLowerCase() !== owner && rights === true ) {
+        //we need to remove rights
+        //haveRights = false
+        //ToDo
+      }
+
       numberOfNFTS = numberOfNFTS + Number(balance.toString())
 
     }
@@ -836,13 +857,13 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
     const numberOfStoredNFTS = Object.keys(myNFTS).length
 
     if (numberOfNFTS !== numberOfStoredNFTS) {
-      
+
       console.log('NFT change - need to add one or more NFTs')
 
       for(let i = 0; i < NFTfactories.length; i++) {
 
         const address = NFTfactories[i][1].address
-        
+
         const contract = new ethers.Contract(
           address,
           L2ERC721Json.abi,
@@ -857,6 +878,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
         let nftName = await contract.name()
         let nftSymbol = await contract.symbol()
         let genesis = await contract.getGenesis()
+        let feeRecipient = '0x0000000000000000000000000000000000000042'
 
         let genesisContractAddress = genesis[0]
 
@@ -864,24 +886,24 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
           //special case - this is just the default NFT factory....
           genesisContractAddress = this.ERC721Address
         }
-        
-        //console.log("NFT genesis contract:", genesis)
-        //wallet address of whomever owns the parent
-        const genesisContract = new ethers.Contract(
-          genesisContractAddress,
-          L2ERC721Json.abi,
-          this.L2Provider
-        )
-        //console.log("genesisContract:", genesisContract)
-        
-        const feeRecipient = await genesisContract.owner()
-        //console.log("NFT feeRecipient:", feeRecipient)
+
+        if( genesisContractAddress !== '0x0000000000000000000000000000000000000042') {
+          const genesisContract = new ethers.Contract(
+            genesisContractAddress,
+            L2ERC721Json.abi,
+            this.L2Provider
+          )
+          //console.log("genesisContract:", genesisContract)
+
+          feeRecipient = await genesisContract.owner()
+          //console.log("NFT feeRecipient:", feeRecipient)
+        }
 
         //can have more than 1 per contract
         for (let i = 0; i < Number(balance.toString()); i++) {
-          
+
           //Goal here is to get all the tokenIDs, e.g. 3, 7, and 98,
-          //based on knowing the user's balance - e.g. three NFTs 
+          //based on knowing the user's balance - e.g. three NFTs
           const tokenIndex = BigNumber.from(i)
 
           const tokenID = await contract.tokenOfOwnerByIndex(
@@ -893,7 +915,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
           const meta = nftMeta.split('#')
           const time = new Date(parseInt(meta[1]))
 
-          let type = 0          
+          let type = 0
           //new flavor of NFT has type field
           //default to zero for old NFTs
           if(meta.length === 4) {
@@ -936,13 +958,13 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       }
 
     }
-    
+
   }
 
   async getBalances() {
 
     try {
-      
+
       // Always check ETH and oETH
       const layer1Balance = await this.L1Provider.getBalance(this.account)
       //console.log('ETH balance on L1:', layer1Balance.toString())
@@ -986,7 +1008,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       const tA = Object.values(state.tokenList)
 
       for (let i = 0; i < tA.length; i++) {
-        
+
         let token = tA[i]
 
         //ETH is special - will break things,
@@ -1064,7 +1086,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       const depositTxStatus = await this.L1StandardBridgeContract.depositETH(
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString()),
-        { 
+        {
           value: parseEther(value),
           gasPrice: ethers.utils.parseUnits(`${gasPrice}`, 'wei'),
         }
@@ -1136,17 +1158,17 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       })
     }
   }
-  
+
   /*Used when people want to fast exit - they have to deposit funds into the L2LP*/
   async approveERC20_L2LP(
     depositAmount_string,
     currencyAddress
   ) {
-    
+
     try {
 
       console.log("approveERC20_L2LP")
-      
+
       //we could use any L2 ERC contract here - just getting generic parts of the abi
       //but we know we alaways have the TEST contract, so will use that
       const L2ERC20Contract = this.L2_TEST_Contract.attach(currencyAddress)
@@ -1176,11 +1198,11 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
     depositAmount_string,
     currencyAddress
   ) {
-    
+
     try {
 
       console.log("approveERC20_L1LP")
-      
+
       const ERC20Contract = new ethers.Contract(
         currencyAddress,
         L1ERC20Json.abi,
@@ -1210,11 +1232,11 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
     approveContractAddress = this.L1StandardBridgeAddress,
     contractABI = L1ERC20Json.abi
   ) {
-    
+
     try {
 
       console.log("approveERC20")
-      
+
       const ERC20Contract = new ethers.Contract(
         currency,
         contractABI,
@@ -1317,7 +1339,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
   //Standard 7 day exit from OMGX
   //updated
   async exitOMGX(currencyAddress, value) {
-    
+
     const allowance = await this.checkAllowance(
       currencyAddress,
       this.L2StandardBridgeAddress
@@ -1365,7 +1387,11 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       L2LPJson.abi,
       this.L2Provider
     )
-    const feeRate = await L2LPContract.totalFeeRate()
+    const [userRewardFeeRate, ownerRewardFeeRate] = await Promise.all([
+      L2LPContract.userRewardFeeRate(),
+      L2LPContract.ownerRewardFeeRate()
+    ])
+    const feeRate = Number(userRewardFeeRate) + Number(ownerRewardFeeRate);
     return ((feeRate / 1000) * 100).toFixed(0)
   }
 
@@ -1383,9 +1409,9 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
   /***** Pool, User Info, to populate the Farm tab *****/
   /*****************************************************/
   async getL1LPInfo() {
-    
+
     const tokenAddressList = [
-      this.L1_ETH_Address, 
+      this.L1_ETH_Address,
       this.L1_TEST_Address
     ]
 
@@ -1399,11 +1425,11 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
     const userInfo = {}
 
     for (let tokenAddress of tokenAddressList) {
-      
+
       let tokenBalance
       let tokenSymbol
       let tokenName
-      
+
       console.log(tokenAddress)
       console.log(this.L1_ETH_Address)
 
@@ -1475,9 +1501,9 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
   }
 
   async getL2LPInfo() {
-    
+
     const tokenAddressList = [
-      this.L2_ETH_Address, 
+      this.L2_ETH_Address,
       this.L2_TEST_Address
     ]
 
@@ -1491,7 +1517,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
     const userInfo = {}
 
     for (let tokenAddress of tokenAddressList) {
-      
+
       let tokenBalance
       let tokenSymbol
       let tokenName
@@ -1567,7 +1593,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
   /*****            Add Liquidity            *****/
   /***********************************************/
   async addLiquidity(currency, value, L1orL2Pool) {
-    
+
     const decimals = 18 //should not assume?
     let depositAmount = powAmount(value, decimals)
 
@@ -1593,7 +1619,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
   /*****           Get Reward L1             *****/
   /***********************************************/
   async getRewardL1(currencyL1Address, userReward_BN) {
-    
+
     try {
       const withdrawRewardTX = await this.L1LPContract.withdrawReward(
         userReward_BN,
@@ -1611,7 +1637,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
   /*****           Get Reward L2             *****/
   /***********************************************/
   async getRewardL2(currencyL2Address, userReward_BN) {
-    
+
     try {
       const withdrawRewardTX = await this.L2LPContract.withdrawReward(
         userReward_BN,
@@ -1652,7 +1678,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
   /***** SWAP ON to OMGX by depositing funds to the L1LP *****/
   /***********************************************************/
   async depositL1LP(currency, value) {
-    
+
     const decimals = 18 //bit dangerous?
     let depositAmount = powAmount(value, decimals)
 
@@ -1727,7 +1753,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
         this.L2LPAddress
       )
     }
-    
+
     console.log("L2LPBalance:",typeof(balance))
 
     if(typeof(balance) === 'undefined') {
@@ -1735,7 +1761,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
     } else {
       return logAmount(balance.toString(), decimals)
     }
-    
+
   }
 
   /**************************************************************/
@@ -1754,7 +1780,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       this.L2LPAddress
     )
 
-    //const decimals = await L2ERC20Contract.decimals() 
+    //const decimals = await L2ERC20Contract.decimals()
 
     let depositAmount_BN = new BN(depositAmount_string)
 
@@ -1850,7 +1876,7 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
 
   // async getDropdownTokens() {
   //   try {
-      
+
   //     return dropdownTokens.map((token) => {
 
   //       let L1 = ''
@@ -1916,8 +1942,8 @@ For more information, see: https://eips.ethereum.org/EIPS/eip-1102
       } catch (error) {
         //
       }
-    } 
-    
+    }
+
     return {
       slow: 1000000000,
       normal: 2000000000,

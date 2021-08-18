@@ -119,63 +119,6 @@ function Transactions({ searchHistory, transactions, chainLink }) {
 
     </S.HistoryContainer>
   )
-
-
-
-
-  return (
-    <S.HistoryContainer>
-      <Pager
-        currentPage={page}
-        isLastPage={paginatedTransactions.length < PER_PAGE}
-        totalPages={totalNumberOfPages}
-        onClickNext={() => setPage(page + 1)}
-        onClickBack={() => setPage(page - 1)}
-      />
-
-
-
-
-
-      {!paginatedTransactions.length && !loading && (
-        <div className={styles.disclaimer}>Transaction history coming soon...</div>
-      )}
-      {!paginatedTransactions.length && loading && (
-        <div className={styles.disclaimer}>Loading...</div>
-      )}
-      {paginatedTransactions.map((i, index) => {
-        const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
-        const {
-          l1BlockHash,
-          l1BlockNumber,
-          l1From,
-          l1Hash,
-          l1To
-        } = i;
-        return (
-          <Transaction
-            key={index}
-            link={chainLink(i)}
-            title={`${truncate(i.hash, 8, 6, '...')}`}
-            midTitle={moment.unix(i.timeStamp).format('lll')}
-            blockNumber={`Block ${i.blockNumber}`}
-            chain={`${i.chain} Chain`}
-            typeTX={`${metaData}`}
-            detail={l1Hash ? {
-              l1BlockHash: truncate(l1BlockHash, 8, 6, '...'),
-              l1BlockNumber,
-              l1From,
-              l1Hash: truncate(l1Hash, 8, 6, '...'),
-              l1To,
-              l1TxLink: chainLink({
-                chain: i.chain,
-                hash: l1Hash
-              })
-            } : null}
-          />
-        )
-      })}
-    </S.HistoryContainer>)
 }
 
 // export default React.memo(Transactions);
