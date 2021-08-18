@@ -136,7 +136,7 @@ function info {
 }
 
 function verify_images_in_ecr {
-  set -x
+#  set -x
 # cached old docker images makes docker refuse to pull latest!
   #docker system prune -a -f --volumes
   info "Login to AWS ECR and start building image"
@@ -170,7 +170,7 @@ function verify_images_in_ecr {
           if [[ ${image} == "omgx-gas-price-oracle" ]]; then
               docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/omgx_gas-price-oracle" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
 	  elif
-	     [[ ${image} == "message-relayer-fast" ]]; then 
+	     [[ ${image} == "message-relayer-fast" ]]; then
 	     docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/omgx_message-relayer-fast" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
           else
           docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
