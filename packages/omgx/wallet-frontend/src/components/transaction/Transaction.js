@@ -13,14 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 
 import Tooltip from 'components/tooltip/Tooltip';
+import Button from 'components/button/Button';
+import {Button as ButtonMUI} from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import * as styles from './Transaction.module.scss';
 
-function Transaction ({
+import * as S from './Transaction.styles';
+import LinkIcon from 'components/icons/LinkIcon';
+
+function Transaction({
   link,
   status,
   statusPercentage,
@@ -33,14 +38,14 @@ function Transaction ({
   typeTX,
   blockNumber,
   tooltip = '',
-  detail
+  detail = {}
 }) {
 
   const [dropDownBox, setDropDownBox] = useState(false);
   const [dropDownBoxInit, setDropDownBoxInit] = useState(true);
 
-  function renderValue () {
-    
+  function renderValue() {
+
     if (button) {
       return (
         <div className={styles.statusContainer}>
@@ -54,7 +59,7 @@ function Transaction ({
         </div>
       )
     }
-    
+
     return (
       <div className={styles.statusContainer}>
         <div className={styles.status}>
@@ -84,7 +89,7 @@ function Transaction ({
     if (!detail) {
       return null;
     }
-    return <> 
+    return <>
       <div className={`${styles.subTitle} ${styles.viewMore}`} style={{ cursor: 'pointer' }}
         onClick={() => {
           setDropDownBox(!dropDownBox)
@@ -99,9 +104,9 @@ function Transaction ({
           styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
       >
         <div className={styles.title}>
-        <a className={styles.href} href={detail.l1TxLink} target="_blank" rel="noopener noreferrer">
-          {detail.l1Hash}
-        </a>
+          <a className={styles.href} href={detail.l1TxLink} target="_blank" rel="noopener noreferrer">
+            {detail.l1Hash}
+          </a>
         </div>
         <div className={styles.content}>
           <div>L1 Block : {detail.l1BlockNumber}</div>
@@ -119,46 +124,176 @@ function Transaction ({
     </>
   }
 
-  return (
-    <div className={styles.Transaction}>
-      <div className={styles.transactionItem}>
-        <div className={styles.title}>
-          <div>{chain}</div>
-          <div>{title}</div>
+  function renderDetailRedesign() {
+    if (!detail) {
+      return null
+    }
+
+    return (<S.TableBody
+    >
+      <S.TableCell sx={{
+        gap: "5px",
+        width: '98% !important',
+        padding: '5px',
+        alignItems: 'flex-start !important',
+      }}>
+        <div
+          className={dropDownBox ?
+            styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
+        >
+          <div className={styles.title}>
+            <a className={styles.href} href={detail.l1TxLink} target="_blank" rel="noopener noreferrer">
+              {detail.l1Hash}
+            </a>
+          </div>
+          <div className={styles.content}>
+            <div>L1 Block : {detail.l1BlockNumber}</div>
+          </div>
+          <div className={styles.content}>
+            <div>Block Hash : {detail.l1BlockHash}</div>
+          </div>
+          <div className={styles.content}>
+            <div>L1 From : {detail.l1From}</div>
+          </div>
+          <div className={styles.content}>
+            <div>L1 To : {detail.l1To}</div>
+          </div>
         </div>
-        {(midTitle || status) && 
-          <div className={styles.subTitle}>
-            <div>{midTitle}</div>
-            <div>{blockNumber}</div>
-          </div>
+      </S.TableCell>
+    </S.TableBody>)
+  }
+
+
+  return (<
+    div style={{
+      padding: '10px',
+      borderRadius: '8px',
+      background: `${!!dropDownBox ? 'rgba(255, 255, 255, 0.03)' : ''}`
+    }}
+  >
+    <S.TableBody
+
+    >
+      <S.TableCell sx={{ gap: "5px" }}>
+        <div>{chain}</div>
+      </S.TableCell>
+      <S.TableCell sx={{ gap: "5px" }}>
+        <div className={styles.muted}>{midTitle}</div>
+      </S.TableCell>
+      <S.TableCell sx={{ gap: "5px" }}>
+        <div>{title}</div>
+        <div className={styles.muted}>{blockNumber}</div>
+      </S.TableCell>
+      <S.TableCell sx={{ gap: "5px" }}>
+        {link &&
+          <a
+            href={link}
+            target={'_blank'}
+            rel='noopener noreferrer'
+          >
+            <ButtonMUI
+              variant="outlined"
+              color="primary"
+              style={{
+                boder: '1.4px solid #506DFA',
+                borderRadius: '8px',
+                width: '180px'
+              }}
+            >
+              <LinkIcon /> Advanced Details
+            </ButtonMUI>
+          </a>
         }
-        {subTitle && 
-          <div className={styles.subTitle}>
-            {subTitle}
+
+        {button && <ButtonMUI
+          variant="contained"
+          color="primary"
+          sx={{
+            boder: '1.4px solid #506DFA',
+            borderRadius: '8px',
+            width: '180px'
+          }}
+          onClick={button.onClick}
+        >
+          {button.text}
+        </ButtonMUI>}
+
+      </S.TableCell>
+    </S.TableBody>
+    <S.TableBody
+
+    >
+      <S.TableCell sx={{
+        gap: "5px",
+        width: '80% !important',
+        alignItems: 'flex-start !important',
+      }}>
+        <div className={styles.muted}>{typeTX}</div>
+      </S.TableCell>
+      {!!detail && <S.TableCell sx={{
+        gap: "5px",
+        alignItems: 'flex-end !important',
+        paddingRight: '30px',
+        color: 'rgba(255, 255, 255, 0.5)',
+        cursor: 'pointer'
+      }}
+        onClick={() => {
+          setDropDownBox(!dropDownBox)
+          setDropDownBoxInit(false)
+        }}
+      >
+        <ExpandMoreIcon />
+      </S.TableCell>}
+    </S.TableBody>
+    {renderDetailRedesign()}
+    <div className={styles.divider}></div>
+  </div>)
+
+
+  return (
+    <>
+      <div className={styles.Transaction}>
+        <div className={styles.transactionItem}>
+          <div className={styles.title}>
+            <div>{chain}</div>
+            <div>{title}</div>
           </div>
-        }
-        <div className={styles.content}>
-          <div>{typeTX}</div>
-          {link && 
-            <a 
-              href={link}
-              target={'_blank'}
-              rel='noopener noreferrer'
-              className={styles.button}
-            >View Details</a>  
+          {(midTitle || status) &&
+            <div className={styles.subTitle}>
+              <div>{midTitle}</div>
+              <div>{blockNumber}</div>
+            </div>
+          }
+          {subTitle &&
+            <div className={styles.subTitle}>
+              {subTitle}
+            </div>
+          }
+          <div className={styles.content}>
+            <div>{typeTX}</div>
+            {link &&
+              <a
+                href={link}
+                target={'_blank'}
+                rel='noopener noreferrer'
+                className={styles.button}
+              >View Details</a>
+            }
+          </div>
+          {renderDetail()}
+          {(button || status) &&
+            <div className={styles.content}>
+              <div className={styles.right}>
+                {renderValue()}
+              </div>
+            </div>
           }
         </div>
-        {renderDetail()}
-        {(button || status) &&
-          <div className={styles.content}>
-            <div className={styles.right}>
-              {renderValue()}
-            </div>
-          </div>
-        }
       </div>
-    </div>
+      <div className={styles.divider}></div>
+    </>
   )
 }
 
-export default React.memo(Transaction);
+// export default React.memo(Transaction);
+export default Transaction;

@@ -9,6 +9,7 @@ import PoolIcon from 'components/icons/PoolIcon';
 import EarnIcon from 'components/icons/EarnIcon';
 import WalletIcon from 'components/icons/WalletIcon';
 import HistoryIcon from 'components/icons/HistoryIcon';
+import NFTIcon from 'components/icons/NFTIcon';
 import chevron from 'images/chevron.svg';
 
 function MenuItems ({handleSetPage, pageDisplay}) {
@@ -25,7 +26,8 @@ function MenuItems ({handleSetPage, pageDisplay}) {
     LearnIcon,
     FarmIcon,
     PoolIcon,
-    HistoryIcon
+    HistoryIcon,
+    NFTIcon
   }
 
   return (

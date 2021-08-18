@@ -7,7 +7,6 @@ export const PagerContainer = styled.div`
     min-height: 25px;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 6px;
 `
 
 export const PagerContent = styled.div`

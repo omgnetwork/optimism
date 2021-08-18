@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React, { useState, useEffect } from 'react'
+import { Grid, Box } from '@material-ui/core'
 import { useSelector } from 'react-redux'
 import moment from 'moment'
 import truncate from 'truncate-middle'
@@ -28,18 +29,19 @@ import networkService from 'services/networkService'
 import * as styles from './Transactions.module.scss'
 
 import * as S from './history.styles';
+import { TransactionHeadList } from './TransactionHeadList'
 
 const PER_PAGE = 10;
 
-function Deposits ({ searchHistory, transactions,chainLink }) {
+function Deposits({ searchHistory, transactions, chainLink }) {
 
-  const [ page, setPage ] = useState(1);
+  const [page, setPage] = useState(1);
 
-  const loading = useSelector(selectLoading([ 'TRANSACTION/GETALL' ]));
+  const loading = useSelector(selectLoading(['TRANSACTION/GETALL']));
 
   useEffect(() => {
     setPage(1);
-  }, [ searchHistory ]);
+  }, [searchHistory]);
 
   const _deposits = transactions.filter(i => {
     return i.hash.includes(searchHistory) && (
@@ -68,29 +70,45 @@ function Deposits ({ searchHistory, transactions,chainLink }) {
           currentPage={page}
           isLastPage={paginatedDeposits.length < PER_PAGE}
           totalPages={totalNumberOfPages}
-          onClickNext={()=>setPage(page + 1)}
-          onClickBack={()=>setPage(page - 1)}
+          onClickNext={() => setPage(page + 1)}
+          onClickBack={() => setPage(page - 1)}
         />
-        {!paginatedDeposits.length && !loading && (
-          <div className={styles.disclaimer}>Deposit history coming soon...</div>
-        )}
-        {!paginatedDeposits.length && loading && (
-          <div className={styles.disclaimer}>Loading...</div>
-        )}
-        {paginatedDeposits.map((i, index) => {
-          const metaData = typeof(i.typeTX) === 'undefined' ? '' : i.typeTX
-          return (
-            <Transaction
-              key={index}
-              link={chainLink(i)}
-              title={truncate(i.hash, 8, 6, '...')}
-              midTitle={moment.unix(i.timeStamp).format('lll')}
-              blockNumber={`Block ${i.blockNumber}`}
-              chain={`L1->L2 Deposit`}
-              typeTX={`${metaData}`}
-            />
-          )
-        })}
+
+        <Grid item xs={12}>
+          <S.TableHeading>
+            {TransactionHeadList.map((item) => {
+              return (
+                <S.TableHeadingItem variant="body2" component="div" >
+                  {item.label}
+                </S.TableHeadingItem>
+              )
+            })}
+          </S.TableHeading>
+          <Box>
+            <S.Content>
+              {!paginatedDeposits.length && !loading && (
+                <div className={styles.disclaimer}>Deposit history coming soon...</div>
+              )}
+              {!paginatedDeposits.length && loading && (
+                <div className={styles.disclaimer}>Loading...</div>
+              )}
+              {paginatedDeposits.map((i, index) => {
+                const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
+                return (
+                  <Transaction
+                    key={index}
+                    link={chainLink(i)}
+                    title={truncate(i.hash, 8, 6, '...')}
+                    midTitle={moment.unix(i.timeStamp).format('lll')}
+                    blockNumber={`Block ${i.blockNumber}`}
+                    chain={`L1->L2 Deposit`}
+                    typeTX={`${metaData}`}
+                  />
+                )
+              })}
+            </S.Content>
+          </Box>
+        </Grid>
       </S.HistoryContainer>
     </div>
   );

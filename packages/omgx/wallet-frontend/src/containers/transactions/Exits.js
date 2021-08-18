@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React, { useState } from 'react'
+import {Grid, Box} from '@material-ui/core'
 import moment from 'moment'
 import { useSelector } from 'react-redux'
 import truncate from 'truncate-middle'
@@ -29,15 +30,16 @@ import networkService from 'services/networkService'
 import * as styles from './Transactions.module.scss'
 
 import * as S from './history.styles';
+import { TransactionHeadList } from './TransactionHeadList'
 
 const PER_PAGE = 8;
 
-function Exits ({ searchHistory, transactions,chainLink }) {
-  
-  const [ page, setPage ] = useState(1);
-  const [ processExitModal, setProcessExitModal ] = useState(false);
-  
-  const loading = useSelector(selectLoading([ 'EXIT/GETALL' ]));  
+function Exits({ searchHistory, transactions, chainLink }) {
+
+  const [page, setPage] = useState(1);
+  const [processExitModal, setProcessExitModal] = useState(false);
+
+  const loading = useSelector(selectLoading(['EXIT/GETALL']));
 
   const _exits = transactions.filter(i => {
     return i.hash.includes(searchHistory) && (
@@ -52,14 +54,14 @@ function Exits ({ searchHistory, transactions,chainLink }) {
 
   const renderExits = _exits.map((i, index) => {
 
-    const metaData = typeof(i.typeTX) === 'undefined' ? '' : i.typeTX
-    
+    const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
+
     let tradExit = false
     let isExitable = false
     let midTitle = 'Swapped: ' + moment.unix(i.timeStamp).format('lll')
-    
+
     const to = i.to.toLowerCase()
-        
+
     const {
       l1BlockHash,
       l1BlockNumber,
@@ -69,12 +71,12 @@ function Exits ({ searchHistory, transactions,chainLink }) {
     } = i;
 
     //are we dealing with a traditional exit?
-    if(to === networkService.L2StandardBridgeAddress.toLowerCase()) {
-      
+    if (to === networkService.L2StandardBridgeAddress.toLowerCase()) {
+
       tradExit = true
       isExitable = moment().isAfter(moment.unix(i.crossDomainMessageEstimateFinalizedTime))
-      
-      if(isExitable) {
+
+      if (isExitable) {
         midTitle = 'Ready to exit - initiated:' + moment.unix(i.timeStamp).format('lll')
       } else {
         const secondsToGo = i.crossDomainMessageEstimateFinalizedTime - Math.round(Date.now() / 1000)
@@ -94,7 +96,7 @@ function Exits ({ searchHistory, transactions,chainLink }) {
         title={truncate(i.hash, 8, 6, '...')}
         blockNumber={`Block ${i.blockNumber}`}
         midTitle={midTitle}
-        button={isExitable && tradExit ? {onClick: ()=>setProcessExitModal(i), text: 'Process Exit'}: undefined}
+        button={isExitable && tradExit ? { onClick: () => setProcessExitModal(i), text: 'Process Exit' } : undefined}
         typeTX={`${metaData}`}
         detail={l1Hash ? {
           l1BlockHash: truncate(l1BlockHash, 8, 6, '...'),
@@ -125,7 +127,7 @@ function Exits ({ searchHistory, transactions,chainLink }) {
       <ProcessExitsModal
         exitData={processExitModal}
         open={!!processExitModal}
-        toggle={()=>setProcessExitModal(false)}
+        toggle={() => setProcessExitModal(false)}
       />
       <div className={styles.section}>
         <div className={styles.transactionSection}>
@@ -137,13 +139,29 @@ function Exits ({ searchHistory, transactions,chainLink }) {
               onClickNext={() => setPage(page + 1)}
               onClickBack={() => setPage(page - 1)}
             />
-            {!renderExits.length && !loading && (
-              <div className={styles.disclaimer}>Exit history coming soon...</div>
-            )}
-            {!renderExits.length && loading && (
-              <div className={styles.disclaimer}>Loading...</div>
-            )}
-            {React.Children.toArray(paginatedExits)}
+
+            <Grid item xs={12}>
+              <S.TableHeading>
+                {TransactionHeadList.map((item) => {
+                  return (
+                    <S.TableHeadingItem variant="body2" component="div" >
+                      {item.label}
+                    </S.TableHeadingItem>
+                  )
+                })}
+              </S.TableHeading>
+              <Box>
+                <S.Content>
+                  {!renderExits.length && !loading && (
+                    <div className={styles.disclaimer}>Exit history coming soon...</div>
+                  )}
+                  {!renderExits.length && loading && (
+                    <div className={styles.disclaimer}>Loading...</div>
+                  )}
+                  {React.Children.toArray(paginatedExits)}
+                </S.Content>
+              </Box>
+            </Grid>
           </S.HistoryContainer>
         </div>
       </div>

@@ -31,7 +31,7 @@ export const menuItems = [
   },
   {
     key: 'NFT',
-    icon: "LearnIcon",
+    icon: "NFTIcon",
     title: "NFT",
     url: "/learn"
   },
