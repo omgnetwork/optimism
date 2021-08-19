@@ -109,8 +109,8 @@ const main = async () => {
   const l2Provider = new providers.JsonRpcProvider(L2_NODE_WEB3_URL)
   const l1Provider = new providers.JsonRpcProvider(L1_NODE_WEB3_URL)
 
-  const network = await l1Provider.getNetwork()
-  console.log(network.name)
+  //const network = await l1Provider.getNetwork()
+  //console.log(network.name)
 
   let wallet: Wallet
   if (RELAYER_PRIVATE_KEY) {

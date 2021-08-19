@@ -213,14 +213,14 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         )
         //that's set in the MMR deploy
 
-        console.log('\nRelayer:\n', relayer)
+        //console.log('\nRelayer:\n', relayer)
         // If it is address(0), then message relaying is not authenticated
         if (relayer !== ethers.constants.AddressZero) {
           // relaying is authenticated
           // so the wallet address has to be the same as whatever is set in
           // OVM_L2MessageRelayer?
           const address = await this.options.l1Wallet.getAddress()
-          console.log('\nAddress:\n', address)
+          //console.log('\nAddress:\n', address)
           // if (relayer !== address) {
           //   throw new Error(
           //     `OVM_L2MessageRelayer (${relayer}) is not set to message-passer EOA ${address}`
@@ -323,11 +323,12 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         const secondsElapsed = Math.floor(
           (Date.now() - this.state.timeOfLastRelayS) / 1000
         )
-        console.log('S elapsed:', secondsElapsed)
+        console.log('\n***********************************')
+        console.log('Seconds elapsed since last batch push:', secondsElapsed)
         const timeOut =
           secondsElapsed > this.options.maxWaitTimeS ? true : false
 
-        console.log('Current buffer size:', this.state.messageBuffer.length)
+        //console.log('Current buffer size:', this.state.messageBuffer.length)
         const bufferFull =
           this.state.messageBuffer.length >= this.options.minBatchSize
             ? true
@@ -335,10 +336,10 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
 
         if (bufferFull || timeOut) {
           if (bufferFull) {
-            console.log('Buffer full - flushing')
+            console.log('Buffer full: flushing')
           }
           if (timeOut) {
-            console.log('Buffer timeout - flushing')
+            console.log('Buffer timeout: flushing')
           }
 
           const receipt = await this._relayMultiMessageToL1(
@@ -357,10 +358,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           this.state.timeOfLastRelayS = Date.now()
         } else {
           console.log(
-            'Buffer still too small: buffer length:',
+            'Buffer still too small - current buffer length:',
             this.state.messageBuffer.length
           )
-          console.log('Buffer flush size:', this.options.minBatchSize)
+          console.log('Buffer flush size set to:', this.options.minBatchSize)
+          console.log('***********************************\n')
         }
 
         if (messages.length === 0) {
@@ -683,6 +685,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   private async _relayMultiMessageToL1(
     messages: Array<BatchMessage>
   ): Promise<any> {
+    
     const result = await this.state.OVM_L1MultiMessageRelayer.connect(
       this.options.l1Wallet
     ).batchRelayMessages(messages, {
