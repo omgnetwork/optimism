@@ -111,7 +111,7 @@ function Propose() {
       description);
 
 
-  };
+  }
 
   const handleChange = (e) => {
     setDescription(e.target.value);

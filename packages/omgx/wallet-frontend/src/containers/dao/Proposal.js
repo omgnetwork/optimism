@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import getBlockchain from "../../services/ethereum.js";
-// import GovernorBravoDelegate from '../../deployment/artifacts-ovm/contracts/GovernorBravoDelegate.json'
+import GovernorBravoDelegate from '../../deployment/artifacts-ovm/contracts/GovernorBravoDelegate.json'
 // import Timelock from '../../deployment/artifacts-ovm/contracts/Timelock.json'
 import BobaMenu from '../../deployment/artifacts-ovm/contracts/BobaMenu.json'
 // import { functions } from "lodash";
@@ -52,11 +52,12 @@ function Proposal(props) {
     let newValues = values;
     newValues[i] = e.target.value;
     setValues(newValues);
+    console.log(values);
   };
 
   function generateInputs(funcInputs, funcInputTypes){
     let funcInputsMarkup = funcInputs.map((input, index) => (
-                <input type={"text"} placeholder={`${input}(${funcInputTypes[index]})`}></input>
+                <input type={"text"}  placeholder={`${input}(${funcInputTypes[index]})`}onChange={(e) => updateValues(e)}></input>
     ));
     return (<>{funcInputsMarkup}</>);
   }
@@ -73,7 +74,7 @@ function Proposal(props) {
 
   }
 
-  function getFunctionInputs(contractABI){
+  function getFunctionsInputs(contractABI){
     let functions = [];
     let inputs = [];
     let inputTypes = []
@@ -118,38 +119,20 @@ function Proposal(props) {
     return [functions, inputs, inputTypes];
   }
 
-  let bobaMenuFuncs, bobaMenuInputs, bobaMenuInputTypes;
-  [bobaMenuFuncs, bobaMenuInputs, bobaMenuInputTypes] = getFunctionInputs(BobaMenu.abi);
-  console.log('Boba Menu', bobaMenuFuncs);
-  console.log('Boba Menu Inputs',bobaMenuInputs);
-  console.log('Boba Menu Input Types', bobaMenuInputTypes);
-
+  let bobaMenuFuncs, bobaMenuInputs, bobaMenuInputTypes, governorBravoFuncs, governorBravoInputs, governorBravoInputTypes;
+  [bobaMenuFuncs, bobaMenuInputs, bobaMenuInputTypes] = getFunctionsInputs(BobaMenu.abi);
+  [governorBravoFuncs, governorBravoInputs, governorBravoInputTypes] = getFunctionsInputs(GovernorBravoDelegate.abi);
   function contractFunctions(contract){
     switch(contract){
       case GBAddress:
         return (
           <>
             <select value={action} onChange={(e) => updateActions(e)}>
-              <option value="select">Select an Action</option>
-              <option value="_setProposalThreshold">
-                _setProposalThreshold
-              </option>
-              <option value="_setVotingDelay">_setVotingDelay</option>
-              <option value="_setVotingPeriod">_setVotingPeriod</option>
-              <option value="_grantComp">Grant BOBA</option>
+              {generateFunctions(governorBravoFuncs)}
             </select>
-            {action === "select" ? null : action === "_grantComp" ? (
-              <>
-                <input type="text" placeholder="Recipient Address"></input>
-                <input type="text" placeholder="Grant Amount"></input>
-              </>
-            ) : (
-              <input
-                type="text"
-                placeholder={`new ${action} (uint)`}
-                onChange={(e) => updateValues(e)}
-              ></input>
-            )}
+            {(action === 'select' || governorBravoInputs[governorBravoFuncs.indexOf(action)] == null)?
+              null :
+              generateInputs(governorBravoInputs[governorBravoFuncs.indexOf(action)], governorBravoInputTypes[governorBravoFuncs.indexOf(action)])}
           </>
         );
       case bobaMenuAddress:
