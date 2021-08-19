@@ -31,3 +31,16 @@ export interface StateRootProof {
   index: number
   siblings: string[]
 }
+
+export interface Message {
+  message: SentMessage
+  proof: SentMessageProof
+}
+
+export interface BatchMessage {
+  target: string
+  message: string
+  sender: string
+  messageNonce: number
+  proof: SentMessageProof
+}
