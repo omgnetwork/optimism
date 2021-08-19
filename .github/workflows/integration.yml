@@ -67,11 +67,13 @@ jobs:
         working-directory: ./ops
         run: ./scripts/wait-for-sequencer.sh
 
-      - name: Start background logging and run the integration tests
+      - name: Start background logging
         working-directory: ./ops
-        run: |
-          docker-compose -f docker-compose.yml logs --follow &
-          sdocker-compose run integration_tests
+        run: docker-compose -f docker-compose.yml logs --follow &
+
+      - name: Run the integration tests
+        working-directory: ./ops
+        run: docker-compose run integration_tests
 
   stop-runner:
     name: Stop self-hosted EC2 runner
