@@ -15,7 +15,7 @@ import RemoveIcon from '@material-ui/icons/Remove';
 import networkService from 'services/networkService';
 
 import * as styles from './listFarm.module.scss';
-import { Box, Typography, Fade } from '@material-ui/core';
+import { Box, Typography, Fade, useMediaQuery } from '@material-ui/core';
 import * as S from "./ListFarm.styles"
 
 class ListFarm extends React.Component {
@@ -30,7 +30,7 @@ class ListFarm extends React.Component {
       userInfo,
       L1orL2Pool,
       balance,
-      decimals
+      decimals,
     } = this.props;
 
     this.state = {
@@ -152,6 +152,10 @@ class ListFarm extends React.Component {
       loading, L1orL2Pool
     } = this.state;
 
+    const { isMobile } = this.props
+
+    console.log("isMobile", isMobile)
+
     let userReward = 0;
 
     if (Object.keys(userInfo).length && Object.keys(poolInfo).length) {
@@ -168,69 +172,92 @@ class ListFarm extends React.Component {
     const disabled = !L1orL2Pool.includes(networkService.L1orL2)
     const symbol = poolInfo.symbol
     const name = poolInfo.name
+    console.log('isMobile', isMobile)
 
     return (
       <div className={styles.ListFarm}>
-        <div
-          className={styles.topContainer}
-          style={disabled ? {pointerEvents: 'none'} : {}}
+        <Box
+          sx={{display: 'flex', justifyContent: 'space-between'}}
+        >
+          <S.WrapperItems sx={{justifyContent: 'flex-start', flex: isMobile ? 'none' : '3'}} isMobile={isMobile}>
+            <S.ListItems isMobile={isMobile}>
+              <img className={styles.Image} src={logo} alt="logo" width={30} />
+              <Typography variant="overline">{name}</Typography>
+            </S.ListItems>
+
+            <S.ListItems isMobile={isMobile}>
+              <Typography variant="overline">Earned</Typography>
+              <Typography variant="body1">
+                {userReward ?
+                  `${logAmount(userReward, 18, 2)} ${symbol}` : `0 ${symbol}`
+                }
+              </Typography>
+            </S.ListItems>
+
+            <S.ListItems isMobile={isMobile}>
+              <Typography variant="overline">Share</Typography>
+              <Typography variant="body1">
+                {userInfo.amount ?
+                  `${logAmount(userInfo.amount, 18, 2)} ${symbol}` : `0 ${symbol}`
+                }
+              </Typography>
+            </S.ListItems>
+          </S.WrapperItems>
+
+          <S.WrapperItems sx={{justifyContent: 'flex-end', flex: isMobile ? 'none' : '4'}} isMobile={isMobile}>
+            <S.ListItems isMobile={isMobile}>
+              <Typography variant="overline">APR</Typography>
+              <Typography variant="body1">
+                {`${poolInfo.APR ? poolInfo.APR.toFixed(2) : 0}%`}
+              </Typography>
+            </S.ListItems>
+
+            <S.ListItems isMobile={isMobile}>
+              <Typography variant="overline">Liquidity</Typography>
+              <Typography variant="body1">
+                {poolInfo.userDepositAmount ?
+                  `${logAmount(poolInfo.userDepositAmount, 18, 2)} ${symbol}` : `0 ${symbol}`
+                }
+              </Typography>
+            </S.ListItems>
+
+            <S.ListItems isMobile={isMobile}>
+              <Typography variant="overline">Balance</Typography>
+              <Typography variant="body1">
+                {poolInfo.tokenBalance ?
+                  `${logAmount(poolInfo.tokenBalance, 18, 2)} ${symbol}` : `0 ${symbol}`
+                }
+              </Typography>
+            </S.ListItems>
+
+            <S.WrapperActions
+              sx={{display: isMobile ? 'none' : 'flex'}}
+              disabled={disabled}
+              onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
+            >
+              <S.ListItems isMobile={isMobile} sx={{flexDirection: 'row', gap: '5px', color: "#0ebf9a"}}>
+                <Typography variant="body1">Staking</Typography>
+                <Box sx={{display: 'flex', transform: dropDownBox ? "rotate(-180deg)" : ""}}>
+                  <ExpandMoreIcon />
+                </Box>
+              </S.ListItems>
+            </S.WrapperActions>
+
+          </S.WrapperItems>
+        </Box>
+
+        <S.WrapperActions
+          sx={{display: isMobile ? 'flex' : 'none'}}
+          disabled={disabled}
           onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
         >
-          <S.ListItems>
-            <img className={styles.Image} src={logo} alt="logo" />
-            <Typography variant="overline">{name}</Typography>
+          <S.ListItems isMobile={isMobile} sx={{flexDirection: 'row', gap: '5px', color: "#0ebf9a"}}>
+            <Typography variant="body1" sx={{color: "#0ebf9a"}}>Staking</Typography>
+            <Box sx={{display: 'flex', transform: dropDownBox ? "rotate(-180deg)" : ""}}>
+              <ExpandMoreIcon />
+            </Box>
           </S.ListItems>
-          <S.ListItems>
-            <Typography variant="overline">Earned</Typography>
-            <Typography variant="body1">
-              {userReward ?
-                `${logAmount(userReward, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </Typography>
-          </S.ListItems>
-          <S.ListItems>
-            <Typography variant="overline">Share</Typography>
-            <Typography variant="body1">
-              {userInfo.amount ?
-                `${logAmount(userInfo.amount, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </Typography>
-          </S.ListItems>
-          <S.ListItems>
-            <Typography variant="overline">APR</Typography>
-            <Typography variant="body1">
-              {`${poolInfo.APR ? poolInfo.APR.toFixed(2) : 0}%`}
-            </Typography>
-          </S.ListItems>
-          <S.ListItems>
-            <Typography variant="overline">Liquidity</Typography>
-            <Typography variant="body1">
-              {poolInfo.userDepositAmount ?
-                `${logAmount(poolInfo.userDepositAmount, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </Typography>
-          </S.ListItems>
-          <S.ListItems>
-            <Typography variant="overline">Balance</Typography>
-            <Typography variant="body1">
-              {poolInfo.tokenBalance ?
-                `${logAmount(poolInfo.tokenBalance, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </Typography>
-          </S.ListItems>
-          {disabled &&
-            <S.ListItems>
-              <div className={styles.LinkTextOff}>Staking</div>
-              <ExpandMoreIcon className={styles.LinkButtonOff} />
-            </S.ListItems>
-          }
-          {!disabled &&
-            <S.ListItems>
-              <div className={styles.LinkText}>Staking</div>
-              <ExpandMoreIcon className={styles.LinkButton} />
-            </S.ListItems>
-          }
-        </div>
+        </S.WrapperActions>
 
         {/*********************************************/
         /**************  Drop Down Box ****************/
@@ -238,7 +265,7 @@ class ListFarm extends React.Component {
         }
         {dropDownBox ? (
           <Fade in={dropDownBox}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", gap: "16px" }}>
+            <S.DropdownContent isMobile={isMobile}>
               <S.DropdownWrapper>
                 <Typography sx={{flex: 1}} variant="body2" component="div">{`${name}`} Earned</Typography>
                 <Typography sx={{flex: 1}} variant="body2" component="div" color="secondary">{logAmount(userReward, 18, 2)}</Typography>
@@ -286,7 +313,7 @@ class ListFarm extends React.Component {
                   </>
                 }
               </S.DropdownWrapper>
-            </Box>
+            </S.DropdownContent>
           </Fade>
         ) : null }
 

@@ -116,15 +116,16 @@ class Nft extends React.Component {
     }).filter(Boolean).length
 
     return (
-
-      <Box>
+      <>
         <PageHeader title="NFT" />
-
-        <Container>
-          <Grid container>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h2" component="h2">Your NFTs</Typography>
-
+        <Grid
+          container
+          spacing={4}
+          justifyContent="center"
+        >
+          <Grid item sx={12} md={6}>
+            <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>Your NFTs</Typography>
+            <Box sx={{mt: 1, mb: 4}}>
               {numberOfNFTs === 1 &&
                 <Typography variant="body1" component="p">You have one NFT and it should be shown below.</Typography>
               }
@@ -134,73 +135,123 @@ class Nft extends React.Component {
               {numberOfNFTs < 1 &&
                 <Typography variant="body1" component="p">Scanning the blockchain for your NFTs...</Typography>
               }
-              <div className={styles.nftTiles}>
-                {Object.keys(list).map((v, i) => {
-                  const key_UUID = `nft_` + i
-                  return (
-                    <ListNFT
-                      key={key_UUID}
-                      name={list[v].name}
-                      symbol={list[v].symbol}
-                      owner={list[v].owner}
-                      address={list[v].address}
-                      layer={list[v].layer}
-                      icon={list[v].originID === 'simple' ? koiIcon : cellIcon}
-                      UUID={list[v].UUID}
-                      URL={list[v].url}
-                      time={list[v].mintedTime}
-                      oriChain={list[v].originChain}
-                      oriAddress={list[v].originAddress}
-                      oriID={list[v].originID}
-                      oriFeeRecipient={list[v].originFeeRecipient}
-                      type={list[v].type}
-                    />
-                  )
-                  })
-                }
-              </div>
-            </Grid>
+            </Box>
 
-            <Grid xs={12} md={6}>
-              <Typography variant="h2" component="h2">
-                Mint your own NFTs
-              </Typography>
-              <Typography variant="body2" component="p" sx={{mt: 1, mb: 4}}>
-                To mint your own NFTs, you first need to deploy your NFT contract. Specify the NFT's name and symbol, and then click
-                "Deploy NFT contract".
-              </Typography>
-              <Box sx={{display: "flex", flexDirection: "column", gap: "10px", mb: 2}}>
-                <Input
-                  placeholder="NFT Symbol (e.g. TWST)"
-                  onChange={i=>{this.setState({newNFTsymbol: i.target.value})}}
-                  value={newNFTsymbol}
-                  fullWidth
-                />
-                <Input
-                  placeholder="NFT Name (e.g. Twist)"
-                  onChange={i=>{this.setState({newNFTname: i.target.value})}}
-                  value={newNFTname}
-                  fullWidth
-                />
-              </Box>
-              <Button
-                variant="contained"
-                fullWidth
-                disabled={!newNFTname || !newNFTsymbol}
-                onClick={()=>{this.handleDeployContract()}}
-                loading={loading}
-              >
-                Deploy NFT contract
-              </Button>
-
-            </Grid>
+            {/* <div className={styles.nftTiles}> */}
+              {Object.keys(list).map((v, i) => {
+                const key_UUID = `nft_` + i
+                return (
+                  <ListNFT
+                    key={key_UUID}
+                    name={list[v].name}
+                    symbol={list[v].symbol}
+                    owner={list[v].owner}
+                    address={list[v].address}
+                    layer={list[v].layer}
+                    icon={list[v].originID === 'simple' ? koiIcon : cellIcon}
+                    UUID={list[v].UUID}
+                    URL={list[v].url}
+                    time={list[v].mintedTime}
+                    oriChain={list[v].originChain}
+                    oriAddress={list[v].originAddress}
+                    oriID={list[v].originID}
+                    oriFeeRecipient={list[v].originFeeRecipient}
+                    type={list[v].type}
+                  />
+                )
+                })
+              }
+            {/* </div> */}
           </Grid>
 
-          <div className={styles.TableContainer}>
+          <Grid item sx={12} md={6}>
+            <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>
+              Mint your own NFTs
+            </Typography>
+            <Typography variant="body2" component="p" sx={{mt: 1, mb: 4}}>
+              To mint your own NFTs, you first need to deploy your NFT contract. Specify the NFT's name and symbol, and then click
+              "Deploy NFT contract".
+            </Typography>
+            <Box sx={{display: "flex", flexDirection: "column", gap: "10px", mb: 2}}>
+              <Input
+                placeholder="NFT Symbol (e.g. TWST)"
+                onChange={i=>{this.setState({newNFTsymbol: i.target.value})}}
+                value={newNFTsymbol}
+                fullWidth
+              />
+              <Input
+                placeholder="NFT Name (e.g. Twist)"
+                onChange={i=>{this.setState({newNFTname: i.target.value})}}
+                value={newNFTname}
+                fullWidth
+              />
+            </Box>
+            <Button
+              variant="contained"
+              fullWidth
+              disabled={!newNFTname || !newNFTsymbol}
+              onClick={()=>{this.handleDeployContract()}}
+              loading={loading}
+            >
+              Deploy NFT contract
+            </Button>
+
+          </Grid>
+        </Grid>
+
+        {Object.keys(factories).map((v, i) => {
+          if(factories[v].haveRights && factories[v].originID === 'simple') {
+            const key_UUID = `fac_` + i
+            console.log(key_UUID)
+            return (
+              <ListNFTfactory
+                key={key_UUID}
+                name={factories[v].name}
+                symbol={factories[v].symbol}
+                owner={factories[v].owner}
+                address={factories[v].address}
+                layer={factories[v].layer}
+                icon={factoryIcon}
+                oriChain={factories[v].originChain}
+                oriAddress={factories[v].originAddress}
+                oriID={factories[v].originID}
+                oriFeeRecipient={factories[v].originFeeRecipient}
+                haveRights={factories[v].haveRights}
+              />
+            )
+          } else {
+            return (<></>)
+          }
+        })}
+
+        <Box sx={{mt: 8}}>
+          <Typography variant="h2" component="h4" sx={{fontWeight: "700", mb: 4}}>
+            Derive an NFT Factory from another NFT (experimental)
+          </Typography>
+          {rights > 0 &&
+            <Typography variant="body2" component="p">
+              In this tab, you can take an NFT you got from someone and derive a new family of NFTs from it.
+              Think of this as creating a "child" NFT from a preceeding "parent" NFT. This is useful, for example, if you generate
+              creative content, and would like to license that content to others, and allow them to build on it, whilst still
+              receiving micropayments for your original contribution and work.
+              Status: You have owner permissions for one or more NFT factories. Select the desired NFT factory
+              and click "Actions" to mint NFTs.
+            </Typography>
+          }
+          {rights === 0 &&
+            <Typography variant="body2" component="p">
+              In this tab, you can take an NFT you obtained from someone else and derive a new family of NFTs from it.
+              Think of this as creating a "child" NFT from a preceeding "parent" NFT. This is useful, for example, if you generate
+              creative content, and would like to license that content to others and allow them to build on it, whilst still
+              receiving micropayments for your original contribution and work.
+              Status: You do not have owner permissions. To create your own NFT factory, obtain an NFT first.
+            </Typography>
+          }
+
+          {/* <div className={styles.TableContainer}> */}
             {Object.keys(factories).map((v, i) => {
-              if(factories[v].haveRights && factories[v].originID === 'simple') {
-                const key_UUID = `fac_` + i
-                console.log(key_UUID)
+              if(factories[v].haveRights && factories[v].originID !== 'simple') {
+                const key_UUID = `fac_d_` + i;
                 return (
                   <ListNFTfactory
                     key={key_UUID}
@@ -221,59 +272,10 @@ class Nft extends React.Component {
                 return (<></>)
               }
             })}
-          </div>
+          {/* </div> */}
 
-          <Box sx={{mt: 8}}>
-            <Typography variant="h2" component="h4">Derive an NFT Factory from another NFT (experimental)</Typography>
-            {rights > 0 &&
-              <Typography variant="body2" component="p">
-                In this tab, you can take an NFT you got from someone and derive a new family of NFTs from it.
-                Think of this as creating a "child" NFT from a preceeding "parent" NFT. This is useful, for example, if you generate
-                creative content, and would like to license that content to others, and allow them to build on it, whilst still
-                receiving micropayments for your original contribution and work.
-                Status: You have owner permissions for one or more NFT factories. Select the desired NFT factory
-                and click "Actions" to mint NFTs.
-              </Typography>
-            }
-            {rights === 0 &&
-              <Typography variant="body2" component="p">
-                In this tab, you can take an NFT you obtained from someone else and derive a new family of NFTs from it.
-                Think of this as creating a "child" NFT from a preceeding "parent" NFT. This is useful, for example, if you generate
-                creative content, and would like to license that content to others and allow them to build on it, whilst still
-                receiving micropayments for your original contribution and work.
-                Status: You do not have owner permissions. To create your own NFT factory, obtain an NFT first.
-              </Typography>
-            }
-
-            <div className={styles.TableContainer}>
-              {Object.keys(factories).map((v, i) => {
-                if(factories[v].haveRights && factories[v].originID !== 'simple') {
-                  const key_UUID = `fac_d_` + i;
-                  return (
-                    <ListNFTfactory
-                      key={key_UUID}
-                      name={factories[v].name}
-                      symbol={factories[v].symbol}
-                      owner={factories[v].owner}
-                      address={factories[v].address}
-                      layer={factories[v].layer}
-                      icon={factoryIcon}
-                      oriChain={factories[v].originChain}
-                      oriAddress={factories[v].originAddress}
-                      oriID={factories[v].originID}
-                      oriFeeRecipient={factories[v].originFeeRecipient}
-                      haveRights={factories[v].haveRights}
-                    />
-                  )
-                } else {
-                  return (<></>)
-                }
-              })}
-            </div>
-
-          </Box>
-        </Container>
-      </Box>
+        </Box>
+      </>
     )
   }
 }

@@ -148,6 +148,7 @@ class Farm extends React.Component {
         }
       }
     }
+
     else if (chain === 'L2') {
       let tokens = Object.entries(layer2)
       for(let i = 0; i < tokens.length; i++) {
@@ -167,8 +168,10 @@ class Farm extends React.Component {
       poolInfo,
       // user
       userInfo,
-      value
+      value,
     } = this.state;
+
+    const { isMobile } = this.props;
 
     const networkLayer = networkService.L1orL2
     const handleChange = () => {}
@@ -198,7 +201,7 @@ class Farm extends React.Component {
                 Note: MetaMask is set to L2. To interact with the L1 liquidity pool, please switch MetaMask to L1.
               </Alert>
             }
-            <Box xs={{backgroundColor: "#f00"}}>
+            <Box>
               {Object.keys(poolInfo.L1LP).map((v, i) => {
                 const ret = this.getBalance(v, 'L1')
                 return (
@@ -210,6 +213,7 @@ class Farm extends React.Component {
                     L1orL2Pool='L1LP'
                     balance={ret[0]}
                     decimals={ret[1]}
+                    isMobile={isMobile}
                   />
                 )
               })}

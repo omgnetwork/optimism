@@ -15,8 +15,9 @@ import { transfer } from 'actions/networkAction'
 
 import * as styles from './listNFT.module.scss'
 
+import * as S from './ListNFT.styles'
 import truncate from 'truncate-middle'
-import { Box, Fade } from '@material-ui/core'
+import { Box, Fade, Link, Typography } from '@material-ui/core'
 
 class listNFT extends React.Component {
 
@@ -267,104 +268,122 @@ class listNFT extends React.Component {
     }
 
     return (
-      <div className={styles.ListNFT}>
-
-        <img className={styles.Image} src={icon} alt="icon"/>
-
-        <div
-          className={styles.topContainer}
-        >
-
+      <S.Wrapper>
+        <img src={icon} alt="icon" height={60} width="100%"/>
+        <Box sx={{p: 3}}>
           {oriID === 'simple' &&
-            <div className={styles.Table2}>
-              <div className={styles.BasicText}>{name} ({symbol})</div>
-              <div className={styles.BasicLightText}>Owner: {owner}</div>
-              <div className={styles.BasicLightText}>UUID: {UUID}</div>
-              <div className={styles.BasicLightText}>Address: {truncate(address, 6, 4, '...')}</div>
-              <div className={styles.BasicLightText}>Time minted: {time}</div>
-              <a className={styles.URILink} href={URL}>Link</a>
-            </div>
+            <Box>
+              <S.NFTTitle variant="h4" component="div">
+                <strong>{name} </strong>({symbol})
+              </S.NFTTitle>
+              <S.NFTItem variant="body2" component="div">
+                Owner: {owner}
+              </S.NFTItem>
+              <S.NFTItem variant="body2" component="div">
+                UUID: {UUID}
+              </S.NFTItem>
+              <S.NFTItem variant="body2" component="div">
+                Address: {truncate(address, 6, 4, '...')}
+              </S.NFTItem>
+              <S.NFTItem variant="body2" component="div">
+                Time minted: {time}
+              </S.NFTItem>
+              <Link to={URL}>Link</Link>
+            </Box>
           }
 
           {oriID !== 'simple' && <>
-            <div className={styles.Table2}>
-              <div className={styles.BasicText}>{name} ({symbol})</div>
-              <div className={styles.BasicLightText}>Owner: {owner}</div>
-              <div className={styles.BasicLightText}>UUID: {UUID}</div>
-              <div className={styles.BasicLightText}>Address: {truncate(address, 6, 4, '...')}</div>
-              <div className={styles.BasicLightText}>Time minted: {time}</div>
-              <div className={styles.BasicLightText}>Type: {typeString}</div>
-              <a className={styles.URILink} href={URL}>DATASHEET</a>
-            </div>
+            <Box>
+              <S.NFTTitle variant="h4" component="div">
+                {name} ({symbol})
+              </S.NFTTitle>
+              <S.NFTItem variant="body2" component="div">
+                Owner: {owner}
+              </S.NFTItem>
+              <S.NFTItem variant="body2" component="div">
+                UUID: {UUID}
+              </S.NFTItem>
+              <S.NFTItem variant="body2" component="div">
+                Address: {truncate(address, 6, 4, '...')}
+              </S.NFTItem>
+              <S.NFTItem variant="body2" component="div">
+                Time minted: {time}
+              </S.NFTItem>
+              <S.NFTItem variant="body2" component="div">
+                Type: {typeString}
+              </S.NFTItem>
+              <S.NFTItem variant="body2" component="div">
+                Time minted: {time}
+              </S.NFTItem>
+              <Link sx={{cursor: "pointer"}} underline="hover" to={URL}>DATASHEET</Link>
+            </Box>
 
-            <div
-              className={styles.Table3}
+            <Button
+              variant="outlined"
+              color="neutral"
+              fullWidth
               onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
+              sx={{display: 'flex', cursor: 'pointer', alignItems: 'center'}}
             >
-              <div className={styles.LinkText}>Actions</div>
-              <ExpandMoreIcon className={styles.LinkButton} />
-            </div>
-          </>
-          }
-
-        </div>
+              <Typography>Actions</Typography>
+              <Box sx={{display: "flex", transform: dropDownBox ? "rotate(-180deg)" : ""}}>
+                <ExpandMoreIcon sx={{width: "12px"}}/>
+              </Box>
+            </Button>
+          </>}
+        </Box>
 
         {/*********************************************/
         /**************  Drop Down Box ****************/
         /**********************************************/
         }
-        {/* <div
-          className={dropDownBox ?
-            styles.dropDownContainer: dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
-        > */}
-        <Box>
+
         {dropDownBox ? (
-          <>
-            <div className={styles.boxOrigin}>
-              <div className={styles.BasicText}>Root</div>
-              <div className={styles.BasicLightText}>Address: {oriAddress}</div>
-              <div className={styles.BasicLightText}>NFT: {oriID}</div>
-              <div className={styles.BasicLightText}>Chain: {oriChain}</div>
-              <div className={styles.BasicLightText}>Fee recipient: {oriFeeRecipient}</div>
-            </div>
+          <Fade in={dropDownBox}>
+            <S.DropdownWrapper>
+                <Box>
+                  <S.NFTTitle variant="h3" component="h4" sx={{mt: 2}}>Root</S.NFTTitle>
+                  <S.NFTItem variant="body2" component="div">Address: {oriAddress}</S.NFTItem>
+                  <S.NFTItem variant="body2" component="div">NFT: {oriID}</S.NFTItem>
+                  <S.NFTItem variant="body2" component="div">Chain: {oriChain}</S.NFTItem>
+                  <S.NFTItem variant="body2" component="div">Fee recipient: {oriFeeRecipient}</S.NFTItem>
+                </Box>
 
-            <div className={styles.boxContainer}>
-            {(type === 0) && <>
-              <h3>Derive New NFT Factory</h3>
-              <div className={styles.BasicLightText}>
-                To create a new NFT factory from this NFT, please fill in the information and click "Create New NFT Factory".
-              </div>
-              <Box sx={{display: "flex", flexDirection: "column", gap: "10px", mb: 1}}>
-                <Input
-                  fullWidth
-                  placeholder="NFT Symbol (e.g. TWST)"
-                  onChange={i=>{this.setState({newNFTsymbol: i.target.value})}}
-                  value={newNFTsymbol}
-                />
-                <Input
-                  fullWidth
-                  placeholder="NFT Name (e.g. Twist Bio NFT)"
-                  onChange={i=>{this.setState({newNFTname: i.target.value})}}
-                  value={newNFTname}
-                />
-              </Box>
-              <Button
-                variant="contained"
-                fullWidth
-                disabled={!newNFTname || !newNFTsymbol}
-                onClick={()=>{this.handleDeployDerivative()}}
-                loading={loading}
-              >
-                Create New NFT Factory
-              </Button>
-            </>}
-            </div>
-          </>
+                <Box>
+                {(type === 0) && <>
+                  <S.NFTTitle variant="h3" component="h4" sx={{mt: 2}}>Derive New NFT Factory</S.NFTTitle>
+                  <S.NFTItem variant="body2" component="p">
+                    To create a new NFT factory from this NFT, please fill in the information and click "Create New NFT Factory".
+                  </S.NFTItem>
+                  <Box sx={{display: "flex", flexDirection: "column", gap: "10px", mb: 1}}>
+                    <Input
+                      fullWidth
+                      placeholder="NFT Symbol (e.g. TWST)"
+                      onChange={i=>{this.setState({newNFTsymbol: i.target.value})}}
+                      value={newNFTsymbol}
+                    />
+                    <Input
+                      fullWidth
+                      placeholder="NFT Name (e.g. Twist Bio NFT)"
+                      onChange={i=>{this.setState({newNFTname: i.target.value})}}
+                      value={newNFTname}
+                    />
+                  </Box>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    disabled={!newNFTname || !newNFTsymbol}
+                    onClick={()=>{this.handleDeployDerivative()}}
+                    loading={loading}
+                  >
+                    Create New NFT Factory
+                  </Button>
+                </>}
+                </Box>
+            </S.DropdownWrapper>
+          </Fade>
         ) : null}
-        </Box>
-        {/* </div> */}
-
-      </div>
+      </S.Wrapper>
     )
   }
 }
