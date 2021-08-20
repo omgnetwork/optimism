@@ -35,7 +35,7 @@ class DatabaseService extends OptimismEnv{
         nonce VARCHAR(255),
         gasLimit INT,
         gasUsed INT,
-        PRIMARY KEY ( hash )
+        PRIMARY KEY ( blockNumber )
       )`
     );
     await this.query(`CREATE TABLE IF NOT EXISTS transaction
@@ -50,7 +50,7 @@ class DatabaseService extends OptimismEnv{
         gasLimit INT,
         gasPrice INT,
         timestamp INT,
-        PRIMARY KEY ( hash )
+        PRIMARY KEY ( blockNumber )
       )`
     );
     await this.query(`CREATE TABLE IF NOT EXISTS receipt
@@ -70,7 +70,12 @@ class DatabaseService extends OptimismEnv{
         crossDomainMessageFinalizedTime INT,
         fastRelay BOOL,
         contractAddress VARCHAR(255),
-        PRIMARY KEY ( hash )
+        l1Hash VARCHAR(255),
+        l1BlockNumber INT,
+        l1BlockHash VARCHAR(255),
+        l1From VARCHAR(255),
+        l1To VARCHAR(255),
+        PRIMARY KEY ( blockNumber )
       )`
     );
     this.logger.info('Initialized the database.');
@@ -157,7 +162,7 @@ class DatabaseService extends OptimismEnv{
   }
 
   async getNewestBlock(){
-    await this.query(`USE OMGXRinkeby`);
+    await this.query(`USE ${this.MySQLDatabaseName}`);
     return await this.query(`SELECT MAX(blockNumber) from block`);
   }
 }

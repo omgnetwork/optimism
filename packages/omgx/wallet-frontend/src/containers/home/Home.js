@@ -62,7 +62,8 @@ import DAO from 'containers/dao/Dao';
 // Farm
 import Farm from 'containers/farm/Farm';
 
-import logo from 'images/omgx.png';
+// import logo from 'images/omgx.png';
+import logo from 'images/logo-boba.svg';
 
 import * as styles from './Home.module.scss';
 
