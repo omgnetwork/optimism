@@ -2,11 +2,11 @@ import styled from "@emotion/styled";
 import { Box } from '@material-ui/core';
 
 export const MobileNavTag = styled.div`
-  padding-top: 20px;
-  padding-left: 20px;
+  padding: 40px 0;
   display: flex;
   gap: 20px;
   align-items: center;
+  justify-content: space-between;
 `;
 
 export const Style = styled(Box)`

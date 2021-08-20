@@ -3,7 +3,6 @@
 $dropDownHeight: 92px;
 
 .ListNFT {
-
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   border-radius: 10px;
   width: 250px;
@@ -18,7 +17,6 @@ $dropDownHeight: 92px;
   }
 
   .topContainer {
-
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -69,7 +67,6 @@ $dropDownHeight: 92px;
   .boxContainer {
     display: flex;
     flex-direction: column;
-    width: 90%;
     padding: 0px;
     margin: 0px;
     padding-bottom: 10px;
@@ -80,7 +77,6 @@ $dropDownHeight: 92px;
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
-    width: 90%;
     padding: 0px;
     margin: 0px;
   }
@@ -135,13 +131,13 @@ $dropDownHeight: 92px;
 
   .URILink {
     color: $blue;
-    padding-top: 2px; 
-    font-size: 0.7em; 
-    font-weight: 700
+    padding-top: 2px;
+    font-size: 0.7em;
+    font-weight: 700;
   }
   /************************/
 
-  .smallButton{
+  .smallButton {
     border-radius: 10px;
     width: 100px !important;
     flex: none;
@@ -149,8 +145,8 @@ $dropDownHeight: 92px;
     padding-top: 10px;
     padding-bottom: 10px;
   }
-  
-  .largeButton{
+
+  .largeButton {
     border-radius: 10px;
     width: calc(100% - 30px);
     flex: none;
@@ -158,5 +154,4 @@ $dropDownHeight: 92px;
     padding-top: 10px;
     padding-bottom: 10px;
   }
-
 }

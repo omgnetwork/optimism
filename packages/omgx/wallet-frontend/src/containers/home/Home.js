@@ -59,6 +59,7 @@ import { useTheme } from '@material-ui/core/styles';
 import { Box, Container, useMediaQuery } from '@material-ui/core';
 import MobileNav from 'components/mainMenu/mobileNav/MobileNav';
 import MainMenu from 'components/mainMenu/MainMenu';
+import FarmWrapper from 'containers/farm/FarmWrapper';
 
 const POLL_INTERVAL = 5000; //milliseconds
 
@@ -129,8 +130,6 @@ function Home () {
     setPageDisplay(page)
   }
 
-
-
   return (
     <>
       <DepositModal  open={depositModalState}  token={token} fast={fast} />
@@ -150,11 +149,10 @@ function Home () {
 
       <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
         {isMobile ? (
-          <MobileNav light={false} />
+          <MobileNav light={false} handleSetPage={handleSetPage} />
         ) : (
           <MainMenu pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
         )}
-        <Box sx={{ flex: 1, px: 5 }}>
           {/* The Top SubMenu Bar, non-mobile */}
 
           {/* <div className={styles.secondtab}>
@@ -184,25 +182,24 @@ function Home () {
             </span>
           </div> */}
 
-          <Container maxWidth="lg">
-            {pageDisplay === "AccountNow" &&
-            <>
-              <Account/>
-            </>
-            }
-            {pageDisplay === "History" &&
-            <>
-              <Transactions/>
-            </>
-            }
-            {pageDisplay === "NFT" &&
-              <NFT/>
-            }
-            {pageDisplay === "Farm" &&
-              <Farm/>
-            }
-          </Container>
-        </Box>
+        <Container maxWidth="lg">
+          {pageDisplay === "AccountNow" &&
+          <>
+            <Account/>
+          </>
+          }
+          {pageDisplay === "History" &&
+          <>
+            <Transactions/>
+          </>
+          }
+          {pageDisplay === "NFT" &&
+            <NFT/>
+          }
+          {pageDisplay === "Farm" &&
+            <FarmWrapper/>
+          }
+        </Container>
       </Box>
     </>
   );

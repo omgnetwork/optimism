@@ -126,11 +126,11 @@ function Account () {
       } */}
 
       <Grid container spacing={2}>
-        <Grid item xs={6}>
+        <Grid item xs={12} md={6}>
           <Paper elevation={1} sx={{ p: 3 }}>
             <S.WrapperHeading>
               <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>Ethereum Mainnet - L1</Typography>
-              <SearchIcon color={theme.palette.secondary.main}/>
+              {/* <SearchIcon color={theme.palette.secondary.main}/> */}
             </S.WrapperHeading>
 
             <S.TableHeading>
@@ -157,14 +157,14 @@ function Account () {
           </Paper>
         </Grid>
 
-        <Grid item xs={6}>
+        <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <S.WrapperHeading>
-              <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.2", fontWeight: "700"}}>OMGX Mainnet - L2</Typography>
-              <SearchIcon color={theme.palette.secondary.main}/>
+              <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>OMGX Mainnet - L2</Typography>
+              {/* <SearchIcon color={theme.palette.secondary.main}/> */}
             </S.WrapperHeading>
 
-            <S.TableHeading sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.2"}}>
+            <S.TableHeading sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4"}}>
               {tableHeadList.map((item) => {
                 return (
                   <S.TableHeadingItem variant="body2" component="div">{item.label}</S.TableHeadingItem>

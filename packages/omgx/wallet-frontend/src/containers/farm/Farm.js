@@ -148,6 +148,7 @@ class Farm extends React.Component {
         }
       }
     }
+
     else if (chain === 'L2') {
       let tokens = Object.entries(layer2)
       for(let i = 0; i < tokens.length; i++) {
@@ -167,8 +168,10 @@ class Farm extends React.Component {
       poolInfo,
       // user
       userInfo,
-      value
+      value,
     } = this.state;
+
+    const { isMobile } = this.props;
 
     const networkLayer = networkService.L1orL2
     const handleChange = () => {}
@@ -210,11 +213,13 @@ class Farm extends React.Component {
                     L1orL2Pool='L1LP'
                     balance={ret[0]}
                     decimals={ret[1]}
+                    isMobile={isMobile}
                   />
                 )
               })}
             </Box>
           </TabPanel>
+
           <TabPanel value={value} index={1}>
             {networkLayer === 'L1' &&
               <Alert severity="info">

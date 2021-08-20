@@ -21,13 +21,14 @@ import { transfer } from 'actions/networkAction'
 import * as styles from './listNFTfactory.module.scss'
 
 import truncate from 'truncate-middle'
+import { Box, Fade } from '@material-ui/core'
 
 class listNFTfactory extends React.Component {
-  
+
   constructor(props) {
-    
+
     super(props);
-    
+
     const {
       name,
       symbol,
@@ -73,18 +74,18 @@ class listNFTfactory extends React.Component {
       haveRights,
       type,
       typeNew : 0,
-      oriFeeRecipient 
+      oriFeeRecipient
     }
   }
-  
+
   componentDidUpdate(prevState) {
 
-    const { 
-      name, layer, symbol, owner, 
+    const {
+      name, layer, symbol, owner,
       address, UUID, time, URL,
       oriChain, oriAddress, oriID,
       haveRights, type, oriFeeRecipient,
-      typeNew 
+      typeNew
     } = this.props;
 
     if (!isEqual(prevState.name, name)) {
@@ -152,9 +153,9 @@ class listNFTfactory extends React.Component {
   async handleMintAndSend() {
 
     const { receiverAddress, ownerName, tokenURI, address, typeNew, oriFeeRecipient } = this.state;
-    
+
     const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
-    
+
     if (!networkStatus) {
       this.props.dispatch(openError('Please use L2 network.'))
       return
@@ -163,22 +164,22 @@ class listNFTfactory extends React.Component {
     this.setState({ loading: true })
 
     const mintTX = await networkService.mintAndSendNFT(
-      receiverAddress, 
+      receiverAddress,
       address,
-      ownerName, 
+      ownerName,
       tokenURI,
       typeNew //can be 0, 1, or 2 - 0 denotes full rights
     )
 
-    //for the payment, this is always in oETH, is always 0.01 oETH in magnitude (for now), and 
-    //goes to the owner of the NFT that was the parent of the NFT you are sending to someone else 
+    //for the payment, this is always in oETH, is always 0.01 oETH in magnitude (for now), and
+    //goes to the owner of the NFT that was the parent of the NFT you are sending to someone else
 
     const ETHL2 = '0x4200000000000000000000000000000000000006'
 
     if (mintTX) {
-      
-      this.props.dispatch(openAlert(`You minted a new NFT for ${receiverAddress}. 
-        The owner's name is ${ownerName}. 
+
+      this.props.dispatch(openAlert(`You minted a new NFT for ${receiverAddress}.
+        The owner's name is ${ownerName}.
         You will now be prompted to send a payment to the creator of the parent NFT`
       ))
 
@@ -196,16 +197,16 @@ class listNFTfactory extends React.Component {
     } else {
       this.props.dispatch(openError('NFT minting error'))
     }
- 
+
     this.setState({ loading: false })
   }
 
     async handleSimpleMintAndSend() {
 
     const { receiverAddress, ownerName, tokenURI, address } = this.state;
-    
+
     const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
-    
+
     if (!networkStatus) {
       this.props.dispatch(openError('Please use L2 network.'))
       return
@@ -214,20 +215,20 @@ class listNFTfactory extends React.Component {
     this.setState({ loading: true })
 
     const mintTX = await networkService.mintAndSendNFT(
-      receiverAddress, 
+      receiverAddress,
       address,
-      ownerName, 
+      ownerName,
       tokenURI,
       0
     )
 
     if (mintTX) {
-      this.props.dispatch(openAlert(`You minted a new NFT for ${receiverAddress}. 
+      this.props.dispatch(openAlert(`You minted a new NFT for ${receiverAddress}.
         The owner's name is ${ownerName}.`))
     } else {
       this.props.dispatch(openError('NFT minting error'))
     }
- 
+
     this.setState({ loading: false })
   }
 
@@ -236,7 +237,7 @@ class listNFTfactory extends React.Component {
     const { newNFTsymbol, newNFTname, address, UUID  } = this.state;
 
     const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
-    
+
     if (!networkStatus) {
       this.props.dispatch(openError('Please use L2 network.'));
       return;
@@ -261,7 +262,7 @@ class listNFTfactory extends React.Component {
       UUID,
       originName
     )
-    
+
     if (deployTX) {
       this.props.dispatch(openAlert(`You have deployed a new NFT factory`))
     } else {
@@ -273,7 +274,7 @@ class listNFTfactory extends React.Component {
 
   render() {
 
-    const { 
+    const {
       name,
       symbol,
       owner,
@@ -284,8 +285,8 @@ class listNFTfactory extends React.Component {
       URL,
       oriChain,
       oriAddress,
-      oriID, 
-      dropDownBox, 
+      oriID,
+      dropDownBox,
       dropDownBoxInit,
       loading,
       receiverAddress,
@@ -296,7 +297,7 @@ class listNFTfactory extends React.Component {
       haveRights,
       type,
       typeNew,
-      oriFeeRecipient 
+      oriFeeRecipient
     } = this.state;
 
     let typeString = 'Commercial; derivatizable'
@@ -313,12 +314,10 @@ class listNFTfactory extends React.Component {
     return (
       <div className={styles.ListNFT}>
 
-        <div 
-          className={styles.topContainer}
-        >
-          
+        <div className={styles.topContainer}>
+
           <div className={styles.Table1}>
-            <img className={styles.Image} src={icon} alt="icon"/>
+            {/* <img className={styles.Image} src={icon} alt="icon"/> */}
           </div>
 
           <div className={styles.Table2}>
@@ -333,14 +332,14 @@ class listNFTfactory extends React.Component {
             </> }
             {!UUID && <>
               <div className={styles.BasicText}>{name} ({symbol}) Factory</div><br/>
-              <div className={styles.BasicLightText}>Owner: {truncate(owner, 6, 4, '...')}</div> 
+              <div className={styles.BasicLightText}>Owner: {truncate(owner, 6, 4, '...')}</div>
               <div className={styles.BasicLightText}>Address: {truncate(address, 6, 4, '...')}</div>
               <div className={styles.BasicLightText}>Chain: {oriChain}</div>
               <div className={styles.BasicLightText}>Owner rights: {haveRights ? 'True' : 'False'}</div>
             </> }
           </div>
 
-          <div 
+          <div
             className={styles.Table3}
             onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
           >
@@ -353,153 +352,159 @@ class listNFTfactory extends React.Component {
         /**************  Drop Down Box ****************/
         /**********************************************/
         }
-        <div 
-          className={dropDownBox ? 
+        {/* <div
+          className={dropDownBox ?
             styles.dropDownContainer: dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
-        >
-          
-          
-          {oriID !== 'simple' &&
-            <div className={styles.boxOrigin}>
-              <img className={styles.Image} src={root} alt="root"/>
-              <div className={styles.originRight}>
-                <div className={styles.BasicText}>Root</div>
-                <div className={styles.BasicLightText}>Address: {oriAddress}</div>
-                <div className={styles.BasicLightText}>NFT: {oriID}</div>
-                <div className={styles.BasicLightText}>Chain: {oriChain}</div>
-                <div className={styles.BasicLightText}>Fee recipient: {oriFeeRecipient}</div>
-              </div>
-            </div>
-          }
+        > */}
+        {dropDownBox ? (
+          <Fade in={dropDownBox}>
+            <Box sx={{backgroundColor: "#152132"}}>
+              {oriID !== 'simple' &&
+                <div className={styles.boxOrigin}>
+                  <img className={styles.Image} src={root} alt="root"/>
+                  <div className={styles.originRight}>
+                    <div className={styles.BasicText}>Root</div>
+                    <div className={styles.BasicLightText}>Address: {oriAddress}</div>
+                    <div className={styles.BasicLightText}>NFT: {oriID}</div>
+                    <div className={styles.BasicLightText}>Chain: {oriChain}</div>
+                    <div className={styles.BasicLightText}>Fee recipient: {oriFeeRecipient}</div>
+                  </div>
+                </div>
+              }
 
-          <div className={styles.boxContainer}>
-          {!UUID && haveRights && oriID === 'simple' &&
-            <>
-              <h3>Mint and Send</h3>
-              <div className={styles.BasicLightText} style={{paddingBottom: '3px'}}>
-                To mint and send a new {name} NFT, please fill in the information and click "Mint and Send".
-              </div>
-              <Input
-                small={true}
-                placeholder="Receiver Address (Ox.....)"
-                onChange={i=>{this.setState({receiverAddress: i.target.value})}}
-                value={receiverAddress}
-              />
-              <Input
-                small={true}
-                placeholder="NFT Owner Name (e.g. Satoshi)"
-                onChange={i=>{this.setState({ownerName: i.target.value})}}
-                value={ownerName}
-              />
-              <Input
-                small={true}
-                placeholder="NFT URL (e.g. https://jimb.stanford.edu)"
-                onChange={i=>{this.setState({tokenURI: i.target.value})}}
-                value={tokenURI}
-              />
-              <Button
-                type='primary'
-                size='small'
-                disabled={!receiverAddress || !ownerName || !tokenURI}
-                onClick={()=>{this.handleSimpleMintAndSend()}}
-                loading={loading}
-              >
-                Mint and Send
-              </Button>
-            </>
-          }  
+              <div className={styles.boxContainer}>
+                {!UUID && haveRights && oriID === 'simple' &&
+                  <>
+                    <h3>Mint and Send</h3>
+                    <div className={styles.BasicLightText} style={{paddingBottom: '3px'}}>
+                      To mint and send a new {name} NFT, please fill in the information and click "Mint and Send".
+                    </div>
+                    <Box sx={{display: "flex", flexDirection: "column", gap: "10px", mb: 3}}>
+                      <Input
+                        fullWidth
+                        placeholder="Receiver Address (Ox.....)"
+                        onChange={i=>{this.setState({receiverAddress: i.target.value})}}
+                        value={receiverAddress}
+                      />
+                      <Input
+                        fullWidth
+                        placeholder="NFT Owner Name (e.g. Satoshi)"
+                        onChange={i=>{this.setState({ownerName: i.target.value})}}
+                        value={ownerName}
+                      />
+                      <Input
+                        fullWidth
+                        placeholder="NFT URL (e.g. https://jimb.stanford.edu)"
+                        onChange={i=>{this.setState({tokenURI: i.target.value})}}
+                        value={tokenURI}
+                      />
+                    </Box>
+                    <Button
+                      variant='contained'
+                      fullWidth
+                      disabled={!receiverAddress || !ownerName || !tokenURI}
+                      onClick={()=>{this.handleSimpleMintAndSend()}}
+                      loading={loading}
+                    >
+                      Mint and Send
+                    </Button>
+                  </>
+                }
 
-          {!UUID && haveRights && oriID !== 'simple' &&
-            <>
-              <h3>Mint and Send</h3>
-              <div className={styles.BasicLightText} style={{paddingBottom: '3px'}}>
-                To mint and send a new {name} NFT, please fill in the information and click "Mint and Send".
+                {!UUID && haveRights && oriID !== 'simple' &&
+                  <>
+                    <h3>Mint and Send</h3>
+                    <div className={styles.BasicLightText} style={{paddingBottom: '3px'}}>
+                      To mint and send a new {name} NFT, please fill in the information and click "Mint and Send".
+                    </div>
+                    <Input
+                      small={true}
+                      placeholder="Receiver Address (Ox.....)"
+                      onChange={i=>{this.setState({receiverAddress: i.target.value})}}
+                      value={receiverAddress}
+                    />
+                    <Input
+                      small={true}
+                      placeholder="NFT Owner Name (e.g. Henrietta Lacks)"
+                      onChange={i=>{this.setState({ownerName: i.target.value})}}
+                      value={ownerName}
+                    />
+                    <Input
+                      small={true}
+                      placeholder="NFT URL (e.g. https://jimb.stanford.edu)"
+                      onChange={i=>{this.setState({tokenURI: i.target.value})}}
+                      value={tokenURI}
+                    />
+                    <FormControl
+                      variant="outlined"
+                      size="small"
+                      style={{paddingTop: '10px', paddingBottom: '10px'}}
+                    >
+                      <InputLabel
+                        id="demo-simple-select-outlined-label"
+                        style={{paddingTop: '13px'}}
+                      >NFT Type</InputLabel>
+                      <Select
+                        labelId="demo-simple-select-outlined-label"
+                        id="demo-simple-select-outlined"
+                        value={typeNew}
+                        onChange={i=>{this.setState({typeNew: i.target.value})}}
+                        label="NFT Type"
+                      >
+                        <MenuItem value={0}>Type: Commercial; derivatizable</MenuItem>
+                        <MenuItem value={1}>Type: Commercial; no derivatives</MenuItem>
+                        <MenuItem value={2}>Type: Non-profit; no derivatives</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <Button
+                      type='primary'
+                      size='small'
+                      disabled={!receiverAddress || !ownerName || !tokenURI}
+                      onClick={()=>{this.handleMintAndSend()}}
+                      loading={loading}
+                    >
+                      Mint and Send
+                    </Button>
+                  </>
+                }
+                {UUID && (type === 0) && <>
+                  <h3>Derive New NFT Factory</h3>
+                  <div className={styles.BasicLightText}
+                  >To create a new NFT factory from this NFT, please fill in the information and click "Create New NFT Factory".</div><br/>
+                  <Input
+                    small={true}
+                    placeholder="NFT Symbol (e.g. TWST)"
+                    onChange={i=>{this.setState({newNFTsymbol: i.target.value})}}
+                    value={newNFTsymbol}
+                  />
+                  <Input
+                    small={true}
+                    placeholder="NFT Name (e.g. Twist Bio NFT)"
+                    onChange={i=>{this.setState({newNFTname: i.target.value})}}
+                    value={newNFTname}
+                  />
+                  <Button
+                    type='primary'
+                    size='small'
+                    disabled={!newNFTname || !newNFTsymbol}
+                    onClick={()=>{this.handleDeployDerivative()}}
+                    loading={loading}
+                  >
+                    Create New NFT Factory
+                  </Button>
+                </>}
               </div>
-              <Input
-                small={true}
-                placeholder="Receiver Address (Ox.....)"
-                onChange={i=>{this.setState({receiverAddress: i.target.value})}}
-                value={receiverAddress}
-              />
-              <Input
-                small={true}
-                placeholder="NFT Owner Name (e.g. Henrietta Lacks)"
-                onChange={i=>{this.setState({ownerName: i.target.value})}}
-                value={ownerName}
-              />
-              <Input
-                small={true}
-                placeholder="NFT URL (e.g. https://jimb.stanford.edu)"
-                onChange={i=>{this.setState({tokenURI: i.target.value})}}
-                value={tokenURI}
-              />
-              <FormControl 
-                variant="outlined" 
-                size="small"
-                style={{paddingTop: '10px', paddingBottom: '10px'}}
-              >
-                <InputLabel 
-                  id="demo-simple-select-outlined-label"
-                  style={{paddingTop: '13px'}}
-                >NFT Type</InputLabel>
-                <Select
-                  labelId="demo-simple-select-outlined-label"
-                  id="demo-simple-select-outlined"
-                  value={typeNew}
-                  onChange={i=>{this.setState({typeNew: i.target.value})}}
-                  label="NFT Type"
-                >
-                  <MenuItem value={0}>Type: Commercial; derivatizable</MenuItem>
-                  <MenuItem value={1}>Type: Commercial; no derivatives</MenuItem>
-                  <MenuItem value={2}>Type: Non-profit; no derivatives</MenuItem>
-                </Select>
-              </FormControl>
-              <Button
-                type='primary'
-                size='small'
-                disabled={!receiverAddress || !ownerName || !tokenURI}
-                onClick={()=>{this.handleMintAndSend()}}
-                loading={loading}
-              >
-                Mint and Send
-              </Button>
-            </>
-          }  
-          {UUID && (type === 0) && <>
-            <h3>Derive New NFT Factory</h3>
-            <div className={styles.BasicLightText}
-            >To create a new NFT factory from this NFT, please fill in the information and click "Create New NFT Factory".</div><br/>
-            <Input
-              small={true}
-              placeholder="NFT Symbol (e.g. TWST)"
-              onChange={i=>{this.setState({newNFTsymbol: i.target.value})}}
-              value={newNFTsymbol}
-            />
-            <Input
-              small={true}
-              placeholder="NFT Name (e.g. Twist Bio NFT)"
-              onChange={i=>{this.setState({newNFTname: i.target.value})}}
-              value={newNFTname}
-            />
-            <Button
-              type='primary'
-              size='small'
-              disabled={!newNFTname || !newNFTsymbol}
-              onClick={()=>{this.handleDeployDerivative()}}
-              loading={loading}
-            >
-              Create New NFT Factory
-            </Button>
-          </>}  
-          </div>
-        </div>
+            </Box>
+          </Fade>
+        ) : null }
+        {/* </div> */}
 
       </div>
     )
   }
 }
 
-const mapStateToProps = state => ({ 
+const mapStateToProps = state => ({
   nft: state.nft
 })
 

@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { Box } from '@material-ui/core';
 import BgWallet from "../../images/backgrounds/bg-wallet.png";
 
 export const Loading = styled.div`
@@ -21,6 +22,8 @@ export const WalletCard = styled.div`
   background-size: cover;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
   cursor: pointer;
+  margin-top: ${(props) => props.isMobile ? "-30px" : "0"};
+  margin-bottom: ${(props) => props.isMobile ? "20px" : "0"};
 `;
 
 export const PlusIcon = styled.div`
@@ -34,7 +37,6 @@ export const PlusIcon = styled.div`
     justify-content: center;
 `;
 
-export const DescriptionContent = styled.div`
-  display: flex;
+export const DescriptionContent = styled(Box)`
   align-items: center;
 `;

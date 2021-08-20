@@ -35,11 +35,12 @@ import Button from 'components/button/Button';
 import * as S from "./WalletPicker.styles"
 import { ReactComponent as Arrow } from './../../images/icons/arrow-right.svg';
 import { ReactComponent as Fox } from './../../images/icons/fox-icon.svg';
-import { Box, Container, Grid, Link } from '@material-ui/core';
+import { Box, Container, Grid, Link, useMediaQuery } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
 import NetworkSwitcher from 'components/mainMenu/networkSwitcher/NetworkSwitcher';
+import { useTheme } from '@emotion/react';
 
 const Root = styled('div')(({ theme }) => ({
   paddingTop: theme.spacing(10),
@@ -55,6 +56,9 @@ function WalletPicker ({ onEnable, enabled }) {
   const [open, setOpen] = useState(false)
   const walletMethod = useSelector(selectWalletMethod())
   const masterConfig = useSelector(selectNetwork())
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const wrongNetworkModalState = useSelector(selectModalState('wrongNetworkModal'));
   const dispatchSetWalletMethod = useCallback((methodName) => {
@@ -152,35 +156,35 @@ function WalletPicker ({ onEnable, enabled }) {
         </Box>
         <Container maxWidth="md">
             <Grid container spacing={8}>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="h1" component="h1" gutterBottom>
-                    Connect a Wallet to access your assets on the network
+              <Grid item xs={12} md={6}>
+                <Typography variant="h1" component="h1" gutterBottom>
+                  Connect a Wallet to access your assets on the network
+                </Typography>
+                <Box sx={{ mt: isMobile ? 2 : 4, mb: isMobile ? 2 : 8, mr: isMobile ? 5 : 10 }}>
+                  <Typography variant="body1" component="p" gutterBottom paragraph={true} style={{ color: grey[500] }}>
+                    Select the wallet that u use to connect it to OMGx system! Don’t worry more wallets support is coming soon
                   </Typography>
-                  <Box sx={{ mt: 4, mb: 8, mr: 10 }}>
-                    <Typography variant="body1" component="p" gutterBottom paragraph={true} style={{ color: grey[500] }}>
-                      Select the wallet that u use to connect it to OMGx system! Don’t worry more wallets support is coming soon
-                    </Typography>
-                  </Box>
-                  <S.DescriptionContent>
-                    <Link
-                      style={{ color: grey[500] }}
-                      color= '#fff'
-                      href="#"
-                      underline="hover"
-                      variant="body1"
-                      onClick={() => {
-                        console.info("I'm a button.");
-                      }}
-                    >
-                      More about OMGX and how L2 work
-                    </Link>
-                    <Arrow />
-                  </S.DescriptionContent>
-                </Grid>
+                </Box>
+                <S.DescriptionContent sx={{display: isMobile ? "none" : "flex"}}>
+                  <Link
+                    style={{ color: grey[500]}}
+                    color= '#fff'
+                    href="#"
+                    underline="hover"
+                    variant="body1"
+                    onClick={() => {
+                      console.info("I'm a button.");
+                    }}
+                  >
+                    More about OMGX and how L2 work
+                  </Link>
+                  <Arrow />
+                </S.DescriptionContent>
+              </Grid>
               <Grid item xs={12} md={6}>
                 <S.WalletCard
                   // disabled={!browserEnabled}
-                  pulsate={true} onClick={() => dispatchSetWalletMethod('browser')}>
+                  pulsate={true} onClick={() => dispatchSetWalletMethod('browser')} isMobile={isMobile}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <S.PlusIcon>+</S.PlusIcon>
                     <Typography variant="h2" component="h2" paragraph={true} mb={0}>
@@ -194,6 +198,21 @@ function WalletPicker ({ onEnable, enabled }) {
                     <Fox width={50} />
                   </Box>
                 </S.WalletCard>
+                <S.DescriptionContent sx={{display: isMobile ? "flex" : "none", justifyContent: 'center' }}>
+                  <Link
+                    style={{ color: grey[500]}}
+                    color= '#fff'
+                    href="#"
+                    underline="hover"
+                    variant="body1"
+                    onClick={() => {
+                      console.info("I'm a button.");
+                    }}
+                  >
+                    More about OMGX and how L2 work
+                  </Link>
+                  <Arrow />
+                </S.DescriptionContent>
                 <br />
                 <Button onClick={() => networkService.addL2Network()}>
                   Add OMGX L2 Provider
