@@ -34,9 +34,9 @@ const NETWORKS = {
     },
   },
   rinkeby: {
-    addressUrl:       `https://rinkeby.omgx.network:8080/addresses.json`,
-    addressOMGXUrl:   `https://rinkeby.omgx.network:8078/addresses.json`,
-    OMGX_WATCHER_URL: `https://api-watcher.rinkeby.omgx.network/`,
+    addressUrl:       `https://integration.omgx.network:8081/addresses.json`,
+    addressOMGXUrl:   `https://integration.omgx.network:8081/omgx-addr.json`,
+    OMGX_WATCHER_URL: `https://api-watcher.integration.omgx.network/`,
     L1: {
       name: "Rinkeby L1",
       chainId: 4,
@@ -47,9 +47,9 @@ const NETWORKS = {
     L2: {
       name: "Rinkeby L2",
       chainId: 28,
-      rpcUrl: `https://rinkeby.omgx.network`,
-      blockExplorer: `https://blockexplorer.omgx.network/?network=Rinkeby`,
-      transaction: `https://blockexplorer.omgx.network/tx/`,
+      rpcUrl: `https://integration.omgx.network`,
+      blockExplorer: `https://blockexplorer.omgx.network/?network=Rinkeby%20Test`,
+      transaction: `https://blockexplorer.omgx.network/tx/?network=Rinkeby%20Test`,
     }
   },
   mainnet: {
@@ -74,7 +74,7 @@ const NETWORKS = {
 }
 
 const BaseServices = {
-  WALLET_SERVICE:   `https://api-service.rinkeby.omgx.network/`,
+  WALLET_SERVICE:   `https://api-service.integration.omgx.network/`,
   //relevant to local?
   SELLER_OPTIMISM_API_URL: `https://pm7f0dp9ud.execute-api.us-west-1.amazonaws.com/prod/`,
   //relevant to local?
@@ -85,7 +85,7 @@ const BaseServices = {
   WEBSOCKET_API_URL: `wss://d1cj5xnal2.execute-api.us-west-1.amazonaws.com/prod`,
   //Coing gecko url
   COIN_GECKO_URL: `https://api.coingecko.com/api/v3/`,
-  //ETH gas station 
+  //ETH gas station
   ETH_GAS_STATION_URL: `https://ethgasstation.info/`,
 }
 
