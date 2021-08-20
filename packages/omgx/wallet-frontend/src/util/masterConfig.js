@@ -48,8 +48,8 @@ const NETWORKS = {
       name: "Rinkeby L2",
       chainId: 28,
       rpcUrl: `https://rinkeby.omgx.network`,
-      blockExplorer: `https://blockexplorer.omgx.network/?network=Rinkeby`,
-      transaction: `https://blockexplorer.omgx.network/tx/`,
+      blockExplorer: `https://blockexplorer.boba.network/?network=Rinkeby`,
+      transaction: `https://blockexplorer.boba.network/tx/`,
     }
   },
   mainnet: {
@@ -67,8 +67,8 @@ const NETWORKS = {
       name: "Mainnet L2",
       chainId: 288,
       rpcUrl: `https://mainnet.omgx.network`,
-      blockExplorer: `https://blockexplorer.omgx.network/?network=Mainnet`,
-      transaction: `https://blockexplorer.omgx.network/tx/`,
+      blockExplorer: `https://blockexplorer.boba.network/?network=Mainnet`,
+      transaction: `https://blockexplorer.boba.network/tx/`,
     }
   }
 }
