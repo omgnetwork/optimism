@@ -33,10 +33,9 @@ import bunny_sad from 'images/bunny_sad.svg'
 import * as S from './Account.styles'
 import { selectTokens } from 'selectors/tokenSelector'
 import PageHeader from 'components/pageHeader/PageHeader'
-import { Box, Grid, Paper, Typography } from '@material-ui/core'
+import { Box, Grid, Paper, Tab, Tabs, Typography, useMediaQuery } from '@material-ui/core'
 import { fetchGas, fetchLookUpPrice } from 'actions/networkAction'
 import { selectNetwork } from 'selectors/setupSelector'
-import SearchIcon from 'components/icons/SearchIcon'
 import { WrapperHeading } from './Account.styles'
 import { useTheme } from '@emotion/react'
 import { tableHeadList } from './tableHeadList'
@@ -96,6 +95,7 @@ function Account () {
   }, balances)
 
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   return (
     <>
       <PageHeader title="Wallet"/>
@@ -124,19 +124,29 @@ function Account () {
           </div>
         </div>
       } */}
+      {isMobile ? (
+      <Tabs aria-label="basic tabs example" sx={{color: '#fff', fontWeight: 700}}>
+        <Tab label="Ethereum Mainnet - L1" />
+        <Tab label="OMGX Mainnet - L2" />
+      </Tabs>
+      ) : (null)}
 
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
-          <Paper elevation={1} sx={{ p: 3 }}>
-            <S.WrapperHeading>
-              <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>Ethereum Mainnet - L1</Typography>
-              {/* <SearchIcon color={theme.palette.secondary.main}/> */}
-            </S.WrapperHeading>
+      <Grid container spacing={2} >
+        <Grid item xs={12} md={6} >
+          <S.AccountWrapper >
+            {!isMobile ? (
+              <S.WrapperHeading>
+                <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>Ethereum Mainnet - L1</Typography>
+                {/* <SearchIcon color={theme.palette.secondary.main}/> */}
+              </S.WrapperHeading>
+            ) : (null)}
 
             <S.TableHeading>
               {tableHeadList.map((item) => {
                 return (
-                  <S.TableHeadingItem variant="body2" component="div" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2"}}>{item.label}</S.TableHeadingItem>
+                  <S.TableHeadingItem variant="body2" component="div" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2"}}>
+                    {item.label}
+                  </S.TableHeadingItem>
                 )
               })}
             </S.TableHeading>
@@ -154,15 +164,17 @@ function Account () {
                 )
               })}
             </Box>
-          </Paper>
+          </S.AccountWrapper>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <S.WrapperHeading>
-              <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>OMGX Mainnet - L2</Typography>
-              {/* <SearchIcon color={theme.palette.secondary.main}/> */}
-            </S.WrapperHeading>
+          <S.AccountWrapper>
+            {!isMobile ? (
+              <S.WrapperHeading>
+                <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>OMGX Mainnet - L2</Typography>
+                {/* <SearchIcon color={theme.palette.secondary.main}/> */}
+              </S.WrapperHeading>
+            ) : (null)}
 
             <S.TableHeading sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4"}}>
               {tableHeadList.map((item) => {
@@ -185,7 +197,7 @@ function Account () {
                 )
               })}
             </Box>
-          </Paper>
+          </S.AccountWrapper>
         </Grid>
       </Grid>
     </>

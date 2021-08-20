@@ -20,7 +20,6 @@ import { setWalletMethod } from 'actions/setupAction';
 import { closeAlert, closeError } from 'actions/uiAction';
 import Alert from 'components/alert/Alert';
 import MainMenu from 'components/mainMenu/MainMenu';
-import MobileNav from 'components/mainMenu/mobileNav/MobileNav';
 import WalletPicker from 'components/walletpicker/WalletPicker';
 import Home from 'containers/home/Home';
 import Notification from 'containers/notification/Notification';
@@ -216,11 +215,6 @@ function App () {
       <CssBaseline />
       <Router>
         <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row' }}>
-          {/* {isMobile ? (
-            <MobileNav light={light} />
-          ) : (
-            <MainMenu light={light} setLight={setLight} />
-          )} */}
           <S.Content>
             <div className={styles.App}>
 

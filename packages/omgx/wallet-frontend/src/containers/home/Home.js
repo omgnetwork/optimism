@@ -57,7 +57,6 @@ import Farm from 'containers/farm/Farm';
 import * as styles from './Home.module.scss';
 import { useTheme } from '@material-ui/core/styles';
 import { Box, Container, useMediaQuery } from '@material-ui/core';
-import MobileNav from 'components/mainMenu/mobileNav/MobileNav';
 import MainMenu from 'components/mainMenu/MainMenu';
 import FarmWrapper from 'containers/farm/FarmWrapper';
 
@@ -148,10 +147,6 @@ function Home () {
       />
 
       <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
-        {/* {isMobile ? (
-          <MobileNav light={false} pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
-        ) : (
-          )} */}
           <MainMenu pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
           {/* The Top SubMenu Bar, non-mobile */}
 
