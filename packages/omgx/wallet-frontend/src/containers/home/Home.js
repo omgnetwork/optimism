@@ -148,11 +148,11 @@ function Home () {
       />
 
       <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
-        {isMobile ? (
-          <MobileNav light={false} handleSetPage={handleSetPage} />
+        {/* {isMobile ? (
+          <MobileNav light={false} pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
         ) : (
+          )} */}
           <MainMenu pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
-        )}
           {/* The Top SubMenu Bar, non-mobile */}
 
           {/* <div className={styles.secondtab}>

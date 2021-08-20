@@ -31,7 +31,7 @@ function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
 
   return (
     <S.Nav>
-      <ul>
+      <S.NavList>
         {menuItems.map((item) => {
           const Icon = iconObj[item.icon];
           // const isActive = window.location.pathname === item.url;
@@ -51,7 +51,7 @@ function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
 
                 {item.items && item.items.length ? (
                   <Box sx={{display: 'flex'}}>
-                    <S.Chevron
+                    <img
                       open={openDropdown}
                       src={chevron}
                       alt='chevron'
@@ -87,7 +87,7 @@ function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
             </li>
           )
         })}
-      </ul>
+      </S.NavList>
     </S.Nav>
   );
 }
