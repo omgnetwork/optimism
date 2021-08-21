@@ -14,6 +14,6 @@ def blockexplorer_version(event, context):
       "Referrer-Policy": "same-origin",
       "Permissions-Policy": "*",
     },
-    "body": json.dumps({"version": "1.0.0"})
+    "body": json.dumps({"version": "1.0.1"})
   }
   return response

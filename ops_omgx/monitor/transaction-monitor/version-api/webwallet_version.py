@@ -14,6 +14,6 @@ def webwallet_version(event, context):
       "Referrer-Policy": "same-origin",
       "Permissions-Policy": "*",
     },
-    "body": json.dumps({"version": "1.3.2"})
+    "body": json.dumps({"version": "1.3.3"})
   }
   return response

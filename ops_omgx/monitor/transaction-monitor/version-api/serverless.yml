@@ -26,7 +26,7 @@ functions:
         - subnet-d92acfbf
     events:
       - http:
-          path: get.block.version
+          path: get.blockexplorer.version
           method: get
           cors: true
     layers:
