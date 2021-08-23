@@ -94,6 +94,14 @@ type Enqueue struct {
 	QueueIndex  *uint64         `json:"index"`
 }
 
+type EnqueueInfo struct {
+	QueueIndex  *uint64         `json:"index"`
+	BlockNumber *uint64         `json:"blockNumber"`
+	Timestamp   *uint64         `json:"timestamp"`
+	BaseBlock   *uint64         `json:"baseBlock"`
+	BaseTime    *uint64         `json:"baseTime"`
+}
+
 // signature represents a secp256k1 ECDSA signature
 type signature struct {
 	R hexutil.Bytes `json:"r"`
@@ -120,6 +128,7 @@ type RollupClient interface {
 	GetEnqueue(index uint64) (*types.Transaction, error)
 	GetLatestEnqueue() (*types.Transaction, error)
 	GetLatestEnqueueIndex() (*uint64, error)
+	GetLatestEnqueueInfo() (*EnqueueInfo, error)
 	GetTransaction(uint64, Backend) (*types.Transaction, error)
 	GetLatestTransaction(Backend) (*types.Transaction, error)
 	GetLatestTransactionIndex(Backend) (*uint64, error)
@@ -297,6 +306,31 @@ func (c *Client) GetLatestEnqueueIndex() (*uint64, error) {
 	return index, nil
 }
 
+// Variant of GetLatestEnqueueIndex() which retrieves the index
+// along with information about the most recent L1 block/timestamp
+// which is guaranteed to be older than any future queue entries.
+// This can avoid some timestamp monotonicity violations
+func (c *Client) GetLatestEnqueueInfo() (*EnqueueInfo, error) {
+	response, err := c.client.R().
+		SetResult(&EnqueueInfo{}).
+		Get("/enqueue/info")
+
+	if err != nil {
+		return nil, fmt.Errorf("cannot fetch latest enqueue info: %w", err)
+	}
+
+	info, ok := response.Result().(*EnqueueInfo)
+	if !ok {
+		return nil, errors.New("Cannot parse latest enqueue info")
+	}
+
+	if info.QueueIndex == nil {
+		return nil, errElementNotFound
+	}
+
+	return info, nil
+}
+
 // GetLatestTransactionIndex returns the latest CTC index that has been batch
 // submitted or not, depending on the backend
 func (c *Client) GetLatestTransactionIndex(backend Backend) (*uint64, error) {
@@ -331,11 +365,12 @@ func batchedTransactionToTransaction(res *transaction, signer *types.EIP155Signe
 	// The queue origin must be either sequencer of l1, otherwise
 	// it is considered an unknown queue origin and will not be processed
 	var queueOrigin types.QueueOrigin
-	if res.QueueOrigin == sequencer {
+	switch res.QueueOrigin {
+	case sequencer:
 		queueOrigin = types.QueueOriginSequencer
-	} else if res.QueueOrigin == l1 {
+	case l1:
 		queueOrigin = types.QueueOriginL1ToL2
-	} else {
+	default:
 		return nil, fmt.Errorf("Unknown queue origin: %s", res.QueueOrigin)
 	}
 	// Transactions that have been decoded are

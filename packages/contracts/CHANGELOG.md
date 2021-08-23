@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.4.8
+
+### Patch Changes
+
+- e4fea5e0: Makes the contracts package browser compatible.
+
+## 0.4.7
+
+### Patch Changes
+
+- 7f26667d: Add hardhat task for whitelisting addresses
+- 77511b68: Add a hardhat task to withdraw ETH fees from L2 to L1
+
+## 0.4.6
+
+### Patch Changes
+
+- 8feac092: Make it possible to override mint & burn methods in L2StandardERC20
+- 4736eb2e: Add a task for setting the gas price oracle
+
 ## 0.4.5
 
 ### Patch Changes

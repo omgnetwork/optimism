@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - develop
-      - 'inomurko/vault-integration'
 
 jobs:
   push2aws:
@@ -20,8 +19,14 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN_SECRET }}
+
     - name: Build and push docker images to AWS
       run: |
             cd ops_omgx
             rm -rf cloudformation/deployer-rinkeby.yaml
-            ./cfn-devenv.sh push2aws --from-tag latest --deploy-tag ${{ github.sha }}
+            ./cfn-devenv.sh push2aws --from-tag ${{ github.sha }} --deploy-tag ${{ github.sha }}

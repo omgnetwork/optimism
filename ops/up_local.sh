@@ -1,13 +1,9 @@
 #!/bin/bash
 
-if ! [ -x "$(command -v yq)" ]; then
-  echo 'Error: yq is not installed. brew install yq' >&2
-  exit 1
-fi
-
-#Set conservative defaults
-#BUILD=${BUILD:-1}     #build unless override
-#DAEMON=${DAEMON:-0}   #run win foreground unless overrride
+#if ! [ -x "$(command -v yq)" ]; then
+#  echo 'Error: yq is not installed. brew install yq' >&2
+#  exit 1
+#fi
 
 if [[ $BUILD == 2 ]]; then
   echo 'You set BUILD to 2, which means that we will use existing docker images on your computer'
@@ -36,45 +32,25 @@ if [[ $BUILD == 1 ]]; then
 fi
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
-ORIGINAL_DOCKERFILE="docker-compose.yml"
-DOCKERFILE="docker-compose-omgx.yml"
-#DOCKERFILE="docker-compose.yml"
-OMGX_DOCKERFILE=docker-compose-omgx-services.yml
-#replace all occurances of image: ethereumoptimism/ with image: omgx/
-#append :latest tag to all apps
-yq eval '(.services.[].image | select(. == "ethereumoptimism*")) |= sub("ethereumoptimism", "omgx")' ${ORIGINAL_DOCKERFILE} | \
-yq eval '(.services.[].image) += ":latest"' - \
-> ${DOCKERFILE}
+DOCKERFILE="docker-compose.yml"
 
 if [[ $BUILD == 1 ]]; then
     docker-compose build --parallel -- builder l2geth l1_chain
     docker-compose build --parallel -- deployer dtl batch_submitter relayer integration_tests
-    docker image tag ethereumoptimism/builder omgx/builder:latest
-    docker image tag ethereumoptimism/hardhat omgx/hardhat:latest
-    # comented out because this command does not seem to wait for completion of the parallel build in GH actions?
-    # see error in https://github.com/omgnetwork/optimism/pull/154/checks?check_run_id=2984030034
-    docker image tag ethereumoptimism/deployer omgx/deployer:latest
-    docker image tag ethereumoptimism/data-transport-layer omgx/data-transport-layer:latest
-    docker image tag ethereumoptimism/l2geth omgx/l2geth:latest
-    docker image tag ethereumoptimism/message-relayer omgx/message-relayer:latest
-    docker image tag ethereumoptimism/batch-submitter omgx/batch-submitter:latest
-    docker image tag ethereumoptimism/integration-tests omgx/integration-tests:latest
-    docker build ../ --file $DIR/docker/Dockerfile.omgx_monorepo --tag omgx/omgx_builder:latest
-    docker build ../ --file $DIR/docker/Dockerfile.omgx_deployer --tag omgx/omgx_deployer:latest
-    docker build ../ --file $DIR/docker/Dockerfile.omgx_message-relayer-fast --tag omgx/omgx_message-relayer-fast:latest
-    docker build ../ --file $DIR/docker/Dockerfile.omgx_vault --tag omgx/vault:latest
+    docker-compose build -- omgx_message-relayer-fast
+    docker-compose build -- gas_oracle
+    docker-compose build -- vault
+    docker-compose build -- omgx_deployer
 elif [[ $BUILD == 0 ]]; then
-    docker-compose -f $DIR/$DOCKERFILE -f $DIR/$OMGX_DOCKERFILE pull
+    docker-compose -f $DIR/$DOCKERFILE pull
 fi
 
 if [[ $DAEMON == 1 ]]; then
     docker-compose \
     -f $DIR/$DOCKERFILE \
-    -f $DIR/$OMGX_DOCKERFILE \
     up --no-build --detach -V
 else
     docker-compose \
     -f $DIR/$DOCKERFILE \
-    -f $DIR/$OMGX_DOCKERFILE \
     up --no-build -V
 fi

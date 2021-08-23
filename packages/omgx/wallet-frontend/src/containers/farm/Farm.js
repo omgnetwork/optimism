@@ -20,38 +20,38 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { isEqual } from 'lodash';
 
-import { getFarmInfo, getFee } from 'actions/farmAction';
+import { getFarmInfo, getFee } from 'actions/farmAction'
 
-import FarmList from 'components/farmList/FarmList';
+import ListFarm from 'components/listFarm/listFarm'
+import networkService from 'services/networkService'
 
-import networkService from 'services/networkService';
+import ethLogo from 'images/ethereum.svg'
+import TESTLogo from 'images/test.svg'
 
-import ethLogo from 'images/ethereum.svg';
-import TESTLogo from 'images/test.svg';
-
-import * as styles from './Farm.module.scss';
+import * as styles from './Farm.module.scss'
 
 class Farm extends React.Component {
-  
+
   constructor(props) {
 
     super(props);
 
-    const { 
-      totalFeeRate, 
+    const {
+      totalFeeRate,
       userRewardFeeRate,
-      poolInfo, 
+      poolInfo,
       userInfo,
     } = this.props.farm;
 
-    const { 
-      layer1, layer2
+    const {
+      layer1,
+      layer2
     } = this.props.balance;
 
     this.state = {
-      totalFeeRate, 
+      totalFeeRate,
       userRewardFeeRate,
-      poolInfo, 
+      poolInfo,
       userInfo,
       layer1,
       layer2
@@ -62,38 +62,43 @@ class Farm extends React.Component {
   componentDidMount() {
 
     const { totalFeeRate, userRewardFeeRate } = this.props.farm;
+
     if (!totalFeeRate || !userRewardFeeRate) {
       this.props.dispatch(getFee());
     }
+
     this.props.dispatch(getFarmInfo());
 
   }
 
   componentDidUpdate(prevState) {
 
-    const { 
-      totalFeeRate, userRewardFeeRate,
-      poolInfo, userInfo,
+    const {
+      totalFeeRate,
+      userRewardFeeRate,
+      poolInfo,
+      userInfo,
     } = this.props.farm
 
-    const { 
-      layer1, layer2
+    const {
+      layer1,
+      layer2
     } = this.props.balance
 
     if (prevState.farm.totalFeeRate !== totalFeeRate) {
-      this.setState({ totalFeeRate });
+      this.setState({ totalFeeRate })
     }
 
     if (prevState.farm.userRewardFeeRate !== userRewardFeeRate) {
-      this.setState({ userRewardFeeRate });
+      this.setState({ userRewardFeeRate })
     }
 
     if (!isEqual(prevState.farm.poolInfo, poolInfo)) {
-      this.setState({ poolInfo });
+      this.setState({ poolInfo })
     }
 
     if (!isEqual(prevState.farm.userInfo, userInfo)) {
-      this.setState({ userInfo });
+      this.setState({ userInfo })
     }
 
     if (!isEqual(prevState.balance.layer1, layer1)) {
@@ -106,99 +111,109 @@ class Farm extends React.Component {
 
   }
 
-  isETH(address) {
-    return [networkService.L2_ETH_Address, networkService.L1_ETH_Address].includes(address)
-  }
 
   getBalance(address, chain) {
 
     const { layer1, layer2 } = this.state;
-  
-    if(typeof(layer1) === 'undefined') return [0, 0]
-    if(typeof(layer2) === 'undefined') return [0, 0]
 
-    if(chain === 'L1'){
+    if (typeof (layer1) === 'undefined') return [0, 0]
+    if (typeof (layer2) === 'undefined') return [0, 0]
+
+    if (chain === 'L1') {
       let tokens = Object.entries(layer1)
-      for(let i = 0; i < tokens.length; i++) {
-        if(tokens[i][1].address.toLowerCase() === address.toLowerCase()) {
+      for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i][1].address.toLowerCase() === address.toLowerCase()) {
           return [tokens[i][1].balance, tokens[i][1].decimals]
         }
       }
-    } 
+    }
     else if (chain === 'L2') {
       let tokens = Object.entries(layer2)
-      for(let i = 0; i < tokens.length; i++) {
-        if(tokens[i][1].address.toLowerCase() === address.toLowerCase()) {
+      for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i][1].address.toLowerCase() === address.toLowerCase()) {
           return [tokens[i][1].balance, tokens[i][1].decimals]
         }
       }
-    } 
-   
-    return [0,0]
+    }
+
+    return [0, 0]
 
   }
 
   render() {
-    const { 
+    const {
       // Pool
       poolInfo,
       // user
       userInfo,
     } = this.state;
 
+    const networkLayer = networkService.L1orL2
+
     return (
       <div className={styles.Farm}>
         <h2>Stake tokens to the liquidity pool to earn</h2>
         <div className={styles.Note}>
-          Your tokens will be deposited into the liquidity pool. 
+          Your tokens will be deposited into the liquidity pool.
           You will share the fees collected from the swap users.
         </div>
-        <h3>L1 Liquidity Pool</h3>
-        <div className={styles.TableContainer}>
-          {Object.keys(poolInfo.L1LP).map((v, i) => {
-            const isETH = this.isETH(v)
-            const ret = this.getBalance(v, 'L1')
-            return (
-              <FarmList 
-                key={i}
-                logo={isETH ? ethLogo : TESTLogo}
-                name={isETH ? "Ethereum" : "TEST"}
-                shortName={isETH ? "ETH" : "TEST"}
-                poolInfo={poolInfo.L1LP[v]}
-                userInfo={userInfo.L1LP[v]}
-                L1orL2Pool="L1LP"
-                balance={ret[0]}
-                decimals={ret[1]}
-              />
-            )
-          })}
+        <div className={styles.PoolContainer}>
+          <h3>L1 Liquidity Pool</h3>
+          {networkLayer === 'L2' &&
+            <div className={styles.NoteStrong}>
+              Note: MetaMask is set to L2. To interact with the L1 liquidity pool, please switch MetaMask to L1.
+            </div>
+          }
+          <div className={styles.TableContainer}>
+            {Object.keys(poolInfo.L1LP).map((v, i) => {
+              const ret = this.getBalance(v, 'L1')
+              return (
+                <ListFarm
+                  key={i}
+                  logo={poolInfo.L1LP[v].symbol === 'ETH' ? ethLogo : TESTLogo}
+                  poolInfo={poolInfo.L1LP[v]}
+                  userInfo={userInfo.L1LP[v]}
+                  L1orL2Pool='L1LP'
+                  balance={ret[0]}
+                  decimals={ret[1]}
+                />
+              )
+            })}
+          </div>
         </div>
-        <h3>L2 Liquidity Pool</h3>
-        <div className={styles.TableContainer}>
-          {Object.keys(poolInfo.L2LP).map((v, i) => {
-            const isETH = this.isETH(v)
-            const ret = this.getBalance(v, 'L2')
-            return (
-              <FarmList 
-                key={i}
-                logo={isETH ? ethLogo : TESTLogo}
-                name={isETH ? "Ethereum" : "TEST"}
-                shortName={isETH ? "ETH" : "TEST"}
-                poolInfo={poolInfo.L2LP[v]}
-                userInfo={userInfo.L2LP[v]}
-                L1orL2Pool="L2LP"
-                balance={ret[0]}
-                decimals={ret[1]}
-              />
-            )
-          })}
+        <div className={styles.PoolContainer}>
+          <h3>L2 Liquidity Pool</h3>
+          {networkLayer === 'L1' &&
+            <div className={styles.NoteStrong}>
+              Note: MetaMask is set to L1. To interact with the L2 liquidity pool, please switch MetaMask to L2.
+            </div>
+          }
+          <div className={styles.TableContainer}>
+            {Object.keys(poolInfo.L2LP).map((v, i) => {
+              const ret = this.getBalance(v, 'L2')
+              console.log(poolInfo.L2LP[v].symbol)
+              return (
+                <ListFarm
+                  key={i}
+                  logo={poolInfo.L2LP[v].symbol === 'oETH' ? ethLogo : TESTLogo}
+                  poolInfo={poolInfo.L2LP[v]}
+                  userInfo={userInfo.L2LP[v]}
+                  L1orL2Pool='L2LP'
+                  balance={ret[0]}
+                  decimals={ret[1]}
+                />
+              )
+            })}
+          </div>
+
         </div>
+
       </div>
     )
   }
 }
 
-const mapStateToProps = state => ({ 
+const mapStateToProps = state => ({
   farm: state.farm,
   balance: state.balance
 });
