@@ -123,6 +123,9 @@ class NetworkService {
 
     this.tokenAddresses = null
 
+    // address
+    this.addresses = null
+
     // chain ID
     this.chainID = null
     this.networkName = null
@@ -450,8 +453,10 @@ class NetworkService {
       else
         this.L1StandardBridgeAddress = addresses.L1StandardBridge
 
-      this.L1_TEST_Address = addresses.TOKENS.TEST.L1
-      this.L2_TEST_Address = addresses.TOKENS.TEST.L2
+      Object.keys(addresses.TOKENS).forEach((key) => {
+        this["L1_" + key + "_Address"] = addresses.TOKENS[key].L1;
+        this["L2_" + key + "_Address"] = addresses.TOKENS[key].L2;
+      })
 
       this.L1LPAddress = addresses.Proxy__L1LiquidityPool
       this.L2LPAddress = addresses.Proxy__L2LiquidityPool
@@ -473,6 +478,8 @@ class NetworkService {
 
       this.L2TokenPoolAddress = addresses.L2TokenPool
       this.AtomicSwapAddress = addresses.AtomicSwap
+
+      this.addresses = addresses
 
       this.L1StandardBridgeContract = new ethers.Contract(
         this.L1StandardBridgeAddress,
@@ -597,28 +604,22 @@ class NetworkService {
     }
   }
 
-  async addL2NetworkRinkeby() {
+  async addL2Network() {
     const nw = getAllNetworks()
-    const chainParam = {
-      chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
-      chainName: 'OMGX L2 Rinkeby',
-      rpcUrls: [nw.rinkeby.L2.rpcUrl],
-    }
-
-    // connect to the wallet
-    this.provider = new ethers.providers.Web3Provider(window.ethereum)
-    this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
-  }
-
-  async addL2NetworkMainnet() {
-    const nw = getAllNetworks()
-    const chainParam = {
-      // chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
-      // chainName: 'OMGX L2 Mainnet',
-      // rpcUrls: [nw.mainnet.L2.rpcUrl],
-      chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
-      chainName: 'OMGX L2 Rinkeby',
-      rpcUrls: [nw.rinkeby.L2.rpcUrl]
+    const masterConfig = store.getState().setup.masterConfig;
+    let chainParam = {}
+    if (masterConfig === 'mainnet') {
+      chainParam = {
+        chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
+        chainName: 'OMGX L2 Mainnet',
+        rpcUrls: [nw.mainnet.L2.rpcUrl],
+      }
+    } else {
+      chainParam = {
+        chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
+        chainName: 'OMGX L2 Rinkeby',
+        rpcUrls: [nw.rinkeby.L2.rpcUrl],
+      }
     }
 
     // connect to the wallet
@@ -964,23 +965,23 @@ class NetworkService {
 
   }
 
+  async addTokenList() {
+    // Add the token to our master list, if we do not have it yet
+    // if the token is already in the list, then this function does nothing
+    // but if a new token shows up, then it will get added
+    Object.keys(this.tokenAddresses).forEach((token, i) => {
+      getToken(this.tokenAddresses[token].L1)
+    })
+  }
+  
   async getBalances() {
-
     try {
-
       // Always check ETH and oETH
       const layer1Balance = await this.L1Provider.getBalance(this.account)
-      //console.log('ETH balance on L1:', layer1Balance.toString())
+      console.log('ETH balance on L1:', layer1Balance.toString())
 
       const layer2Balance = await this.L2Provider.getBalance(this.account)
-      //console.log("oETH balance on L2:", layer2Balance.toString())
-
-      // Add the token to our master list, if we do not have it yet
-      // if the token is already in the list, then this function does nothing
-      // but if a new token shows up, then it will get added
-      Object.keys(this.tokenAddresses).forEach((token, i) => {
-        getToken(this.tokenAddresses[token].L1)
-      })
+      console.log("oETH balance on L2:", layer2Balance.toString())
 
       //const ethToken = await getToken(this.L1_ETH_Address)
       //console.log('Checking ethToken:', ethToken)
@@ -1010,65 +1011,37 @@ class NetworkService {
       const state = store.getState()
       const tA = Object.values(state.tokenList)
 
-      for (let i = 0; i < tA.length; i++) {
+      const tokenC = new ethers.Contract(
+        this.L1_ETH_Address,
+        L1ERC20Json.abi,
+        this.L1Provider
+      )
 
-        let token = tA[i]
-
-        //ETH is special - will break things,
-        //so, continue
-        if (token.addressL1 === this.L1_ETH_Address) continue
-
-        const tokenC = new ethers.Contract(
-          token.addressL1,
-          L1ERC20Json.abi,
-          this.provider.getSigner()
-        )
-        const balance = await tokenC
-          .connect(this.L1Provider)
-          .balanceOf(this.account)
-
-        //Value is too small to show
-        if (Number(balance.toString()) < 0.1) continue
-
-        layer1Balances.push({
-          currency: token.currency,
-          address: token.addressL1,
-          addressL2: token.addressL2,
-          symbol: token.symbolL1,
-          decimals: token.decimals,
-          balance: new BN(balance.toString())
-        })
+      const getERC20Balance = async(token, tokenAddress, layer, provider=this.L1Provider) => {
+        const balance = await tokenC.attach(tokenAddress).connect(provider).balanceOf(this.account);
+        return { 
+          ...token, balance: new BN(balance.toString()), 
+          layer, address: layer === 'L1' ? token.addressL1: token.addressL2,
+          symbol: token.symbolL1
+        };
       }
 
-      for (let i = 0; i < tA.length; i++) {
+      const getBalancePromise = [];
 
-        let token = tA[i]
+      tA.forEach((token) => {
+        if (token.addressL1 === this.L1_ETH_Address) return;
+        getBalancePromise.push(getERC20Balance(token, token.addressL1, "L1"))
+        getBalancePromise.push(getERC20Balance(token, token.addressL2, "L2", this.L2Provider))
+      })
 
-        //ETH is special - will break things,
-        //so, continue
-        if (token.addressL2 === this.L2_ETH_Address) continue
-
-        const tokenC = new ethers.Contract(
-          token.addressL2,
-          L2ERC20Json.abi,
-          this.provider.getSigner()
-        )
-        const balance = await tokenC
-          .connect(this.L2Provider)
-          .balanceOf(this.account)
-
-        //Value is too small to show
-        if (Number(balance.toString()) < 0.1) continue
-
-        layer2Balances.push({
-          currency: token.currency,
-          address: token.addressL2,
-          addressL1: token.addressL1,
-          symbol: token.symbolL2,
-          decimals: token.decimals,
-          balance: new BN(balance.toString())
-        })
-      }
+      const tokenBalances = await Promise.all(getBalancePromise);
+      tokenBalances.forEach((token) => {
+        if (token.layer === 'L1' && token.balance.gt(new BN(0))) {
+          layer1Balances.push(token)
+        } else if (token.layer === 'L2' && token.balance.gt(new BN(0))){
+          layer2Balances.push(token)
+        }
+      })
 
       return {
         layer1: orderBy(layer1Balances, (i) => i.currency),
@@ -1413,10 +1386,10 @@ class NetworkService {
   /*****************************************************/
   async getL1LPInfo() {
 
-    const tokenAddressList = [
-      this.L1_ETH_Address,
-      this.L1_TEST_Address
-    ]
+    const tokenAddressList = Object.keys(this.addresses.TOKENS).reduce((acc, cur) => {
+      acc.push(this["L1_" + cur + "_Address"]);
+      return acc;
+    }, [this.L1_ETH_Address]);
 
     const L1LPContract = new ethers.Contract(
       this.L1LPAddress,
@@ -1427,88 +1400,75 @@ class NetworkService {
     const poolInfo = {}
     const userInfo = {}
 
-    for (let tokenAddress of tokenAddressList) {
+    const L1LPInfoPromise = [];
 
+    const getL1LPInfoPromise = async(tokenAddress) => {
       let tokenBalance
       let tokenSymbol
       let tokenName
 
-      console.log(tokenAddress)
-      console.log(this.L1_ETH_Address)
-
       if (tokenAddress === this.L1_ETH_Address) {
         tokenBalance = await this.L1Provider.getBalance(this.L1LPAddress)
-        console.log('Match')
         tokenSymbol = 'ETH'
         tokenName = 'Ethereum'
-      } else if (tokenAddress === this.L1_TEST_Address) {
-        tokenBalance = await this.L1_TEST_Contract.connect(
-          this.L1Provider
-        ).balanceOf(this.L1LPAddress)
-        tokenSymbol = await this.L2_TEST_Contract.connect(
-          this.L2Provider
-        ).symbol()
-        tokenName = await this.L2_TEST_Contract.connect(
-          this.L2Provider
-        ).name()
+      } else {
+        tokenBalance = await this.L1_TEST_Contract.attach(tokenAddress).connect(this.L1Provider).balanceOf(this.L1LPAddress)
+        tokenSymbol = await this.L1_TEST_Contract.attach(tokenAddress).connect(this.L1Provider).symbol()
+        tokenName = await this.L1_TEST_Contract.attach(tokenAddress).connect(this.L1Provider).name()
       }
-      // Add new LPs here
-      // else if (tokenAddress === __________) {
-      //   tokenBalance = await this.___________.connect(this.L1Provider).balanceOf(this.L1LPAddress)
-      // }
-      else {
-        console.log('No liquidity pool for this token:', tokenAddress)
-      }
+      const poolTokenInfo = await L1LPContract.poolInfo(tokenAddress)
+      const userTokenInfo = await L1LPContract.userInfo(tokenAddress, this.account)
+      return { tokenAddress, tokenBalance, tokenSymbol, tokenName, poolTokenInfo, userTokenInfo }
+    }
 
-      const [poolTokenInfo, userTokenInfo] = await Promise.all([
-        L1LPContract.poolInfo(tokenAddress),
-        L1LPContract.userInfo(tokenAddress, this.account),
-      ])
+    tokenAddressList.forEach((tokenAddress) => L1LPInfoPromise.push(getL1LPInfoPromise(tokenAddress)))
+    const L1LPInfo = await Promise.all(L1LPInfoPromise);
 
-      poolInfo[tokenAddress] = {
-        symbol: tokenSymbol,
-        name: tokenName,
-        l1TokenAddress: poolTokenInfo.l1TokenAddress,
-        l2TokenAddress: poolTokenInfo.l2TokenAddress,
-        accUserReward: poolTokenInfo.accUserReward.toString(),
-        accUserRewardPerShare: poolTokenInfo.accUserRewardPerShare.toString(),
-        userDepositAmount: poolTokenInfo.userDepositAmount.toString(),
-        startTime: poolTokenInfo.startTime.toString(),
+    L1LPInfo.forEach((token) => {
+      poolInfo[token.tokenAddress] = {
+        symbol: token.tokenSymbol,
+        name: token.tokenName,
+        l1TokenAddress: token.poolTokenInfo.l1TokenAddress,
+        l2TokenAddress: token.poolTokenInfo.l2TokenAddress,
+        accUserReward: token.poolTokenInfo.accUserReward.toString(),
+        accUserRewardPerShare: token.poolTokenInfo.accUserRewardPerShare.toString(),
+        userDepositAmount: token.poolTokenInfo.userDepositAmount.toString(),
+        startTime: token.poolTokenInfo.startTime.toString(),
         APR:
-          Number(poolTokenInfo.userDepositAmount.toString()) === 0
+          Number(token.poolTokenInfo.userDepositAmount.toString()) === 0
             ? 0
             : accMul(
                 accDiv(
                   accDiv(
-                    poolTokenInfo.accUserReward,
-                    poolTokenInfo.userDepositAmount
+                    token.poolTokenInfo.accUserReward,
+                    token.poolTokenInfo.userDepositAmount
                   ),
                   accDiv(
                     new Date().getTime() -
-                      Number(poolTokenInfo.startTime) * 1000,
+                      Number(token.poolTokenInfo.startTime) * 1000,
                     365 * 24 * 60 * 60 * 1000
                   )
                 ),
                 100
               ), // ( accUserReward - userDepositAmount ) / timeDuration
-        tokenBalance: tokenBalance.toString()
+        tokenBalance: token.tokenBalance.toString()
       }
-      userInfo[tokenAddress] = {
-        l1TokenAddress: tokenAddress,
-        amount: userTokenInfo.amount.toString(),
-        pendingReward: userTokenInfo.pendingReward.toString(),
-        rewardDebt: userTokenInfo.rewardDebt.toString()
+      userInfo[token.tokenAddress] = {
+        l1TokenAddress: token.tokenAddress,
+        amount: token.userTokenInfo.amount.toString(),
+        pendingReward: token.userTokenInfo.pendingReward.toString(),
+        rewardDebt: token.userTokenInfo.rewardDebt.toString()
       }
-    }
+    })
     return { poolInfo, userInfo }
   }
 
   async getL2LPInfo() {
 
-    const tokenAddressList = [
-      this.L2_ETH_Address,
-      this.L2_TEST_Address
-    ]
+    const tokenAddressList = Object.keys(this.addresses.TOKENS).reduce((acc, cur) => {
+      acc.push(this["L2_" + cur + "_Address"]);
+      return acc;
+    }, [this.L2_ETH_Address]);
 
     const L2LPContract = new ethers.Contract(
       this.L2LPAddress,
@@ -1519,8 +1479,9 @@ class NetworkService {
     const poolInfo = {}
     const userInfo = {}
 
-    for (let tokenAddress of tokenAddressList) {
+    const L2LPInfoPromise = [];
 
+    const getL2LPInfoPromise = async(tokenAddress) => {
       let tokenBalance
       let tokenSymbol
       let tokenName
@@ -1529,65 +1490,55 @@ class NetworkService {
         tokenBalance = await this.L2Provider.getBalance(this.L2LPAddress)
         tokenSymbol = 'oETH'
         tokenName = 'Ethereum'
-      } else if (tokenAddress === this.L2_TEST_Address) {
-        tokenBalance = await this.L2_TEST_Contract.connect(
-          this.L2Provider
-        ).balanceOf(this.L2LPAddress)
-        tokenSymbol = await this.L2_TEST_Contract.connect(
-          this.L2Provider
-        ).symbol()
-         tokenName = await this.L2_TEST_Contract.connect(
-          this.L2Provider
-        ).name()
+      } else {
+        tokenBalance = await this.L2_TEST_Contract.attach(tokenAddress).connect(this.L2Provider).balanceOf(this.L2LPAddress)
+        tokenSymbol = await this.L2_TEST_Contract.attach(tokenAddress).connect(this.L2Provider).symbol()
+        tokenName = await this.L2_TEST_Contract.attach(tokenAddress).connect(this.L2Provider).name()
       }
-      // Add new LPs here
-      // else if (tokenAddress === __________) {
-      //   tokenBalance = await this.___________.connect(this.L2Provider).balanceOf(this.L2LPAddress)
-      // }
-      else {
-        console.log('No liquidity pool for this token:', tokenAddress)
-      }
+      const poolTokenInfo = await L2LPContract.poolInfo(tokenAddress)
+      const userTokenInfo = await L2LPContract.userInfo(tokenAddress, this.account)
+      return { tokenAddress, tokenBalance, tokenSymbol, tokenName, poolTokenInfo, userTokenInfo }
+    }
 
-      const [poolTokenInfo, userTokenInfo] = await Promise.all([
-        L2LPContract.poolInfo(tokenAddress),
-        L2LPContract.userInfo(tokenAddress, this.account),
-      ])
-
-      poolInfo[tokenAddress] = {
-        symbol: tokenSymbol,
-        name: tokenName,
-        l1TokenAddress: poolTokenInfo.l1TokenAddress,
-        l2TokenAddress: poolTokenInfo.l2TokenAddress,
-        accUserReward: poolTokenInfo.accUserReward.toString(),
-        accUserRewardPerShare: poolTokenInfo.accUserRewardPerShare.toString(),
-        userDepositAmount: poolTokenInfo.userDepositAmount.toString(),
-        startTime: poolTokenInfo.startTime.toString(),
+    tokenAddressList.forEach((tokenAddress) => L2LPInfoPromise.push(getL2LPInfoPromise(tokenAddress)))
+    const L2LPInfo = await Promise.all(L2LPInfoPromise);
+    
+    L2LPInfo.forEach((token) => {
+      poolInfo[token.tokenAddress] = {
+        symbol: token.tokenSymbol,
+        name: token.tokenName,
+        l1TokenAddress: token.poolTokenInfo.l1TokenAddress,
+        l2TokenAddress: token.poolTokenInfo.l2TokenAddress,
+        accUserReward: token.poolTokenInfo.accUserReward.toString(),
+        accUserRewardPerShare: token.poolTokenInfo.accUserRewardPerShare.toString(),
+        userDepositAmount: token.poolTokenInfo.userDepositAmount.toString(),
+        startTime: token.poolTokenInfo.startTime.toString(),
         APR:
-          Number(poolTokenInfo.userDepositAmount.toString()) === 0
+          Number(token.poolTokenInfo.userDepositAmount.toString()) === 0
             ? 0
             : accMul(
                 accDiv(
                   accDiv(
-                    poolTokenInfo.accUserReward,
-                    poolTokenInfo.userDepositAmount
+                    token.poolTokenInfo.accUserReward,
+                    token.poolTokenInfo.userDepositAmount
                   ),
                   accDiv(
                     new Date().getTime() -
-                      Number(poolTokenInfo.startTime) * 1000,
+                      Number(token.poolTokenInfo.startTime) * 1000,
                     365 * 24 * 60 * 60 * 1000
                   )
                 ),
                 100
               ), // ( accUserReward - userDepositAmount ) / timeDuration
-        tokenBalance: tokenBalance.toString()
+        tokenBalance: token.tokenBalance.toString()
       }
-      userInfo[tokenAddress] = {
-        l2TokenAddress: tokenAddress,
-        amount: userTokenInfo.amount.toString(),
-        pendingReward: userTokenInfo.pendingReward.toString(),
-        rewardDebt: userTokenInfo.rewardDebt.toString()
+      userInfo[token.tokenAddress] = {
+        l2TokenAddress: token.tokenAddress,
+        amount: token.userTokenInfo.amount.toString(),
+        pendingReward: token.userTokenInfo.pendingReward.toString(),
+        rewardDebt: token.userTokenInfo.rewardDebt.toString()
       }
-    }
+    })
 
     return { poolInfo, userInfo }
   }
