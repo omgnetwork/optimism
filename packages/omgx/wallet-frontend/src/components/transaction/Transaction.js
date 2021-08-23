@@ -19,11 +19,9 @@ import Tooltip from 'components/tooltip/Tooltip';
 import Button from 'components/button/Button';
 import {Button as ButtonMUI} from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-
-import * as styles from './Transaction.module.scss';
-
-import * as S from './Transaction.styles';
 import LinkIcon from 'components/icons/LinkIcon';
+import * as styles from './Transaction.module.scss';
+import * as S from './Transaction.styles';
 
 function Transaction({
   link,

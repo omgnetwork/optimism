@@ -81,7 +81,11 @@ function History () {
       console.log(['network',network])
       console.log(network[item.chain].transaction)
       // network object should have L1 & L2
-      return `${network[item.chain].transaction}${item.hash}`;
+      if(item.chain === 'L1') {
+        return `${network[item.chain].transaction}${item.hash}`;
+      } else {
+        return `${network[item.chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase()+currentNetwork.slice(1)}`;
+      }
     }
     return '';
   }
@@ -96,7 +100,7 @@ function History () {
     <>
       <PageHeader title="Transaction History" />
 
-    {/* 
+    {/*
     <Input
             icon
             placeholder='Search by hash'
@@ -106,12 +110,12 @@ function History () {
             }}
             className={styles.searchBar}
           />
-    
+
     */}
 
       <div className={styles.header}>
         <div className={styles.actions}>
-          <div className={styles.actionLabel}>Show period from </div>
+          <div style={{margin: '0px 10px'}}>Show period from </div>
           <DatePicker
             wrapperClassName={styles.datePickerInput}
             selected={startDate}
@@ -121,7 +125,7 @@ function History () {
             endDate={endDate}
           />
 
-          <div> to </div>
+          <div style={{margin: '0px 10px'}}>to </div>
           <DatePicker
             wrapperClassName={styles.datePickerInput}
             selected={endDate}

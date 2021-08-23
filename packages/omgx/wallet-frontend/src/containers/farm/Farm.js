@@ -137,28 +137,27 @@ class Farm extends React.Component {
 
     const { layer1, layer2 } = this.state;
 
-    if(typeof(layer1) === 'undefined') return [0, 0]
-    if(typeof(layer2) === 'undefined') return [0, 0]
+    if (typeof (layer1) === 'undefined') return [0, 0]
+    if (typeof (layer2) === 'undefined') return [0, 0]
 
-    if(chain === 'L1'){
+    if (chain === 'L1') {
       let tokens = Object.entries(layer1)
-      for(let i = 0; i < tokens.length; i++) {
-        if(tokens[i][1].address.toLowerCase() === address.toLowerCase()) {
+      for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i][1].address.toLowerCase() === address.toLowerCase()) {
           return [tokens[i][1].balance, tokens[i][1].decimals]
         }
       }
     }
-
     else if (chain === 'L2') {
       let tokens = Object.entries(layer2)
-      for(let i = 0; i < tokens.length; i++) {
-        if(tokens[i][1].address.toLowerCase() === address.toLowerCase()) {
+      for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i][1].address.toLowerCase() === address.toLowerCase()) {
           return [tokens[i][1].balance, tokens[i][1].decimals]
         }
       }
     }
 
-    return [0,0]
+    return [0, 0]
 
   }
 
