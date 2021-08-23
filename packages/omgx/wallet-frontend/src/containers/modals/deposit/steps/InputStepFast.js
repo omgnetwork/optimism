@@ -133,7 +133,7 @@ function InputStepFast({ handleClose, token }) {
 
   const label = 'There is a ' + feeRate + '% fee.'
 
-  let buttonLabel = 'DEPOSIT'
+  let buttonLabel = 'Deposit'
 
   if(depositLoading) {
     buttonLabel = "Depositing..."
