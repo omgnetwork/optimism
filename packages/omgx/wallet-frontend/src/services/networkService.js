@@ -973,15 +973,15 @@ class NetworkService {
       getToken(this.tokenAddresses[token].L1)
     })
   }
-  
+
   async getBalances() {
     try {
       // Always check ETH and oETH
       const layer1Balance = await this.L1Provider.getBalance(this.account)
-      console.log('ETH balance on L1:', layer1Balance.toString())
+      //console.log('ETH balance on L1:', layer1Balance.toString())
 
       const layer2Balance = await this.L2Provider.getBalance(this.account)
-      console.log("oETH balance on L2:", layer2Balance.toString())
+      //console.log("oETH balance on L2:", layer2Balance.toString())
 
       //const ethToken = await getToken(this.L1_ETH_Address)
       //console.log('Checking ethToken:', ethToken)
@@ -1019,8 +1019,8 @@ class NetworkService {
 
       const getERC20Balance = async(token, tokenAddress, layer, provider=this.L1Provider) => {
         const balance = await tokenC.attach(tokenAddress).connect(provider).balanceOf(this.account);
-        return { 
-          ...token, balance: new BN(balance.toString()), 
+        return {
+          ...token, balance: new BN(balance.toString()),
           layer, address: layer === 'L1' ? token.addressL1: token.addressL2,
           symbol: token.symbolL1
         };
@@ -1502,7 +1502,7 @@ class NetworkService {
 
     tokenAddressList.forEach((tokenAddress) => L2LPInfoPromise.push(getL2LPInfoPromise(tokenAddress)))
     const L2LPInfo = await Promise.all(L2LPInfoPromise);
-    
+
     L2LPInfo.forEach((token) => {
       poolInfo[token.tokenAddress] = {
         symbol: token.tokenSymbol,
