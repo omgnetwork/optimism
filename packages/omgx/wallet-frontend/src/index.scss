@@ -1,7 +1,7 @@
 $red: #ff6868;
 $yellow: #f0ba31;
 $green: #0ebf9a;
-$blue: #4967ff;
+$blue:  #506DFA;// #4967ff;
 $maxWidth: 450px;
 $red1: #ff8080;
 
@@ -14,6 +14,18 @@ $gray6: #d2d2d2; //v. light gray
 $gray7: #f8f8f8;
 
 $bunnyRed: #c83950;
+
+
+// redesign color;
+
+$background: linear-gradient(180deg, #061122 0%, #08162C 100%);
+$background400: rgba(255, 255, 255, 0.04);
+
+
+$white: #ffffff;
+$white700: rgba(255, 255, 255, 0.7);
+$white500: rgba(255, 255, 255, 0.5);
+
 
 :export {
   red: $red;
@@ -30,6 +42,11 @@ $bunnyRed: #c83950;
   gray7: $gray7;
   bunnyRed: $bunnyRed;
   maxWidth: $maxWidth;
+  background:$background;
+  background400:$background400;
+  white:$white;
+  white700:$white700;
+  white500:$white500;
 }
 
 // /* small screens */
@@ -50,6 +67,23 @@ $bunnyRed: #c83950;
     @content;
   }
 }
+
+
+@font-face {
+  font-family: 'MrEavesXL';
+  src: url(./fonts/MrEavesXLModOT-Reg.ttf) format('opentype');
+}
+
+@font-face {
+  font-family: 'MrEavesXLBold';
+  src: url(./fonts/MrEavesXLModOT-Bold.ttf) format('opentype');
+}
+
+@font-face {
+  font-family: 'MrEavesXLThin';
+  src: url(./fonts/MrEavesXLModOT-Thin.ttf) format('opentype');
+}
+
 
 @font-face {
   font-family: 'MrEavesXL';

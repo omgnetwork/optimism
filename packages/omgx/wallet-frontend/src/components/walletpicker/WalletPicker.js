@@ -30,6 +30,11 @@ import { openModal } from 'actions/uiAction';
 import { setWalletMethod } from 'actions/setupAction';
 import { getAllNetworks } from 'util/masterConfig';
 
+// import logo from 'images/omgx.png';
+import logo from 'images/logo-boba.svg';
+import chevron from 'images/chevron.svg';
+
+import * as styles from './WalletPicker.module.scss';
 import { isChangingChain } from 'util/changeChain';
 import Button from 'components/button/Button';
 import * as S from "./WalletPicker.styles"

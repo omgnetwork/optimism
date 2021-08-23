@@ -28,8 +28,6 @@ import ListAccount from 'components/listAccount/listAccount';
 import { logAmount } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
-import bunny_sad from 'images/bunny_sad.svg'
-
 import * as S from './Account.styles'
 import { selectTokens } from 'selectors/tokenSelector'
 import PageHeader from 'components/pageHeader/PageHeader'
@@ -102,10 +100,9 @@ function Account () {
 
       {/* {!balances['oETH']['have'] &&
         <div className={styles.RabbitBox}>
-          <img className={styles.bunny} src={bunny_sad} alt='Sad Bunny' />
           <div className={styles.RabbitRight}>
             <div className={styles.RabbitRightTop}>
-              OMGX Balance
+              BOBA Balance
             </div>
             <div className={styles.RabbitRightMiddle}>
                 <div className={styles.sad}>0</div>
