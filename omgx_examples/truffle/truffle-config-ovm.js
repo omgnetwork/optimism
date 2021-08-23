@@ -30,11 +30,11 @@ module.exports = {
           mnemonic: {
             phrase: mnemonicPhrase,
           },
-          providerOrUrl: 'http://rinkeby.omgx.network',
+          providerOrUrl:env.L2_NODE_WEB3_URL,
         })
       },
       network_id: 28,
-      host: 'http://rinkeby.omgx.network',
+      host: env.L2_NODE_WEB3_URL,
       gasPrice: 15000000,
       gas: 8000000,
     },

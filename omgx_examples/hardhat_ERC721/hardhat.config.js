@@ -21,7 +21,7 @@ module.exports = {
     },
     // Add this network to your config!
     omgx_rinkeby: {
-      url: 'https://rinkeby.omgx.network',
+      url: env.L2_NODE_WEB3_URL,
       // instantiate with a mnemonic so that you have >1 accounts available
       accounts: {
         mnemonic: env.mnemonic

@@ -41,10 +41,9 @@ describe(`L1 <> L2 Deposit and Withdrawal`, () => {
   // Set up our wallets (using a default private key with 10k ETH allocated to it).
   // Need two wallets objects, one for interacting with L1 and one for interacting with L2.
   // Both will use the same private key.
-  const key1 = env.privateKey1;
-  const key2 =env.privateKey2;
-  const l1Wallet = new ethers.Wallet(key1, l1RpcProvider);
-  const l2Wallet = new ethers.Wallet(key2, l2RpcProvider);
+  const key = env.privateKey1;
+  const l1Wallet = new ethers.Wallet(key, l1RpcProvider);
+  const l2Wallet = new ethers.Wallet(key, l2RpcProvider);
 
   // Tool that helps watches and waits for messages to be relayed between L1 and L2.
   const watcher = new Watcher({
@@ -142,7 +141,6 @@ describe(`L1 <> L2 Deposit and Withdrawal`, () => {
 
     it(`should withdraw tokens back to L1 ERC20 and relay the message`, async () => {
       // Burn the tokens on L2 and ask the L1 contract to unlock on our behalf.
-      console.log(`l2 ballance: ${await l2Wallet.getBalance()}`);
 
       l2Tx1 = await L2StandardBridge.connect(l2Wallet).withdraw(
         L2_ERC20.address,
