@@ -20,10 +20,12 @@ import {
   Grid,
   Container,
   IconButton,
-  Box
+  Box,
+  useMediaQuery
 } from '@material-ui/core';
 import { ReactComponent as CloseIcon } from './../../images/icons/close-modal.svg';
 import * as S from "./Modal.styles"
+import { useTheme } from '@emotion/react';
 
 function _Modal ({
   children,
@@ -34,17 +36,21 @@ function _Modal ({
   transparent,
   maxWidth
 }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   return (
     <S.StyledModal
       aria-labelledby='transition-modal-title'
       aria-describedby='transition-modal-description'
       open={open}
       onClose={onClose}
+      isMobile={isMobile}
       // closeAfterTransition
       BackdropComponent={S.Backdrop}
     >
       <Fade in={open}>
-        <Container maxWidth={maxWidth || "lg"} sx={{border: 'none'}}>
+        <Container maxWidth={maxWidth || "lg"} sx={{border: 'none', position: 'relative'}}>
           <Grid container>
             <Grid item xs={12} md={2}>
               <Box sx={{mr: 8}}>
@@ -53,15 +59,15 @@ function _Modal ({
             </Grid>
 
             <Grid item xs={12} md={9}>
-              <S.Style transparent={transparent}>
+              <S.Style isMobile={isMobile} transparent={transparent || isMobile}>
                 {children}
               </S.Style>
             </Grid>
 
             <Grid item xs={12} md={1}>
-              <IconButton onClick={onClose}>
-                <CloseIcon />
-              </IconButton>
+            <S.IconButtonTag onClick={onClose}>
+              <CloseIcon />
+            </S.IconButtonTag>
             </Grid>
           </Grid>
         </Container>

@@ -13,8 +13,10 @@ import { selectLoading } from 'selectors/loadingSelector'
 import { amountToUsd, logAmount, powAmount } from 'util/amountConvert'
 
 import * as styles from '../DepositModal.module.scss'
+import * as S from './InputSteps.styles'
 import { selectLookupPrice } from 'selectors/lookupSelector'
-import { Grid, Typography } from '@material-ui/core'
+import { Box, Typography, useMediaQuery } from '@material-ui/core'
+import { useTheme } from '@emotion/react'
 
 function InputStep({ handleClose, token }) {
 
@@ -71,23 +73,26 @@ function InputStep({ handleClose, token }) {
       setGasPrice={setGasPrice}
     />
   )
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   console.log("Loading:", depositLoading)
 
   return (
     <>
-      <Typography variant="h3" gutterBottom>
+      <Typography variant="h2" gutterBottom>
         {`Deposit ${token && token.symbol ? token.symbol : ''}`}
       </Typography>
 
       <Input
-        label={'Amount to deposit'}
-        placeholder="0.0"
+        label="Enter amount to deposit"
+        placeholder="0.0000"
         value={value}
         type="number"
         onChange={(i)=>setAmount(i.target.value)}
         unit={token.symbol}
         maxValue={logAmount(token.balance, token.decimals)}
+        variant="standard"
       />
 
       {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
@@ -98,29 +103,31 @@ function InputStep({ handleClose, token }) {
 
       {renderGasPicker}
 
-      <Grid justifyContent="flex-end" container spacing={2}>
-        <Grid item>
+      <S.WrapperActions>
+        {!isMobile ? (
           <Button
             onClick={handleClose}
             color="neutral"
+            size="lg"
           >
             Cancel
           </Button>
-        </Grid>
-        <Grid item>
-          <Button
-            onClick={doDeposit}
-            color='primary'
-            variant="contained"
-            loading={depositLoading}
-            tooltip='Your swap is still pending. Please wait for confirmation.'
-            disabled={disabledSubmit}
-            triggerTime={new Date()}
-          >
-            Deposit
-          </Button>
-        </Grid>
-      </Grid>
+        ) : null}
+
+        <Button
+          onClick={doDeposit}
+          color='primary'
+          size="lg"
+          variant="contained"
+          loading={depositLoading}
+          tooltip='Your swap is still pending. Please wait for confirmation.'
+          disabled={disabledSubmit}
+          triggerTime={new Date()}
+          fullWidth={isMobile}
+        >
+          Deposit
+        </Button>
+      </S.WrapperActions>
     </>
   )
 }

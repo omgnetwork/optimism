@@ -21,6 +21,8 @@ import { closeModal } from 'actions/uiAction'
 
 import InputStep from './steps/InputStep'
 import InputStepFast from './steps/InputStepFast'
+import { useTheme } from '@emotion/react'
+import { useMediaQuery } from '@material-ui/core'
 
 function DepositModal({ open, token, fast }) {
 
@@ -31,7 +33,7 @@ function DepositModal({ open, token, fast }) {
   }
 
   return (
-    <Modal open={open} maxWidth="sm" onClose={handleClose}>
+    <Modal open={open} maxWidth="md" onClose={handleClose}>
       {!!fast ? (
           <InputStepFast handleClose={handleClose} token={token}/>
         ) : (

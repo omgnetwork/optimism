@@ -16,10 +16,11 @@ limitations under the License. */
 import React from 'react'
 import { Search } from '@material-ui/icons'
 import BN from 'bignumber.js'
-import * as styles from './Input.module.scss'
-import { CssTextField } from './Input.styles'
+import * as S from './Input.styles'
 import Button from 'components/button/Button'
-import { Box, Grid, TextField, Typography } from '@material-ui/core'
+import { Box, Typography, useMediaQuery } from '@material-ui/core'
+import { useTheme } from '@emotion/react'
+import EthereumIcon from 'components/icons/EthereumIcon'
 
 function Input({
   placeholder,
@@ -55,52 +56,57 @@ function Input({
 
   const overMax = new BN(value).gt(new BN(maxValue))
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   return (
-    <>
-      <Grid container spacing={2}>
-        <Grid item xs={unit ? 6 : 12}>
-          <Typography variant="body2" component="div" sx={{opacity: 0.5}}>
-            {label}
+    <S.Wrapper>
+      {!isMobile ? (
+        <S.UnitContent>
+          <div>
+            <Typography variant="body2" component="div">{unit}</Typography>
+            <EthereumIcon width={50} />
+          </div>
+        </S.UnitContent>
+      ) : null}
+
+      <S.InputWrapper>
+        <Typography variant="body2" component="div" sx={{opacity: 0.7}}>
+          {label}
+        </Typography>
+        <S.TextFieldTag
+          placeholder={placeholder}
+          type={type}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          fullWidth={fullWidth}
+          size={size}
+          variant={variant}
+          error={overMax}
+          InputProps={{ disableUnderline: true }}
+        />
+      </S.InputWrapper>
+
+      {unit && (
+        <S.ActionsWrapper>
+          <Typography variant="body2" component="p" sx={{opacity: 0.7, textAlign: "end"}}>
+            Available: {Number(maxValue).toFixed(3)}
           </Typography>
-          {/* <div className={[styles.field, overMax ? styles.error : ''].join(' ')}> */}
-          {icon && <Search className={styles.icon} />}
-            <CssTextField
-              // className={[styles.input, small ? styles.small : ''].join(' ')} // todo
-              placeholder={placeholder}
-              type={type}
-              value={value}
-              onChange={onChange}
-              disabled={disabled}
-              fullWidth={fullWidth}
-              size={size}
-              id="custom-css-outlined-input"
-              variant={variant}
-              error={overMax}
-            />
-            {/* </div> */}
-        </Grid>
-        {unit && (
-          <Grid item xs={6}>
-            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px'}}>
-              <Typography variant="body2" component="p" sx={{opacity: 0.5, textAlign: "end"}}>
-                Available: {Number(maxValue).toFixed(3)}
-              </Typography>
 
-              {maxValue && value !== maxValue && (
-                <Box>
-                  <Button onClick={handleMaxClick} variant="small" >
-                    Use All
-                  </Button>
-                </Box>
-              )}
+          {maxValue && value !== maxValue && (
+            <Box>
+              <Button onClick={handleMaxClick} variant="small" >
+                Use All
+              </Button>
             </Box>
-          </Grid>
-        )}
-      </Grid>
-
-      {/* <div className={[styles.Input, className].join(' ')}>
+          )}
+        </S.ActionsWrapper>
+      )}
+    </S.Wrapper>
+      /* <div className={[styles.Input, className].join(' ')}>
         {label &&
-          <Typography variant="body1" component="div" sx={{opacity: 0.5}}>
+          <Typography variant="body1" component="div" sx={{opacity: 0.7}}>
             {label}
           </Typography>
         }
@@ -117,7 +123,7 @@ function Input({
           {unit && (
             <Box sx={{display: 'flex', flexDirection: 'column', gap: '5px'}}>
                 {unit}
-              <Typography variant="body2" component="p" sx={{opacity: 0.5}}>
+              <Typography variant="body2" component="p" sx={{opacity: 0.7}}>
                 Available: {Number(maxValue).toFixed(3)}
               </Typography>
 
@@ -134,8 +140,7 @@ function Input({
             </div>
           )}
         </div>
-      </div> */}
-    </>
+      </div> */
   )
 }
 
