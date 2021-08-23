@@ -1,6 +1,10 @@
-const mnemonicPhrase =
-  'test test test test test test test test test test test junk'
-const HDWalletProvider = require('@truffle/hdwallet-provider')
+
+
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+require('dotenv').config();
+const env = process.env;
+const mnemonicPhrase = env.mnemonic;
+
 
 module.exports = {
   contracts_build_directory: './build-ovm',

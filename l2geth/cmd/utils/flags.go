@@ -881,12 +881,6 @@ var (
 		Value:  eth.DefaultConfig.Rollup.StateDumpPath,
 		EnvVar: "ROLLUP_STATE_DUMP_PATH",
 	}
-	RollupDiffDbFlag = cli.Uint64Flag{
-		Name:   "rollup.diffdbcache",
-		Usage:  "Number of diffdb batch updates",
-		Value:  eth.DefaultConfig.DiffDbCache,
-		EnvVar: "ROLLUP_DIFFDB_CACHE",
-	}
 	RollupMaxCalldataSizeFlag = cli.IntFlag{
 		Name:   "rollup.maxcalldatasize",
 		Usage:  "Maximum allowed calldata size for Queue Origin Sequencer Txs",
@@ -1136,6 +1130,7 @@ func setIPC(ctx *cli.Context, cfg *node.Config) {
 	}
 }
 
+// UsingOVM
 // setEth1 configures the sync service
 func setEth1(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(Eth1CanonicalTransactionChainDeployHeightFlag.Name) {
@@ -1165,6 +1160,8 @@ func setEth1(ctx *cli.Context, cfg *rollup.Config) {
 	}
 }
 
+// UsingOVM
+// setRollup configures the rollup
 func setRollup(ctx *cli.Context, cfg *rollup.Config) {
 	if ctx.GlobalIsSet(RollupAddressManagerOwnerAddressFlag.Name) {
 		addr := ctx.GlobalString(RollupAddressManagerOwnerAddressFlag.Name)
@@ -1676,9 +1673,6 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	setEth1(ctx, &cfg.Rollup)
 	setRollup(ctx, &cfg.Rollup)
 
-	if ctx.GlobalIsSet(RollupDiffDbFlag.Name) {
-		cfg.DiffDbCache = ctx.GlobalUint64(RollupDiffDbFlag.Name)
-	}
 	if ctx.GlobalIsSet(SyncModeFlag.Name) {
 		cfg.SyncMode = *GlobalTextMarshaler(ctx, SyncModeFlag.Name).(*downloader.SyncMode)
 	}
@@ -1773,6 +1767,10 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			chainID = new(big.Int).SetUint64(id)
 		}
 
+		// UsingOVM
+		// The genesis block includes state that is set at runtime.
+		// This allows the statedump to be generic and not created
+		// specific for each network.
 		gasLimit := cfg.Rollup.GasLimit
 		if gasLimit == 0 {
 			gasLimit = params.GenesisGasLimit

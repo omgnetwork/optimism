@@ -169,7 +169,11 @@ class ListFarm extends React.Component {
     const name = poolInfo.name
 
     return (
-      <div className={styles.ListFarm}>
+      <div className={styles.ListFarm}
+      style={{
+        background: `${!!dropDownBox ? 'rgba(255, 255, 255, 0.03)' : ''}`
+      }}
+      >
         <div 
           className={styles.topContainer} 
           style={disabled ? {pointerEvents: 'none'} : {}}
@@ -206,6 +210,14 @@ class ListFarm extends React.Component {
             <div className={styles.BasicLightText}>
               {poolInfo.userDepositAmount ? 
                 `${logAmount(poolInfo.userDepositAmount, 18, 2)} ${symbol}` : `0 ${symbol}`
+              }
+            </div>
+          </div>
+          <div className={styles.Table5}>
+            <div className={styles.BasicText}>Balance</div>
+            <div className={styles.BasicLightText}>
+              {poolInfo.tokenBalance ?
+                `${logAmount(poolInfo.tokenBalance, 18, 2)} ${symbol}` : `0 ${symbol}`
               }
             </div>
           </div>
