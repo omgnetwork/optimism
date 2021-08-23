@@ -7,8 +7,8 @@ import "hardhat/console.sol";
 contract TuringHelper {
   bytes data_URL;
   TuringHelper Self;
-  bytes[] methods; 
-  
+  bytes[] methods;
+
   constructor(string memory _url) {
     console.log("Deploying a helper contract with data source:", _url);
     data_URL = bytes(_url);
@@ -60,23 +60,23 @@ contract TuringHelper {
     // Constrain these to simplify the RLP encoding logic.
     require (data_URL.length < 65536, "data_URL is too long");
     require (payload.length < 65536, "payload is too long");
-    
+
     uint32 l1 = uint32(data_URL.length);
     uint32 l2 = uint32(method.length);
     uint32 l3 = uint32(payload.length);
-    
+
     uint32 pLen = 1 + l1 + l2 + l3; // Payload length + inner headers
     uint32 hLen = 1; // Extra length of list header
-    
+
     uint8[4] memory pre;
-    
+
     (pre[1], pLen) = _lenCalc1(data_URL, pLen);
     (pre[2], pLen) = _lenCalc1(method, pLen);
     (pre[3], pLen) = _lenCalc1(payload, pLen);
-    
+
     // We now have the total length of the three items which will be in the list.
     // This determines the encoding required for the list header
-    
+
     if (pLen > 65535) {
       hLen += 3;
       pre[0] = 0xfa;
@@ -89,13 +89,13 @@ contract TuringHelper {
     } else {
       pre[0] = 0xc0 + uint8(pLen);
     }
-   
+
     bytes memory result = new bytes(hLen + pLen + prefix.length);
 
     for (i=0; i < prefix.length; i++) result[j++] = prefix[i];
-    
+
     result[j++] = bytes1(pre[0]);
-    
+
     if (pre[0] > 0xf9) {
       result[j++] = bytes1(uint8(pLen / 65536));
       pLen = pLen % 65536;
@@ -107,9 +107,9 @@ contract TuringHelper {
     if (pre[0] > 0xf7) {
       result[j++] = bytes1(uint8(pLen));
     }
-    
+
     result[j++] = request_version;
-    
+
     result[j++] = bytes1(pre[1]);
     if (pre[1] > 0xb8) {
       result[j++] = bytes1(uint8(l1 / 256));
@@ -119,7 +119,7 @@ contract TuringHelper {
       result[j++] = bytes1(uint8(l1));
     }
     for (i=0; i<data_URL.length; i++) result[j++] = data_URL[i];
-   
+
     result[j++] = bytes1(pre[2]);
     if (pre[2] > 0xb8) {
       result[j++] = bytes1(uint8(l2 / 256));

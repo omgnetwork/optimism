@@ -59,12 +59,20 @@ contract HelloTuring {
 
     return greeting;
   }
-  
+
   /* Example of performing off-chain calculations on numeric data types */
   function AddNumbers(uint112 a, uint112 b) public view returns (uint256) {
     uint256 c;
     bytes memory encRequest = abi.encode(a, b);
     bytes memory encResponse = myHelper.TuringCall(1, encRequest);
+    c = abi.decode(encResponse,(uint256));
+    return c;
+  }
+
+  function MultNumbers(uint112 a, uint112 b) public view returns (uint256) {
+    uint256 c;
+    bytes memory encRequest = abi.encode(a, b);
+    bytes memory encResponse = myHelper.TuringCall(2, encRequest);
     c = abi.decode(encResponse,(uint256));
     return c;
   }
