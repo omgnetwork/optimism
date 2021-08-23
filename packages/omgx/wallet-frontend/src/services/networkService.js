@@ -363,7 +363,7 @@ class NetworkService {
       } else if (masterSystemConfig === 'mainnet') {
         addresses = mainnetAddresses
         console.log('Mainnet Addresses:', addresses)
-      } else if (masterSystemConfig === 'rinkeby_integration') {
+      } else if (masterSystemConfig === 'rinkeby-integration') {
         addresses = rinkebyIntegrationAddresses
         console.log('Rinkeby Integration Addresses:', addresses)
       }
@@ -407,11 +407,11 @@ class NetworkService {
         //ok, that's reasonable
         //rinkeby, L2
         this.L1orL2 = 'L2'
-      } else if (masterSystemConfig === 'rinkeby_integration' && network.chainId === 4) {
+      } else if (masterSystemConfig === 'rinkeby-integration' && network.chainId === 4) {
         //ok, that's reasonable
         //rinkeby, L1
         this.L1orL2 = 'L1'
-      } else if (masterSystemConfig === 'rinkeby_integration' && network.chainId === 28) {
+      } else if (masterSystemConfig === 'rinkeby-integration' && network.chainId === 28) {
         //ok, that's reasonable
         //rinkeby, L2
         this.L1orL2 = 'L2'
