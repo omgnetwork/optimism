@@ -60,7 +60,7 @@ describe(`L1 <> L2 Deposit and Withdrawal`, () => {
 
   const L1StandardBridge = factory__L1StandardBridge.connect(l1Wallet).attach(L1StandardBridgeAddress)
   const L2StandardBridge = factory__L2StandardBridge.connect(l2Wallet).attach(L2StandardBridgeAddress)
-  let L1_ERC20, L2_ERC20, L1GasLimit = 8000000, L2GasLimit = 8000000;
+  let L1_ERC20, L2_ERC20, L1GasLimit = 15000000, L2GasLimit = 8000000;
 
   before(`deploy contracts`, async () => {
     // Deploy an ERC20 token on L1.
@@ -142,7 +142,9 @@ describe(`L1 <> L2 Deposit and Withdrawal`, () => {
 
     it(`should withdraw tokens back to L1 ERC20 and relay the message`, async () => {
       // Burn the tokens on L2 and ask the L1 contract to unlock on our behalf.
-      l2Tx1 = await L2StandardBridge.withdraw(
+      console.log(`l2 ballance: ${await l2Wallet.getBalance()}`);
+
+      l2Tx1 = await L2StandardBridge.connect(l2Wallet).withdraw(
         L2_ERC20.address,
         1234,
         L1GasLimit,
