@@ -5,7 +5,6 @@ export const WalletPickerContainer = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  margin-bottom: 50px;
 
   @include mobile {
     font-size: 0.9em;
@@ -23,7 +22,6 @@ export const WallerPickerWrapper = styled.div`
     flex-direction: column;
   }
   img {
-    margin-left: 10px;
     height: 20px;
   }
 `;
@@ -73,7 +71,7 @@ export const Dropdown = styled.div`
 `;
 
 export const NetWorkStyle = styled.div`
-  margin-left: 10px;
+  /* margin-left: 10px; */
   display: flex;
   flex-direction: row;
   align-items: center;

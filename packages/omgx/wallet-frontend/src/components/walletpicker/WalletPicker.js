@@ -162,18 +162,15 @@ function WalletPicker ({ onEnable, enabled }) {
         <Container maxWidth="md">
             <Grid container spacing={8}>
               <Grid item xs={12} md={6}>
-                <Typography variant="h1" component="h1" gutterBottom>
+                <Typography variant="h1" component="h1">
                   Connect a Wallet to access your assets on the network
                 </Typography>
-                <Box sx={{ mt: isMobile ? 2 : 4, mb: isMobile ? 2 : 8, mr: isMobile ? 5 : 10 }}>
-                  <Typography variant="body1" component="p" gutterBottom paragraph={true} style={{ color: grey[500] }}>
+                <S.Subtitle variant="body1" component="p" paragraph={true}>
                     Select the wallet that u use to connect it to OMGx system! Don’t worry more wallets support is coming soon
-                  </Typography>
-                </Box>
-                <S.DescriptionContent sx={{display: isMobile ? "none" : "flex"}}>
+                </S.Subtitle>
+                <S.WrapperLink sx={{display: isMobile ? "none" : "flex"}}>
                   <Link
                     style={{ color: grey[500]}}
-                    color= '#fff'
                     href="#"
                     underline="hover"
                     variant="body1"
@@ -184,29 +181,42 @@ function WalletPicker ({ onEnable, enabled }) {
                     More about OMGX and how L2 work
                   </Link>
                   <Arrow />
-                </S.DescriptionContent>
+                </S.WrapperLink>
               </Grid>
+
               <Grid item xs={12} md={6}>
                 <S.WalletCard
                   // disabled={!browserEnabled}
                   pulsate={true} onClick={() => dispatchSetWalletMethod('browser')} isMobile={isMobile}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <S.PlusIcon>+</S.PlusIcon>
-                    <Typography variant="h2" component="h2" paragraph={true} mb={0}>
-                      Metamask
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <Typography variant="body1" component="p" gutterBottom paragraph={true} mt={4} mr={4}>
+                  <S.WalletCardHeading>
+                    <S.WalletCardTitle>
+                      <S.PlusIcon>+</S.PlusIcon>
+                      <Typography variant="h2" component="h2" paragraph={true} mb={0}>
+                        Metamask
+                      </Typography>
+                    </S.WalletCardTitle>
+                    <Typography variant="body1" component="p" gutterBottom paragraph={true} mb={0}>
                       Connect using <strong>browser </strong>wallet
                     </Typography>
-                    <Fox width={50} />
-                  </Box>
+                  </S.WalletCardHeading>
+
+                  <S.WalletCardDescription>
+                    <Fox width={isMobile ? 100 : 50} />
+                  </S.WalletCardDescription>
+
                 </S.WalletCard>
-                <S.DescriptionContent sx={{display: isMobile ? "flex" : "none", justifyContent: 'center' }}>
+                <Button
+                  onClick={() => networkService.addL2Network()}
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  sx={{display: isMobile ? "flex" : "none" }}
+                >
+                  Add OMGX L2 Provider
+                </Button>
+                <S.WrapperLink sx={{display: isMobile ? "flex" : "none", justifyContent: "center"}}>
                   <Link
-                    style={{ color: grey[500]}}
-                    color= '#fff'
+                    style={{ color: theme.palette.secondary.main }}
                     href="#"
                     underline="hover"
                     variant="body1"
@@ -217,11 +227,7 @@ function WalletPicker ({ onEnable, enabled }) {
                     More about OMGX and how L2 work
                   </Link>
                   <Arrow />
-                </S.DescriptionContent>
-                <br />
-                <Button onClick={() => networkService.addL2Network()}>
-                  Add OMGX L2 Provider
-                </Button>
+                </S.WrapperLink>
               </Grid>
           </Grid>
         </Container>

@@ -5,8 +5,8 @@ export const Content = styled(Box)`
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin-bottom: 10px;
-  background-color: #1C2738;
+  margin-bottom: 5px;
+  background-color: rgba(255, 255, 255, 0.04);
   padding: 10px;
   border-radius: 6px;
 `;
