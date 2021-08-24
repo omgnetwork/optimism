@@ -1,6 +1,14 @@
 import { styled } from '@material-ui/core/styles'
 import { Box } from '@material-ui/core';
 
+export const Wrapper = styled(Box)`
+  border-bottom: 1px solid #192537;
+  padding: 20px 20px 20px 0;
+  border-radius: 8px;
+  background: ${(props) => props.dropDownBox ? 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)' : 'rgba(255, 255, 255, 0.03);'}
+  ;
+`;
+
 export const DropdownWrapper = styled(Box)`
   display: flex;
   align-items: center;

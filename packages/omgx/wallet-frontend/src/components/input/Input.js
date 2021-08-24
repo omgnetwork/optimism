@@ -32,7 +32,7 @@ function Input({
   value,
   onChange,
   sx,
-  // paste,
+  paste,
   // className,
   maxValue,
   // small,
@@ -41,6 +41,7 @@ function Input({
   variant,
   newStyle = false,
 }) {
+
   async function handlePaste() {
     try {
       const text = await navigator.clipboard.readText()
@@ -109,6 +110,11 @@ function Input({
           )}
         </S.ActionsWrapper>
       )}
+      {paste && (
+        <Box onClick={handlePaste} sx={{color: theme.palette.secondary.main, opacity: 0.9, cursor: 'pointer', position: 'absolute', right: '70px', fontSize: '14px'}}>
+          PASTE
+        </Box>
+      )}
     </S.Wrapper>
       /* <div className={[styles.Input, className].join(' ')}>
         {label &&
@@ -142,7 +148,7 @@ function Input({
           )}
           {paste && (
             <div onClick={handlePaste} className={styles.paste}>
-              Paste
+              // Paste
             </div>
           )}
         </div>
