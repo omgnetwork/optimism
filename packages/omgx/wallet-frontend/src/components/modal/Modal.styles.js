@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box, IconButton } from '@material-ui/core';
 import { styled } from '@material-ui/system';
 import ModalUnstyled from '@material-ui/unstyled/ModalUnstyled';
 
@@ -13,6 +13,7 @@ export const StyledModal = styled(ModalUnstyled)`
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: ${(props) => props.isMobile ? 'blur(20px)' : 'none'};
 `;
 
 export const Backdrop = styled('div')`
@@ -34,8 +35,17 @@ export const Style = styled(Box)`
   padding: ${(props) => props.transparent ? '0' : '40px'};
   border: 0;
   outline: 0;
-  // width: '500px',
   box-sizing: border-box;
   max-width: 100%;
   border-radius: 12px;
 `;
+
+export const IconButtonTag = styled(IconButton)(({ theme }) => ({
+  [theme.breakpoints.down('md')]: {
+    position: 'absolute',
+    top: -20,
+    right: 15,
+  },
+  [theme.breakpoints.up('md')]: {
+  },
+}));

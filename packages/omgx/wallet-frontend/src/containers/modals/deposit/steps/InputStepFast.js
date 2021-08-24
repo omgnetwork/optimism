@@ -13,7 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import { Alert, Box, Grid, Typography } from '@material-ui/core'
+import { useTheme } from '@emotion/react'
+import { Alert, Box, Grid, Typography, useMediaQuery } from '@material-ui/core'
 import { depositL1LP, approveERC20 } from 'actions/networkAction'
 import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
 import Button from 'components/button/Button'
@@ -25,7 +26,7 @@ import { selectLoading } from 'selectors/loadingSelector'
 import { selectLookupPrice } from 'selectors/lookupSelector'
 import networkService from 'services/networkService'
 import { powAmount, logAmount, amountToUsd } from 'util/amountConvert'
-import * as styles from '../DepositModal.module.scss'
+import * as S from './InputSteps.styles'
 
 function InputStepFast({ handleClose, token }) {
 
@@ -140,18 +141,18 @@ function InputStepFast({ handleClose, token }) {
     buttonLabel = "Approving..."
   }
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   return (
     <>
-      <Typography variant="h3" gutterBottom>
+      <Typography variant="h2">
         Fast Deposit
       </Typography>
 
-      <Alert severity="info" variant="simple">
-        {label}
-      </Alert>
+      <Typography variant="body2">{label}</Typography>
 
       <Box sx={{ mt: 3 }}>
-
         <Input
           label={`Amount to deposit`}
           placeholder="0.0"
@@ -160,51 +161,53 @@ function InputStepFast({ handleClose, token }) {
           onChange={(i)=>{setAmount(i.target.value)}}
           unit={token.symbol}
           maxValue={logAmount(token.balance, token.decimals)}
+          variant="standard"
         />
 
         {token && token.symbol === 'ETH' && (
-          <h3>
+          <Typography variant="body2" sx={{mt: 2}}>
             {value && `You will receive ${receivableAmount(value)} oETH ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
-          </h3>
+          </Typography>
         )}
 
         {token && token.symbol !== 'ETH' && (
-          <h3>
+          <Typography variant="body2" sx={{mt: 2}}>
             {value && `You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
-          </h3>
+          </Typography>
         )}
 
         {Number(LPBalance) < Number(value) && (
-          <h3 style={{ color: 'red' }}>
+          <Typography variant="body2"style={{ color: 'red', my: 2}}>
             The liquidity pool balance (of {LPBalance}) is too low to cover your fast deposit. Please
             use the traditional deposit or reduce the amount.
-          </h3>
+          </Typography>
         )}
       </Box>
 
-      <Grid justifyContent="flex-end" container spacing={2}>
-        <Grid item>
+      <S.WrapperActions>
+        {!isMobile ? (
           <Button
             onClick={handleClose}
             color="neutral"
+            size="lg"
           >
             Cancel
           </Button>
-        </Grid>
-        <Grid item>
-          <Button
-            onClick={doDeposit}
-            color='primary'
-            variant="contained"
-            loading={depositLoading || approvalLoading}
-            tooltip="Your deposit is still pending. Please wait for confirmation."
-            disabled={disabledSubmit}
-            triggerTime={new Date()}
-          >
-            {buttonLabel}
-          </Button>
-        </Grid>
-      </Grid>
+        ) : null}
+        <Button
+          onClick={doDeposit}
+          color='primary'
+          variant="contained"
+          loading={depositLoading || approvalLoading}
+          tooltip="Your deposit is still pending. Please wait for confirmation."
+          disabled={disabledSubmit}
+          triggerTime={new Date()}
+          size="lg"
+          fullWidth={isMobile}
+        >
+          {buttonLabel}
+        </Button>
+      </S.WrapperActions>
     </>
   )
 }

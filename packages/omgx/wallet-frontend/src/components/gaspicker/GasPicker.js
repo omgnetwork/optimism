@@ -18,6 +18,7 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { selectGas } from 'selectors/gasSelector';
+import * as S from './GasPicker.styles'
 import * as styles from './GasPicker.module.scss';
 
 function GasPicker ({ selectedSpeed, setSelectedSpeed, setGasPrice }) {
@@ -29,49 +30,49 @@ function GasPicker ({ selectedSpeed, setSelectedSpeed, setGasPrice }) {
 
   return (
     <Box sx={{ my: 3 }}>
-      <Typography variant="h6">
+      <Typography variant="h4" gutterBottom>
         Gas Fee
       </Typography>
 
       <Grid container spacing={1}>
         <Grid item xs={4}>
-          <Card
-            variant={selectedSpeed === 'slow' ? 'selected' : 'outlined'}
+          <S.CardTag
+            selected={selectedSpeed === 'slow'}
           >
             <CardActionArea onClick={() => setSelectedSpeed('slow')}>
-              <Box sx={{ p: 1 }}>
-                <Typography variant="body2">Slow</Typography>
-                <Typography variant="caption" color="primary">{gas.slow / 1000000000} gwei</Typography>
-              </Box>
+              <S.WrapperItem>
+                <Typography variant="body2" sx={{fontWeight: 700}}>Slow</Typography>
+                <Typography variant="caption" sx={{fontWeight: 700}}>{gas.slow / 1000000000} gwei</Typography>
+              </S.WrapperItem>
             </CardActionArea>
-          </Card>
+          </S.CardTag>
         </Grid>
 
         <Grid item xs={4}>
-          <Card
-            variant={selectedSpeed === 'normal' ? 'selected' : 'outlined'}
+          <S.CardTag selected={selectedSpeed === 'normal'}
           >
             <CardActionArea onClick={() => setSelectedSpeed('normal')}>
-              <Box sx={{ p: 1 }}>
-                <Typography variant="body2">Normal</Typography>
-                <Typography variant="caption" color="primary">{gas.normal / 1000000000} gwei</Typography>
-              </Box>
+              <S.WrapperItem>
+                <Typography variant="body2" sx={{fontWeight: 700}}>Normal</Typography>
+                <Typography variant="caption" sx={{fontWeight: 700}}>{gas.normal / 1000000000} gwei</Typography>
+              </S.WrapperItem>
             </CardActionArea>
-          </Card>
+          </S.CardTag>
         </Grid>
 
         <Grid item xs={4}>
-          <Card
-            variant={selectedSpeed === 'fast' ? 'selected' : 'outlined'}
+          <S.CardTag
+            selected={selectedSpeed === 'fast'}
           >
             <CardActionArea onClick={() => setSelectedSpeed('fast')}>
-              <Box sx={{ p: 1 }}>
-                <Typography variant="body2">Fast</Typography>
-                <Typography variant="caption" color="primary">{gas.fast / 1000000000} gwei</Typography>
-              </Box>
+              <S.WrapperItem>
+                <Typography variant="body2" sx={{fontWeight: 700}}>Fast</Typography>
+                <Typography variant="caption" sx={{fontWeight: 700}}>{gas.fast / 1000000000} gwei</Typography>
+              </S.WrapperItem>
             </CardActionArea>
-          </Card>
+          </S.CardTag>
         </Grid>
+
       </Grid>
     </Box>
   );

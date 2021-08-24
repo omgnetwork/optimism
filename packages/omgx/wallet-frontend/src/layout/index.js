@@ -108,15 +108,6 @@ function App () {
             borderRadius: 10,
           },
         },
-        variants: [
-          {
-            props: { variant: 'selected' },
-            style: {
-              border: '1px solid #506DFA',
-              boxShadow: '0 0 0 1px #506DFA inset'
-            },
-          },
-        ],
       },
       MuiButton: {
         styleOverrides: {
