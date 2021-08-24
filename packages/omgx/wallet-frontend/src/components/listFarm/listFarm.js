@@ -14,6 +14,8 @@ import RemoveIcon from '@material-ui/icons/Remove';
 
 import networkService from 'services/networkService';
 
+import { getCoinImage } from 'util/coinImage';
+
 import * as styles from './listFarm.module.scss';
 import { Box, Typography, Fade, useMediaQuery } from '@material-ui/core';
 import * as S from "./ListFarm.styles"
@@ -25,7 +27,6 @@ class ListFarm extends React.Component {
     super(props);
 
     const {
-      logo,
       poolInfo,
       userInfo,
       L1orL2Pool,
@@ -34,7 +35,6 @@ class ListFarm extends React.Component {
     } = this.props;
 
     this.state = {
-      logo,
       balance,
       decimals,
       L1orL2Pool,
@@ -146,7 +146,6 @@ class ListFarm extends React.Component {
   render() {
 
     const {
-      logo,
       poolInfo, userInfo,
       dropDownBox, dropDownBoxInit,
       loading, L1orL2Pool
@@ -172,7 +171,7 @@ class ListFarm extends React.Component {
     const disabled = !L1orL2Pool.includes(networkService.L1orL2)
     const symbol = poolInfo.symbol
     const name = poolInfo.name
-    console.log('isMobile', isMobile)
+    const logo = getCoinImage(symbol);
 
     return (
       <div className={styles.ListFarm}>

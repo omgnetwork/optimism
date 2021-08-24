@@ -23,6 +23,7 @@ import useInterval from 'util/useInterval';
 import {
   checkWatcherStatus,
   fetchBalances,
+  addTokenList,
   fetchNFTs,
   fetchExits,
   fetchDeposits,
@@ -121,11 +122,12 @@ function Home () {
   //get all account balances
   useInterval(() => {
     dispatch(fetchBalances());
+    dispatch(addTokenList());
     dispatch(fetchNFTs());
   }, POLL_INTERVAL);
 
   useEffect(() => {
-    checkVersion()
+    checkVersion();
   }, [])
 
   const handleSetPage = async (page) => {

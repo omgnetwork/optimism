@@ -7,10 +7,10 @@ import {
 import SearchIcon from 'components/icons/SearchIcon';
 
 /**
- * 
+ *
  * @param {
  *  optionList: ['string','string']
- * } param 
+ * } param
  * @returns ReactComponent
  */
 
