@@ -13,7 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import { Box, Grid, Typography } from '@material-ui/core'
+import { useTheme } from '@emotion/react'
+import { Box, Grid, Typography, useMediaQuery } from '@material-ui/core'
 import { exitOMGX } from 'actions/networkAction'
 import { openAlert, openError } from 'actions/uiAction'
 import Button from 'components/button/Button'
@@ -24,6 +25,7 @@ import { selectLoading } from 'selectors/loadingSelector'
 import { selectLookupPrice } from 'selectors/lookupSelector'
 import { amountToUsd, logAmount } from 'util/amountConvert'
 import * as styles from '../ExitModal.module.scss'
+import * as S from './DoExitSteps.styles'
 
 function DoExitStep({ handleClose, token }) {
 
@@ -66,58 +68,59 @@ function DoExitStep({ handleClose, token }) {
     }
     setValue(value)
   }
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <>
-      <Typography variant="h3" gutterBottom>
+      <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
         Standard Exit ({` ${token ? token.symbol : ''}`})
       </Typography>
 
-      <Box display="block">
-        <Input
-          label={'Amount to exit'}
-          placeholder="0.0"
-          value={value}
-          type="number"
-          onChange={(i)=>{setExitAmount(i.target.value)}}
-          unit={token.symbol}
-          maxValue={logAmount(token.balance, token.decimals)}
-        />
-      </Box>
+      <Input
+        label={'Amount to exit'}
+        placeholder="0.0"
+        value={value}
+        type="number"
+        onChange={(i)=>{setExitAmount(i.target.value)}}
+        unit={token.symbol}
+        maxValue={logAmount(token.balance, token.decimals)}
+        variant="standard"
+        newStyle
+      />
 
 
       {token && token.symbol === 'oETH' && (
-        <h3>
+        <Typography variant="body2" sx={{mt: 2}}>
           {value &&
             `You will receive ${Number(value).toFixed(2)} ETH
             ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
             on L1.
             Your funds will be available on L1 in 7 days.`}
-        </h3>
+        </Typography>
       )}
 
       {token && token.symbol !== 'oETH' && (
-        <h3>
+        <Typography variant="body2" sx={{mt: 2}}>
           {value &&
             `You will receive ${Number(value).toFixed(2)}
             ${token.symbol}
             ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
             on L1.
             Your funds will be available on L1 in 7 days.`}
-        </h3>
+        </Typography>
       )}
 
-      <Grid justifyContent="flex-end" container spacing={2}>
-        <Grid item>
+      <S.WrapperActions>
+        {!isMobile ? (
           <Button
             onClick={handleClose}
             color="neutral"
-            style={{ flex: 0 }}
+            size="lg"
           >
             Cancel
           </Button>
-        </Grid>
-        <Grid item>
+        ) : null}
           {token && (
             <Button
               onClick={doExit}
@@ -127,12 +130,13 @@ function DoExitStep({ handleClose, token }) {
               tooltip="Your exit is still pending. Please wait for confirmation."
               disabled={disabledSubmit}
               triggerTime={new Date()}
+              fullWidth={isMobile}
+              size="lg"
             >
               Exit
             </Button>
           )}
-        </Grid>
-      </Grid>
+      </S.WrapperActions>
     </>
   )
 }

@@ -209,7 +209,7 @@ function Account () {
       } */}
       {isMobile ? (
         <>
-          <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, mt: 2}}>
+          <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, my: 2}}>
             <Tab label="Ethereum Mainnet - L1" />
             <Tab label="OMGX Mainnet - L2" />
           </Tabs>

@@ -31,6 +31,7 @@ function Input({
   unit,
   value,
   onChange,
+  sx,
   // paste,
   // className,
   maxValue,
@@ -38,6 +39,7 @@ function Input({
   fullWidth,
   size,
   variant,
+  newStyle = false,
 }) {
   async function handlePaste() {
     try {
@@ -60,20 +62,22 @@ function Input({
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
-    <S.Wrapper>
-      {!isMobile ? (
+    <S.Wrapper newStyle={newStyle}>
+      {unit && (
         <S.UnitContent>
           <div>
             <Typography variant="body2" component="div">{unit}</Typography>
             <EthereumIcon width={50} />
           </div>
         </S.UnitContent>
-      ) : null}
+      )}
 
       <S.InputWrapper>
-        <Typography variant="body2" component="div" sx={{opacity: 0.7}}>
-          {label}
-        </Typography>
+        {label && (
+          <Typography variant="body2" component="div" sx={{opacity: 0.7, mb: 1}}>
+            {label}
+          </Typography>
+        )}
         <S.TextFieldTag
           placeholder={placeholder}
           type={type}
@@ -85,12 +89,14 @@ function Input({
           variant={variant}
           error={overMax}
           InputProps={{ disableUnderline: true }}
+          sx={sx}
+          newStyle={newStyle}
         />
       </S.InputWrapper>
 
       {unit && (
         <S.ActionsWrapper>
-          <Typography variant="body2" component="p" sx={{opacity: 0.7, textAlign: "end"}}>
+          <Typography variant="body2" component="p" sx={{opacity: 0.7, textAlign: "end", mb: 2}}>
             Available: {Number(maxValue).toFixed(3)}
           </Typography>
 

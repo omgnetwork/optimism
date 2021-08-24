@@ -1,32 +1,24 @@
 import { styled } from '@material-ui/core/styles'
-import { Box, Input, TextField } from '@material-ui/core'
+import { Box, TextField } from '@material-ui/core'
 
-export const Wrapper = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  backgroundColor: 'rgba(9, 22, 43, 0.5)',
-  borderRadius: '8px',
-  boxShadow: '-13px 15px 19px rgba(0, 0, 0, 0.15), inset 53px 36px 120px rgba(255, 255, 255, 0.06)',
-  padding: '20px 30px',
-  border: '2px solid #5E6170',
-  // [theme.breakpoints.down('md')]: {
-  // },
-  // [theme.breakpoints.up('md')]: {
-  // },
-}));
+export const Wrapper = styled(Box)`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: ${(props) => props.newStyle ? 'rgba(9, 22, 43, 0.5)' : 'transparente' };
+  border-radius: 8px;
+  box-shadow: ${(props) => props.newStyle ? '-13px 15px 19px rgba(0, 0, 0, 0.15), inset 53px 36px 120px rgba(255, 255, 255, 0.06)' : 'none' };
+  padding: ${(props) => props.newStyle ? '20px 30px' : '0' };
+  border: ${(props) => props.newStyle ? '2px solid #5E6170' : 'none' };
+`;
 
-export const TextFieldTag = styled(TextField)({
+export const TextFieldTag = styled(TextField)(({ ...props }) => ({
   '& .MuiInputBase-input': {
-    fontSize: '24px',
+    fontSize: props.newStyle ? '24px' : '16px',
     fontWeight: 700,
     opacity: 0.7,
   }
-  // '& .MuiInputBase': {
-    // fontWeight: 700,
-    // fontSize: '20px',
-  // },
-});
+}));
 
 export const UnitContent = styled(Box)`
 display: flex;
@@ -44,7 +36,6 @@ flex: 2;
 export const InputWrapper = styled(Box)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: '15px',
   flex: 6,
   [theme.breakpoints.down('md')]: {
     flex: 4,
@@ -55,7 +46,5 @@ export const ActionsWrapper = styled(Box)`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 20px;
   flex: 3;
-
 `;

@@ -30,7 +30,7 @@ import networkService from 'services/networkService';
 import * as styles from './TransferModal.module.scss';
 import Input from 'components/input/Input';
 import { selectLookupPrice } from 'selectors/lookupSelector';
-import { Box, Grid, TextField, Typography } from '@material-ui/core';
+import { Box, Grid, TextField, Typography, useMediaQuery } from '@material-ui/core';
 import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon';
 import * as S from './TransferModal.style';
 import BoxConfirmation from './boxConfirmation/BoxConfirmation';
@@ -52,7 +52,9 @@ function TransferModal ({ open, token }) {
   const wAddress = networkService.account ? truncate(networkService.account, 6, 14, '.') : '';
 
   const lookupPrice = useSelector(selectLookupPrice);
+
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   async function submit () {
     if (
@@ -82,135 +84,83 @@ function TransferModal ({ open, token }) {
     !token.address ||
     !recipient
 
-  function renderTransferScreen () {
-    if(typeof(token) === 'undefined') return
-
-    return (
-      <>
-        <S.StyleCreateTransactions>
-          <Grid container>
-            <Grid item xs={5}>
-              <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px"}}>
-                <Typography variant="h2" component="h2">From ETH Mainnet</Typography>
-                <NetworkSwitcherIcon active />
-              </Box>
-              <Typography variant="body2" component="div" sx={{opacity: 0.5}}>Select Token</Typography>
-
-              <Grid container>
-                <Grid item xs={4}>
-                  <Box sx={{ background: "#121e30", borderRight: "1px solid #2F2E40", height: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                    {token.symbol}
-                  </Box>
-                </Grid>
-
-                <Grid item xs={8}>
-                  <AdressDisabled>
-                    <Typography variant="body1" component="p">
-                      {wAddress}
-                    </Typography>
-                  </AdressDisabled>
-                </Grid>
-              </Grid>
-            </Grid>
-
-            <Grid item xs={2}>
-              <S.SwapCircle>
-                <SwapIcon />
-              </S.SwapCircle>
-              <S.Line />
-            </Grid>
-
-            <Grid item xs={5}>
-              <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px"}}>
-                <Typography variant="h2" component="h2">To OMGX Mainnet</Typography>
-                <NetworkSwitcherIcon />
-              </Box>
-              <Input
-                label='Enter Adress'
-                placeholder='Enter adress to send to...'
-                value={recipient}
-                onChange={i => setRecipient(i.target.value)}
-                fullWidth
-                // size="small"
-              />
-            </Grid>
-          </Grid>
-
-          <S.Balance>
-            <Box display="flex">
-              <Box sx={{ flexGrow: 1, flexBasis: 1 }}>
-                <S.ContentBalance>
-                  <Box>
-                    <Input
-                      label="Enter Amount"
-                      placeholder="0,00"
-                      value={value}
-                      type="number"
-                      onChange={(i) => {setValue(i.target.value)}}
-                      unit={token.symbol}
-                      maxValue={logAmount(token.balance, token.decimals)}
-                      size="small"
-                    />
-                    {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
-                      <Typography variant="body2" component="p" sx={{opacity: 0.5, position: 'absolute'}}>
-                        {`($${amountToUsd(value, lookupPrice, token).toFixed(2)})`}
-                      </Typography>
-                    )}
-                  </Box>
-                </S.ContentBalance>
-              </Box>
-
-              <Box sx={{ flexGrow: 0, flexShrink: 0 }}>
-                <S.TransactionsButton>
-                  <S.FastButton active={activeButton} onClick={() => setActiveButton("fast")}>Fast</S.FastButton>
-                  <S.BridgeButton onClick={() => setShowFeedback(true)} >
-                    <Typography variant="body2" component="span">Bridge</Typography>
-                  </S.BridgeButton>
-                  <S.SlowButton active={activeButton} onClick={() => setActiveButton("slow")}>Slow</S.SlowButton>
-                </S.TransactionsButton>
-              </Box>
-
-              <Box sx={{ flexGrow: 1, flexBasis: 1 }}>
-                <S.ContentBalance>
-                  <Box>
-                    <Typography variant="body2" component="p"sx={{opacity: 0.5}}>Current Balance</Typography>
-                    <Typography variant="body2" component="p" sx={{opacity: 0.5}}>0,0224</Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="h3" component="span" sx={{color: theme.palette.secondary.main}}>+ 0,3142</Typography>
-                    <Typography variant="body2" component="p" sx={{opacity: 0.5}}>New Balance: 0,3364</Typography>
-                  </Box>
-                </S.ContentBalance>
-              </Box>
-            </Box>
-          </S.Balance>
-
-        {/* <Button
-          className={styles.button}
-          onClick={()=>{submit({useLedgerSign: false})}}
-          type='primary'
-          loading={loading}
-          tooltip='Your transfer is still pending. Please wait for confirmation.'
-          disabled={disabledTransfer}
-          triggerTime={new Date()}
-        >
-          TRANSFER
-        </Button> */}
-        </S.StyleCreateTransactions>
-      </>
-    );
-  }
+  if(typeof(token) === 'undefined') return
 
   return (
-    <Modal title="Create bridging transaction" open={open} transparent onClose={handleClose}>
-      {renderTransferScreen()}
-      <BoxConfirmation
+    <Modal open={open} onClose={handleClose} maxWidth="md">
+      <Typography variant="h2" sx={{fontWeight: 700, mb: 2}}>
+        Transfer
+      </Typography>
+
+      <Typography variant="body1" sx={{mb: 1}}>
+        From Adress: {wAddress}
+      </Typography>
+
+      <Typography variant="body1" sx={{mb: 1}}>
+        To Adress
+      </Typography>
+
+      <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
+        <Input
+          placeholder='Enter adress to send to...'
+          value={recipient}
+          onChange={i => setRecipient(i.target.value)}
+          fullWidth
+          sx={{fontSize: '50px', boxShadow: '-13px 15px 19px rgba(0, 0, 0, 0.15), inset 53px 36px 120px rgba(255, 255, 255, 0.06)', backgroundColor: 'rgba(9, 22, 43, 0.5)'}}
+        />
+
+        <Input
+          label="Enter Amount to Deposit"
+          placeholder="0,00"
+          value={value}
+          type="number"
+          onChange={(i) => {setValue(i.target.value)}}
+          unit={token.symbol}
+          maxValue={logAmount(token.balance, token.decimals)}
+          variant="standard"
+          newStyle
+        />
+      </Box>
+
+      {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+        <Typography variant="body2" component="p" sx={{opacity: 0.5, mt: 3}}>
+          {`($${amountToUsd(value, lookupPrice, token).toFixed(2)})`}
+        </Typography>
+      )}
+
+      <S.WrapperActions>
+        {!isMobile ? (
+          <Button
+            onClick={handleClose}
+            color="neutral"
+            size="lg"
+          >
+            Cancel
+          </Button>
+        ) : null}
+          <Button
+            onClick={() => {submit({useLedgerSign: false})}}
+            color='primary'
+            variant="contained"
+            loading={loading}
+            tooltip='Your exit is still pending. Please wait for confirmation.'
+            disabled={disabledTransfer}
+            triggerTime={new Date()}
+            fullWidth={isMobile}
+            size="lg"
+          >
+            Deposit
+          </Button>
+      </S.WrapperActions>
+
+      {/* <BoxConfirmation
         recipient={recipient}
         value={value}
         showFeedback={showFeedback}
         setShowFeedback={setShowFeedback}
         handleClose={handleClose}
-        onSubmit={() => {submit({useLedgerSign: false})}} />
+        onSubmit={() => {submit({useLedgerSign: false})}}
+      /> */}
     </Modal>
   );
 }
