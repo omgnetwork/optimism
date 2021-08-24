@@ -31,13 +31,13 @@ import networkService from 'services/networkService'
 import * as S from './Account.styles'
 import { selectTokens } from 'selectors/tokenSelector'
 import PageHeader from 'components/pageHeader/PageHeader'
-import { Box, Grid, Paper, Tab, Tabs, Typography, useMediaQuery } from '@material-ui/core'
+import { Box, Grid, Tab, Tabs, Typography, useMediaQuery } from '@material-ui/core'
 import { fetchGas, fetchLookUpPrice } from 'actions/networkAction'
 import { selectNetwork } from 'selectors/setupSelector'
-import { WrapperHeading } from './Account.styles'
 import { useTheme } from '@emotion/react'
 import { tableHeadList } from './tableHeadList'
 import TabPanel from 'components/tabs/TabPanel'
+import AccountGlass from '../../images/backgrounds/account-glass.png'
 
 function Account () {
   const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
@@ -172,6 +172,18 @@ function Account () {
     <>
       <PageHeader title="Wallet"/>
 
+      <S.CardTag>
+        <S.CardContentTag>
+          <S.CardInfo>Boba Balance</S.CardInfo>
+          <S.BalanceValue component ="div">0.50</S.BalanceValue>
+          <Typography>oETH</Typography>
+        </S.CardContentTag>
+
+        <S.ContentGlass>
+          <img src={AccountGlass} href="#" width={180}/>
+        </S.ContentGlass>
+
+      </S.CardTag>
       {/* {!balances['oETH']['have'] &&
         <div className={styles.RabbitBox}>
           <div className={styles.RabbitRight}>
@@ -197,7 +209,7 @@ function Account () {
       } */}
       {isMobile ? (
         <>
-          <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700}}>
+          <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, mt: 2}}>
             <Tab label="Ethereum Mainnet - L1" />
             <Tab label="OMGX Mainnet - L2" />
           </Tabs>

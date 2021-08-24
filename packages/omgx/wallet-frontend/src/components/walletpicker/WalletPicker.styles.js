@@ -22,7 +22,6 @@ export const Subtitle = styled(Typography)(({ theme }) => ({
 }));
 
 export const WalletCard = styled.div`
-
   border-top-left-radius: 4px;
   border-top-right-radius: 16px;
   border-bottom-left-radius: 16px;
