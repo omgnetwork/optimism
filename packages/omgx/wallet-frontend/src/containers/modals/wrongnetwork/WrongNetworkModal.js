@@ -17,12 +17,13 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Modal from 'components/modal/Modal';
 import { closeModal } from 'actions/uiAction';
-import close from 'images/close.png';
-import arrow from 'images/arrow.png';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 
 import * as styles from './WrongNetworkModal.module.scss';
 
 import { selectNetwork } from 'selectors/setupSelector';
+import { Box, Card, Typography } from '@material-ui/core';
+import { styled } from '@material-ui/core/styles';
 
 function WrongNetworkModal ({ open, onClose }) {
 
@@ -39,39 +40,24 @@ function WrongNetworkModal ({ open, onClose }) {
       open={open}
       onClose={handleClose}
       light
+      maxWidth="sm"
     >
-      <div className={styles.WrongNetworkModal}>
-        <img
-          className={styles.close}
-          onClick={handleClose}
-          src={close}
-          alt='close'
-        />
-        <h2>Wrong Network</h2>
+      <Typography variant="h2" gutterBottom>
+        Wrong Network
+      </Typography>
 
-        <div className={styles.content}>
-          <div className={styles.description}>
-            Metamask is set to the wrong network. Please switch Metamask to {masterConfig} to continue.
-          </div>
+      <Typography variant="body1">
+        Metamask is set to the wrong network. Please switch Metamask to {masterConfig} to continue.
+      </Typography>
 
-          <div className={styles.currentNetwork}>
-            <div
-              className={[
-                styles.indicator,
-                styles.active
-              ].join(' ')}
-            />
-            <span>{masterConfig}</span>
-          </div>
-
-          <img
-            className={styles.arrow}
-            src={arrow}
-            alt='arrow'
-          />
-          
-        </div>
-      </div>
+      <Box display="flex" sx={{ flexDirection: 'column', alignItems: 'center', mt: 3 }}>
+        <Card variant="outlined" sx={{ px: 2, py: 1, minWidth: 200, mb: 1 }}>
+          <Typography variant="body1" color="secondary">
+            {masterConfig}
+          </Typography>
+        </Card>
+        <ArrowUpwardIcon color="disabled" />
+      </Box>
     </Modal>
   );
 }

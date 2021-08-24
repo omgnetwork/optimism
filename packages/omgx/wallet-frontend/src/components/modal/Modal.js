@@ -48,17 +48,18 @@ function _Modal ({
       isMobile={isMobile}
       // closeAfterTransition
       BackdropComponent={S.Backdrop}
+      disableAutoFocus={true}
     >
       <Fade in={open}>
         <Container maxWidth={maxWidth || "lg"} sx={{border: 'none', position: 'relative'}}>
           <Grid container>
-            <Grid item xs={12} md={2}>
+            <Grid item xs={12} md={title ? 2 : 1}>
               <Box sx={{mr: 8}}>
                 <Typography variant="h2" component="h3" sx={{ fontWeight: "700"}}>{title}</Typography>
               </Box>
             </Grid>
 
-            <Grid item xs={12} md={9}>
+            <Grid item xs={12} md={title ? 10 : 9}>
               <S.Style isMobile={isMobile} transparent={transparent || isMobile}>
                 {children}
               </S.Style>
