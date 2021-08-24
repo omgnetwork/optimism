@@ -1,5 +1,5 @@
 import { styled } from '@material-ui/core/styles'
-import { Box, Typography } from "@material-ui/core";
+import { Box, Card, CardContent, Typography } from "@material-ui/core";
 
 export const WrapperHeading = styled(Box)`
   display: flex;
@@ -41,3 +41,43 @@ export const AccountWrapper = styled(Box)(({ theme }) => ({
   },
 }));
 
+export const CardTag = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  padding: '10px',
+  border: '2px solid rgba(255, 255, 255, 0.2)',
+  overflow: 'initial',
+  maxHeight: '190px',
+  [theme.breakpoints.up('md')]: {
+    margin: '50px 0 30px 0'
+  },
+}));
+
+export const CardContentTag = styled(CardContent)(({ theme }) => ({
+  backgroundColor: 'rgba(255, 255, 255, 0.04)',
+  borderRadius: '6px',
+  flex: 9,
+  [theme.breakpoints.down('md')]: {
+    // backgroundColor: "transparent",
+  },
+}));
+
+export const BalanceValue = styled(Typography)(({ theme }) => ({
+  color: theme.palette.secondary.main,
+  fontSize: '50px !important',
+  fontWeight: 700
+}));
+
+export const CardInfo = styled(Typography)`
+  opacity: 0.7;
+  font-size: 20px !important;
+`;
+
+export const ContentGlass = styled(Box)(({ theme }) => ({
+ position: 'relative',
+ top: '-100px',
+ left: '20px',
+ flex: 3,
+ [theme.breakpoints.up('md')]: {
+  top: '-85px',
+},
+}));

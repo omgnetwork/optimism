@@ -31,13 +31,13 @@ import networkService from 'services/networkService'
 import * as S from './Account.styles'
 import { selectTokens } from 'selectors/tokenSelector'
 import PageHeader from 'components/pageHeader/PageHeader'
-import { Box, Grid, Paper, Tab, Tabs, Typography, useMediaQuery } from '@material-ui/core'
+import { Box, Grid, Tab, Tabs, Typography, useMediaQuery } from '@material-ui/core'
 import { fetchGas, fetchLookUpPrice } from 'actions/networkAction'
 import { selectNetwork } from 'selectors/setupSelector'
-import { WrapperHeading } from './Account.styles'
 import { useTheme } from '@emotion/react'
 import { tableHeadList } from './tableHeadList'
 import TabPanel from 'components/tabs/TabPanel'
+import AccountGlass from '../../images/backgrounds/account-glass.png'
 
 function Account () {
   const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
@@ -172,32 +172,21 @@ function Account () {
     <>
       <PageHeader title="Wallet"/>
 
-      {/* {!balances['oETH']['have'] &&
-        <div className={styles.RabbitBox}>
-          <div className={styles.RabbitRight}>
-            <div className={styles.RabbitRightTop}>
-              BOBA Balance
-            </div>
-            <div className={styles.RabbitRightMiddle}>
-                <div className={styles.sad}>0</div>
-            </div>
-            <div className={styles.RabbitRightBottom}>
-              oETH
-            </div>
-            <div className={styles.RabbitRightBottomNote}>
-            {networkLayer === 'L1' &&
-              <span>You are on L1. To use the L2, please switch to L2 in MetaMask.</span>
-            }
-            {networkLayer === 'L2' &&
-              <span>You are on L2. To use the L1, please switch to L1 in MetaMask.</span>
-            }
-            </div>
-          </div>
-        </div>
-      } */}
+      <S.CardTag>
+        <S.CardContentTag>
+          <S.CardInfo>Boba Balance</S.CardInfo>
+          <S.BalanceValue component ="div">{balances['oETH'].amountShort}</S.BalanceValue>
+          <Typography>oETH</Typography>
+        </S.CardContentTag>
+
+        <S.ContentGlass>
+          <img src={AccountGlass} href="#" width={180}/>
+        </S.ContentGlass>
+
+      </S.CardTag>
       {isMobile ? (
         <>
-          <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700}}>
+          <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, mt: 2}}>
             <Tab label="Ethereum Mainnet - L1" />
             <Tab label="OMGX Mainnet - L2" />
           </Tabs>

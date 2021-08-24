@@ -66,10 +66,11 @@ function _Modal ({
             </Grid>
 
             <Grid item xs={12} md={1}>
-            <S.IconButtonTag onClick={onClose}>
-              <CloseIcon />
-            </S.IconButtonTag>
+              <S.IconButtonTag onClick={onClose}>
+                <CloseIcon />
+              </S.IconButtonTag>
             </Grid>
+
           </Grid>
         </Container>
       </Fade>

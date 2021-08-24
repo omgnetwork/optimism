@@ -60,7 +60,6 @@ function NetworkSwitcher() {
           >
             {!!allNetworks.length && showAllNetworks && allNetworks.map((network,   ) => (
               <div
-                style={{background: `linear-gradient(90deg, rgba(237, 72, 240, 0.09) 1.32%, rgba(237, 72, 236, 0.0775647) 40.2%`, color: 'white', marginTop: 5, paddingTop: 5, paddingBottom: 5, paddingLeft: 12, paddingRight: 5, borderRadius: 3, cursor: 'pointer'}}
                 // key={index}
                 onClick={()=>dispatchSetNetwork(network)}
               >

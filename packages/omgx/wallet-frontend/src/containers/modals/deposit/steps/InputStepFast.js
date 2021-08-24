@@ -154,7 +154,7 @@ function InputStepFast({ handleClose, token }) {
 
       <Box sx={{ mt: 3 }}>
         <Input
-          label={`Amount to deposit`}
+          label={`Enter amount to deposit`}
           placeholder="0.0"
           value={value}
           type="number"
