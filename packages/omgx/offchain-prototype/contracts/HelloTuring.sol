@@ -76,4 +76,12 @@ contract HelloTuring {
     c = abi.decode(encResponse,(uint256));
     return c;
   }
+
+  function isCatOrDog(string memory url) public view returns (string memory) {
+    string memory result;
+    bytes memory encRequest = abi.encode(url);
+    bytes memory encResponse = myHelper.TuringCall(3, encRequest);
+    result = abi.decode(encResponse, (string));
+    return result;
+  }
 }
