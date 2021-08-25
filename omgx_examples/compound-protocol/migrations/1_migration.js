@@ -9,13 +9,16 @@ const sleep = (timeout) => {
 }
 
 module.exports = async function (deployer) {
+  
   const accounts = await web3.eth.getAccounts()
+  
   const Comp = artifacts.require('Comp')
   const Timelock = artifacts.require('Timelock')
   const GovernorBravoDelegate = artifacts.require('GovernorBravoDelegate')
   const GovernorBravoDelegator = artifacts.require('GovernorBravoDelegator')
 
   const user = accounts[0]
+  
   console.log('STARTING HERE')
   console.log(user)
   // Deploy Comp

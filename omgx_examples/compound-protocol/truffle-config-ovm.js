@@ -26,11 +26,11 @@ module.exports = {
           mnemonic: {
             phrase: mnemonicPhrase,
           },
-          providerOrUrl: 'http://rinkeby.omgx.network',
+          providerOrUrl: 'http://rinkeby.boba.network',
         })
       },
       network_id: 28,
-      host: 'http://rinkeby.omgx.network',
+      host: 'rinkeby.boba.network',
       gasPrice: 0,
       gas: 54180127,
     },
