@@ -49,14 +49,15 @@ export const CardTag = styled(Card)(({ theme }) => ({
   overflow: 'initial',
   maxHeight: '190px',
   [theme.breakpoints.up('md')]: {
-    margin: '50px 0 30px 0'
+    margin: '60px 0 30px 0'
   },
 }));
 
 export const CardContentTag = styled(CardContent)(({ theme }) => ({
+  clipPath: 'polygon(0 0, 93% 0, 100% 100%, 0% 100%)',
   backgroundColor: 'rgba(255, 255, 255, 0.04)',
   borderRadius: '6px',
-  flex: 9,
+  flex: 12,
   [theme.breakpoints.down('md')]: {
     // backgroundColor: "transparent",
   },
@@ -74,11 +75,17 @@ export const CardInfo = styled(Typography)`
 `;
 
 export const ContentGlass = styled(Box)(({ theme }) => ({
- position: 'relative',
- top: '-100px',
- left: '20px',
- flex: 3,
- [theme.breakpoints.up('md')]: {
+  transform: 'rotateZ(350deg)',
+  position: 'relative',
+  top: '-87px',
+  left: '-12px',
+  flex: 3,
+  [theme.breakpoints.up('md')]: {
+  top: '-83px',
+  left: '-20px',
+  },
+  [theme.breakpoints.up('lg')]: {
   top: '-85px',
-},
+  left: '-13px',
+  },
 }));

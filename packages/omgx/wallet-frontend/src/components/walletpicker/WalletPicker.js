@@ -146,6 +146,8 @@ function WalletPicker ({ onEnable, enabled }) {
     return <S.Loading>Switching Chain...</S.Loading>
   }
 
+  console.log('----> ta logado wallet?', walletEnabled)
+
   return (
     <>
       <WrongNetworkModal
@@ -158,7 +160,7 @@ function WalletPicker ({ onEnable, enabled }) {
           top: '10px',
           right: '20px'
         }}>
-          <NetworkSwitcher />
+          <NetworkSwitcher walletEnabled={walletEnabled} />
         </Box>
         <Container maxWidth="md">
           <Grid container spacing={8}>

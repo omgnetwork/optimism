@@ -14,6 +14,9 @@ import { logAmount, powAmount } from 'util/amountConvert';
 import networkService from 'services/networkService';
 
 import * as styles from './Farm.module.scss';
+import * as S from './FarmModal.styles';
+import { useTheme } from '@emotion/react';
+import { Typography, useMediaQuery } from '@material-ui/core';
 
 class FarmDepositModal extends React.Component {
   constructor(props) {
@@ -143,10 +146,15 @@ class FarmDepositModal extends React.Component {
       loading,
     } = this.state;
 
-    return (
-      <Modal open={open} maxWidth="md">
+    // const theme = useTheme();
+    // const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-        <h2>Stake {`${stakeToken.symbol}`}</h2>
+    return (
+      <Modal open={open} maxWidth="md" onClose={()=>{this.handleClose()}}>
+
+        <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
+          Stake {`${stakeToken.symbol}`}
+        </Typography>
 
         <Input
           placeholder={`Amount to stake`}
@@ -156,62 +164,69 @@ class FarmDepositModal extends React.Component {
           unit={stakeToken.symbol}
           maxValue={this.getMaxTransferValue()}
           newStyle
+          variant="standard"
         />
 
         {Number(stakeValue) > Number(this.getMaxTransferValue()) &&
-          <div className={styles.disclaimer}>
+          <Typography variant="body2" sx={{mt: 2}}>
             You don't have enough {stakeToken.symbol} to stake.
-          </div>
+          </Typography>
         }
 
         {(new BN(approvedAllowance).gte(powAmount(stakeValue, 18)) || stakeValue === '') &&
-          <div className={styles.buttons}>
-            <Button
-              onClick={()=>{this.handleClose()}}
-              type='outline'
-              className={styles.button}
-            >
-              CANCEL
-            </Button>
+          <S.WrapperActions>
+            {/* {!isMobile ? ( */}
+              <Button
+                onClick={()=>{this.handleClose()}}
+                color="neutral"
+                size="large"
+              >
+                CANCEL
+              </Button>
+            {/* ) : null} */}
             <Button
               onClick={()=>{this.handleConfirm()}}
-              type='primary'
-              className={styles.button}
               disabled={Number(this.getMaxTransferValue()) < Number(stakeValue) || stakeValue === '' || !stakeValue}
               loading={loading}
+              color='primary'
+              size="large"
+              variant="contained"
+              // fullWidth={isMobile}
             >
               STAKE!
             </Button>
-          </div>
+          </S.WrapperActions>
         }
 
         {new BN(approvedAllowance).lt(new BN(powAmount(stakeValue, 18))) &&
           <>
-            <div className={styles.disclaimer}>
+            <Typography variant="body2" sx={{mt: 2}}>
               To stake {stakeValue} {stakeToken.symbol},
               you first need to approve this amount.
-            </div>
-            <div className={styles.buttons}>
+            </Typography>
+
+            <S.WrapperActions>
               <Button
                 onClick={()=>{this.handleClose()}}
-                type='outline'
-                className={styles.button}
+                color="neutral"
+                size="large"
               >
                 CANCEL
               </Button>
               <Button
                 onClick={()=>{this.handleApprove()}}
-                type='primary'
                 className={styles.button}
                 loading={loading}
                 disabled={Number(this.getMaxTransferValue()) < Number(stakeValue)}
+                color='primary'
+                size="large"
+                variant="contained"
               >
                 APPROVE AMOUNT
               </Button>
-            </div>
+            </S.WrapperActions>
           </>
         }
-
       </Modal>
     )
   }

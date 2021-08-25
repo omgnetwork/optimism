@@ -37,7 +37,7 @@ import { selectNetwork } from 'selectors/setupSelector'
 import { useTheme } from '@emotion/react'
 import { tableHeadList } from './tableHeadList'
 import TabPanel from 'components/tabs/TabPanel'
-import AccountGlass from '../../images/backgrounds/account-glass.png'
+import Drink from '../../images/backgrounds/drink.png'
 import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon'
 
 function Account () {
@@ -189,7 +189,7 @@ function Account () {
         </S.CardContentTag>
 
         <S.ContentGlass>
-          <img src={AccountGlass} href="#" width={180}/>
+          <img src={Drink} href="#" width={135}/>
         </S.ContentGlass>
 
       </S.CardTag>
