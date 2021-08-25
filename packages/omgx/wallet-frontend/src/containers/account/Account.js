@@ -175,7 +175,7 @@ function Account () {
       <S.CardTag>
         <S.CardContentTag>
           <S.CardInfo>Boba Balance</S.CardInfo>
-          <S.BalanceValue component ="div">0.50</S.BalanceValue>
+          <S.BalanceValue component ="div">{balances['oETH'].amountShort}</S.BalanceValue>
           <Typography>oETH</Typography>
         </S.CardContentTag>
 
@@ -184,29 +184,6 @@ function Account () {
         </S.ContentGlass>
 
       </S.CardTag>
-      {/* {!balances['oETH']['have'] &&
-        <div className={styles.RabbitBox}>
-          <div className={styles.RabbitRight}>
-            <div className={styles.RabbitRightTop}>
-              BOBA Balance
-            </div>
-            <div className={styles.RabbitRightMiddle}>
-                <div className={styles.sad}>0</div>
-            </div>
-            <div className={styles.RabbitRightBottom}>
-              oETH
-            </div>
-            <div className={styles.RabbitRightBottomNote}>
-            {networkLayer === 'L1' &&
-              <span>You are on L1. To use the L2, please switch to L2 in MetaMask.</span>
-            }
-            {networkLayer === 'L2' &&
-              <span>You are on L2. To use the L1, please switch to L1 in MetaMask.</span>
-            }
-            </div>
-          </div>
-        </div>
-      } */}
       {isMobile ? (
         <>
           <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, my: 2}}>

@@ -68,6 +68,14 @@ export const Dropdown = styled.div`
       background-color: $gray2;
     }
   }
+  > div {
+    cursor: pointer;
+    background-color: rgba(0,0,0,0.9);
+    border-radius: 5px;
+    margin-bottom: 1px;
+    padding-left: 12px;
+    margin-left: 20px;
+  }
 `;
 
 export const NetWorkStyle = styled.div`
