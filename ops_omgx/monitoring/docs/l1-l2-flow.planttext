@@ -1,0 +1,86 @@
+@startuml
+
+
+skinparam BoxPadding 15
+skinparam ParticipantPadding 15
+skinparam defaultFontSize 13
+skinparam defaultFontName Vedana
+
+
+
+actor "user" as user
+
+
+box "L1"
+participant "Liquidity Pool\nL1 (SC)” as pool1 #aquamarine
+participant “Cross Domain Message\nL1 (SC)” as msg1 #aquamarine
+collections "Canonical Transaction Chain\n(SC)" as ctc #aquamarine
+end box
+
+participant "Data Transport Layer" as dtl
+
+box "L2"
+participant "Sequencer” as sequencer
+participant “Cross Domain Message\nL2 (SC)” as msg2 #aquamarine
+participant "Liquidity Pool\nL2 (SC)” as pool2 #aquamarine
+end box
+
+
+autonumber
+
+== L1 ==
+user -> pool1: clientDepositL1
+pool1 -> pool1: msg = function to be called in L2
+note left
+        bytes memory data = abi.encodeWithSelector(
+            iL2LiquidityPool.clientPayL2.selector,
+            msg.sender,
+            _amount,
+            pool.l2TokenAddress
+        );
+end note
+pool1 -> pool1: getCrossDomainSenderMessage
+pool1 -> msg1: sendMessage
+note left
+sendCrossDomainMessage(
+            address(L2LiquidityPoolAddress),
+            SETTLEMENT_L2_GAS,
+            data
+        );
+end note
+|||
+
+msg1 -> msg1: resolve **OVM_CanonicalTransactionChain**
+msg1 -> msg1: nonce = CTC queue length
+msg1 -> msg1: compute xDomainCallData
+note left
+abi.encodeWithSignature(
+    "relayMessage(address,address,bytes,uint256)",
+    _target,
+    _sender,
+    _message,
+    _messageNonce
+);
+end note
+
+msg1 -> msg1: resolve **OVM_L2CrossDomainMessenger**
+msg1 -> ctc: enqueue  CTC Chain
+note left
+iOVM_CanonicalTransactionChain(_canonicalTransactionChain).enqueue(
+            _l2CrossDomainMessenger,
+            _gasLimit,
+            _message
+        );
+
+
+end note
+
+== L2 ==
+
+dtl -> ctc: fetch transactions
+sequencer -> dtl: fetch transactions
+sequencer -> sequencer: apply transactions
+sequencer -> sequencer: check if the transaction\nfrom **OVM_L2CrossDomainMessenger**
+sequencer -> msg2: relayMessage
+msg2 -> pool2: clientPayL2
+pool2 -> pool2: update

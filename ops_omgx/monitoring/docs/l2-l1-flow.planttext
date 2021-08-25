@@ -1,0 +1,76 @@
+@startuml
+
+
+skinparam BoxPadding 15
+skinparam ParticipantPadding 15
+skinparam defaultFontSize 13
+skinparam defaultFontName Vedana
+
+
+
+actor "user" as user
+
+box "L2"
+participant "Liquidity Pool\nL2 (SC)” as pool2 #aquamarine
+participant “Cross Domain Message\nL2 (SC)” as msg2 #aquamarine
+participant "L2ToL1MessagePasser” as passer
+end box
+
+participant "Batch Submitter" as submitter
+
+box "L1"
+participant “Cross Domain Message\nL1 (SC)” as msg1 #aquamarine
+participant "Liquidity Pool\nL1 (SC)” as pool1 #aquamarine
+end box
+
+
+
+
+
+autonumber
+
+== L2 ==
+
+user -> pool2: clientDepositL2
+pool2 -> pool2: encode msg
+note left
+bytes memory data = abi.encodeWithSelector(
+            iL1LiquidityPool.clientPayL1.selector,
+            msg.sender,
+            _amount,
+            pool.l1TokenAddress
+        );
+end note
+pool2 -> pool2: getCrossDomainMessenger();
+pool2 -> msg2: sendMessage
+msg2 -> msg2: encodeXDomainCalldata
+note left
+return abi.encodeWithSignature(
+            "relayMessage(address,address,bytes,uint256)",
+            _target,
+            _sender,
+            _message,
+            _messageNonce
+        );
+end note
+
+msg2 -> msg2: resolve **OVM_L2ToL1MessagePasser**
+
+msg2 -> passer: passMessageToL1
+note right: 0x4200000000000000000000000000000000000000
+passer -> passer: update **sentMessage**
+note left
+sentMessages[keccak256(
+            abi.encodePacked(
+                _message,
+                msg.sender
+            )
+        )] = true;
+end note
+
+== L1 ==
+
+submitter -> msg2: filter **sentMessage**
+submitter -> passer: getMessageProof
+submitter -> msg1: relayMessage
+msg1 -> pool1: clientPayL1
