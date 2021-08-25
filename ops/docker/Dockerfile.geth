@@ -1,5 +1,15 @@
 # Build Geth in a stock Go builder container
-FROM golang:1.15-alpine3.13 as builder
+# For development, the 'base' arg allows l2geth to be rebuilt without
+# staring from scratch each time. First manually create and tag "builder":
+#
+#   docker build --target builder -t l2geth_builder -f docker/Dockerfile.geth ..
+#
+# Then to rebuild l2geth starting from that image:
+#
+#   docker-compose build --build-arg base=l2geth_builder l2geth
+#
+ARG base
+FROM ${base:-golang:1.15-alpine3.13} as builder
 
 RUN apk add --no-cache make gcc musl-dev linux-headers git
 

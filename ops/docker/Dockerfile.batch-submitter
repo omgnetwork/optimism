@@ -25,7 +25,8 @@ COPY --from=builder /optimism/packages/contracts/artifacts-ovm ./packages/contra
 # copy the service
 WORKDIR /opt/optimism/packages/batch-submitter
 COPY --from=builder /optimism/packages/batch-submitter/package.json ./
-COPY --from=builder /optimism/packages/batch-submitter/dist ./dist
+#COPY --from=builder /optimism/packages/batch-submitter/dist ./dist
+ADD ./packages/batch-submitter/dist ./dist
 COPY --from=builder /optimism/packages/batch-submitter/exec ./exec
 COPY --from=builder /optimism/packages/batch-submitter/node_modules ./node_modules
 
