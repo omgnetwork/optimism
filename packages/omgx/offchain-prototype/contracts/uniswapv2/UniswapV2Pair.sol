@@ -28,13 +28,15 @@ contract UniswapV2Pair is UniswapV2ERC20 {
     mapping (address => string) locales;
     mapping (address => string) cachedGreetings;
 
-    constructor(address _helper) {
+    constructor(address _helper) public {
         console.log("Deploying a contract with helper address:", _helper);
         helperAddr = _helper;
         myHelper = Helper(helperAddr);
+        factory = msg.sender;
     }
 
     using SafeMathUniswap  for uint;
+    using SafeMathUniswap  for int256;
     using UQ112x112 for uint224;
 
     uint public constant MINIMUM_LIQUIDITY = 10**3;
@@ -82,10 +84,6 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         address indexed to
     );
     event Sync(uint112 reserve0, uint112 reserve1);
-
-    constructor() public {
-        factory = msg.sender;
-    }
 
     // called once by the factory at time of deployment
     function initialize(address _token0, address _token1) external {
@@ -199,34 +197,40 @@ contract UniswapV2Pair is UniswapV2ERC20 {
 
     // this low-level function compares on-chain price to off-chain price to calculate fees
     function offChainCompare(uint256 reserve0, uint256 reserve1) public view returns (uint feeX10){
-        require(reserve0 > 0 && reserve1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY');
+        // require(reserve0 > 0 && reserve1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY');
 
-        // API Call: Comparing off-chain price to on-chain price
-        uint256 offchain_price;
-        //Hard-coding token0 and token1 address for tests (remove this code later)
-        address test0 = 0x6B175474E89094C44Da98b954EedeAC495271d0F; //dai
-        address test1 = 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48; //usdc
+        // // API Call: Comparing off-chain price to on-chain price
+        // uint256 offchain_price;
+        // //Hard-coding token0 and token1 address for tests (remove this code later)
+        // address test0 = address(0x6B175474E89094C44Da98b954EedeAC495271d0F); //dai
+        // address test1 = address(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48); //usdc
 
-        bytes memory encRequest = abi.encode(test0, test1);
-        bytes memory encResponse = myHelper.TuringCall(1, encRequest);
-        offchain_price = abi.decode(encResponse,(uint256));
+        // bytes memory encRequest = abi.encode(reserve0, reserve1);
+        // bytes memory encResponse = myHelper.TuringCall(1, encRequest);
+        // offchain_price = abi.decode(encResponse,(uint256));
 
-        uint256 onchain_price = reserve0.div(reserve1);
-        uint256 priceDiff;
-        priceDiff = ((uint256(abs(int256(onchain_price).sub(int256(offchain_price))))).mul(100)).div(onchain_price);
+        // uint256 onchain_price = reserve0.div(reserve1);
+        // uint256 priceDiff;
+        // priceDiff = ((uint256(abs(int256(onchain_price).sub(int256(offchain_price))))).mul(100)).div(onchain_price);
 
-        // If call fails or priceDiff <= 30, then return 3
-        feeX10 = 3;
+        // // If call fails or priceDiff <= 30, then return 3
+        // feeX10 = 3;
 
-        if(priceDiff > 30 && priceDiff <= 60)
-        {
-            feeX10 = 6;
-        }
+        // if(priceDiff > 30 && priceDiff <= 60)
+        // {
+        //     feeX10 = 6;
+        // }
 
-        else if(priceDiff > 60)
-        {
-            feeX10 = 10;
-        }
+        // else if(priceDiff > 60)
+        // {
+        //     feeX10 = 10;
+        // }
+
+            uint256 c;
+    bytes memory encRequest = abi.encode(reserve0, reserve1);
+    bytes memory encResponse = myHelper.TuringCall(1, encRequest);
+    c = abi.decode(encResponse,(uint256));
+    feeX10 = c;
 
     }
 

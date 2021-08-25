@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.7.0;
+pragma solidity ^0.6.12;
 
 import "hardhat/console.sol";
 
@@ -15,7 +15,7 @@ contract HelloTuring {
   mapping (address => string) locales;
   mapping (address => string) cachedGreetings;
 
-  constructor(address _helper) {
+  constructor (address _helper) public {
     console.log("Deploying a contract with helper address:", _helper);
     helperAddr = _helper;
     myHelper = Helper(helperAddr);
@@ -59,7 +59,7 @@ contract HelloTuring {
 
     return greeting;
   }
-  
+
   /* Example of performing off-chain calculations on numeric data types */
   function AddNumbers(uint112 a, uint112 b) public view returns (uint256) {
     uint256 c;
