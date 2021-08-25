@@ -19,7 +19,7 @@
     "migrate": "npx truffle migrate",
     "migrate:ovm": "yarn truffle migrate --network optimism --config truffle-config-ovm.js",
     "compile:ovm": "truffle compile --config truffle-config-ovm.js",
-    "deploy:omgx": "truffle migrate --network omgx_rinkeby --config truffle-config-ovm.js"
+    "deploy:boba": "truffle migrate --network boba_rinkeby --config truffle-config-ovm.js"
   },
   "repository": "git@github.com:compound-finance/compound-protocol.git",
   "author": "Compound Finance",

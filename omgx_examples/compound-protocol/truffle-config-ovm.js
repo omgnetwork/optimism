@@ -1,5 +1,6 @@
-const mnemonicPhrase =
-  'test test test test test test test test test test test junk'
+require('dotenv').config();
+const env = process.env;
+const mnemonicPhrase = env.mnemonic
 const HDWalletProvider = require('@truffle/hdwallet-provider')
 
 module.exports = {
@@ -20,19 +21,19 @@ module.exports = {
       gasPrice: 15000000,
       gas: 803900000,
     },
-    omgx_rinkeby: {
+    boba_rinkeby: {
       provider: function () {
         return new HDWalletProvider({
           mnemonic: {
             phrase: mnemonicPhrase,
           },
-          providerOrUrl: 'http://rinkeby.omgx.network',
+          providerOrUrl: 'https://rinkeby.boba.network',
         })
       },
       network_id: 28,
-      host: 'http://rinkeby.omgx.network',
-      gasPrice: 0,
-      gas: 54180127,
+      host: 'https://rinkeby.boba.network',
+      gasPrice: 15000000,
+      gas: 156170127,
     },
     L1: {
       provider: function () {
