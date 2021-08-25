@@ -26,9 +26,10 @@ import { openError } from 'actions/uiAction';
 import ListFarm from 'components/listFarm/listFarm'
 import networkService from 'services/networkService'
 
-import * as styles from './Farm.module.scss'
+import * as S from './Farm.styles'
 import { Alert, Box, Grid, Tab, Tabs, Typography } from '@material-ui/core';
 import PageHeader from 'components/pageHeader/PageHeader';
+import { tableHeadList } from './tableHeadList';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -42,7 +43,7 @@ function TabPanel(props) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ mt: 2 }}>{children}</Box>
+        <Box>{children}</Box>
       )}
     </div>
   );
@@ -188,6 +189,7 @@ class Farm extends React.Component {
             </Typography>
           </Grid>
         </Grid>
+
         <Box sx={{ my: 3, width: '100%' }}>
           <Box sx={{ mb: 2 }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
@@ -195,6 +197,19 @@ class Farm extends React.Component {
               <Tab label="L2 Liquidity Pool" />
             </Tabs>
           </Box>
+
+          {!isMobile ? (
+            <S.TableHeading>
+              {tableHeadList.map((item) => {
+                return (
+                  <S.TableHeadingItem variant="body2" component="div">
+                    {item.label}
+                  </S.TableHeadingItem>
+                )
+              })}
+            </S.TableHeading>
+          ) : (null)}
+
 
           <TabPanel value={value} index={0}>
             {networkLayer === 'L2' &&
@@ -213,6 +228,7 @@ class Farm extends React.Component {
                     L1orL2Pool='L1LP'
                     balance={ret[0]}
                     decimals={ret[1]}
+                    isMobile={isMobile}
                   />
                 )
               })}
@@ -236,6 +252,7 @@ class Farm extends React.Component {
                     L1orL2Pool='L2LP'
                     balance={ret[0]}
                     decimals={ret[1]}
+                    isMobile={isMobile}
                   />
                 )
               })}
