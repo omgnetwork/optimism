@@ -11,10 +11,12 @@ const hPort = 1234 // Port for local HTTP server
 var urlStr
 const gasOverride = {} // Can specify e.g. {gasPrice:0, gasLimit:999999} if needed
 
-import HelloTuringJson_1 from "../artifacts/contracts/HelloTuring.sol/HelloTuring.json"
-import HelloTuringJson_2 from "../artifacts-ovm/contracts/HelloTuring.sol/HelloTuring.json"
-import TuringHelper_1 from "../artifacts/contracts/TuringHelper.sol/TuringHelper.json"
-import TuringHelper_2 from "../artifacts-ovm/contracts/TuringHelper.sol/TuringHelper.json"
+// import HelloTuringJson_1 from "../artifacts/contracts/HelloTuring.sol/HelloTuring.json"
+// import HelloTuringJson_2 from "../artifacts-ovm/contracts/HelloTuring.sol/HelloTuring.json"
+// import TuringHelper_1 from "../artifacts/contracts/TuringHelper.sol/TuringHelper.json"
+// import TuringHelper_2 from "../artifacts-ovm/contracts/TuringHelper.sol/TuringHelper.json"
+import UniswapV2PairJSON from "../artifacts-ovm/contracts/uniswapv2/UniswapV2Pair.sol/UniswapV2Pair.ovm.json"
+import TuringHelper_2 from "../artifacts-ovm/contracts/uniswapv2/TuringHelper.sol/TuringHelper.json"
 
 let Factory__Hello: ContractFactory
 let hello: Contract
@@ -56,35 +58,36 @@ describe("HelloTest", function() {
 	  var jBody = JSON.parse(body)
 	  //console.log ("jBody", jBody)
 
-          if (jBody.method === "hello") {
-	    res.writeHead(200, {'Content-Type': 'application/json'});
-	    var answer = "(UNDEFINED)"
-	    var v3=jBody.params[0]
-	    var v4 = abiDecoder.decodeParameter('string',v3)
+    //       if (jBody.method === "hello") {
+	  //   res.writeHead(200, {'Content-Type': 'application/json'});
+	  //   var answer = "(UNDEFINED)"
+	  //   var v3=jBody.params[0]
+	  //   var v4 = abiDecoder.decodeParameter('string',v3)
 
-	    switch(v4) {
-              case 'EN_US':
-		answer = "Hello World"
-		break;
-	      case 'EN_GB':
-		answer = "Top of the Morning"
-		break;
-	      case 'FR':
-		answer = "Bonjour le monde"
-		break;
-	      default:
-		answer = "(UNDEFINED)"  // FIXME This should return an error.
-		break;
-	    }
-	    console.log ("      (HTTP) Returning off-chain response:", v4, "->", answer)
-	    var jResp = {
-              "jsonrpc": "2.0",
-	      "id": jBody.id,
-	      "result": abiDecoder.encodeParameter('string',answer)
-	    }
-	    res.end(JSON.stringify(jResp))
-	    server.emit('success', body);
-          } else if (jBody.method === "add2") {
+	  //   switch(v4) {
+    //           case 'EN_US':
+		// answer = "Hello World"
+		// break;
+	  //     case 'EN_GB':
+		// answer = "Top of the Morning"
+		// break;
+	  //     case 'FR':
+		// answer = "Bonjour le monde"
+		// break;
+	  //     default:
+		// answer = "(UNDEFINED)"  // FIXME This should return an error.
+		// break;
+	  //   }
+	  //   console.log ("      (HTTP) Returning off-chain response:", v4, "->", answer)
+	  //   var jResp = {
+    //           "jsonrpc": "2.0",
+	  //     "id": jBody.id,
+	  //     "result": abiDecoder.encodeParameter('string',answer)
+	  //   }
+	  //   res.end(JSON.stringify(jResp))
+	  //   server.emit('success', body);
+    //       }
+        if (jBody.method === "add2") {
 
 	    let v1 = jBody.params[0]
 

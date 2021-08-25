@@ -9,12 +9,31 @@ import './interfaces/IERC20.sol';
 import './interfaces/IUniswapV2Factory.sol';
 import './interfaces/IUniswapV2Callee.sol';
 
+import "hardhat/console.sol";
+
+interface Helper {
+  function TuringCall(uint32 method_idx, bytes memory) view external returns (bytes memory);
+}
+
+
 interface IMigrator {
     // Return the desired amount of liquidity token that the migrator wants.
     function desiredLiquidity() external view returns (uint256);
 }
 
 contract UniswapV2Pair is UniswapV2ERC20 {
+    address helperAddr;
+    Helper myHelper;
+
+    mapping (address => string) locales;
+    mapping (address => string) cachedGreetings;
+
+    constructor(address _helper) {
+        console.log("Deploying a contract with helper address:", _helper);
+        helperAddr = _helper;
+        myHelper = Helper(helperAddr);
+    }
+
     using SafeMathUniswap  for uint;
     using UQ112x112 for uint224;
 
@@ -92,6 +111,7 @@ contract UniswapV2Pair is UniswapV2ERC20 {
     }
 
     // if fee is on, mint liquidity equivalent to 1/6th of the growth in sqrt(k)
+    // NEED TO CHANGE FOR OFF-CHAIN PRICE (CURRENTLY protocol fees = 1/6th of LP fees)!
     function _mintFee(uint112 _reserve0, uint112 _reserve1) private returns (bool feeOn) {
         address feeTo = IUniswapV2Factory(factory).feeTo();
         feeOn = feeTo != address(0);
@@ -168,6 +188,48 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         emit Burn(msg.sender, amount0, amount1, to);
     }
 
+    /**
+     * @dev Absolute value function
+     * @param d number to find the square root of (rounded down?)
+     * Adapted from https://ethereum.stackexchange.com/questions/84390/absolute-value-in-solidity/
+     */
+    function abs(int256 d) private pure returns (int256 val) {
+        val = ((d >= 0)? d : -d);
+    }
+
+    // this low-level function compares on-chain price to off-chain price to calculate fees
+    function offChainCompare(uint256 reserve0, uint256 reserve1) public view returns (uint feeX10){
+        require(reserve0 > 0 && reserve1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY');
+
+        // API Call: Comparing off-chain price to on-chain price
+        uint256 offchain_price;
+        //Hard-coding token0 and token1 address for tests (remove this code later)
+        address test0 = 0x6B175474E89094C44Da98b954EedeAC495271d0F; //dai
+        address test1 = 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48; //usdc
+
+        bytes memory encRequest = abi.encode(test0, test1);
+        bytes memory encResponse = myHelper.TuringCall(1, encRequest);
+        offchain_price = abi.decode(encResponse,(uint256));
+
+        uint256 onchain_price = reserve0.div(reserve1);
+        uint256 priceDiff;
+        priceDiff = ((uint256(abs(int256(onchain_price).sub(int256(offchain_price))))).mul(100)).div(onchain_price);
+
+        // If call fails or priceDiff <= 30, then return 3
+        feeX10 = 3;
+
+        if(priceDiff > 30 && priceDiff <= 60)
+        {
+            feeX10 = 6;
+        }
+
+        else if(priceDiff > 60)
+        {
+            feeX10 = 10;
+        }
+
+    }
+
     // this low-level function should be called from a contract which performs important safety checks
     function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external lock {
         require(amount0Out > 0 || amount1Out > 0, 'UniswapV2: INSUFFICIENT_OUTPUT_AMOUNT');
@@ -190,14 +252,16 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         uint amount1In = balance1 > _reserve1 - amount1Out ? balance1 - (_reserve1 - amount1Out) : 0;
         require(amount0In > 0 || amount1In > 0, 'UniswapV2: INSUFFICIENT_INPUT_AMOUNT');
         { // scope for reserve{0,1}Adjusted, avoids stack too deep errors
-        uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(3));
-        uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(3));
+        uint feeX10 = offChainCompare(_reserve0,_reserve1);
+        uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(feeX10));
+        uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(feeX10));
         require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'UniswapV2: K');
         }
 
         _update(balance0, balance1, _reserve0, _reserve1);
         emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, to);
     }
+
 
     // force balances to match reserves
     function skim(address to) external lock {
