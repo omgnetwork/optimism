@@ -6,6 +6,7 @@ export const WrapperHeading = styled(Box)`
   align-items: center;
   gap: 10px;
   margin-bottom: 30px;
+  justify-content: space-between;
 `;
 
 export const TableHeading = styled(Box)(({ theme }) => ({

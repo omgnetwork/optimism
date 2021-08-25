@@ -6,10 +6,10 @@ import NetworkSwitcher from './networkSwitcher/NetworkSwitcher';
 import MenuItems from './menuItems/MenuItems';
 import { useTheme } from '@emotion/react';
 import { Container, Drawer, IconButton, useMediaQuery } from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu';
 import WalletAddress from 'components/walletAddress/WalletAddress';
 import { makeStyles } from '@material-ui/styles';
 import { ReactComponent as CloseIcon } from './../../images/icons/close-modal.svg';
+import { ReactComponent as NavIcon } from './../../images/icons/nav-collapsed.svg';
 
 const useStyles = makeStyles({
   root: {
@@ -37,7 +37,7 @@ function MainMenu ({ pageDisplay, handleSetPage }) {
       {isMobile ? (
         <Container>
           <S.MobileNavTag>
-            <MenuIcon fontSize="medium" onClick={() => setOpen(!open)} />
+            <NavIcon onClick={() => setOpen(!open)} />
 
             <Drawer open={open} onClose={() => setOpen(false)} classes={{paper: classes.root}}>
               <S.StyleDrawer theme={theme}>
@@ -48,7 +48,7 @@ function MainMenu ({ pageDisplay, handleSetPage }) {
                       <Logo width={150} />
                     </Link>
 
-                    <IconButton onClick={() => setOpen(false)}>
+                    <IconButton size="small" onClick={() => setOpen(false)}>
                       <CloseIcon />
                     </IconButton>
                   </S.WrapperCloseIcon>

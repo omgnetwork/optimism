@@ -134,7 +134,7 @@ function TransferModal ({ open, token }) {
           <Button
             onClick={handleClose}
             color="neutral"
-            size="lg"
+            size="large"
           >
             Cancel
           </Button>
@@ -148,7 +148,7 @@ function TransferModal ({ open, token }) {
             disabled={disabledTransfer}
             triggerTime={new Date()}
             fullWidth={isMobile}
-            size="lg"
+            size="large"
           >
             Deposit
           </Button>

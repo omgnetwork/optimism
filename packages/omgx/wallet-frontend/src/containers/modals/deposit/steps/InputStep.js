@@ -109,7 +109,7 @@ function InputStep({ handleClose, token }) {
           <Button
             onClick={handleClose}
             color="neutral"
-            size="lg"
+            size="large"
           >
             Cancel
           </Button>
@@ -118,7 +118,7 @@ function InputStep({ handleClose, token }) {
         <Button
           onClick={doDeposit}
           color='primary'
-          size="lg"
+          size="large"
           variant="contained"
           loading={depositLoading}
           tooltip='Your swap is still pending. Please wait for confirmation.'

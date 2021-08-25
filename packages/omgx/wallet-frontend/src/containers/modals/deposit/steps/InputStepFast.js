@@ -188,7 +188,7 @@ function InputStepFast({ handleClose, token }) {
           <Button
             onClick={handleClose}
             color="neutral"
-            size="lg"
+            size="large"
           >
             Cancel
           </Button>
@@ -201,7 +201,7 @@ function InputStepFast({ handleClose, token }) {
           tooltip="Your deposit is still pending. Please wait for confirmation."
           disabled={disabledSubmit}
           triggerTime={new Date()}
-          size="lg"
+          size="large"
           fullWidth={isMobile}
           newStyle
         >

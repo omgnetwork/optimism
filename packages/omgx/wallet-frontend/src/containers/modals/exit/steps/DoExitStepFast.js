@@ -157,7 +157,7 @@ function DoExitStepFast({ handleClose, token }) {
           <Button
             onClick={handleClose}
             color="neutral"
-            size="lg"
+            size="large"
           >
             Cancel
           </Button>
@@ -171,7 +171,7 @@ function DoExitStepFast({ handleClose, token }) {
             disabled={disabledSubmit}
             triggerTime={new Date()}
             fullWidth={isMobile}
-            size="lg"
+            size="large"
           >
             Fast Exit
           </Button>

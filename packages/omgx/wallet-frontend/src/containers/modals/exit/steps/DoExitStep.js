@@ -74,7 +74,7 @@ function DoExitStep({ handleClose, token }) {
   return (
     <>
       <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
-        Standard Exit ({` ${token ? token.symbol : ''}`})
+        Standard Exit ({`${token ? token.symbol : ''}`})
       </Typography>
 
       <Input
@@ -116,7 +116,7 @@ function DoExitStep({ handleClose, token }) {
           <Button
             onClick={handleClose}
             color="neutral"
-            size="lg"
+            size="large"
           >
             Cancel
           </Button>
@@ -131,7 +131,7 @@ function DoExitStep({ handleClose, token }) {
               disabled={disabledSubmit}
               triggerTime={new Date()}
               fullWidth={isMobile}
-              size="lg"
+              size="large"
             >
               Exit
             </Button>

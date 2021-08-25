@@ -8,7 +8,7 @@ export const Wrapper = styled(Box)`
   background-color: ${(props) => props.newStyle ? 'rgba(9, 22, 43, 0.5)' : 'transparente' };
   border-radius: 8px;
   box-shadow: ${(props) => props.newStyle ? '-13px 15px 19px rgba(0, 0, 0, 0.15), inset 53px 36px 120px rgba(255, 255, 255, 0.06)' : 'none' };
-  padding: ${(props) => props.newStyle ? '20px 30px' : '0' };
+  padding: ${(props) => props.newStyle ? '10px 20px' : '0' };
   border: ${(props) => props.newStyle ? '2px solid #5E6170' : 'none' };
 `;
 
@@ -17,13 +17,17 @@ export const TextFieldTag = styled(TextField)(({ ...props }) => ({
     fontSize: props.newStyle ? '24px' : '16px',
     fontWeight: 700,
     opacity: 0.7,
+  },
+  '&:hover': {
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.05)',
   }
 }));
 
 export const UnitContent = styled(Box)`
 display: flex;
 justify-content: flex-start;
-border-right: 1px solid #212639;
+border-right: 1px solid rgba(255,255,255,0.2);
 margin-right: 30px;
 flex: 2;
   div {
