@@ -1678,11 +1678,8 @@ class NetworkService {
       tokenAddressLC === this.L1_ETH_Address
     ) {
       balance = await this.L1Provider.getBalance(this.L1LPAddress)
-    } else if (
-      tokenAddressLC === this.L2_TEST_Address.toLowerCase() ||
-      tokenAddressLC === this.L1_TEST_Address.toLowerCase()
-    ) {
-      balance = await this.L1_TEST_Contract.connect(this.L1Provider).balanceOf(
+    } else {
+      balance = await this.L1_TEST_Contract.attach(tokenAddress).connect(this.L1Provider).balanceOf(
         this.L1LPAddress
       )
     }
@@ -1710,12 +1707,8 @@ class NetworkService {
       balance = await this.L2_ETH_Contract.connect(this.L2Provider).balanceOf(
         this.L2LPAddress
       )
-    } else if (
-      tokenAddressLC === this.L2_TEST_Address.toLowerCase() ||
-      tokenAddressLC === this.L1_TEST_Address.toLowerCase()
-    ) {
-      //we are dealing with TEST
-      balance = await this.L2_TEST_Contract.connect(this.L2Provider).balanceOf(
+    } else {
+      balance = await this.L2_TEST_Contract.attach(tokenAddress).connect(this.L2Provider).balanceOf(
         this.L2LPAddress
       )
     }
