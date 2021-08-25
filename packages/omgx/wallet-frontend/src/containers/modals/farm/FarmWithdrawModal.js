@@ -30,7 +30,7 @@ class FarmWithdrawModal extends React.Component {
       layer1Balance: balance.layer1,
       layer2Balance: balance.layer2,
       LPBalance: 0,
-      // loading 
+      // loading
       loading: false,
     }
   }
@@ -58,9 +58,9 @@ class FarmWithdrawModal extends React.Component {
     }
 
     if (!isEqual(prevState.balance, balance)) {
-      this.setState({ 
+      this.setState({
         layer1Balance: balance.layer1,
-        layer2Balance: balance.layer2 
+        layer2Balance: balance.layer2
       });
     }
   }
@@ -80,7 +80,7 @@ class FarmWithdrawModal extends React.Component {
 
   async handleConfirm() {
     const { withdrawToken, withdrawValue } = this.state;
-    
+
     this.setState({ loading: true });
 
     const withdrawLiquidityTX = await networkService.withdrawLiquidity(
@@ -100,15 +100,15 @@ class FarmWithdrawModal extends React.Component {
   }
 
   render() {
-    const { 
-      open, 
+    const {
+      open,
       withdrawToken, withdrawValue,
-      userInfo, 
-      layer1Balance, layer2Balance, 
+      userInfo,
+      layer1Balance, layer2Balance,
       LPBalance,
       loading,
     } = this.state;
-    
+
 
     const selectOptions = (withdrawToken.L1orL2Pool === 'L1LP' ? layer1Balance : layer2Balance)
       .reduce((acc, cur) => {
@@ -138,17 +138,18 @@ class FarmWithdrawModal extends React.Component {
           selectValue={withdrawToken.currency}
           maxValue={this.getMaxTransferValue()}
           disabledSelect={true}
+          newStyle
         />
 
-        {Number(withdrawValue) > Number(this.getMaxTransferValue()) && 
+        {Number(withdrawValue) > Number(this.getMaxTransferValue()) &&
           <div className={styles.disclaimer}>
             You don't have enough {withdrawToken.symbol} to withdraw.
           </div>
         }
-        {Number(withdrawValue) > Number(LPBalance) && 
+        {Number(withdrawValue) > Number(LPBalance) &&
           <div className={styles.disclaimer}>
             We don't have enough {withdrawToken.symbol} in the {' '}
-            {withdrawToken.L1orL2Pool === 'L1LP' ? 'L1' : 'L2'} liquidity pool. 
+            {withdrawToken.L1orL2Pool === 'L1LP' ? 'L1' : 'L2'} liquidity pool.
             Please contact us.
           </div>
         }
@@ -166,16 +167,16 @@ class FarmWithdrawModal extends React.Component {
             type='primary'
             className={styles.button}
             disabled={
-              Number(this.getMaxTransferValue()) < Number(withdrawValue) || 
+              Number(this.getMaxTransferValue()) < Number(withdrawValue) ||
               Number(withdrawValue) > Number(LPBalance) ||
-              withdrawValue === '' || 
-              !withdrawValue 
+              withdrawValue === '' ||
+              !withdrawValue
             }
             loading={loading}
           >
             CONFIRM
           </Button>
-        </div> 
+        </div>
 
 
       </Modal>

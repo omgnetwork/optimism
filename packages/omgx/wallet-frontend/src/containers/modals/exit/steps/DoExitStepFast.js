@@ -27,7 +27,9 @@ import networkService from 'services/networkService'
 import * as styles from '../ExitModal.module.scss'
 import Input from 'components/input/Input'
 import { selectLookupPrice } from 'selectors/lookupSelector'
-import { Grid, Typography } from '@material-ui/core'
+import { Grid, Typography, useMediaQuery } from '@material-ui/core'
+import { useTheme } from '@emotion/react'
+import * as S from './DoExitSteps.styles'
 
 function DoExitStepFast({ handleClose, token }) {
 
@@ -96,25 +98,31 @@ function DoExitStepFast({ handleClose, token }) {
   }, [token])
 
   const label = 'There is a ' + feeRate + '% fee.'
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <>
-      <Typography variant="h3" gutterBottom>
+      <Typography variant="h2" sx={{fontWeight: 700, mb: 1}}>
         Fast Exit
       </Typography>
 
+      <Typography variant="body2" sx={{mb: 3}}>{label}</Typography>
+
       <Input
-        label={label}
-        placeholder={`Amount to exit`}
+        label={`Enter amount to deposit`}
+        placeholder="0.0000"
         value={value}
         type="number"
         onChange={(i)=>{setAmount(i.target.value)}}
         unit={token.symbol}
         maxValue={logAmount(token.balance, token.decimals)}
+        newStyle
+        variant="standard"
       />
 
       {token && token.symbol === 'oETH' && (
-        <h3>
+        <Typography variant="body2" sx={{mt: 2}}>
           {value &&
             `You will receive
             ${receivableAmount(value)}
@@ -122,11 +130,11 @@ function DoExitStepFast({ handleClose, token }) {
             ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
             on L1.`
           }
-        </h3>
+        </Typography>
       )}
 
       {token && token.symbol !== 'oETH' && (
-        <h3>
+        <Typography variant="body2" sx={{mt: 2}}>
           {value &&
             `You will receive
             ${receivableAmount(value)}
@@ -134,26 +142,26 @@ function DoExitStepFast({ handleClose, token }) {
             ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
             on L1.`
           }
-        </h3>
+        </Typography>
       )}
 
       {Number(LPBalance) < Number(value) && (
-        <h3 style={{color: 'red'}}>
+        <Typography variant="body2" sx={{mt: 2, color: 'red'}}>
           The liquidity pool balance (of {LPBalance}) is too low to cover your swap - please
           use the traditional exit or reduce the amount to swap.
-        </h3>
+        </Typography>
       )}
 
-      <Grid justifyContent="flex-end" container spacing={2}>
-        <Grid item>
+      <S.WrapperActions>
+        {!isMobile ? (
           <Button
             onClick={handleClose}
             color="neutral"
+            size="large"
           >
             Cancel
           </Button>
-        </Grid>
-        <Grid item>
+        ) : null}
           <Button
             onClick={doExit}
             color='primary'
@@ -162,11 +170,12 @@ function DoExitStepFast({ handleClose, token }) {
             tooltip='Your exit is still pending. Please wait for confirmation.'
             disabled={disabledSubmit}
             triggerTime={new Date()}
+            fullWidth={isMobile}
+            size="large"
           >
             Fast Exit
           </Button>
-        </Grid>
-      </Grid>
+      </S.WrapperActions>
     </>
   )
 }

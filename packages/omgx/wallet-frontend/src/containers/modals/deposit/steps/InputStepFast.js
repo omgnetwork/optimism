@@ -146,50 +146,49 @@ function InputStepFast({ handleClose, token }) {
 
   return (
     <>
-      <Typography variant="h2">
+      <Typography variant="h2" sx={{fontWeight: 700, mb: 1}}>
         Fast Deposit
       </Typography>
 
-      <Typography variant="body2">{label}</Typography>
+      <Typography variant="body2" sx={{mb: 3}}>{label}</Typography>
 
-      <Box sx={{ mt: 3 }}>
-        <Input
-          label={`Enter amount to deposit`}
-          placeholder="0.0"
-          value={value}
-          type="number"
-          onChange={(i)=>{setAmount(i.target.value)}}
-          unit={token.symbol}
-          maxValue={logAmount(token.balance, token.decimals)}
-          variant="standard"
-        />
+      <Input
+        label={`Enter amount to deposit`}
+        placeholder="0.0000"
+        value={value}
+        type="number"
+        onChange={(i)=>{setAmount(i.target.value)}}
+        unit={token.symbol}
+        maxValue={logAmount(token.balance, token.decimals)}
+        variant="standard"
+        newStyle
+      />
 
-        {token && token.symbol === 'ETH' && (
-          <Typography variant="body2" sx={{mt: 2}}>
-            {value && `You will receive ${receivableAmount(value)} oETH ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
-          </Typography>
-        )}
+      {token && token.symbol === 'ETH' && (
+        <Typography variant="body2" sx={{mt: 2}}>
+          {value && `You will receive ${receivableAmount(value)} oETH ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
+        </Typography>
+      )}
 
-        {token && token.symbol !== 'ETH' && (
-          <Typography variant="body2" sx={{mt: 2}}>
-            {value && `You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
-          </Typography>
-        )}
+      {token && token.symbol !== 'ETH' && (
+        <Typography variant="body2" sx={{mt: 2}}>
+          {value && `You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
+        </Typography>
+      )}
 
-        {Number(LPBalance) < Number(value) && (
-          <Typography variant="body2"style={{ color: 'red', my: 2}}>
-            The liquidity pool balance (of {LPBalance}) is too low to cover your fast deposit. Please
-            use the traditional deposit or reduce the amount.
-          </Typography>
-        )}
-      </Box>
+      {Number(LPBalance) < Number(value) && (
+        <Typography variant="body2" sx={{ color: 'red', my: 2}}>
+          The liquidity pool balance (of {LPBalance}) is too low to cover your fast deposit. Please
+          use the traditional deposit or reduce the amount.
+        </Typography>
+      )}
 
       <S.WrapperActions>
         {!isMobile ? (
           <Button
             onClick={handleClose}
             color="neutral"
-            size="lg"
+            size="large"
           >
             Cancel
           </Button>
@@ -202,8 +201,9 @@ function InputStepFast({ handleClose, token }) {
           tooltip="Your deposit is still pending. Please wait for confirmation."
           disabled={disabledSubmit}
           triggerTime={new Date()}
-          size="lg"
+          size="large"
           fullWidth={isMobile}
+          newStyle
         >
           {buttonLabel}
         </Button>

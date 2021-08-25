@@ -188,13 +188,14 @@ class Farm extends React.Component {
             </Typography>
           </Grid>
         </Grid>
-        <Box sx={{ mt: 3, width: '100%' }}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ my: 3, width: '100%' }}>
+          <Box sx={{ mb: 2 }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
               <Tab label="L1 Liquidity Pool" />
               <Tab label="L2 Liquidity Pool" />
             </Tabs>
           </Box>
+
           <TabPanel value={value} index={0}>
             {networkLayer === 'L2' &&
               <Alert severity="info">

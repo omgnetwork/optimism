@@ -80,7 +80,7 @@ function InputStep({ handleClose, token }) {
 
   return (
     <>
-      <Typography variant="h2" gutterBottom>
+      <Typography variant="h2" sx={{fontWeight: 700, mb: 1}}>
         {`Deposit ${token && token.symbol ? token.symbol : ''}`}
       </Typography>
 
@@ -93,6 +93,7 @@ function InputStep({ handleClose, token }) {
         unit={token.symbol}
         maxValue={logAmount(token.balance, token.decimals)}
         variant="standard"
+        newStyle
       />
 
       {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
@@ -108,7 +109,7 @@ function InputStep({ handleClose, token }) {
           <Button
             onClick={handleClose}
             color="neutral"
-            size="lg"
+            size="large"
           >
             Cancel
           </Button>
@@ -117,7 +118,7 @@ function InputStep({ handleClose, token }) {
         <Button
           onClick={doDeposit}
           color='primary'
-          size="lg"
+          size="large"
           variant="contained"
           loading={depositLoading}
           tooltip='Your swap is still pending. Please wait for confirmation.'

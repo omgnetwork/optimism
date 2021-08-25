@@ -174,7 +174,7 @@ class ListFarm extends React.Component {
     const logo = getCoinImage(symbol);
 
     return (
-      <div className={styles.ListFarm}>
+      <S.Wrapper dropDownBox={dropDownBox}>
         <Box
           sx={{display: 'flex', justifyContent: 'space-between'}}
         >
@@ -265,7 +265,7 @@ class ListFarm extends React.Component {
         {dropDownBox ? (
           <Fade in={dropDownBox}>
             <S.DropdownContent isMobile={isMobile}>
-              <S.DropdownWrapper>
+              <S.DropdownWrapper sx={{marginLeft: '20px'}}>
                 <Typography sx={{flex: 1}} variant="body2" component="div">{`${name}`} Earned</Typography>
                 <Typography sx={{flex: 1}} variant="body2" component="div" color="secondary">{logAmount(userReward, 18, 2)}</Typography>
                 <Button
@@ -316,7 +316,7 @@ class ListFarm extends React.Component {
           </Fade>
         ) : null }
 
-      </div>
+      </S.Wrapper>
     )
   }
 }

@@ -43,7 +43,7 @@ function NetworkSwitcher() {
             onClick={()=>setShowAllNetworks(prev => !prev)}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
-              <NetworkSwitcherIcon active={networkLayer === 'L1'} />
+              <NetworkSwitcherIcon active={networkLayer === 'L2'} />
               <Typography variant="body1">BOBA {masterConfig}</Typography>
             </Box>
             {!!allNetworks.length && (

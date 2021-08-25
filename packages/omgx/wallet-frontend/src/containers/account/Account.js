@@ -38,6 +38,7 @@ import { useTheme } from '@emotion/react'
 import { tableHeadList } from './tableHeadList'
 import TabPanel from 'components/tabs/TabPanel'
 import AccountGlass from '../../images/backgrounds/account-glass.png'
+import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon'
 
 function Account () {
   const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
@@ -100,12 +101,19 @@ function Account () {
     setActiveTab(newValue);
   };
 
+  const ActiveItem = ({active}) => (
+    <Box display="flex" sx={{ justifyContent: 'center', gap: 1 }}>
+      <NetworkSwitcherIcon active={active} /> <Typography variant="overline">Active</Typography>
+    </Box>
+  )
+
   const L1Column = () => (
     <S.AccountWrapper >
       {!isMobile ? (
         <S.WrapperHeading>
           <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>Ethereum Mainnet - L1</Typography>
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
+          {networkLayer === 'L1' ? <ActiveItem active={false} /> : null}
         </S.WrapperHeading>
       ) : (null)}
 
@@ -141,6 +149,7 @@ function Account () {
         <S.WrapperHeading>
           <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>OMGX Mainnet - L2</Typography>
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
+          {networkLayer === 'L2' ? <ActiveItem active /> : null}
         </S.WrapperHeading>
       ) : (null)}
 
@@ -186,7 +195,7 @@ function Account () {
       </S.CardTag>
       {isMobile ? (
         <>
-          <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, mt: 2}}>
+          <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, my: 2}}>
             <Tab label="Ethereum Mainnet - L1" />
             <Tab label="OMGX Mainnet - L2" />
           </Tabs>

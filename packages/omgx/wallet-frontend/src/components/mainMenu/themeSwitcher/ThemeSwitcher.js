@@ -8,8 +8,6 @@ import LightIcon from 'components/icons/LightIcon.js';
 import { ReactComponent as ShadowMenu } from './../../../images/backgrounds/shadow-menu.svg';
 
 function ThemeSwitcher ({ light, setLight }) {
-  console.log('ThemeSwitcher', light, setLight)
-
   return (
     <S.ThemeSwitcherTag>
       <S.Button onClick={() => setLight(false)} selected={!light}>

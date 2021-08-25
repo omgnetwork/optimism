@@ -4,7 +4,7 @@ import * as React from "react"
 function NetworkSwitcherIcon({ active }) {
   const theme = useTheme();
   const isLight = theme.palette.mode === 'light';
-  const color = active ? '#506DFA' : isLight ? 'black' : 'white';
+  const color = !active ? '#506DFA' : isLight ? 'black' : 'white';
 
   return (
     <svg

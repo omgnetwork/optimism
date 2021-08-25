@@ -71,7 +71,7 @@ class FarmDepositModal extends React.Component {
   }
 
   async handleApprove() {
-    
+
     const { stakeToken, stakeValue } = this.state;
 
     this.setState({ loading: true })
@@ -134,19 +134,18 @@ class FarmDepositModal extends React.Component {
   }
 
   render() {
-    
+
     const {
       open,
-      stakeToken, 
+      stakeToken,
       stakeValue,
       approvedAllowance,
       loading,
     } = this.state;
 
     return (
+      <Modal open={open} maxWidth="md">
 
-      <Modal open={open}>
-        
         <h2>Stake {`${stakeToken.symbol}`}</h2>
 
         <Input
@@ -156,6 +155,7 @@ class FarmDepositModal extends React.Component {
           onChange={i=>{this.setState({stakeValue: i.target.value})}}
           unit={stakeToken.symbol}
           maxValue={this.getMaxTransferValue()}
+          newStyle
         />
 
         {Number(stakeValue) > Number(this.getMaxTransferValue()) &&

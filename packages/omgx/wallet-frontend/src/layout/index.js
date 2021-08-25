@@ -169,6 +169,12 @@ function App () {
               }
             },
           },
+          {
+            props: { size: 'large'},
+            style: {
+              fontSize: '1rem',
+            },
+          },
         ],
       },
       MuiInputBase: {
