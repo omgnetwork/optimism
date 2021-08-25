@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.11
+
+### Patch Changes
+
+- f331428f: Update the memory usage in geth
+
+## 0.4.10
+
+### Patch Changes
+
+- eb1eb327: Ensure that L2 geth doesn't reject blocks from the future
+
 ## 0.4.9
 
 ### Patch Changes
