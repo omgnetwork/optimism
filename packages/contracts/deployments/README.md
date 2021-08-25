@@ -55,7 +55,6 @@ Use their proxied counterparts seen above.
 OVM_L1CrossDomainMessenger: 
  - 0x37c82b55A507085787A17A3a24158C0Aa646f4A3
  - https://rinkeby.etherscan.io/address/0x37c82b55A507085787A17A3a24158C0Aa646f4A3)
--->
 ---
 ## RINKEBY-INTEGRATION
 
@@ -100,6 +99,39 @@ Use their proxied counterparts seen above.
 
 -->
 ---
+
+=======
+## MAINNET-PRODUCTION
+
+Network : __mainnet (chain id: 1)__
+
+|Contract|Address|
+|--|--|
+|Lib_AddressManager|[0x8376ac6C3f73a25Dd994E0b0669ca7ee0C02F089](https://etherscan.io/address/0x8376ac6C3f73a25Dd994E0b0669ca7ee0C02F089)|
+|OVM_CanonicalTransactionChain|[0x4B5D9E5A6B1a514eba15A2f949531DcCd7c272F2](https://etherscan.io/address/0x4B5D9E5A6B1a514eba15A2f949531DcCd7c272F2)|
+|OVM_ChainStorageContainer-CTC-batches|[0xA7557b676EA0D9406459409B5ad01c14b5522c46](https://etherscan.io/address/0xA7557b676EA0D9406459409B5ad01c14b5522c46)|
+|OVM_ChainStorageContainer-CTC-queue|[0x33938f8E5F2c36e3Ca2B01E878b3322E280d4c50](https://etherscan.io/address/0x33938f8E5F2c36e3Ca2B01E878b3322E280d4c50)|
+|OVM_ChainStorageContainer-SCC-batches|[0x318d4dAb7D3793E40139b496c3B89422Ae5372D1](https://etherscan.io/address/0x318d4dAb7D3793E40139b496c3B89422Ae5372D1)|
+|OVM_ExecutionManager|[0xa230D4b11F66A3DEEE0bEAf8D04551F236C8B646](https://etherscan.io/address/0xa230D4b11F66A3DEEE0bEAf8D04551F236C8B646)|
+|OVM_FraudVerifier|[0x872c65c835deB2CFB3493f2C3dD353633Ae4f4B8](https://etherscan.io/address/0x872c65c835deB2CFB3493f2C3dD353633Ae4f4B8)|
+|OVM_L1MultiMessageRelayer|[0xAb2AF3A98D229b7dAeD7305Bb88aD0BA2c42f9cA](https://etherscan.io/address/0xAb2AF3A98D229b7dAeD7305Bb88aD0BA2c42f9cA)|
+|OVM_SafetyChecker|[0x85c0Cebfe3b81d64D256b38fDf65DD05887e5884](https://etherscan.io/address/0x85c0Cebfe3b81d64D256b38fDf65DD05887e5884)|
+|OVM_StateCommitmentChain|[0x17834b754e2f09946CE48D7B5beB4D7D94D98aB6](https://etherscan.io/address/0x17834b754e2f09946CE48D7B5beB4D7D94D98aB6)|
+|OVM_StateManagerFactory|[0x0c4935b421Af8F86698Fb77233e90AbC5f146846](https://etherscan.io/address/0x0c4935b421Af8F86698Fb77233e90AbC5f146846)|
+|OVM_StateTransitionerFactory|[0xc6dd73D427Bf784dd1e2f9F64029a79533ffAb40](https://etherscan.io/address/0xc6dd73D427Bf784dd1e2f9F64029a79533ffAb40)|
+|Proxy__OVM_L1CrossDomainMessenger|[0x6D4528d192dB72E282265D6092F4B872f9Dff69e](https://etherscan.io/address/0x6D4528d192dB72E282265D6092F4B872f9Dff69e)|
+|Proxy__OVM_L1StandardBridge|[0xdc1664458d2f0B6090bEa60A8793A4E66c2F1c00](https://etherscan.io/address/0xdc1664458d2f0B6090bEa60A8793A4E66c2F1c00)|
+|mockOVM_BondManager|[0xa4F8CD56c14fCEc655CfdDb2ceBd9f1e9329Ec27](https://etherscan.io/address/0xa4F8CD56c14fCEc655CfdDb2ceBd9f1e9329Ec27)|
+<!--
+Implementation addresses. DO NOT use these addresses directly.
+Use their proxied counterparts seen above.
+
+OVM_L1CrossDomainMessenger: 
+ - 0x25109139f8C4F9f7b4E4d5452A067feaE3a537F3
+ - https://etherscan.io/address/0x25109139f8C4F9f7b4E4d5452A067feaE3a537F3)
+-->
+---
+
 ## MAINNET
 
 Network : __mainnet (chain id: 1)__
