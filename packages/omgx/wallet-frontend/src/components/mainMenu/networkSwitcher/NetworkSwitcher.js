@@ -12,7 +12,7 @@ import networkService from 'services/networkService'
 import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon.js';
 import { Typography } from '@material-ui/core';
 
-function NetworkSwitcher() {
+function NetworkSwitcher({ walletEnabled }) {
   const dispatch = useDispatch();
   const dropdownNode = useRef(null);
   const [ showAllNetworks, setShowAllNetworks ] = useState(false);
@@ -32,21 +32,22 @@ function NetworkSwitcher() {
     dispatch(setNetwork(network));
   }, [ dispatch ])
 
-  console.log('networkLayer', networkLayer)
-
-
   return (
     <S.WalletPickerContainer>
       <S.WallerPickerWrapper>
         <S.Menu>
-          <S.NetWorkStyle
-            onClick={()=>setShowAllNetworks(prev => !prev)}
-          >
+
+          <S.NetWorkStyle walletEnabled={walletEnabled} onClick={()=>{
+            if (walletEnabled === false)
+            setShowAllNetworks(prev => !prev)
+          }}>
+
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
               <NetworkSwitcherIcon active={networkLayer === 'L2'} />
               <Typography variant="body1">BOBA {masterConfig}</Typography>
             </Box>
-            {!!allNetworks.length && (
+
+            {walletEnabled !== false || !!allNetworks.length && (
               <S.Chevron
                 open={showAllNetworks}
                 src={chevron}
@@ -55,18 +56,18 @@ function NetworkSwitcher() {
             )}
           </S.NetWorkStyle>
 
-          <S.Dropdown
-            ref={dropdownNode}
-          >
-            {!!allNetworks.length && showAllNetworks && allNetworks.map((network,   ) => (
-              <div
-                // key={index}
-                onClick={()=>dispatchSetNetwork(network)}
-              >
-                {network}
-              </div>))
-            }
-          </S.Dropdown>
+          {walletEnabled !== false || networkLayer === 'L1' || 'L2' ? (
+            <S.Dropdown ref={dropdownNode}>
+              {!!allNetworks.length && showAllNetworks && allNetworks.map((network,   ) => (
+                <div
+                  // key={index}
+                  onClick={()=>dispatchSetNetwork(network)}
+                >
+                  {network}
+                </div>))
+              }
+            </S.Dropdown>
+          ) : (null)}
 
         </S.Menu>
       </S.WallerPickerWrapper>

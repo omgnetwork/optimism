@@ -120,7 +120,7 @@ class Nft extends React.Component {
         <PageHeader title="NFT" />
         <Grid
           container
-          spacing={4}
+          spacing={10}
           justifyContent="center"
         >
           <Grid item sx={12} md={6}>
@@ -224,7 +224,7 @@ class Nft extends React.Component {
           }
         })}
 
-        <Box sx={{mt: 8}}>
+        <Box sx={{my: 8}}>
           <Typography variant="h2" component="h4" sx={{fontWeight: "700", mb: 4}}>
             Derive an NFT Factory from another NFT (experimental)
           </Typography>

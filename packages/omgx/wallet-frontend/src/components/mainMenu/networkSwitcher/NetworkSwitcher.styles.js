@@ -63,7 +63,7 @@ export const Dropdown = styled.div`
     background-color: $gray3;
     transition: all 200ms ease-in-out;
     padding: 10px 15px;
-    cursor: pointer;
+    /* cursor: pointer; */
     &:hover {
       background-color: $gray2;
     }
@@ -83,5 +83,5 @@ export const NetWorkStyle = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  cursor: pointer;
+  cursor: ${(props) => props.walletEnabled !== false ? 'inherit' : 'pointer'};
 `;

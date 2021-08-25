@@ -158,7 +158,7 @@ function WalletPicker ({ onEnable, enabled }) {
           top: '10px',
           right: '20px'
         }}>
-          <NetworkSwitcher />
+          <NetworkSwitcher walletEnabled={walletEnabled} />
         </Box>
         <Container maxWidth="md">
           <Grid container spacing={8}>
@@ -169,7 +169,7 @@ function WalletPicker ({ onEnable, enabled }) {
               <S.Subtitle variant="body1" component="p" paragraph={true}>
                   Select the wallet that u use to connect it to OMGx system! Don’t worry more wallets support is coming soon
               </S.Subtitle>
-              <S.WrapperLink sx={{display: isMobile ? "none" : "flex"}}>
+              <S.WrapperLink sx={{display: "none"}}>
                 <Link
                   style={{ color: grey[500]}}
                   href="#"
@@ -206,29 +206,14 @@ function WalletPicker ({ onEnable, enabled }) {
                 </S.WalletCardDescription>
 
               </S.WalletCard>
+
               <Button
                 onClick={() => networkService.addL2Network()}
-                variant="contained"
                 fullWidth
                 size="large"
-                sx={{display: isMobile ? "flex" : "none" }}
               >
                 Add OMGX L2 Provider
               </Button>
-              <S.WrapperLink sx={{display: isMobile ? "flex" : "none", justifyContent: "center"}}>
-                <Link
-                  style={{ color: theme.palette.secondary.main }}
-                  href="#"
-                  underline="hover"
-                  variant="body1"
-                  onClick={() => {
-                    console.info("I'm a button.");
-                  }}
-                >
-                  More about OMGX and how L2 work
-                </Link>
-                <Arrow />
-              </S.WrapperLink>
             </Grid>
           </Grid>
         </Container>

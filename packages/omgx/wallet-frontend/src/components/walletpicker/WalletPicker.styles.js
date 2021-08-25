@@ -34,7 +34,7 @@ export const WalletCard = styled.div`
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
   cursor: pointer;
   margin-top: ${(props) => props.isMobile ? "-30px" : "0"};
-  margin-bottom: ${(props) => props.isMobile ? "20px" : "0"};
+  margin-bottom: ${(props) => props.isMobile ? "20px" : "30px"};
   display: flex;
 `;
 
@@ -93,6 +93,3 @@ export const WrapperLink = styled(Box)(({ theme }) => ({
     marginTop: "20px",
   },
 }));
-
-
-
