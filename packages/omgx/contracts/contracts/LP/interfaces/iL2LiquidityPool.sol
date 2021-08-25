@@ -10,7 +10,7 @@ interface iL2LiquidityPool {
     /********************
      *       Events     *
      ********************/
-    
+
     event AddLiquidity(
         address sender,
         uint256 amount,
@@ -27,15 +27,24 @@ interface iL2LiquidityPool {
     event ClientDepositL2(
         address sender,
         uint256 receivedAmount,
-        uint256 userRewardFee,
-        uint256 ownerRewardFee,
-        uint256 totalFee,
         address tokenAddress
     );
 
     event ClientPayL2(
         address sender,
         uint256 amount,
+        uint256 userRewardFee,
+        uint256 ownerRewardFee,
+        uint256 totalFee,
+        address tokenAddress
+    );
+
+    event ClientPayL2Settlement(
+        address sender,
+        uint256 amount,
+        uint256 userRewardFee,
+        uint256 ownerRewardFee,
+        uint256 totalFee,
         address tokenAddress
     );
 
@@ -58,6 +67,13 @@ interface iL2LiquidityPool {
      *************************/
 
     function clientPayL2(
+        address payable _to,
+        uint256 _amount,
+        address _tokenAddress
+    )
+        external;
+
+    function clientPayL2Settlement(
         address payable _to,
         uint256 _amount,
         address _tokenAddress

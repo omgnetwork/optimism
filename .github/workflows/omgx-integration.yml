@@ -11,6 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
+
   start-runner:
     name: Start self-hosted EC2 runner
     runs-on: ubuntu-latest
@@ -34,12 +35,13 @@ jobs:
           ec2-instance-type: t2.xlarge
           subnet-id: subnet-905870ae
           security-group-id: sg-0855631d714870b32
+
   omgx_integration:
     needs: start-runner
     runs-on: ${{ needs.start-runner.outputs.label }}
     env:
-      DOCKER_BUILDKIT: 1
-      COMPOSE_DOCKER_CLI_BUILD: 1
+      #DOCKER_BUILDKIT: 1
+      #COMPOSE_DOCKER_CLI_BUILD: 1
       TEST_PRIVATE_KEY_1: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       TEST_PRIVATE_KEY_2: "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba"
       TEST_PRIVATE_KEY_3: "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e"
@@ -48,6 +50,8 @@ jobs:
       L2_NODE_WEB3_URL: http://localhost:8545
       URL: http://127.0.0.1:8080/addresses.json
       OMGX_URL: http://127.0.0.1:8078/addresses.json
+      TARGET_GAS_LIMIT: 9000000000
+      CHAIN_ID: 28
 
     steps:
       # Monorepo tests
@@ -65,23 +69,29 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Install yq
-        run: sudo snap install yq
-
       - name: Check the .envs
         run: printenv
 
-      - name: Build the services, bring the stack up + OMGX services
+      - name: Build the services
         working-directory: ./ops
-        env:
-          BUILD: 1
-          DAEMON: 1
-        run: ./up_local.sh
+        run: ./scripts/build-ci.sh
+
+      - name: List all images
+        run: docker image ls --all
+
+      - name: Bring the stack up
+        working-directory: ./ops
+        run: docker-compose up --no-build -d -V
 
       # just sets up background logs for the system that was just started
+      # this just adds the logging
       - name: Start background logging
         working-directory: ./ops
-        run: docker-compose -f docker-compose.yml -f docker-compose-omgx-services.yml logs --follow &
+        run: docker-compose -f docker-compose.yml logs --follow &
+
+      - name: Wait for the Sequencer node
+        working-directory: ./ops
+        run: ./scripts/wait-for-sequencer.sh
 
       # this test jitters - in any case, later tests will fail if the OMGX_deployer does not come up
       - name: Test serving OMGX contracts
@@ -112,42 +122,11 @@ jobs:
         run: |
           yarn test:integration
 
-      # ToDo
-      # - name: Test the base OMGX contracts
-      #   working-directory: ./ops
-      #   run: docker-compose -f docker-compose.yml -f docker-compose-omgx-services.yml run omgx_test_contracts
-
       - name: Test the message-relayer-fast
         working-directory: ./packages/omgx/message-relayer-fast
         run: |
           yarn test:integration
 
-      # ToDo
-      # - name: Test the message-relayer-fast
-      #   working-directory: ./ops
-      #   run: docker-compose -f docker-compose.yml -f docker-compose-omgx-services.yml run omgx_test_relayer
-
-      # - name: List all built images
-      #   if: failure()
-      #   run: docker images
-
-      # - name: Collect docker logs on failure
-      #   if: failure()
-      #   uses: jwalton/gh-docker-logs@v1
-      #   with:
-      #     images: 'omgx/builder,omgx/hardhat,omgx/deployer,omgx/data-transport-layer,omgx/l2geth,omgx/message-relayer,omgx/batch-submitter,omgx/l2geth,omgx/integration-tests,omgx/wallet_builder,omgx/wallet_deployer'
-      #     dest: './logs'
-
-      # - name: Tar logs
-      #   if: failure()
-      #   run: tar cvzf ./logs.tgz ./logs
-
-      # - name: Upload logs to GitHub
-      #   if: failure()
-      #   uses: actions/upload-artifact@master
-      #   with:
-      #     name: logs.tgz
-      #     path: ./logs.tgz
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:

@@ -13,10 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React from 'react';
+import React, {useState} from 'react';
 
 import Tooltip from 'components/tooltip/Tooltip';
-
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import LinkIcon from 'components/Icons/LinkIcon';
 import * as styles from './Transaction.module.scss';
 
 function Transaction ({
@@ -30,8 +31,14 @@ function Transaction ({
   subTitle,
   chain,
   typeTX,
-  tooltip = ''
+  blockNumber,
+  tooltip = '',
+  detail
 }) {
+
+  const [dropDownBox, setDropDownBox] = useState(false);
+  const [dropDownBoxInit, setDropDownBoxInit] = useState(true);
+
   function renderValue () {
     
     if (button) {
@@ -73,25 +80,91 @@ function Transaction ({
     )
   }
 
-  const Resolved = link ? 'a' : 'div'
+  function renderDetail() {
+    if (!detail) {
+      return null;
+    }
+    return <> 
+      <div className={`${styles.subTitle} ${styles.viewMore}`} style={{ cursor: 'pointer' }}
+        onClick={() => {
+          setDropDownBox(!dropDownBox)
+          setDropDownBoxInit(false)
+        }}
+      >
+        <div>View More</div>
+        <ExpandMoreIcon />
+      </div>
+      <div
+        className={dropDownBox ?
+          styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
+      >
+        <div className={styles.title}>
+        <a className={styles.href} href={detail.l1TxLink} target="_blank" rel="noopener noreferrer">
+          {detail.l1Hash}
+        </a>
+        </div>
+        <div className={styles.content}>
+          <div>L1 Block : {detail.l1BlockNumber}</div>
+        </div>
+        <div className={styles.content}>
+          <div>Block Hash : {detail.l1BlockHash}</div>
+        </div>
+        <div className={styles.content}>
+          <div>L1 From : {detail.l1From}</div>
+        </div>
+        <div className={styles.content}>
+          <div>L1 To : {detail.l1To}</div>
+        </div>
+      </div>
+    </>
+  }
 
   return (
-    <div className={styles.Transaction}>
-      <Resolved
-        href={link}
-        target={'_blank'}
-        rel='noopener noreferrer'
-        className={styles.left}
-      >
-        <span style={{fontSize: '1.2em'}}>{chain}</span>
-        <div>{title}</div>
-        {midTitle && (<div className={styles.midTitle}>{midTitle}</div>)}
-        <div>{subTitle}</div>
-        <div>{typeTX}</div>
-      </Resolved>
-      <div className={styles.right}>
-        {renderValue()}
+    <div className={styles.Transaction}
+      style={{
+        background: `${!!dropDownBox ? 'rgba(255, 255, 255, 0.03)' : ''}`
+      }}
+    >
+      <div className={styles.transactionItem}>
+        <div className={styles.title}>
+          <div>{chain}</div>
+          <div>{title}</div>
+        </div>
+        {(midTitle || status) && 
+          <div className={styles.subTitle}>
+            <div>{midTitle}</div>
+            <div>{blockNumber}</div>
+          </div>
+        }
+        {subTitle && 
+          <div className={styles.subTitle}>
+            {subTitle}
+          </div>
+        }
+        <div className={styles.content}>
+          <div>{typeTX}</div>
+          {link && 
+            <a 
+              href={link}
+              target={'_blank'}
+              rel='noopener noreferrer'
+              className={styles.button}
+            > 
+            <LinkIcon />
+             Advanced Details</a>  
+          }
+        </div>
+        {renderDetail()}
+        {(button || status) &&
+          <div className={styles.content}>
+            <div className={styles.right}>
+              {renderValue()}
+            </div>
+          </div>
+        }
       </div>
+      <div className={styles.divider}></div>
+
     </div>
   )
 }

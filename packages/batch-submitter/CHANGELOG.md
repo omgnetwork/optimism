@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3.11
+
+### Patch Changes
+
+- 918c08ca: Bump ethers dependency to 5.4.x to support eip1559
+- Updated dependencies [918c08ca]
+  - @eth-optimism/contracts@0.4.10
+  - @eth-optimism/core-utils@0.5.2
+
+## 0.3.10
+
+### Patch Changes
+
+- b5b9fd89: Migrate to using `ethers.StaticJsonRpcProvider`
+- Updated dependencies [ecc2f8c1]
+  - @eth-optimism/contracts@0.4.9
+
+## 0.3.9
+
+### Patch Changes
+
+- 3b132974: Fix tx resubmission estimateGas bug in batch submitter
+- Updated dependencies [7f26667d]
+- Updated dependencies [77511b68]
+  - @eth-optimism/contracts@0.4.7
+
 ## 0.3.8
 
 ### Patch Changes

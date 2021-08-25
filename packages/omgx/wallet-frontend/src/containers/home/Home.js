@@ -23,7 +23,8 @@ import useInterval from 'util/useInterval';
 import {
   checkWatcherStatus,
   fetchBalances,
-  fetchTransactions,
+  addTokenList,
+  fetchNFTs,
   fetchExits,
   fetchDeposits,
   fetchEthStats,
@@ -45,7 +46,7 @@ import FarmWithdrawModal from 'containers/modals/farm/FarmWithdrawModal';
 //Wallet Functions
 import Status from 'containers/status/Status';
 import Account from 'containers/account/Account';
-import Transactions from 'containers/transactions/Transactions';
+import Transactions from 'containers/transactions/History';
 
 //NFT Example Page
 import NFT from 'containers/nft/Nft';
@@ -55,7 +56,8 @@ import MobileMenu from 'components/mobilemenu/MobileMenu';
 // Farm
 import Farm from 'containers/farm/Farm';
 
-import logo from 'images/omgx.png';
+// import logo from 'images/omgx.png';
+import logo from 'images/logo-boba.svg';
 
 import * as styles from './Home.module.scss';
 
@@ -109,21 +111,22 @@ function Home () {
       // watcher only calls
       dispatch(checkWatcherStatus());
       dispatch(fetchExits());
-      dispatch(fetchTransactions());
     });
   }, POLL_INTERVAL * 2);
 
   //get all account balances
   useInterval(() => {
     dispatch(fetchBalances());
+    dispatch(addTokenList());
+    dispatch(fetchNFTs());
   }, POLL_INTERVAL);
 
   useEffect(() => {
-    checkVersion()
+    checkVersion();
   }, [])
   
   const handleSetPage = async (page) => {
-    setPageDisplay(page);
+    setPageDisplay(page)
   }
 
   return (
@@ -178,7 +181,7 @@ function Home () {
               className={pageDisplay === "Farm" ? styles.subtitletextActive : styles.subtitletext}
               onClick={()=>{handleSetPage("Farm")}}
             >  
-              Farm
+              Earn
             </h2>
             <h2
               className={pageDisplay === "NFT" ? styles.subtitletextActive : styles.subtitletext}

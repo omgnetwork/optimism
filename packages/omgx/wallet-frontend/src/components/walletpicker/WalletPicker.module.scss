@@ -1,9 +1,9 @@
 @import 'index.scss';
 
 .B {
-  font-family: MessinaMonoBold;
+  font-family: 'MrEavesXLBold', MessinaMonoBold;
   font-style: unset;
-  color: $bunnyRed;
+  color: $white // $bunnyRed;
 }
 
 .MainBar {
@@ -24,7 +24,7 @@
 .MainLeft {
   width: 490px;
   font-size: 1.3em;
-  color: $gray3;
+  color: $white;// $gray3;
   margin-top: 5px;
   margin-bottom: 5px;
   padding: 3px;
@@ -41,6 +41,32 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
+}
+
+.ButtonConnect {
+  width: 250px;
+  border-radius: 5px;
+  padding: 15px;
+  cursor: pointer;
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  @include mobile {
+    flex-direction: column;
+    width: 70%;
+  }
+}
+
+.ButtonAdd {
+  width: 200px;
+  border-radius: 5px;
+  margin-top: 20px;
+  transition: all 200ms ease-in-out;
+  padding: 5px;
+  cursor: pointer;
+  @include mobile {
+    flex-direction: column;
+    width: 70%;
+  }
+  box-shadow: 0 4px 10px 0 rgba(0,0,0,0.2);
 }
 
 /*the actual button*/
@@ -128,7 +154,7 @@
 }
 
 .disabledMM {
-  padding-top: 5px;
+  padding-top: 20px;
   font-size: 0.9em;
   color: $red;
 }
@@ -164,7 +190,7 @@
   }
 
   .VPText {
-    font-family: 'Messina';
+    font-family: 'MrEavesXL', 'Messina';
     font-size: 1.0em;
     font-style: italic;
     color: $gray4;
@@ -178,7 +204,7 @@
 }
 
 .Note {
-  font-family: 'Messina';
+  font-family: 'MrEavesXL', 'Messina';
   font-size: 0.8em;
   font-style: italic;
   color: $gray4;
@@ -188,9 +214,9 @@
 }
 
 .Title {
-  font-family: 'Messina';
+  font-family: 'MrEavesXL', 'Messina';
   font-size: 0.9em;
-  color: $gray4;
+  color: $white700; //$gray4;
   margin-top: 5px;
   margin-bottom: 5px;
   padding: 3px;
@@ -203,7 +229,7 @@
   justify-content: center;
   align-items: flex-start;
   padding: 20px;
-  font-family: 'Messina';
+  font-family: 'MrEavesXL', 'Messina';
   margin-bottom: 50px;
 
   @include mobile {
@@ -261,7 +287,7 @@
           width: 150px;
         }
         a {
-          background-color: $gray3;
+          background-color: $white; ///$gray3;
           transition: all 200ms ease-in-out;
           padding: 10px 15px;
           cursor: pointer;
@@ -276,11 +302,13 @@
         flex-direction: row;
         align-items: center;
         cursor: pointer;
+        color: $white;
+
         .indicator {
           margin-right: 5px;
           width: 5px;
           height: 13px;
-          background-color: #2A308E;
+          background-color: $white ;// #2A308E;
           border-radius: 4px;
         }
       }

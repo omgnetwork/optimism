@@ -3,6 +3,7 @@ import {
   TxGasLimit,
   TxGasPrice,
 } from '@eth-optimism/core-utils'
+import { loadContract } from '@eth-optimism/contracts'
 import { Wallet, BigNumber, Contract, ContractFactory } from 'ethers'
 import { ethers } from 'hardhat'
 import chai, { expect } from 'chai'
@@ -37,33 +38,54 @@ describe('Basic RPC tests', () => {
   let revertingDeployTx: TransactionRequest
 
   before(async () => {
+    
     env = await OptimismEnv.new()
+    
     wallet = env.l2Wallet
+    
     const Factory__Reverter = await ethers.getContractFactory(
       'Reverter',
       wallet
     )
     Reverter = await Factory__Reverter.connect(env.l2Wallet).deploy()
     await Reverter.deployTransaction.wait()
+    
     revertMessage = await Reverter.revertMessage()
     revertingTx = {
       to: Reverter.address,
       data: Reverter.interface.encodeFunctionData('doRevert'),
     }
+    
     const Factory__ConstructorReverter = await ethers.getContractFactory(
       'ConstructorReverter',
       wallet
     )
+    
     revertingDeployTx = {
       data: Factory__ConstructorReverter.bytecode,
     }
+
   })
 
   describe('eth_sendRawTransaction', () => {
+    
     it('should correctly process a valid transaction', async () => {
+
+      await fundUser(env.watcher, env.l1Bridge, ethers.utils.parseEther('1'), env.l2Wallet.address)
+
       const tx = DEFAULT_TRANSACTION
+
+      const balanceBefore1 = await provider.getBalance(env.l1Wallet.address)
+      console.log("balanceBefore1:",balanceBefore1.toString())
+
+      const balanceBefore = await provider.getBalance(env.l2Wallet.address)
+      console.log("balanceBefore:",balanceBefore.toString())
+
       const nonce = await wallet.getTransactionCount()
       const result = await wallet.sendTransaction(tx)
+
+      const balanceAfter = await provider.getBalance(env.l2Wallet.address)
+      console.log("balanceAfter:",balanceAfter.toString())
 
       expect(result.from).to.equal(wallet.address)
       expect(result.nonce).to.equal(nonce)
@@ -99,7 +121,7 @@ describe('Basic RPC tests', () => {
         ...DEFAULT_TRANSACTION,
         chainId: await env.l2Wallet.getChainId(),
         data: '0x',
-        value: ethers.utils.parseEther('0.1'),
+        value: ethers.utils.parseEther('0.001'),
       }
 
       const balanceBefore = await provider.getBalance(env.l2Wallet.address)
@@ -107,8 +129,8 @@ describe('Basic RPC tests', () => {
       const receipt = await result.wait()
       expect(receipt.status).to.deep.equal(1)
 
-      expect(await provider.getBalance(env.l2Wallet.address)).to.deep.equal(
-        balanceBefore.sub(ethers.utils.parseEther('0.1'))
+      expect(await provider.getBalance(env.l2Wallet.address)).to.be.below( //because of fees
+        balanceBefore.sub(ethers.utils.parseEther('0.001'))
       )
     })
 
@@ -235,7 +257,7 @@ describe('Basic RPC tests', () => {
     it('correctly exposes revert data for contract calls', async () => {
       const req: TransactionRequest = {
         ...revertingTx,
-        gasLimit: 5980899, // override gas estimation
+        gasLimit: 7000000, // override gas estimation
       }
 
       const tx = await wallet.sendTransaction(req)
@@ -328,10 +350,21 @@ describe('Basic RPC tests', () => {
 
       // Get latest block once to start.
       const prev = await provider.getBlockWithTransactions('latest')
+      // set wait to null to allow a deep object comparison
+      prev.transactions[0].wait = null
 
       // Over ten seconds, repeatedly check the latest block to make sure nothing has changed.
       for (let i = 0; i < 5; i++) {
         const latest = await provider.getBlockWithTransactions('latest')
+        latest.transactions[0].wait = null
+        // Check each key of the transaction individually
+        // for easy debugging if one field changes
+        for (const [key, value] of Object.entries(latest.transactions[0])) {
+          expect(value).to.deep.equal(
+            prev.transactions[0][key],
+            `mismatch ${key}`
+          )
+        }
         expect(latest).to.deep.equal(prev)
         await sleep(2000)
       }
@@ -409,9 +442,13 @@ describe('Basic RPC tests', () => {
         expect(decoded).to.deep.eq(BigNumber.from(l2Gaslimit))
         expect(estimate.toString().endsWith(l2Gaslimit.toString()))
 
-        const l2GasPrice = BigNumber.from(0)
-        // The L2GasPrice should be fetched from the L2GasPrice oracle contract,
-        // but it does not yet exist. Use the default value for now
+        const OVM_GasPriceOracle = loadContract(
+          'OVM_GasPriceOracle',
+          "0x420000000000000000000000000000000000000F",
+          l2Provider,
+        ).connect(wallet)
+        const l2GasPrice = BigNumber.from(await OVM_GasPriceOracle.gasPrice())
+
         const expected = TxGasLimit.encode({
           data: tx.data,
           l1GasPrice,

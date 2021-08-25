@@ -67,6 +67,7 @@ Resources:
                   - "secretsmanager:ListSecretVersionIds"
                 Resource:
                   - arn:aws:secretsmanager:us-east-1:942431445534:secret:*
+
   DataTransportLayerLBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -85,6 +86,7 @@ Resources:
       UnhealthyThresholdCount: 10
       Matcher:
         HttpCode: 200
+
   DataTransportLayerLBListenerRulePriority:
     Type: AWS::CloudFormation::CustomResource
     Properties:
@@ -92,6 +94,7 @@ Resources:
         Fn::ImportValue: !Sub "${CFHelperELBv2RulePriorityStack}:Function"
       ListenerArn:
         Fn::ImportValue: !Sub "${InfrastructureStackName}:DataTransportLayerListener"
+
   DataTransportLayerListenerRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
@@ -106,6 +109,57 @@ Resources:
       ListenerArn:
         Fn::ImportValue: !Sub "${InfrastructureStackName}:DataTransportLayerListener"
       Priority: !GetAtt DataTransportLayerLBListenerRulePriority.Value
+
+  DataTransportLayerDeployerListener1:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn:
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancer:ARN"
+      Port: 8081
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-TLS-1-2-2017-01 # https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-https-listener.html
+      Certificates:
+      - CertificateArn: arn:aws:acm:us-east-1:942431445534:certificate/f0c77afc-0e13-42f4-b3b7-eeeafb32c631
+      DefaultActions:
+      - Type: fixed-response
+        FixedResponseConfig:
+          ContentType: text/html
+          MessageBody: ""
+          StatusCode: 404
+
+  DataTransportLayerDeployerLBTargetGroup1:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 8081
+      Protocol: HTTP
+      VpcId:
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:VpcId"
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 30
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /health
+      HealthCheckProtocol: HTTP # TODO Implement proper healthcheck
+      HealthCheckTimeoutSeconds: 15
+      HealthyThresholdCount: 3
+      UnhealthyThresholdCount: 10
+      Matcher:
+        HttpCode: 200
+
+  DataTransportLayerDeployerLBListenerRule1:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref DataTransportLayerDeployerLBTargetGroup1
+      Conditions:
+        - Field: host-header
+          HostHeaderConfig:
+            Values:
+            - Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
+      ListenerArn: !Ref DataTransportLayerDeployerListener1
+      Priority: !GetAtt DataTransportLayerLBListenerRulePriority.Value
+
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -114,11 +168,16 @@ Resources:
         - Name: db
           Host:
             SourcePath: "/mnt/efs/db"
+        - Name: addresses
+          Host:
+            SourcePath: "/mnt/efs/addresses"
       ContainerDefinitions:
         - Image: !Sub "${ECRRegistry}/${DockerPrefix}/${DataTransportLayerImage}:${ImageTag}"
           Name: data_transport_layer
           PortMappings:
             - ContainerPort: 7878
+              HostPort: 0
+            - ContainerPort: 8081
               HostPort: 0
           Environment:
             - Name: SECRETNAME
@@ -132,14 +191,14 @@ Resources:
                     Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
             - Name: DEPLOYER_HTTP
               Value: !Sub
-                - "http://${EndpointAddress}:8081"
+                - "https://${EndpointAddress}:8081"
                 - EndpointAddress:
-                    Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerInt:DNSName"
+                    Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
             - Name: URL
               Value: !Sub
-                - "http://${EndpointAddress}:8081/addresses.json"
+                - "https://${EndpointAddress}:8081/addresses.json"
                 - EndpointAddress:
-                    Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerInt:DNSName"
+                    Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
             - Name: DATA_TRANSPORT_LAYER__SERVER_PORT
               Value: 7878
           EntryPoint:
@@ -147,16 +206,20 @@ Resources:
           MountPoints:
             - ContainerPath: "/db"
               SourceVolume: db
+            - ContainerPath: "/opt/optimism/packages/data-transport-layer/dist/dumps/"
+              SourceVolume: addresses
           DockerLabels:
             com.datadoghq.ad.check_names: '["data_transport_layer"]'
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "data_transport_layer", "service": "data_transport_layer"}]'
           Essential: true
-          Memory: "512"
+          Memory: "100"
         - Image: 942431445534.dkr.ecr.us-east-1.amazonaws.com/omgx/nginx-eth-proxy:data_tr_layer
           Name: nginx-dtl
           PortMappings:
             - ContainerPort: 80
+              HostPort: 0
+            - ContainerPort: 8081
               HostPort: 0
           Environment:
             - Name: SEQUENCER
@@ -172,7 +235,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "nginx", "service": "nginx"}]'
           Essential: true
-          Memory: "256"
+          Memory: "64"
           Links:
             - data_transport_layer
       NetworkMode: bridge
@@ -188,8 +251,11 @@ Resources:
         - ContainerName: nginx-dtl
           ContainerPort: 80
           TargetGroupArn: !Ref DataTransportLayerLBTargetGroup
+        - ContainerName: nginx-dtl
+          ContainerPort: 8081
+          TargetGroupArn: !Ref DataTransportLayerDeployerLBTargetGroup1
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: !Sub "DataTransportLayer-${EnvironmentName}"
+      ServiceName: "data-transport-layer"
       TaskDefinition: !Ref TaskDefinition

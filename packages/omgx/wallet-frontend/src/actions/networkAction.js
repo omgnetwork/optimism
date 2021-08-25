@@ -32,6 +32,16 @@ export function fetchBalances() {
   return createAction('BALANCE/GET', () => networkService.getBalances())
 }
 
+export function addTokenList() {
+  console.log("addTokenList")
+  return createAction('TOKENLIST/GET', () => networkService.addTokenList())
+}
+
+export function fetchNFTs() {
+  console.log("fetchNFTs")
+  return createAction('NFTS/GET', () => networkService.fetchNFTs())
+}
+
 export function fetchTransactions() {
   return createAction('TRANSACTION/GETALL', () =>
     networkService.getTransactions()
@@ -102,9 +112,9 @@ export function depositL2LP(token, value) {
   )
 }
 
-export function depositETHL2(value) {
+export function depositETHL2(value,gasLimit) {
   return createAction('DEPOSIT/CREATE', () =>
-    networkService.depositETHL2(value)
+    networkService.depositETHL2(value,gasLimit)
   )
 }
 
@@ -197,12 +207,12 @@ export function getTransferTypedData(data) {
   }
 }
 
-// export function fetchGas () {
-//   return createAction(
-//     'GAS/GET',
-//     () => networkService.getGasPrice()
-//   );
-// }
+export function fetchGas (params) {
+  return createAction(
+    'GAS/GET',
+    () => networkService.getGasPrice(params)
+  );
+}
 
 // export function fetchFees () {
 //   return async function (dispatch) {
@@ -227,3 +237,7 @@ export function getTransferTypedData(data) {
 //     }
 //   };
 // }
+
+export function fetchLookUpPrice(params) {
+  return createAction('PRICE/GET', () => networkService.fetchLookUpPrice(params))
+}
