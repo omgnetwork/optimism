@@ -42,6 +42,10 @@ import LedgerConnect from 'containers/modals/ledger/LedgerConnect';
 import AddTokenModal from 'containers/modals/addtoken/AddTokenModal';
 import FarmDepositModal from 'containers/modals/farm/FarmDepositModal';
 import FarmWithdrawModal from 'containers/modals/farm/FarmWithdrawModal';
+import TransferDaoModal from 'containers/modals/dao/TransferDaoModal';
+import DelegateDaoModal from 'containers/modals/dao/DelegateDaoModal';
+import NewProposalModal from 'containers/modals/dao/NewProposalModal';
+
 
 //Wallet Functions
 import Status from 'containers/status/Status';
@@ -55,6 +59,10 @@ import MobileMenu from 'components/mobilemenu/MobileMenu';
 
 // Farm
 import Farm from 'containers/farm/Farm';
+
+// DAO
+import DAO from 'containers/dao/Dao';
+
 
 // import logo from 'images/omgx.png';
 import logo from 'images/logo-boba.svg';
@@ -83,6 +91,11 @@ function Home () {
 
   const farmDepositModalState = useSelector(selectModalState('farmDepositModal'))
   const farmWithdrawModalState = useSelector(selectModalState('farmWithdrawModal'))
+
+  // DAO modal
+  const tranferBobaDaoModalState = useSelector(selectModalState('transferDaoModal'))
+  const delegateBobaDaoModalState = useSelector(selectModalState('delegateDaoModal'))
+  const proposalBobaDaoModalState = useSelector(selectModalState('newProposalModal'))
 
   const walletMethod = useSelector(selectWalletMethod())
   //const transactions = useSelector(selectlayer2Transactions, isEqual);
@@ -141,6 +154,10 @@ function Home () {
       <FarmDepositModal open={farmDepositModalState} />
       <FarmWithdrawModal open={farmWithdrawModalState} />
 
+      <TransferDaoModal open={tranferBobaDaoModalState} />
+      <DelegateDaoModal open={delegateBobaDaoModalState} />
+      <NewProposalModal open={proposalBobaDaoModalState} />
+
       <LedgerConnect
         open={walletMethod === 'browser'
           ? ledgerConnectModalState
@@ -189,6 +206,12 @@ function Home () {
             >  
               NFT
             </h2>
+            <h2
+              className={pageDisplay === "DAO" ? styles.subtitletextActive : styles.subtitletext}
+              onClick={()=>{handleSetPage("DAO")}}
+            >  
+              DAO
+            </h2>
           </div>
           {pageDisplay === "AccountNow" &&
           <>  
@@ -205,6 +228,9 @@ function Home () {
           }
           {pageDisplay === "Farm" &&
             <Farm/>
+          }
+          {pageDisplay === "DAO" &&
+            <DAO/>
           }
         </div>
       </div>

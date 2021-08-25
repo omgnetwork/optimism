@@ -1,0 +1,125 @@
+@import 'index.scss';
+
+$dropDownHeight: 60px;
+$boxDropDownHeight: 50px;
+
+.containerAction {
+  display: flex;
+  justify-content: center;
+  margin: 10px auto;
+  flex-direction: row;
+  width: 90%;
+  .listTitle {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+    margin: 10px auto;
+    color: $white;
+    font-size: 20px;
+    font-family: 'MrEavesXL','Messina';
+    margin: 0px;
+    font-size: 1.5em;
+  }
+}
+
+.listContainer {
+    overflow-y: auto;
+    max-height: calc(100vh - 300px);
+    margin: 10px auto;
+    display: flex;
+    width: 90%;
+    justify-content: center;
+    flex-direction: column;
+    border-radius: 8px;
+    padding: 20px 10px;
+    background: $background400;
+    
+    .proposalCard {
+        margin: 10px auto;
+        width: 90%;
+        padding: 5px 10px;
+        border-radius: 8px;
+        .proposalHeader {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px;
+            .title {
+                font-size: 1.4em;
+                color: $white;
+                p{
+                  margin: 0px;
+                }
+
+                .muted {
+                  color: $white700;
+                }
+            }
+        }
+        .proposalContent {
+            padding: 10px 5px;
+            display: flex;
+            justify-content: space-between;
+            color: $white;
+            span {
+                font-size: 1.3em;
+                color: $white700;
+            }   
+        }
+    }
+}
+
+
+.dropDownContainer {
+    height: $dropDownHeight;
+    animation: openDropDown 1s;
+    overflow: hidden;
+    // background-color: $gray7;
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .closeDropDown {
+    height: 0px;
+    animation: closeDropDown 1s;
+    overflow: hidden;
+    // background-color: $gray7;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .dropDownInit {
+    height: 0px;
+    overflow: hidden;
+  }
+
+  .boxContainer {
+    height: $boxDropDownHeight;
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /*************************/
+  @keyframes openDropDown {
+    0% {
+      height: 0px;
+    }
+    100% {
+      height: $dropDownHeight;
+    }
+  }
+
+  @keyframes closeDropDown {
+    0% {
+      height: $dropDownHeight;
+    }
+    100% {
+      height: 0px;
+    }
+  }
+
+  /*************************/
