@@ -163,6 +163,10 @@ class Farm extends React.Component {
 
   }
 
+  handleChange = (event, value) => {
+    this.setState({ value });
+  };
+
   render() {
     const {
       // Pool
@@ -175,7 +179,6 @@ class Farm extends React.Component {
     const { isMobile } = this.props;
 
     const networkLayer = networkService.L1orL2
-    const handleChange = () => {}
 
     return (
       <>
@@ -192,7 +195,7 @@ class Farm extends React.Component {
 
         <Box sx={{ my: 3, width: '100%' }}>
           <Box sx={{ mb: 2 }}>
-            <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+            <Tabs value={value} onChange={this.handleChange} aria-label="basic tabs example">
               <Tab label="L1 Liquidity Pool" />
               <Tab label="L2 Liquidity Pool" />
             </Tabs>
