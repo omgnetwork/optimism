@@ -52,6 +52,7 @@ module.exports = async function main(callback) {
   //   data,
   //   1628744989
   // )
+  
   console.log(
     '\n\n\n-----------------------------------------------------------\nQueuing setPendingAdmin'
   )
@@ -64,6 +65,7 @@ module.exports = async function main(callback) {
     eta
   )
   console.log('queued')
+
   console.log('queued setPendingAdmin')
 
   sleep(2000 * 1000)
@@ -104,6 +106,5 @@ module.exports = async function main(callback) {
     0,
     1628549022
   )
-
   console.log('Executed initiate')
 }

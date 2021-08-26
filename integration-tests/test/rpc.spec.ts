@@ -38,33 +38,54 @@ describe('Basic RPC tests', () => {
   let revertingDeployTx: TransactionRequest
 
   before(async () => {
+    
     env = await OptimismEnv.new()
+    
     wallet = env.l2Wallet
+    
     const Factory__Reverter = await ethers.getContractFactory(
       'Reverter',
       wallet
     )
     Reverter = await Factory__Reverter.connect(env.l2Wallet).deploy()
     await Reverter.deployTransaction.wait()
+    
     revertMessage = await Reverter.revertMessage()
     revertingTx = {
       to: Reverter.address,
       data: Reverter.interface.encodeFunctionData('doRevert'),
     }
+    
     const Factory__ConstructorReverter = await ethers.getContractFactory(
       'ConstructorReverter',
       wallet
     )
+    
     revertingDeployTx = {
       data: Factory__ConstructorReverter.bytecode,
     }
+
   })
 
   describe('eth_sendRawTransaction', () => {
+    
     it('should correctly process a valid transaction', async () => {
+
+      await fundUser(env.watcher, env.l1Bridge, ethers.utils.parseEther('1'), env.l2Wallet.address)
+
       const tx = DEFAULT_TRANSACTION
+
+      const balanceBefore1 = await provider.getBalance(env.l1Wallet.address)
+      console.log("balanceBefore1:",balanceBefore1.toString())
+
+      const balanceBefore = await provider.getBalance(env.l2Wallet.address)
+      console.log("balanceBefore:",balanceBefore.toString())
+
       const nonce = await wallet.getTransactionCount()
       const result = await wallet.sendTransaction(tx)
+
+      const balanceAfter = await provider.getBalance(env.l2Wallet.address)
+      console.log("balanceAfter:",balanceAfter.toString())
 
       expect(result.from).to.equal(wallet.address)
       expect(result.nonce).to.equal(nonce)
@@ -100,7 +121,7 @@ describe('Basic RPC tests', () => {
         ...DEFAULT_TRANSACTION,
         chainId: await env.l2Wallet.getChainId(),
         data: '0x',
-        value: ethers.utils.parseEther('0.1'),
+        value: ethers.utils.parseEther('0.001'),
       }
 
       const balanceBefore = await provider.getBalance(env.l2Wallet.address)
@@ -108,8 +129,8 @@ describe('Basic RPC tests', () => {
       const receipt = await result.wait()
       expect(receipt.status).to.deep.equal(1)
 
-      expect(await provider.getBalance(env.l2Wallet.address)).to.deep.equal(
-        balanceBefore.sub(ethers.utils.parseEther('0.1'))
+      expect(await provider.getBalance(env.l2Wallet.address)).to.be.below( //because of fees
+        balanceBefore.sub(ethers.utils.parseEther('0.001'))
       )
     })
 
@@ -329,10 +350,21 @@ describe('Basic RPC tests', () => {
 
       // Get latest block once to start.
       const prev = await provider.getBlockWithTransactions('latest')
+      // set wait to null to allow a deep object comparison
+      prev.transactions[0].wait = null
 
       // Over ten seconds, repeatedly check the latest block to make sure nothing has changed.
       for (let i = 0; i < 5; i++) {
         const latest = await provider.getBlockWithTransactions('latest')
+        latest.transactions[0].wait = null
+        // Check each key of the transaction individually
+        // for easy debugging if one field changes
+        for (const [key, value] of Object.entries(latest.transactions[0])) {
+          expect(value).to.deep.equal(
+            prev.transactions[0][key],
+            `mismatch ${key}`
+          )
+        }
         expect(latest).to.deep.equal(prev)
         await sleep(2000)
       }

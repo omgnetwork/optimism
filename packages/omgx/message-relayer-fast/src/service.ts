@@ -160,6 +160,9 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       await this._getfilter();
 
       try {
+        // The message is relayed directly, no need to keep cache
+        this.state.eventCache = [];
+
         // Check that the correct address is set in the address manager
         const relayer = await this.state.Lib_AddressManager.getAddress(
           'OVM_L2MessageRelayer'
@@ -578,7 +581,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           // export L1LIQPOOL=$(echo $ADDRESSES | jq -r '.L1LiquidityPool')
           // export L1M=$(echo $ADDRESSES | jq -r '.L1Message')
           // echo '["'$L1LIQPOOL'", "'$L1M'"]' > dist/dumps/whitelist.json
-          const filterSelect = [ filter.L1LiquidityPool, filter.L1Message ]
+          const filterSelect = [ filter.Proxy__L1LiquidityPool, filter.L1Message ]
 
           this.state.lastFilterPollingTimestamp = new Date().getTime()
           this.state.filter = filterSelect

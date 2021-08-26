@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const env = process.env;
 const mnemonicPhrase = env.mnemonic
