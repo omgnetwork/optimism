@@ -85,15 +85,15 @@ class FarmDepositModal extends React.Component {
       approveTX = await networkService.approveERC20_L2LP(
         powAmount(stakeValue, 18),
         stakeToken.currency,
-      )
-    } else if (stakeToken.L1orL2Pool === 'L1LP') {
-      approveTX = await networkService.approveERC20_L1LP(
-        powAmount(stakeValue, 18),
-        stakeToken.currency,
-      )
-    }
+        )
+      } else if (stakeToken.L1orL2Pool === 'L1LP') {
+        approveTX = await networkService.approveERC20_L1LP(
+          powAmount(stakeValue, 18),
+          stakeToken.currency,
+          )
+        }
 
-    console.log("stakeToken.LPAddress:",stakeToken.LPAddress)
+        console.log("stakeToken.LPAddress:",stakeToken.LPAddress)
     //0x2C12649A5A4FC61F146E0a3409f3e4c7FbeD15Dc
     //for trying to stake TST
 

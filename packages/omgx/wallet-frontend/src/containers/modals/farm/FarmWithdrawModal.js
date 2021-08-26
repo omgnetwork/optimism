@@ -7,8 +7,7 @@ import { getFarmInfo } from 'actions/farmAction';
 
 import Button from 'components/button/Button';
 import Modal from 'components/modal/Modal';
-// import InputSelect from 'components/inputselect/InputSelect';
-import Input from 'components/input/Input';
+import InputSelect from 'components/inputselect/InputSelect';
 import { logAmount } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
@@ -131,7 +130,7 @@ class FarmWithdrawModal extends React.Component {
           Withdraw {`${withdrawToken.symbol}`}
         </Typography>
 
-        <Input
+        <InputSelect
           label='Amount to withdraw'
           placeholder={0}
           value={withdrawValue}
@@ -140,8 +139,8 @@ class FarmWithdrawModal extends React.Component {
             this.setState({withdrawValue: i.target.value});
           }}
           onSelect={i => {}}
-          // selectOptions={selectOptions}
-          // selectValue={withdrawToken.currency}
+          selectOptions={selectOptions}
+          selectValue={withdrawToken.currency}
           unit={withdrawToken.symbol}
           maxValue={this.getMaxTransferValue()}
           disabledSelect={true}
