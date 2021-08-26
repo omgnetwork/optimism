@@ -47,16 +47,16 @@ function NetworkSwitcher({ walletEnabled }) {
               <Typography variant="body1">BOBA {masterConfig}</Typography>
             </Box>
 
-            {walletEnabled !== false || !!allNetworks.length && (
+            {walletEnabled !== false || !!allNetworks.length ? (
               <S.Chevron
                 open={showAllNetworks}
                 src={chevron}
                 alt='chevron'
               />
-            )}
+            ) : null}
           </S.NetWorkStyle>
 
-          {walletEnabled !== false || networkLayer === 'L1' || 'L2' ? (
+          {walletEnabled !== false || networkLayer === 'L1' || networkLayer === 'L2' ? (
             <S.Dropdown ref={dropdownNode}>
               {!!allNetworks.length && showAllNetworks && allNetworks.map((network,   ) => (
                 <div

@@ -27,7 +27,7 @@ import ListFarm from 'components/listFarm/listFarm'
 import networkService from 'services/networkService'
 
 import * as S from './Farm.styles'
-import { Alert, Box, Grid, Tab, Tabs, Typography } from '@material-ui/core';
+import { Alert, Box, Tab, Tabs } from '@material-ui/core';
 import PageHeader from 'components/pageHeader/PageHeader';
 import { tableHeadList } from './tableHeadList';
 

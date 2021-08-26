@@ -30,11 +30,6 @@ import { openModal } from 'actions/uiAction';
 import { setWalletMethod } from 'actions/setupAction';
 import { getAllNetworks } from 'util/masterConfig';
 
-// import logo from 'images/omgx.png';
-import logo from 'images/logo-boba.svg';
-import chevron from 'images/chevron.svg';
-
-import * as styles from './WalletPicker.module.scss';
 import { isChangingChain } from 'util/changeChain';
 import Button from 'components/button/Button';
 import * as S from "./WalletPicker.styles"
@@ -46,7 +41,6 @@ import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
 import NetworkSwitcher from 'components/mainMenu/networkSwitcher/NetworkSwitcher';
 import { useTheme } from '@emotion/react';
-import Input from 'components/input/Input';
 
 const Root = styled('div')(({ theme }) => ({
   paddingTop: theme.spacing(10),
@@ -59,7 +53,6 @@ function WalletPicker ({ onEnable, enabled }) {
   const [ walletEnabled, setWalletEnabled ] = useState(false);
   const [ accountsEnabled, setAccountsEnabled ] = useState(false);
   const [ wrongNetwork, setWrongNetwork ] = useState(false);
-  const [open, setOpen] = useState(false)
   const walletMethod = useSelector(selectWalletMethod())
   const masterConfig = useSelector(selectNetwork())
 

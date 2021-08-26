@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import { useTheme } from '@emotion/react'
-import { Box, Grid, Typography, useMediaQuery } from '@material-ui/core'
+import { Typography, useMediaQuery } from '@material-ui/core'
 import { exitOMGX } from 'actions/networkAction'
 import { openAlert, openError } from 'actions/uiAction'
 import Button from 'components/button/Button'
@@ -24,7 +24,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectLookupPrice } from 'selectors/lookupSelector'
 import { amountToUsd, logAmount } from 'util/amountConvert'
-import * as styles from '../ExitModal.module.scss'
 import * as S from './DoExitSteps.styles'
 
 function DoExitStep({ handleClose, token }) {

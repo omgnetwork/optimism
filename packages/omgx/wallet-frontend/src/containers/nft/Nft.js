@@ -7,11 +7,9 @@ import ListNFTfactory from 'components/listNFTfactory/listNFTfactory'
 
 import { openAlert, openError } from 'actions/uiAction'
 
-import * as styles from './Nft.module.scss'
-
 import cellIcon from 'images/hela.jpg'
 import factoryIcon from 'images/factory.png'
-import { Alert, Box, Container, Grid, Typography } from '@material-ui/core'
+import { Box, Grid, Typography } from '@material-ui/core'
 import PageHeader from 'components/pageHeader/PageHeader'
 import koiIcon from 'images/koi.png'
 

@@ -140,7 +140,7 @@ function Home () {
       <TransferModal open={transferModalState} token={token} fast={fast} />
       <ExitModal     open={exitModalState}     token={token} fast={fast} />
 
-      <AddTokenModal open={addTokenModalState} />
+      <AddTokenModal open={true} />
       <FarmDepositModal open={farmDepositModalState} />
       <FarmWithdrawModal open={farmWithdrawModalState} />
 

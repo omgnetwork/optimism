@@ -1,4 +1,4 @@
-/*
+  /*
 Copyright 2019-present OmiseGO Pte Ltd
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,11 +19,8 @@ import Modal from 'components/modal/Modal';
 import { closeModal } from 'actions/uiAction';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 
-import * as styles from './WrongNetworkModal.module.scss';
-
 import { selectNetwork } from 'selectors/setupSelector';
 import { Box, Card, Typography } from '@material-ui/core';
-import { styled } from '@material-ui/core/styles';
 
 function WrongNetworkModal ({ open, onClose }) {
 

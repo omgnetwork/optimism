@@ -12,10 +12,9 @@ import GasPicker from 'components/gaspicker/GasPicker'
 import { selectLoading } from 'selectors/loadingSelector'
 import { amountToUsd, logAmount, powAmount } from 'util/amountConvert'
 
-import * as styles from '../DepositModal.module.scss'
 import * as S from './InputSteps.styles'
 import { selectLookupPrice } from 'selectors/lookupSelector'
-import { Box, Typography, useMediaQuery } from '@material-ui/core'
+import { Typography, useMediaQuery } from '@material-ui/core'
 import { useTheme } from '@emotion/react'
 
 function InputStep({ handleClose, token }) {

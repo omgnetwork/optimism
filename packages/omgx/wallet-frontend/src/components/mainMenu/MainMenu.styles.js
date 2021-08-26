@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Box, IconButton } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 
 export const Menu = styled.div`
   flex: 0 0 260px;

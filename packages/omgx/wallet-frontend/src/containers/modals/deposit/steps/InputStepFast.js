@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import { useTheme } from '@emotion/react'
-import { Alert, Box, Grid, Typography, useMediaQuery } from '@material-ui/core'
+import { Typography, useMediaQuery } from '@material-ui/core'
 import { depositL1LP, approveERC20 } from 'actions/networkAction'
 import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
 import Button from 'components/button/Button'

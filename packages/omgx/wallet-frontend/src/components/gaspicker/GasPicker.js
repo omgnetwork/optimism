@@ -13,13 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import { Box, Card, CardActionArea, Grid, Typography } from '@material-ui/core';
+import { Box, CardActionArea, Grid, Typography } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { selectGas } from 'selectors/gasSelector';
 import * as S from './GasPicker.styles'
-import * as styles from './GasPicker.module.scss';
 
 function GasPicker ({ selectedSpeed, setSelectedSpeed, setGasPrice }) {
   const gas = useSelector(selectGas);
