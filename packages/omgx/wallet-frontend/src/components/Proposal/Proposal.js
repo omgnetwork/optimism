@@ -13,23 +13,68 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { utils } from 'ethers';
 import { useDispatch } from 'react-redux';
 
-import { openModal } from 'actions/uiAction';
+import { openAlert } from 'actions/uiAction';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Button from 'components/button/Button';
 
 
 import * as styles from './Proposal.module.scss';
+import networkService from 'services/networkService';
 
 
-function Proposal({ }) {
+function Proposal({
+    id,
+    proposal,
+    title,
+    description
+
+}) {
     const dispatch = useDispatch();
-
+    const { boba, delegate, provider } = networkService;
     const [dropDownBox, setDropDownBox] = useState(false);
     const [dropDownBoxInit, setDropDownBoxInit] = useState(true);
+
+    const [votePercent, setVotePercent] = useState(undefined);
+    const [totalVotes, setTotalVotes] = useState(undefined);
+
+    useEffect(() => {
+        const init = async () => {
+            if (proposal && proposal[0][0] === delegate.address) {
+                let fn = await delegate.interface.getFunction(proposal[2][0]);
+                const proposalData = await delegate.proposals(id);
+                let forVotes = utils.formatEther(proposalData.forVotes);
+                forVotes = parseInt(forVotes);
+                let againstVotes = utils.formatEther(proposalData.againstVotes);
+                againstVotes = parseInt(againstVotes);
+                let abstainVotes = utils.formatEther(proposalData.abstainVotes);
+                abstainVotes = parseInt(abstainVotes);
+                const totalVotes = forVotes + againstVotes;
+                setTotalVotes(totalVotes);
+
+                if (totalVotes > 0) {
+                    setVotePercent(Math.round((100 * forVotes) / totalVotes));
+                } else {
+                    setVotePercent(50);
+                }
+            }
+        };
+        init();
+    }, []);
+
+
+    const updateVote = async (e, userVote, label) => {
+        console.log('update vote');
+        await delegate.castVote(id, userVote);
+        // show alert
+        dispatch(openAlert(`${label}`));
+    }
+
+
 
 
     return (<div
@@ -54,10 +99,11 @@ function Proposal({ }) {
                 <ExpandMoreIcon />
             </div>
             <div className={styles.proposalContent}>
-                <div>For Votes : <span>"for votes"</span> </div>
-                <div>Against Votes : <span>"for votes"</span> </div>
-                <div>Abstain Votes : <span>"for votes"</span> </div>
-                <div>Vote Percentage : "23%" </div>
+                <div>For Votes : <span>10</span> </div>
+                <div>Against Votes : <span>1231</span> </div>
+                <div>Abstain Votes : <span>8912</span> </div>
+                <div>Vote Percentage : {votePercent} % </div>
+                <div>Total Votes : {totalVotes} </div>
             </div>
         </div>
 
@@ -74,8 +120,11 @@ function Proposal({ }) {
                         borderRadius: '8px',
                         alignSelf: 'center'
                     }}
+                    onClick={(e) => {
+                        updateVote(e, 1, 'Cast Vote For')
+                    }}
 
-                > Cast Vote For1</Button>
+                > Cast Vote For</Button>
                 <Button
                     type="primary"
                     style={{
@@ -83,6 +132,9 @@ function Proposal({ }) {
                         padding: '15px 10px',
                         borderRadius: '8px',
                         alignSelf: 'center'
+                    }}
+                    onClick={(e) => {
+                        updateVote(e, 0, 'Cast Vote Against')
                     }}
 
                 > Cast Vote Against</Button>
@@ -94,10 +146,12 @@ function Proposal({ }) {
                         borderRadius: '8px',
                         alignSelf: 'center'
                     }}
-
+                    onClick={(e) => {
+                        updateVote(e, 2, 'Cast Vote Abstain')
+                    }}
                 > Cast Vote Abstain</Button>
             </div>
-          
+
         </div>
         <div className={styles.divider}></div>
     </div>)

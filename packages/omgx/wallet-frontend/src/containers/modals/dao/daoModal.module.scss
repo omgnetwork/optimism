@@ -27,7 +27,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      
+
       h3 { 
         flex: 1;
         margin: 0px;
@@ -42,3 +42,28 @@
   }
 
 }  
+
+
+.actionContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  border-bottom: 1px solid $background400;
+  width: 100%;
+  padding: 10px;
+
+  h4 {
+    align-self: flex-start;
+  }
+
+  .actionContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 90%;
+    select {
+      margin-bottom: 5px;
+    }
+  }
+}

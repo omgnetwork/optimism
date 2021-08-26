@@ -22,20 +22,32 @@ import * as styles from './daoModal.module.scss';
 import Modal from 'components/modal/Modal';
 import Button from 'components/button/Button';
 import Input from 'components/input/Input';
+import ProposalAction from './ProposalAction';
 
 function NewProposalModal({ open }) {
     const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+
     const [actionList, setActionList] = useState([]);
     const [contracts, setContracts] = useState(['select']);
-    const dispatch = useDispatch()
 
+    const [calldata, setCalldata] = useState(undefined);
+
+    const dispatch = useDispatch()
 
     const renderActions = () => {
         return actionList.map((action, index) => {
-            return <div key={index}>Action {index}</div>
+            return <div key={index}>
+                <ProposalAction index={index}
+                    setActionList={setActionList}
+                    actionList={actionList}
+                    contracts={contracts}
+                    setContracts={setContracts}
+                    setCalldata={setCalldata}
+                />
+            </div>
         })
     }
-
 
     const addAction = () => {
         setActionList([...actionList, '']);
@@ -85,9 +97,9 @@ function NewProposalModal({ open }) {
                     />
                     <Input
                         label='Proposal Description'
-                        value={title}
+                        value={description}
                         type="textArea"
-                        onChange={i => setTitle(i.target.value)}
+                        onChange={i => setDescription(i.target.value)}
                     />
                 </div>
             </div>
@@ -108,7 +120,7 @@ function NewProposalModal({ open }) {
                     // loading={loading} // TODO: Implement loading base on the action trigger
                     disabled={disabledProposal}
                 >
-                    Submit Proposal
+                    SUBMIT PROPOSAL
                 </Button>
             </div>
         </Modal >
