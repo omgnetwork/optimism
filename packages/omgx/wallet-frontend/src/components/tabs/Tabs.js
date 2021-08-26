@@ -16,7 +16,6 @@ limitations under the License. */
 import React from 'react';
 import * as S from './Tabs.styles';
 
-
 // TODO @deprecated;
 // @deprecated;
 function Tabs ({ tabs, activeTab, onClick, className }) {

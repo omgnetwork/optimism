@@ -196,7 +196,7 @@ class Farm extends React.Component {
             <S.TableHeading>
               {tableHeadList.map((item) => {
                 return (
-                  <S.TableHeadingItem variant="body2" component="div">
+                  <S.TableHeadingItem key={item.label} variant="body2" component="div">
                     {item.label}
                   </S.TableHeadingItem>
                 )

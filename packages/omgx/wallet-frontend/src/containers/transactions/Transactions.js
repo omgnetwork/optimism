@@ -67,7 +67,7 @@ function Transactions({ searchHistory, transactions, chainLink }) {
         <S.TableHeading>
           {TransactionHeadList.map((item) => {
             return (
-              <S.TableHeadingItem variant="body2" component="div" >
+              <S.TableHeadingItem key={item.label} variant="body2" component="div" >
                 {item.label}
               </S.TableHeadingItem>
             )

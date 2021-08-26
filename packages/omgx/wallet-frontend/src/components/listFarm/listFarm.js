@@ -16,7 +16,6 @@ import networkService from 'services/networkService';
 
 import { getCoinImage } from 'util/coinImage';
 
-import * as styles from './listFarm.module.scss';
 import { Box, Typography, Fade, Grid } from '@material-ui/core';
 import * as S from "./ListFarm.styles"
 
@@ -147,7 +146,7 @@ class ListFarm extends React.Component {
 
     const {
       poolInfo, userInfo,
-      dropDownBox, dropDownBoxInit,
+      dropDownBox,
       loading, L1orL2Pool
     } = this.state;
 
@@ -176,7 +175,7 @@ class ListFarm extends React.Component {
         <Grid container spacing={2} direction="row" justifyContent="center" alignItems="center" >
 
           <S.GridItemTag item xs={4} md={1.7}>
-              <img className={styles.Image} src={logo} alt="logo" width={30} />
+              <img src={logo} alt="logo" width={30} />
               <Typography variant="overline">{name}</Typography>
           </S.GridItemTag>
 

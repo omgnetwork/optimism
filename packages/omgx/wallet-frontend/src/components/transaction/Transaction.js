@@ -16,7 +16,7 @@ limitations under the License. */
 import React, { useState } from 'react';
 
 import Tooltip from 'components/tooltip/Tooltip';
-import {Button as ButtonMUI} from '@material-ui/core';
+import { Button as ButtonMUI } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import LinkIcon from 'components/icons/LinkIcon';
 import * as styles from './Transaction.module.scss';

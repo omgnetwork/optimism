@@ -72,25 +72,25 @@ class ListAccount extends React.Component {
               <S.TableCell sx={{gap: "10px", justifyContent: "flex-start"}}>
                 <EthereumIcon width={42} height={42}/>
 
-                <S.TextTableCell enabled={enabled} variant="body2" component="div">
+                <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div">
                   {token.symbol}
                 </S.TextTableCell>
               </S.TableCell>
 
               <S.TableCell>
-                <S.TextTableCell enabled={enabled} variant="body2" component="div" sx={{fontWeight:"700"}}>
+                <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div" sx={{fontWeight:"700"}}>
                   {`${logAmount(token.balance, 18, 2)}`}
                 </S.TextTableCell>
               </S.TableCell>
 {/*
               <S.TableCell>
-                <S.TextTableCell enabled={enabled} variant="body2" component="div" sx={{fontWeight:"700"}}>
+                <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div" sx={{fontWeight:"700"}}>
                   $ 26.43
                 </S.TextTableCell>
               </S.TableCell>
 
               <S.TableCell>
-                <S.TextTableCell enabled={enabled} variant="body2" component="div" sx={{fontWeight:"700"}}>
+                <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div" sx={{fontWeight:"700"}}>
                   $ 1,556,43
                 </S.TextTableCell>
               </S.TableCell> */}
@@ -105,12 +105,12 @@ class ListAccount extends React.Component {
                 sx={{cursor: "pointer", gap: "5px", justifyContent: "flex-end"}}
               >
                 {chain === 'L1' &&
-                  <S.TextTableCell enabled={enabled} variant="body2" component="div">
+                  <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div">
                     Deposit
                   </S.TextTableCell>
                 }
                 {chain === 'L2' &&
-                  <S.TextTableCell enabled={enabled} variant="body2" component="div">
+                  <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div">
                     Transact
                   </S.TextTableCell>
                 }

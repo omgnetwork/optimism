@@ -249,7 +249,6 @@ class listNFT extends React.Component {
       oriAddress,
       oriID,
       dropDownBox,
-      dropDownBoxInit,
       loading,
       newNFTsymbol,
       newNFTname,

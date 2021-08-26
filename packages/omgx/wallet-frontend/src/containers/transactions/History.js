@@ -23,7 +23,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import moment from 'moment';
 
 import { setActiveHistoryTab1 } from 'actions/uiAction'
-import { setActiveHistoryTab2 } from 'actions/uiAction'
+// import { setActiveHistoryTab2 } from 'actions/uiAction'
 import { fetchTransactions } from 'actions/networkAction';
 
 import { selectActiveHistoryTab1 } from 'selectors/uiSelector'
@@ -32,7 +32,6 @@ import { selectTransactions } from 'selectors/transactionSelector';
 import { selectNetwork } from 'selectors/setupSelector'
 
 import Tabs from 'components/tabs/Tabs'
-import Input from 'components/input/Input'
 
 import Exits from './Exits';
 import Deposits from './Deposits';
@@ -55,7 +54,7 @@ function History () {
   const [ searchHistory, setSearchHistory ] = useState('');
 
   const activeTab1 = useSelector(selectActiveHistoryTab1, isEqual);
-  const activeTab2 = useSelector(selectActiveHistoryTab2, isEqual);
+  // const activeTab2 = useSelector(selectActiveHistoryTab2, isEqual);
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual)
 
