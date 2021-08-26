@@ -120,7 +120,7 @@ function Account () {
       <S.TableHeading>
         {tableHeadList.map((item) => {
           return (
-            <S.TableHeadingItem variant="body2" component="div" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2"}}>
+            <S.TableHeadingItem key={item.label} variant="body2" component="div" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2"}}>
               {item.label}
             </S.TableHeadingItem>
           )
@@ -156,7 +156,7 @@ function Account () {
       <S.TableHeading sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4"}}>
         {tableHeadList.map((item) => {
           return (
-            <S.TableHeadingItem variant="body2" component="div">{item.label}</S.TableHeadingItem>
+            <S.TableHeadingItem key={item.label} variant="body2" component="div">{item.label}</S.TableHeadingItem>
           )
         })}
       </S.TableHeading>
