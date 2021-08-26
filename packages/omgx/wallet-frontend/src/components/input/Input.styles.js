@@ -17,7 +17,8 @@ export const TextFieldTag = styled(TextField)(({ ...props }) => ({
     fontSize: props.newStyle ? '24px' : '16px',
     fontWeight: 700,
     opacity: 0.7,
-    padding: '0 15px',
+    paddingLeft: '15px',
+    paddingRight: '15px',
   },
   '&:hover': {
     borderRadius: 8,

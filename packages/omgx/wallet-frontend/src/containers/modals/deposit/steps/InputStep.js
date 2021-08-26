@@ -79,7 +79,7 @@ function InputStep({ handleClose, token }) {
 
   return (
     <>
-      <Typography variant="h2" sx={{fontWeight: 700, mb: 1}}>
+      <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
         {`Deposit ${token && token.symbol ? token.symbol : ''}`}
       </Typography>
 
