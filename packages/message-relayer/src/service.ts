@@ -2,19 +2,14 @@
 import { Contract, ethers, Wallet, BigNumber, providers } from 'ethers'
 import * as rlp from 'rlp'
 import { MerkleTree } from 'merkletreejs'
-import fetch from 'node-fetch'
+import fetch from 'node-fetch';
 
 /* Imports: Internal */
 import { fromHexString, sleep, toHexString } from '@eth-optimism/core-utils'
 import { Logger, BaseService, Metrics } from '@eth-optimism/common-ts'
 
 import { loadContract, loadContractFromManager } from '@eth-optimism/contracts'
-import {
-  StateRootBatchHeader,
-  SentMessage,
-  SentMessageProof,
-  BatchMessage,
-} from './types'
+import { StateRootBatchHeader, SentMessage, SentMessageProof, BatchMessage } from './types'
 
 interface MessageRelayerOptions {
   // Providers for interacting with L1 and L2.
@@ -65,11 +60,9 @@ interface MessageRelayerOptions {
 
 const optionSettings = {
   relayGasLimit: { default: 4_000_000 },
-
   //batch system
   minBatchSize: { default: 2 },
   maxWaitTimeS: { default: 60 },
-
   fromL2TransactionIndex: { default: 0 },
   pollingInterval: { default: 5000 },
   l2BlockOffset: { default: 1 },
@@ -90,15 +83,12 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     eventCache: ethers.Event[]
     Lib_AddressManager: Contract
     OVM_StateCommitmentChain: Contract
-
     OVM_L1CrossDomainMessenger: Contract
     OVM_L1MultiMessageRelayer: Contract
-
     OVM_L2CrossDomainMessenger: Contract
     OVM_L2ToL1MessagePasser: Contract
     filter: Array<any>
     lastFilterPollingTimestamp: number
-
     //batch system
     timeSinceLastRelayS: number
     timeOfLastRelayS: number
@@ -114,8 +104,9 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       getLogsInterval: this.options.getLogsInterval,
       filterPollingInterval: this.options.filterPollingInterval,
       minBatchSize: this.options.minBatchSize,
+      maxWaitTimeS: this.options.maxWaitTimeS,
     })
-
+    // Need to improve this, sorry.
     this.state = {} as any
 
     const address = await this.options.l1Wallet.getAddress()
@@ -125,10 +116,6 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       'Lib_AddressManager',
       this.options.addressManagerAddress,
       this.options.l1RpcProvider
-    )
-
-    const t1 = await this.state.Lib_AddressManager.getAddress(
-      'OVM_L2MessageRelayer'
     )
 
     this.logger.info('Connecting to OVM_StateCommitmentChain...')
@@ -185,14 +172,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     this.logger.info('Connected to all contracts.')
 
     this.state.lastQueriedL1Block = this.options.l1StartOffset
-
     this.state.eventCache = []
 
     this.state.lastFinalizedTxHeight = this.options.fromL2TransactionIndex || 0
-
     this.state.nextUnfinalizedTxHeight =
       this.options.fromL2TransactionIndex || 0
-
     this.state.lastFilterPollingTimestamp = 0
 
     //batch system
@@ -211,25 +195,71 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         const relayer = await this.state.Lib_AddressManager.getAddress(
           'OVM_L2MessageRelayer'
         )
-        //that's set in the MMR deploy
-
-        //console.log('\nRelayer:\n', relayer)
         // If it is address(0), then message relaying is not authenticated
         if (relayer !== ethers.constants.AddressZero) {
-          // relaying is authenticated
-          // so the wallet address has to be the same as whatever is set in
-          // OVM_L2MessageRelayer?
           const address = await this.options.l1Wallet.getAddress()
-          //console.log('\nAddress:\n', address)
-          // if (relayer !== address) {
-          //   throw new Error(
-          //     `OVM_L2MessageRelayer (${relayer}) is not set to message-passer EOA ${address}`
-          //   )
-          // }
+          if (relayer !== address) {
+            throw new Error(
+              `OVM_L2MessageRelayer (${relayer}) is not set to message-passer EOA ${address}`
+            )
+          }
         }
 
-        this.logger.info('Checking for newly finalized transactions...')
+        console.log(this.options.minBatchSize)
+        console.log(this.options.maxWaitTimeS)
+        console.log(this.state.messageBuffer)
 
+
+        //Batch flushing logic
+        const secondsElapsed = Math.floor(
+          (Date.now() - this.state.timeOfLastRelayS) / 1000
+        )
+        console.log('\n***********************************')
+        console.log('Seconds elapsed since last batch push:', secondsElapsed)
+        const timeOut =
+          secondsElapsed > this.options.maxWaitTimeS ? true : false
+
+        //console.log('Current buffer size:', this.state.messageBuffer.length)
+        const bufferFull =
+          this.state.messageBuffer.length >= this.options.minBatchSize
+            ? true : false
+
+        console.log(timeOut)
+        console.log(bufferFull)
+
+        if (bufferFull || timeOut) {
+          if (bufferFull) {
+            console.log('Buffer full: flushing')
+          }
+          if (timeOut) {
+            console.log('Buffer timeout: flushing')
+          }
+
+          const receipt = await this._relayMultiMessageToL1(
+            this.state.messageBuffer
+          )
+
+          console.log('Receipt:', receipt)
+
+          /* parse this to make sure that the mesaage was actually relayed */
+          if (/*everything went well*/ true) {
+            //clear out the buffer so we do not double relay, which will just
+            //led to reversion at the SCC level
+            this.state.messageBuffer = []
+          }
+
+          this.state.timeOfLastRelayS = Date.now()
+        } else {
+          console.log(
+            'Buffer still too small - current buffer length:',
+            this.state.messageBuffer.length
+          )
+          console.log('Buffer flush size set to:', this.options.minBatchSize)
+          console.log('***********************************\n')
+        }
+
+
+        this.logger.info('Checking for newly finalized transactions...')
         if (
           !(await this._isTransactionFinalized(
             this.state.nextUnfinalizedTxHeight
@@ -243,7 +273,6 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         }
 
         this.state.lastFinalizedTxHeight = this.state.nextUnfinalizedTxHeight
-
         while (
           await this._isTransactionFinalized(this.state.nextUnfinalizedTxHeight)
         ) {
@@ -280,12 +309,9 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         )
 
         for (const message of messages) {
-          //console.log("\nMessage:",message)
-
           this.logger.info('Found a message sent during transaction', {
             index: message.parentTransactionIndex,
           })
-
           if (await this._wasMessageRelayed(message)) {
             this.logger.info('Message has already been relayed, skipping.')
             continue
@@ -300,14 +326,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
             'Message not yet relayed. Attempting to generate a proof...'
           )
           const proof = await this._getMessageProof(message)
-
           this.logger.info(
             'Successfully generated a proof. Attempting to relay to Layer 1...'
           )
 
-          //at this point we know we need to relay the message
-          //add it to the message buffer
-
+          // await this._relayMessageToL1(message, proof)
           const messageToSend = {
             target: message.target,
             message: message.message,
@@ -315,54 +338,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
             messageNonce: message.messageNonce,
             proof,
           }
-
           this.state.messageBuffer.push(messageToSend)
-        }
-
-        //Batch flushing logic
-        const secondsElapsed = Math.floor(
-          (Date.now() - this.state.timeOfLastRelayS) / 1000
-        )
-        console.log('\n***********************************')
-        console.log('Seconds elapsed since last batch push:', secondsElapsed)
-        const timeOut =
-          secondsElapsed > this.options.maxWaitTimeS ? true : false
-
-        //console.log('Current buffer size:', this.state.messageBuffer.length)
-        const bufferFull =
-          this.state.messageBuffer.length >= this.options.minBatchSize
-            ? true
-            : false
-
-        if (bufferFull || timeOut) {
-          if (bufferFull) {
-            console.log('Buffer full: flushing')
-          }
-          if (timeOut) {
-            console.log('Buffer timeout: flushing')
-          }
-
-          const receipt = await this._relayMultiMessageToL1(
-            this.state.messageBuffer
-          )
-
-          console.log('Receipt:', receipt)
-
-          /* parse this to make sure that the mesaage was actually relayed */
-          if (/*everything went well*/ true) {
-            //clear out the buffer so we do not double relay, which will just
-            //led to reversion at the SCC level
-            this.state.messageBuffer = []
-          }
-
-          this.state.timeOfLastRelayS = Date.now()
-        } else {
-          console.log(
-            'Buffer still too small - current buffer length:',
-            this.state.messageBuffer.length
-          )
-          console.log('Buffer flush size set to:', this.options.minBatchSize)
-          console.log('***********************************\n')
         }
 
         if (messages.length === 0) {
@@ -698,7 +674,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   private async _relayMultiMessageToL1(
     messages: Array<BatchMessage>
   ): Promise<any> {
-    
+
     const result = await this.state.OVM_L1MultiMessageRelayer.connect(
       this.options.l1Wallet
     ).batchRelayMessages(messages, {
@@ -736,11 +712,8 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   private async _getFilter(): Promise<void> {
     try {
       if (this.options.filterEndpoint) {
-        if (
-          this.state.lastFilterPollingTimestamp === 0 ||
-          new Date().getTime() >
-            this.state.lastFilterPollingTimestamp +
-              this.options.filterPollingInterval
+        if (this.state.lastFilterPollingTimestamp === 0 ||
+          new Date().getTime() > this.state.lastFilterPollingTimestamp + this.options.filterPollingInterval
         ) {
           const response = await fetch(this.options.filterEndpoint)
           const filter = await response.json()
@@ -748,18 +721,18 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           // export L1LIQPOOL=$(echo $ADDRESSES | jq -r '.L1LiquidityPool')
           // export L1M=$(echo $ADDRESSES | jq -r '.L1Message')
           // echo '["'$L1LIQPOOL'", "'$L1M'"]' > dist/dumps/whitelist.json
-          const filterSelect = [filter.Proxy__L1LiquidityPool, filter.L1Message]
+          const filterSelect = [ filter.Proxy__L1LiquidityPool, filter.L1Message ]
 
           this.state.lastFilterPollingTimestamp = new Date().getTime()
           this.state.filter = filterSelect
           this.logger.info('Found the filter', { filterSelect })
         }
       } else {
-        this.state.filter = []
+        this.state.filter = [];
       }
     } catch {
       this.logger.info('Failed to fetch the filter')
-      this.state.filter = []
+      this.state.filter = [];
     }
   }
 }

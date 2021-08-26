@@ -32,11 +32,6 @@ export interface StateRootProof {
   siblings: string[]
 }
 
-export interface Message {
-  message: SentMessage
-  proof: SentMessageProof
-}
-
 export interface BatchMessage {
   target: string
   message: string
