@@ -15,8 +15,6 @@ limitations under the License. */
 
 import React from 'react';
 import * as S from './Tabs.styles';
-import * as styles from './Tabs.module.scss';
-
 
 // TODO @deprecated;
 // @deprecated;

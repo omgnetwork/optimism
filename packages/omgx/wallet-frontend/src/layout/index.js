@@ -19,7 +19,6 @@ import { createTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/co
 import { setWalletMethod } from 'actions/setupAction';
 import { closeAlert, closeError } from 'actions/uiAction';
 import Alert from 'components/alert/Alert';
-import MainMenu from 'components/mainMenu/MainMenu';
 import WalletPicker from 'components/walletpicker/WalletPicker';
 import Home from 'containers/home/Home';
 import Notification from 'containers/notification/Notification';
@@ -32,11 +31,9 @@ import {
 } from "react-router-dom";
 import { selectAlert, selectError } from 'selectors/uiSelector';
 import { isChangingChain } from 'util/changeChain';
-import Layout from './layout';
 //import oracleService from 'services/oracleService';
 import * as styles from './layout.module.scss';
 import * as S from './layout.style';
-import { routeConfig } from './route.config';
 
 
 function App () {

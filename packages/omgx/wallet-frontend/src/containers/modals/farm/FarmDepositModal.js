@@ -13,10 +13,8 @@ import { logAmount, powAmount } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
 
-import * as styles from './Farm.module.scss';
 import * as S from './FarmModal.styles';
-import { useTheme } from '@emotion/react';
-import { Typography, useMediaQuery } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 
 class FarmDepositModal extends React.Component {
   constructor(props) {
@@ -146,9 +144,6 @@ class FarmDepositModal extends React.Component {
       loading,
     } = this.state;
 
-    // const theme = useTheme();
-    // const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
     return (
       <Modal open={open} maxWidth="md" onClose={()=>{this.handleClose()}}>
 
@@ -215,7 +210,6 @@ class FarmDepositModal extends React.Component {
               </Button>
               <Button
                 onClick={()=>{this.handleApprove()}}
-                className={styles.button}
                 loading={loading}
                 disabled={Number(this.getMaxTransferValue()) < Number(stakeValue)}
                 color='primary'

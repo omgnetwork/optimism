@@ -14,11 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React from 'react'
-import { Search } from '@material-ui/icons'
 import BN from 'bignumber.js'
 import * as S from './Input.styles'
 import Button from 'components/button/Button'
-import { Box, Typography, useMediaQuery } from '@material-ui/core'
+import { Box, Typography } from '@material-ui/core'
 import { useTheme } from '@emotion/react'
 import EthereumIcon from 'components/icons/EthereumIcon'
 
@@ -60,7 +59,6 @@ function Input({
   const overMax = new BN(value).gt(new BN(maxValue))
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <S.Wrapper newStyle={newStyle}>

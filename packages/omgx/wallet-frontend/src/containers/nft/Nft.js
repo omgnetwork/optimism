@@ -7,11 +7,9 @@ import ListNFTfactory from 'components/listNFTfactory/listNFTfactory'
 
 import { openAlert, openError } from 'actions/uiAction'
 
-import * as styles from './Nft.module.scss'
-
 import cellIcon from 'images/hela.jpg'
 import factoryIcon from 'images/factory.png'
-import { Alert, Box, Container, Grid, Typography } from '@material-ui/core'
+import { Box, Grid, Typography } from '@material-ui/core'
 import PageHeader from 'components/pageHeader/PageHeader'
 import koiIcon from 'images/koi.png'
 
@@ -123,7 +121,7 @@ class Nft extends React.Component {
           spacing={10}
           justifyContent="center"
         >
-          <Grid item sx={12} md={6}>
+          <Grid item xs={12} md={6}>
             <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>Your NFTs</Typography>
             <Box sx={{mt: 1, mb: 4}}>
               {numberOfNFTs === 1 &&
@@ -137,34 +135,32 @@ class Nft extends React.Component {
               }
             </Box>
 
-            {/* <div className={styles.nftTiles}> */}
-              {Object.keys(list).map((v, i) => {
-                const key_UUID = `nft_` + i
-                return (
-                  <ListNFT
-                    key={key_UUID}
-                    name={list[v].name}
-                    symbol={list[v].symbol}
-                    owner={list[v].owner}
-                    address={list[v].address}
-                    layer={list[v].layer}
-                    icon={list[v].originID === 'simple' ? koiIcon : cellIcon}
-                    UUID={list[v].UUID}
-                    URL={list[v].url}
-                    time={list[v].mintedTime}
-                    oriChain={list[v].originChain}
-                    oriAddress={list[v].originAddress}
-                    oriID={list[v].originID}
-                    oriFeeRecipient={list[v].originFeeRecipient}
-                    type={list[v].type}
-                  />
-                )
-                })
-              }
-            {/* </div> */}
+            {Object.keys(list).map((v, i) => {
+              const key_UUID = `nft_` + i
+              return (
+                <ListNFT
+                  key={key_UUID}
+                  name={list[v].name}
+                  symbol={list[v].symbol}
+                  owner={list[v].owner}
+                  address={list[v].address}
+                  layer={list[v].layer}
+                  icon={list[v].originID === 'simple' ? koiIcon : cellIcon}
+                  UUID={list[v].UUID}
+                  URL={list[v].url}
+                  time={list[v].mintedTime}
+                  oriChain={list[v].originChain}
+                  oriAddress={list[v].originAddress}
+                  oriID={list[v].originID}
+                  oriFeeRecipient={list[v].originFeeRecipient}
+                  type={list[v].type}
+                />
+              )
+              })
+            }
           </Grid>
 
-          <Grid item sx={12} md={6}>
+          <Grid item xs={12} md={6}>
             <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>
               Mint your own NFTs
             </Typography>
@@ -248,31 +244,29 @@ class Nft extends React.Component {
             </Typography>
           }
 
-          {/* <div className={styles.TableContainer}> */}
-            {Object.keys(factories).map((v, i) => {
-              if(factories[v].haveRights && factories[v].originID !== 'simple') {
-                const key_UUID = `fac_d_` + i;
-                return (
-                  <ListNFTfactory
-                    key={key_UUID}
-                    name={factories[v].name}
-                    symbol={factories[v].symbol}
-                    owner={factories[v].owner}
-                    address={factories[v].address}
-                    layer={factories[v].layer}
-                    icon={factoryIcon}
-                    oriChain={factories[v].originChain}
-                    oriAddress={factories[v].originAddress}
-                    oriID={factories[v].originID}
-                    oriFeeRecipient={factories[v].originFeeRecipient}
-                    haveRights={factories[v].haveRights}
-                  />
-                )
-              } else {
-                return (<></>)
-              }
-            })}
-          {/* </div> */}
+          {Object.keys(factories).map((v, i) => {
+            if(factories[v].haveRights && factories[v].originID !== 'simple') {
+              const key_UUID = `fac_d_` + i;
+              return (
+                <ListNFTfactory
+                  key={key_UUID}
+                  name={factories[v].name}
+                  symbol={factories[v].symbol}
+                  owner={factories[v].owner}
+                  address={factories[v].address}
+                  layer={factories[v].layer}
+                  icon={factoryIcon}
+                  oriChain={factories[v].originChain}
+                  oriAddress={factories[v].originAddress}
+                  oriID={factories[v].originID}
+                  oriFeeRecipient={factories[v].originFeeRecipient}
+                  haveRights={factories[v].haveRights}
+                />
+              )
+            } else {
+              return (<></>)
+            }
+          })}
 
         </Box>
       </>

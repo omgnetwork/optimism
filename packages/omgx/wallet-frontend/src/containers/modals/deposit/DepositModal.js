@@ -21,8 +21,6 @@ import { closeModal } from 'actions/uiAction'
 
 import InputStep from './steps/InputStep'
 import InputStepFast from './steps/InputStepFast'
-import { useTheme } from '@emotion/react'
-import { useMediaQuery } from '@material-ui/core'
 
 function DepositModal({ open, token, fast }) {
 

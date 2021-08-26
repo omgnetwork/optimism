@@ -13,8 +13,6 @@ import networkService from 'services/networkService'
 
 import { transfer } from 'actions/networkAction'
 
-import * as styles from './listNFT.module.scss'
-
 import * as S from './ListNFT.styles'
 import truncate from 'truncate-middle'
 import { Box, Fade, Link, Typography } from '@material-ui/core'
@@ -251,7 +249,6 @@ class listNFT extends React.Component {
       oriAddress,
       oriID,
       dropDownBox,
-      dropDownBoxInit,
       loading,
       newNFTsymbol,
       newNFTname,

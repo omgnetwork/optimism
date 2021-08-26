@@ -19,7 +19,6 @@ import {
   Typography,
   Grid,
   Container,
-  IconButton,
   Box,
   useMediaQuery
 } from '@material-ui/core';

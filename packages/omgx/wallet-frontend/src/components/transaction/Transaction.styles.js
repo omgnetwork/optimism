@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import {Typography, Box} from '@material-ui/core'
+import { Box } from '@material-ui/core'
 
 export const DropdownWrapper = styled(Box)`
   display: flex;

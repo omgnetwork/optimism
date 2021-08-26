@@ -27,26 +27,18 @@ import Modal from 'components/modal/Modal';
 import { amountToUsd, logAmount } from 'util/amountConvert'
 import networkService from 'services/networkService';
 
-import * as styles from './TransferModal.module.scss';
 import Input from 'components/input/Input';
 import { selectLookupPrice } from 'selectors/lookupSelector';
-import { Box, Grid, TextField, Typography, useMediaQuery } from '@material-ui/core';
-import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon';
+import { Box, Typography, useMediaQuery } from '@material-ui/core';
 import * as S from './TransferModal.style';
-import BoxConfirmation from './boxConfirmation/BoxConfirmation';
-import { styled } from '@material-ui/core/styles';
 import { useTheme } from '@emotion/react';
-import AdressDisabled from 'components/adressDisabled/AdressDisabled';
 import truncate from 'truncate-middle';
-import SwapIcon from 'components/icons/SwapIcon';
 
 function TransferModal ({ open, token }) {
   const dispatch = useDispatch()
 
   const [ value, setValue ] = useState('')
   const [ recipient, setRecipient ] = useState('')
-  const [ showFeedback, setShowFeedback] = useState(false);
-  const [ activeButton, setActiveButton ] = useState("slow");
 
   const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]));
   const wAddress = networkService.account ? truncate(networkService.account, 6, 14, '.') : '';
@@ -153,15 +145,6 @@ function TransferModal ({ open, token }) {
             Deposit
           </Button>
       </S.WrapperActions>
-
-      {/* <BoxConfirmation
-        recipient={recipient}
-        value={value}
-        showFeedback={showFeedback}
-        setShowFeedback={setShowFeedback}
-        handleClose={handleClose}
-        onSubmit={() => {submit({useLedgerSign: false})}}
-      /> */}
     </Modal>
   );
 }

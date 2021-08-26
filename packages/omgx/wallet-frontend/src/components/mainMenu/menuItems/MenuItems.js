@@ -1,5 +1,4 @@
 import { useTheme } from '@emotion/react';
-import { Box } from '@material-ui/core';
 import React, { useState } from 'react';
 import { menuItems } from '../menuItems';
 import * as S from './MenuItems.styles';
@@ -10,10 +9,10 @@ import EarnIcon from 'components/icons/EarnIcon';
 import WalletIcon from 'components/icons/WalletIcon';
 import HistoryIcon from 'components/icons/HistoryIcon';
 import NFTIcon from 'components/icons/NFTIcon';
-import chevron from 'images/chevron.svg';
+// import chevron from 'images/chevron.svg';
 
 function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
-  const [ openDropdown, setOpenDropdown ] = useState(['/pool', '/farm'].includes(window.location.pathname));
+  // const [ openDropdown, setOpenDropdown ] = useState(['/pool', '/farm'].includes(window.location.pathname));
   const [ activeItem, setActiveItem ] = useState(false);
   const theme = useTheme();
   const isLight = theme.palette.mode === 'light';
@@ -49,7 +48,7 @@ function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
               >
                 <Icon color={isActive || activeItem === title ? theme.palette.secondary.main : colorIcon} />{item.title}
 
-                {item.items && item.items.length ? (
+                {/* {item.items && item.items.length ? (
                   <Box sx={{display: 'flex'}}>
                     <img
                       open={openDropdown}
@@ -57,10 +56,10 @@ function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
                       alt='chevron'
                     />
                   </Box>
-                ) : null }
+                ) : null } */}
               </S.MenuItem>
 
-              {openDropdown && item.items ? (
+              {/* {openDropdown && item.items ? (
                 <ul>
                   <Box>
                     {item.items.map((children) => {
@@ -83,7 +82,7 @@ function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
                     })}
                   </Box>
                 </ul>
-              ) : null }
+              ) : null } */}
             </li>
           )
         })}

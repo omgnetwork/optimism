@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import { styled } from '@material-ui/system';
 
 export const WrapperActions = styled(Box)`

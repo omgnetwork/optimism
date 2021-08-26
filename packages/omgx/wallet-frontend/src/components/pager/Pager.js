@@ -16,8 +16,6 @@ limitations under the License. */
 import React from 'react';
 import { NavigateNext, NavigateBefore } from '@material-ui/icons';
 
-import Button from 'components/button/Button';
-
 import * as styles from './Pager.module.scss';
 import * as S from './Pager.styles';
 
@@ -53,32 +51,32 @@ function Pager ({ currentPage, totalPages, isLastPage, onClickNext, onClickBack,
     </S.PagerContainer>
   )
 
-  return (
-    <div className={styles.Pager}>
-      <div className={styles.numberLeft}>{label}</div>
-      <div className={styles.numberRight}>
-        <div className={styles.number}>{`Page ${currentPage} of ${totalPages}`}</div>
-        <div
-          className={[
-            styles.box,
-            currentPage === 1 ? styles.disabled : ''
-          ].join(' ')}
-          onClick={onClickBack}
-        >
-          <NavigateBefore className={styles.icon} />
-        </div>
-        <div
-          className={[
-            styles.box,
-            isLastPage ? styles.disabled : ''
-          ].join(' ')}
-          onClick={onClickNext}
-        >
-          <NavigateNext className={styles.icon} />
-        </div>
-        </div>
-    </div>
-  );
+  // return (
+  //   <div className={styles.Pager}>
+  //     <div className={styles.numberLeft}>{label}</div>
+  //     <div className={styles.numberRight}>
+  //       <div className={styles.number}>{`Page ${currentPage} of ${totalPages}`}</div>
+  //       <div
+  //         className={[
+  //           styles.box,
+  //           currentPage === 1 ? styles.disabled : ''
+  //         ].join(' ')}
+  //         onClick={onClickBack}
+  //       >
+  //         <NavigateBefore className={styles.icon} />
+  //       </div>
+  //       <div
+  //         className={[
+  //           styles.box,
+  //           isLastPage ? styles.disabled : ''
+  //         ].join(' ')}
+  //         onClick={onClickNext}
+  //       >
+  //         <NavigateNext className={styles.icon} />
+  //       </div>
+  //       </div>
+  //   </div>
+  // );
 }
 
 export default Pager;

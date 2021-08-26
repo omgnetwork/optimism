@@ -24,10 +24,9 @@ import Button from 'components/button/Button'
 import { amountToUsd, logAmount, powAmount } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
-import * as styles from '../ExitModal.module.scss'
 import Input from 'components/input/Input'
 import { selectLookupPrice } from 'selectors/lookupSelector'
-import { Grid, Typography, useMediaQuery } from '@material-ui/core'
+import { Typography, useMediaQuery } from '@material-ui/core'
 import { useTheme } from '@emotion/react'
 import * as S from './DoExitSteps.styles'
 
