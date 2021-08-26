@@ -59,7 +59,7 @@ function Button ({
     color,
     variant,
     fullWidth,
-    onClick,
+    onClick: loading || disabled ? null : onClick,
     disabled,
     size,
     sx,
@@ -81,38 +81,6 @@ function Button ({
       }
     </ButtonMUI>
   )
-
-  // return (
-  //   <div
-  //     style={style}
-  //     className={[
-  //       styles.Button,
-  //       type === 'primary' ? styles.primary : '',
-  //       type === 'secondary' ? styles.secondary : '',
-  //       type === 'outline' ? styles.outline : '',
-  //       size === 'small' ? styles.small : '',
-  //       size === 'tiny' ? styles.tiny : '',
-  //       loading ? styles.disabled : '',
-  //       disabled ? styles.disabled : '',
-  //       pulsate ? styles.pulsate : '',
-  //       className
-  //     ].join(' ')}
-  //     onClick={loading || disabled ? null : onClick}
-  //   >
-  //     {children}
-  //     {(disabled || loading) && timeDefined && (waitTime > 3) &&
-  //       <div style={{marginLeft: '10px'}}
-  //       >
-  //         {waitTime}s ago
-  //       </div>
-  //     }
-  //     {loading &&
-  //       <div style={{paddingTop: '4px', marginLeft: '10px'}}>
-  //         <CircularProgress size={14} color='inherit' />
-  //       </div>
-  //     }
-  //   </div>
-  // );
 }
 
 export default React.memo(Button);
