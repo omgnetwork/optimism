@@ -34,6 +34,16 @@ $boxDropDownHeight: 50px;
             color: $white700;
         }   
     }
+
+    
+}
+
+.proposalDetail {
+  display: flex;
+  justify-content: space-around; 
+  margin: auto;
+  padding: 10px;
+  width: 100%;
 }
 
 .dropDownContainer {

@@ -13,26 +13,63 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { closeModal } from 'actions/uiAction';
+import * as styles from './daoModal.module.scss';
 
 import Modal from 'components/modal/Modal';
+import Input from 'components/input/Input';
 import Button from 'components/button/Button';
 
 function DelegateDaoModal({ open }) {
-
+    const [recipient, setRecipient] = useState('');
     const dispatch = useDispatch()
 
+    const submit = async () => {
+        console.log([recipient]);
+        // transfer to over the network service
+    }
+
+    const disabledTransfer = !recipient;
+
     function handleClose() {
+        setRecipient('');
         dispatch(closeModal('delegateDaoModal'))
     }
 
     return (
         <Modal open={open}>
-            <h2>Delegate DAO Modal</h2>
-            <Button onClick={handleClose}>OKAY</Button>
+            <h2>Delegate Boba</h2>
+
+            <Input
+                label='Delegate Address'
+                placeholder='Hash'
+                paste
+                value={recipient}
+                onChange={i => setRecipient(i.target.value)}
+            />
+
+            <div className={styles.buttons}>
+                <Button
+                    onClick={handleClose}
+                    type='secondary'
+                    className={styles.button}
+                >
+                    CANCEL
+                </Button>
+
+                <Button
+                    className={styles.button}
+                    onClick={() => { submit({ useLedgerSign: false }) }}
+                    type='primary'
+                    // loading={loading} // TODO: Implement loading base on the action trigger
+                    disabled={disabledTransfer}
+                >
+                    Delegate
+                </Button>
+            </div>
         </Modal>
     )
 }

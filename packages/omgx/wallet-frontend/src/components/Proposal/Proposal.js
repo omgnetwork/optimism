@@ -65,36 +65,39 @@ function Proposal({ }) {
             className={dropDownBox ?
                 styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
         >
-            <Button
-                type="outline"
-                style={{
-                    width: '60%',
-                    padding: '15px 10px',
-                    borderRadius: '8px',
-                    alignSelf: 'center'
-                }}
+            <div className={styles.proposalDetail}>
+                <Button
+                    type="outline"
+                    style={{
+                        maxWidth: '180px',
+                        padding: '15px 10px',
+                        borderRadius: '8px',
+                        alignSelf: 'center'
+                    }}
 
-            > Cast Vote For</Button>
-            <Button
-                type="primary"
-                style={{
-                    width: '60%',
-                    padding: '15px 10px',
-                    borderRadius: '8px',
-                    alignSelf: 'center'
-                }}
+                > Cast Vote For1</Button>
+                <Button
+                    type="primary"
+                    style={{
+                        maxWidth: '180px',
+                        padding: '15px 10px',
+                        borderRadius: '8px',
+                        alignSelf: 'center'
+                    }}
 
-            > Cast Vote Against</Button>
-            <Button
-                type="outline"
-                style={{
-                    width: '60%',
-                    padding: '15px 10px',
-                    borderRadius: '8px',
-                    alignSelf: 'center'
-                }}
+                > Cast Vote Against</Button>
+                <Button
+                    type="outline"
+                    style={{
+                        maxWidth: '180px',
+                        padding: '15px 10px',
+                        borderRadius: '8px',
+                        alignSelf: 'center'
+                    }}
 
-            > Cast Vote Abstain</Button>
+                > Cast Vote Abstain</Button>
+            </div>
+          
         </div>
         <div className={styles.divider}></div>
     </div>)
