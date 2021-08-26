@@ -189,7 +189,7 @@ function Account () {
         </S.CardContentTag>
 
         <S.ContentGlass>
-          <img src={Drink} href="#" width={135}/>
+          <img src={Drink} href="#" width={135} alt="" />
         </S.ContentGlass>
 
       </S.CardTag>

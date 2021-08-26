@@ -16,8 +16,6 @@ limitations under the License. */
 import React from 'react';
 import { NavigateNext, NavigateBefore } from '@material-ui/icons';
 
-import Button from 'components/button/Button';
-
 import * as styles from './Pager.module.scss';
 import * as S from './Pager.styles';
 

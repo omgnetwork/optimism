@@ -17,7 +17,7 @@ import networkService from 'services/networkService';
 import { getCoinImage } from 'util/coinImage';
 
 import * as styles from './listFarm.module.scss';
-import { Box, Typography, Fade, useMediaQuery, Grid } from '@material-ui/core';
+import { Box, Typography, Fade, Grid } from '@material-ui/core';
 import * as S from "./ListFarm.styles"
 
 class ListFarm extends React.Component {

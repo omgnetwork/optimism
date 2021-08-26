@@ -15,8 +15,7 @@ import networkService from 'services/networkService';
 
 import * as styles from './Farm.module.scss';
 import * as S from './FarmModal.styles';
-import { useTheme } from '@emotion/react';
-import { Typography, useMediaQuery } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 
 class FarmDepositModal extends React.Component {
   constructor(props) {

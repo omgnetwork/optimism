@@ -12,7 +12,6 @@ import { logAmount } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
 
-import * as styles from './Farm.module.scss';
 import * as S from './FarmModal.styles';
 import { Typography } from '@material-ui/core';
 

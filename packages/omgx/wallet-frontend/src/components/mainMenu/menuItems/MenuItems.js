@@ -13,7 +13,7 @@ import NFTIcon from 'components/icons/NFTIcon';
 import chevron from 'images/chevron.svg';
 
 function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
-  const [ openDropdown, setOpenDropdown ] = useState(['/pool', '/farm'].includes(window.location.pathname));
+  const [ openDropdown,  ] = useState(['/pool', '/farm'].includes(window.location.pathname));
   const [ activeItem, setActiveItem ] = useState(false);
   const theme = useTheme();
   const isLight = theme.palette.mode === 'light';
