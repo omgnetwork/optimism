@@ -32,6 +32,8 @@ function NetworkSwitcher({ walletEnabled }) {
     dispatch(setNetwork(network));
   }, [ dispatch ])
 
+  console.log('allNetworks', allNetworks, walletEnabled)
+
   return (
     <S.WalletPickerContainer>
       <S.WallerPickerWrapper>
@@ -47,7 +49,7 @@ function NetworkSwitcher({ walletEnabled }) {
               <Typography variant="body1">BOBA {masterConfig}</Typography>
             </Box>
 
-            {walletEnabled !== false || !!allNetworks.length ? (
+            {walletEnabled === false ? (
               <S.Chevron
                 open={showAllNetworks}
                 src={chevron}
@@ -56,7 +58,7 @@ function NetworkSwitcher({ walletEnabled }) {
             ) : null}
           </S.NetWorkStyle>
 
-          {walletEnabled !== false || networkLayer === 'L1' || networkLayer === 'L2' ? (
+          {walletEnabled === false ? (
             <S.Dropdown ref={dropdownNode}>
               {!!allNetworks.length && showAllNetworks && allNetworks.map((network,   ) => (
                 <div
