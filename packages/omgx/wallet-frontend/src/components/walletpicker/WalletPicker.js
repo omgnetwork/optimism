@@ -42,9 +42,10 @@ import { useTheme } from '@emotion/react'
 const Root = styled('div')(({ theme }) => ({
   paddingTop: theme.spacing(10),
   paddingBottom: theme.spacing(10),
-}));
+}))
 
 function WalletPicker ({ onEnable, enabled }) {
+  
   const dispatch = useDispatch();
 
   const [ walletEnabled, setWalletEnabled ] = useState(false);

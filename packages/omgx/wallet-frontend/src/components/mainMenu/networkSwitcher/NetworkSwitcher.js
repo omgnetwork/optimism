@@ -1,4 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
+import { openModal } from 'actions/uiAction'
 import { Box } from '@material-ui/system'
 import { useSelector, useDispatch } from 'react-redux'
 import * as S from './NetworkSwitcher.styles.js'
@@ -7,6 +8,9 @@ import { selectNetwork } from 'selectors/setupSelector'
 import { setNetwork } from 'actions/setupAction'
 import { getAllNetworks } from 'util/masterConfig'
 import { Typography } from '@material-ui/core'
+import networkService from 'services/networkService'
+import WrongNetworkModal from 'containers/modals/wrongnetwork/WrongNetworkModal'
+import { selectModalState } from 'selectors/uiSelector'
 
 function NetworkSwitcher({ walletEnabled }) {
 
@@ -14,6 +18,9 @@ function NetworkSwitcher({ walletEnabled }) {
   const dropdownNode = useRef(null)
   const [ showAllNetworks, setShowAllNetworks ] = useState(false)
   const masterConfig = useSelector(selectNetwork())
+
+  const [ wrongNetwork, setWrongNetwork ] = useState(false)
+  const wrongNetworkModalState = useSelector(selectModalState('wrongNetworkModal'))
 
   // defines the set of possible networks
   const networks = getAllNetworks()
@@ -24,19 +31,43 @@ function NetworkSwitcher({ walletEnabled }) {
   const dispatchSetNetwork = useCallback((network) => {
     console.log("dispatchSetNetwork:",network)
     dispatch(setNetwork(network))
+
+    async function initializeAccounts () {
+      const initialized = await networkService.initializeAccounts(network);
+      if (initialized === 'wrongnetwork') {
+        console.log('wrongnetwork')
+        return setWrongNetwork(true)
+      }
+    }
+
+    initializeAccounts()
+
     setShowAllNetworks(false)
   }, [ dispatch ])
 
+  useEffect(() => {
+    if (wrongNetwork) {
+      dispatch(openModal('wrongNetworkModal'))
+      localStorage.setItem('changeChain', false)
+    }
+  }, [ dispatch, wrongNetwork ]);
 
-// const dispatchSetLayer = useCallback((layer) => {
-//     console.log("dispatchSetLayer:",layer)
-//     dispatch(setLayer(layer))
-//     networkService.switchChain(layer)
-//     setShowAllLayers(false)
-//   }, [ dispatch ])
+  function resetSelection () {
+    //dispatchSetWalletMethod(null);
+    //setWalletEnabled(false);
+    //setAccountsEnabled(false);
+  }
 
   return (
+
+
     <S.WalletPickerContainer>
+
+      <WrongNetworkModal
+        open={wrongNetworkModalState}
+        onClose={resetSelection}
+      />
+
       <S.WallerPickerWrapper>
         <S.Menu>
 
@@ -57,9 +88,9 @@ function NetworkSwitcher({ walletEnabled }) {
           </S.NetWorkStyle>
 
           <S.Dropdown ref={dropdownNode}>
-            {!!allNetworks.length && showAllNetworks && allNetworks.map((network,   ) => (
+            {!!allNetworks.length && showAllNetworks && allNetworks.map((network) => (
               <div
-                // key={index}
+                key={network}
                 onClick={()=>dispatchSetNetwork(network)}
               >
                 {network}

@@ -278,7 +278,7 @@ class NetworkService {
       })
 
     } catch (error) {
-      console.log("addNFTFactoryNS cache is stale:",error)
+      console.log("addNFTFactoryNS cache is stale or bad address:", error)
     }
 
   }
@@ -324,7 +324,7 @@ class NetworkService {
 
   }
 
-  async initializeAccounts(masterSystemConfig) {
+  async initializeAccounts( masterSystemConfig ) {
 
     console.log('NS: initializeAccounts() for', masterSystemConfig)
 
@@ -424,6 +424,7 @@ class NetworkService {
         //rinkeby, L2
         this.L1orL2 = 'L2'
       } else {
+        console.log("ERROR: masterSystemConfig does not match actual network.chainId")
         this.bindProviderListeners()
         return 'wrongnetwork'
       }
