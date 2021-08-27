@@ -19,12 +19,19 @@ if (masterConfigCache) {
   masterConfigCache = JSON.parse(masterConfigCache);
 }
 
+let netLayerCache = localStorage.getItem("netLayer");
+
+if (netLayerCache) {
+  netLayerCache = JSON.parse(netLayerCache);
+}
+
 const initialState = {
   walletMethod: null,
   masterConfig: masterConfigCache ? masterConfigCache : 'rinkeby',
   blockexplorerURL: '',
   etherscan: '',
-  minter: false
+  minter: false,
+  netLayer: netLayerCache ? netLayerCache : 'L1'
 };
 
 function setupReducer (state = initialState, action) {
@@ -35,15 +42,13 @@ function setupReducer (state = initialState, action) {
         walletMethod: action.payload 
       }
     case 'SETUP/NETWORK/SET':
-      localStorage.setItem("masterConfig", JSON.stringify(action.payload));
+      localStorage.setItem("masterConfig", JSON.stringify(action.payload))
       return { 
       	...state, 
-        masterConfig: action.payload,
-      	// masterConfig: action.payload.network.name,
-        // blockexplorerURL: action.payload.network.blockexplorer,
-        // etherscan: action.payload.network.etherscan,
+        masterConfig: action.payload
       }
     case 'SETUP/LAYER/SET':
+      localStorage.setItem("netLayer", JSON.stringify(action.payload))
       return { 
         ...state, 
         netLayer: action.payload

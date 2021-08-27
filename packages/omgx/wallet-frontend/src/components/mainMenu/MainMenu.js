@@ -1,15 +1,16 @@
-import React, {useEffect, useState} from 'react';
-import { ReactComponent as Logo } from './../../images/logo-boba.svg';
-import * as S from "./MainMenu.styles";
-import { Link } from 'react-router-dom';
-import NetworkSwitcher from './networkSwitcher/NetworkSwitcher';
-import MenuItems from './menuItems/MenuItems';
-import { useTheme } from '@emotion/react';
-import { Container, Drawer, IconButton, useMediaQuery } from '@material-ui/core';
-import WalletAddress from 'components/walletAddress/WalletAddress';
-import { makeStyles } from '@material-ui/styles';
-import { ReactComponent as CloseIcon } from './../../images/icons/close-modal.svg';
-import { ReactComponent as NavIcon } from './../../images/icons/nav-collapsed.svg';
+import React, {useEffect, useState} from 'react'
+import { ReactComponent as Logo } from './../../images/logo-boba.svg'
+import * as S from "./MainMenu.styles"
+import { Link } from 'react-router-dom'
+import NetworkSwitcher from './networkSwitcher/NetworkSwitcher'
+import LayerSwitcher from './layerSwitcher/LayerSwitcher'
+import MenuItems from './menuItems/MenuItems'
+import { useTheme } from '@emotion/react'
+import { Container, Drawer, IconButton, useMediaQuery } from '@material-ui/core'
+import WalletAddress from 'components/walletAddress/WalletAddress'
+import { makeStyles } from '@material-ui/styles'
+import { ReactComponent as CloseIcon } from './../../images/icons/close-modal.svg'
+import { ReactComponent as NavIcon } from './../../images/icons/nav-collapsed.svg'
 
 const useStyles = makeStyles({
   root: {
@@ -54,6 +55,7 @@ function MainMenu ({ pageDisplay, handleSetPage }) {
                   </S.WrapperCloseIcon>
 
                   <NetworkSwitcher />
+                  <LayerSwitcher />
                 </S.DrawerHeader>
 
                 <MenuItems pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
@@ -70,6 +72,7 @@ function MainMenu ({ pageDisplay, handleSetPage }) {
             <Logo />
           </Link>
           <NetworkSwitcher />
+          <LayerSwitcher />
           <MenuItems pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
           {/* <ThemeSwitcher light={light} setLight={setLight} /> */}
         </S.Menu>
