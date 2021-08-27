@@ -13,15 +13,27 @@ function LayerSwitcher({ walletEnabled }) {
   const dispatch = useDispatch()
   const dropdownNode = useRef(null)
   const [ showAllLayers, setShowAllLayers ] = useState(false)
-  const layer = useSelector(selectLayer())
+  let layer = useSelector(selectLayer())
+
+  if (networkService.L1orL2 !== layer) {
+    //networkService.L1orL2 is always right...
+    layer = networkService.L1orL2
+  }
 
   let layers = ['L1', 'L2']
+
+  //show only the one relevant to switching
+  if(layer === 'L1') {
+    layers = ['L2']
+  } else {
+    layers = ['L1']
+  }
 
   const dispatchSetLayer = useCallback((layer) => {
     console.log("dispatchSetLayer:",layer)
     dispatch(setLayer(layer))
-    setShowAllLayers(false)
     networkService.switchChain(layer)
+    setShowAllLayers(false)
   }, [ dispatch ])
 
   return (

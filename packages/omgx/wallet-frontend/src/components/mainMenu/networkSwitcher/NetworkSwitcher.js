@@ -23,9 +23,17 @@ function NetworkSwitcher({ walletEnabled }) {
 
   const dispatchSetNetwork = useCallback((network) => {
     console.log("dispatchSetNetwork:",network)
-    setShowAllNetworks(false)
     dispatch(setNetwork(network))
+    setShowAllNetworks(false)
   }, [ dispatch ])
+
+
+// const dispatchSetLayer = useCallback((layer) => {
+//     console.log("dispatchSetLayer:",layer)
+//     dispatch(setLayer(layer))
+//     networkService.switchChain(layer)
+//     setShowAllLayers(false)
+//   }, [ dispatch ])
 
   return (
     <S.WalletPickerContainer>

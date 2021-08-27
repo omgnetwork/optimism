@@ -670,13 +670,12 @@ class NetworkService {
     }
 
     const nw = getAllNetworks()
-
-    const masterConfig = store.getState().setup.masterConfig;
+    const masterConfig = store.getState().setup.masterConfig
     
     const chainParam = {
-      chainId: '0x' + nw.masterConfig.L2.chainId.toString(16),
-      chainName: nw.masterConfig.L2.name,
-      rpcUrls: [nw.masterConfig.L2.rpcUrl],
+      chainId: '0x' + nw[masterConfig].L2.chainId.toString(16),
+      chainName: nw[masterConfig].L2.name,
+      rpcUrls: [nw[masterConfig].L2.rpcUrl],
     }
 
     // connect to the wallet
@@ -750,7 +749,7 @@ class NetworkService {
     } else if (masterConfig === 'local' && this.L1orL2 === 'L1') {
       //ok, so then, we want to switch to 'local' && 'L2'
       try {
-        await this.provider.send('wallet_switchEthereumChain', [{ chainId: '7A6A' }]) //ChainID 31338
+        await this.provider.send('wallet_switchEthereumChain', [{ chainId: '0x7A6A' }]) //ChainID 31338
       } catch (error) {
         if (error.code === 4902) {
           try {
@@ -765,7 +764,7 @@ class NetworkService {
       }
     } else if (masterConfig === 'local' && this.L1orL2 === 'L2') {
       try {
-        await this.provider.send('wallet_switchEthereumChain',[{ chainId: '7A69' }]) //ChainID 31337
+        await this.provider.send('wallet_switchEthereumChain',[{ chainId: '0x7A69' }]) //ChainID 31337
       } catch (switchError) {
         console.log("MetaMask - could not switch to Local L1")
       }
