@@ -59,7 +59,7 @@ function Account () {
       if(i.symbolL1 === 'ETH') {
         return 'ethereum'
       } else if(i.symbolL1 === 'OMG') {
-        return 'omisego'
+        return 'omg'
       } else {
         return i.symbolL1.toLowerCase()
       }
@@ -111,7 +111,7 @@ function Account () {
     <S.AccountWrapper >
       {!isMobile ? (
         <S.WrapperHeading>
-          <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>Ethereum Mainnet - L1</Typography>
+          <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>L1 ({network})</Typography>
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
           {networkLayer === 'L1' ? <ActiveItem active={false} /> : null}
         </S.WrapperHeading>
@@ -147,7 +147,7 @@ function Account () {
     <S.AccountWrapper>
       {!isMobile ? (
         <S.WrapperHeading>
-          <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>OMGX Mainnet - L2</Typography>
+          <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>BOBA L2 ({network})</Typography>
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
           {networkLayer === 'L2' ? <ActiveItem active /> : null}
         </S.WrapperHeading>
@@ -196,8 +196,8 @@ function Account () {
       {isMobile ? (
         <>
           <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, my: 2}}>
-            <Tab label="Ethereum Mainnet - L1" />
-            <Tab label="OMGX Mainnet - L2" />
+            <Tab label="${network} L1" />
+            <Tab label="BOBA L2 ${network}" />
           </Tabs>
           <TabPanel value={activeTab} index={0}>
             <L1Column />

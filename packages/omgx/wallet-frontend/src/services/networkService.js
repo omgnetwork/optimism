@@ -668,6 +668,20 @@ class NetworkService {
     const masterConfig = store.getState().setup.masterConfig;
     let chainParam = {}
 
+    if (masterConfig === 'mainnet') {
+      chainParam = {
+        chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
+        chainName: nw.mainnet.L2.name,
+        rpcUrls: [nw.mainnet.L2.rpcUrl],
+      }
+    } else if (masterConfig === 'rinkeby') {
+      chainParam = {
+        chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
+        chainName: nw.rinkeby.L2.name,
+        rpcUrls: [nw.rinkeby.L2.rpcUrl],
+      }
+    }
+
     // connect to the wallet
     this.provider = new ethers.providers.Web3Provider(window.ethereum)
     
@@ -680,11 +694,6 @@ class NetworkService {
         // This error code indicates that the chain has not been added to MetaMask.
         if (error.code === 4902) {
           try {
-            chainParam = {
-              chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
-              chainName: nw.mainnet.L2.name,
-              rpcUrls: [nw.mainnet.L2.rpcUrl],
-            }
             await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
           } catch (addError) {
             console.log("MetaMask - Error adding new RPC: ", addError)
@@ -694,7 +703,7 @@ class NetworkService {
           console.log("MetaMask - Switch Error: ", error.code)
         }
       }
-    } else if ( masterConfig === 'mainnet' && this.L1orL2 === 'L2' ) {
+    } else if ( masterConfig === 'mainnet' && this.L1orL2 === 'L2') {
       //ok, so then, we want to switch to 'mainnet' && 'L1' - no need to add 
       //if fail since mainnet L1 is always there unless the planet has been vaporized by 
       //space aliens with a blaster ray
@@ -708,14 +717,8 @@ class NetworkService {
       try {
         await this.provider.send('wallet_switchEthereumChain', [{ chainId: '0x1C' }]) //28 in Hex
       } catch (error) {
-        // This error code indicates that the chain has not been added to MetaMask.
         if (error.code === 4902) {
           try {
-            chainParam = {
-              chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
-              chainName: nw.rinkeby.L2.name,
-              rpcUrls: [nw.rinkeby.L2.rpcUrl],
-            }
             await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
           } catch (addError) {
             console.log("MetaMask - Error adding new RPC: ", addError)
@@ -725,10 +728,9 @@ class NetworkService {
           console.log("MetaMask - Switch Error: ", error.code)
         }
       }
-    } else if ( masterConfig === 'rinkeby' && this.L1orL2 === 'L2' ) {
-      //ok, so then, we want to switch to 'mainnet' && 'L1' - no need to add 
-      //if fail since mainnet L1 is always there unless the planet has been vaporized by 
-      //space aliens with a blaster ray
+    } else if ( masterConfig === 'rinkeby' && this.L1orL2 === 'L2') {
+      //ok, so then, we want to switch to 'rinkeby' && 'L1' - no need to add 
+      //if fail since rinkeby L1 is always there
       try {
         await this.provider.send('wallet_switchEthereumChain',[{ chainId: '0x4' }])
       } catch (switchError) {
