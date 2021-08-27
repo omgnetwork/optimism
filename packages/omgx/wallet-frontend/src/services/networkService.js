@@ -391,7 +391,7 @@ class NetworkService {
       //and then, also, either L1 or L2
 
       //at this point, we only know whether we want to be on local or rinkeby etc
-      if (masterSystemConfig === 'local' && network.chainId === 28) {
+      if (masterSystemConfig === 'local' && network.chainId === 31338) {
         //ok, that's reasonable
         //local deployment, L2
         this.L1orL2 = 'L2'
@@ -662,24 +662,21 @@ class NetworkService {
     
   }
 
-  async switchChain() {
-    
-    const nw = getAllNetworks()
-    const masterConfig = store.getState().setup.masterConfig;
-    let chainParam = {}
+  async switchChain( layer ) {
 
-    if (masterConfig === 'mainnet') {
-      chainParam = {
-        chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
-        chainName: nw.mainnet.L2.name,
-        rpcUrls: [nw.mainnet.L2.rpcUrl],
-      }
-    } else if (masterConfig === 'rinkeby') {
-      chainParam = {
-        chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
-        chainName: nw.rinkeby.L2.name,
-        rpcUrls: [nw.rinkeby.L2.rpcUrl],
-      }
+    if(this.L1orL2 === layer) {
+      console.log("Nothing to do - You are already on ",layer)
+      return
+    }
+
+    const nw = getAllNetworks()
+
+    const masterConfig = store.getState().setup.masterConfig;
+    
+    const chainParam = {
+      chainId: '0x' + nw.masterConfig.L2.chainId.toString(16),
+      chainName: nw.masterConfig.L2.name,
+      rpcUrls: [nw.masterConfig.L2.rpcUrl],
     }
 
     // connect to the wallet
@@ -689,7 +686,7 @@ class NetworkService {
     if (masterConfig === 'mainnet' && this.L1orL2 === 'L1') {
       //ok, so then, we want to switch to 'mainnet' && 'L2'
       try {
-        await this.provider.send('wallet_switchEthereumChain', [{ chainId: '0x120' }]) //288 in Hex
+        await this.provider.send('wallet_switchEthereumChain', [{ chainId: '0x120' }]) //ChainID 288
       } catch (error) {
         // This error code indicates that the chain has not been added to MetaMask.
         if (error.code === 4902) {
@@ -705,17 +702,17 @@ class NetworkService {
       }
     } else if ( masterConfig === 'mainnet' && this.L1orL2 === 'L2') {
       //ok, so then, we want to switch to 'mainnet' && 'L1' - no need to add 
-      //if fail since mainnet L1 is always there unless the planet has been vaporized by 
-      //space aliens with a blaster ray
+      //if(fail) since mainnet L1 is always there unless the planet 
+      //has been vaporized by space aliens with a blaster ray
       try {
-        await this.provider.send('wallet_switchEthereumChain',[{ chainId: '0x1' }])
+        await this.provider.send('wallet_switchEthereumChain',[{ chainId: '0x1' }]) //ChainID 1
       } catch (switchError) {
         console.log("MetaMask - could not switch to Ethereum Mainchain. Needless to say, this should never happen.")
       }
     } else if (masterConfig === 'rinkeby' && this.L1orL2 === 'L1') {
       //ok, so then, we want to switch to 'rinkeby' && 'L2'
       try {
-        await this.provider.send('wallet_switchEthereumChain', [{ chainId: '0x1C' }]) //28 in Hex
+        await this.provider.send('wallet_switchEthereumChain', [{ chainId: '0x1C' }]) //ChainID 28
       } catch (error) {
         if (error.code === 4902) {
           try {
@@ -728,41 +725,54 @@ class NetworkService {
           console.log("MetaMask - Switch Error: ", error.code)
         }
       }
-    } else if ( masterConfig === 'rinkeby' && this.L1orL2 === 'L2') {
-      //ok, so then, we want to switch to 'rinkeby' && 'L1' - no need to add 
-      //if fail since rinkeby L1 is always there
+    } else if (masterConfig === 'rinkeby_integration' && this.L1orL2 === 'L1') {
+      //ok, so then, we want to switch to 'rinkeby_integration' && 'L2'
       try {
-        await this.provider.send('wallet_switchEthereumChain',[{ chainId: '0x4' }])
+        await this.provider.send('wallet_switchEthereumChain', [{ chainId: '0x1D' }]) //ChainID 29
+      } catch (error) {
+        if (error.code === 4902) {
+          try {
+            await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
+          } catch (addError) {
+            console.log("MetaMask - Error adding new RPC: ", addError)
+            // handle "add" error via alert message
+          }
+        } else { //some other error code
+          console.log("MetaMask - Switch Error: ", error.code)
+        }
+      }
+    } else if ((masterConfig === 'rinkeby' || masterConfig === 'rinkeby_integration') && this.L1orL2 === 'L2') {
+      try {
+        await this.provider.send('wallet_switchEthereumChain',[{ chainId: '0x4' }]) //ChainID 4
       } catch (switchError) {
-        console.log("MetaMask - could not switch to Rinkeby Ethereum. Needless to say, this should never happen.")
+        console.log("MetaMask - could not switch to Rinkeby. Needless to say, this should never happen.")
+      }
+    } else if (masterConfig === 'local' && this.L1orL2 === 'L1') {
+      //ok, so then, we want to switch to 'local' && 'L2'
+      try {
+        await this.provider.send('wallet_switchEthereumChain', [{ chainId: '7A6A' }]) //ChainID 31338
+      } catch (error) {
+        if (error.code === 4902) {
+          try {
+            await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
+          } catch (addError) {
+            console.log("MetaMask - Error adding new RPC: ", addError)
+            // handle "add" error via alert message
+          }
+        } else { //some other error code
+          console.log("MetaMask - Switch Error: ", error.code)
+        }
+      }
+    } else if (masterConfig === 'local' && this.L1orL2 === 'L2') {
+      try {
+        await this.provider.send('wallet_switchEthereumChain',[{ chainId: '7A69' }]) //ChainID 31337
+      } catch (switchError) {
+        console.log("MetaMask - could not switch to Local L1")
       }
     } 
   }
 
-  //     chainParam = {
-  //       chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
-  //       chainName: nw.mainnet.L2.name,
-  //       rpcUrls: [nw.mainnet.L2.rpcUrl],
-  //     }
-  //   } else if (masterConfig === 'rinkeby') {
-  //     chainParam = {
-  //       chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
-  //       chainName: nw.rinkeby.L2.name,
-  //       rpcUrls: [nw.rinkeby.L2.rpcUrl],
-  //     }
-  //   } else if (masterConfig === 'rinkeby_integration') {
-  //     chainParam = {
-  //       chainId: '0x' + nw.rinkeby_integration.L2.chainId.toString(16),
-  //       chainName: nw.rinkeby_integration.L2.name,
-  //       rpcUrls: [nw.rinkeby_integration.L2.rpcUrl],
-  //     }
-  //   } else if (masterConfig === 'local') {
-  //     chainParam = {
-  //       chainId: '0x' + nw.local.L2.chainId.toString(16),
-  //       chainName: nw.local.L2.name,
-  //       rpcUrls: [nw.local.L2.rpcUrl],
-  //     }
-  //   }
+
     
   //   console.log("MetaMask: Trying to add ", chainParam)
     

@@ -6,6 +6,7 @@ import chevron from 'images/chevron.svg'
 import { selectLayer } from 'selectors/setupSelector'
 import { setLayer } from 'actions/setupAction'
 import { Typography } from '@material-ui/core'
+import networkService from 'services/networkService'
 
 function LayerSwitcher({ walletEnabled }) {
 
@@ -20,6 +21,7 @@ function LayerSwitcher({ walletEnabled }) {
     console.log("dispatchSetLayer:",layer)
     dispatch(setLayer(layer))
     setShowAllLayers(false)
+    networkService.switchChain(layer)
   }, [ dispatch ])
 
   return (

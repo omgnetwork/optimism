@@ -13,11 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useCallback, useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useCallback, useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
-import WrongNetworkModal from 'containers/modals/wrongnetwork/WrongNetworkModal';
-import networkService from 'services/networkService';
+import WrongNetworkModal from 'containers/modals/wrongnetwork/WrongNetworkModal'
+import networkService from 'services/networkService'
 
 import { selectModalState } from 'selectors/uiSelector';
 
@@ -67,7 +67,7 @@ function WalletPicker ({ onEnable, enabled }) {
   useEffect(() => {
 
     if (walletMethod === 'browser') {
-      enableBrowserWallet();
+      enableBrowserWallet()
     }
 
     async function enableBrowserWallet () {
