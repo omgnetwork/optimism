@@ -12,12 +12,11 @@ module.exports = {
           mnemonic: {
             phrase: mnemonicPhrase,
           },
-          providerOrUrl: 'http://127.0.0.1:8545',
+          providerOrUrl: env.L2_NODE_WEB3_URL,
         })
       },
       network_id: 28,
-      host: '127.0.0.1',
-      port: 8545,
+      host:  env.L2_NODE_WEB3_URL,
       gasPrice: 15000000,
       gas: 803900000,
     },
