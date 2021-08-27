@@ -24,23 +24,20 @@ import { selectModalState } from 'selectors/uiSelector';
 import {
   selectWalletMethod,
   selectNetwork,
-} from 'selectors/setupSelector';
+} from 'selectors/setupSelector'
 
-import { openModal } from 'actions/uiAction';
-import { setWalletMethod } from 'actions/setupAction';
-import { getAllNetworks } from 'util/masterConfig';
+import { openModal } from 'actions/uiAction'
+import { setWalletMethod } from 'actions/setupAction'
+import { getAllNetworks } from 'util/masterConfig'
 
-import { isChangingChain } from 'util/changeChain';
-import Button from 'components/button/Button';
+import { isChangingChain } from 'util/changeChain'
 import * as S from "./WalletPicker.styles"
-import { ReactComponent as Arrow } from './../../images/icons/arrow-right.svg';
-import { ReactComponent as Fox } from './../../images/icons/fox-icon.svg';
-import { Box, Container, Grid, Link, useMediaQuery } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
-import { grey } from '@material-ui/core/colors';
-import { styled } from '@material-ui/core/styles';
-import NetworkSwitcher from 'components/mainMenu/networkSwitcher/NetworkSwitcher';
-import { useTheme } from '@emotion/react';
+import { ReactComponent as Fox } from './../../images/icons/fox-icon.svg'
+import { Box, Container, Grid, useMediaQuery } from '@material-ui/core'
+import Typography from '@material-ui/core/Typography'
+import { styled } from '@material-ui/core/styles'
+import NetworkSwitcher from 'components/mainMenu/networkSwitcher/NetworkSwitcher'
+import { useTheme } from '@emotion/react'
 
 const Root = styled('div')(({ theme }) => ({
   paddingTop: theme.spacing(10),

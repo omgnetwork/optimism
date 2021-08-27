@@ -6,7 +6,6 @@ import chevron from 'images/chevron.svg'
 import { selectNetwork } from 'selectors/setupSelector'
 import { setNetwork } from 'actions/setupAction'
 import { getAllNetworks } from 'util/masterConfig'
-import networkService from 'services/networkService'
 import { Typography } from '@material-ui/core'
 
 function NetworkSwitcher({ walletEnabled }) {
