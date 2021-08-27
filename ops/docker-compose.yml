@@ -226,7 +226,6 @@ services:
       GET_LOGS_INTERVAL: 500
       FILTER_ENDPOINT: http://dtl:8081/omgx-addr.json #this will fail early, but then start to work
       FILTER_POLLING_INTERVAL: 30000
-      BATCH_MODE: 'true'
 
   # a second relay system for messages that need to get to L1 quickly
   # NOTE - all withdrawal messenges use the standard relayer with its 7 day window

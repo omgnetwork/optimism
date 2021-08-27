@@ -47,7 +47,6 @@ const main = async () => {
   const MNEMONIC = config.str('mnemonic', env.MNEMONIC)
   const HD_PATH = config.str('hd-path', env.HD_PATH)
   //batch system
-  const BATCH_MODE = config.bool('batch-mode', env.BATCH_MODE === 'true')
   const MIN_BATCH_SIZE = config.uint(
     'min-batch-size',
     parseInt(env.MIN_BATCH_SIZE, 10) || 2
@@ -119,7 +118,6 @@ const main = async () => {
     l1Wallet: wallet,
     relayGasLimit: RELAY_GAS_LIMIT,
     //batch system
-    batchMode: BATCH_MODE,
     minBatchSize: MIN_BATCH_SIZE,
     maxWaitTimeS: MAX_WAIT_TIME_S,
     fromL2TransactionIndex: FROM_L2_TRANSACTION_INDEX,
