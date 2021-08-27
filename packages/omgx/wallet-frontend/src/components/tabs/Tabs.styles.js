@@ -1,25 +1,25 @@
 import styled from '@emotion/styled';
-
+import { Typography } from '@material-ui/core';
 
 export const Tabs = styled.div`
 display: flex;
 flex-direction: row;
 justify-content: flex-start;
 flex: 1;
-margin-bottom: 20px;
+/* margin-bottom: 20px; */
 `;
 
-export const TabItem = styled.div`
+export const TabItem = styled(Typography)`
 color: rgba(255, 255, 255, 0.7);
 transition: color 200ms ease-in-out;
 cursor: pointer;
 margin-right: 20px;
- &.active { 
+ &.active {
     color: ${props => props.theme.palette.neutral.main};
     border-bottom: 2px solid ${props => props.theme.palette.neutral.contrastText};
     margin-bottom: -2px;
     z-index: 1;
  }
-`
+`;
 
 
