@@ -109,7 +109,7 @@ function DoExitStepFast({ handleClose, token }) {
       <Typography variant="body2" sx={{mb: 3}}>{label}</Typography>
 
       <Input
-        label={`Enter amount to deposit`}
+        label={`Enter amount to exit`}
         placeholder="0.0000"
         value={value}
         type="number"
@@ -146,8 +146,8 @@ function DoExitStepFast({ handleClose, token }) {
 
       {Number(LPBalance) < Number(value) && (
         <Typography variant="body2" sx={{mt: 2, color: 'red'}}>
-          The liquidity pool balance (of {LPBalance}) is too low to cover your swap - please
-          use the traditional exit or reduce the amount to swap.
+          The liquidity pool balance (of {LPBalance}) is too low to cover your exit - please
+          use the traditional exit or reduce the amount to exit.
         </Typography>
       )}
 
@@ -172,7 +172,7 @@ function DoExitStepFast({ handleClose, token }) {
             fullWidth={isMobile}
             size="large"
           >
-            Fast Exit
+            Exit
           </Button>
       </S.WrapperActions>
     </>

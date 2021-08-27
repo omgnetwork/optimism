@@ -32,8 +32,6 @@ function NetworkSwitcher({ walletEnabled }) {
     dispatch(setNetwork(network));
   }, [ dispatch ])
 
-  console.log('allNetworks', allNetworks, walletEnabled)
-
   return (
     <S.WalletPickerContainer>
       <S.WallerPickerWrapper>

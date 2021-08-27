@@ -205,7 +205,7 @@ function WalletPicker ({ onEnable, enabled }) {
                 fullWidth
                 size="large"
               >
-                Add OMGX L2 Provider
+                Add BOBA Rinkeby L2 to MetaMask
               </Button>
             </Grid>
           </Grid>

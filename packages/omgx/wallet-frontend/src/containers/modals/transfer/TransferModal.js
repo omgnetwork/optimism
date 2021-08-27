@@ -104,7 +104,7 @@ function TransferModal ({ open, token }) {
 
         <Input
           label="Enter Amount to Deposit"
-          placeholder="0,00"
+          placeholder="0.00"
           value={value}
           type="number"
           onChange={(i) => {setValue(i.target.value)}}
@@ -142,7 +142,7 @@ function TransferModal ({ open, token }) {
             fullWidth={isMobile}
             size="large"
           >
-            Deposit
+            Transfer
           </Button>
       </S.WrapperActions>
     </Modal>
