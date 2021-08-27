@@ -617,26 +617,49 @@ class NetworkService {
   }
 
   async addL2Network() {
+    
     const nw = getAllNetworks()
     const masterConfig = store.getState().setup.masterConfig;
     let chainParam = {}
+    
     if (masterConfig === 'mainnet') {
       chainParam = {
         chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
-        chainName: 'OMGX L2 Mainnet',
+        chainName: nw.mainnet.L2.name,
         rpcUrls: [nw.mainnet.L2.rpcUrl],
       }
-    } else {
+    } else if (masterConfig === 'rinkeby') {
       chainParam = {
         chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
-        chainName: 'OMGX L2 Rinkeby',
+        chainName: nw.rinkeby.L2.name,
         rpcUrls: [nw.rinkeby.L2.rpcUrl],
       }
+    } else if (masterConfig === 'rinkeby_integration') {
+      chainParam = {
+        chainId: '0x' + nw.rinkeby_integration.L2.chainId.toString(16),
+        chainName: nw.rinkeby_integration.L2.name,
+        rpcUrls: [nw.rinkeby_integration.L2.rpcUrl],
+      }
+    } else if (masterConfig === 'local') {
+      chainParam = {
+        chainId: '0x' + nw.local.L2.chainId.toString(16),
+        chainName: nw.local.L2.name,
+        rpcUrls: [nw.local.L2.rpcUrl],
+      }
     }
-
+    
+    console.log("MetaMask: Trying to add ", chainParam)
+    
     // connect to the wallet
     this.provider = new ethers.providers.Web3Provider(window.ethereum)
-    this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
+    let res = await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
+
+    if( res === null ){
+      console.log("MetaMask - Added new RPC")
+    } else {
+      console.log("MetaMask - Error adding new RPC: ", res)
+    }
+    
   }
 
   async getTransactions() {

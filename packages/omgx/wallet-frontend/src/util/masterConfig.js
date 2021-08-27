@@ -52,7 +52,7 @@ const NETWORKS = {
       transaction: `https://blockexplorer.boba.network/tx/`,
     }
   },
-  "rinkeby-integration": {
+  rinkeby_integration: {
     addressUrl:       `https://rinkeby-integration.boba.network:8081/addresses.json`,
     addressOMGXUrl:   `https://rinkeby-integration.boba.network:8081/omgx-addr.json`,
     OMGX_WATCHER_URL: `https://api-watcher.rinkeby-integration.boba.network/`,
