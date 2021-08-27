@@ -9,6 +9,7 @@
   "rules": {
     "trailing-comma": true,
     "object-literal-sort-keys": false,
-    "ordered-imports": false
+    "ordered-imports": false,
+    "space-before-function-paren": false
   }
 }

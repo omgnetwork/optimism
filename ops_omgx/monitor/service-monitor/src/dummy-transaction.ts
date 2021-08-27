@@ -1,11 +1,9 @@
-import dotenv from 'dotenv'
-dotenv.config()
+import * as configs from './configs'
 import { fastOnRamp } from './3_fast-onramp'
 import { fastExit } from './4_fast-exit'
 import logger from './logger'
 
-const dummyDelayMins = parseInt(process.env.DUMMY_DELAY_MINS, 10) || 5
-const delayTime = 1000 * 60 * dummyDelayMins
+const delayTime = 1000 * 60 * configs.dummyDelayMins
 
 const sleep = () => {
   return new Promise((resolve) => {
@@ -15,14 +13,15 @@ const sleep = () => {
   })
 }
 
-const doTransaction = () => {
-  return fastOnRamp().catch((err) => {
-    logger.error(err.message)
-  })
-  .then(fastExit).catch((err) => {
-    logger.error(err.message)
-  })
-  .then(sleep).then(doTransaction)
+export const doDummyTransaction = () => {
+  return fastOnRamp()
+    .catch((err) => {
+      logger.error(err.message)
+    })
+    .then(fastExit)
+    .catch((err) => {
+      logger.error(err.message)
+    })
+    .then(sleep)
+    .then(doDummyTransaction)
 }
-
-doTransaction()
