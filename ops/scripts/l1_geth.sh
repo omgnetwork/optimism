@@ -107,7 +107,4 @@ exec geth \
   --http.api "admin,debug,web3,eth,txpool,personal,clique,miner,net"\
   --http.corsdomain "*"\
   --http.vhosts "*"\
-  --txpool.pricelimit 0\
-  --gpo.maxprice 0\
-  --miner.gasprice 0\
   "$@"

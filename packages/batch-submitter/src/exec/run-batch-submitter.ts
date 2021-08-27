@@ -420,7 +420,7 @@ export const run = async () => {
 
   // Loops infinitely!
   const loop = async (
-    func: () => Promise<TransactionReceipt>
+    func: (a) => Promise<TransactionReceipt>
   ): Promise<void> => {
     // Clear all pending transactions
     if (clearPendingTxs) {
@@ -463,8 +463,12 @@ export const run = async () => {
     }
 
     while (true) {
+      const workObj = {
+        noWork: true
+      }
+      
       try {
-        await func()
+        await func(workObj)
       } catch (err) {
         switch (err.code) {
           case 'SERVER_ERROR':
@@ -492,16 +496,21 @@ export const run = async () => {
         logger.info('Retrying...')
       }
       // Sleep
-      await new Promise((r) => setTimeout(r, requiredEnvVars.POLL_INTERVAL))
+      if (workObj.noWork) {
+        logger.info('MMDBG did no work, will sleep')
+        await new Promise((r) => setTimeout(r, requiredEnvVars.POLL_INTERVAL))
+      } else {
+        logger.info('MMDBG fast loop')
+      }
     }
   }
 
   // Run batch submitters in two seperate infinite loops!
   if (requiredEnvVars.RUN_TX_BATCH_SUBMITTER) {
-    loop(() => txBatchSubmitter.submitNextBatch())
+    loop((a) => txBatchSubmitter.submitNextBatch(a))
   }
   if (requiredEnvVars.RUN_STATE_BATCH_SUBMITTER) {
-    loop(() => stateBatchSubmitter.submitNextBatch())
+    loop((a) => stateBatchSubmitter.submitNextBatch(a))
   }
 
   if (config.bool('run-metrics-server', env.RUN_METRICS_SERVER === 'true')) {

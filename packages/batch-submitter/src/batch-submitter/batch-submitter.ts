@@ -40,7 +40,8 @@ export abstract class BatchSubmitter {
   protected syncing: boolean
   protected lastBatchSubmissionTimestamp: number = 0
   protected metrics: BatchSubmitterMetrics
-
+  protected workObj: any
+  
   constructor(
     readonly signer: Signer,
     readonly l2Provider: providers.StaticJsonRpcProvider,
@@ -68,7 +69,8 @@ export abstract class BatchSubmitter {
   public abstract _getBatchStartAndEnd(): Promise<BlockRange>
   public abstract _updateChainInfo(): Promise<void>
 
-  public async submitNextBatch(): Promise<TransactionReceipt> {
+  public async submitNextBatch(_workObj): Promise<TransactionReceipt> {
+    this.workObj = _workObj
     if (typeof this.l2ChainId === 'undefined') {
       this.l2ChainId = await this._getL2ChainId()
     }
@@ -223,8 +225,11 @@ export abstract class BatchSubmitter {
 
     let receipt: TransactionReceipt
     try {
+this.logger.info("MMDBG_1 tx-submitter before-Try")    
       receipt = await submitTransaction()
+this.logger.info("MMDBG_1 tx-submitter after-Try")    
     } catch (err) {
+this.logger.info("MMDBG_1 tx-submitter in-catch") 
       this.metrics.failedSubmissions.inc()
       if (err.reason) {
         this.logger.error(`Transaction invalid: ${err.reason}, aborting`, {
@@ -232,6 +237,7 @@ export abstract class BatchSubmitter {
           stack: err.stack,
           code: err.code,
         })
+this.logger.error('MMDBG_1 Error 1')
         return
       }
 
@@ -240,21 +246,32 @@ export abstract class BatchSubmitter {
         stack: err.stack,
         code: err.code,
       })
+this.logger.error('MMDBG_1 Error 2')
       return
     }
+this.logger.info("MMDBG_1 tx-submitter after-catch", { receipt })    
 
     this.logger.info('Received transaction receipt', { receipt })
+
     // this.logger.info(successMessage, {
     //   block:receipt.blockNumber,
     //   status:receipt.status,
     //   txHash:receipt.transactionHash,
     // })
+    if (! receipt) {
+      this.logger.error('MMDBG Error - NULL transaction receipt')
+    }
     this.logger.info(successMessage)
+
     this.metrics.batchesSubmitted.inc()
     this.metrics.submissionGasUsed.observe(
       receipt ? receipt.gasUsed.toNumber() : 0
     )
     this.metrics.submissionTimestamp.observe(Date.now())
+    
+    this.logger.info('MMDBG I did some work')
+    this.workObj.noWork = false
+    
     return receipt
   }
 

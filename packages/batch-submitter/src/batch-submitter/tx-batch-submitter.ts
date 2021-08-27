@@ -230,7 +230,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       batchStart:batchParams.shouldStartAtElement,
       batchElements:batchParams.totalElementsToAppend
     })
-    this.logger.info('Submitting batch.', {
+    this.logger.debug('Submitting batch.', {
       calldata: batchParams,
       l1tipHeight,
     })
@@ -263,7 +263,12 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
 //     if (typeof receipt === 'undefined') { this._enableAutoFixBatchOptions(1) }
 //     return receipt
 // =======
-    return this.submitAppendSequencerBatch(batchParams)
+
+    const ret = this.submitAppendSequencerBatch(batchParams)
+    
+    this.logger.info("MMDBG tx_chain submit", { ret })
+
+    return ret
   }
 
   /*********************
@@ -276,6 +281,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     )
     const submitTransaction = (): Promise<TransactionReceipt> => {
       return this.transactionSubmitter.submitTransaction(
+        this.logger,
         tx,
         this._makeHooks('appendQueueBatch')
       )
@@ -293,6 +299,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       )
     const submitTransaction = (): Promise<TransactionReceipt> => {
       return this.transactionSubmitter.submitTransaction(
+        this.logger,
         tx,
         this._makeHooks('appendSequencerBatch')
       )
@@ -344,10 +351,11 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       //  In this case, we want to submit regardless of the batch's size.
       wasBatchTruncated = true
     }
-
+    
     this.logger.info('Generated sequencer batch params', {
       contexts: sequencerBatchParams.contexts,
-      transactions: sequencerBatchParams.transactions,
+//      transactions: sequencerBatchParams.transactions,
+      numTransactions: sequencerBatchParams.transactions.length,
       wasBatchTruncated,
     })
     return [sequencerBatchParams, wasBatchTruncated]

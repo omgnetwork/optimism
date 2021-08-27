@@ -188,8 +188,14 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
 
   protected async _start(): Promise<void> {
     while (this.running) {
-      await sleep(this.options.pollingInterval)
-      await this._getFilter();
+      let moreWork = false
+      
+      if (! moreWork) {
+        await sleep(this.options.pollingInterval)
+      }
+      moreWork = false
+      
+      await this._getfilter();
 
       try {
         // The message is relayed directly, no need to keep cache
@@ -334,6 +340,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
             proof,
           }
           this.state.messageBuffer.push(messageToSend)
+          moreWork = true // FIXME - should move this. 
         }
 
         if (messages.length === 0) {

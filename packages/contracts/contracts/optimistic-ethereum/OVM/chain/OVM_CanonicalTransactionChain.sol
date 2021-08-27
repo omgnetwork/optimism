@@ -408,8 +408,13 @@ contract OVM_CanonicalTransactionChain is iOVM_CanonicalTransactionChain, Lib_Ad
         }
 
         require(
-            shouldStartAtElement == getTotalElements(),
-            "Actual batch start index does not match expected start index."
+            shouldStartAtElement >= getTotalElements(),
+            "ctc shouldStart is less than totalElements."
+        );
+        
+        require(
+            shouldStartAtElement <= getTotalElements(),
+            "ctc shouldStart is greater than totalElements."
         );
 
         require(

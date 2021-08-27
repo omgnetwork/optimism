@@ -171,6 +171,13 @@ export class StateBatchSubmitter extends BatchSubmitter {
 
     const offsetStartsAtIndex = startBlock - this.blockOffset
     this.logger.debug('Submitting batch.', { calldata })
+    
+    this.logger.info('Submitting state_chain batch', {
+      startBlock,
+      endBlock,
+      offsetStarts:offsetStartsAtIndex,
+      batchLen:batch.length,
+    })
 
     // Generate the transaction we will repeatedly submit
     const nonce = await this.signer.getTransactionCount()
@@ -181,8 +188,9 @@ export class StateBatchSubmitter extends BatchSubmitter {
     )
     const submitTransaction = (): Promise<TransactionReceipt> => {
       return this.transactionSubmitter.submitTransaction(
+        this.logger,
         tx,
-        this._makeHooks('appendStateBatch')
+        this._makeHooks('appendStateBatch_'+startBlock.toString()+"-"+endBlock.toString())
       )
     }
     return this._submitAndLogTx(
@@ -238,7 +246,7 @@ export class StateBatchSubmitter extends BatchSubmitter {
       ])
     }
 
-    this.logger.info('Generated state commitment batch', {
+    this.logger.debug('Generated state commitment batch', {
       batch, // list of stateRoots
     })
     return batch

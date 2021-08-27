@@ -134,8 +134,12 @@ contract OVM_StateCommitmentChain is iOVM_StateCommitmentChain, Lib_AddressResol
         // Fail fast in to make sure our batch roots aren't accidentally made fraudulent by the
         // publication of batches by some other user.
         require(
-            _shouldStartAtElement == getTotalElements(),
-            "Actual batch start index does not match expected start index."
+            _shouldStartAtElement >= getTotalElements(),
+            "scc shouldStartAt is less than totalElements."
+        );
+        require(
+            _shouldStartAtElement <= getTotalElements(),
+            "scc shouldStartAt is greater than totalElements."
         );
 
         // Proposers must have previously staked at the BondManager

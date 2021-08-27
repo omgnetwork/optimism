@@ -1,0 +1,11 @@
+{
+  "name":"local",
+  "endpoints":[ "http://localhost:9545", "http://localhost:8545" ],
+  "L1_geth_PoA":true,
+  "confirmations": [ 0, 0 ],
+  "gas_price_gwei": [ 1.0 , 0.015 ],
+  "gas_mult": [ 1.2 , 1.0 ],
+  "whale_acct":[ "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc" , "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba" ],
+  "max_fund_eth": 100.0,
+  "address_server":"http://localhost:8080"
+}
