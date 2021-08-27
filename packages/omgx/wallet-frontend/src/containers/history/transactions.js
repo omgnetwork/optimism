@@ -8,7 +8,7 @@ const tableHeadList = [
     },
     {
         label: 'Result',
-        isSort: false,
+        isSort: true,
     },
     {
         label: 'My Deposits',

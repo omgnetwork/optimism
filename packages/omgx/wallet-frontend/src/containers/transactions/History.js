@@ -41,7 +41,8 @@ import * as styles from './Transactions.module.scss';
 import { getAllNetworks } from 'util/masterConfig';
 import useInterval from 'util/useInterval';
 import PageHeader from 'components/pageHeader/PageHeader';
-import Transactions from './Transactions';
+import TransactionsOld from './Transactions';
+import Transactions from './../history/transactions';
 
 const POLL_INTERVAL = 5000; //milliseconds
 
@@ -98,6 +99,8 @@ function History () {
   return (
     <>
       <PageHeader title="Transaction History" />
+      <Transactions transactions={transactions}
+              chainLink={chainLink} />
 
     {/*
     <Input
@@ -147,7 +150,7 @@ function History () {
           />
 
           {activeTab1 === 'All' && (
-            <Transactions
+            <TransactionsOld
               searchHistory={searchHistory}
               transactions={transactions}
               chainLink={chainLink}
