@@ -10,7 +10,6 @@ dotenv.config()
 
 const main = async () => {
   const config: Bcfg = new Config('message-relayer')
-
   config.load({
     env: true,
     argv: true,
@@ -40,35 +39,27 @@ const main = async () => {
 
   const L2_NODE_WEB3_URL = config.str('l2-node-web3-url', env.L2_NODE_WEB3_URL)
   const L1_NODE_WEB3_URL = config.str('l1-node-web3-url', env.L1_NODE_WEB3_URL)
-
   const ADDRESS_MANAGER_ADDRESS = config.str(
     'address-manager-address',
     env.ADDRESS_MANAGER_ADDRESS
   )
-
-  const RELAYER_PRIVATE_KEY = config.str(
-    'relayer-private-key',
-    env.RELAYER_PRIVATE_KEY
-  )
+  const RELAYER_PRIVATE_KEY = config.str('relayer-private-key', env.RELAYER_PRIVATE_KEY)
   const MNEMONIC = config.str('mnemonic', env.MNEMONIC)
   const HD_PATH = config.str('hd-path', env.HD_PATH)
-
   //batch system
+  const BATCH_MODE = config.bool('batch-mode', env.BATCH_MODE === 'true')
   const MIN_BATCH_SIZE = config.uint(
     'min-batch-size',
     parseInt(env.MIN_BATCH_SIZE, 10) || 2
   )
-
   const MAX_WAIT_TIME_S = config.uint(
     'max-wait-time-s',
     parseInt(env.MAX_WAIT_TIME_S, 10) || 60
   )
-
   const RELAY_GAS_LIMIT = config.uint(
     'relay-gas-limit',
     parseInt(env.RELAY_GAS_LIMIT, 10) || 4000000
   )
-
   const POLLING_INTERVAL = config.uint(
     'polling-interval',
     parseInt(env.POLLING_INTERVAL, 10) || 5000
@@ -89,8 +80,10 @@ const main = async () => {
     'from-l2-transaction-index',
     parseInt(env.FROM_L2_TRANSACTION_INDEX, 10) || 0
   )
-  const FILTER_ENDPOINT =
-    config.str('filter-endpoint', env.FILTER_ENDPOINT) || ''
+  const FILTER_ENDPOINT = config.str(
+    'filter-endpoint',
+    env.FILTER_ENDPOINT
+  ) || ''
   const FILTER_POLLING_INTERVAL = config.uint(
     'filter-polling-interval',
     parseInt(env.FILTER_POLLING_INTERVAL, 10) || 60000
@@ -109,13 +102,9 @@ const main = async () => {
   const l2Provider = new providers.JsonRpcProvider(L2_NODE_WEB3_URL)
   const l1Provider = new providers.JsonRpcProvider(L1_NODE_WEB3_URL)
 
-  //const network = await l1Provider.getNetwork()
-  //console.log(network.name)
-
   let wallet: Wallet
   if (RELAYER_PRIVATE_KEY) {
     wallet = new Wallet(RELAYER_PRIVATE_KEY, l1Provider)
-    console.log(wallet)
   } else if (MNEMONIC) {
     wallet = Wallet.fromMnemonic(MNEMONIC, HD_PATH)
     wallet = wallet.connect(l1Provider)
@@ -129,11 +118,10 @@ const main = async () => {
     addressManagerAddress: ADDRESS_MANAGER_ADDRESS,
     l1Wallet: wallet,
     relayGasLimit: RELAY_GAS_LIMIT,
-
     //batch system
+    batchMode: BATCH_MODE,
     minBatchSize: MIN_BATCH_SIZE,
     maxWaitTimeS: MAX_WAIT_TIME_S,
-
     fromL2TransactionIndex: FROM_L2_TRANSACTION_INDEX,
     pollingInterval: POLLING_INTERVAL,
     l2BlockOffset: L2_BLOCK_OFFSET,

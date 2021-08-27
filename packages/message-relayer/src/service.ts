@@ -5,7 +5,7 @@ import { MerkleTree } from 'merkletreejs'
 import fetch from 'node-fetch';
 
 /* Imports: Internal */
-import { fromHexString, sleep, toHexString } from '@eth-optimism/core-utils'
+import { fromHexString, sleep } from '@eth-optimism/core-utils'
 import { Logger, BaseService, Metrics } from '@eth-optimism/common-ts'
 
 import { loadContract, loadContractFromManager } from '@eth-optimism/contracts'
@@ -27,6 +27,7 @@ interface MessageRelayerOptions {
   relayGasLimit: number
 
   //batch system
+  batchMode: boolean
   minBatchSize: number
   maxWaitTimeS: number
 
@@ -106,6 +107,14 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       minBatchSize: this.options.minBatchSize,
       maxWaitTimeS: this.options.maxWaitTimeS,
     })
+
+    console.log('\n***********************************')
+    if (this.options.batchMode) {
+      this.logger.info('Running in Batch Relay Mode')
+    } else {
+      this.logger.info('Running in Normal Relay Mode')
+    }
+    console.log('***********************************\n')
     // Need to improve this, sorry.
     this.state = {} as any
 
@@ -205,59 +214,52 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           }
         }
 
-        console.log(this.options.minBatchSize)
-        console.log(this.options.maxWaitTimeS)
-        console.log(this.state.messageBuffer)
-
-
-        //Batch flushing logic
-        const secondsElapsed = Math.floor(
-          (Date.now() - this.state.timeOfLastRelayS) / 1000
-        )
-        console.log('\n***********************************')
-        console.log('Seconds elapsed since last batch push:', secondsElapsed)
-        const timeOut =
-          secondsElapsed > this.options.maxWaitTimeS ? true : false
-
-        //console.log('Current buffer size:', this.state.messageBuffer.length)
-        const bufferFull =
-          this.state.messageBuffer.length >= this.options.minBatchSize
-            ? true : false
-
-        console.log(timeOut)
-        console.log(bufferFull)
-
-        if (bufferFull || timeOut) {
-          if (bufferFull) {
-            console.log('Buffer full: flushing')
-          }
-          if (timeOut) {
-            console.log('Buffer timeout: flushing')
-          }
-
-          const receipt = await this._relayMultiMessageToL1(
-            this.state.messageBuffer
+        if (this.options.batchMode) {
+          //Batch flushing logic
+          const secondsElapsed = Math.floor(
+            (Date.now() - this.state.timeOfLastRelayS) / 1000
           )
+          console.log('\n***********************************')
+          console.log('Seconds elapsed since last batch push:', secondsElapsed)
+          const timeOut =
+            secondsElapsed > this.options.maxWaitTimeS ? true : false
 
-          console.log('Receipt:', receipt)
+          //console.log('Current buffer size:', this.state.messageBuffer.length)
+          const bufferFull =
+            this.state.messageBuffer.length >= this.options.minBatchSize
+              ? true : false
 
-          /* parse this to make sure that the mesaage was actually relayed */
-          if (/*everything went well*/ true) {
-            //clear out the buffer so we do not double relay, which will just
-            //led to reversion at the SCC level
-            this.state.messageBuffer = []
+          if (this.state.messageBuffer.length !== 0 && (bufferFull || timeOut)) {
+            if (bufferFull) {
+              console.log('Buffer full: flushing')
+            }
+            if (timeOut) {
+              console.log('Buffer timeout: flushing')
+            }
+
+            const receipt = await this._relayMultiMessageToL1(
+              this.state.messageBuffer
+            )
+
+            console.log('Receipt:', receipt)
+
+            /* parse this to make sure that the mesaage was actually relayed */
+            if (/*everything went well*/ true) {
+              //clear out the buffer so we do not double relay, which will just
+              //led to reversion at the SCC level
+              this.state.messageBuffer = []
+            }
+
+            this.state.timeOfLastRelayS = Date.now()
+          } else {
+            console.log(
+              'Buffer still too small - current buffer length:',
+              this.state.messageBuffer.length
+            )
+            console.log('Buffer flush size set to:', this.options.minBatchSize)
+            console.log('***********************************\n')
           }
-
-          this.state.timeOfLastRelayS = Date.now()
-        } else {
-          console.log(
-            'Buffer still too small - current buffer length:',
-            this.state.messageBuffer.length
-          )
-          console.log('Buffer flush size set to:', this.options.minBatchSize)
-          console.log('***********************************\n')
         }
-
 
         this.logger.info('Checking for newly finalized transactions...')
         if (
@@ -331,14 +333,18 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           )
 
           // await this._relayMessageToL1(message, proof)
-          const messageToSend = {
-            target: message.target,
-            message: message.message,
-            sender: message.sender,
-            messageNonce: message.messageNonce,
-            proof,
+          if (this.options.batchMode) {
+            const messageToSend = {
+              target: message.target,
+              message: message.message,
+              sender: message.sender,
+              messageNonce: message.messageNonce,
+              proof,
+            }
+            this.state.messageBuffer.push(messageToSend)
+          } else {
+            await this._relayMessageToL1(message, proof)
           }
-          this.state.messageBuffer.push(messageToSend)
         }
 
         if (messages.length === 0) {
@@ -705,8 +711,8 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       })
       return
     }
-    return receipt
     this.logger.info('Message Batch successfully relayed to Layer 1!')
+    return receipt
   }
 
   private async _getFilter(): Promise<void> {
