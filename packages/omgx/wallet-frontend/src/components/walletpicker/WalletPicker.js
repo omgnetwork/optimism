@@ -1,5 +1,5 @@
 /*
-Copyright 2019-present OmiseGO Pte Ltd
+Copyright 2021 OMG/BOBA
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -157,25 +157,11 @@ function WalletPicker ({ onEnable, enabled }) {
           <Grid container spacing={8}>
             <Grid item xs={12} md={6}>
               <Typography variant="h1" component="h1">
-                Connect a Wallet to access your assets on the network
+                Connect a Wallet to access BOBA
               </Typography>
               <S.Subtitle variant="body1" component="p" paragraph={true}>
-                  Select the wallet that u use to connect it to OMGx system! Don’t worry more wallets support is coming soon
+                  Select a wallet to connect to BOBA. You can select among different networks (Mainnet, Rinkeby, ...) using the dropdown at the top right.
               </S.Subtitle>
-              <S.WrapperLink sx={{display: "none"}}>
-                <Link
-                  style={{ color: grey[500]}}
-                  href="#"
-                  underline="hover"
-                  variant="body1"
-                  onClick={() => {
-                    console.info("I'm a button.");
-                  }}
-                >
-                  More about OMGX and how L2 work
-                </Link>
-                <Arrow />
-              </S.WrapperLink>
             </Grid>
 
             <Grid item xs={12} md={6}>
@@ -200,13 +186,6 @@ function WalletPicker ({ onEnable, enabled }) {
 
               </S.WalletCard>
 
-              <Button
-                onClick={() => networkService.addL2Network()}
-                fullWidth
-                size="large"
-              >
-                Add BOBA Rinkeby L2 to MetaMask
-              </Button>
             </Grid>
           </Grid>
         </Container>

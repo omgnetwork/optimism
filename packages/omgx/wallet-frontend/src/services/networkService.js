@@ -662,6 +662,94 @@ class NetworkService {
     
   }
 
+  async switchChain() {
+    
+    const nw = getAllNetworks()
+    const masterConfig = store.getState().setup.masterConfig;
+    let chainParam = {}
+
+    // connect to the wallet
+    this.provider = new ethers.providers.Web3Provider(window.ethereum)
+    
+    /********************* Switch to Mainnet L2 ****************/
+    if (masterConfig === 'mainnet' && this.L1orL2 === 'L1') {
+      //ok, so then, we want to switch to 'mainnet' && 'L2'
+      try {
+        await this.provider.send(
+          'wallet_switchEthereumChain',
+          [{ chainId: '0x120' }], //288 in Hex
+        )
+      } catch (error) {
+        // This error code indicates that the chain has not been added to MetaMask.
+        if (error.code === 4902) {
+          try {
+            chainParam = {
+              chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
+              chainName: nw.mainnet.L2.name,
+              rpcUrls: [nw.mainnet.L2.rpcUrl],
+            }
+            await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
+          } catch (addError) {
+            console.log("MetaMask - Error adding new RPC: ", addError)
+            // handle "add" error via alert message
+          }
+        } else { //some other error code
+          console.log("MetaMask - Switch Error: ", error.code)
+        }
+      }
+    } else if ( masterConfig === 'mainnet' && this.L1orL2 === 'L2' ) {
+      //ok, so then, we want to switch to 'mainnet' && 'L1' - no need to add 
+      //if fail since mainnet L1 is always there unless the planet has been vaporized by 
+      //space aliens with a blaster ray
+      try {
+        await this.provider.send('wallet_switchEthereumChain',[{ chainId: '0x1' }])
+      } catch (switchError) {
+        console.log("MetaMask - could not switch to Ethereum Mainchain. Needless to say, this should never happen.")
+      }
+    }
+  } 
+
+  //}
+
+  //     chainParam = {
+  //       chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
+  //       chainName: nw.mainnet.L2.name,
+  //       rpcUrls: [nw.mainnet.L2.rpcUrl],
+  //     }
+  //   } else if (masterConfig === 'rinkeby') {
+  //     chainParam = {
+  //       chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
+  //       chainName: nw.rinkeby.L2.name,
+  //       rpcUrls: [nw.rinkeby.L2.rpcUrl],
+  //     }
+  //   } else if (masterConfig === 'rinkeby_integration') {
+  //     chainParam = {
+  //       chainId: '0x' + nw.rinkeby_integration.L2.chainId.toString(16),
+  //       chainName: nw.rinkeby_integration.L2.name,
+  //       rpcUrls: [nw.rinkeby_integration.L2.rpcUrl],
+  //     }
+  //   } else if (masterConfig === 'local') {
+  //     chainParam = {
+  //       chainId: '0x' + nw.local.L2.chainId.toString(16),
+  //       chainName: nw.local.L2.name,
+  //       rpcUrls: [nw.local.L2.rpcUrl],
+  //     }
+  //   }
+    
+  //   console.log("MetaMask: Trying to add ", chainParam)
+    
+  //   // connect to the wallet
+  //   this.provider = new ethers.providers.Web3Provider(window.ethereum)
+  //   let res = await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
+
+  //   if( res === null ){
+  //     console.log("MetaMask - Added new RPC")
+  //   } else {
+  //     console.log("MetaMask - Error adding new RPC: ", res)
+  //   }
+    
+  // }
+
   async getTransactions() {
 
     // NOT SUPPORTED on LOCAL
