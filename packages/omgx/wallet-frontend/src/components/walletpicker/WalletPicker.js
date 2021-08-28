@@ -19,7 +19,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import WrongNetworkModal from 'containers/modals/wrongnetwork/WrongNetworkModal'
 import networkService from 'services/networkService'
 
-import { selectModalState } from 'selectors/uiSelector';
+import { selectModalState } from 'selectors/uiSelector'
 
 import {
   selectWalletMethod,
@@ -45,12 +45,13 @@ const Root = styled('div')(({ theme }) => ({
 }))
 
 function WalletPicker ({ onEnable, enabled }) {
-  
+
   const dispatch = useDispatch();
 
   const [ walletEnabled, setWalletEnabled ] = useState(false);
   const [ accountsEnabled, setAccountsEnabled ] = useState(false);
   const [ wrongNetwork, setWrongNetwork ] = useState(false);
+  
   const walletMethod = useSelector(selectWalletMethod())
   const masterConfig = useSelector(selectNetwork())
 
@@ -58,6 +59,7 @@ function WalletPicker ({ onEnable, enabled }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const wrongNetworkModalState = useSelector(selectModalState('wrongNetworkModal'));
+  
   const dispatchSetWalletMethod = useCallback((methodName) => {
     dispatch(setWalletMethod(methodName));
   }, [ dispatch ])
@@ -70,7 +72,9 @@ function WalletPicker ({ onEnable, enabled }) {
 
     async function enableBrowserWallet () {
       //console.log("enableBrowserWallet() for",masterConfig)
-      const selectedNetwork = masterConfig ? masterConfig : "local";
+      //default to mainnet for normal user, unless set otherwise later 
+      //which is then captured in the localStorage cache
+      const selectedNetwork = masterConfig ? masterConfig : "mainnet"
       const walletEnabled = await networkService.enableBrowserWallet(selectedNetwork);
       //console.log("walletEnabled:",walletEnabled)
       return walletEnabled
@@ -99,12 +103,12 @@ function WalletPicker ({ onEnable, enabled }) {
       }
 
       if (initialized === 'enabled') {
-        return setAccountsEnabled(true);
+        return setAccountsEnabled(true)
       }
 
     }
     if (walletEnabled) {
-      initializeAccounts();
+      initializeAccounts()
     }
   }, [ walletEnabled, masterConfig ]);
 
@@ -122,15 +126,15 @@ function WalletPicker ({ onEnable, enabled }) {
   }, [ dispatch, walletEnabled, wrongNetwork ]);
 
   function resetSelection () {
-    dispatchSetWalletMethod(null);
-    setWalletEnabled(false);
-    setAccountsEnabled(false);
+    dispatchSetWalletMethod(null)
+    setWalletEnabled(false)
+    setAccountsEnabled(false)
   }
 
   // defines the set of possible networks
-  const networks = getAllNetworks();
+  const networks = getAllNetworks()
 
-  let allNetworks = [];
+  let allNetworks = []
   for (var prop in networks) allNetworks.push(prop)
 
   if (!wrongNetwork && !enabled && isChangingChain) {
@@ -144,13 +148,6 @@ function WalletPicker ({ onEnable, enabled }) {
         onClose={resetSelection}
       />
       <Root>
-        <Box sx={{
-          position: 'absolute',
-          top: '10px',
-          right: '20px'
-        }}>
-          <NetworkSwitcher walletEnabled={walletEnabled} />
-        </Box>
         <Container maxWidth="md">
           <Grid container spacing={8}>
             <Grid item xs={12} md={6}>
@@ -158,7 +155,7 @@ function WalletPicker ({ onEnable, enabled }) {
                 Connect a Wallet to access BOBA
               </Typography>
               <S.Subtitle variant="body1" component="p" paragraph={true}>
-                  Select a wallet to connect to BOBA. You can select among different networks (Mainnet, Rinkeby, ...) using the dropdown at the top right.
+                  Select a wallet to connect to BOBA.
               </S.Subtitle>
             </Grid>
 
@@ -191,4 +188,4 @@ function WalletPicker ({ onEnable, enabled }) {
     </>
   );
 }
-export default React.memo(WalletPicker);
+export default React.memo(WalletPicker)

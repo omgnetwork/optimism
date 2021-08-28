@@ -13,21 +13,24 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-let masterConfigCache = localStorage.getItem("masterConfig");
+//localStorage.removeItem("masterConfig")
+//localStorage.removeItem("netLayer")
+
+let masterConfigCache = localStorage.getItem("masterConfig")
 
 if (masterConfigCache) {
-  masterConfigCache = JSON.parse(masterConfigCache);
+  masterConfigCache = JSON.parse(masterConfigCache)
 }
 
-let netLayerCache = localStorage.getItem("netLayer");
+let netLayerCache = localStorage.getItem("netLayer")
 
 if (netLayerCache) {
-  netLayerCache = JSON.parse(netLayerCache);
+  netLayerCache = JSON.parse(netLayerCache)
 }
 
 const initialState = {
   walletMethod: null,
-  masterConfig: masterConfigCache ? masterConfigCache : 'rinkeby',
+  masterConfig: masterConfigCache ? masterConfigCache : 'mainnet',
   blockexplorerURL: '',
   etherscan: '',
   minter: false,

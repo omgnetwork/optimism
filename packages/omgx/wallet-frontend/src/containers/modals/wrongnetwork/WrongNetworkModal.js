@@ -14,22 +14,36 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import Modal from 'components/modal/Modal';
-import { closeModal } from 'actions/uiAction';
-import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import { useDispatch } from 'react-redux'
+import Modal from 'components/modal/Modal'
+import { closeModal } from 'actions/uiAction'
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
+import { Box, Card, Typography, useMediaQuery } from '@material-ui/core'
+import { ReactComponent as Fox } from './../../../images/icons/fox-icon.svg'
+//import { ReactComponent as User } from './../../../images/icons/user-icon.svg'
+import Account from './../../../images/icons/user-icon.png'
 
-import { selectNetwork } from 'selectors/setupSelector';
-import { Box, Card, Typography } from '@material-ui/core';
+import { getAllNetworks } from 'util/masterConfig'
+import store from 'store'
+
+import * as styles from './WrongNetworkModal.module.scss'
+import { useTheme } from '@emotion/react'
 
 function WrongNetworkModal ({ open, onClose }) {
 
-  const masterConfig = useSelector(selectNetwork());
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
+
+  const nw = getAllNetworks()
+  const masterConfig = store.getState().setup.masterConfig
+  const textLabel = nw[masterConfig].MM_Label
+  const iconLabel = nw[masterConfig].MM_Label
+
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   function handleClose () {
-    onClose();
-    dispatch(closeModal('wrongNetworkModal'));
+    onClose()
+    dispatch(closeModal('wrongNetworkModal'))
   }
 
   return (
@@ -44,15 +58,17 @@ function WrongNetworkModal ({ open, onClose }) {
       </Typography>
 
       <Typography variant="body1">
-        Metamask is set to the wrong network. Please switch Metamask to {masterConfig} to continue.
+        MetaMask is set to the wrong network. Please switch MetaMask to "{textLabel}" to continue.
       </Typography>
 
       <Box display="flex" sx={{ flexDirection: 'column', alignItems: 'center', mt: 3 }}>
-        <Card variant="outlined" sx={{ px: 2, py: 1, minWidth: 200, mb: 1 }}>
-          <Typography variant="body1" color="secondary">
-            {masterConfig}
-          </Typography>
-        </Card>
+        <div className={styles.metamask}>
+          <Fox width={isMobile ? 30 : 30} />
+          <div className={styles.button}>
+            {iconLabel}
+          </div>
+          <img className={styles.account} src={Account} alt='MetaMask Account Icon' />
+        </div>
         <ArrowUpwardIcon color="disabled" />
       </Box>
     </Modal>

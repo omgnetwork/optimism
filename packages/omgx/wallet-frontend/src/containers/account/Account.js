@@ -113,7 +113,7 @@ function Account () {
         <S.WrapperHeading>
           <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>L1 ({network})</Typography>
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
-          {networkLayer === 'L1' ? <ActiveItem active={false} /> : null}
+          {networkLayer === 'L1' ? <ActiveItem active /> : null}
         </S.WrapperHeading>
       ) : (null)}
 
