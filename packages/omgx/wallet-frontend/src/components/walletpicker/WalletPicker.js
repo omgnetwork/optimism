@@ -33,10 +33,9 @@ import { getAllNetworks } from 'util/masterConfig'
 import { isChangingChain } from 'util/changeChain'
 import * as S from "./WalletPicker.styles"
 import { ReactComponent as Fox } from './../../images/icons/fox-icon.svg'
-import { Box, Container, Grid, useMediaQuery } from '@material-ui/core'
+import { Container, Grid, useMediaQuery } from '@material-ui/core'
 import Typography from '@material-ui/core/Typography'
 import { styled } from '@material-ui/core/styles'
-import NetworkSwitcher from 'components/mainMenu/networkSwitcher/NetworkSwitcher'
 import { useTheme } from '@emotion/react'
 
 const Root = styled('div')(({ theme }) => ({

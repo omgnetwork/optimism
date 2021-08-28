@@ -17,11 +17,16 @@ import React from 'react';
 import { useDispatch } from 'react-redux'
 import Modal from 'components/modal/Modal'
 import { closeModal } from 'actions/uiAction'
+
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
-import { Box, Card, Typography, useMediaQuery } from '@material-ui/core'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+
+import { Box, Typography, useMediaQuery } from '@material-ui/core'
 import { ReactComponent as Fox } from './../../../images/icons/fox-icon.svg'
-//import { ReactComponent as User } from './../../../images/icons/user-icon.svg'
-import Account from './../../../images/icons/user-icon.png'
+import { ReactComponent as Account } from './../../../images/icons/mm-account.svg'
+//import Account from './../../../images/icons/mm-account.png'
+
+import chevron from 'images/chevron.svg'
 
 import { getAllNetworks } from 'util/masterConfig'
 import store from 'store'
@@ -66,10 +71,11 @@ function WrongNetworkModal ({ open, onClose }) {
           <Fox width={isMobile ? 30 : 30} />
           <div className={styles.button}>
             {iconLabel}
+            <ExpandMoreIcon/>
           </div>
-          <img className={styles.account} src={Account} alt='MetaMask Account Icon' />
+          <Account width={isMobile ? 40 : 40} />
         </div>
-        <ArrowUpwardIcon color="disabled" />
+        <ArrowUpwardIcon fontSize={'large'} color={'primary'}/>
       </Box>
     </Modal>
   );
