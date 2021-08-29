@@ -23,6 +23,7 @@ import useInterval from 'util/useInterval';
 import {
   checkWatcherStatus,
   fetchBalances,
+  addTokenList,
   fetchNFTs,
   fetchExits,
   fetchDeposits,
@@ -55,7 +56,8 @@ import MobileMenu from 'components/mobilemenu/MobileMenu';
 // Farm
 import Farm from 'containers/farm/Farm';
 
-import logo from 'images/omgx.png';
+// import logo from 'images/omgx.png';
+import logo from 'images/logo-boba.svg';
 
 import * as styles from './Home.module.scss';
 
@@ -115,11 +117,12 @@ function Home () {
   //get all account balances
   useInterval(() => {
     dispatch(fetchBalances());
+    dispatch(addTokenList());
     dispatch(fetchNFTs());
   }, POLL_INTERVAL);
 
   useEffect(() => {
-    checkVersion()
+    checkVersion();
   }, [])
   
   const handleSetPage = async (page) => {

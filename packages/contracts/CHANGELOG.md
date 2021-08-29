@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.4.10
+
+### Patch Changes
+
+- 918c08ca: Bump ethers dependency to 5.4.x to support eip1559
+- Updated dependencies [918c08ca]
+  - @eth-optimism/core-utils@0.5.2
+
+## 0.4.9
+
+### Patch Changes
+
+- ecc2f8c1: Patch so contracts package will correctly use the browser-compatible contract artifacts import
+
+## 0.4.8
+
+### Patch Changes
+
+- e4fea5e0: Makes the contracts package browser compatible.
+
+## 0.4.7
+
+### Patch Changes
+
+- 7f26667d: Add hardhat task for whitelisting addresses
+- 77511b68: Add a hardhat task to withdraw ETH fees from L2 to L1
+
 ## 0.4.6
 
 ### Patch Changes

@@ -5,7 +5,8 @@ on:
   push:
     branches:
       - develop
-      - l1-env-add-gas-price-oracle-fix-stack-name
+      - wallet-integration
+
 jobs:
   push2aws:
     runs-on: ubuntu-latest
