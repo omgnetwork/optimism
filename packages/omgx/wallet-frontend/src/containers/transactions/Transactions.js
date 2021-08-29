@@ -76,7 +76,7 @@ function Transactions({ searchHistory, transactions, chainLink }) {
         <Box>
           <S.Content>
             {!paginatedTransactions.length && !loading && (
-              <div className={styles.disclaimer}>Transaction history coming soon...</div>
+              <div className={styles.disclaimer}>Scanning for transactions...</div>
             )}
             {!paginatedTransactions.length && loading && (
               <div className={styles.disclaimer}>Loading...</div>

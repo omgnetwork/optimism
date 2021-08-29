@@ -87,7 +87,7 @@ function Deposits({ searchHistory, transactions, chainLink }) {
           <Box>
             <S.Content>
               {!paginatedDeposits.length && !loading && (
-                <div className={styles.disclaimer}>Deposit history coming soon...</div>
+                <div className={styles.disclaimer}>Scanning for deposits...</div>
               )}
               {!paginatedDeposits.length && loading && (
                 <div className={styles.disclaimer}>Loading...</div>
