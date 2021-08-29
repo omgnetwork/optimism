@@ -30,7 +30,7 @@ export const Menu = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  z-index: 1;
+  z-index: 1000;
   position: relative;
   @include mobile {
     width: 100%;
@@ -54,27 +54,32 @@ export const Dropdown = styled.div`
   position: absolute;
   right: 0;
   top: 27px;
+  background: rgba(0,0,0,0.9);
+  border-radius: 20px;
   @include mobile {
     right: unset;
     left: 10px;
     width: 150px;
   }
   a {
-    background-color: $gray3;
+    background-color: gray;
     transition: all 200ms ease-in-out;
     padding: 10px 15px;
     /* cursor: pointer; */
     &:hover {
-      background-color: $gray2;
+      background-color: gray;
     }
   }
   > div {
     cursor: pointer;
-    background-color: rgba(0,0,0,0.9);
-    border-radius: 5px;
-    margin-bottom: 1px;
-    padding-left: 12px;
-    margin-left: 20px;
+    color: #1CD8D2;
+    font-weight: 600;
+    border: 4px solid #CCFF00;
+    border-radius: 20px;
+    margin: 5px;
+    padding-top: 1px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 `;
 

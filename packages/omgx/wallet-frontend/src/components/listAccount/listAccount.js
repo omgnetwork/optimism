@@ -131,7 +131,7 @@ class ListAccount extends React.Component {
               {!enabled && chain === 'L1' &&
                 <Box>
                   <Typography variant="body2" component="p">
-                      MetaMask is set to L2. To transact on L1, please change the chain in MetaMask to L1.
+                      MetaMask is set to L2. To transact on L1, please click "SWITCH LAYER" in the sidebar.
                   </Typography>
               </Box>
               }
@@ -139,7 +139,7 @@ class ListAccount extends React.Component {
               {!enabled && chain === 'L2' &&
                 <Box>
                   <Typography variant="body2" component="p">
-                    MetaMask is set to L1. To transact on L2, please change the chain in MetaMask to L2.
+                    MetaMask is set to L1. To transact on L2, please click "SWITCH LAYER" in the sidebar.
                   </Typography>
                 </Box>
               }
@@ -176,7 +176,7 @@ class ListAccount extends React.Component {
                     disabled={disabled}
                     fullWidth
                   >
-                    Standart Exit
+                    Standard Exit
                   </Button>
 
                   <Button

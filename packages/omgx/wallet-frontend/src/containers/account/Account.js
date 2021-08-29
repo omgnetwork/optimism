@@ -40,7 +40,10 @@ import TabPanel from 'components/tabs/TabPanel'
 import Drink from '../../images/backgrounds/drink.png'
 import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon'
 
+import { openError } from 'actions/uiAction'
+
 function Account () {
+
   const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState(networkLayer === 'L1' ? 0 : 1);
@@ -75,9 +78,15 @@ function Account () {
   }, [dispatch, network, networkLayer])
 
   useEffect(()=>{
-    getLookupPrice();
+    getLookupPrice()
     getGasPrice()
   },[childBalance, rootBalance, getLookupPrice, getGasPrice])
+
+  useEffect(()=>{
+    if (network === 'mainnet') {
+      dispatch(openError('You are using Mainnet Beta. WARNING: the mainnet smart contracts are not fully audited and funds may be at risk. Please exercise caution when using Mainnet Beta.'))
+    }
+  },[dispatch, network])
 
   const disabled = criticalTransactionLoading || !isSynced
 
@@ -176,6 +185,25 @@ function Account () {
       </Box>
     </S.AccountWrapper>
   );
+
+
+/*
+componentDidMount() {
+
+    const { totalFeeRate, userRewardFeeRate } = this.props.farm;
+
+    if (!totalFeeRate || !userRewardFeeRate) {
+      this.props.dispatch(getFee());
+    }
+
+    this.props.dispatch(getFarmInfo());
+
+    if (networkService.masterSystemConfig === 'mainnet') {
+      this.props.dispatch(openError('You are using Mainnet Beta. WARNING: the mainnet smart contracts are not fully audited and funds may be at risk. Please exercise caution when using mainnet beta.'))
+    }
+  }
+  */
+
 
   return (
     <>

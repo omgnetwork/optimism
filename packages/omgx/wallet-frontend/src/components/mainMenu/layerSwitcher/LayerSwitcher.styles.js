@@ -28,8 +28,8 @@ export const WalletPickerWrapper = styled.div`
 
 export const Menu = styled.div`
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   z-index: 1;
   position: relative;
   @include mobile {
@@ -41,47 +41,25 @@ export const Menu = styled.div`
   }
 `;
 
-export const Chevron = styled.img`
-  transform: ${props => props.open ? 'rotate(-90deg)' : 'rotate(90deg)'};
-  transition: all 200ms ease-in-out;
-  height: 20px;
-  margin-bottom: 0;
-`;
-
-export const Dropdown = styled.div`
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  right: 0;
-  top: 27px;
-  @include mobile {
-    right: unset;
-    left: 10px;
-    width: 150px;
-  }
-  a {
-    background-color: $gray3;
-    transition: all 200ms ease-in-out;
-    padding: 10px 15px;
-    /* cursor: pointer; */
-    &:hover {
-      background-color: $gray2;
-    }
-  }
-  > div {
-    cursor: pointer;
-    background-color: rgba(0,0,0,0.9);
-    border-radius: 5px;
-    margin-bottom: 1px;
-    padding-left: 12px;
-    margin-left: 20px;
-  }
-`;
-
 export const NetWorkStyle = styled.div`
   /* margin-left: 10px; */
   display: flex;
   flex-direction: row;
   align-items: center;
+  cursor: ${(props) => props.walletEnabled !== false ? 'inherit' : 'pointer'};
+`;
+
+export const ButtonStyle = styled.div`
+  /* margin-left: 10px; */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 3px;
+  background-color: blue;
+  padding-top: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
+  font-size: 0.9em;
+  font-weight: 600;
   cursor: ${(props) => props.walletEnabled !== false ? 'inherit' : 'pointer'};
 `;

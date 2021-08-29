@@ -15,7 +15,7 @@ const tableHeadList = [
         isSort: false,
     },
     {
-        label: 'Eternal Information',
+        label: 'External Information',
         isSort: false,
     },
     {

@@ -20,13 +20,12 @@ function LayerSwitcher({ walletEnabled }) {
     layer = networkService.L1orL2
   }
 
-  let layers = ['L1', 'L2']
+  let otherLayer = ''
 
-  //show only the one relevant to switching
   if(layer === 'L1') {
-    layers = ['L2']
+    otherLayer = 'L2'
   } else {
-    layers = ['L1']
+    otherLayer = 'L1'
   }
 
   const dispatchSetLayer = useCallback((layer) => {
@@ -41,32 +40,19 @@ function LayerSwitcher({ walletEnabled }) {
       <S.WalletPickerWrapper>
         <S.Menu>
 
-          <S.NetWorkStyle 
-            onClick={()=>{setShowAllLayers(prev => !prev)}}
-          >
-
+          <S.NetWorkStyle>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
               <Typography variant="body1">LAYER: {layer}</Typography>
             </Box>
-
-            <S.Chevron
-              open={showAllLayers}
-              src={chevron}
-              alt='chevron'
-            />
-
           </S.NetWorkStyle>
 
-          <S.Dropdown ref={dropdownNode}>
-            {!!layers.length && showAllLayers && layers.map((layer) => (
-              <div
-                key={layer}
-                onClick={()=>dispatchSetLayer(layer)}
-              >
-                {layer}
-              </div>))
-            }
-          </S.Dropdown>
+          <S.ButtonStyle 
+            onClick={()=>{dispatchSetLayer(otherLayer)}}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
+              SWITCH LAYER
+            </Box>
+          </S.ButtonStyle>
 
         </S.Menu>
       </S.WalletPickerWrapper>
