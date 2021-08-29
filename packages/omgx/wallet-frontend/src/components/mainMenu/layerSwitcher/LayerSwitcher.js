@@ -1,8 +1,7 @@
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Box } from '@material-ui/system'
 import { useSelector, useDispatch } from 'react-redux'
 import * as S from './LayerSwitcher.styles.js'
-import chevron from 'images/chevron.svg'
 import { selectLayer } from 'selectors/setupSelector'
 import { setLayer } from 'actions/setupAction'
 import { Typography } from '@material-ui/core'
@@ -11,8 +10,7 @@ import networkService from 'services/networkService'
 function LayerSwitcher({ walletEnabled }) {
 
   const dispatch = useDispatch()
-  const dropdownNode = useRef(null)
-  const [ showAllLayers, setShowAllLayers ] = useState(false)
+  const [ setShowAllLayers ] = useState(false)
   let layer = useSelector(selectLayer())
 
   if (networkService.L1orL2 !== layer) {
@@ -33,7 +31,7 @@ function LayerSwitcher({ walletEnabled }) {
     dispatch(setLayer(layer))
     networkService.switchChain(layer)
     setShowAllLayers(false)
-  }, [ dispatch ])
+  }, [ dispatch, setShowAllLayers ])
 
   return (
     <S.WalletPickerContainer>

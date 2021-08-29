@@ -1,4 +1,4 @@
-  /*
+/*
 Copyright 2019-present OmiseGO Pte Ltd
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,9 +24,6 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { Box, Typography, useMediaQuery } from '@material-ui/core'
 import { ReactComponent as Fox } from './../../../images/icons/fox-icon.svg'
 import { ReactComponent as Account } from './../../../images/icons/mm-account.svg'
-//import Account from './../../../images/icons/mm-account.png'
-
-import chevron from 'images/chevron.svg'
 
 import { getAllNetworks } from 'util/masterConfig'
 import store from 'store'

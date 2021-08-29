@@ -23,7 +23,7 @@ import { selectIsSynced } from 'selectors/statusSelector'
 
 import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector'
 
-import ListAccount from 'components/listAccount/listAccount';
+import ListAccount from 'components/listAccount/listAccount'
 
 import { logAmount } from 'util/amountConvert'
 import networkService from 'services/networkService'
@@ -44,18 +44,18 @@ import { openError } from 'actions/uiAction'
 
 function Account () {
 
-  const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
-  const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState(networkLayer === 'L1' ? 0 : 1);
+  const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2'
+  const dispatch = useDispatch()
+  const [activeTab, setActiveTab] = useState(networkLayer === 'L1' ? 0 : 1)
 
-  const childBalance = useSelector(selectlayer2Balance, isEqual);
-  const rootBalance = useSelector(selectlayer1Balance, isEqual);
+  const childBalance = useSelector(selectlayer2Balance, isEqual)
+  const rootBalance = useSelector(selectlayer1Balance, isEqual)
 
-  const isSynced = useSelector(selectIsSynced);
-  const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]));
-  const tokenList = useSelector(selectTokens);
+  const isSynced = useSelector(selectIsSynced)
+  const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]))
+  const tokenList = useSelector(selectTokens)
 
-  const network = useSelector(selectNetwork());
+  const network = useSelector(selectNetwork())
 
   const getLookupPrice = useCallback(()=>{
     const symbolList = Object.values(tokenList).map((i)=> {
@@ -67,7 +67,7 @@ function Account () {
         return i.symbolL1.toLowerCase()
       }
     });
-    dispatch(fetchLookUpPrice(symbolList));
+    dispatch(fetchLookUpPrice(symbolList))
   },[tokenList,dispatch])
 
   const getGasPrice = useCallback(() => {
@@ -115,6 +115,9 @@ function Account () {
       <NetworkSwitcherIcon active={active} /> <Typography variant="overline">Active</Typography>
     </Box>
   )
+
+  const mobileL1 = network + ' L1'
+  const mobileL2 = 'BOBA L2 ' + network
 
   const L1Column = () => (
     <S.AccountWrapper >
@@ -186,25 +189,6 @@ function Account () {
     </S.AccountWrapper>
   );
 
-
-/*
-componentDidMount() {
-
-    const { totalFeeRate, userRewardFeeRate } = this.props.farm;
-
-    if (!totalFeeRate || !userRewardFeeRate) {
-      this.props.dispatch(getFee());
-    }
-
-    this.props.dispatch(getFarmInfo());
-
-    if (networkService.masterSystemConfig === 'mainnet') {
-      this.props.dispatch(openError('You are using Mainnet Beta. WARNING: the mainnet smart contracts are not fully audited and funds may be at risk. Please exercise caution when using mainnet beta.'))
-    }
-  }
-  */
-
-
   return (
     <>
       <PageHeader title="Wallet"/>
@@ -224,8 +208,8 @@ componentDidMount() {
       {isMobile ? (
         <>
           <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, my: 2}}>
-            <Tab label="${network} L1" />
-            <Tab label="BOBA L2 ${network}" />
+            <Tab label={mobileL1} />
+            <Tab label={mobileL2} />
           </Tabs>
           <TabPanel value={activeTab} index={0}>
             <L1Column />
