@@ -31,7 +31,7 @@ const L1 = !cfg['ovm']
 
 describe("L2_Only", function() {
   // It is no longer feasible to mock out enough of the l2geth functionality to support
-  // an L1 version of these tests. 
+  // an L1 version of these tests.
 
   it("should not be run on an L1 chain", async() => {
     expect(L1).to.be.false
@@ -61,7 +61,7 @@ describe("HelloTest", function() {
 	    var answer = "(UNDEFINED)"
 	    var v3=jBody.params[0]
 	    var v4 = abiDecoder.decodeParameter('string',v3)
-	    
+
 	    switch(v4) {
               case 'EN_US':
 		answer = "Hello World"
@@ -85,13 +85,13 @@ describe("HelloTest", function() {
 	    res.end(JSON.stringify(jResp))
 	    server.emit('success', body);
           } else if (jBody.method === "add2") {
-	  
+
 	    let v1 = jBody.params[0]
 
 	    const args = abiDecoder.decodeParameters(['uint256','uint256'], v1)
-	       
+
 	    let sum = Number(args['0']) + Number(args['1'])
-	  
+
 	    res.writeHead(200, {'Content-Type': 'application/json'});
 	    console.log ("      (HTTP) Returning off-chain response:", args, "->", sum)
 	    var jResp2 = {
@@ -162,7 +162,7 @@ describe("HelloTest", function() {
     let msg2 = hello.PersonalGreeting(gasOverride)
     expect (await msg2).to.equal("Top of the Morning")
   })
-  
+
   it("should support numerical datatypes", async() => {
     let sum = hello.AddNumbers(20, 22)
     expect (await sum).to.equal(42)
