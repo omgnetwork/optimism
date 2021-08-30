@@ -6,14 +6,13 @@
   "scripts": {
     "clean": "rimraf build build-ovm",
     "compile": "truffle compile --config truffle-config",
-    "compile:ovm": "truffle compile --config truffle-config-ovm.js",
-    "compile:omgx": "truffle compile --config truffle-config-ovm.js",
+    "compile:local": "truffle compile --config truffle-config-ovm.js",
+    "compile:boba": "truffle compile --config truffle-config-ovm.js",
     "test:integration": "truffle test",
-    "test:integration:ovm": "truffle test --network optimism --config truffle-config-ovm.js",
-    "test:integration:omgx": "truffle test --network omgx_rinkeby --config truffle-config-ovm.js",
-    "deploy": "truffle migrate --network ethereum --config truffle-config",
-    "deploy:ovm": "truffle migrate --network optimism --config truffle-config-ovm.js",
-    "deploy:omgx": "truffle migrate --network omgx_rinkeby --config truffle-config-ovm.js"
+    "test:integration:local": "truffle test --network local_l2 --config truffle-config-ovm.js",
+    "test:integration:boba": "truffle test --network boba_rinkeby --config truffle-config-ovm.js",
+    "deploy:local": "truffle migrate --network local_l2 --config truffle-config-ovm.js",
+    "deploy:boba": "truffle migrate --network boba_rinkeby --config truffle-config-ovm.js"
   },
   "keywords": [
     "optimism",

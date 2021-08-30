@@ -14,16 +14,16 @@ const sleep = (timeout) => {
 module.exports = async function (deployer) {
 
   const accounts = await web3.eth.getAccounts()
+  const user = accounts[0]
 
   const Comp = artifacts.require('Comp')
   const Timelock = artifacts.require('Timelock')
   const GovernorBravoDelegate = artifacts.require('GovernorBravoDelegate')
   const GovernorBravoDelegator = artifacts.require('GovernorBravoDelegator')
 
-  const user = accounts[0]
-
   console.log('STARTING HERE')
   console.log(user)
+  
   // Deploy Comp
   await deployer.deploy(Comp, user)
   const comp = await Comp.deployed()
@@ -56,7 +56,7 @@ module.exports = async function (deployer) {
   const GovernorBravo = await GovernorBravoDelegate.at(delegator.address)
   // Set Delegator as pending admin
 
-  var provider = new ethers.providers.JsonRpcProvider(env.L2_NODE_WEB3_URL, { chainId: 28 })
+  var provider = new ethers.providers.JsonRpcProvider(env.NODE_WEB3_URL, { chainId: env.CHAIN_ID })
   var blockNumber = await provider.getBlockNumber()
   var block = await provider.getBlock(blockNumber)
   var eta = block.timestamp // + 1
@@ -68,9 +68,7 @@ module.exports = async function (deployer) {
   await timelock.queueTransaction(
     timelock.address,
     0,
-
     'setPendingAdmin(0)',
-
     data,
     eta
   )
@@ -94,9 +92,7 @@ module.exports = async function (deployer) {
     console.log(error)
   }
 
-
   await sleep(100000)
-
 
   blockNumber = await provider.getBlockNumber()
   block = await provider.getBlock(blockNumber)
@@ -121,6 +117,5 @@ module.exports = async function (deployer) {
   )
 
   // Initiate GovernorBravo
-
   console.log('HERE')
 }

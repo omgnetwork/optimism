@@ -1,10 +1,8 @@
-
-
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 require('dotenv').config();
 const env = process.env;
 const mnemonicPhrase = env.mnemonic;
-
+const privateKey = env.privateKey;
 
 module.exports = {
   contracts_build_directory: './build-ovm',
@@ -12,9 +10,10 @@ module.exports = {
     optimism: {
       provider: function () {
         return new HDWalletProvider({
-          mnemonic: {
-            phrase: mnemonicPhrase,
-          },
+          privateKeys: [privateKey],
+          //mnemonic: {
+          //  phrase: mnemonicPhrase,
+          //},
           providerOrUrl: 'http://127.0.0.1:8545',
         })
       },
@@ -27,9 +26,10 @@ module.exports = {
     omgx_rinkeby: {
       provider: function () {
         return new HDWalletProvider({
-          mnemonic: {
-            phrase: mnemonicPhrase,
-          },
+          privateKeys: [privateKey],
+          //mnemonic: {
+          //  phrase: mnemonicPhrase,
+          //},
           providerOrUrl: 'http://rinkeby.omgx.network',
         })
       },

@@ -1,5 +1,23 @@
 ## Deploying on local OMGX and rinkeby OMGX
 
+The key parts of any DAO are:
+
+* 1. The contracts that constitute the DAO. The contracts allow e.g. people to vote on proposals. 
+* 2. The token that will be used to control who can particiapte. This is called the Ctoken. 
+* 3. The contracts that will be controlled via the DAO. For example, these could be liquidiy pools with fees, and those fees could be set via the DAO.
+
+For the Compound DAO example given here, you need to provide three private keys / memonics.   
+
+The `mnemonic` in the .env sets the `mnemonicPhrase` used in `truffle-config-ovm.js`. This key is used to pay for the deployment, and also, set the contract owner (where applicable).
+
+
+
+
+
+
+
+
+
 ```
 
 $ cd omgx_examples/compound-protocol/
@@ -7,6 +25,27 @@ $ yarn
 $ yarn migrate:ovm
 
 ```
+
+FOR QUICK RUN THROUGH.... 
+-------------------------
+Make a `.env` file that follows the structure of `env.example`.
+
+Then run `yarn deploy:boba` in terminal. This will deploy the Boba DAO on Rinkeby.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 [![CircleCI](https://circleci.com/gh/compound-finance/compound-protocol.svg?style=svg&circle-token=5ed19932325c559a06f71f87d69012aedd2cf3fb)](https://circleci.com/gh/compound-finance/compound-protocol) [![codecov](https://codecov.io/gh/compound-finance/compound-protocol/branch/master/graph/badge.svg?token=q4UvsvVzOX)](https://codecov.io/gh/compound-finance/compound-protocol)
 
@@ -285,9 +324,3 @@ For security concerns, please email [security@compound.finance](mailto:security@
 _© Copyright 2020, Compound Labs_
 
 
-
-
-FOR QUICK RUN THROUGH.... 
--------------------------
-Make a `.env` file that follows the strucutre of `.env.example`.
-Then run `yarn deploy:boba` in terminal.

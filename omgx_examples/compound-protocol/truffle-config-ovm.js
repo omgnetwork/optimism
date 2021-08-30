@@ -1,23 +1,19 @@
-
-
 require('dotenv').config();
 const env = process.env;
-const mnemonicPhrase = env.mnemonic
+const deployerPrivateKey = env.deployerPrivateKey
 const HDWalletProvider = require('@truffle/hdwallet-provider')
 
 module.exports = {
   contracts_build_directory: './build-ovm',
   networks: {
-    optimism: {
+    local_l2: {
       provider: function () {
         return new HDWalletProvider({
-          mnemonic: {
-            phrase: mnemonicPhrase,
-          },
+          privateKeys: [deployerPrivateKey],
           providerOrUrl: 'http://127.0.0.1:8545',
         })
       },
-      network_id: 28,
+      network_id: 31338,
       host: '127.0.0.1',
       port: 8545,
       gasPrice: 15000000,
@@ -26,9 +22,7 @@ module.exports = {
     boba_rinkeby: {
       provider: function () {
         return new HDWalletProvider({
-          mnemonic: {
-            phrase: mnemonicPhrase,
-          },
+          privateKeys: [deployerPrivateKey],
           providerOrUrl: 'https://rinkeby.boba.network',
         })
       },
@@ -36,21 +30,6 @@ module.exports = {
       host: 'https://rinkeby.boba.network',
       gasPrice: 15000000,
       gas: 156170127,
-    },
-    L1: {
-      provider: function () {
-        return new HDWalletProvider({
-          mnemonic: {
-            phrase: mnemonicPhrase,
-          },
-          providerOrUrl: 'http://127.0.0.1:9545',
-        })
-      },
-      network_id: 31337,
-      host: '127.0.0.1',
-      port: 9545,
-      gasPrice: 15000000,
-      gas: 803900000,
     },
   },
   compilers: {
