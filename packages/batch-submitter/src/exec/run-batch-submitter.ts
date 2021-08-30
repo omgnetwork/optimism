@@ -391,8 +391,9 @@ export const run = async () => {
     gasRetryIncrement: GAS_RETRY_INCREMENT,
   }
   const txBatchTxSubmitter: TransactionSubmitter =
+    //TODO INO ynatm needs to get BatchSigner passed in and decide what to do with the transaction (figure out the route)
     new YnatmTransactionSubmitter(
-      sequencerSigner,
+      sequencerSigner.signer,
       resubmissionConfig,
       requiredEnvVars.NUM_CONFIRMATIONS
     )
@@ -418,8 +419,9 @@ export const run = async () => {
   )
 
   const stateBatchTxSubmitter: TransactionSubmitter =
+    //TODO INO ynatm needs to get BatchSigner passed in and decide what to do with the transaction (figure out the route)
     new YnatmTransactionSubmitter(
-      proposerSigner,
+      proposerSigner.signer,
       resubmissionConfig,
       requiredEnvVars.NUM_CONFIRMATIONS
     )

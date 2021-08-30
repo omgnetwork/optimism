@@ -10,10 +10,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"math/big"
 	"strconv"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -142,7 +143,6 @@ func OvmPaths(b *PluginBackend) []*framework.Path {
 	}
 }
 
-//this goes into L1
 func (b *PluginBackend) pathOvmAppendStateBatch(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
 	config, err := b.configured(ctx, req)
 	if err != nil {
@@ -205,7 +205,6 @@ func (b *PluginBackend) pathOvmAppendStateBatch(ctx context.Context, req *logica
 		copy(batchByteElement[:], buf[0:32])
 		batch[i] = batchByteElement
 	}
-	// log.Print(batch)
 	// get the AppendStateBatch function arguments from JSON DONE
 
 	instance, err := ovm_scc.NewOvmScc(contractAddress, client)
@@ -259,7 +258,6 @@ func (b *PluginBackend) pathOvmAppendStateBatch(ctx context.Context, req *logica
 }
 
 func (b *PluginBackend) pathEncodeAppendSequencerBatch(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
-	//log.Print(util.PrettyPrint(data))
 
 	encodedData, err := encode(data)
 	if err != nil {
@@ -273,7 +271,6 @@ func (b *PluginBackend) pathEncodeAppendSequencerBatch(ctx context.Context, req 
 }
 
 func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
-	log.Print(util.PrettyPrint(data))
 
 	config, err := b.configured(ctx, req)
 	if err != nil {
@@ -308,7 +305,7 @@ func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *lo
 	}
 
 	instance, err := ovm_ctc.NewOvmCtc(contractAddress, client)
-	//instance.OvmCtcTransactor.
+
 	if err != nil {
 		return nil, err
 	}
@@ -324,14 +321,17 @@ func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *lo
 		return nil, fmt.Errorf("invalid gas_price")
 	}
 	transactOpts.GasPrice = util.ValidNumber(gasPriceRaw)
-	log.Print("transactOpts.GasPrice")
-	log.Print(transactOpts.GasPrice)
+
 	// //transactOpts needs nonce. Use supplied nonce
 	nonceRaw := data.Get("nonce").(string)
 	if nonceRaw == "" {
 		return nil, fmt.Errorf("invalid nonce")
 	}
-	transactOpts.Nonce = util.ValidNumber(nonceRaw)
+	//	transactOpts.Nonce = util.ValidNumber(nonceRaw)
+	// TODO Ino
+	transactOpts.GasLimit = 9500000
+	var bignum, _ = new(big.Int).SetString("23000000000", 0)
+	transactOpts.GasPrice = bignum
 
 	ctcSession := &ovm_ctc.OvmCtcSession{
 		Contract:     instance,  // Generic contract caller binding to set the session for
@@ -344,14 +344,25 @@ func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *lo
 		return nil, err
 	}
 
-	tx, err := ctcSession.RawAppendSequencerBatch([]byte(encodedData))
+	json := `[{
+      "inputs": [],
+      "name": "appendSequencerBatch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }]`
 
+	abi, _ := abi.JSON(strings.NewReader(json))
+	packed, _ := abi.Pack("appendSequencerBatch")
+
+	tx, err := ctcSession.RawAppendSequencerBatch(append(packed, common.FromHex(encodedData)...))
 	if err != nil {
 		return nil, err
 	}
 
 	var signedTxBuff bytes.Buffer
 	tx.EncodeRLP(&signedTxBuff)
+
 	return &logical.Response{
 		Data: map[string]interface{}{
 			"contract":           contractAddress.Hex(),

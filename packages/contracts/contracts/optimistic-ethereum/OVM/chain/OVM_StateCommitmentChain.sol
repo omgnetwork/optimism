@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >0.5.0 <0.8.0;
 pragma experimental ABIEncoderV2;
-
+import "hardhat/console.sol";
 /* Library Imports */
 import { Lib_OVMCodec } from "../../libraries/codec/Lib_OVMCodec.sol";
 import { Lib_AddressResolver } from "../../libraries/resolver/Lib_AddressResolver.sol";
@@ -138,11 +138,11 @@ contract OVM_StateCommitmentChain is iOVM_StateCommitmentChain, Lib_AddressResol
             "Actual batch start index does not match expected start index."
         );
 
-        // Proposers must have previously staked at the BondManager
-        require(
-            iOVM_BondManager(resolve("OVM_BondManager")).isCollateralized(msg.sender),
-            "Proposer does not have enough collateral posted"
-        );
+        // // Proposers must have previously staked at the BondManager
+        // require(
+        //     iOVM_BondManager(resolve("OVM_BondManager")).isCollateralized(msg.sender),
+        //     "Proposer does not have enough collateral posted"
+        // );
 
         require(
             _batch.length > 0,

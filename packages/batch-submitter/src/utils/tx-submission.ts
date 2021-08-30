@@ -43,6 +43,7 @@ export const submitTransactionWithYNATM = async (
       gasPrice,
     }
     hooks.beforeSendTransaction(fullTx)
+    //at this poinmt we need to decide if this is going through the Vault or straight to the Ethereum client
     const txResponse = await signer.sendTransaction(fullTx)
     hooks.onTransactionResponse(txResponse)
     return signer.provider.waitForTransaction(txResponse.hash, numConfirmations)

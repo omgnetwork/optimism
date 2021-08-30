@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export MNEMONIC="explain foam nice clown method avocado hill basket echo blur elevator marble"
-export CHAIN_ID=5777
+export CHAIN_ID=31337
 export CHAIN_L2_ID=28
 export PORT=8545
 export RPC_URL="http://l1_chain:8545"
@@ -9,7 +9,7 @@ export RPC_L2_URL="http://l2geth:8545"
 export CONTRACTS_PATH="/vault/contracts/erc20/build/"
 export GAS_PRICE_LOW="1"
 export GAS_PRICE_HIGH="37000000000"
-export GAS_PRICE_HIGH2="70000000000"
+export GAS_PRICE_HIGH2="700000000000"
 export FUNDING_AMOUNT=100000000000000000
 export TEST_AMOUNT=10000000000000000
 export PASSPHRASE="passion bauble hypnotic hanky kiwi effective overcast roman staleness"

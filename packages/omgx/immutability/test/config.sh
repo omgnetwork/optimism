@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export CHAIN_ID=5777
+export CHAIN_ID=31337
 export CHAIN_L2_ID=28
 export RPC_URL="http://l1_chain:8545"
 export RPC_L2_URL="http://l2geth:8545"
@@ -9,6 +9,7 @@ export WALLET_NAME_2=proposer
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 echo "CONFIGURE BACKEND"
 vault write -format=json immutability-eth-plugin/config rpc_url="$RPC_URL" chain_id="$CHAIN_ID" rpc_l2_url="$RPC_L2_URL" chain_l2_id="$CHAIN_L2_ID"
+echo "DONE CONFIGURING BACKEND"
 
 # lets create a sequencer wallet without mnemonic
 echo "WALLET $WALLET_NAME WITHOUT MNEMONIC"
@@ -37,6 +38,9 @@ EOF
 
 vault policy write append-state-batch-proposer append-state-batch-proposer.hcl
 
+node index.js $ACCOUNT0
+node index.js $ACCOUNT1
+echo "Creating tokens helper file"
 rm $DIR/tokens.sh || true
 touch $DIR/tokens.sh
 PROPOSER_TOKEN=$(vault token create -field=token -period=10m -policy=append-state-batch-proposer)
