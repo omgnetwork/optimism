@@ -18,6 +18,7 @@ require('dotenv').config()
 const env = process.env.REACT_APP_ENV;
 
 let NETWORKS;
+
 NETWORKS = {
   rinkeby: {
     addressUrl:       `https://rinkeby.boba.network:8080/addresses.json`,
@@ -78,7 +79,7 @@ if (env === 'dev') {
         blockExplorer: null, //does not exist on local
       },
     },
-    "rinkeby-integration": {
+    rinkeby_integration: {
       addressUrl:       `https://rinkeby-integration.boba.network:8081/addresses.json`,
       addressOMGXUrl:   `https://rinkeby-integration.boba.network:8081/omgx-addr.json`,
       OMGX_WATCHER_URL: `https://api-watcher.rinkeby-integration.boba.network/`,
@@ -91,7 +92,7 @@ if (env === 'dev') {
       },
       L2: {
         name: "Rinkeby Integration L2",
-        chainId: 28,
+        chainId: 29,
         rpcUrl: `https://rinkeby-integration.boba.network`,
         blockExplorer: `https://blockexplorer.boba.network/?network=Rinkeby%20Test`,
         transaction: `https://blockexplorer.boba.network/tx/`,
