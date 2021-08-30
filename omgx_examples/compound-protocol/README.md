@@ -277,7 +277,9 @@ _© Copyright 2020, Compound Labs_
 
 
 
-FOR QUICK RUN THROUGH.... 
+FOR QUICK RUN THROUGH....
 -------------------------
 Make a `.env` file that follows the strucutre of `.env.example`.
 Then run `yarn deploy:boba` in terminal.
+Copy and paste the contract addresses into `networks/rinkeby-boba`.
+Then run `node initiateCompound.js` in terminal to initate the Dao.

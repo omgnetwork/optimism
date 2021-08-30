@@ -26,13 +26,13 @@ module.exports = {
           mnemonic: {
             phrase: mnemonicPhrase,
           },
-          providerOrUrl: 'https://rinkeby.boba.network',
+          providerOrUrl: env.L2_NODE_WEB3_URL,
         })
       },
       network_id: 28,
-      host: 'https://rinkeby.boba.network',
+      host: env.L2_NODE_WEB3_URL,
       gasPrice: 15000000,
-      gas: 156170127,
+      gas: 803900000,
     },
     L1: {
       provider: function () {

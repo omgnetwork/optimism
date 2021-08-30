@@ -3,12 +3,13 @@ const Timelock = require('./build-ovm/Timelock.json');
 const GovernorBravoDelegate = require('./build-ovm/GovernorBravoDelegate.json');
 const GovernorBravoDelegator = require('./build-ovm/GovernorBravoDelegator.json');
 const Comp = require('./build-ovm/Comp.json');
+const addresses = require('./networks/rinkeby-boba.json');
 require('dotenv').config();
 const env = process.env;
-const compAddress = '0x60ddAa9c4926705F8ab23565e21eB9e5DF2aBF2c';
-const timelockAddress = '0xdfDA22e95116D0c034B3fBBA9838B1E9Bf2cAA17';
-const governorBravoDelegateAddress = '0x174e7DC50BCE45fC04671939A8f1762ed6725423';
-const governorBravoDelegatorAddress = '0xA8637a094550f49e8A0879de1620Ae2AD1DB8A02';
+const compAddress = addresses.Comp;
+const timelockAddress = addresses.Timelock;
+const governorBravoDelegateAddress = addresses.GovernorBravoDelegate;
+const governorBravoDelegatorAddress = addresses.GovernorBravoDelegator;
 
 
 const sleep = (timeout) => {
@@ -21,8 +22,8 @@ const sleep = (timeout) => {
 
 async function getTimestamp(web3URL, chainID){
     let provider = new ethers.providers.JsonRpcProvider(web3URL, { chainId: chainID });
-    var blockNumber = await provider.getBlockNumber();
-    var block = await provider.getBlock(blockNumber);
+    let blockNumber = await provider.getBlockNumber();
+    let block = await provider.getBlock(blockNumber);
     return block.timestamp;
 }
 
@@ -41,33 +42,50 @@ async function main(){
 
     const governorBravo = await governorBravoDelegate.attach(
         governorBravoDelegator.address
-      )
+    );
 
-    var blockNumber = await l2_provider.getBlockNumber()
-    var block = await l2_provider.getBlock(blockNumber)
-    var eta = block.timestamp + 300
+    var blockNumber = await l2_provider.getBlockNumber();
+    var block = await l2_provider.getBlock(blockNumber);
+    var eta = block.timestamp + 300;
     var setPendingAdminData = ethers.utils.defaultAbiCoder.encode(
     ['address'],
     [governorBravoDelegator.address]
-    )
-    console.log("block.timestamp: ", block.timestamp);
-    console.log("eta", eta)
+    );
+    console.log("-----------Initiating Compound-----------\n");
+    console.log("Current Time: ", block.timestamp);
+    console.log("Time at which transaction can be executed:", eta);
 
     console.log(
-        '\n\n\n---------------------------------------------------\nqueueing setPendingAdmin'
-      )
+    '\n\n\n-----------queueing setPendingAdmin-----------\n'
+    );
     await timelock.queueTransaction(
     timelock.address,
     0,
     'setPendingAdmin(address)',
     setPendingAdminData,
     eta
-    )
-    console.log('queued setPendingAdmin')
-    console.log('execute setPendingAdmin')
+    );
+    console.log('queued setPendingAdmin');
+    console.log('execute setPendingAdmin');
+
+    // let currTimestamp = await getTimestamp(env.L2_NODE_WEB3_URL, 28);
+    // while(eta > currTimestamp){
+    //     console.log("It is not yet time to execute the proposal.Timestamp: ", currTimestamp);
+    //     await sleep(120 * 1000);
+    //     currTimestamp = await getTimestamp(env.L2_NODE_WEB3_URL, 28);
+    // }
+    // await timelock.executeTransaction(
+    //     timelock.address,
+    //     0,
+    //     'setPendingAdmin(address)',
+    //     setPendingAdminData,
+    //     eta
+    // );
+    // console.log('executed setPendingAdmin')
+    await sleep(250 * 1000);
     for(let i = 0; i < 30; i++){
-      await sleep(120 * 1000);
-      console.log(`Timestamp: ${await getTimestamp(env.L2_NODE_WEB3_URL, 28)}`);
+      console.log(`Attempt: ${i + 1}`)
+      console.log(`\tTimestamp: ${await getTimestamp(env.L2_NODE_WEB3_URL, 28)}`);
       try{
         await timelock.executeTransaction(
           timelock.address,
@@ -76,28 +94,32 @@ async function main(){
           setPendingAdminData,
           eta
         );
-        console.log('executed setPendingAdmin')
+        console.log('\texecuted setPendingAdmin')
         break;
       }catch(error){
-        console.log("\n\n\n-----FAILED-----\n\n\n");
-        console.log(JSON.stringify(error));
-        console.log("\n\n\n-----RETRYING-----\n\n\n");
+        if(error.message === `execution reverted: Timelock::executeTransaction: Transaction hasn't surpassed time lock.`){
+            console.log("\tTransaction hasn't surpassed time lock\n");
+        }else{
+          throw error;
+        }
       }
+      await sleep(15 * 1000);
     }
 
     console.log(
-    '\n\n\n---------------------------------------------------\nqueueing initiate'
-    )
+    '\n\n\n-----------queueing initiate-----------\n'
+    );
 
-    blockNumber = await l2_provider.getBlockNumber()
-    block = await l2_provider.getBlock(blockNumber)
+    blockNumber = await l2_provider.getBlockNumber();
+    block = await l2_provider.getBlock(blockNumber);
     eta = block.timestamp + 300
     var initiateData = ethers.utils.defaultAbiCoder.encode(
     ['bytes'],
     [[]]
     );
 
-    console.log(eta)
+    console.log("Current Time: ", block.timestamp);
+    console.log("Time at which transaction can be executed:", eta);
 
     await timelock.queueTransaction(
     governorBravo.address,
@@ -105,12 +127,26 @@ async function main(){
     '_initiate()',
     initiateData,
     eta
-    )
+    );
     console.log('queued initiate');
     console.log('execute initiate');
-    for(let i = 0; i < 15; i++ ){
-        await sleep(120 * 1000);
-        console.log(`Timestamp: ${await getTimestamp(env.L2_NODE_WEB3_URL, 28)}`);
+    // while(eta > currTimestamp){
+    //     console.log("It is not yet time to execute the proposal.Timestamp: ", currTimestamp);
+    //     await sleep(120 * 1000);
+    //     currTimestamp = await getTimestamp(env.L2_NODE_WEB3_URL, 28);
+    // }
+    // await timelock.executeTransaction(
+    //     governorBravo.address,
+    //     0,
+    //     '_initiate()',
+    //     initiateData,
+    //     eta
+    // )
+    // console.log('Executed initiate');
+    await sleep(250 * 1000);
+    for(let i = 0; i < 30; i++ ){
+        console.log(`Attempt: ${i + 1}`);
+        console.log(`\tTimestamp: ${await getTimestamp(env.L2_NODE_WEB3_URL, 28)}`);
         try{
             await timelock.executeTransaction(
                 governorBravo.address,
@@ -118,14 +154,17 @@ async function main(){
                 '_initiate()',
                 initiateData,
                 eta
-            )
+            );
             console.log('Executed initiate');
             break;
         }catch(error){
-            console.log("\n\n\n-----FAILED-----\n\n\n");
-            console.log(JSON.stringify(error));
-            console.log("\n\n\n-----RETRYING-----\n\n\n");
+            if(error.message === `execution reverted: Timelock::executeTransaction: Transaction hasn't surpassed time lock.`){
+                console.log("\tTransaction hasn't surpassed time lock\n");
+            }else{
+              throw error;
+            }
         }
+        await sleep(15 * 1000);
     }
 }
 

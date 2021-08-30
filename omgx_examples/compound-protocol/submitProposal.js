@@ -3,12 +3,14 @@ const Timelock = require('./build-ovm/Timelock.json');
 const GovernorBravoDelegate = require('./build-ovm/GovernorBravoDelegate.json');
 const GovernorBravoDelegator = require('./build-ovm/GovernorBravoDelegator.json');
 const Comp = require('./build-ovm/Comp.json');
+const addresses = require('./networks/rinkeby-boba.json');
 require('dotenv').config();
 const env = process.env;
-const compAddress = '0x60ddAa9c4926705F8ab23565e21eB9e5DF2aBF2c';
-const timelockAddress = '0xdfDA22e95116D0c034B3fBBA9838B1E9Bf2cAA17';
-const governorBravoDelegateAddress = '0x174e7DC50BCE45fC04671939A8f1762ed6725423';
-const governorBravoDelegatorAddress = '0xA8637a094550f49e8A0879de1620Ae2AD1DB8A02';
+
+const compAddress = addresses.Comp;
+const timelockAddress = addresses.Timelock;
+const governorBravoDelegateAddress = addresses.GovernorBravoDelegate;
+const governorBravoDelegatorAddress = addresses.GovernorBravoDelegator;
 
 
 const sleep = async (timeout) => {
@@ -16,7 +18,7 @@ const sleep = async (timeout) => {
 		setTimeout(() => {
 			resolve()
 		}, timeout)
-	})
+	});
 }
 
 async function main(){
@@ -35,7 +37,13 @@ async function main(){
 
     const governorBravo = await governorBravoDelegate.attach(
         governorBravoDelegator.address
-    )
+    );
+
+    // const proposal = await governorBravo.proposals(3);
+    // console.log(`Proposal 1: ${proposal}`);
+    // governorBravo.cancel(3)
+    // return;
+
     const proposalStates = [
         'Pending',
         'Active',
@@ -45,82 +53,181 @@ async function main(){
         'Queued',
         'Expired',
         'Executed',
-    ]
+    ];
 
-    const value = await comp.balanceOf(wallet1.address)
-    console.log('Comp power: ', value.toString())
-    let addresses = [governorBravo.address]
-    let values = [0]
-    let signatures = ['_setProposalThreshold(uint256)']
+    const value = await comp.balanceOf(wallet1.address);
+    console.log('Comp power: ', value.toString());
+    let addresses = [governorBravo.address];
+    let values = [0];
+    let signatures = ['_setProposalThreshold(uint256)'];
     let calldatas = [ethers.utils.defaultAbiCoder.encode(
         ['uint256'],
         [65000]
-    )]
-    let description = '#Changing Proposal Threshold to 65000 Comp'
+    )];
+    let description = '#Changing Proposal Threshold to 65000 Comp';
 
-    await comp.delegate(wallet1.address)
+    await comp.delegate(wallet1.address);
 
     console.log(
         'current votes: ',
         (await comp.getCurrentVotes(wallet1.address)).toString()
-    )
+    );
 
-    await sleep(500)
+    console.log(`Wait 5 minutes to make sure votes are processed.`);
+    // await sleep(300 * 1000);
 
     // THIS SECTION DOES ALL THE PROPOSING LOGIC YOU NEED TO
     // MAKE SURE THAT YOU'RE ONLY CALLING ONE OF THESE AT A TIME
 
+    // console.log(`Proposal Count:${(await governorBravo.proposalCount())._hex}`);
+    // governorBravo.cancel(7)
+    // return;
+
+
     // DO THIS FIRST
 
-    // await governorBravo.cancel(2);
-    // return;
-    const proposalID = await governorBravo.propose(
+    console.log(`Proposing`);
+
+
+    await governorBravo.propose(
     	addresses,
     	values,
     	signatures,
     	calldatas,
     	description
-    )
-    console.log('proposed')
+    );
+    const proposalID = (await governorBravo.proposalCount())._hex;
+    let blockNumberAtProposal = await l2_provider.getBlockNumber();
+    console.log('Success: Proposed');
+    console.log('Proposal ID:', proposalID);
+    // console.log(`Proposal was made at block: ${blockNumberAtProposal}`);
+    // console.log(`Voting begins at block: ${blockNumberAtProposal + 10}`);
 
     // DO THIS SECOND
-    console.log('Proposal ID:', proposalID);
 
-    await governorBravo.castVote(proposalID, 1)
-    console.log('vote cast')
+    // let currBlock = await l2_provider.getBlockNumber();
+    // while(blockNumberAtProposal + 10 > currBlock){
+    //     console.log(`Voting time has not started yet. Current block: ${currBlock}`);
+    //     await sleep(15 * 1000);
+    //     currBlock = await l2_provider.getBlockNumber();
+    // }
+    // console.log(`Current block: ${currBlock}`);
+    // await governorBravo.castVote(proposalID, 1);
+    // console.log('vote cast');
+
+    console.log(`Casting Votes`);
+
+    for(let i = 0; i < 30; i++){
+        await sleep(15 * 1000);
+        console.log(`Attempt: ${i + 1}`);
+        try{
+            await governorBravo.castVote(proposalID, 1);
+            console.log('Success: vote cast')
+            break;
+        }catch(error){
+            if(i == 29){
+                await governorBravo.cancel(proposalID);
+                console.log(`Proposal failed and has been canceled, please try again`);
+                return;
+            } else if(error.message === `execution reverted: GovernorBravo::castVoteInternal: voting is closed`){
+                console.log("\tVoting is closed\n");
+            } else{
+                await governorBravo.cancel(proposalID);
+                console.log(`An unexpected error was thrown, the proposal has been canceled.`);
+                throw error;
+            }
+        }
+    }
+
+
+
+
+
 
     // DO THIS THIRD
+    // console.log(`Voting ends at block: ${blockNumberAtProposal + 20}`);
+    // currBlock = await l2_provider.getBlockNumber();
+    // while(blockNumberAtProposal + 20 > currBlock){
+    //     console.log(`Voting time has not ended yet. Current block: ${currBlock}`);
+    //     await sleep(15 * 1000);
+    //     currBlock = await l2_provider.getBlockNumber();
+    // }
+    // await governorBravo.queue(proposalID);
+    // console.log('Queued');
 
-    await governorBravo.queue(proposalID)
-    console.log('Queued')
+    console.log(`Queuing Proposal`);
+
+    for(let i= 0; i < 30; i++){
+        console.log(`Attempt: ${i + 1}`);
+        await sleep(15 * 1000)
+        try{
+            await governorBravo.queue(proposalID);
+            console.log('Success: Queued');
+            break;
+        }catch(error){
+            if(i == 29){
+                await governorBravo.cancel(proposalID);
+                console.log(`Proposal failed and has been canceled, please try again`);
+                return;
+            }else if(error.message === `execution reverted: GovernorBravo::queue: proposal can only be queued if it is succeeded`){
+                console.log(`\tproposal can only be queued if it is succeeded`);
+            }else{
+                await governorBravo.cancel(proposalID);
+                console.log(`An unexpected error was thrown, the proposal has been canceled.`);
+                throw error;
+            }
+        }
+    }
+
+
+    console.log(`Executing Transaction`);
 
     // DO THIS FOURTH
+    for(let i= 0; i < 30; i++){
+        await sleep(15 * 1000);
+        console.log(`Attempt: ${i + 1}`);
+        try{
+            await governorBravo.execute(proposalID);
+            console.log('Success: Executed');
+            break;
+        }catch(error){
+            if(i == 29){
+                await governorBravo.cancel(proposalID);
+                console.log(`Proposal failed and has been canceled, please try again`);
+                return;
+            }else if(error.message === `execution reverted: GovernorBravo::execute: proposal can only be executed if it is queued`){
+                console.log(`\tproposal can only be executed if it is queued`);
+            }else{
+                console.log(`An unexpected error was thrown, the proposal has been canceled.`);
+                await governorBravo.cancel(proposalID);
+                throw error;
+            }
+        }
+    }
 
-    await governorBravo.execute(proposalID)
-    console.log('Executed')
 
     await sleep(500)
 
-    proposalCount = await governorBravo.proposalCount()
-    console.log(proposalCount.toString())
+    proposalCount = await governorBravo.proposalCount();
+    console.log(proposalCount.toString());
 
     await governorBravo.proposals.call(proposalID, function (err, res) {
         if (err) {
-            console.log('PROPOSALS', err)
+            console.log('PROPOSALS', err);
         }
-        console.log('PROPOSALS', res)
+        console.log('PROPOSALS', res);
     })
 
-    state = await governorBravo.state(1)
-    console.log('State is : ', proposalStates[state])
-    console.log(JSON.stringify(await governorBravo.getActions(1)))
-    timeStamp = await timelock.exGetBlockTimestamp()
-    console.log('Timestamp : ', timeStamp.toString())
-    console.log('WEB3 : ', await web3.eth.getBlockNumber())
-    const proposalThreshold = await governorBravo.proposalThreshold()
-    console.log('Proposal Threshold : ', proposalThreshold.toString())
-    const proposalId = await governorBravo.initialProposalId()
-    console.log('proposalId : ', proposalId.toString())
+    state = await governorBravo.state(1);
+    console.log('State is : ', proposalStates[state]);
+    console.log(JSON.stringify(await governorBravo.getActions(1)));
+    timeStamp = await timelock.exGetBlockTimestamp();
+    console.log('Timestamp : ', timeStamp.toString());
+    console.log('WEB3 : ', await web3.eth.getBlockNumber());
+    const proposalThreshold = await governorBravo.proposalThreshold();
+    console.log('Proposal Threshold : ', proposalThreshold.toString());
+    const proposalId = await governorBravo.initialProposalId();
+    console.log('proposalId : ', proposalId.toString());
 }
 
 (async () =>{

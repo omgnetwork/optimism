@@ -7,7 +7,7 @@ const sleep = (timeout) => {
 		}, timeout)
 	})
 }
-module.exports = async function main(callback) {
+async function main(callback) {
 	try {
 		// deployer.then(async () => {
 		// 	await deployer.deploy(GovernorBravoDelegate)
@@ -124,3 +124,6 @@ module.exports = async function main(callback) {
 		callback(1)
 	}
 }
+
+
+module.exports = main;

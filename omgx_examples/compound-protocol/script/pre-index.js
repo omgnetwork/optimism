@@ -1,4 +1,5 @@
 const { ethers } = require('ethers')
+const {web3} = require('web3')
 
 const sleep = (timeout) => {
   return new Promise((resolve, reject) => {
@@ -8,9 +9,9 @@ const sleep = (timeout) => {
   })
 }
 
-module.exports = async function main(callback) {
+async function main(callback) {
   console.log('starting')
-  const accounts = await web3.eth.getAccounts()
+  // const accounts = await web3.eth.getAccounts()
   const GovernorBravoDelegate = artifacts.require('GovernorBravoDelegate')
   const governorBravoDelegate = await GovernorBravoDelegate.deployed()
   const GovernorBravoDelegator = artifacts.require('GovernorBravoDelegator')
@@ -36,10 +37,10 @@ module.exports = async function main(callback) {
     ['address'],
     [governorBravoDelegator.address]
   )
-  txHash = ethers.utils.keccak256(values)
-  console.log('txHash: ', txHash)
-  console.log('eta: ', eta)
-  queuedTransaction = await timelock.queuedTransactions(txHash)
+  // txHash = ethers.utils.keccak256(values)
+  // console.log('txHash: ', txHash)
+  // console.log('eta: ', eta)
+  // queuedTransaction = await timelock.queuedTransactions(txHash)
 
   console.log('queuedTransaction :', queuedTransaction)
   timestamp = await timelock.exGetBlockTimestamp()
@@ -107,3 +108,9 @@ module.exports = async function main(callback) {
 
   console.log('Executed initiate')
 }
+
+(async ()=> {
+  main();
+})();
+
+module.exports = main;
