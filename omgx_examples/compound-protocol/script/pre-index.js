@@ -26,7 +26,7 @@ module.exports = async function main(callback) {
 
   // Set Delegator as pending admin
   var provider = new ethers.providers.JsonRpcProvider(
-    'http://rinkeby.omgx.network',
+    'https://rinkeby.boba.network',
     { chainId: 28 }
   )
   var blockNumber = await provider.getBlockNumber()
@@ -52,9 +52,10 @@ module.exports = async function main(callback) {
   //   data,
   //   1628744989
   // )
-  // console.log(
-  //   '\n\n\n-----------------------------------------------------------\nQueuing setPendingAdmin'
-  // )
+  
+  console.log(
+    '\n\n\n-----------------------------------------------------------\nQueuing setPendingAdmin'
+  )
 
   await timelock.queueTransaction(
     timelock.address,
@@ -64,46 +65,46 @@ module.exports = async function main(callback) {
     eta
   )
   console.log('queued')
-  // console.log('queued setPendingAdmin')
 
-  // sleep(2000 * 1000)
+  console.log('queued setPendingAdmin')
 
-  // await timelock.executeTransaction(
-  //   timelock.address,
-  //   0,
-  //   'setPendingAdmin(address)',
-  //   data,
-  //   1628547326
-  // )
+  sleep(2000 * 1000)
 
-  // console.log(
-  //   '\n\n\n---------------------------------------------------\nqueueing initiate'
-  // )
+  await timelock.executeTransaction(
+    timelock.address,
+    0,
+    'setPendingAdmin(address)',
+    data,
+    1628547326
+  )
 
-  // blockNumber = await provider.getBlockNumber()
-  // block = await provider.getBlock(blockNumber)
-  // eta = block.timestamp + 1000
+  console.log(
+    '\n\n\n---------------------------------------------------\nqueueing initiate'
+  )
 
-  // console.log(eta)
+  blockNumber = await provider.getBlockNumber()
+  block = await provider.getBlock(blockNumber)
+  eta = block.timestamp + 1000
 
-  // await timelock.queueTransaction(
-  //   GovernorBravo.address,
-  //   0,
-  //   '_initiate()',
-  //   0,
-  //   eta
-  // )
+  console.log(eta)
 
-  // await sleep(2000 * 1000)
+  await timelock.queueTransaction(
+    GovernorBravo.address,
+    0,
+    '_initiate()',
+    0,
+    eta
+  )
 
-  // console.log('execute initiate')
-  // await timelock.executeTransaction(
-  //   GovernorBravo.address,
-  //   0,
-  //   '_initiate()',
-  //   0,
-  //   1628549022
-  // )
+  await sleep(2000 * 1000)
 
+  console.log('execute initiate')
+  await timelock.executeTransaction(
+    GovernorBravo.address,
+    0,
+    '_initiate()',
+    0,
+    1628549022
+  )
   console.log('Executed initiate')
 }

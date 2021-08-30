@@ -1,5 +1,8 @@
 const { ethers } = require('ethers')
 
+require('dotenv').config()
+const env = process.env
+
 const sleep = (timeout) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -9,16 +12,16 @@ const sleep = (timeout) => {
 }
 
 module.exports = async function (deployer) {
-  
+
   const accounts = await web3.eth.getAccounts()
-  
+
   const Comp = artifacts.require('Comp')
   const Timelock = artifacts.require('Timelock')
   const GovernorBravoDelegate = artifacts.require('GovernorBravoDelegate')
   const GovernorBravoDelegator = artifacts.require('GovernorBravoDelegator')
 
   const user = accounts[0]
-  
+
   console.log('STARTING HERE')
   console.log(user)
   // Deploy Comp
@@ -52,10 +55,12 @@ module.exports = async function (deployer) {
 
   const GovernorBravo = await GovernorBravoDelegate.at(delegator.address)
   // Set Delegator as pending admin
-  var provider = new ethers.providers.JsonRpcProvider()
+
+  var provider = new ethers.providers.JsonRpcProvider(env.L2_NODE_WEB3_URL, { chainId: 28 })
   var blockNumber = await provider.getBlockNumber()
   var block = await provider.getBlock(blockNumber)
-  var eta = block.timestamp + 3
+  var eta = block.timestamp // + 1
+
   var data = ethers.utils.defaultAbiCoder.encode(
     ['address'],
     [delegator.address]
@@ -63,7 +68,9 @@ module.exports = async function (deployer) {
   await timelock.queueTransaction(
     timelock.address,
     0,
-    'setPendingAdmin(address)',
+
+    'setPendingAdmin(0)',
+
     data,
     eta
   )
@@ -71,18 +78,25 @@ module.exports = async function (deployer) {
   // Wait for timelock delay
 
   console.log('Waiting for timelock...')
-  await sleep(5000)
+
+  await sleep(100000)
 
   // Execute transaction
-  await timelock.executeTransaction(
-    timelock.address,
-    0,
-    'setPendingAdmin(address)',
-    data,
-    eta
-  )
+  try{
+    await timelock.executeTransaction(
+      timelock.address,
+      0,
+      'setPendingAdmin(address)',
+      data,
+      eta
+    )
+  }catch(error){
+    console.log(error)
+  }
 
-  await sleep(5000)
+
+  await sleep(100000)
+
 
   blockNumber = await provider.getBlockNumber()
   block = await provider.getBlock(blockNumber)
@@ -96,7 +110,7 @@ module.exports = async function (deployer) {
     eta
   )
 
-  await sleep(5000)
+  await sleep(100000)
 
   await timelock.executeTransaction(
     GovernorBravo.address,

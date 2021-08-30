@@ -18,7 +18,6 @@
     "ganache": "npx ganache-cli -l 10000038 -i 1234 -e 100000 -a 10 -u 0 -g 1000000000 --allowUnlimitedContractSize -m \"$HDWALLET_MNEMONIC\"",
     "migrate": "npx truffle migrate",
     "compile:ovm": "truffle compile --config truffle-config-ovm.js",
-    "migrate:ovm": "truffle migrate --network optimism --config truffle-config-ovm.js",
     "deploy:boba": "truffle migrate --network boba_rinkeby --config truffle-config-ovm.js"
   },
   "repository": "git@github.com:compound-finance/compound-protocol.git",
