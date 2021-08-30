@@ -16,27 +16,36 @@ limitations under the License. */
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { closeModal } from 'actions/uiAction';
+import { closeModal, openAlert, openError } from 'actions/uiAction';
+
 import * as styles from './daoModal.module.scss';
 
 import Modal from 'components/modal/Modal';
 import Input from 'components/input/Input';
 import Button from 'components/button/Button';
+import { delegateVotes } from 'actions/daoAction';
 
 function DelegateDaoModal({ open }) {
     const [recipient, setRecipient] = useState('');
     const dispatch = useDispatch()
-
-    const submit = async () => {
-        console.log([recipient]);
-        // transfer to over the network service
-    }
 
     const disabledTransfer = !recipient;
 
     function handleClose() {
         setRecipient('');
         dispatch(closeModal('delegateDaoModal'))
+    }
+
+    const submit = async () => {
+        let res = await dispatch(delegateVotes({recipient}));
+        console.log(res);
+        if(res) {
+            dispatch(openAlert(`Votes delegated successfully!`));
+            handleClose();
+        } else {
+            dispatch(openError(`Failed to delegate`));
+            handleClose();
+        }
     }
 
     return (
@@ -62,7 +71,7 @@ function DelegateDaoModal({ open }) {
 
                 <Button
                     className={styles.button}
-                    onClick={() => { submit({ useLedgerSign: false }) }}
+                    onClick={() => { submit() }}
                     type='primary'
                     // loading={loading} // TODO: Implement loading base on the action trigger
                     disabled={disabledTransfer}

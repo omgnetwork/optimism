@@ -15,7 +15,8 @@ limitations under the License. */
 import React, {useState, useEffect} from 'react';
 import { useDispatch } from 'react-redux';
 
-import { closeModal } from 'actions/uiAction';
+import { closeModal, openAlert, openError } from 'actions/uiAction';
+import { transferDao } from 'actions/daoAction';
 
 import * as styles  from './daoModal.module.scss'
 
@@ -27,22 +28,27 @@ function TransferDaoModal({ open }) {
 
     const [recipient, setRecipient] = useState('');
     const [amount, setAmount] = useState('');
-
     const dispatch = useDispatch()
-
-
-    const submit = async () => {
-        console.log([amount, recipient]);
-        // transfer to over the network service
-    }
-
-    const disabledTransfer = amount <= 0 || !recipient;
 
     function handleClose() {
         setRecipient('');
         setAmount('');
         dispatch(closeModal('transferDaoModal'))
     }
+
+    const submit = async () => {
+        let res = await dispatch(transferDao({recipient, amount}));
+
+        if(res) {
+            dispatch(openAlert(`Boba transfer has been done`));
+            handleClose();
+        } else {
+            dispatch(openError(`Failed to tranfer boba`));
+            handleClose();
+        }
+    }
+
+    const disabledTransfer = amount <= 0 || !recipient;
 
     return (
         <Modal open={open}>
@@ -75,7 +81,7 @@ function TransferDaoModal({ open }) {
 
                 <Button
                     className={styles.button}
-                    onClick={() => { submit({ useLedgerSign: false }) }}
+                    onClick={() => { submit() }}
                     type='primary'
                     // loading={loading} // TODO: Implement loading base on the action trigger
                     disabled={disabledTransfer}

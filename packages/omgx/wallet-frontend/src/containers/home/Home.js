@@ -68,6 +68,7 @@ import DAO from 'containers/dao/Dao';
 import logo from 'images/logo-boba.svg';
 
 import * as styles from './Home.module.scss';
+import { fetchDaoBalance, fetchDaoVotes } from 'actions/daoAction';
 
 const POLL_INTERVAL = 5000; //milliseconds
 
@@ -132,6 +133,10 @@ function Home () {
     dispatch(fetchBalances());
     dispatch(addTokenList());
     dispatch(fetchNFTs());
+
+    // get Dao balance / Votes
+    dispatch(fetchDaoBalance());
+    dispatch(fetchDaoVotes());
   }, POLL_INTERVAL);
 
   useEffect(() => {

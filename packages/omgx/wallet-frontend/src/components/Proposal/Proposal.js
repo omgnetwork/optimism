@@ -75,15 +75,12 @@ function Proposal({
     }
 
 
-
-
     return (<div
         className={styles.proposalCard}
         style={{
             background: `${!!dropDownBox ? 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)' : 'none'}`,
             borderRadius: `${!!dropDownBox ? '12px' : ''}`
-        }}
-    >
+        }}>
         <div
             onClick={() => {
                 setDropDownBox(!dropDownBox);

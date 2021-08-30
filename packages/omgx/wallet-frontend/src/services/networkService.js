@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import { parseUnits, parseEther } from '@ethersproject/units'
+import { parseUnits, parseEther, formatEther } from '@ethersproject/units'
 import { Watcher } from '@eth-optimism/watcher'
 
 import { ethers, BigNumber, utils, ContractFactory } from 'ethers'
@@ -1914,6 +1914,83 @@ class NetworkService {
       slow: 1000000000,
       normal: 2000000000,
       fast: 10000000000
+    }
+  }
+
+  /***********************************************/
+  /*****         DAO Function                *****/
+  /***********************************************/
+
+  // get DAO Balance
+  async getDaoBalance() {
+    try {
+      let balance = await this.boba.balanceOf(this.account);
+      return { balance: formatEther(balance) }
+    } catch (error) {
+      console.log('Error : DAO Balance', error);
+    }
+  }
+
+
+  // get DAO Votes
+  async getDaoVotes() {
+    try {
+      let votes = await this.boba.getCurrentVotes(this.account);
+      return { votes: formatEther(votes) }
+    } catch (error) {
+      console.log('Error : DAO Votes', error);
+    }
+  }
+
+  //Transfer dao funds
+  async transferDao({ recipient, amount }) {
+    try {
+      const tx = await this.boba.transfer(recipient, parseEther(amount.toString()));
+      await tx.wait();
+      return tx
+    } catch (error) {
+      console.log('Error : DAO tranfer', error);
+    }
+  }
+
+  //Delegate dao
+  async delegateVotes({ recipient }) {
+    try {
+      const tx = await this.boba.delegate(recipient);
+      await tx.wait();
+      return tx
+    } catch (error) {
+      console.log('Error : DAO Delegate', error);
+    }
+  }
+
+
+  //Create Proposal
+  async createProposal({ address, amount }) {
+    try {
+
+      // const tx = await this.L2_TEST_Contract.attach(currency).transfer(
+      //   address,
+      //   parseEther(value.toString())
+      // )
+      // await tx.wait()
+      // return tx
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  //Fetch Proposals
+  async fetchProposals() {
+    try {
+      // const tx = await this.L2_TEST_Contract.attach(currency).transfer(
+      //   address,
+      //   parseEther(value.toString())
+      // )
+      // await tx.wait()
+      // return tx
+    } catch (error) {
+      console.log(error)
     }
   }
 

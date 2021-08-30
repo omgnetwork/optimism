@@ -14,22 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 
 import { openModal } from 'actions/uiAction';
 
 import * as styles from './Dao.module.scss';
 
 
-
 import Button from 'components/button/Button';
 import ProposalList from './proposal/ProposalList';
+import { selectDaoBalance, selectDaoVotes } from 'selectors/daoSelector';
 
 
 function DAO() {
-    const { balance, votes } = { balance: Math.random(), votes: Math.random() }
-
     const dispatch = useDispatch();
+
+    const balance = useSelector(selectDaoBalance);
+    const votes = useSelector(selectDaoVotes);
+
+    console.log(['balance', balance])
+    console.log(['votes', votes])
 
     return (
         <div className={styles.container}>
