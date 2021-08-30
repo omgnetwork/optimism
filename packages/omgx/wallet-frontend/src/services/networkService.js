@@ -403,7 +403,7 @@ class NetworkService {
       //and then, also, either L1 or L2
 
       //at this point, we only know whether we want to be on local or rinkeby etc
-      if (masterSystemConfig === 'local' && network.chainId === 28) {
+      if (masterSystemConfig === 'local' && network.chainId === 31338) {
         //ok, that's reasonable
         //local deployment, L2
         this.L1orL2 = 'L2'
@@ -419,7 +419,7 @@ class NetworkService {
         //ok, that's reasonable
         //rinkeby, L2
         this.L1orL2 = 'L2'
-      } else if (masterSystemConfig === 'rinkeby-integration' && network.chainId === 4) {
+      } else if (masterSystemConfig === 'rinkeby_integration' && network.chainId === 4) {
         //ok, that's reasonable
         //rinkeby, L1
         this.L1orL2 = 'L1'
