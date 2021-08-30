@@ -20,6 +20,7 @@ const NETWORKS = {
     addressUrl:       `http://${window.location.hostname}:8080/addresses.json`,
     addressOMGXUrl:   `http://${window.location.hostname}:8078/addresses.json`,
     OMGX_WATCHER_URL: null, //Does not exist on local
+    MM_Label:         `Local Network`,
     L1: {
       name: "Local L1",
       chainId: 31337,
@@ -27,8 +28,8 @@ const NETWORKS = {
       blockExplorer: null, //does not exist on local
     },
     L2: {
-      name: "Local L2",
-      chainId: 28,
+      name: "BOBA Local L2",
+      chainId: 31338,
       rpcUrl: `http://${window.location.hostname}:8545`,
       blockExplorer: null, //does not exist on local
     },
@@ -37,34 +38,36 @@ const NETWORKS = {
     addressUrl:       `https://rinkeby.boba.network:8080/addresses.json`,
     addressOMGXUrl:   `https://rinkeby.boba.network:8078/addresses.json`,
     OMGX_WATCHER_URL: `https://api-watcher.rinkeby.boba.network/`,
+    MM_Label:         `Rinkeby Test Network`,
     L1: {
-      name: "Rinkeby L1",
+      name: "Rinkeby",
       chainId: 4,
       rpcUrl: `https://rinkeby.infura.io/v3/${process.env.REACT_APP_INFURA_ID}`,
       blockExplorer: `https://api-rinkeby.etherscan.io/api?module=account&action=txlist&startblock=0&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_ETHERSCAN_API}`,
       transaction: `https://rinkeby.etherscan.io/tx/`,
     },
     L2: {
-      name: "Rinkeby L2",
+      name: "BOBA Rinkeby L2",
       chainId: 28,
       rpcUrl: `https://rinkeby.boba.network`,
       blockExplorer: `https://blockexplorer.boba.network/?network=Rinkeby`,
       transaction: `https://blockexplorer.boba.network/tx/`,
     }
   },
-  "rinkeby-integration": {
+  rinkeby_integration: {
     addressUrl:       `https://rinkeby-integration.boba.network:8081/addresses.json`,
     addressOMGXUrl:   `https://rinkeby-integration.boba.network:8081/omgx-addr.json`,
     OMGX_WATCHER_URL: `https://api-watcher.rinkeby-integration.boba.network/`,
+    MM_Label:         `Rinkeby Int Test Network`,
     L1: {
-      name: "Rinkeby Integration L1",
+      name: "Rinkeby Int",
       chainId: 4,
       rpcUrl: `https://rinkeby.infura.io/v3/${process.env.REACT_APP_INFURA_ID}`,
       blockExplorer: `https://api-rinkeby.etherscan.io/api?module=account&action=txlist&startblock=0&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_ETHERSCAN_API}`,
       transaction: `https://rinkeby.etherscan.io/tx/`,
     },
     L2: {
-      name: "Rinkeby Integration L2",
+      name: "BOBA Rinkeby Int L2",
       chainId: 29,
       rpcUrl: `https://rinkeby-integration.boba.network`,
       blockExplorer: `https://blockexplorer.boba.network/?network=Rinkeby%20Test`,
@@ -75,15 +78,16 @@ const NETWORKS = {
     addressUrl:       `https://mainnet.boba.network:8080/addresses.json`,
     addressOMGXUrl:   `https://mainnet.boba.network:8078/addresses.json`,
     OMGX_WATCHER_URL: `https://api-watcher.mainnet.boba.network/`,
+    MM_Label:         `Ethereum Mainnet`,
     L1: {
-      name: "Mainnet L1",
+      name: "Mainnet",
       chainId: 1,
       rpcUrl: `https://mainnet.infura.io/v3/${process.env.REACT_APP_INFURA_ID}`,
       blockExplorer: `https://api.etherscan.io/api?module=account&action=txlist&startblock=0&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_ETHERSCAN_API}`,
       transaction: ` https://etherscan.io/tx/`,
     },
     L2: {
-      name: "Mainnet L2",
+      name: "BOBA L2",
       chainId: 288,
       rpcUrl: `https://mainnet.boba.network`,
       blockExplorer: `https://blockexplorer.boba.network/?network=Mainnet`,

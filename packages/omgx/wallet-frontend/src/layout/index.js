@@ -58,7 +58,7 @@ function App () {
         contrastText: '#fff',
       },
       secondary: {
-        main: '#F0A000',
+        main: '#CCFF00',
       },
       background: {
         default: light ? "#fff" : "#061122"

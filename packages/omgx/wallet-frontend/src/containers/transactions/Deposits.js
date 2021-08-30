@@ -87,13 +87,16 @@ function Deposits({ searchHistory, transactions, chainLink }) {
           <Box>
             <S.Content>
               {!paginatedDeposits.length && !loading && (
-                <div className={styles.disclaimer}>Deposit history coming soon...</div>
+                <div className={styles.disclaimer}>Scanning for deposits...</div>
               )}
               {!paginatedDeposits.length && loading && (
-                <div className={styles.disclaimer}>Loading...</div>
+                <div className={styles.disclaimer}>Loading deposits...</div>
               )}
               {paginatedDeposits.map((i, index) => {
                 const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
+                let label = ''
+                if( metaData === 'Traditional') label = 'Deposit'
+                if( metaData === 'Fast Onramp') label = 'Fast Deposit'
                 return (
                   <Transaction
                     key={index}
@@ -102,7 +105,8 @@ function Deposits({ searchHistory, transactions, chainLink }) {
                     midTitle={moment.unix(i.timeStamp).format('lll')}
                     blockNumber={`Block ${i.blockNumber}`}
                     chain={`L1->L2 Deposit`}
-                    typeTX={`${metaData}`}
+                    typeTX={`${label}`}
+                    detail={null} 
                   />
                 )
               })}

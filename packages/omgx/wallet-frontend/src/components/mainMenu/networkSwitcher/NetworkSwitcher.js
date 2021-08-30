@@ -1,75 +1,102 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { Box } from '@material-ui/system';
-import { useSelector, useDispatch } from 'react-redux';
-import * as S from './NetworkSwitcher.styles.js';
-import chevron from 'images/chevron.svg';
-import {
-  selectNetwork,
-} from 'selectors/setupSelector';
-import { setNetwork } from 'actions/setupAction';
-import { getAllNetworks } from 'util/masterConfig';
+import React, { useState, useRef, useCallback, useEffect } from 'react'
+import { openModal } from 'actions/uiAction'
+import { Box } from '@material-ui/system'
+import { useSelector, useDispatch } from 'react-redux'
+import * as S from './NetworkSwitcher.styles.js'
+import chevron from 'images/chevron.svg'
+import { selectNetwork } from 'selectors/setupSelector'
+import { setNetwork } from 'actions/setupAction'
+import { getAllNetworks } from 'util/masterConfig'
+import { Typography } from '@material-ui/core'
 import networkService from 'services/networkService'
-import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon.js';
-import { Typography } from '@material-ui/core';
+import WrongNetworkModal from 'containers/modals/wrongnetwork/WrongNetworkModal'
+import { selectModalState } from 'selectors/uiSelector'
 
 function NetworkSwitcher({ walletEnabled }) {
-  const dispatch = useDispatch();
-  const dropdownNode = useRef(null);
-  const [ showAllNetworks, setShowAllNetworks ] = useState(false);
+
+  const dispatch = useDispatch()
+  const dropdownNode = useRef(null)
+  const [ showAllNetworks, setShowAllNetworks ] = useState(false)
   const masterConfig = useSelector(selectNetwork())
 
+  const [ wrongNetwork, setWrongNetwork ] = useState(false)
+  const wrongNetworkModalState = useSelector(selectModalState('wrongNetworkModal'))
+
   // defines the set of possible networks
-  const networks = getAllNetworks();
+  const networks = getAllNetworks()
 
-  const networkLayer = networkService.L1orL2
-
-  let allNetworks = [];
+  let allNetworks = []
   for (var prop in networks) allNetworks.push(prop)
 
   const dispatchSetNetwork = useCallback((network) => {
-    //console.log("dispatchSetNetwork:",network)
-    setShowAllNetworks(false);
-    dispatch(setNetwork(network));
+    console.log("dispatchSetNetwork:",network)
+    dispatch(setNetwork(network))
+
+    async function initializeAccounts () {
+      const initialized = await networkService.initializeAccounts(network);
+      if (initialized === 'wrongnetwork') {
+        console.log('wrongnetwork')
+        return setWrongNetwork(true)
+      }
+    }
+
+    initializeAccounts()
+
+    setShowAllNetworks(false)
   }, [ dispatch ])
 
-  console.log('allNetworks', allNetworks, walletEnabled)
+  useEffect(() => {
+    if (wrongNetwork) {
+      dispatch(openModal('wrongNetworkModal'))
+      localStorage.setItem('changeChain', false)
+    }
+  }, [ dispatch, wrongNetwork ]);
+
+  function resetSelection () {
+    //dispatchSetWalletMethod(null);
+    //setWalletEnabled(false);
+    //setAccountsEnabled(false);
+  }
 
   return (
+
+
     <S.WalletPickerContainer>
+
+      <WrongNetworkModal
+        open={wrongNetworkModalState}
+        onClose={resetSelection}
+      />
+
       <S.WallerPickerWrapper>
         <S.Menu>
 
-          <S.NetWorkStyle walletEnabled={walletEnabled} onClick={()=>{
-            if (walletEnabled === false)
-            setShowAllNetworks(prev => !prev)
-          }}>
+          <S.NetWorkStyle 
+            onClick={()=>{setShowAllNetworks(prev => !prev)}}
+          >
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
-              <NetworkSwitcherIcon active={networkLayer === 'L2'} />
-              <Typography variant="body1">BOBA {masterConfig}</Typography>
+              <Typography variant="body1">NETWORK: {masterConfig}</Typography>
             </Box>
 
-            {walletEnabled === false ? (
-              <S.Chevron
-                open={showAllNetworks}
-                src={chevron}
-                alt='chevron'
-              />
-            ) : null}
+            <S.Chevron
+              open={showAllNetworks}
+              src={chevron}
+              alt='chevron'
+            />
+
           </S.NetWorkStyle>
 
-          {walletEnabled === false ? (
-            <S.Dropdown ref={dropdownNode}>
-              {!!allNetworks.length && showAllNetworks && allNetworks.map((network,   ) => (
-                <div
-                  // key={index}
-                  onClick={()=>dispatchSetNetwork(network)}
-                >
-                  {network}
-                </div>))
-              }
-            </S.Dropdown>
-          ) : (null)}
+          <S.Dropdown ref={dropdownNode}>
+            {!!allNetworks.length && showAllNetworks && allNetworks.map((network) => (
+              <div
+                key={network}
+                onClick={()=>dispatchSetNetwork(network)}
+              >
+                {network}
+              </div>))
+            }
+          </S.Dropdown>
 
         </S.Menu>
       </S.WallerPickerWrapper>

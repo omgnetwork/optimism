@@ -13,14 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 
-import Tooltip from 'components/tooltip/Tooltip';
-import { Button as ButtonMUI } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import LinkIcon from 'components/icons/LinkIcon';
-import * as styles from './Transaction.module.scss';
-import * as S from './Transaction.styles';
+import Tooltip from 'components/tooltip/Tooltip'
+import { Button as ButtonMUI } from '@material-ui/core'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+import LinkIcon from 'components/icons/LinkIcon'
+import * as styles from './Transaction.module.scss'
+import * as S from './Transaction.styles'
 
 function Transaction({
   link,
@@ -83,9 +83,13 @@ function Transaction({
   }
 
   function renderDetail() {
+    
+    console.log("Transaction detail:", detail)
+    
     if (!detail) {
       return null;
     }
+    
     return <>
       <div className={`${styles.subTitle} ${styles.viewMore}`} style={{ cursor: 'pointer' }}
         onClick={() => {
@@ -123,6 +127,8 @@ function Transaction({
   }
 
   function renderDetailRedesign() {
+    console.log("Transaction detail:", detail)
+
     if (!detail) {
       return null
     }

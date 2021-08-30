@@ -1,25 +1,26 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { logAmount } from 'util/amountConvert';
-import { isEqual } from 'lodash';
+import React from 'react'
+import { connect } from 'react-redux'
+import { logAmount } from 'util/amountConvert'
+import { isEqual } from 'lodash'
 
-import { openModal } from 'actions/uiAction';
-import Button from 'components/button/Button';
+import { openModal } from 'actions/uiAction'
+import Button from 'components/button/Button'
 
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 
-import { Box, Typography, Fade } from '@material-ui/core';
+import { Box, Typography, Fade } from '@material-ui/core'
 import * as S from './ListAccount.styles'
-import EthereumIcon from 'components/icons/EthereumIcon';
+import EthereumIcon from 'components/icons/EthereumIcon'
+
 class ListAccount extends React.Component {
+  
   constructor(props) {
-    super(props);
-    const { token, chain, networkLayer, disabled } = this.props;
+    super(props)
+    const { token, chain, networkLayer, disabled } = this.props
     this.state = {
       token,
       chain,
       dropDownBox: false,
-      dropDownBoxInit: true,
       networkLayer,
       disabled
     }
@@ -57,7 +58,6 @@ class ListAccount extends React.Component {
       token,
       chain,
       dropDownBox,
-      dropDownBoxInit,
       networkLayer,
       disabled
     } = this.state;
@@ -82,7 +82,7 @@ class ListAccount extends React.Component {
                   {`${logAmount(token.balance, 18, 2)}`}
                 </S.TextTableCell>
               </S.TableCell>
-{/*
+            {/*
               <S.TableCell>
                 <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div" sx={{fontWeight:"700"}}>
                   $ 26.43
@@ -93,7 +93,8 @@ class ListAccount extends React.Component {
                 <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div" sx={{fontWeight:"700"}}>
                   $ 1,556,43
                 </S.TextTableCell>
-              </S.TableCell> */}
+              </S.TableCell> 
+            */}
 
               <S.TableCell
                 onClick={() => {
@@ -131,7 +132,7 @@ class ListAccount extends React.Component {
               {!enabled && chain === 'L1' &&
                 <Box>
                   <Typography variant="body2" component="p">
-                      MetaMask is set to L2. To transact on L1, please change the chain in MetaMask to L1.
+                      MetaMask is set to L2. To transact on L1, please click "SWITCH LAYER" in the sidebar.
                   </Typography>
               </Box>
               }
@@ -139,7 +140,7 @@ class ListAccount extends React.Component {
               {!enabled && chain === 'L2' &&
                 <Box>
                   <Typography variant="body2" component="p">
-                    MetaMask is set to L1. To transact on L2, please change the chain in MetaMask to L2.
+                    MetaMask is set to L1. To transact on L2, please click "SWITCH LAYER" in the sidebar.
                   </Typography>
                 </Box>
               }
@@ -176,7 +177,7 @@ class ListAccount extends React.Component {
                     disabled={disabled}
                     fullWidth
                   >
-                    Standart Exit
+                    Standard Exit
                   </Button>
 
                   <Button

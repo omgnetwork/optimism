@@ -1,5 +1,5 @@
 /*
-Copyright 2019-present OmiseGO Pte Ltd
+Copyright 2021 OMG/BOBA
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,46 +13,44 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useCallback, useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useCallback, useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
-import WrongNetworkModal from 'containers/modals/wrongnetwork/WrongNetworkModal';
-import networkService from 'services/networkService';
+import WrongNetworkModal from 'containers/modals/wrongnetwork/WrongNetworkModal'
+import networkService from 'services/networkService'
 
-import { selectModalState } from 'selectors/uiSelector';
+import { selectModalState } from 'selectors/uiSelector'
 
 import {
   selectWalletMethod,
   selectNetwork,
-} from 'selectors/setupSelector';
+} from 'selectors/setupSelector'
 
-import { openModal } from 'actions/uiAction';
-import { setWalletMethod } from 'actions/setupAction';
-import { getAllNetworks } from 'util/masterConfig';
+import { openModal } from 'actions/uiAction'
+import { setWalletMethod } from 'actions/setupAction'
+import { getAllNetworks } from 'util/masterConfig'
 
-import { isChangingChain } from 'util/changeChain';
-import Button from 'components/button/Button';
+import { isChangingChain } from 'util/changeChain'
 import * as S from "./WalletPicker.styles"
-import { ReactComponent as Arrow } from './../../images/icons/arrow-right.svg';
-import { ReactComponent as Fox } from './../../images/icons/fox-icon.svg';
-import { Box, Container, Grid, Link, useMediaQuery } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
-import { grey } from '@material-ui/core/colors';
-import { styled } from '@material-ui/core/styles';
-import NetworkSwitcher from 'components/mainMenu/networkSwitcher/NetworkSwitcher';
-import { useTheme } from '@emotion/react';
+import { ReactComponent as Fox } from './../../images/icons/fox-icon.svg'
+import { Container, Grid, useMediaQuery } from '@material-ui/core'
+import Typography from '@material-ui/core/Typography'
+import { styled } from '@material-ui/core/styles'
+import { useTheme } from '@emotion/react'
 
 const Root = styled('div')(({ theme }) => ({
   paddingTop: theme.spacing(10),
   paddingBottom: theme.spacing(10),
-}));
+}))
 
 function WalletPicker ({ onEnable, enabled }) {
+
   const dispatch = useDispatch();
 
   const [ walletEnabled, setWalletEnabled ] = useState(false);
   const [ accountsEnabled, setAccountsEnabled ] = useState(false);
   const [ wrongNetwork, setWrongNetwork ] = useState(false);
+  
   const walletMethod = useSelector(selectWalletMethod())
   const masterConfig = useSelector(selectNetwork())
 
@@ -60,6 +58,7 @@ function WalletPicker ({ onEnable, enabled }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const wrongNetworkModalState = useSelector(selectModalState('wrongNetworkModal'));
+  
   const dispatchSetWalletMethod = useCallback((methodName) => {
     dispatch(setWalletMethod(methodName));
   }, [ dispatch ])
@@ -67,12 +66,14 @@ function WalletPicker ({ onEnable, enabled }) {
   useEffect(() => {
 
     if (walletMethod === 'browser') {
-      enableBrowserWallet();
+      enableBrowserWallet()
     }
 
     async function enableBrowserWallet () {
       //console.log("enableBrowserWallet() for",masterConfig)
-      const selectedNetwork = masterConfig ? masterConfig : "local";
+      //default to mainnet for normal user, unless set otherwise later 
+      //which is then captured in the localStorage cache
+      const selectedNetwork = masterConfig ? masterConfig : "mainnet"
       const walletEnabled = await networkService.enableBrowserWallet(selectedNetwork);
       //console.log("walletEnabled:",walletEnabled)
       return walletEnabled
@@ -101,12 +102,12 @@ function WalletPicker ({ onEnable, enabled }) {
       }
 
       if (initialized === 'enabled') {
-        return setAccountsEnabled(true);
+        return setAccountsEnabled(true)
       }
 
     }
     if (walletEnabled) {
-      initializeAccounts();
+      initializeAccounts()
     }
   }, [ walletEnabled, masterConfig ]);
 
@@ -124,15 +125,15 @@ function WalletPicker ({ onEnable, enabled }) {
   }, [ dispatch, walletEnabled, wrongNetwork ]);
 
   function resetSelection () {
-    dispatchSetWalletMethod(null);
-    setWalletEnabled(false);
-    setAccountsEnabled(false);
+    dispatchSetWalletMethod(null)
+    setWalletEnabled(false)
+    setAccountsEnabled(false)
   }
 
   // defines the set of possible networks
-  const networks = getAllNetworks();
+  const networks = getAllNetworks()
 
-  let allNetworks = [];
+  let allNetworks = []
   for (var prop in networks) allNetworks.push(prop)
 
   if (!wrongNetwork && !enabled && isChangingChain) {
@@ -146,36 +147,15 @@ function WalletPicker ({ onEnable, enabled }) {
         onClose={resetSelection}
       />
       <Root>
-        <Box sx={{
-          position: 'absolute',
-          top: '10px',
-          right: '20px'
-        }}>
-          <NetworkSwitcher walletEnabled={walletEnabled} />
-        </Box>
         <Container maxWidth="md">
           <Grid container spacing={8}>
             <Grid item xs={12} md={6}>
               <Typography variant="h1" component="h1">
-                Connect a Wallet to access your assets on the network
+                Connect a Wallet to access BOBA
               </Typography>
               <S.Subtitle variant="body1" component="p" paragraph={true}>
-                  Select the wallet that u use to connect it to OMGx system! Don’t worry more wallets support is coming soon
+                  Select a wallet to connect to BOBA.
               </S.Subtitle>
-              <S.WrapperLink sx={{display: "none"}}>
-                <Link
-                  style={{ color: grey[500]}}
-                  href="#"
-                  underline="hover"
-                  variant="body1"
-                  onClick={() => {
-                    console.info("I'm a button.");
-                  }}
-                >
-                  More about OMGX and how L2 work
-                </Link>
-                <Arrow />
-              </S.WrapperLink>
             </Grid>
 
             <Grid item xs={12} md={6}>
@@ -200,13 +180,6 @@ function WalletPicker ({ onEnable, enabled }) {
 
               </S.WalletCard>
 
-              <Button
-                onClick={() => networkService.addL2Network()}
-                fullWidth
-                size="large"
-              >
-                Add OMGX L2 Provider
-              </Button>
             </Grid>
           </Grid>
         </Container>
@@ -214,4 +187,4 @@ function WalletPicker ({ onEnable, enabled }) {
     </>
   );
 }
-export default React.memo(WalletPicker);
+export default React.memo(WalletPicker)
