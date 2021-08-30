@@ -35,7 +35,7 @@ function Transaction({
   typeTX,
   blockNumber,
   tooltip = '',
-  detail = {}
+  detail
 }) {
 
   const [dropDownBox, setDropDownBox] = useState(false);
@@ -84,10 +84,8 @@ function Transaction({
 
   function renderDetail() {
     
-    console.log("Transaction detail:", detail)
-    
     if (!detail) {
-      return null;
+      return null
     }
     
     return <>
@@ -126,7 +124,6 @@ function Transaction({
   }
 
   function renderDetailRedesign() {
-    console.log("Transaction detail:", detail)
 
     if (!detail) {
       return null
@@ -234,7 +231,7 @@ function Transaction({
         <div className={styles.muted}>{typeTX}</div>
       </S.TableCell>
       {!!detail && <S.TableCell sx={{
-        gap: "5px",
+        gap: '5px',
         alignItems: 'flex-end !important',
         paddingRight: '30px',
         color: 'rgba(255, 255, 255, 0.5)',
