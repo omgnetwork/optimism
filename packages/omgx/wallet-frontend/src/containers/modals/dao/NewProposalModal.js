@@ -54,13 +54,20 @@ function NewProposalModal({ open }) {
         setContracts([...contracts, 'select']);
     }
 
-    const submit = async () => {
-        console.log('data');
-    }
 
     function handleClose() {
         setTitle('');
         dispatch(closeModal('newProposalModal'))
+    }
+
+    const submit = async () => {
+        console.log({
+            description,
+            title, 
+            actionList,
+            contracts,
+            calldata
+        })
     }
 
     const disabledProposal = !title;

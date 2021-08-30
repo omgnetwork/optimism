@@ -13,23 +13,24 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { openModal } from 'actions/uiAction';
 
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Button from 'components/button/Button';
 import Proposal from 'components/Proposal/Proposal';
 
-
-
 import * as styles from './proposalList.module.scss'
+import { selectProposals } from 'selectors/daoSelector';
+import { selectLoading } from 'selectors/loadingSelector';
 
 function ProposalList() {
 
     const dispatch = useDispatch();
+    const loading = useSelector(selectLoading(['PROPOSAL/GET']));
 
+    const proposals = useSelector(selectProposals);
 
     return <>
         <div className={styles.containerAction}>
@@ -49,10 +50,10 @@ function ProposalList() {
             > Create Proposal </Button>
         </div>
         <div className={styles.listContainer}>
-            {[1,2,3,4,4,5,6,6,7].map((p, index) => {
+            {!!loading ? <div className={styles.loadingContainer}> Loading... </div> : null}
+            {proposals.map((p, index) => {
                 return <React.Fragment key={index}><Proposal /></React.Fragment>
             })}
-
         </div>
     </>
 }

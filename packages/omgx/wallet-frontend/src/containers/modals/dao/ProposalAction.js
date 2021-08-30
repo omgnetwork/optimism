@@ -58,16 +58,16 @@ const ProposalAction = ({
 
         let newOptions = ['asdf', 'test'];
 
-        // interfaces.forEach((item, index) => {
-        //     let functions = item.interface.functions;
-        //     setInterfaceIndex(index);
-        //     for (let fragment in functions) {
-        //         let fn = item.interface.getFunction(fragment);
-        //         if (fn.stateMutability === "nonpayable") {
-        //             newOptions.push(fn.name);
-        //         }
-        //     }
-        // })
+        interfaces.forEach((item, index) => {
+            let functions = item.interface.functions;
+            setInterfaceIndex(index);
+            for (let fragment in functions) {
+                let fn = item.interface.getFunction(fragment);
+                if (fn.stateMutability === "nonpayable") {
+                    newOptions.push(fn.name);
+                }
+            }
+        })
 
         setOptions(newOptions);
     };

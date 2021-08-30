@@ -55,6 +55,12 @@ import L2ERC721RegJson from '../deployment/artifacts-ovm/contracts/ERC721Registr
 import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol/TokenPool.json'
 import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
 
+// DAO 
+import Boba from "../deployment/artifacts/contracts/Boba/Boba.json";
+import GovernorBravoDelegate from "../deployment/artifacts/contracts/GovernorBravoDelegate/GovernorBravoDelegate.json";
+import GovernorBravoDelegator from "../deployment/artifacts/contracts/GovernorBravoDelegator/GovernorBravoDelegator.json";
+import Timelock from "../deployment/artifacts/contracts/Timelock/Timelock.json";
+
 import { powAmount, logAmount } from 'util/amountConvert'
 import { accDiv, accMul } from 'util/calculation'
 
@@ -134,6 +140,12 @@ class NetworkService {
     // gas
     this.L1GasLimit = 9999999
     this.L2GasLimit = 10000000
+
+    // Dao
+    this.boba = null
+    this.delegate = null
+    this.delegator = null
+    this.timelock = null
   }
 
   async enableBrowserWallet() {
@@ -597,6 +609,30 @@ class NetworkService {
           messengerAddress: this.L2MessengerAddress,
         },
       })
+
+      this.boba = new ethers.Contract(
+        Boba.networks[this.networkId].address,
+        Boba.abi,
+        this.provider.getSigner()
+      );
+
+      this.delegate = new ethers.Contract(
+        GovernorBravoDelegator.networks[this.networkId].address,
+        GovernorBravoDelegate.abi,
+        this.provider.getSigner()
+      );
+
+      this.delegator = new ethers.Contract(
+        GovernorBravoDelegator.networks[this.networkId].address,
+        GovernorBravoDelegator.abi,
+        this.provider.getSigner()
+      );
+
+      this.timelock = new ethers.Contract(
+        Timelock.networks[this.networkId].address,
+        Timelock.abi,
+        this.provider.getSigner()
+      );
 
       this.bindProviderListeners()
 
@@ -1928,6 +1964,7 @@ class NetworkService {
       return { balance: formatEther(balance) }
     } catch (error) {
       console.log('Error : DAO Balance', error);
+      throw new Error(error.message);
     }
   }
 
@@ -1939,6 +1976,7 @@ class NetworkService {
       return { votes: formatEther(votes) }
     } catch (error) {
       console.log('Error : DAO Votes', error);
+      throw new Error(error.message);
     }
   }
 
@@ -1950,6 +1988,7 @@ class NetworkService {
       return tx
     } catch (error) {
       console.log('Error : DAO tranfer', error);
+      throw new Error(error.message);
     }
   }
 
@@ -1961,36 +2000,56 @@ class NetworkService {
       return tx
     } catch (error) {
       console.log('Error : DAO Delegate', error);
+      throw new Error(error.message);
     }
   }
 
 
   //Create Proposal
-  async createProposal({ address, amount }) {
+  async createProposal(payload) {
     try {
-
-      // const tx = await this.L2_TEST_Contract.attach(currency).transfer(
-      //   address,
-      //   parseEther(value.toString())
-      // )
-      // await tx.wait()
-      // return tx
+      let res = await this.delegate.propose(payload);
+      return res;
     } catch (error) {
-      console.log(error)
+      console.log(error);
+      throw new Error(error.message);
     }
   }
 
   //Fetch Proposals
   async fetchProposals() {
     try {
-      // const tx = await this.L2_TEST_Contract.attach(currency).transfer(
-      //   address,
-      //   parseEther(value.toString())
-      // )
-      // await tx.wait()
-      // return tx
+      let proposalList = [];
+      const proposalCounts = await this.delegate.proposalCount();
+      const totalProposal = await proposalCounts.toNumber();
+      const filter = this.delegate.filters.ProposalCreated(
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      );
+      const descriptionList = await this.delegate.queryFilter(filter);
+      for (let i = totalProposal; i > 1 && i > totalProposal - 3; i--) {
+        let proposal = await this.delegate.getActions(i);
+        let fullDescription = descriptionList[i - 2].args[8].toString();
+        let titleEnd = fullDescription.search(/\n/);
+        let title = fullDescription.substring(0, titleEnd);
+        let description = fullDescription.substring(titleEnd + 1);
+        proposalList.push({
+          proposal,
+          title,
+          description
+        })
+      }
+      return { proposalList };
     } catch (error) {
       console.log(error)
+      throw new Error(error.message);
     }
   }
 

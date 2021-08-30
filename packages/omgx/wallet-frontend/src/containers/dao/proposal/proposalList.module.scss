@@ -53,7 +53,11 @@ $boxDropDownHeight: 50px;
     border-radius: 8px;
     padding: 20px 10px;
     background: $background400;
-    
+
+    .loadingContainer {
+      padding: 10px auto;
+      color: $white;
+    }
 }
 
 

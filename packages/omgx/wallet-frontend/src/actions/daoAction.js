@@ -40,12 +40,10 @@ export function delegateVotes({ recipient }) {
     return createAction('DELEGATE/VOTES/CREATE', () => networkService.delegateVotes({ recipient }))
 }
 
-export function fetchProposal({ }) {
+export function fetchProposal() {
     return createAction('PROPOSAL/GET', () => networkService.fetchProposals())
 }
 
-export function createProposal({ }) {
-    return createAction('PROPOSAL/CREATE', () => {
-
-    })
+export function createProposal(payload) {
+    return createAction('PROPOSAL/CREATE', () => networkService.createProposal(payload))
 }

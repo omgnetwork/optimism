@@ -30,12 +30,9 @@ import networkService from 'services/networkService';
 function Proposal({
     id,
     proposal,
-    title,
-    description
-
 }) {
     const dispatch = useDispatch();
-    const { boba, delegate, provider } = networkService;
+    const { delegate } = networkService;
     const [dropDownBox, setDropDownBox] = useState(false);
     const [dropDownBoxInit, setDropDownBoxInit] = useState(true);
 
@@ -45,14 +42,11 @@ function Proposal({
     useEffect(() => {
         const init = async () => {
             if (proposal && proposal[0][0] === delegate.address) {
-                let fn = await delegate.interface.getFunction(proposal[2][0]);
                 const proposalData = await delegate.proposals(id);
                 let forVotes = utils.formatEther(proposalData.forVotes);
                 forVotes = parseInt(forVotes);
                 let againstVotes = utils.formatEther(proposalData.againstVotes);
                 againstVotes = parseInt(againstVotes);
-                let abstainVotes = utils.formatEther(proposalData.abstainVotes);
-                abstainVotes = parseInt(abstainVotes);
                 const totalVotes = forVotes + againstVotes;
                 setTotalVotes(totalVotes);
 
