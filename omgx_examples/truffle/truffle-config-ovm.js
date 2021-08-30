@@ -1,6 +1,10 @@
-const mnemonicPhrase =
-  'test test test test test test test test test test test junk'
-const HDWalletProvider = require('@truffle/hdwallet-provider')
+
+
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+require('dotenv').config();
+const env = process.env;
+const mnemonicPhrase = env.mnemonic;
+
 
 module.exports = {
   contracts_build_directory: './build-ovm',
@@ -26,11 +30,11 @@ module.exports = {
           mnemonic: {
             phrase: mnemonicPhrase,
           },
-          providerOrUrl: 'http://rinkeby.omgx.network',
+          providerOrUrl:env.L2_NODE_WEB3_URL,
         })
       },
       network_id: 28,
-      host: 'http://rinkeby.omgx.network',
+      host: env.L2_NODE_WEB3_URL,
       gasPrice: 15000000,
       gas: 8000000,
     },

@@ -19,26 +19,24 @@ const NETWORKS = {
   local: {
     addressUrl:       `http://${window.location.hostname}:8080/addresses.json`,
     addressOMGXUrl:   `http://${window.location.hostname}:8078/addresses.json`,
-    OMGX_WATCHER_URL: null,//Does not exist on local
+    OMGX_WATCHER_URL: null, //Does not exist on local
     L1: {
       name: "Local L1",
       chainId: 31337,
       rpcUrl: `http://${window.location.hostname}:9545`,
-      blockExplorer: null,//does not exist on local
-      transaction: null, //TODO: ❓ @jan please provide the valid url here for local
+      blockExplorer: null, //does not exist on local
     },
     L2: {
       name: "Local L2",
       chainId: 28,
       rpcUrl: `http://${window.location.hostname}:8545`,
-      blockExplorer: null,//does not exist on local
-      transaction: null, //TODO: ❓ @jan please provide the valid url here for local
+      blockExplorer: null, //does not exist on local
     },
   },
   rinkeby: {
-    addressUrl:       `https://rinkeby.omgx.network:8080/addresses.json`,
-    addressOMGXUrl:   `https://rinkeby.omgx.network:8078/addresses.json`,
-    OMGX_WATCHER_URL: `https://api-watcher.rinkeby.omgx.network/`,
+    addressUrl:       `https://rinkeby.boba.network:8080/addresses.json`,
+    addressOMGXUrl:   `https://rinkeby.boba.network:8078/addresses.json`,
+    OMGX_WATCHER_URL: `https://api-watcher.rinkeby.boba.network/`,
     L1: {
       name: "Rinkeby L1",
       chainId: 4,
@@ -49,34 +47,53 @@ const NETWORKS = {
     L2: {
       name: "Rinkeby L2",
       chainId: 28,
-      rpcUrl: `https://rinkeby.omgx.network`,
-      blockExplorer: `https://blockexplorer.rinkeby.omgx.network`,
-      transaction: `https://blockexplorer.rinkeby.omgx.network/tx/`,
+      rpcUrl: `https://rinkeby.boba.network`,
+      blockExplorer: `https://blockexplorer.boba.network/?network=Rinkeby`,
+      transaction: `https://blockexplorer.boba.network/tx/`,
     }
   },
-/*
+  "rinkeby-integration": {
+    addressUrl:       `https://rinkeby-integration.boba.network:8081/addresses.json`,
+    addressOMGXUrl:   `https://rinkeby-integration.boba.network:8081/omgx-addr.json`,
+    OMGX_WATCHER_URL: `https://api-watcher.rinkeby-integration.boba.network/`,
+    L1: {
+      name: "Rinkeby Integration L1",
+      chainId: 4,
+      rpcUrl: `https://rinkeby.infura.io/v3/${process.env.REACT_APP_INFURA_ID}`,
+      blockExplorer: `https://api-rinkeby.etherscan.io/api?module=account&action=txlist&startblock=0&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_ETHERSCAN_API}`,
+      transaction: `https://rinkeby.etherscan.io/tx/`,
+    },
+    L2: {
+      name: "Rinkeby Integration L2",
+      chainId: 28,
+      rpcUrl: `https://rinkeby-integration.boba.network`,
+      blockExplorer: `https://blockexplorer.boba.network/?network=Rinkeby%20Test`,
+      transaction: `https://blockexplorer.boba.network/tx/`,
+    }
+  },
   mainnet: {
-    addressUrl:       `https://mainnet.omgx.network:8080/addresses.json`,
-    addressOMGXUrl:   `https://mainnet.omgx.network:8078/addresses.json`,
-    OMGX_WATCHER_URL: `https://api-watcher.mainnet.omgx.network/`,
+    addressUrl:       `https://mainnet.boba.network:8080/addresses.json`,
+    addressOMGXUrl:   `https://mainnet.boba.network:8078/addresses.json`,
+    OMGX_WATCHER_URL: `https://api-watcher.mainnet.boba.network/`,
     L1: {
       name: "Mainnet L1",
-      chainId: 4,
+      chainId: 1,
       rpcUrl: `https://mainnet.infura.io/v3/${process.env.REACT_APP_INFURA_ID}`,
-      blockExplorer: `https://api-mainnet.etherscan.io/api?module=account&action=txlist&startblock=0&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_ETHERSCAN_API}`,
+      blockExplorer: `https://api.etherscan.io/api?module=account&action=txlist&startblock=0&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_ETHERSCAN_API}`,
+      transaction: ` https://etherscan.io/tx/`,
     },
     L2: {
       name: "Mainnet L2",
       chainId: 288,
-      rpcUrl: `https://mainnet.omgx.network`,
-      blockExplorer: `https://blockexplorer.mainnet.omgx.network`,
+      rpcUrl: `https://mainnet.boba.network`,
+      blockExplorer: `https://blockexplorer.boba.network/?network=Mainnet`,
+      transaction: `https://blockexplorer.boba.network/tx/`,
     }
   }
-*/
 }
 
 const BaseServices = {
-  WALLET_SERVICE:   `https://api-service.rinkeby.omgx.network/`,
+  WALLET_SERVICE:   `https://api-service.boba.network/`,
   //relevant to local?
   SELLER_OPTIMISM_API_URL: `https://pm7f0dp9ud.execute-api.us-west-1.amazonaws.com/prod/`,
   //relevant to local?
@@ -87,7 +104,7 @@ const BaseServices = {
   WEBSOCKET_API_URL: `wss://d1cj5xnal2.execute-api.us-west-1.amazonaws.com/prod`,
   //Coing gecko url
   COIN_GECKO_URL: `https://api.coingecko.com/api/v3/`,
-  //ETH gas station 
+  //ETH gas station
   ETH_GAS_STATION_URL: `https://ethgasstation.info/`,
 }
 

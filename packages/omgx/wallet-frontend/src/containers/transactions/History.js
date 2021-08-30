@@ -48,11 +48,8 @@ const POLL_INTERVAL = 5000; //milliseconds
 function History () {
 
   const dispatch = useDispatch();
-
-  const start = new Date();
-  const end = new Date();
-  const [startDate, setStartDate] = useState(new Date(start.setDate(1)));
-  const [endDate, setEndDate] = useState(new Date(end.setDate(end.getDate() + 7)));
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const [ searchHistory, setSearchHistory ] = useState('');
 
@@ -64,7 +61,10 @@ function History () {
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
     
   const transactions = orderedTransactions.filter((i)=>{
-    return (moment.unix(i.timeStamp).isSameOrAfter(startDate) && moment.unix(i.timeStamp).isSameOrBefore(endDate));
+    if(startDate && endDate) {
+      return (moment.unix(i.timeStamp).isSameOrAfter(startDate) && moment.unix(i.timeStamp).isSameOrBefore(endDate));
+    }
+    return true;
   })  
 
   const currentNetwork = useSelector(selectNetwork());
@@ -76,7 +76,11 @@ function History () {
     let network = nw[currentNetwork];
     if (!!network && !!network[item.chain]) {
       // network object should have L1 & L2
-      return `${network[item.chain].transaction}${item.hash}`;
+      if(item.chain === 'L1') {
+        return `${network[item.chain].transaction}${item.hash}`;
+      } else {
+        return `${network[item.chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase()+currentNetwork.slice(1)}`;
+      }
     }
     return '';
   }
@@ -93,8 +97,9 @@ function History () {
       <div className={styles.header}>
         <h2>Search</h2>
         <div className={styles.actions}>
-          <div>Start: </div>
+          <div style={{margin: '0px 10px'}}>Show period from </div>
           <DatePicker
+            wrapperClassName={styles.datePickerInput}
             selected={startDate}
             onChange={(date) => setStartDate(date)}
             selectsStart
@@ -102,8 +107,9 @@ function History () {
             endDate={endDate}
           />
 
-          <div>End: </div>
+          <div style={{margin: '0px 10px'}}>to </div>
           <DatePicker
+            wrapperClassName={styles.datePickerInput}
             selected={endDate}
             onChange={(date) => setEndDate(date)}
             selectsEnd
