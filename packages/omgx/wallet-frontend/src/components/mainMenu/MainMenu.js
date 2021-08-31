@@ -25,8 +25,8 @@ function MainMenu ({ pageDisplay, handleSetPage }) {
 
   const classes = useStyles()
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     localStorage.setItem('theme', light ? 'light' : 'dark');
@@ -56,7 +56,7 @@ function MainMenu ({ pageDisplay, handleSetPage }) {
                   <NetworkSwitcher />
                 </S.DrawerHeader>
 
-                <MenuItems pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
+                <MenuItems pageDisplay={pageDisplay} handleSetPage={handleSetPage} setOpen={setOpen} />
               </S.StyleDrawer>
             </Drawer>
 
@@ -70,7 +70,7 @@ function MainMenu ({ pageDisplay, handleSetPage }) {
             <Logo />
           </Link>
           <NetworkSwitcher />
-          <MenuItems pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
+          <MenuItems pageDisplay={pageDisplay} handleSetPage={handleSetPage} setOpen={setOpen} />
           {/* <ThemeSwitcher light={light} setLight={setLight} /> */}
         </S.Menu>
       )}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     Box, Button, Collapse,
-    Grid, Typography
+    Grid, Typography, useMediaQuery
 } from '@material-ui/core';
 
 import DownIcon from 'components/icons/DownIcon';
@@ -17,37 +17,107 @@ import {
     StyledTableCell,
     StyledTableRow
 } from './table.styles';
+import { useTheme } from '@emotion/react';
 
 
 function TransactionTableRow({ chainLink, index, ...data }) {
-
     const [expandRow, setExpandRow] = useState(false);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-    return <React.Fragment
-        key={index}
-    >
-        <StyledTableRow
-            className={!!expandRow ? 'expand' : ''}
-        >
-            <StyledTableCell>
-                <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
+    return <React.Fragment key={index}>
+        {isMobile ? (
+          <Box sx={{p: 1, mb: 1, backgroundColor: 'rgba(255, 255, 255, 0.01)', borderRadius: '6px'}}>
+            <Box sx={{p: 4, backgroundColor: 'rgba(255, 255, 255, 0.04)', borderRadius: '6px'}}>
+              <Box sx={{display: 'flex', justifyContent: 'space-between', alignItem: 'center', mb: 3}}>
+                <Box>
+                  <CellTitle variant="h3" component="div"> L2 - L1 Exit </CellTitle>
+                  <CellSubTitle variant="body2" component="div"> Fast Offramp </CellSubTitle>
+                </Box>
+                <L2ToL1Icon />
+              </Box>
+
+              <Box>
+                <CellTitle variant="h3" component="div" color="#06D3D3"> Swapped </CellTitle>
+                <CellSubTitle variant="body2" component="div"> {moment.unix(data.timeStamp).format('lll')} </CellSubTitle>
+              </Box>
+
+              <Box sx={{display: 'flex', justifyContent: 'space-between', alignItem: 'center', mt: 3}}>
+                <Box>
+                  <CellTitle variant="h3" component="div"> {truncate(data.hash, 8, 6, '...')} </CellTitle>
+                  <CellSubTitle variant="body2" component="div"> Block {data.blockNumber} </CellSubTitle>
+                </Box>
+                <a
+                  href={chainLink(data)}
+                  target={'_blank'}
+                  rel='noopener noreferrer'
+                  style={{textDecoration: 'none'}}
                 >
-                    <L2ToL1Icon />
-                    <Box
-                        sx={{
-                            marginLeft: '30px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                        }}
-                    >
-                        <CellTitle> L2 - L1 Exit </CellTitle>
-                        <CellSubTitle> Fast Offramp </CellSubTitle>
-                    </Box>
-                </Grid>
+                  <Button
+                    startIcon={<LinkIcon />}
+                    variant="outlined"
+                    color="primary"
+                    size="large"
+                  >
+                      More
+                  </Button>
+                  </a>
+              </Box>
+            </Box>
+            {data.l1Hash ? !!expandRow ?
+              <Box
+                onClick={() => setExpandRow(!expandRow)}
+                sx={{textAlign: 'center', py: 2, cursor: 'pointer'}}>
+                <UpIcon />
+              </Box>
+              :
+              <Box sx={{textAlign: 'center', py: 2}}>
+                <DownIcon />
+              </Box>
+            : null}
+
+          </Box>
+        ) : (
+        <StyledTableRow className={!!expandRow ? 'expand' : ''}>
+            <StyledTableCell>
+              <Grid
+                container
+                direction={{xs: 'row-reverse', md: 'row'}}
+                justify='space-between'
+                alignItems='center'
+              >
+                {/* <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}> */}
+                <L2ToL1Icon />
+                <Box
+                  sx={{
+                      marginLeft: '30px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                  }}
+                >
+                  <CellTitle variant="body1"> L2 - L1 Exit </CellTitle>
+                  <CellSubTitle variant="body2"> Fast Offramp </CellSubTitle>
+                </Box>
+                {/* </Box> */}
+              </Grid>
+            </StyledTableCell>
+            <StyledTableCell>
+              <Grid
+                container
+                direction='row'
+                justify='space-between'
+                alignItems='center'
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <CellTitle variant="body1" color="#06D3D3"> Swapped </CellTitle>
+                  <CellSubTitle variant="body2"> {moment.unix(data.timeStamp).format('lll')} </CellSubTitle>
+                </Box>
+              </Grid>
             </StyledTableCell>
             <StyledTableCell>
                 <Grid
@@ -62,26 +132,8 @@ function TransactionTableRow({ chainLink, index, ...data }) {
                             flexDirection: 'column',
                         }}
                     >
-                        <CellTitle color="#06D3D3"> Swapped </CellTitle>
-                        <CellSubTitle> {moment.unix(data.timeStamp).format('lll')} </CellSubTitle>
-                    </Box>
-                </Grid>
-            </StyledTableCell>
-            <StyledTableCell>
-                <Grid
-                    container
-                    direction='row'
-                    justify='space-between'
-                    alignItems='center'
-                >
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                        }}
-                    >
-                        <CellTitle> {truncate(data.hash, 8, 6, '...')} </CellTitle>
-                        <CellSubTitle> Block {data.blockNumber} </CellSubTitle>
+                        <CellTitle variant="body1"> {truncate(data.hash, 8, 6, '...')} </CellTitle>
+                        <CellSubTitle variant="body2"> Block {data.blockNumber} </CellSubTitle>
                     </Box>
                 </Grid>
             </StyledTableCell>
@@ -96,12 +148,15 @@ function TransactionTableRow({ chainLink, index, ...data }) {
                         href={chainLink(data)}
                         target={'_blank'}
                         rel='noopener noreferrer'
-                    ><Button
+                        style={{textDecoration: 'none'}}
+                    >
+                      <Button
                         startIcon={<LinkIcon />}
                         variant="outlined"
                         color="primary">
-                            Advanced Details
-                        </Button></a>
+                          Advanced Details
+                      </Button>
+                    </a>
                 </Grid>
             </StyledTableCell>
             <StyledTableCell>
@@ -123,6 +178,7 @@ function TransactionTableRow({ chainLink, index, ...data }) {
                 </Grid>
             </StyledTableCell>
         </StyledTableRow>
+        )}
         {
             data.l1Hash ?
                 <StyledTableRow

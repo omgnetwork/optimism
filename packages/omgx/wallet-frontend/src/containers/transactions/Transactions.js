@@ -63,8 +63,9 @@ function Transactions({ searchHistory, transactions, chainLink }) {
         onClickNext={() => setPage(page + 1)}
         onClickBack={() => setPage(page - 1)}
       />
+
       <Grid item xs={12}>
-        <S.TableHeading>
+        {/* <S.TableHeading>
           {TransactionHeadList.map((item) => {
             return (
               <S.TableHeadingItem key={item.label} variant="body2" component="div" >
@@ -72,7 +73,8 @@ function Transactions({ searchHistory, transactions, chainLink }) {
               </S.TableHeadingItem>
             )
           })}
-        </S.TableHeading>
+        </S.TableHeading> */}
+
         <Box>
           <S.Content>
             {!paginatedTransactions.length && !loading && (

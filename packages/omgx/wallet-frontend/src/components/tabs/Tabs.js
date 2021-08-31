@@ -24,6 +24,7 @@ function Tabs ({ tabs, activeTab, onClick, className }) {
     <S.Tabs className={className}>
       {tabs.map((i, index) => {
         return <S.TabItem
+          variant="h4"
           key={index}
           onClick={() => onClick(i)}
           className={activeTab === i ? 'active': ''}

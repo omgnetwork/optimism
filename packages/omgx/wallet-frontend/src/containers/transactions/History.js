@@ -43,6 +43,7 @@ import useInterval from 'util/useInterval';
 import PageHeader from 'components/pageHeader/PageHeader';
 import TransactionsOld from './Transactions';
 import Transactions from './../history/transactions';
+import { Box, Typography } from '@material-ui/core';
 
 const POLL_INTERVAL = 5000; //milliseconds
 
@@ -99,48 +100,9 @@ function History () {
   return (
     <>
       <PageHeader title="Transaction History" />
-      <Transactions transactions={transactions}
-              chainLink={chainLink} />
 
-    {/*
-    <Input
-            icon
-            placeholder='Search by hash'
-            value={searchHistory}
-            onChange={i => {
-              setSearchHistory(i.target.value);
-            }}
-            className={styles.searchBar}
-          />
-
-    */}
-
-      <div className={styles.header}>
-        <div className={styles.actions}>
-          <div style={{margin: '0px 10px'}}>Show period from </div>
-          <DatePicker
-            wrapperClassName={styles.datePickerInput}
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
-            selectsStart
-            startDate={startDate}
-            endDate={endDate}
-          />
-
-          <div style={{margin: '0px 10px'}}>to </div>
-          <DatePicker
-            wrapperClassName={styles.datePickerInput}
-            selected={endDate}
-            onChange={(date) => setEndDate(date)}
-            selectsEnd
-            startDate={startDate}
-            endDate={endDate}
-            minDate={startDate}
-          />
-        </div>
-      </div>
-      <div className={styles.data}>
-        <div className={styles.section}>
+      <Box sx={{display: 'flex', flexDirection: 'column'}}>
+        <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
           <Tabs
             onClick={tab => {
               dispatch(setActiveHistoryTab1(tab));
@@ -148,30 +110,73 @@ function History () {
             activeTab={activeTab1}
             tabs={['All', 'Deposits', 'Exits']}
           />
-
-          {activeTab1 === 'All' && (
-            <TransactionsOld
-              searchHistory={searchHistory}
-              transactions={transactions}
-              chainLink={chainLink}
+          <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
+            {/* <div style={{margin: '0px 10px'}}>Show period from</div> */}
+            <Typography variant="h4" sx={{color: 'rgba(255, 255, 255, 0.7)'}}>Show period from</Typography>
+            <DatePicker
+              wrapperClassName={styles.datePickerInput}
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              selectsStart
+              startDate={startDate}
+              endDate={endDate}
             />
-          )}
 
-          {activeTab1 === 'Deposits' && <
-            Deposits
+            {/* <div style={{margin: '0px 10px'}}>to </div> */}
+            <Typography variant="h4" sx={{color: 'rgba(255, 255, 255, 0.7)'}}>to </Typography>
+            <DatePicker
+              wrapperClassName={styles.datePickerInput}
+              selected={endDate}
+              onChange={(date) => setEndDate(date)}
+              selectsEnd
+              startDate={startDate}
+              endDate={endDate}
+              minDate={startDate}
+            />
+          </Box>
+        </Box>
+
+        {activeTab1 === 'All' && (
+          // <TransactionsOld
+          //   searchHistory={searchHistory}
+          //   transactions={transactions}
+          //   chainLink={chainLink}
+          // />
+          <Transactions
+            transactions={transactions}
+            chainLink={chainLink}
+          />
+        )}
+
+        {activeTab1 === 'Deposits' &&
+          <Deposits
             searchHistory={searchHistory}
             transactions={transactions}
             chainLink={chainLink}
-          />}
+          />
+        }
 
-          {activeTab1 === 'Exits' &&
-            <Exits
-              searchHistory={searchHistory}
-              transactions={transactions}
-              chainLink={chainLink}
+        {activeTab1 === 'Exits' &&
+          <Exits
+            searchHistory={searchHistory}
+            transactions={transactions}
+            chainLink={chainLink}
+          />
+        }
+      </Box>
+
+      {/*
+      <Input
+              icon
+              placeholder='Search by hash'
+              value={searchHistory}
+              onChange={i => {
+                setSearchHistory(i.target.value);
+              }}
+              className={styles.searchBar}
             />
-          }
-        </div>
+
+      */}
 
         {/* <div className={styles.section}>
           <Tabs
@@ -190,7 +195,6 @@ function History () {
             />
           }
         </div> */}
-      </div>
     </>
   );
 }

@@ -1,9 +1,13 @@
+import { useTheme } from '@emotion/react';
 import {
+  Box,
     Grid,
     Table,
     TableBody,
     TableContainer,
-    TableHead
+    TableHead,
+    Typography,
+    useMediaQuery
 } from '@material-ui/core';
 import SortIcon from 'components/icons/SortIcon';
 import React from 'react';
@@ -20,66 +24,58 @@ function StyledTable({
     tableData,
     chainLink,
 }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-    return (
-        <TableContainer
-            sx={{
-                marginTop: '30px',
-                textAlign: 'left',
-                width: '100%',
-                background: 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)',
-                borderRadius: '8px',
-                padding: '0px 0px 20px',
-                height: 'calc(100vh - 250px)'
-            }}
-        >
-            <Table stickyHeader>
-                <TableHead
-                    sx={{
-                        padding: '0px 55px',
-                        background: 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)',
-                    }}
-                >
-                    <StyledTableRow
-                        className="header"
-                    >
-                        {tableHeadList && tableHeadList.length > 0 ?
-                            tableHeadList.map((head) => {
-                                return (
-                                    <StyledTableCell
-                                        key={head.label}
-                                        color="rgba(255, 255, 255, 0.7)">
-                                        <Grid
-                                            container
-                                            direction='row'
-                                            justify='space-between'
-                                            alignItems='center'
-                                        >
-                                            <span>{head.label}</span>
-                                            {head.isSort ? <SortIcon /> : null}
-                                        </Grid>
-                                    </StyledTableCell>)
-                            })
-                            : null
-                        }
-                    </StyledTableRow>
-                </TableHead>
-                <TableBody>
-                    {tableData && tableData.length > 0 ?
-                        tableData.map((item,index) => {
-                            if (isTransaction) {
-                                return <TransactionTableRow
-                                    index={index}
-                                    chainLink={chainLink}
-                                    {...item} />
-                            }
-                        })
-                        : null}
-                </TableBody>
+  return (
+    <TableContainer
+      sx={{
+        marginTop: '20px',
+        textAlign: 'left',
+        width: '100%',
+        background: {sx:'none', md:'#0D182A'},
+        borderRadius: '8px',
+        padding: '0px 0px 20px',
+        height: 'calc(100vh - 250px)'
+      }}
+    >
+      <Table stickyHeader>
+        {!isMobile ? (
+          <TableHead sx={{ padding: '0px 55px'}}>
+            <StyledTableRow className="header">
+              {tableHeadList && tableHeadList.length > 0 ?
+                tableHeadList.map((head) => {
+                  return (
+                    <StyledTableCell key={head.label} sx={{backgroundColor: '#0D182A', color: 'rgba(255, 255, 255, 0.7) !important'}}>
+                      <Box sx={{display: "flex", justifyContent: head.isSort ? "flex-start" : "space-between", alignItems: "center", gap: "10px"}}>
+                        <Typography variant="body2" component="span">{head.label}</Typography>
+                        {head.isSort ? <SortIcon /> : null}
+                      </Box>
+                    </StyledTableCell>
+                  )
+                })
+              : null}
+            </StyledTableRow>
+          </TableHead>
+        ) : (null)}
 
-            </Table>
-        </TableContainer>
-    )
+        <TableBody sx={{mb: 1}}>
+          {tableData && tableData.length > 0 ?
+            tableData.map((item,index) => {
+              if (isTransaction) {
+                return (
+                  <TransactionTableRow
+                    index={index}
+                    chainLink={chainLink}
+                    {...item}
+                  />
+                )}
+            })
+          : null}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  )
 }
 
 export default StyledTable;

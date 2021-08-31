@@ -96,6 +96,7 @@ function Transaction({
         <div>View More</div>
         <ExpandMoreIcon />
       </div>
+
       <div
         className={dropDownBox ?
           styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}

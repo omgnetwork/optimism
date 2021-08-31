@@ -40,7 +40,10 @@ function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
             <li key={title}>
               <S.MenuItem
                 // onClick={() => item.items ? setOpenDropdown(!openDropdown) : null}
-                onClick={() => handleSetPage(item.key)}
+                onClick={() => {
+                  handleSetPage(item.key)
+                  setOpen(false)
+                }}
                 onMouseEnter={() => setActiveItem(title)}
                 onMouseLeave={() => setActiveItem(false)}
                 // to={item.url}
