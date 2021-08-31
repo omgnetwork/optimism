@@ -13,11 +13,11 @@ module.exports = {
           mnemonic: {
             phrase: mnemonicPhrase,
           },
-          providerOrUrl: env.L2_NODE_WEB3_URL,
+          providerOrUrl: 'http://l2geth:8545',
         })
       },
-      network_id: 28,
-      host:  env.L2_NODE_WEB3_URL,
+      network_id: "*",
+      host:  'http://l2geth:8545',
       gasPrice: 15000000,
       gas: 803900000,
     },

@@ -10,7 +10,7 @@ module.exports = {
   networks: {
     // Add this network to your config!
     optimism: {
-      url: 'http://127.0.0.1:8545',
+      url: 'http://l2geth:8545',
       // instantiate with a mnemonic so that you have >1 accounts available
       accounts: {
         mnemonic: env.mnemonic
