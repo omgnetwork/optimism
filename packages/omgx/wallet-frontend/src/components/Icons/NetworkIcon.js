@@ -1,10 +1,10 @@
 import { useTheme } from "@emotion/react";
 import * as React from "react"
 
-function NetworkIcon() {
+function NetworkIcon({ active }) {
   const theme = useTheme();
   const isLight = theme.palette.mode === 'light';
-  const color = isLight ? 'black' : 'white';
+  const color = !active ? '#506DFA' : isLight ? 'black' : '#506DFA';
 
   return (
     <svg
