@@ -21,7 +21,7 @@
     "migrate:boba": "truffle migrate --network boba_rinkeby --config truffle-config-ovm.js",
     "migrate:ovm": "truffle migrate --network optimism --config truffle-config-ovm.js",
     "submitProposal": "node scripts/submitProposal.js",
-    "initiateComp": "node initiateCompound.js"
+    "initiateComp": "node scripts/initiateCompound.js"
   },
   "repository": "git@github.com:compound-finance/compound-protocol.git",
   "author": "Compound Finance",

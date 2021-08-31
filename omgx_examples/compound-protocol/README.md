@@ -2,7 +2,7 @@
 
 
 Instructions or Deploying Compound Governance Protocol on Rinkeby-Boba.
-First add
+First create a `.env` file that follows the structure of `.env.example`. This file should contained a mnemonic phrase, and the private key linked to mnemonic phrase.
 
 ```bash
 $ yarn
@@ -178,9 +178,74 @@ Summary
 ```
 
 
-FOR QUICK RUN THROUGH....
--------------------------
-Make a `.env` file that follows the strucutre of `.env.example`.
-Then run `yarn deploy:boba` in terminal.
-Copy and paste the contract addresses into `networks/rinkeby-boba.json`.
-Then run `node initiateCompound.js` in terminal to initate the Dao.
+## Initiating Timelock and submiting a proposal
+First paste the contract addresses into the file `networks/rinkeby-boba.json`. Using the addresses above the file should look as follows.
+
+```json
+{
+"Comp":"0xef459fad4B8F53c05dE251Ad838593A98C6671fc",
+"Timelock":"0x1099876c30f541F8c001872198B9094b976DF687",
+"GovernorBravoDelegate":"0x0c2678D4EB7EaC9c334Fb0d2b6d10Ec1dbf2cE9A",
+"GovernorBravoDelegator":"0x53E691925D847843D50F7864321651858197080F"
+}
+```
+
+
+# Initiating Timelock
+This step is necessary in order to link the Governor contract to the Timelock contract.
+Run the following command. Note running this program may take some time.
+```bash
+$ yarn initiateComp
+```
+
+The output should look similar to the following:
+
+```bash
+yarn run v1.22.10
+$ node scripts/initiateCompound.js
+-----------Initiating Compound-----------
+
+Current Time:  1630448203
+Time at which transaction can be executed: 1630448503
+
+
+
+-----------queueing setPendingAdmin-----------
+
+queued setPendingAdmin
+execute setPendingAdmin
+Attempt: 1
+	Timestamp: 1630448398
+	Transaction hasn\'t surpassed time lock
+
+Attempt: 2
+	Timestamp: 1630448593
+	executed setPendingAdmin
+
+
+
+-----------queueing initiate-----------
+
+Current Time:  1630448593
+Time at which transaction can be executed: 1630448893
+queued initiate
+execute initiate
+Attempt: 1
+	Timestamp: 1630448788
+	Transaction hasn\'t surpassed time lock
+
+Attempt: 2
+	Timestamp: 1630448788
+	Transaction hasn\'t surpassed time lock
+
+...
+
+Attempt: 18
+	Timestamp: 1630448788
+	Transaction hasn\'t surpassed time lock
+
+Attempt: 19
+	Timestamp: 1630449178
+Executed initiate
+✨  Done in 836.14s.
+```

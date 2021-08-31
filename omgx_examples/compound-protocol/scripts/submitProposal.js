@@ -1,9 +1,9 @@
 const {ethers} = require('ethers');
-const Timelock = require('./build-ovm/Timelock.json');
-const GovernorBravoDelegate = require('./build-ovm/GovernorBravoDelegate.json');
-const GovernorBravoDelegator = require('./build-ovm/GovernorBravoDelegator.json');
-const Comp = require('./build-ovm/Comp.json');
-const addresses = require('./networks/rinkeby-boba.json');
+const Timelock = require('../build-ovm/Timelock.json');
+const GovernorBravoDelegate = require('../build-ovm/GovernorBravoDelegate.json');
+const GovernorBravoDelegator = require('../build-ovm/GovernorBravoDelegator.json');
+const Comp = require('../build-ovm/Comp.json');
+const addresses = require('../networks/rinkeby-boba.json');
 const BigNumber = require('bignumber.js');
 require('dotenv').config();
 

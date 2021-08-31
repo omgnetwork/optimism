@@ -1,9 +1,9 @@
 const {ethers} = require('ethers');
-const Timelock = require('./build-ovm/Timelock.json');
-const GovernorBravoDelegate = require('./build-ovm/GovernorBravoDelegate.json');
-const GovernorBravoDelegator = require('./build-ovm/GovernorBravoDelegator.json');
-const Comp = require('./build-ovm/Comp.json');
-const addresses = require('./networks/rinkeby-boba.json');
+const Timelock = require('../build-ovm/Timelock.json');
+const GovernorBravoDelegate = require('../build-ovm/GovernorBravoDelegate.json');
+const GovernorBravoDelegator = require('../build-ovm/GovernorBravoDelegator.json');
+const Comp = require('../build-ovm/Comp.json');
+const addresses = require('../networks/rinkeby-boba.json');
 require('dotenv').config();
 const env = process.env;
 const compAddress = addresses.Comp;
@@ -46,8 +46,8 @@ async function main(){
 
     var blockNumber = await l2_provider.getBlockNumber();
     var block = await l2_provider.getBlock(blockNumber);
-    var eta = block.timestamp + 300;
-    var setPendingAdminData = ethers.utils.defaultAbiCoder.encode(
+    var eta = block.timestamp + 300; // the time at which the transaction can be executed
+    var setPendingAdminData = ethers.utils.defaultAbiCoder.encode( // the parameters for the setPendingAdmin function
     ['address'],
     [governorBravoDelegator.address]
     );
@@ -58,35 +58,24 @@ async function main(){
     console.log(
     '\n\n\n-----------queueing setPendingAdmin-----------\n'
     );
+
+    // Queue the transaction that will set the admin of Timelock to the GovernorBravoDelegator contract
     await timelock.queueTransaction(
-    timelock.address,
-    0,
-    'setPendingAdmin(address)',
-    setPendingAdminData,
-    eta
+      timelock.address,
+      0,
+      'setPendingAdmin(address)', // the function to be called
+      setPendingAdminData,
+      eta
     );
     console.log('queued setPendingAdmin');
     console.log('execute setPendingAdmin');
 
-    // let currTimestamp = await getTimestamp(env.L2_NODE_WEB3_URL, 28);
-    // while(eta > currTimestamp){
-    //     console.log("It is not yet time to execute the proposal.Timestamp: ", currTimestamp);
-    //     await sleep(120 * 1000);
-    //     currTimestamp = await getTimestamp(env.L2_NODE_WEB3_URL, 28);
-    // }
-    // await timelock.executeTransaction(
-    //     timelock.address,
-    //     0,
-    //     'setPendingAdmin(address)',
-    //     setPendingAdminData,
-    //     eta
-    // );
-    // console.log('executed setPendingAdmin')
     await sleep(250 * 1000);
     for(let i = 0; i < 30; i++){
       console.log(`Attempt: ${i + 1}`)
       console.log(`\tTimestamp: ${await getTimestamp(env.L2_NODE_WEB3_URL, 28)}`);
       try{
+        // Execute the transaction that will set the admin of Timelock to the GovernorBravoDelegator contract
         await timelock.executeTransaction(
           timelock.address,
           0,
@@ -130,19 +119,7 @@ async function main(){
     );
     console.log('queued initiate');
     console.log('execute initiate');
-    // while(eta > currTimestamp){
-    //     console.log("It is not yet time to execute the proposal.Timestamp: ", currTimestamp);
-    //     await sleep(120 * 1000);
-    //     currTimestamp = await getTimestamp(env.L2_NODE_WEB3_URL, 28);
-    // }
-    // await timelock.executeTransaction(
-    //     governorBravo.address,
-    //     0,
-    //     '_initiate()',
-    //     initiateData,
-    //     eta
-    // )
-    // console.log('Executed initiate');
+
     await sleep(250 * 1000);
     for(let i = 0; i < 30; i++ ){
         console.log(`Attempt: ${i + 1}`);
