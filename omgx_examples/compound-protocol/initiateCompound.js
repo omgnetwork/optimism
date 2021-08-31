@@ -97,11 +97,11 @@ async function main(){
         console.log('\texecuted setPendingAdmin')
         break;
       }catch(error){
-        if(error.message === `execution reverted: Timelock::executeTransaction: Transaction hasn't surpassed time lock.`){
+        // if(error.message === `execution reverted: Timelock::executeTransaction: Transaction hasn't surpassed time lock.`){
             console.log("\tTransaction hasn't surpassed time lock\n");
-        }else{
-          throw error;
-        }
+        // }else{
+        //   throw error;
+        // }
       }
       await sleep(15 * 1000);
     }
@@ -158,11 +158,11 @@ async function main(){
             console.log('Executed initiate');
             break;
         }catch(error){
-            if(error.message === `execution reverted: Timelock::executeTransaction: Transaction hasn't surpassed time lock.`){
+            // if(error.message === `execution reverted: Timelock::executeTransaction: Transaction hasn't surpassed time lock.`){
                 console.log("\tTransaction hasn't surpassed time lock\n");
-            }else{
-              throw error;
-            }
+            // }else{
+            //   throw error;
+            // }
         }
         await sleep(15 * 1000);
     }
