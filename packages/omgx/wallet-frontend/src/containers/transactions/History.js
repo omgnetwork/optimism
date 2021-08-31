@@ -74,10 +74,6 @@ function History () {
   const chainLink = (item) => {
     let network = nw[currentNetwork];
     if (!!network && !!network[item.chain]) {
-      // console.group('test');
-      // console.log(['item.chain',item.chain])
-      // console.log(['network',network])
-      // console.log(network[item.chain].transaction)
       // network object should have L1 & L2
       if(item.chain === 'L1') {
         return `${network[item.chain].transaction}${item.hash}`;

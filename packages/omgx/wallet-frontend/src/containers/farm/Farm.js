@@ -30,6 +30,7 @@ import * as S from './Farm.styles'
 import { Alert, Box, Tab, Tabs } from '@material-ui/core';
 import PageHeader from 'components/pageHeader/PageHeader';
 import { tableHeadList } from './tableHeadList';
+import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -207,8 +208,13 @@ class Farm extends React.Component {
 
           <TabPanel value={value} index={0}>
             {networkLayer === 'L2' &&
-              <Alert severity="info">
-                Note: MetaMask is set to L2. To interact with the L1 liquidity pool, please switch MetaMask to L1.
+              <Alert severity="info"
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <LayerSwitcher />
               </Alert>
             }
             <Box>
@@ -231,8 +237,13 @@ class Farm extends React.Component {
 
           <TabPanel value={value} index={1}>
             {networkLayer === 'L1' &&
-              <Alert severity="info">
-                Note: MetaMask is set to L1. To interact with the L2 liquidity pool, please switch MetaMask to L2.
+              <Alert severity="info"
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <LayerSwitcher />
               </Alert>
             }
             <Box>

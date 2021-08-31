@@ -10,7 +10,7 @@ import networkService from 'services/networkService'
 function LayerSwitcher({ walletEnabled }) {
 
   const dispatch = useDispatch()
-  const [ setShowAllLayers ] = useState(false)
+  const [ showAllLayers, setShowAllLayers ] = useState(false)
   let layer = useSelector(selectLayer())
 
   if (networkService.L1orL2 !== layer) {
@@ -27,7 +27,6 @@ function LayerSwitcher({ walletEnabled }) {
   }
 
   const dispatchSetLayer = useCallback((layer) => {
-    console.log("dispatchSetLayer:",layer)
     dispatch(setLayer(layer))
     networkService.switchChain(layer)
     setShowAllLayers(false)

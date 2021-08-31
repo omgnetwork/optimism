@@ -76,9 +76,9 @@ function Deposits({ searchHistory, transactions, chainLink }) {
 
         <Grid item xs={12}>
           <S.TableHeading>
-            {TransactionHeadList.map((item) => {
+            {TransactionHeadList.map((item,headIndex) => {
               return (
-                <S.TableHeadingItem variant="body2" component="div" >
+                <S.TableHeadingItem key={headIndex} variant="body2" component="div" >
                   {item.label}
                 </S.TableHeadingItem>
               )

@@ -44,7 +44,7 @@ function _Modal ({
       aria-describedby='transition-modal-description'
       open={open}
       onClose={onClose}
-      isMobile={isMobile}
+      ismobile={isMobile ? 1 : 0}
       // closeAfterTransition
       BackdropComponent={S.Backdrop}
       disableAutoFocus={true}
