@@ -88,7 +88,7 @@ function Propose() {
     let calldataTypes = [];
     let callData = [];
     let proposeValues = [];
-    for(let i = 0; i <actions.length; i++){
+    for(let i = 0; i < actions.length; i++){
       calldataTypes.push('uint256');
       proposeValues.push(0);
       callData.push(ethers.utils.defaultAbiCoder.encode(
