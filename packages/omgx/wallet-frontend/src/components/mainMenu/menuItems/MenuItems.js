@@ -6,6 +6,7 @@ import EarnIcon from 'components/icons/EarnIcon';
 import WalletIcon from 'components/icons/WalletIcon';
 import HistoryIcon from 'components/icons/HistoryIcon';
 import NFTIcon from 'components/icons/NFTIcon';
+import LearnIcon from 'components/icons/LearnIcon';
 
 function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
   const [ activeItem, setActiveItem ] = useState(false);
@@ -17,7 +18,8 @@ function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
     WalletIcon,
     EarnIcon,
     HistoryIcon,
-    NFTIcon
+    NFTIcon,
+    LearnIcon,
   }
 
   return (

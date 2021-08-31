@@ -26,7 +26,7 @@ export const MenuItem = styled(Box)`
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 20px 10px 20px 40px;
+  padding: 20px 10px 20px 35px;
   position: relative;
   margin-bottom: 1px;
   font-weight: ${props => props.selected ? 700 : 'normal'};
