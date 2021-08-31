@@ -5,7 +5,7 @@
   flex-direction: column;
   padding: 10px;
   padding-top: 0px;
-  background: $background;//white;
+  background: $background; //white;
 }
 
 .header {
@@ -13,7 +13,7 @@
     // flex: 1;
     margin-bottom: 0;
     padding-left: 10px;
-    color: $white;//$gray2;
+    color: $white; //$gray2;
   }
   display: flex;
   flex-direction: row;
@@ -65,7 +65,6 @@
     border: none !important;
   }
   input {
-
   }
 }
 
@@ -118,21 +117,28 @@
   }
 }
 
+.popperStyle {
+  z-index: 10;
+}
+
 .datePickerInput {
   background: rgba(9, 22, 43, 0.5);
-  box-shadow: -13px 15px 19px rgba(0, 0, 0, 0.15), inset 53px 36px 120px rgba(255, 255, 255, 0.06);
+  box-shadow: -13px 15px 19px rgba(0, 0, 0, 0.15),
+    inset 53px 36px 120px rgba(255, 255, 255, 0.06);
   border-radius: 8px;
   width: 130px;
-  margin: 0px 15px;
   position: relative;
+  @include tablet {
+    width: 100%;
+  }
 
-  &::after{
-    content: "^";
-    color: rgba(255, 255, 255, 0.7);;
+  &::after {
+    content: '^';
+    color: rgba(255, 255, 255, 0.7);
     position: absolute;
-    right: 10px;
+    right: 17px;
     font-size: 25px;
-    bottom: 10px;
+    bottom: 5px;
     transform: rotate(180deg);
   }
 
@@ -143,8 +149,11 @@
     padding: 0px 15px;
     line-height: 40px;
     border: 0;
-    color: #F0A000;
+    color: #f0a000;
     font-size: 16px;
     text-align: left;
+    @include tablet {
+      width: 100%;
+    }
   }
 }

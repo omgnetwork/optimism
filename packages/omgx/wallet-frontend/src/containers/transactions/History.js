@@ -43,7 +43,8 @@ import useInterval from 'util/useInterval';
 import PageHeader from 'components/pageHeader/PageHeader';
 import TransactionsOld from './Transactions';
 import Transactions from './../history/transactions';
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography, useMediaQuery } from '@material-ui/core';
+import { useTheme } from '@emotion/react';
 
 const POLL_INTERVAL = 5000; //milliseconds
 
@@ -52,6 +53,8 @@ function History () {
   const dispatch = useDispatch();
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [ searchHistory, setSearchHistory ] = useState('');
 
@@ -101,7 +104,7 @@ function History () {
       <PageHeader title="Transaction History" />
 
       <Box sx={{display: 'flex', flexDirection: 'column'}}>
-        <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
+        <Box sx={{display: 'flex', justifyContent: 'space-between', flexDirection: {xs:'column-reverse', md: 'row'}, gap: {xs: 2, md: 0}, alignItems: {xs: 'flex-start', md: 'center'}, ml: {xs: 1}}}>
           <Tabs
             onClick={tab => {
               dispatch(setActiveHistoryTab1(tab));
@@ -109,28 +112,34 @@ function History () {
             activeTab={activeTab1}
             tabs={['All', 'Deposits', 'Exits']}
           />
-          <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
-            {/* <div style={{margin: '0px 10px'}}>Show period from</div> */}
-            <Typography variant="h4" sx={{color: 'rgba(255, 255, 255, 0.7)'}}>Show period from</Typography>
+          <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 2, width: {xs: '100%', md: 'initial' }}}>
+            {!isMobile ? (
+              <Typography variant="h4" sx={{color: 'rgba(255, 255, 255, 0.7)', whiteSpace: 'nowrap'}}>Show period from</Typography>
+            ) : null}
             <DatePicker
               wrapperClassName={styles.datePickerInput}
+              popperClassName={styles.popperStyle}
               selected={startDate}
               onChange={(date) => setStartDate(date)}
               selectsStart
               startDate={startDate}
               endDate={endDate}
+              placeholderText={isMobile ? 'From' : ''}
             />
 
-            {/* <div style={{margin: '0px 10px'}}>to </div> */}
-            <Typography variant="h4" sx={{color: 'rgba(255, 255, 255, 0.7)'}}>to </Typography>
+            {!isMobile ? (
+              <Typography variant="h4" sx={{color: 'rgba(255, 255, 255, 0.7)'}}>to </Typography>
+            ) : null}
             <DatePicker
               wrapperClassName={styles.datePickerInput}
+              popperClassName={styles.popperStyle}
               selected={endDate}
               onChange={(date) => setEndDate(date)}
               selectsEnd
               startDate={startDate}
               endDate={endDate}
               minDate={startDate}
+              placeholderText={isMobile ? 'To' : ''}
             />
           </Box>
         </Box>
