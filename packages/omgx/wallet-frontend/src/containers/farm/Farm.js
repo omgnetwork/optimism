@@ -24,10 +24,12 @@ import { getFarmInfo, getFee } from 'actions/farmAction'
 import { openError } from 'actions/uiAction';
 
 import ListFarm from 'components/listFarm/listFarm'
+import Tabs from 'components/tabs/Tabs'
+import AlertIcon from 'components/icons/AlertIcon'
 import networkService from 'services/networkService'
 
 import * as S from './Farm.styles'
-import { Alert, Box, Tab, Tabs } from '@material-ui/core';
+import { Alert, Box, Typography } from '@material-ui/core';
 import PageHeader from 'components/pageHeader/PageHeader';
 import { tableHeadList } from './tableHeadList';
 import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher';
@@ -75,7 +77,7 @@ class Farm extends React.Component {
       userInfo,
       layer1,
       layer2,
-      value: 0
+      value: 'L1 Liquidity Pool'
     }
 
   }
@@ -187,11 +189,45 @@ class Farm extends React.Component {
 
         <Box sx={{ my: 3, width: '100%' }}>
           <Box sx={{ mb: 2 }}>
-            <Tabs value={value} onChange={this.handleChange} aria-label="basic tabs example">
-              <Tab label="L1 Liquidity Pool" />
-              <Tab label="L2 Liquidity Pool" />
-            </Tabs>
+            <Tabs 
+              activeTab={value}
+              onClick={(t) => this.handleChange(null, t)} 
+              aria-label="basic tabs example"
+              tabs={["L1 Liquidity Pool", "L2 Liquidity Pool"]}
+            />
           </Box>
+
+          {networkLayer === 'L2' && value === 'L1 Liquidity Pool' &&
+            <S.LayerAlert>
+              <Box className="info">
+                <AlertIcon /> 
+                <Typography 
+                  sx={{wordBreak:'break-all', marginLeft: '10px'}}
+                  variant="body1"
+                  component="p"
+                >
+                  Note: MetaMask is set to L2. To interact with the L1 liquidity pool, please switch MetaMask to L1.
+                </Typography>
+              </Box>
+              <LayerSwitcher isButton={true} />
+            </S.LayerAlert>
+          }
+
+          {networkLayer === 'L1' && value === 'L2 Liquidity Pool' &&
+            <S.LayerAlert>
+              <Box className="info">
+                <AlertIcon />
+                <Typography 
+                  sx={{wordBreak:'break-all', marginLeft: '10px'}}
+                  variant="body1"
+                  component="p"
+                >
+                  Note: MetaMask is set to L1. To interact with the L2 liquidity pool, please switch MetaMask to L2.
+                </Typography>
+              </Box>
+              <LayerSwitcher isButton={true} />
+            </S.LayerAlert>
+          }
 
           {!isMobile ? (
             <S.TableHeading>
@@ -205,18 +241,7 @@ class Farm extends React.Component {
             </S.TableHeading>
           ) : (null)}
 
-
-          <TabPanel value={value} index={0}>
-            {networkLayer === 'L2' &&
-              <Alert severity="info"
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <LayerSwitcher />
-              </Alert>
-            }
+          {value === 'L1 Liquidity Pool' &&
             <Box>
               {Object.keys(poolInfo.L1LP).map((v, i) => {
                 const ret = this.getBalance(v, 'L1')
@@ -232,20 +257,9 @@ class Farm extends React.Component {
                   />
                 )
               })}
-            </Box>
-          </TabPanel>
+            </Box>}
 
-          <TabPanel value={value} index={1}>
-            {networkLayer === 'L1' &&
-              <Alert severity="info"
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <LayerSwitcher />
-              </Alert>
-            }
+          {value === 'L2 Liquidity Pool' &&
             <Box>
               {Object.keys(poolInfo.L2LP).map((v, i) => {
                 const ret = this.getBalance(v, 'L2')
@@ -262,7 +276,7 @@ class Farm extends React.Component {
                 )
               })}
             </Box>
-          </TabPanel>
+          }
         </Box>
       </>
     )
