@@ -63,3 +63,21 @@ export const ButtonStyle = styled.div`
   font-weight: 600;
   cursor: ${(props) => props.walletEnabled !== false ? 'inherit' : 'pointer'};
 `;
+
+
+export const LayerSwitch = styled.div`
+  margin-left: 15px;
+  padding: 5px;
+  border-radius: 16px;
+  background: #3C5DFC;
+  cursor: pointer;
+  span {
+    padding: 5px 15px;
+    border-radius: 16px;
+
+    &.active { 
+      color: #3c5dfc;
+      background: white;
+    }
+  }
+`;

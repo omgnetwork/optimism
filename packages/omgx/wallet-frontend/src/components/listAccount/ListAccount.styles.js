@@ -38,3 +38,12 @@ export const TableBody = styled(Box)`
   gap: 5px;
   text-align: center;
 `;
+
+export const AccountAlertBox = styled(Box)`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  p {
+    flex: 1
+  }
+`

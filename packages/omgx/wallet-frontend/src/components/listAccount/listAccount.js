@@ -11,6 +11,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { Box, Typography, Fade } from '@material-ui/core'
 import * as S from './ListAccount.styles'
 import EthereumIcon from 'components/icons/EthereumIcon'
+import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher'
 
 class ListAccount extends React.Component {
   
@@ -130,19 +131,22 @@ class ListAccount extends React.Component {
           <Fade in={dropDownBox}>
             <S.DropdownWrapper>
               {!enabled && chain === 'L1' &&
-                <Box>
-                  <Typography variant="body2" component="p">
-                      MetaMask is set to L2. To transact on L1, please click "SWITCH LAYER" in the sidebar.
-                  </Typography>
-              </Box>
+                  <S.AccountAlertBox
+                  >
+                    <Typography variant="body2" component="p">
+                      MetaMask is set to L2. To transact on L1, - SWITCH LAYER to L1
+                    </Typography>
+                    <LayerSwitcher isButton={true} />
+                  </S.AccountAlertBox>
               }
 
               {!enabled && chain === 'L2' &&
-                <Box>
+                <S.AccountAlertBox>
                   <Typography variant="body2" component="p">
-                    MetaMask is set to L1. To transact on L2, please click "SWITCH LAYER" in the sidebar.
+                    MetaMask is set to L1. To transact on L2, - SWITCH LAYER to L2
                   </Typography>
-                </Box>
+                  <LayerSwitcher isButton={true} />
+                </S.AccountAlertBox>
               }
 
               {enabled && chain === 'L1' &&

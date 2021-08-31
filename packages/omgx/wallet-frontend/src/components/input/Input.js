@@ -61,7 +61,7 @@ function Input({
   const theme = useTheme();
 
   return (
-    <S.Wrapper newStyle={newStyle}>
+    <S.Wrapper newstyle={newStyle ? 1 : 0}>
       {unit && (
         <S.UnitContent>
           <div>
@@ -89,7 +89,7 @@ function Input({
           error={overMax}
           InputProps={{ disableUnderline: true }}
           sx={sx}
-          newStyle={newStyle}
+          newstyle={newStyle ? 1 : 0}
         />
       </S.InputWrapper>
 

@@ -12,6 +12,8 @@ import networkService from 'services/networkService'
 import WrongNetworkModal from 'containers/modals/wrongnetwork/WrongNetworkModal'
 import { selectModalState } from 'selectors/uiSelector'
 
+import NetworkIcon from 'components/icons/NetworkIcon'
+
 function NetworkSwitcher({ walletEnabled }) {
 
   const dispatch = useDispatch()
@@ -29,13 +31,11 @@ function NetworkSwitcher({ walletEnabled }) {
   for (var prop in networks) allNetworks.push(prop)
 
   const dispatchSetNetwork = useCallback((network) => {
-    console.log("dispatchSetNetwork:",network)
     dispatch(setNetwork(network))
 
     async function initializeAccounts () {
       const initialized = await networkService.initializeAccounts(network);
       if (initialized === 'wrongnetwork') {
-        console.log('wrongnetwork')
         return setWrongNetwork(true)
       }
     }
@@ -74,9 +74,15 @@ function NetworkSwitcher({ walletEnabled }) {
           <S.NetWorkStyle 
             onClick={()=>{setShowAllNetworks(prev => !prev)}}
           >
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
-              <Typography variant="body1">NETWORK: {masterConfig}</Typography>
+            <NetworkIcon />
+            <Box sx={{
+              display: 'flex',
+              margin: '10px 0 10px 20px',
+              color: 'white',
+              alignItems: 'center',
+              gap: 2
+            }} >
+              <Typography variant="body1">{masterConfig}</Typography>
             </Box>
 
             <S.Chevron
