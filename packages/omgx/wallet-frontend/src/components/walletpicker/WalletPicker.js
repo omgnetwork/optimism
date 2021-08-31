@@ -33,10 +33,14 @@ import { getAllNetworks } from 'util/masterConfig'
 import { isChangingChain } from 'util/changeChain'
 import * as S from "./WalletPicker.styles"
 import { ReactComponent as Fox } from './../../images/icons/fox-icon.svg'
-import { Container, Grid, useMediaQuery } from '@material-ui/core'
+import { ReactComponent as Arrow } from './../../images/icons/arrow-right.svg';
+import { Link as RouterLink } from 'react-router-dom';
+import { Container, Grid, Link, useMediaQuery } from '@material-ui/core'
 import Typography from '@material-ui/core/Typography'
 import { styled } from '@material-ui/core/styles'
 import { useTheme } from '@emotion/react'
+import { grey } from '@material-ui/core/colors'
+import { useHistory } from 'react-router-dom'
 
 const Root = styled('div')(({ theme }) => ({
   paddingTop: theme.spacing(10),
@@ -46,11 +50,12 @@ const Root = styled('div')(({ theme }) => ({
 function WalletPicker ({ onEnable, enabled }) {
 
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const [ walletEnabled, setWalletEnabled ] = useState(false);
   const [ accountsEnabled, setAccountsEnabled ] = useState(false);
   const [ wrongNetwork, setWrongNetwork ] = useState(false);
-  
+
   const walletMethod = useSelector(selectWalletMethod())
   const masterConfig = useSelector(selectNetwork())
 
@@ -58,7 +63,7 @@ function WalletPicker ({ onEnable, enabled }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const wrongNetworkModalState = useSelector(selectModalState('wrongNetworkModal'));
-  
+
   const dispatchSetWalletMethod = useCallback((methodName) => {
     dispatch(setWalletMethod(methodName));
   }, [ dispatch ])
@@ -71,7 +76,7 @@ function WalletPicker ({ onEnable, enabled }) {
 
     async function enableBrowserWallet () {
       //console.log("enableBrowserWallet() for",masterConfig)
-      //default to mainnet for normal user, unless set otherwise later 
+      //default to mainnet for normal user, unless set otherwise later
       //which is then captured in the localStorage cache
       const selectedNetwork = masterConfig ? masterConfig : "mainnet"
       const walletEnabled = await networkService.enableBrowserWallet(selectedNetwork);
@@ -154,8 +159,20 @@ function WalletPicker ({ onEnable, enabled }) {
                 Connect a Wallet to access BOBA
               </Typography>
               <S.Subtitle variant="body1" component="p" paragraph={true}>
-                  Select a wallet to connect to BOBA.
+                Select a wallet to connect to BOBA.
               </S.Subtitle>
+              <S.WrapperLink display="flex">
+                <Link
+                  component={RouterLink}
+                  style={{ color: grey[500]}}
+                  variant="body1"
+                  underline="hover"
+                  to="/learn"
+                >
+                  More about OMGX and how L2 work
+                </Link>
+                <Arrow />
+              </S.WrapperLink>
             </Grid>
 
             <Grid item xs={12} md={6}>

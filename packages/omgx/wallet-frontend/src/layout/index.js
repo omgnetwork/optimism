@@ -22,6 +22,7 @@ import Alert from 'components/alert/Alert';
 import WalletPicker from 'components/walletpicker/WalletPicker';
 import Home from 'containers/home/Home';
 import Notification from 'containers/notification/Notification';
+import Learn from 'pages/learn';
 import React, { Suspense, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -243,6 +244,7 @@ function App () {
                     })
                   } */}
                   <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />} />
+                  <Route exact path="/learn" component={()=> <Learn enabled={enabled} onEnable={setEnabled} />} />
                 </Switch>
               </Suspense>
 

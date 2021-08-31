@@ -46,6 +46,7 @@ import FarmWithdrawModal from 'containers/modals/farm/FarmWithdrawModal';
 //Wallet Functions
 import Account from 'containers/account/Account';
 import Transactions from 'containers/transactions/History';
+import Learn from 'pages/learn';
 
 //NFT Example Page
 import NFT from 'containers/nft/Nft';
@@ -191,6 +192,9 @@ function Home () {
           }
           {pageDisplay === "Farm" &&
             <FarmWrapper/>
+          }
+          {pageDisplay === "Learn" &&
+            <Learn/>
           }
         </Container>
       </Box>

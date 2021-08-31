@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box } from '@material-ui/core';
+import { Link as RouterLink } from 'react-router-dom';
+import { Box, Link } from '@material-ui/core';
 import networkService from 'services/networkService';
 import truncate from 'truncate-middle';
 import * as S from './WalletAddress.styles';
@@ -8,6 +9,18 @@ import Copy from 'components/copy/Copy';
 
 const WalletAddress = () => {
   const wAddress = networkService.account ? truncate(networkService.account, 6, 4, '...') : '';
+  if (!wAddress || wAddress === '') {
+    return (
+      <Link
+        component={RouterLink}
+        variant="body1"
+        underline="hover"
+        to="/"
+      >
+        Go back
+      </Link>
+    )
+  }
   return (
     <S.WalletPill>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
