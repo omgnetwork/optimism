@@ -4,8 +4,9 @@ const ethers = require('ethers');
 const DatabaseService = require('./database.service');
 const OptimismEnv = require('./utilities/optimismEnv');
 const fetch = require('node-fetch');
+const { sleep } = require('@eth-optimism/core-utils')
 
-class MonitorService extends OptimismEnv {
+class BlockMonitorService extends OptimismEnv {
   constructor() {
     super(...arguments);
 
@@ -33,7 +34,7 @@ class MonitorService extends OptimismEnv {
               this.logger.info('Unable to connect to L1 network', {
                   retryAttemptsRemaining: 10 - i,
               });
-              await this.sleep(1000);
+              await sleep(1000);
           }
           else {
               throw new Error(`Unable to connect to the L1 network, check that your L1 endpoint is correct.`);
@@ -52,7 +53,7 @@ class MonitorService extends OptimismEnv {
               this.logger.info('Unable to connect to L2 network', {
                   retryAttemptsRemaining: 10 - i,
               });
-              await this.sleep(1000);
+              await sleep(1000);
           }
           else {
               throw new Error(`Unable to connect to the L2 network, check that your L2 endpoint is correct.`);
@@ -76,7 +77,7 @@ class MonitorService extends OptimismEnv {
     this.latestBlock = await this.L2Provider.getBlockNumber();
 
     // check the latest block on MySQL
-    let latestSQLBlockQuery = await this.databaseService.getNewestBlock();
+    let latestSQLBlockQuery = await this.databaseService.getNewestBlockFromBlockTable();
     let latestSQLBlock = latestSQLBlockQuery[0]['MAX(blockNumber)'];
 
     // get the blocks, transactions and receipts
@@ -112,6 +113,7 @@ class MonitorService extends OptimismEnv {
         receiptData = await this.getCrossDomainMessageStatusL1(receiptData);
       }
       await this.databaseService.insertReceiptData(receiptData);
+      await sleep(5);
     }
 
     // update scannedLastBlock
@@ -178,7 +180,7 @@ class MonitorService extends OptimismEnv {
       // this.logger.info('No new block found.');
     }
 
-    await this.sleep(this.transactionMonitorInterval);
+    await sleep(this.transactionMonitorInterval);
   }
 
   async startCrossDomainMessageMonitor() {
@@ -202,7 +204,7 @@ class MonitorService extends OptimismEnv {
 
       for (let receiptData of crossDomainData) {
         if(promiseCount % this.L2sleepThresh === 0){
-          await this.sleep(2000);
+          await sleep(2000);
         }
         // if its time check cross domain message finalization
         if(receiptData.fastRelay){
@@ -229,7 +231,7 @@ class MonitorService extends OptimismEnv {
 
     this.logger.info(`End searching cross domain messages. Sleeping ${this.crossDomainMessageMonitorInterval} ms...`);
 
-    await this.sleep(this.crossDomainMessageMonitorInterval);
+    await sleep(this.crossDomainMessageMonitorInterval);
   }
 
   async getChainData(startingBlock, endingBlock) {
@@ -245,7 +247,7 @@ class MonitorService extends OptimismEnv {
           promisesReceipt.push(this.L2Provider.getTransactionReceipt(i.hash));
         });
       }
-      this.sleep(2000);
+      sleep(2000);
     }
     const receiptsData = await Promise.all(promisesReceipt);
 
@@ -427,7 +429,7 @@ class MonitorService extends OptimismEnv {
             return result;
         } catch (error) {
           console.log(`${func}returned an error!`, error);
-          await this.sleep(1000);
+          await sleep(1000);
         }
       }
     })();
@@ -436,4 +438,4 @@ class MonitorService extends OptimismEnv {
 
 
 
-module.exports = MonitorService;
+module.exports = BlockMonitorService;

@@ -26,6 +26,7 @@ const DEPLOYER_PRIVATE_KEY = env.DEPLOYER_PRIVATE_KEY;
 
 const TRANSACTION_MONITOR_INTERVAL = env.TRANSACTION_MONITOR_INTERVAL || 60000;
 const CROSS_DOMAIN_MESSAGE_MONITOR_INTERVAL = env.CROSS_DOMAIN_MESSAGE_MONITOR_INTERVAL || 60 * 1000;
+const STATE_ROOT_MONITOR_INTERVAL = env.STATE_ROOT_MONITOR_INTERVAL || 60 * 1000;
 
 const SQL_DISCONNECTED = "disconnected";
 
@@ -38,6 +39,9 @@ const L2_RATE_LIMIT = 500;
 const L2_SLEEP_THRESH = 100;
 
 const FILTER_ENDPOINT = env.FILTER_ENDPOINT;
+
+const STATE_ROOT_MONITOR_START_BLOCK = env.STATE_ROOT_MONITOR_START_BLOCK || 0;
+const STATE_ROOT_MONITOR_LOG_INTERVAL = env.STATE_ROOT_MONITOR_LOG_INTERVAL || 2000;
 
 class OptimismEnv {
   constructor() {
@@ -60,6 +64,7 @@ class OptimismEnv {
     this.numberBlockToFetch = 10000000;
     this.transactionMonitorInterval = TRANSACTION_MONITOR_INTERVAL;
     this.crossDomainMessageMonitorInterval = CROSS_DOMAIN_MESSAGE_MONITOR_INTERVAL;
+    this.stateRootMonitorInterval = STATE_ROOT_MONITOR_INTERVAL;
 
     this.whitelistSleep = WHITELIST_SLEEP;
     this.nonWhitelistSleep = NON_WHITELIST_SLEEP;
@@ -70,7 +75,6 @@ class OptimismEnv {
     this.L2sleepThresh = L2_SLEEP_THRESH;
 
     this.logger = new core_utils_1.Logger({ name: this.name });
-    this.sleep = util.promisify(setTimeout);
 
     this.sqlDisconnected = SQL_DISCONNECTED;
 
@@ -81,8 +85,12 @@ class OptimismEnv {
     this.databaseConnectedMutex = new Mutex();
 
     this.OVM_L2CrossDomainMessengerContract = null;
+    this.OVM_StateCommitmentChainContract = null;
 
     this.filterEndpoint = FILTER_ENDPOINT;
+
+    this.stateRootMonitorStartBlock = STATE_ROOT_MONITOR_START_BLOCK;
+    this.stateRootMonitorLogInterval = STATE_ROOT_MONITOR_LOG_INTERVAL;
   }
 
   async initOptimismEnv() {
@@ -97,10 +105,17 @@ class OptimismEnv {
       OVM_L1CrossDomainMessenger: this.OVM_L1CrossDomainMessenger,
       OVM_L1CrossDomainMessengerFast: this.OVM_L1CrossDomainMessengerFast,
     });
+    // Load L2 CDM
     this.OVM_L2CrossDomainMessengerContract = await loadContractFromManager({
       name: 'OVM_L2CrossDomainMessenger',
       Lib_AddressManager: addressManager,
       provider: this.L2Provider,
+    });
+    // Load SCC
+    this.OVM_StateCommitmentChainContract = await loadContractFromManager({
+      name: 'OVM_StateCommitmentChain',
+      Lib_AddressManager: addressManager,
+      provider: this.L1Provider,
     });
     this.logger.info("Set up")
   }

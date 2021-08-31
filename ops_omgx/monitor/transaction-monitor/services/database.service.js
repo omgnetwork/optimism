@@ -78,6 +78,18 @@ class DatabaseService extends OptimismEnv{
         PRIMARY KEY ( blockNumber )
       )`
     );
+    await this.query(`CREATE TABLE IF NOT EXISTS stateRoot
+      (
+        hash VARCHAR(255) NOT NULL,
+        blockHash VARCHAR(255) NOT NULL,
+        blockNumber INT NOT NULL,
+        stateRootHash VARCHAR(255),
+        stateRootBlockNumber INT,
+        stateRootBlockHash VARCHAR(255),
+        stateRootBlockTimestamp INT,
+        PRIMARY KEY ( blockNumber )
+      )`
+    );
     this.logger.info('Initialized the database.');
   }
 
@@ -161,9 +173,27 @@ class DatabaseService extends OptimismEnv{
     `);
   }
 
-  async getNewestBlock(){
+  async insertStateRootData(stateRootData) {
+    await this.query(`USE ${this.MySQLDatabaseName}`);
+    await this.query(`INSERT IGNORE INTO stateRoot
+      SET hash='${stateRootData.hash}',
+      blockHash='${stateRootData.blockHash}',
+      blockNumber=${Number(stateRootData.blockNumber)},
+      stateRootHash='${stateRootData.stateRootHash}',
+      stateRootBlockNumber=${Number(stateRootData.stateRootBlockNumber)},
+      stateRootBlockHash='${stateRootData.stateRootBlockHash}',
+      stateRootBlockTimestamp='${Number(stateRootData.stateRootBlockTimestamp)}'
+  `);
+  }
+
+  async getNewestBlockFromBlockTable() {
     await this.query(`USE ${this.MySQLDatabaseName}`);
     return await this.query(`SELECT MAX(blockNumber) from block`);
+  }
+
+  async getNewestBlockFromStateRootTable() {
+    await this.query(`USE ${this.MySQLDatabaseName}`);
+    return await this.query(`SELECT MAX(stateRootBlockNumber) from stateRoot`);
   }
 }
 

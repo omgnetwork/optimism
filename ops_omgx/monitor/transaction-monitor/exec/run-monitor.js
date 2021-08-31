@@ -1,29 +1,36 @@
 #!/usr/bin/env node
 
-const MonitorService = require('../services/monitor.service');
+const BlockMonitorService = require('../services/blockMonitor');
+const stateRootMonitorService = require('../services/stateRootMonitor');
 
 const loop = async (func) => {
   while (true) {
     try {
       await func();
     } catch (error) {
-      console.log('Unhandled exception during monitor transaction and cross domain message', {
+      console.log('Unhandled exception during monitor service', {
         message: error.toString(),
         stack: error.stack,
         code: error.code,
       });
-      break;
     }
   }
 }
 
 const main = async () => {
-  const service = new MonitorService();
-  await service.initConnection();
-  await service.initScan();
+  // state root
+  const stateRootService = new stateRootMonitorService();
+  await stateRootService.initConnection();
 
-  loop(() => service.startTransactionMonitor())
-  loop(() => service.startCrossDomainMessageMonitor())
+  loop(() => stateRootService.startStateRootMonitor())
+
+  // block
+  const blockService = new BlockMonitorService();
+  await blockService.initConnection();
+  await blockService.initScan();
+
+  loop(() => blockService.startTransactionMonitor())
+  loop(() => blockService.startCrossDomainMessageMonitor())
 }
 
 (async () => {
