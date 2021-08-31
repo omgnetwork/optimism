@@ -1,4 +1,4 @@
-## Deploying on Rinkeby-Boba Network
+# Deploying on Rinkeby-Boba Network
 
 
 Instructions or Deploying Compound Governance Protocol on Rinkeby-Boba.
@@ -191,7 +191,7 @@ First paste the contract addresses into the file `networks/rinkeby-boba.json`. U
 ```
 
 
-# Initiating Timelock
+### Initiating Timelock
 This step is necessary in order to link the Governor contract to the Timelock contract.
 Run the following command. Note running this program may take some time please be patient.
 ```bash
@@ -216,7 +216,7 @@ queued setPendingAdmin
 execute setPendingAdmin
 Attempt: 1
 	Timestamp: 1630448398
-	Transaction hasn\'t surpassed time lock
+	Transaction hasn't surpassed time lock
 
 Attempt: 2
 	Timestamp: 1630448593
@@ -232,17 +232,17 @@ queued initiate
 execute initiate
 Attempt: 1
 	Timestamp: 1630448788
-	Transaction hasn\'t surpassed time lock
+	Transaction hasn't surpassed time lock
 
 Attempt: 2
 	Timestamp: 1630448788
-	Transaction hasn\'t surpassed time lock
+	Transaction hasn't surpassed time lock
 
 ...
 
 Attempt: 18
 	Timestamp: 1630448788
-	Transaction hasn\'t surpassed time lock
+	Transaction hasn't surpassed time lock
 
 Attempt: 19
 	Timestamp: 1630449178
@@ -250,7 +250,7 @@ Executed initiate
 ✨  Done in 836.14s.
 ```
 
-# Submitting a Proposal, Voting, and Executing
+## Submitting a Proposal, Voting, and Executing
 This section will guide you in submitting a poroposal, voting on it, and executing it. The file `scripts/submitProposal.js` does all of this. The proposal that it will submit is one that reduces the number of votes necessary to submit a proposal to 65000.
 
 Running this script will take time, approximately 15 minutes.
