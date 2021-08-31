@@ -67,6 +67,7 @@ function StyledTable({
                   <TransactionTableRow
                     index={index}
                     chainLink={chainLink}
+                    key={index}
                     {...item}
                   />
                 )}
