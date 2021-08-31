@@ -52,7 +52,7 @@ export const Dropdown = styled.div`
   display: flex;
   flex-direction: column;
   position: absolute;
-  right: 0;
+  left: 0;
   top: 27px;
   background: rgba(0,0,0,0.9);
   border-radius: 20px;
