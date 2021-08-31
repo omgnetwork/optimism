@@ -153,7 +153,7 @@ function Exits({ searchHistory, transactions, chainLink }) {
               <Box>
                 <S.Content>
                   {!renderExits.length && !loading && (
-                    <div className={styles.disclaimer}>Exit history coming soon...</div>
+                    <div className={styles.disclaimer}>Scanning for exits...</div>
                   )}
                   {!renderExits.length && loading && (
                     <div className={styles.disclaimer}>Loading...</div>

@@ -13,14 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 
-import Tooltip from 'components/tooltip/Tooltip';
-import { Button as ButtonMUI } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import LinkIcon from 'components/icons/LinkIcon';
-import * as styles from './Transaction.module.scss';
-import * as S from './Transaction.styles';
+import Tooltip from 'components/tooltip/Tooltip'
+import { Button as ButtonMUI } from '@material-ui/core'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+import LinkIcon from 'components/icons/LinkIcon'
+import * as styles from './Transaction.module.scss'
+import * as S from './Transaction.styles'
 
 function Transaction({
   link,
@@ -35,7 +35,7 @@ function Transaction({
   typeTX,
   blockNumber,
   tooltip = '',
-  detail = {}
+  detail
 }) {
 
   const [dropDownBox, setDropDownBox] = useState(false);
@@ -83,9 +83,11 @@ function Transaction({
   }
 
   function renderDetail() {
+    
     if (!detail) {
-      return null;
+      return null
     }
+    
     return <>
       <div className={`${styles.subTitle} ${styles.viewMore}`} style={{ cursor: 'pointer' }}
         onClick={() => {
@@ -123,6 +125,7 @@ function Transaction({
   }
 
   function renderDetailRedesign() {
+
     if (!detail) {
       return null
     }
@@ -229,7 +232,7 @@ function Transaction({
         <div className={styles.muted}>{typeTX}</div>
       </S.TableCell>
       {!!detail && <S.TableCell sx={{
-        gap: "5px",
+        gap: '5px',
         alignItems: 'flex-end !important',
         paddingRight: '30px',
         color: 'rgba(255, 255, 255, 0.5)',

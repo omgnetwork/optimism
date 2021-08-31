@@ -52,19 +52,12 @@ import NFT from 'containers/nft/Nft';
 import MobileHeader from 'components/mobileheader/MobileHeader';
 import MobileMenu from 'components/mobilemenu/MobileMenu';
 
-// Farm
-import Farm from 'containers/farm/Farm';
+import { useTheme } from '@material-ui/core/styles'
+import { Box, Container, useMediaQuery } from '@material-ui/core'
+import MainMenu from 'components/mainMenu/MainMenu'
+import FarmWrapper from 'containers/farm/FarmWrapper'
 
-// import logo from 'images/omgx.png';
-import logo from 'images/logo-boba.svg';
-
-import * as styles from './Home.module.scss';
-import { useTheme } from '@material-ui/core/styles';
-import { Box, Container, useMediaQuery } from '@material-ui/core';
-import MainMenu from 'components/mainMenu/MainMenu';
-import FarmWrapper from 'containers/farm/FarmWrapper';
-
-const POLL_INTERVAL = 5000; //milliseconds
+const POLL_INTERVAL = 5000 //milliseconds
 
 function Home () {
 

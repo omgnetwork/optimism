@@ -6,38 +6,21 @@ export const menuItems = [
     url: "/"
   },
   {
-    key: 'Farm',
-    icon: "EarnIcon",
-    title: "Earn",
-    url: "#",
-    // items: [
-    //   {
-    //     icon: "PoolIcon",
-    //     title: "Pool",
-    //     url: "/pool"
-    //   },
-    //   {
-    //     icon: "FarmIcon",
-    //     title: "Farm",
-    //     url: "/farm"
-    //   }
-    // ]
-  },
-  {
     key: 'History',
     icon: "HistoryIcon",
     title: "Transaction History",
     url: "/history"
   },
   {
+    key: 'Farm',
+    icon: "EarnIcon",
+    title: "Earn",
+    url: "#",
+  },
+  {
     key: 'NFT',
     icon: "NFTIcon",
     title: "NFT",
-    url: "/learn"
+    url: "/"
   },
-  // {
-  //   icon: "LearnIcon",
-  //   title: "Learn",
-  //   url: "/learn"
-  // }
 ]

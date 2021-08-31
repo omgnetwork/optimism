@@ -2,17 +2,12 @@ import { useTheme } from '@emotion/react';
 import React, { useState } from 'react';
 import { menuItems } from '../menuItems';
 import * as S from './MenuItems.styles';
-import LearnIcon from 'components/icons/LearnIcon';
-import FarmIcon from 'components/icons/FarmIcon';
-import PoolIcon from 'components/icons/PoolIcon';
 import EarnIcon from 'components/icons/EarnIcon';
 import WalletIcon from 'components/icons/WalletIcon';
 import HistoryIcon from 'components/icons/HistoryIcon';
 import NFTIcon from 'components/icons/NFTIcon';
-// import chevron from 'images/chevron.svg';
 
 function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
-  // const [ openDropdown, setOpenDropdown ] = useState(['/pool', '/farm'].includes(window.location.pathname));
   const [ activeItem, setActiveItem ] = useState(false);
   const theme = useTheme();
   const isLight = theme.palette.mode === 'light';
@@ -21,9 +16,6 @@ function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
   const iconObj = {
     WalletIcon,
     EarnIcon,
-    LearnIcon,
-    FarmIcon,
-    PoolIcon,
     HistoryIcon,
     NFTIcon
   }

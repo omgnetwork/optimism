@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React from 'react';
-import { Snackbar } from '@material-ui/core';
+import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/core/Alert';
 
 function _Alert ({ children, open, onClose, type = 'success', duration = 3000, position = 0 }) {
@@ -23,9 +23,9 @@ function _Alert ({ children, open, onClose, type = 'success', duration = 3000, p
     marginTop: position,
   };
 
-  function Alert (props) {
-    return <MuiAlert elevation={6} variant='filled' {...props} />;
-  }
+  const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
 
   let autohide = 0;
   if(type === 'success') {
@@ -47,7 +47,8 @@ function _Alert ({ children, open, onClose, type = 'success', duration = 3000, p
     >
       <Alert
         onClose={onClose}
-        severity={type}>
+        severity={type}
+      >
         {children}
       </Alert>
     </Snackbar>

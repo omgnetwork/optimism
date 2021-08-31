@@ -143,7 +143,7 @@ function TransferModal ({ open, token }) {
                   <Box>
                     <Input
                       label="Enter Amount"
-                      placeholder="0,00"
+                      placeholder="0.00"
                       value={value}
                       type="number"
                       onChange={(i) => {setValue(i.target.value)}}

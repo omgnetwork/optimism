@@ -23,7 +23,7 @@ import { selectIsSynced } from 'selectors/statusSelector'
 
 import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector'
 
-import ListAccount from 'components/listAccount/listAccount';
+import ListAccount from 'components/listAccount/listAccount'
 
 import { logAmount } from 'util/amountConvert'
 import networkService from 'services/networkService'
@@ -40,31 +40,34 @@ import TabPanel from 'components/tabs/TabPanel'
 import Drink from '../../images/backgrounds/drink.png'
 import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon'
 
+import { openError } from 'actions/uiAction'
+
 function Account () {
-  const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
-  const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState(networkLayer === 'L1' ? 0 : 1);
 
-  const childBalance = useSelector(selectlayer2Balance, isEqual);
-  const rootBalance = useSelector(selectlayer1Balance, isEqual);
+  const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2'
+  const dispatch = useDispatch()
+  const [activeTab, setActiveTab] = useState(networkLayer === 'L1' ? 0 : 1)
 
-  const isSynced = useSelector(selectIsSynced);
-  const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]));
-  const tokenList = useSelector(selectTokens);
+  const childBalance = useSelector(selectlayer2Balance, isEqual)
+  const rootBalance = useSelector(selectlayer1Balance, isEqual)
 
-  const network = useSelector(selectNetwork());
+  const isSynced = useSelector(selectIsSynced)
+  const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]))
+  const tokenList = useSelector(selectTokens)
+
+  const network = useSelector(selectNetwork())
 
   const getLookupPrice = useCallback(()=>{
     const symbolList = Object.values(tokenList).map((i)=> {
       if(i.symbolL1 === 'ETH') {
         return 'ethereum'
       } else if(i.symbolL1 === 'OMG') {
-        return 'omisego'
+        return 'omg'
       } else {
         return i.symbolL1.toLowerCase()
       }
     });
-    dispatch(fetchLookUpPrice(symbolList));
+    dispatch(fetchLookUpPrice(symbolList))
   },[tokenList,dispatch])
 
   const getGasPrice = useCallback(() => {
@@ -75,9 +78,15 @@ function Account () {
   }, [dispatch, network, networkLayer])
 
   useEffect(()=>{
-    getLookupPrice();
+    getLookupPrice()
     getGasPrice()
   },[childBalance, rootBalance, getLookupPrice, getGasPrice])
+
+  useEffect(()=>{
+    if (network === 'mainnet') {
+      dispatch(openError('You are using Mainnet Beta. WARNING: the mainnet smart contracts are not fully audited and funds may be at risk. Please exercise caution when using Mainnet Beta.'))
+    }
+  },[dispatch, network])
 
   const disabled = criticalTransactionLoading || !isSynced
 
@@ -107,13 +116,16 @@ function Account () {
     </Box>
   )
 
+  const mobileL1 = network + ' L1'
+  const mobileL2 = 'BOBA L2 ' + network
+
   const L1Column = () => (
     <S.AccountWrapper >
       {!isMobile ? (
         <S.WrapperHeading>
-          <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>Ethereum Mainnet - L1</Typography>
+          <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>L1 ({network})</Typography>
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
-          {networkLayer === 'L1' ? <ActiveItem active={false} /> : null}
+          {networkLayer === 'L1' ? <ActiveItem active /> : null}
         </S.WrapperHeading>
       ) : (null)}
 
@@ -147,7 +159,7 @@ function Account () {
     <S.AccountWrapper>
       {!isMobile ? (
         <S.WrapperHeading>
-          <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>OMGX Mainnet - L2</Typography>
+          <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>BOBA L2 ({network})</Typography>
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
           {networkLayer === 'L2' ? <ActiveItem active /> : null}
         </S.WrapperHeading>
@@ -189,15 +201,15 @@ function Account () {
         </S.CardContentTag>
 
         <S.ContentGlass>
-          <img src={Drink} href="#" width={135} alt="Drink image"/>
+          <img src={Drink} href="#" width={135} alt="Boba Drink"/>
         </S.ContentGlass>
 
       </S.CardTag>
       {isMobile ? (
         <>
           <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, my: 2}}>
-            <Tab label="Ethereum Mainnet - L1" />
-            <Tab label="OMGX Mainnet - L2" />
+            <Tab label={mobileL1} />
+            <Tab label={mobileL2} />
           </Tabs>
           <TabPanel value={activeTab} index={0}>
             <L1Column />
