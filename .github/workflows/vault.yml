@@ -38,10 +38,12 @@ jobs:
       run: |
         mkdir -p $DATA_DIR
         sudo chown -R 100:1000 $DATA_DIR && sudo chmod -R 777 $DATA_DIR
-        docker-compose -f docker-compose.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml up -d l1_chain deployer vault
+        docker-compose -f docker-compose.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml up --build -d builder l1_chain deployer vault
     - name: Wait for Vault
       working-directory: ./ops
       run: |
+        sleep 30s
+        docker-compose -f docker-compose.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml logs
         while [ $(docker-compose -f docker-compose.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml logs | grep -c "Done with tests.") -ne 1 ];
         do
             sleep 1
