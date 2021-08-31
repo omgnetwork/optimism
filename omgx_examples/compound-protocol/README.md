@@ -249,3 +249,19 @@ Attempt: 19
 Executed initiate
 ✨  Done in 836.14s.
 ```
+
+# Submitting a Proposal, Voting, and Executing
+This section will guide you in submitting a poroposal, voting on it, and executing it. The file `scripts/submitProposal.js` does all of this. The proposal that it will submit is one that reduces the number of votes necessary to submit a proposal to 65000.
+
+Running this script will take time, approximately 15 minutes.
+
+```bash
+$ yarn submitProposal
+```
+You should expect output similar to the following:
+
+```bash
+
+```
+
+

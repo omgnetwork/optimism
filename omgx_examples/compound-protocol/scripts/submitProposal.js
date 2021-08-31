@@ -41,10 +41,7 @@ async function main(){
         governorBravoDelegator.address
     );
 
-    // const proposal = await governorBravo.proposals(9);
-    // console.log(`Proposal 1: ${proposal}`);
-    // governorBravo.cancel(5)
-    // return;
+
 
     const proposalStates = [
         'Pending',
@@ -59,39 +56,34 @@ async function main(){
 
     const value = await comp.balanceOf(wallet1.address);
     console.log('Comp power: ', value.toString());
-    // let newProposalThreshold = DECIMALS.mul(65000);
-    let addresses = [governorBravo.address];
-    let values = [0];
-    let signatures = ['_setProposalThreshold(uint256)'];
-    let calldatas = [ethers.utils.defaultAbiCoder.encode(
+    let addresses = [governorBravo.address]; // the address of the contract where the function will be called
+    let values = [0]; // the eth necessary to send to the contract above
+    let signatures = ['_setProposalThreshold(uint256)']; // the function that will carry out the proposal
+    let calldatas = [ethers.utils.defaultAbiCoder.encode( // the parameter for the above function
         ['uint256'],
-        [DECIMALS * BigInt(70000)] // 65000 * 10^18
+        [DECIMALS * BigInt(65000)] // 65000 * 10^18
     )];
-    let description = '#Changing Proposal Threshold to 65000 Comp';
+    let description = '#Changing Proposal Threshold to 65000 Comp'; // the description of the proposal
 
-    await comp.delegate(wallet1.address);
+    await comp.delegate(wallet1.address); // delegate votes to yourself
 
     console.log(
         'current votes: ',
         (await comp.getCurrentVotes(wallet1.address)).toString()
     );
 
-    // console.log(`Wait 5 minutes to make sure votes are processed.`);
-    // await sleep(300 * 1000);
+    console.log(`Wait 5 minutes to make sure votes are processed.`);
+    await sleep(300 * 1000);
 
-    // // THIS SECTION DOES ALL THE PROPOSING LOGIC YOU NEED TO
-    // // MAKE SURE THAT YOU'RE ONLY CALLING ONE OF THESE AT A TIME
-
-    // // console.log(`Proposal Count:${(await governorBravo.proposalCount())._hex}`);
-    // // governorBravo.cancel(7)
-    // // return;
+    // THIS SECTION DOES ALL THE PROPOSING LOGIC YOU NEED TO SUBMIT a Proposal
 
 
-    // // DO THIS FIRST
+
+    // DO THIS FIRST
 
     console.log(`Proposing`);
 
-
+    // submitting the proposal
     await governorBravo.propose(
     	addresses,
     	values,
@@ -101,25 +93,9 @@ async function main(){
     );
     sleep(15 * 1000);
     const proposalID = (await governorBravo.proposalCount())._hex;
-    // // let blockNumberAtProposal = await l2_provider.getBlockNumber();
-    // console.log('Success: Proposed');
-    // console.log('Proposal ID:', proposalID);
-    // // return;
-    // // console.log(`Proposal was made at block: ${blockNumberAtProposal}`);
-    // // console.log(`Voting begins at block: ${blockNumberAtProposal + 10}`);
 
-    // // DO THIS SECOND
 
-    // // let currBlock = await l2_provider.getBlockNumber();
-    // // while(blockNumberAtProposal + 10 > currBlock){
-    // //     console.log(`Voting time has not started yet. Current block: ${currBlock}`);
-    // //     await sleep(15 * 1000);
-    // //     currBlock = await l2_provider.getBlockNumber();
-    // // }
-    // // console.log(`Current block: ${currBlock}`);
-    // // await governorBravo.castVote(proposalID, 1);
-    // // console.log('vote cast');
-
+    // DO THIS SECOND
     console.log(`Casting Votes`);
 
     for(let i = 0; i < 30; i++){
@@ -134,14 +110,7 @@ async function main(){
                 await governorBravo.cancel(proposalID);
                 console.log(`Proposal failed and has been canceled, please try again`);
                 return;
-            } // else if(error.message === `execution reverted: GovernorBravo::castVoteInternal: voting is closed`){
-            //     console.log("\tVoting is closed\n");
-            // } else{
-            //     await governorBravo.cancel(proposalID);
-            //     console.log(`An unexpected error was thrown, the proposal has been canceled.`);
-            //     throw error;
-            // }
-            // console.log(error);
+            }
             console.log("\tVoting is closed\n");
         }
     }
@@ -151,16 +120,8 @@ async function main(){
 
 
 
-    // // DO THIS THIRD
-    // // console.log(`Voting ends at block: ${blockNumberAtProposal + 20}`);
-    // // currBlock = await l2_provider.getBlockNumber();
-    // // while(blockNumberAtProposal + 20 > currBlock){
-    // //     console.log(`Voting time has not ended yet. Current block: ${currBlock}`);
-    // //     await sleep(15 * 1000);
-    // //     currBlock = await l2_provider.getBlockNumber();
-    // // }
-    // await governorBravo.queue(proposalID);
-    // console.log('Queued');
+    // DO THIS THIRD
+
 
     console.log(`Queuing Proposal`);
 
@@ -177,21 +138,14 @@ async function main(){
                 console.log(`Proposal failed and has been canceled, please try again`);
                 return;
             }
-            // else if(error.message === `execution reverted: GovernorBravo::queue: proposal can only be queued if it is succeeded`){
-
-            // }else{
-            //     await governorBravo.cancel(proposalID);
-            //     console.log(`An unexpected error was thrown, the proposal has been canceled.`);
-            //     throw error;
-            // }
             console.log(`\tproposal can only be queued if it is succeeded`);
         }
     }
 
 
-    console.log(`Executing Transaction`);
+    console.log(`Executing Proposal`);
 
-    // // DO THIS FOURTH
+    // DO THIS FOURTH
     for(let i= 0; i < 30; i++){
         await sleep(15 * 1000);
         console.log(`Attempt: ${i + 1}`);
@@ -205,13 +159,7 @@ async function main(){
                 console.log(`Proposal failed and has been canceled, please try again`);
                 return;
             }
-            // else if(error.message === `execution reverted: GovernorBravo::execute: proposal can only be executed if it is queued`){
-            //     console.log(`\tproposal can only be executed if it is queued`);
-            // }else{
-            //     console.log(`An unexpected error was thrown, the proposal has been canceled.`);
-            //     await governorBravo.cancel(proposalID);
-            //     throw error;
-            // }
+
             console.log(`\tproposal can only be executed if it is queued`);
         }
     }
