@@ -1,14 +1,22 @@
-1. Install the node_modules.
+# The Boba DAO basic contracts
+
+1. Install
+
+Install the node_modules.
 
 ```
-yarn
+$ yarn
 ```
 
-2. Then, provide a `.env` with the private keys you want to use for deployment and testing. These private keys need to be funded.
+2. Provide .env
 
-3. Spin up the local `develop` stack as usual.
+Then, provide a `.env` with the private keys you want to use for deployment and testing. These private keys need to be funded.
 
-4. Compile and deploy the contracts. For example,
+3. Spin up local L1/L2
+
+Spin up the local `develop` stack as usual.
+
+4. Compile and deploy the contracts. For example, if you want to deploy to the local L1, ...
 
 ```
 yarn migrate:local_l1

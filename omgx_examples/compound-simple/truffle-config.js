@@ -23,9 +23,10 @@ const HDWalletProvider = require("@truffle/hdwallet-provider");
 require('dotenv').config();
 
 const env = process.env;
-const deployerPrivateKey = env.deployerPrivateKey
+const pk_0 = env.pk_0
 const pk_1 = env.pk_1
 const pk_2 = env.pk_2
+const REACT_APP_INFURA_ID = env.REACT_APP_INFURA_ID
 
 module.exports = {
 
@@ -40,7 +41,7 @@ module.exports = {
     local_l1: {
       provider: function () {
         return new HDWalletProvider({
-          privateKeys: [deployerPrivateKey, pk_1, pk_2],
+          privateKeys: [pk_0, pk_1, pk_2],
           providerOrUrl: 'http://127.0.0.1:9545',
         })
       },
@@ -50,13 +51,23 @@ module.exports = {
       //gasPrice: 15000000,
       //gas: 803900000,
     },
+    rinkeby_l1: {
+      provider: function () {
+        return new HDWalletProvider({
+          privateKeys: [pk_0, pk_1, pk_2],
+          providerOrUrl: `https://rinkeby.infura.io/v3/${REACT_APP_INFURA_ID}`,
+        })
+      },
+      network_id: 28,
+      host: `https://rinkeby.infura.io/v3/${REACT_APP_INFURA_ID}`,
+      gasPrice: 15000000,
+      gas: 165000000,
+    },
   },
-
   // Set default mocha options here, use special reporters etc.
   mocha: {
     // timeout: 100000
   },
-
   // Configure your compilers
   compilers: {
     solc: {
@@ -69,5 +80,4 @@ module.exports = {
       },
     },
   },
-
 }

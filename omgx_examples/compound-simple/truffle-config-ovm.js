@@ -23,9 +23,12 @@ const HDWalletProvider = require("@truffle/hdwallet-provider");
 require('dotenv').config();
 
 const env = process.env;
-const deployerPrivateKey = env.deployerPrivateKey
+
+const pk_0 = env.pk_0
 const pk_1 = env.pk_1
 const pk_2 = env.pk_2
+
+console.log(env)
 
 module.exports = {
 
@@ -35,7 +38,7 @@ module.exports = {
     local_l2: {
       provider: function () {
         return new HDWalletProvider({
-          privateKeys: [deployerPrivateKey, pk_1, pk_2],
+          privateKeys: [ pk_0, pk_1, pk_2 ],
           providerOrUrl: 'http://127.0.0.1:8545',
         })
       },
@@ -44,16 +47,15 @@ module.exports = {
       port: 8545,
       gasPrice: 15000000,
       gas: 50000000,
-      //gasPrice: 0,
-      //gas: 11000000,
-      //gasLimit: 6770000,
-      //gas: 154180127,
     },
     rinkeby_l2: {
       provider: function () {
         return new HDWalletProvider({
-          privateKeys: [deployerPrivateKey, pk_1, pk_2],
+          privateKeys: [ pk_0, pk_1, pk_2 ],
           providerOrUrl: 'https://rinkeby.boba.network',
+          //start at address_index 0 and load all three addresses
+          addressIndex: 0,
+          numberOfAddresses: 1
         })
       },
       network_id: 28,

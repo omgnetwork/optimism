@@ -7,6 +7,8 @@ const Timelock = artifacts.require('Timelock')
 const GovernorBravoDelegate = artifacts.require('GovernorBravoDelegate')
 const GovernorBravoDelegator = artifacts.require('GovernorBravoDelegator')
 
+require('dotenv').config()
+
 module.exports = async function (deployer, network, accounts) {
 
 // module.exports = function(deployer, network, accounts) {
@@ -19,24 +21,45 @@ module.exports = async function (deployer, network, accounts) {
 //   });
 // };
 
+  let gasSet = {}
+
+  if( network === 'rinkeby_l2' ) {
+    gasSet = {
+      gasPrice:  15000000,
+      gas: 165000000,
+    }
+  }
+
+  console.log("network:",network)
   console.log("accounts:",accounts)
 
-  //this is just the developer account?
-  //we really want this to return the 
-  const provider = new ethers.providers.JsonRpcProvider()
-  //let accounts = await provider.listAccounts()
+  const host = deployer.networks[network].host
+  const provider = new ethers.providers.JsonRpcProvider(host)
 
   // Deploy CToken, Timelock, GovernorBravoDelegate
   await deployer.deploy(CToken, accounts[0])
   const ctoken = await CToken.deployed()
   console.log("ctoken address:", ctoken.address)
 
+  //Let's move some CToken so others can vote
+  console.log("Distributing CTokens")
+  //from the zeroth, to the first
+  //and from the zeroth to the second
+  for (let i = 1; i < 3; i++) {
+    console.log("Account:",accounts[i])
+    await ctoken.transfer(accounts[i], ethers.utils.parseEther("1000000"))
+    await ctoken.delegate(accounts[i], { from: accounts[i] })
+  }
+  //why does this need delegate?
+  ctoken.delegate(accounts[0])
+
   //What does the zero mean?
   await deployer.deploy(Timelock, accounts[0], 0) //Increase Timelock
   const timelock = await Timelock.deployed()
   console.log("timelock address:", timelock.address)
 
-  await deployer.deploy(GovernorBravoDelegate)
+  await deployer.deploy(GovernorBravoDelegate, gasSet)
+
   const delegate = await GovernorBravoDelegate.deployed()
   console.log("delegate address:", delegate.address)
 
@@ -67,7 +90,7 @@ module.exports = async function (deployer, network, accounts) {
   // Set Delegator as pending admin
   let blockNumber = await provider.getBlockNumber()
   let block = await provider.getBlock(blockNumber)
-  let eta = block.timestamp + 3 //basically, wait for three seconds
+  let eta = block.timestamp + 3 //basically, wait for three seconds?
   
   console.log("Block:", block)
   console.log("ETA:", eta)
@@ -96,44 +119,29 @@ module.exports = async function (deployer, network, accounts) {
   //   });
   // };
 
-
   await timelock.queueTransaction(
     timelock.address,
     0, // What it this?
     "setPendingAdmin(address)",
     data,
     eta,
-    //{ 
-    //  gasPrice: 15000000,
-    //  gas: 50000000,
-    //}
-  );
+    gasSet
+  )
 
   const sleep = (timeout) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve();
       }, timeout);
-    });
-  };
-
-  console.log("Waiting for timelock...");
-
-  for (let i = 1; i < 3; i++) {
-    console.log("Account:",accounts[i])
-    await ctoken.transfer(accounts[i], ethers.utils.parseEther("1000000"))
-    await ctoken.delegate(accounts[i], { from: accounts[i] })
+    })
   }
-  ctoken.delegate(accounts[0])
+
+  console.log("Waiting for timelock...")
 
   await sleep(10000)
 
   block = await provider.getBlock(blockNumber)
   console.log("Block.timestamp after the 10s wait:", block.timestamp)
-
-  //const nonce = web3.eth.getTransactionCount(account);
-
-  console.log(timelock)
 
   await timelock.executeTransaction(
     timelock.address,
@@ -141,20 +149,10 @@ module.exports = async function (deployer, network, accounts) {
     "setPendingAdmin(address)",
     data,
     eta,
-    // {
-    //   nonce: 27 + 5 //increment by 5 or 6
-    // }
   )
 
   const GovernorBravo = await GovernorBravoDelegate.at(delegator.address);
   GovernorBravo._initiate();
-
-  // for (let i = 1; i < 3; i++) {
-  //   console.log("Account:",accounts[i])
-  //   await ctoken.transfer(accounts[i], ethers.utils.parseEther("1000000"));
-  //   await ctoken.delegate(accounts[i], { from: accounts[i] });
-  // }
-  // ctoken.delegate(accounts[0])
 
   await GovernorBravo.propose(
     [delegator.address],
