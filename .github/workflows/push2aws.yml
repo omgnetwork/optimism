@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - develop
+      - wallet-integration
 
 jobs:
   push2aws:
@@ -29,4 +30,4 @@ jobs:
       run: |
             cd ops_omgx
             rm -rf cloudformation/deployer-rinkeby.yaml
-            ./cfn-devenv.sh push2aws --from-tag ${{ github.sha }} --deploy-tag ${{ github.sha }}
+            ./cfn-devenv.sh push2aws --from-tag latest --deploy-tag ${{ github.sha }}

@@ -28,8 +28,8 @@ export class StateBatchSubmitter extends BatchSubmitter {
 
   constructor(
     batch_signer: BatchSigner,
-    l1Provider: providers.JsonRpcProvider,
-    l2Provider: providers.JsonRpcProvider,
+    l1Provider: providers.StaticJsonRpcProvider,
+    l2Provider: providers.StaticJsonRpcProvider,
     minTxSize: number,
     maxTxSize: number,
     maxBatchSize: number,

@@ -4,11 +4,18 @@ import * as Sentry from '@sentry/node'
 import { Logger, Metrics, createMetricsServer } from '@eth-optimism/common-ts'
 import { exit } from 'process'
 import { Signer, Wallet } from 'ethers'
-import { JsonRpcProvider, TransactionReceipt } from '@ethersproject/providers'
+import {
+  StaticJsonRpcProvider,
+  TransactionReceipt,
+} from '@ethersproject/providers'
 import * as dotenv from 'dotenv'
 import Config from 'bcfg'
 import { BatchSigner } from '../batch-submitter/batch-submitter'
-import { getBatchSignerAddress, getTransactionCountBlock, sendTransaction } from '../batch-submitter/provider-helper'
+import {
+  getBatchSignerAddress,
+  getTransactionCountBlock,
+  sendTransaction,
+} from '../batch-submitter/provider-helper'
 /* Internal Imports */
 import {
   TransactionBatchSubmitter,
@@ -137,25 +144,31 @@ export const run = async () => {
   )
 
   const getSequencerSigner = async (): Promise<BatchSigner> => {
+    const l1ProviderTmp = new StaticJsonRpcProvider(
+      requiredEnvVars.L1_NODE_WEB3_URL
+    )
 
     if (useHardhat) {
       if (!DEBUG_IMPERSONATE_SEQUENCER_ADDRESS) {
         throw new Error('Must pass DEBUG_IMPERSONATE_SEQUENCER_ADDRESS')
       }
-      await l1Provider.send('hardhat_impersonateAccount', [
+      await l1ProviderTmp.send('hardhat_impersonateAccount', [
         DEBUG_IMPERSONATE_SEQUENCER_ADDRESS,
       ])
-      return {signer: l1Provider.getSigner(DEBUG_IMPERSONATE_SEQUENCER_ADDRESS), address: undefined}
+      return {signer: l1ProviderTmp.getSigner(DEBUG_IMPERSONATE_SEQUENCER_ADDRESS), address: undefined}
     }
 
     if (SEQUENCER_ADDRESS) {
       return {signer: undefined, address: SEQUENCER_ADDRESS};
     }
     else if (SEQUENCER_PRIVATE_KEY) {
-      return {signer: new Wallet(SEQUENCER_PRIVATE_KEY, l1Provider), address: undefined}
+      return {
+        signer: new Wallet(SEQUENCER_PRIVATE_KEY, l1ProviderTmp),
+        address: undefined,
+      }
     } else if (SEQUENCER_MNEMONIC) {
       return {signer: Wallet.fromMnemonic(SEQUENCER_MNEMONIC, SEQUENCER_HD_PATH).connect(
-        l1Provider
+        l1ProviderTmp
       ), address: undefined}
     }
     throw new Error(
@@ -164,26 +177,35 @@ export const run = async () => {
   }
 
   const getProposerSigner = async (): Promise<BatchSigner> => {
+    const l1ProviderTmp = new StaticJsonRpcProvider(
+      requiredEnvVars.L1_NODE_WEB3_URL
+    )
 
     if (useHardhat) {
       if (!DEBUG_IMPERSONATE_PROPOSER_ADDRESS) {
         throw new Error('Must pass DEBUG_IMPERSONATE_PROPOSER_ADDRESS')
       }
-      await l1Provider.send('hardhat_impersonateAccount', [
+      await l1ProviderTmp.send('hardhat_impersonateAccount', [
         DEBUG_IMPERSONATE_PROPOSER_ADDRESS,
       ])
-      return {signer: l1Provider.getSigner(DEBUG_IMPERSONATE_PROPOSER_ADDRESS), address: undefined}
+      return {
+        signer: l1ProviderTmp.getSigner(DEBUG_IMPERSONATE_PROPOSER_ADDRESS),
+        address: undefined,
+      }
     }
 
     if (PROPOSER_ADDRESS) {
-      return {address: PROPOSER_ADDRESS, signer: undefined};
+      return { address: PROPOSER_ADDRESS, signer: undefined }
     }
     else if (PROPOSER_PRIVATE_KEY) {
-      return {signer: new Wallet(PROPOSER_PRIVATE_KEY, l1Provider), address: undefined}
+      return {
+        signer: new Wallet(PROPOSER_PRIVATE_KEY, l1ProviderTmp),
+        address: undefined,
+      }
     } else if (PROPOSER_MNEMONIC) {
-      return {signer: Wallet.fromMnemonic(PROPOSER_MNEMONIC, PROPOSER_HD_PATH).connect(
-        l1Provider
-      ), address: undefined}
+      return { signer: Wallet.fromMnemonic(PROPOSER_MNEMONIC, PROPOSER_HD_PATH).connect(
+        l1ProviderTmp
+      ), address: undefined }
     }
     throw new Error(
       'Must pass one of PROPOSER_PRIVATE_KEY, MNEMONIC, PROPOSER_MNEMONIC or PROPOSER_ADDRESS'
@@ -361,11 +383,11 @@ export const run = async () => {
   const clearPendingTxs = requiredEnvVars.CLEAR_PENDING_TXS
 
   const l2Provider = injectL2Context(
-    new JsonRpcProvider(requiredEnvVars.L2_NODE_WEB3_URL)
+    new StaticJsonRpcProvider(requiredEnvVars.L2_NODE_WEB3_URL)
   )
 
   const l1Provider = injectL2Context(
-    new JsonRpcProvider(requiredEnvVars.L1_NODE_WEB3_URL)
+    new StaticJsonRpcProvider(requiredEnvVars.L1_NODE_WEB3_URL)
   )
 
   const sequencerSigner: BatchSigner = await getSequencerSigner()

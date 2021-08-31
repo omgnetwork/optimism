@@ -50,8 +50,8 @@ export abstract class BatchSubmitter {
 
   constructor(
     readonly batchSigner: BatchSigner,
-    readonly l1Provider: providers.JsonRpcProvider,
-    readonly l2Provider: providers.JsonRpcProvider,
+    readonly l1Provider: providers.StaticJsonRpcProvider,
+    readonly l2Provider: providers.StaticJsonRpcProvider,
     readonly minTxSize: number,
     readonly maxTxSize: number,
     readonly maxBatchSize: number,
@@ -256,9 +256,9 @@ export abstract class BatchSubmitter {
 
     this.logger.info('Received transaction receipt', { receipt })
     this.logger.info(successMessage, {
-      block:receipt.blockNumber,
-      status:receipt.status,
-      txHash:receipt.transactionHash,
+      block: receipt.blockNumber,
+      status: receipt.status,
+      txHash: receipt.transactionHash,
     })
     this.metrics.batchesSubmitted.inc()
     this.metrics.submissionGasUsed.observe(
