@@ -1,5 +1,9 @@
 ## Deploying on Rinkeby-Boba Network
 
+
+Instructions or Deploying Compound Governance Protocol on Rinkeby-Boba.
+First add
+
 ```bash
 $ yarn
 $ yarn compile:ovm
