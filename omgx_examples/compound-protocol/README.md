@@ -261,7 +261,117 @@ $ yarn submitProposal
 You should expect output similar to the following:
 
 ```bash
+yarn run v1.22.10
+$ node scripts/submitProposal.js
+Comp power:  10000000000000000000000000
+current votes:  10000000000000000000000000
+Wait 5 minutes to make sure votes are processed.
+Proposing
+Casting Votes
+Attempt: 1
+	Voting is closed
 
+Attempt: 2
+	Voting is closed
+
+Attempt: 3
+	Voting is closed
+
+Attempt: 4
+	Voting is closed
+
+Attempt: 5
+	Voting is closed
+
+Attempt: 6
+	Voting is closed
+
+Attempt: 7
+	Voting is closed
+
+Attempt: 8
+	Voting is closed
+
+Attempt: 9
+Success: vote cast
+Queuing Proposal
+Attempt: 1
+	proposal can only be queued if it is succeeded
+Attempt: 2
+	proposal can only be queued if it is succeeded
+Attempt: 3
+	proposal can only be queued if it is succeeded
+Attempt: 4
+	proposal can only be queued if it is succeeded
+Attempt: 5
+	proposal can only be queued if it is succeeded
+Attempt: 6
+	proposal can only be queued if it is succeeded
+Attempt: 7
+	proposal can only be queued if it is succeeded
+Attempt: 8
+	proposal can only be queued if it is succeeded
+Attempt: 9
+	proposal can only be queued if it is succeeded
+Attempt: 10
+	proposal can only be queued if it is succeeded
+Attempt: 11
+	proposal can only be queued if it is succeeded
+Attempt: 12
+	proposal can only be queued if it is succeeded
+Attempt: 13
+	proposal can only be queued if it is succeeded
+Attempt: 14
+	proposal can only be queued if it is succeeded
+Attempt: 15
+	proposal can only be queued if it is succeeded
+Attempt: 16
+	proposal can only be queued if it is succeeded
+Attempt: 17
+	proposal can only be queued if it is succeeded
+Attempt: 18
+	proposal can only be queued if it is succeeded
+Attempt: 19
+	proposal can only be queued if it is succeeded
+Attempt: 20
+	proposal can only be queued if it is succeeded
+Attempt: 21
+	proposal can only be queued if it is succeeded
+Attempt: 22
+Success: Queued
+Executing Proposal
+Attempt: 1
+Success: Executed
+2
+[
+  BigNumber { _hex: '0x02', _isBigNumber: true },
+  '0x21A235cf690798ee052f54888297Ad8F46D3F389',
+  BigNumber { _hex: '0x612eb722', _isBigNumber: true },
+  BigNumber { _hex: '0x8c9598', _isBigNumber: true },
+  BigNumber { _hex: '0x8c95a2', _isBigNumber: true },
+  BigNumber { _hex: '0x084595161401484a000000', _isBigNumber: true },
+  BigNumber { _hex: '0x00', _isBigNumber: true },
+  BigNumber { _hex: '0x00', _isBigNumber: true },
+  false,
+  true,
+  id: BigNumber { _hex: '0x02', _isBigNumber: true },
+  proposer: '0x21A235cf690798ee052f54888297Ad8F46D3F389',
+  eta: BigNumber { _hex: '0x612eb722', _isBigNumber: true },
+  startBlock: BigNumber { _hex: '0x8c9598', _isBigNumber: true },
+  endBlock: BigNumber { _hex: '0x8c95a2', _isBigNumber: true },
+  forVotes: BigNumber { _hex: '0x084595161401484a000000', _isBigNumber: true },
+  againstVotes: BigNumber { _hex: '0x00', _isBigNumber: true },
+  abstainVotes: BigNumber { _hex: '0x00', _isBigNumber: true },
+  canceled: false,
+  executed: true
+]
+State is :  Executed
+[["0x53E691925D847843D50F7864321651858197080F"],[{"type":"BigNumber","hex":"0x00"}],["_setProposalThreshold(uint256)"],["0x000000000000000000000000000000000000000000000dc3a8351f3d86a00000"]]
+Timestamp :  1630451490
+BlockNum :  22500
+Proposal Threshold :  65000000000000000000000
+proposalId :  0x02
+✨  Done in 611.37s.
 ```
 
 

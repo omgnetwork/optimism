@@ -73,7 +73,7 @@ async function main(){
     );
 
     console.log(`Wait 5 minutes to make sure votes are processed.`);
-    await sleep(300 * 1000);
+    // await sleep(300 * 1000);
 
     // THIS SECTION DOES ALL THE PROPOSING LOGIC YOU NEED TO SUBMIT a Proposal
 
@@ -109,6 +109,7 @@ async function main(){
             if(i == 29){
                 await governorBravo.cancel(proposalID);
                 console.log(`Proposal failed and has been canceled, please try again`);
+                console.log(error);
                 return;
             }
             console.log("\tVoting is closed\n");
@@ -136,6 +137,7 @@ async function main(){
             if(i == 29){
                 await governorBravo.cancel(proposalID);
                 console.log(`Proposal failed and has been canceled, please try again`);
+                console.log(error);
                 return;
             }
             console.log(`\tproposal can only be queued if it is succeeded`);
@@ -157,6 +159,7 @@ async function main(){
             if(i == 29){
                 await governorBravo.cancel(proposalID);
                 console.log(`Proposal failed and has been canceled, please try again`);
+                console.log(error)
                 return;
             }
 
