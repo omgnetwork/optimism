@@ -46,7 +46,10 @@ services:
       - "/bin/sh"
       - -ec
       - |
-        apk add --update python python-dev python3 python3-dev nodejs npm
+        apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
+        python3 -m ensurepip
+        pip3 install --no-cache --upgrade pip setuptools
+        apk add --update nodejs npm
         cd /vault/test && npm install
         nohup /vault/vault.sh > /tmp/vault.out &
         while [ $$(cat /tmp/vault.out | grep -c "Success! Enabled the immutability-eth-plugin secrets engine at: immutability-eth-plugin/") -ne 1 ];
