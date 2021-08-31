@@ -79,7 +79,7 @@ async function main(){
         await timelock.executeTransaction(
           timelock.address,
           0,
-          'setPendingAdmin(address)',
+          'setPendingAdmin(address)', // the function to be called
           setPendingAdminData,
           eta
         );
@@ -102,7 +102,7 @@ async function main(){
     blockNumber = await l2_provider.getBlockNumber();
     block = await l2_provider.getBlock(blockNumber);
     eta = block.timestamp + 300
-    var initiateData = ethers.utils.defaultAbiCoder.encode(
+    var initiateData = ethers.utils.defaultAbiCoder.encode( // parameters to initate the GovernorBravoDelegate contract
     ['bytes'],
     [[]]
     );
@@ -110,10 +110,12 @@ async function main(){
     console.log("Current Time: ", block.timestamp);
     console.log("Time at which transaction can be executed:", eta);
 
+
+    // Queuing the transaction that will initate the GovernorBravoDelegate contract
     await timelock.queueTransaction(
     governorBravo.address,
     0,
-    '_initiate()',
+    '_initiate()', // function that needs to be called
     initiateData,
     eta
     );
@@ -125,6 +127,7 @@ async function main(){
         console.log(`Attempt: ${i + 1}`);
         console.log(`\tTimestamp: ${await getTimestamp(env.L2_NODE_WEB3_URL, 28)}`);
         try{
+          // Executing the transaction that will initate the GovernorBravoDelegate contract
             await timelock.executeTransaction(
                 governorBravo.address,
                 0,

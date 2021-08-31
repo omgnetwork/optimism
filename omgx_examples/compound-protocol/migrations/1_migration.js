@@ -38,8 +38,8 @@ module.exports = async function (deployer) {
     comp.address,
     timelock.address,
     delegate.address,
-    10,
-    10,
+    10, // the duration of the voting period in blocks
+    10, // the duration of the time between when a proposal is proposed and when the voting period starts
     ethers.utils.parseEther('100000')
   )
   await GovernorBravoDelegator.deployed()

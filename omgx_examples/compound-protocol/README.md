@@ -193,7 +193,7 @@ First paste the contract addresses into the file `networks/rinkeby-boba.json`. U
 
 # Initiating Timelock
 This step is necessary in order to link the Governor contract to the Timelock contract.
-Run the following command. Note running this program may take some time.
+Run the following command. Note running this program may take some time please be patient.
 ```bash
 $ yarn initiateComp
 ```
