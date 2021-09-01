@@ -301,38 +301,8 @@ Attempt: 2
 	proposal can only be queued if it is succeeded
 Attempt: 3
 	proposal can only be queued if it is succeeded
-Attempt: 4
-	proposal can only be queued if it is succeeded
-Attempt: 5
-	proposal can only be queued if it is succeeded
-Attempt: 6
-	proposal can only be queued if it is succeeded
-Attempt: 7
-	proposal can only be queued if it is succeeded
-Attempt: 8
-	proposal can only be queued if it is succeeded
-Attempt: 9
-	proposal can only be queued if it is succeeded
-Attempt: 10
-	proposal can only be queued if it is succeeded
-Attempt: 11
-	proposal can only be queued if it is succeeded
-Attempt: 12
-	proposal can only be queued if it is succeeded
-Attempt: 13
-	proposal can only be queued if it is succeeded
-Attempt: 14
-	proposal can only be queued if it is succeeded
-Attempt: 15
-	proposal can only be queued if it is succeeded
-Attempt: 16
-	proposal can only be queued if it is succeeded
-Attempt: 17
-	proposal can only be queued if it is succeeded
-Attempt: 18
-	proposal can only be queued if it is succeeded
-Attempt: 19
-	proposal can only be queued if it is succeeded
+...
+
 Attempt: 20
 	proposal can only be queued if it is succeeded
 Attempt: 21
