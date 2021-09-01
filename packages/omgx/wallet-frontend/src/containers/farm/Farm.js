@@ -24,13 +24,15 @@ import { getFarmInfo, getFee } from 'actions/farmAction'
 import { openError } from 'actions/uiAction';
 
 import ListFarm from 'components/listFarm/listFarm'
+import Tabs from 'components/tabs/Tabs'
+import AlertIcon from 'components/icons/AlertIcon'
 import networkService from 'services/networkService'
 
 import * as S from './Farm.styles'
-import { Alert, Box, Tab } from '@material-ui/core';
-import Tabs from 'components/tabs/Tabs'
+import { Alert, Box, Typography } from '@material-ui/core';
 import PageHeader from 'components/pageHeader/PageHeader';
 import { tableHeadList } from './tableHeadList';
+import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -188,13 +190,44 @@ class Farm extends React.Component {
         <Box sx={{ my: 3, width: '100%' }}>
           <Box sx={{ mb: 2 }}>
             <Tabs
-              onClick={tab => {
-                this.handleChange(tab);
-              }}
               activeTab={value}
-              tabs={['L1 Liquidity Pool', 'L2 Liquidity Pool']}
+              onClick={(t) => this.handleChange(null, t)}
+              aria-label="basic tabs example"
+              tabs={["L1 Liquidity Pool", "L2 Liquidity Pool"]}
             />
           </Box>
+
+          {networkLayer === 'L2' && value === 'L1 Liquidity Pool' &&
+            <S.LayerAlert>
+              <Box className="info">
+                <AlertIcon />
+                <Typography
+                  sx={{wordBreak:'break-all', marginLeft: '10px'}}
+                  variant="body1"
+                  component="p"
+                >
+                  Note: MetaMask is set to L2. To interact with the L1 liquidity pool, please switch MetaMask to L1.
+                </Typography>
+              </Box>
+              <LayerSwitcher isButton={true} />
+            </S.LayerAlert>
+          }
+
+          {networkLayer === 'L1' && value === 'L2 Liquidity Pool' &&
+            <S.LayerAlert>
+              <Box className="info">
+                <AlertIcon />
+                <Typography
+                  sx={{wordBreak:'break-all', marginLeft: '10px'}}
+                  variant="body1"
+                  component="p"
+                >
+                  Note: MetaMask is set to L1. To interact with the L2 liquidity pool, please switch MetaMask to L2.
+                </Typography>
+              </Box>
+              <LayerSwitcher isButton={true} />
+            </S.LayerAlert>
+          }
 
           {!isMobile ? (
             <S.TableHeading>
@@ -208,57 +241,42 @@ class Farm extends React.Component {
             </S.TableHeading>
           ) : (null)}
 
-          {value === 'L1 Liquidity Pool' ? (
-            <>
-              {networkLayer === 'L2' && (
-                <Alert severity="info">
-                  Note: MetaMask is set to L2. To interact with the L1 liquidity pool, please switch MetaMask to L1.
-                </Alert>
-              )}
-              <Box>
-                {Object.keys(poolInfo.L1LP).map((v, i) => {
-                  const ret = this.getBalance(v, 'L1')
-                  return (
-                    <ListFarm
-                      key={i}
-                      poolInfo={poolInfo.L1LP[v]}
-                      userInfo={userInfo.L1LP[v]}
-                      L1orL2Pool='L1LP'
-                      balance={ret[0]}
-                      decimals={ret[1]}
-                      isMobile={isMobile}
-                    />
-                  )
-                })}
-              </Box>
-            </>
-          ) : null}
+          {value === 'L1 Liquidity Pool' &&
+            <Box>
+              {Object.keys(poolInfo.L1LP).map((v, i) => {
+                const ret = this.getBalance(v, 'L1')
+                return (
+                  <ListFarm
+                    key={i}
+                    poolInfo={poolInfo.L1LP[v]}
+                    userInfo={userInfo.L1LP[v]}
+                    L1orL2Pool='L1LP'
+                    balance={ret[0]}
+                    decimals={ret[1]}
+                    isMobile={isMobile}
+                  />
+                )
+              })}
+            </Box>}
 
-          {value === 'L2 Liquidity Pool' ? (
-            <>
-              {networkLayer === 'L1' &&
-                <Alert severity="info">
-                  Note: MetaMask is set to L1. To interact with the L2 liquidity pool, please switch MetaMask to L2.
-                </Alert>
-              }
-              <Box>
-                {Object.keys(poolInfo.L2LP).map((v, i) => {
-                  const ret = this.getBalance(v, 'L2')
-                  return (
-                    <ListFarm
-                      key={i}
-                      poolInfo={poolInfo.L2LP[v]}
-                      userInfo={userInfo.L2LP[v]}
-                      L1orL2Pool='L2LP'
-                      balance={ret[0]}
-                      decimals={ret[1]}
-                      isMobile={isMobile}
-                    />
-                  )
-                })}
-              </Box>
-            </>
-          ) : null}
+          {value === 'L2 Liquidity Pool' &&
+            <Box>
+              {Object.keys(poolInfo.L2LP).map((v, i) => {
+                const ret = this.getBalance(v, 'L2')
+                return (
+                  <ListFarm
+                    key={i}
+                    poolInfo={poolInfo.L2LP[v]}
+                    userInfo={userInfo.L2LP[v]}
+                    L1orL2Pool='L2LP'
+                    balance={ret[0]}
+                    decimals={ret[1]}
+                    isMobile={isMobile}
+                  />
+                )
+              })}
+            </Box>
+          }
         </Box>
       </>
     )

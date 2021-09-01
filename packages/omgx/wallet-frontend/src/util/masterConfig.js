@@ -50,8 +50,8 @@ const NETWORKS = {
       name: "BOBA Rinkeby L2",
       chainId: 28,
       rpcUrl: `https://rinkeby.boba.network`,
-      blockExplorer: `https://blockexplorer.boba.network/?network=Rinkeby`,
-      transaction: `https://blockexplorer.boba.network/tx/`,
+      blockExplorer: `https://blockexplorer.rinkeby.boba.network/?network=Rinkeby`,
+      transaction: `https://blockexplorer.rinkeby.boba.network/tx/`,
     }
   },
   rinkeby_integration: {
@@ -70,8 +70,8 @@ const NETWORKS = {
       name: "BOBA Rinkeby Int L2",
       chainId: 29,
       rpcUrl: `https://rinkeby-integration.boba.network`,
-      blockExplorer: `https://blockexplorer.boba.network/?network=Rinkeby%20Test`,
-      transaction: `https://blockexplorer.boba.network/tx/`,
+      blockExplorer: `https://blockexplorer.rinkeby.boba.network/?network=Rinkeby%20Test`,
+      transaction: `https://blockexplorer.rinkeby.boba.network/tx/`,
     }
   },
   mainnet: {
@@ -90,8 +90,8 @@ const NETWORKS = {
       name: "BOBA L2",
       chainId: 288,
       rpcUrl: `https://mainnet.boba.network`,
-      blockExplorer: `https://blockexplorer.boba.network/?network=Mainnet`,
-      transaction: `https://blockexplorer.boba.network/tx/`,
+      blockExplorer: `https://blockexplorer.rinkeby.boba.network/?network=Mainnet`,
+      transaction: `https://blockexplorer.rinkeby.boba.network/tx/`,
     }
   }
 }

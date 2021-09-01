@@ -13,7 +13,7 @@ export const StyledModal = styled(ModalUnstyled)`
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: ${(props) => props.isMobile ? 'blur(20px)' : 'none'};
+  backdrop-filter: ${(props) => props.ismobile ? 'blur(20px)' : 'none'};
 `;
 
 export const Backdrop = styled('div')`
