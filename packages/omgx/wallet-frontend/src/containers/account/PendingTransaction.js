@@ -88,7 +88,7 @@ function PendingTransaction() {
                     background: 'rgba(9, 22, 43, 0.5)',
                     borderRadius: '12px',
                     margin: '5px',
-                    padding: '15px 20px',
+                    padding: '5px 20px',
                     display: 'flex',
                     justifyContent: 'flex-start'
                 }}
@@ -113,22 +113,22 @@ function PendingTransaction() {
                     key={i.hash}
                     container
                     sx={{
-                        background: 'rgba(9, 22, 43, 0.5)',
-                        borderRadius: '12px',
+                        background: '#192333',
+                        borderRadius: '8px',
                         margin: '5px',
-                        padding: '15px 20px',
+                        padding: '5px 20px',
                     }}
                 >
                     <Grid item xs={2}>
                         {'L2->L1 Exit'}
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={4}>
                         {'Started : '} {moment.unix(i.timestamp).format('lll')}
                     </Grid>
                     <Grid item xs={2}>
                         {'In Progress'}
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                         <a style={{color: 'white'}}
                             href={link}
                             target={'_blank'}
