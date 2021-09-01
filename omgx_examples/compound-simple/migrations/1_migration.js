@@ -54,7 +54,7 @@ module.exports = async function (deployer) {
     governorBravoDelegate.address,
     10, // the duration of the voting period in blocks
     10, // the duration of the time between when a proposal is proposed and when the voting period starts
-    ethers.utils.parseEther('100000')
+    ethers.utils.parseEther('100000') // the votes necessary to make a proposal
   )
   const governorBravoDelegator = await GovernorBravoDelegator.deployed()
   console.log('deployed delegator')

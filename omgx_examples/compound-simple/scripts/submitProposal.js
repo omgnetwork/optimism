@@ -66,6 +66,8 @@ async function main(){
     let description = '#Changing Proposal Threshold to 65000 Comp'; // the description of the proposal
 
     await comp.delegate(wallet1.address); // delegate votes to yourself
+    await comp.delegate(wallet2.address);
+    await comp.delegate(wallet3.address);
 
     console.log(
         'current votes: ',
@@ -73,7 +75,7 @@ async function main(){
     );
 
     console.log(`Wait 5 minutes to make sure votes are processed.`);
-    // await sleep(300 * 1000);
+    await sleep(300 * 1000);
 
     // THIS SECTION DOES ALL THE PROPOSING LOGIC YOU NEED TO SUBMIT a Proposal
 

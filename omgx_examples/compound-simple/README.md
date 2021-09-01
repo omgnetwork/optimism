@@ -181,98 +181,18 @@ Summary
 ✨  Done in 320.22s.
 ```
 
-## Submitting a Proposal, Voting, and Executing
-This section will guide you in submitting a poroposal, voting on it, and executing it. The file `scripts/submitProposal.js` does all of this. The proposal that it will submit is one that reduces the number of votes necessary to submit a proposal to 65000.
+## Initiating Timelock and submiting a proposal
+First paste the contract addresses into the file `networks/rinkeby-boba.json`. Using the addresses above the file should look as follows.
 
-Running this script will take time, approximately 15 minutes.
-
-```bash
-$ yarn submitProposal
+```json
+{
+"Comp":"0x7e5C11814DEfC1Adb8F8a9371334F7c9Fc4a3a7b",
+"Timelock":"0x55D6151B519853aaF38A669b2248221B128E14B9",
+"GovernorBravoDelegate":"0xe1004C6E7f490189F712441846031D76A38E5A49",
+"GovernorBravoDelegator":"0x15fFafE1b7060f6D61ea6Bed004721e2D5be7707"
+}
 ```
-You should expect output similar to the following:
 
-```bash
-yarn run v1.22.10
-$ node scripts/submitProposal.js
-Comp power:  10000000000000000000000000
-current votes:  10000000000000000000000000
-Wait 5 minutes to make sure votes are processed.
-Proposing
-Casting Votes
-Attempt: 1
-	Voting is closed
 
-Attempt: 2
-	Voting is closed
-
-Attempt: 3
-	Voting is closed
-
-Attempt: 4
-	Voting is closed
-
-Attempt: 5
-	Voting is closed
-
-Attempt: 6
-	Voting is closed
-
-Attempt: 7
-	Voting is closed
-
-Attempt: 8
-	Voting is closed
-
-Attempt: 9
-Success: vote cast
-Queuing Proposal
-Attempt: 1
-	proposal can only be queued if it is succeeded
-Attempt: 2
-	proposal can only be queued if it is succeeded
-Attempt: 3
-	proposal can only be queued if it is succeeded
-...
-
-Attempt: 20
-	proposal can only be queued if it is succeeded
-Attempt: 21
-	proposal can only be queued if it is succeeded
-Attempt: 22
-Success: Queued
-Executing Proposal
-Attempt: 1
-Success: Executed
-2
-[
-  BigNumber { _hex: '0x02', _isBigNumber: true },
-  '0x21A235cf690798ee052f54888297Ad8F46D3F389',
-  BigNumber { _hex: '0x612eb722', _isBigNumber: true },
-  BigNumber { _hex: '0x8c9598', _isBigNumber: true },
-  BigNumber { _hex: '0x8c95a2', _isBigNumber: true },
-  BigNumber { _hex: '0x084595161401484a000000', _isBigNumber: true },
-  BigNumber { _hex: '0x00', _isBigNumber: true },
-  BigNumber { _hex: '0x00', _isBigNumber: true },
-  false,
-  true,
-  id: BigNumber { _hex: '0x02', _isBigNumber: true },
-  proposer: '0x21A235cf690798ee052f54888297Ad8F46D3F389',
-  eta: BigNumber { _hex: '0x612eb722', _isBigNumber: true },
-  startBlock: BigNumber { _hex: '0x8c9598', _isBigNumber: true },
-  endBlock: BigNumber { _hex: '0x8c95a2', _isBigNumber: true },
-  forVotes: BigNumber { _hex: '0x084595161401484a000000', _isBigNumber: true },
-  againstVotes: BigNumber { _hex: '0x00', _isBigNumber: true },
-  abstainVotes: BigNumber { _hex: '0x00', _isBigNumber: true },
-  canceled: false,
-  executed: true
-]
-State is :  Executed
-[["0x53E691925D847843D50F7864321651858197080F"],[{"type":"BigNumber","hex":"0x00"}],["_setProposalThreshold(uint256)"],["0x000000000000000000000000000000000000000000000dc3a8351f3d86a00000"]]
-Timestamp :  1630451490
-BlockNum :  22500
-Proposal Threshold :  65000000000000000000000
-proposalId :  0x02
-✨  Done in 611.37s.
-```
 
 
