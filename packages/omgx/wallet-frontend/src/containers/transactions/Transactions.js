@@ -83,13 +83,7 @@ function Transactions({ searchHistory, transactions, chainLink }) {
             )}
             {paginatedTransactions.map((i, index) => {
               const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
-              const {
-                l1BlockHash,
-                l1BlockNumber,
-                l1From,
-                l1Hash,
-                l1To
-              } = i;
+              
               return (
                 <Transaction
                   key={index}
@@ -99,15 +93,15 @@ function Transactions({ searchHistory, transactions, chainLink }) {
                   blockNumber={`Block ${i.blockNumber}`}
                   chain={`${i.chain} Chain`}
                   typeTX={`${metaData}`}
-                  detail={l1Hash ? {
-                    l1BlockHash: truncate(l1BlockHash, 8, 6, '...'),
-                    l1BlockNumber,
-                    l1From,
-                    l1Hash: truncate(l1Hash, 8, 6, '...'),
-                    l1To,
+                  detail={!!i.crossDomainMessage?.crossDomainMessage ? {
+                    l1BlockHash: truncate(i.crossDomainMessage.l1BlockHash, 8, 6, '...'),
+                    l1BlockNumber: i.crossDomainMessage.l1BlockNumber,
+                    l1From: i.crossDomainMessage.l1From,
+                    l1Hash: truncate(i.crossDomainMessage.l1Hash, 8, 6, '...'),
+                    l1To: i.crossDomainMessage.l1To,
                     l1TxLink: chainLink({
-                      chain: i.chain,
-                      hash: l1Hash
+                      chain: "L1",
+                      hash: i.crossDomainMessage.l1Hash
                     })
                   } : null}
                 />

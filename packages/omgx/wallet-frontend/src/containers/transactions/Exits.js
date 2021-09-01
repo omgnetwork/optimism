@@ -53,7 +53,6 @@ function Exits({ searchHistory, transactions, chainLink }) {
   })
 
   const renderExits = _exits.map((i, index) => {
-
     const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
 
     let tradExit = false
@@ -61,14 +60,6 @@ function Exits({ searchHistory, transactions, chainLink }) {
     let midTitle = 'Swapped: ' + moment.unix(i.timeStamp).format('lll')
 
     const to = i.to.toLowerCase()
-
-    const {
-      l1BlockHash,
-      l1BlockNumber,
-      l1From,
-      l1Hash,
-      l1To
-    } = i;
 
     //are we dealing with a traditional exit?
     if (to === networkService.L2StandardBridgeAddress.toLowerCase()) {
@@ -98,15 +89,15 @@ function Exits({ searchHistory, transactions, chainLink }) {
         midTitle={midTitle}
         button={isExitable && tradExit ? { onClick: () => setProcessExitModal(i), text: 'Process Exit' } : undefined}
         typeTX={`${metaData}`}
-        detail={l1Hash ? {
-          l1BlockHash: truncate(l1BlockHash, 8, 6, '...'),
-          l1BlockNumber,
-          l1From,
-          l1Hash: truncate(l1Hash, 8, 6, '...'),
-          l1To,
+        detail={!!i.crossDomainMessage?.crossDomainMessage ? {
+          l1BlockHash: truncate(i.crossDomainMessage.l1BlockHash, 8, 6, '...'),
+          l1BlockNumber: i.crossDomainMessage.l1BlockNumber,
+          l1From: i.crossDomainMessage.l1From,
+          l1Hash: truncate(i.crossDomainMessage.l1Hash, 8, 6, '...'),
+          l1To: i.crossDomainMessage.l1To,
           l1TxLink: chainLink({
             chain: "L1",
-            hash: l1Hash
+            hash: i.crossDomainMessage.l1Hash
           })
         } : null}
       />
