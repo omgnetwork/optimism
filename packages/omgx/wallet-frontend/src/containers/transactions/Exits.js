@@ -57,7 +57,7 @@ function Exits({ searchHistory, transactions, chainLink }) {
 
     let tradExit = false
     let isExitable = false
-    let midTitle = 'Swapped: ' + moment.unix(i.timeStamp).format('lll')
+    let midTitle = 'Swapped: ' + moment.unix(i.timestamp).format('lll')
 
     const to = i.to.toLowerCase()
 

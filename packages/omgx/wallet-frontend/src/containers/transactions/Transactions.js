@@ -89,7 +89,7 @@ function Transactions({ searchHistory, transactions, chainLink }) {
                   key={index}
                   link={chainLink(i)}
                   title={`${truncate(i.hash, 8, 6, '...')}`}
-                  midTitle={moment.unix(i.timeStamp).format('lll')}
+                  midTitle={moment.unix(i.timestamp).format('lll')}
                   blockNumber={`Block ${i.blockNumber}`}
                   chain={`${i.chain} Chain`}
                   typeTX={`${metaData}`}
