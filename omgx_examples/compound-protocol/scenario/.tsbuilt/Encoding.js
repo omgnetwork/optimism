@@ -1,0 +1,21 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.toEncodableNum = exports.getExpMantissa = void 0;
+const bignumber_js_1 = __importDefault(require("bignumber.js"));
+const smallEnoughNumber = new bignumber_js_1.default('100000000');
+// Returns the mantissa of an Exp with given floating value
+function getExpMantissa(float) {
+    // Workaround from https://github.com/ethereum/web3.js/issues/1920
+    const str = Math.floor(float * 1.0e18).toString();
+    return toEncodableNum(str);
+}
+exports.getExpMantissa = getExpMantissa;
+function toEncodableNum(amountArgRaw) {
+    const bigNumber = new bignumber_js_1.default(amountArgRaw);
+    return bigNumber.lt(smallEnoughNumber) ? bigNumber.toNumber() : bigNumber;
+}
+exports.toEncodableNum = toEncodableNum;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiRW5jb2RpbmcuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvRW5jb2RpbmcudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7O0FBQUEsZ0VBQXFDO0FBRXJDLE1BQU0saUJBQWlCLEdBQUcsSUFBSSxzQkFBUyxDQUFDLFdBQVcsQ0FBQyxDQUFDO0FBSXJELDJEQUEyRDtBQUMzRCxTQUFnQixjQUFjLENBQUMsS0FBYTtJQUMxQyxrRUFBa0U7SUFDbEUsTUFBTSxHQUFHLEdBQUcsSUFBSSxDQUFDLEtBQUssQ0FBQyxLQUFLLEdBQUcsTUFBTSxDQUFDLENBQUMsUUFBUSxFQUFFLENBQUM7SUFFbEQsT0FBTyxjQUFjLENBQUMsR0FBRyxDQUFDLENBQUM7QUFDN0IsQ0FBQztBQUxELHdDQUtDO0FBRUQsU0FBZ0IsY0FBYyxDQUFDLFlBQW9DO0lBQ2pFLE1BQU0sU0FBUyxHQUFHLElBQUksc0JBQVMsQ0FBQyxZQUFZLENBQUMsQ0FBQztJQUM5QyxPQUFPLFNBQVMsQ0FBQyxFQUFFLENBQUMsaUJBQWlCLENBQUMsQ0FBQyxDQUFDLENBQUMsU0FBUyxDQUFDLFFBQVEsRUFBRSxDQUFDLENBQUMsQ0FBQyxTQUFTLENBQUM7QUFDNUUsQ0FBQztBQUhELHdDQUdDIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IEJpZ051bWJlciBmcm9tICdiaWdudW1iZXIuanMnO1xuXG5jb25zdCBzbWFsbEVub3VnaE51bWJlciA9IG5ldyBCaWdOdW1iZXIoJzEwMDAwMDAwMCcpO1xuXG5leHBvcnQgdHlwZSBlbmNvZGVkTnVtYmVyID0gbnVtYmVyIHwgQmlnTnVtYmVyO1xuXG4vLyBSZXR1cm5zIHRoZSBtYW50aXNzYSBvZiBhbiBFeHAgd2l0aCBnaXZlbiBmbG9hdGluZyB2YWx1ZVxuZXhwb3J0IGZ1bmN0aW9uIGdldEV4cE1hbnRpc3NhKGZsb2F0OiBudW1iZXIpOiBlbmNvZGVkTnVtYmVyIHtcbiAgLy8gV29ya2Fyb3VuZCBmcm9tIGh0dHBzOi8vZ2l0aHViLmNvbS9ldGhlcmV1bS93ZWIzLmpzL2lzc3Vlcy8xOTIwXG4gIGNvbnN0IHN0ciA9IE1hdGguZmxvb3IoZmxvYXQgKiAxLjBlMTgpLnRvU3RyaW5nKCk7XG5cbiAgcmV0dXJuIHRvRW5jb2RhYmxlTnVtKHN0cik7XG59XG5cbmV4cG9ydCBmdW5jdGlvbiB0b0VuY29kYWJsZU51bShhbW91bnRBcmdSYXc6IHN0cmluZyB8IGVuY29kZWROdW1iZXIpOiBlbmNvZGVkTnVtYmVyIHtcbiAgY29uc3QgYmlnTnVtYmVyID0gbmV3IEJpZ051bWJlcihhbW91bnRBcmdSYXcpO1xuICByZXR1cm4gYmlnTnVtYmVyLmx0KHNtYWxsRW5vdWdoTnVtYmVyKSA/IGJpZ051bWJlci50b051bWJlcigpIDogYmlnTnVtYmVyO1xufVxuIl19

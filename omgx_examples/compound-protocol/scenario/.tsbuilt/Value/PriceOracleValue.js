@@ -1,0 +1,39 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getPriceOracleValue = exports.priceOracleFetchers = exports.getPriceOracleAddress = void 0;
+const CoreValue_1 = require("../CoreValue");
+const Value_1 = require("../Value");
+const Command_1 = require("../Command");
+const ContractLookup_1 = require("../ContractLookup");
+async function getPrice(world, priceOracle, asset) {
+    return new Value_1.NumberV(await priceOracle.methods.assetPrices(asset).call());
+}
+async function getPriceOracleAddress(world, priceOracle) {
+    return new Value_1.AddressV(priceOracle._address);
+}
+exports.getPriceOracleAddress = getPriceOracleAddress;
+function priceOracleFetchers() {
+    return [
+        new Command_1.Fetcher(`
+        #### Address
+
+        * "Address" - Gets the address of the global price oracle
+      `, "Address", [
+            new Command_1.Arg("priceOracle", ContractLookup_1.getPriceOracle, { implicit: true })
+        ], (world, { priceOracle }) => getPriceOracleAddress(world, priceOracle)),
+        new Command_1.Fetcher(`
+        #### Price
+
+        * "Price asset:<Address>" - Gets the price of the given asset
+      `, "Price", [
+            new Command_1.Arg("priceOracle", ContractLookup_1.getPriceOracle, { implicit: true }),
+            new Command_1.Arg("asset", CoreValue_1.getAddressV)
+        ], (world, { priceOracle, asset }) => getPrice(world, priceOracle, asset.val))
+    ];
+}
+exports.priceOracleFetchers = priceOracleFetchers;
+async function getPriceOracleValue(world, event) {
+    return await Command_1.getFetcherValue("PriceOracle", priceOracleFetchers(), world, event);
+}
+exports.getPriceOracleValue = getPriceOracleValue;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUHJpY2VPcmFjbGVWYWx1ZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9WYWx1ZS9QcmljZU9yYWNsZVZhbHVlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztBQUdBLDRDQUVzQjtBQUN0QixvQ0FHeUI7QUFDekIsd0NBQXlEO0FBQ3pELHNEQUFpRDtBQUVqRCxLQUFLLFVBQVUsUUFBUSxDQUFDLEtBQVksRUFBRSxXQUF3QixFQUFFLEtBQWE7SUFDM0UsT0FBTyxJQUFJLGVBQU8sQ0FBQyxNQUFNLFdBQVcsQ0FBQyxPQUFPLENBQUMsV0FBVyxDQUFDLEtBQUssQ0FBQyxDQUFDLElBQUksRUFBRSxDQUFDLENBQUM7QUFDMUUsQ0FBQztBQUVNLEtBQUssVUFBVSxxQkFBcUIsQ0FBQyxLQUFZLEVBQUUsV0FBd0I7SUFDaEYsT0FBTyxJQUFJLGdCQUFRLENBQUMsV0FBVyxDQUFDLFFBQVEsQ0FBQyxDQUFDO0FBQzVDLENBQUM7QUFGRCxzREFFQztBQUVELFNBQWdCLG1CQUFtQjtJQUNqQyxPQUFPO1FBQ0wsSUFBSSxpQkFBTyxDQUF1Qzs7OztPQUkvQyxFQUNELFNBQVMsRUFDVDtZQUNFLElBQUksYUFBRyxDQUFDLGFBQWEsRUFBRSwrQkFBYyxFQUFFLEVBQUMsUUFBUSxFQUFFLElBQUksRUFBQyxDQUFDO1NBQ3pELEVBQ0QsQ0FBQyxLQUFLLEVBQUUsRUFBQyxXQUFXLEVBQUMsRUFBRSxFQUFFLENBQUMscUJBQXFCLENBQUMsS0FBSyxFQUFFLFdBQVcsQ0FBQyxDQUNwRTtRQUNELElBQUksaUJBQU8sQ0FBdUQ7Ozs7T0FJL0QsRUFDRCxPQUFPLEVBQ1A7WUFDRSxJQUFJLGFBQUcsQ0FBQyxhQUFhLEVBQUUsK0JBQWMsRUFBRSxFQUFDLFFBQVEsRUFBRSxJQUFJLEVBQUMsQ0FBQztZQUN4RCxJQUFJLGFBQUcsQ0FBQyxPQUFPLEVBQUUsdUJBQVcsQ0FBRTtTQUMvQixFQUNELENBQUMsS0FBSyxFQUFFLEVBQUMsV0FBVyxFQUFFLEtBQUssRUFBQyxFQUFFLEVBQUUsQ0FBQyxRQUFRLENBQUMsS0FBSyxFQUFFLFdBQVcsRUFBRSxLQUFLLENBQUMsR0FBRyxDQUFDLENBQ3pFO0tBQ0YsQ0FBQztBQUNKLENBQUM7QUExQkQsa0RBMEJDO0FBRU0sS0FBSyxVQUFVLG1CQUFtQixDQUFDLEtBQVksRUFBRSxLQUFZO0lBQ2xFLE9BQU8sTUFBTSx5QkFBZSxDQUFXLGFBQWEsRUFBRSxtQkFBbUIsRUFBRSxFQUFFLEtBQUssRUFBRSxLQUFLLENBQUMsQ0FBQztBQUM3RixDQUFDO0FBRkQsa0RBRUMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQge0V2ZW50fSBmcm9tICcuLi9FdmVudCc7XG5pbXBvcnQge1dvcmxkfSBmcm9tICcuLi9Xb3JsZCc7XG5pbXBvcnQge1ByaWNlT3JhY2xlfSBmcm9tICcuLi9Db250cmFjdC9QcmljZU9yYWNsZSc7XG5pbXBvcnQge1xuICBnZXRBZGRyZXNzVlxufSBmcm9tICcuLi9Db3JlVmFsdWUnO1xuaW1wb3J0IHtcbiAgQWRkcmVzc1YsXG4gIE51bWJlclYsXG4gIFZhbHVlfSBmcm9tICcuLi9WYWx1ZSc7XG5pbXBvcnQge0FyZywgRmV0Y2hlciwgZ2V0RmV0Y2hlclZhbHVlfSBmcm9tICcuLi9Db21tYW5kJztcbmltcG9ydCB7Z2V0UHJpY2VPcmFjbGV9IGZyb20gJy4uL0NvbnRyYWN0TG9va3VwJztcblxuYXN5bmMgZnVuY3Rpb24gZ2V0UHJpY2Uod29ybGQ6IFdvcmxkLCBwcmljZU9yYWNsZTogUHJpY2VPcmFjbGUsIGFzc2V0OiBzdHJpbmcpOiBQcm9taXNlPE51bWJlclY+IHtcbiAgcmV0dXJuIG5ldyBOdW1iZXJWKGF3YWl0IHByaWNlT3JhY2xlLm1ldGhvZHMuYXNzZXRQcmljZXMoYXNzZXQpLmNhbGwoKSk7XG59XG5cbmV4cG9ydCBhc3luYyBmdW5jdGlvbiBnZXRQcmljZU9yYWNsZUFkZHJlc3Mod29ybGQ6IFdvcmxkLCBwcmljZU9yYWNsZTogUHJpY2VPcmFjbGUpOiBQcm9taXNlPEFkZHJlc3NWPiB7XG4gIHJldHVybiBuZXcgQWRkcmVzc1YocHJpY2VPcmFjbGUuX2FkZHJlc3MpO1xufVxuXG5leHBvcnQgZnVuY3Rpb24gcHJpY2VPcmFjbGVGZXRjaGVycygpIHtcbiAgcmV0dXJuIFtcbiAgICBuZXcgRmV0Y2hlcjx7cHJpY2VPcmFjbGU6IFByaWNlT3JhY2xlfSwgQWRkcmVzc1Y+KGBcbiAgICAgICAgIyMjIyBBZGRyZXNzXG5cbiAgICAgICAgKiBcIkFkZHJlc3NcIiAtIEdldHMgdGhlIGFkZHJlc3Mgb2YgdGhlIGdsb2JhbCBwcmljZSBvcmFjbGVcbiAgICAgIGAsXG4gICAgICBcIkFkZHJlc3NcIixcbiAgICAgIFtcbiAgICAgICAgbmV3IEFyZyhcInByaWNlT3JhY2xlXCIsIGdldFByaWNlT3JhY2xlLCB7aW1wbGljaXQ6IHRydWV9KVxuICAgICAgXSxcbiAgICAgICh3b3JsZCwge3ByaWNlT3JhY2xlfSkgPT4gZ2V0UHJpY2VPcmFjbGVBZGRyZXNzKHdvcmxkLCBwcmljZU9yYWNsZSlcbiAgICApLFxuICAgIG5ldyBGZXRjaGVyPHtwcmljZU9yYWNsZTogUHJpY2VPcmFjbGUsIGFzc2V0OiBBZGRyZXNzVn0sIE51bWJlclY+KGBcbiAgICAgICAgIyMjIyBQcmljZVxuXG4gICAgICAgICogXCJQcmljZSBhc3NldDo8QWRkcmVzcz5cIiAtIEdldHMgdGhlIHByaWNlIG9mIHRoZSBnaXZlbiBhc3NldFxuICAgICAgYCxcbiAgICAgIFwiUHJpY2VcIixcbiAgICAgIFtcbiAgICAgICAgbmV3IEFyZyhcInByaWNlT3JhY2xlXCIsIGdldFByaWNlT3JhY2xlLCB7aW1wbGljaXQ6IHRydWV9KSxcbiAgICAgICAgbmV3IEFyZyhcImFzc2V0XCIsIGdldEFkZHJlc3NWLClcbiAgICAgIF0sXG4gICAgICAod29ybGQsIHtwcmljZU9yYWNsZSwgYXNzZXR9KSA9PiBnZXRQcmljZSh3b3JsZCwgcHJpY2VPcmFjbGUsIGFzc2V0LnZhbClcbiAgICApXG4gIF07XG59XG5cbmV4cG9ydCBhc3luYyBmdW5jdGlvbiBnZXRQcmljZU9yYWNsZVZhbHVlKHdvcmxkOiBXb3JsZCwgZXZlbnQ6IEV2ZW50KTogUHJvbWlzZTxWYWx1ZT4ge1xuICByZXR1cm4gYXdhaXQgZ2V0RmV0Y2hlclZhbHVlPGFueSwgYW55PihcIlByaWNlT3JhY2xlXCIsIHByaWNlT3JhY2xlRmV0Y2hlcnMoKSwgd29ybGQsIGV2ZW50KTtcbn1cbiJdfQ==

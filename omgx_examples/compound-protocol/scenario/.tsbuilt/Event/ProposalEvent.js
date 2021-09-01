@@ -1,0 +1,76 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.processProposalEvent = exports.proposalCommands = void 0;
+const World_1 = require("../World");
+const Invokation_1 = require("../Invokation");
+const CoreValue_1 = require("../CoreValue");
+const Command_1 = require("../Command");
+const ProposalValue_1 = require("../Value/ProposalValue");
+function getSupport(support) {
+    if (typeof support === 'string') {
+        if (support === 'For' || support === 'Against') {
+            return support === 'For';
+        }
+    }
+    throw new Error(`Unknown support flag \`${support}\`, expected "For" or "Against"`);
+}
+async function describeProposal(world, governor, proposalId) {
+    // const proposal = await governor.methods.proposals(proposalId).call();
+    return `proposal ${proposalId.toString()}`; // TODO: Cleanup
+}
+function proposalCommands(governor) {
+    return [
+        new Command_1.Command(`
+        #### Vote
+
+        * "Governor <Governor> Vote <For|Against>" - Votes for or against a given proposal
+        * E.g. "Governor GovernorScenario Proposal LastProposal Vote For"
+    `, 'Vote', [
+            new Command_1.Arg("proposalIdent", CoreValue_1.getEventV),
+            new Command_1.Arg("support", CoreValue_1.getEventV),
+        ], async (world, from, { proposalIdent, support }) => {
+            const proposalId = await ProposalValue_1.getProposalId(world, governor, proposalIdent.val);
+            const invokation = await Invokation_1.invoke(world, governor.methods.castVote(proposalId, getSupport(support.val)), from);
+            return World_1.addAction(world, `Cast ${support.val.toString()} vote from ${World_1.describeUser(world, from)} for proposal ${proposalId}`, invokation);
+        }, { namePos: 1 }),
+        new Command_1.Command(`
+        #### Queue
+        * "Governor <Governor> Queue" - Queues given proposal
+        * E.g. "Governor GovernorScenario Proposal LastProposal Queue"
+    `, 'Queue', [
+            new Command_1.Arg("proposalIdent", CoreValue_1.getEventV)
+        ], async (world, from, { proposalIdent }) => {
+            const proposalId = await ProposalValue_1.getProposalId(world, governor, proposalIdent.val);
+            const invokation = await Invokation_1.invoke(world, governor.methods.queue(proposalId), from);
+            return World_1.addAction(world, `Queue proposal ${await describeProposal(world, governor, proposalId)} from ${World_1.describeUser(world, from)}`, invokation);
+        }, { namePos: 1 }),
+        new Command_1.Command(`
+        #### Execute
+        * "Governor <Governor> Execute" - Executes given proposal
+        * E.g. "Governor GovernorScenario Proposal LastProposal Execute"
+    `, 'Execute', [
+            new Command_1.Arg("proposalIdent", CoreValue_1.getEventV)
+        ], async (world, from, { proposalIdent }) => {
+            const proposalId = await ProposalValue_1.getProposalId(world, governor, proposalIdent.val);
+            const invokation = await Invokation_1.invoke(world, governor.methods.execute(proposalId), from);
+            return World_1.addAction(world, `Execute proposal ${await describeProposal(world, governor, proposalId)} from ${World_1.describeUser(world, from)}`, invokation);
+        }, { namePos: 1 }),
+        new Command_1.Command(`
+        #### Cancel
+        * "Cancel" - cancels given proposal
+        * E.g. "Governor Proposal LastProposal Cancel"
+    `, 'Cancel', [
+            new Command_1.Arg("proposalIdent", CoreValue_1.getEventV)
+        ], async (world, from, { proposalIdent }) => {
+            const proposalId = await ProposalValue_1.getProposalId(world, governor, proposalIdent.val);
+            const invokation = await Invokation_1.invoke(world, governor.methods.cancel(proposalId), from);
+            return World_1.addAction(world, `Cancel proposal ${await describeProposal(world, governor, proposalId)} from ${World_1.describeUser(world, from)}`, invokation);
+        }, { namePos: 1 }),
+    ];
+}
+exports.proposalCommands = proposalCommands;
+async function processProposalEvent(world, governor, event, from) {
+    return await Command_1.processCommandEvent('Proposal', proposalCommands(governor), world, event, from);
+}
+exports.processProposalEvent = processProposalEvent;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUHJvcG9zYWxFdmVudC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9FdmVudC9Qcm9wb3NhbEV2ZW50LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztBQUNBLG9DQUEwRDtBQUUxRCw4Q0FBdUM7QUFDdkMsNENBRXNCO0FBSXRCLHdDQUErRDtBQUMvRCwwREFBdUQ7QUFFdkQsU0FBUyxVQUFVLENBQUMsT0FBYztJQUNoQyxJQUFJLE9BQU8sT0FBTyxLQUFLLFFBQVEsRUFBRTtRQUMvQixJQUFJLE9BQU8sS0FBSyxLQUFLLElBQUksT0FBTyxLQUFLLFNBQVMsRUFBRTtZQUM5QyxPQUFPLE9BQU8sS0FBSyxLQUFLLENBQUM7U0FDMUI7S0FDRjtJQUVELE1BQU0sSUFBSSxLQUFLLENBQUMsMEJBQTBCLE9BQU8saUNBQWlDLENBQUMsQ0FBQztBQUN0RixDQUFDO0FBRUQsS0FBSyxVQUFVLGdCQUFnQixDQUFDLEtBQVksRUFBRSxRQUFrQixFQUFFLFVBQWtCO0lBQ2xGLHdFQUF3RTtJQUN4RSxPQUFPLFlBQVksVUFBVSxDQUFDLFFBQVEsRUFBRSxFQUFFLENBQUMsQ0FBQyxnQkFBZ0I7QUFDOUQsQ0FBQztBQUVELFNBQWdCLGdCQUFnQixDQUFDLFFBQWtCO0lBQ2pELE9BQU87UUFDTCxJQUFJLGlCQUFPLENBQ1Q7Ozs7O0tBS0QsRUFDQyxNQUFNLEVBQ047WUFDRSxJQUFJLGFBQUcsQ0FBQyxlQUFlLEVBQUUscUJBQVMsQ0FBQztZQUNuQyxJQUFJLGFBQUcsQ0FBQyxTQUFTLEVBQUUscUJBQVMsQ0FBQztTQUM5QixFQUNELEtBQUssRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLEVBQUUsYUFBYSxFQUFFLE9BQU8sRUFBRSxFQUFFLEVBQUU7WUFDaEQsTUFBTSxVQUFVLEdBQUcsTUFBTSw2QkFBYSxDQUFDLEtBQUssRUFBRSxRQUFRLEVBQUUsYUFBYSxDQUFDLEdBQUcsQ0FBQyxDQUFDO1lBQzNFLE1BQU0sVUFBVSxHQUFHLE1BQU0s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QkFBWSxDQUFDLEtBQUssRUFBRSxJQUFJLENBQUMsRUFBRSxFQUMxRyxVQUFVLENBQ1gsQ0FBQTtRQUNILENBQUMsRUFDRCxFQUFFLE9BQU8sRUFBRSxDQUFDLEVBQUUsQ0FDZjtLQUNGLENBQUM7QUFDSixDQUFDO0FBOUZELDRDQThGQztBQUVNLEtBQUssVUFBVSxvQkFBb0IsQ0FBQyxLQUFZLEVBQUUsUUFBa0IsRUFBRSxLQUFZLEVBQUUsSUFBbUI7SUFDNUcsT0FBTyxNQUFNLDZCQUFtQixDQUFNLFVBQVUsRUFBRSxnQkFBZ0IsQ0FBQyxRQUFRLENBQUMsRUFBRSxLQUFLLEVBQUUsS0FBSyxFQUFFLElBQUksQ0FBQyxDQUFDO0FBQ3BHLENBQUM7QUFGRCxvREFFQyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IEV2ZW50IH0gZnJvbSAnLi4vRXZlbnQnO1xuaW1wb3J0IHsgYWRkQWN0aW9uLCBkZXNjcmliZVVzZXIsIFdvcmxkIH0gZnJvbSAnLi4vV29ybGQnO1xuaW1wb3J0IHsgR292ZXJub3IgfSBmcm9tICcuLi9Db250cmFjdC9Hb3Zlcm5vcic7XG5pbXBvcnQgeyBpbnZva2UgfSBmcm9tICcuLi9JbnZva2F0aW9uJztcbmltcG9ydCB7XG4gIGdldEV2ZW50Vixcbn0gZnJvbSAnLi4vQ29yZVZhbHVlJztcbmltcG9ydCB7XG4gIEV2ZW50Vixcbn0gZnJvbSAnLi4vVmFsdWUnO1xuaW1wb3J0IHsgQXJnLCBDb21tYW5kLCBwcm9jZXNzQ29tbWFuZEV2ZW50IH0gZnJvbSAnLi4vQ29tbWFuZCc7XG5pbXBvcnQgeyBnZXRQcm9wb3NhbElkIH0gZnJvbSAnLi4vVmFsdWUvUHJvcG9zYWxWYWx1ZSc7XG5cbmZ1bmN0aW9uIGdldFN1cHBvcnQoc3VwcG9ydDogRXZlbnQpOiBib29sZWFuIHtcbiAgaWYgKHR5cGVvZiBzdXBwb3J0ID09PSAnc3RyaW5nJykge1xuICAgIGlmIChzdXBwb3J0ID09PSAnRm9yJyB8fCBzdXBwb3J0ID09PSAnQWdhaW5zdCcpIHtcbiAgICAgIHJldHVybiBzdXBwb3J0ID09PSAnRm9yJztcbiAgICB9XG4gIH1cblxuICB0aHJvdyBuZXcgRXJyb3IoYFVua25vd24gc3VwcG9ydCBmbGFnIFxcYCR7c3VwcG9ydH1cXGAsIGV4cGVjdGVkIFwiRm9yXCIgb3IgXCJBZ2FpbnN0XCJgKTtcbn1cblxuYXN5bmMgZnVuY3Rpb24gZGVzY3JpYmVQcm9wb3NhbCh3b3JsZDogV29ybGQsIGdvdmVybm9yOiBHb3Zlcm5vciwgcHJvcG9zYWxJZDogbnVtYmVyKTogUHJvbWlzZTxzdHJpbmc+IHtcbiAgLy8gY29uc3QgcHJvcG9zYWwgPSBhd2FpdCBnb3Zlcm5vci5tZXRob2RzLnByb3Bvc2Fscyhwcm9wb3NhbElkKS5jYWxsKCk7XG4gIHJldHVybiBgcHJvcG9zYWwgJHtwcm9wb3NhbElkLnRvU3RyaW5nKCl9YDsgLy8gVE9ETzogQ2xlYW51cFxufVxuXG5leHBvcnQgZnVuY3Rpb24gcHJvcG9zYWxDb21tYW5kcyhnb3Zlcm5vcjogR292ZXJub3IpIHtcbiAgcmV0dXJuIFtcbiAgICBuZXcgQ29tbWFuZDx7IHByb3Bvc2FsSWRlbnQ6IEV2ZW50Viwgc3VwcG9ydDogRXZlbnRWIH0+KFxuICAgICAgYFxuICAgICAgICAjIyMjIFZvdGVcblxuICAgICAgICAqIFwiR292ZXJub3IgPEdvdmVybm9yPiBWb3RlIDxGb3J8QWdhaW5zdD5cIiAtIFZvdGVzIGZvciBvciBhZ2FpbnN0IGEgZ2l2ZW4gcHJvcG9zYWxcbiAgICAgICAgKiBFLmcuIFwiR292ZXJub3IgR292ZXJub3JTY2VuYXJpbyBQcm9wb3NhbCBMYXN0UHJvcG9zYWwgVm90ZSBGb3JcIlxuICAgIGAsXG4gICAgICAnVm90ZScsXG4gICAgICBbXG4gICAgICAgIG5ldyBBcmcoXCJwcm9wb3NhbElkZW50XCIsIGdldEV2ZW50ViksXG4gICAgICAgIG5ldyBBcmcoXCJzdXBwb3J0XCIsIGdldEV2ZW50ViksXG4gICAgICBdLFxuICAgICAgYXN5bmMgKHdvcmxkLCBmcm9tLCB7IHByb3Bvc2FsSWRlbnQsIHN1cHBvcnQgfSkgPT4ge1xuICAgICAgICBjb25zdCBwcm9wb3NhbElkID0gYXdhaXQgZ2V0UHJvcG9zYWxJZCh3b3JsZCwgZ292ZXJub3IsIHByb3Bvc2FsSWRlbnQudmFsKTtcbiAgICAgICAgY29uc3QgaW52b2thdGlvbiA9IGF3YWl0IGludm9rZSh3b3JsZCwgZ292ZXJub3IubWV0aG9kcy5jYXN0Vm90ZShwcm9wb3NhbElkLCBnZXRTdXBwb3J0KHN1cHBvcnQudmFsKSksIGZyb20pO1xuXG4gICAgICAgIHJldHVybiBhZGRBY3Rpb24oXG4gICAgICAgICAgd29ybGQsXG4gICAgICAgICAgYENhc3QgJHtzdXBwb3J0LnZhbC50b1N0cmluZygpfSB2b3RlIGZyb20gJHtkZXNjcmliZVVzZXIod29ybGQsIGZyb20pfSBmb3IgcHJvcG9zYWwgJHtwcm9wb3NhbElkfWAsXG4gICAgICAgICAgaW52b2thdGlvblxuICAgICAgICApXG4gICAgICB9LFxuICAgICAgeyBuYW1lUG9zOiAxIH1cbiAgICApLFxuXG4gICAgbmV3IENvbW1hbmQ8eyBwcm9wb3NhbElkZW50OiBFdmVudFYgfT4oXG4gICAgICBgXG4gICAgICAgICMjIyMgUXVldWVcbiAgICAgICAgKiBcIkdvdmVybm9yIDxHb3Zlcm5vcj4gUXVldWVcIiAtIFF1ZXVlcyBnaXZlbiBwcm9wb3NhbFxuICAgICAgICAqIEUuZy4gXCJHb3Zlcm5vciBHb3Zlcm5vclNjZW5hcmlvIFByb3Bvc2FsIExhc3RQcm9wb3NhbCBRdWV1ZVwiXG4gICAgYCxcbiAgICAgICdRdWV1ZScsXG4gICAgICBbXG4gICAgICAgIG5ldyBBcmcoXCJwcm9wb3NhbElkZW50XCIsIGdldEV2ZW50VilcbiAgICAgIF0sXG4gICAgICBhc3luYyAod29ybGQsIGZyb20sIHsgcHJvcG9zYWxJZGVudCB9KSA9PiB7XG4gICAgICAgIGNvbnN0IHByb3Bvc2FsSWQgPSBhd2FpdCBnZXRQcm9wb3NhbElkKHdvcmxkLCBnb3Zlcm5vciwgcHJvcG9zYWxJZGVudC52YWwpO1xuICAgICAgICBjb25zdCBpbnZva2F0aW9uID0gYXdhaXQgaW52b2tlKHdvcmxkLCBnb3Zlcm5vci5tZXRob2RzLnF1ZXVlKHByb3Bvc2FsSWQpLCBmcm9tKTtcblxuICAgICAgICByZXR1cm4gYWRkQWN0aW9uKFxuICAgICAgICAgIHdvcmxkLFxuICAgICAgICAgIGBRdWV1ZSBwcm9wb3NhbCAke2F3YWl0IGRlc2NyaWJlUHJvcG9zYWwod29ybGQsIGdvdmVybm9yLCBwcm9wb3NhbElkKX0gZnJvbSAke2Rlc2NyaWJlVXNlcih3b3JsZCwgZnJvbSl9YCxcbiAgICAgICAgICBpbnZva2F0aW9uXG4gICAgICAgIClcbiAgICAgIH0sXG4gICAgICB7IG5hbWVQb3M6IDEgfVxuICAgICksXG4gICAgbmV3IENvbW1hbmQ8eyBwcm9wb3NhbElkZW50OiBFdmVudFYgfT4oXG4gICAgICBgXG4gICAgICAgICMjIyMgRXhlY3V0ZVxuICAgICAgICAqIFwiR292ZXJub3IgPEdvdmVybm9yPiBFeGVjdXRlXCIgLSBFeGVjdXRlcyBnaXZlbiBwcm9wb3NhbFxuICAgICAgICAqIEUuZy4gXCJHb3Zlcm5vciBHb3Zlcm5vclNjZW5hcmlvIFByb3Bvc2FsIExhc3RQcm9wb3NhbCBFeGVjdXRlXCJcbiAgICBgLFxuICAgICAgJ0V4ZWN1dGUnLFxuICAgICAgW1xuICAgICAgICBuZXcgQXJnKFwicHJvcG9zYWxJZGVudFwiLCBnZXRFdmVudFYpXG4gICAgICBdLFxuICAgICAgYXN5bmMgKHdvcmxkLCBmcm9tLCB7IHByb3Bvc2FsSWRlbnQgfSkgPT4ge1xuICAgICAgICBjb25zdCBwcm9wb3NhbElkID0gYXdhaXQgZ2V0UHJvcG9zYWxJZCh3b3JsZCwgZ292ZXJub3IsIHByb3Bvc2FsSWRlbnQudmFsKTtcbiAgICAgICAgY29uc3QgaW52b2thdGlvbiA9IGF3YWl0IGludm9rZSh3b3JsZCwgZ292ZXJub3IubWV0aG9kcy5leGVjdXRlKHByb3Bvc2FsSWQpLCBmcm9tKTtcblxuICAgICAgICByZXR1cm4gYWRkQWN0aW9uKFxuICAgICAgICAgIHdvcmxkLFxuICAgICAgICAgIGBFeGVjdXRlIHByb3Bvc2FsICR7YXdhaXQgZGVzY3JpYmVQcm9wb3NhbCh3b3JsZCwgZ292ZXJub3IsIHByb3Bvc2FsSWQpfSBmcm9tICR7ZGVzY3JpYmVVc2VyKHdvcmxkLCBmcm9tKX1gLFxuICAgICAgICAgIGludm9rYXRpb25cbiAgICAgICAgKVxuICAgICAgfSxcbiAgICAgIHsgbmFtZVBvczogMSB9XG4gICAgKSxcbiAgICBuZXcgQ29tbWFuZDx7IHByb3Bvc2FsSWRlbnQ6IEV2ZW50ViB9PihcbiAgICAgIGBcbiAgICAgICAgIyMjIyBDYW5jZWxcbiAgICAgICAgKiBcIkNhbmNlbFwiIC0gY2FuY2VscyBnaXZlbiBwcm9wb3NhbFxuICAgICAgICAqIEUuZy4gXCJHb3Zlcm5vciBQcm9wb3NhbCBMYXN0UHJvcG9zYWwgQ2FuY2VsXCJcbiAgICBgLFxuICAgICAgJ0NhbmNlbCcsXG4gICAgICBbXG4gICAgICAgIG5ldyBBcmcoXCJwcm9wb3NhbElkZW50XCIsIGdldEV2ZW50VilcbiAgICAgIF0sXG4gICAgICBhc3luYyAod29ybGQsIGZyb20sIHsgcHJvcG9zYWxJZGVudCB9KSA9PiB7XG4gICAgICAgIGNvbnN0IHByb3Bvc2FsSWQgPSBhd2FpdCBnZXRQcm9wb3NhbElkKHdvcmxkLCBnb3Zlcm5vciwgcHJvcG9zYWxJZGVudC52YWwpO1xuICAgICAgICBjb25zdCBpbnZva2F0aW9uID0gYXdhaXQgaW52b2tlKHdvcmxkLCBnb3Zlcm5vci5tZXRob2RzLmNhbmNlbChwcm9wb3NhbElkKSwgZnJvbSk7XG5cbiAgICAgICAgcmV0dXJuIGFkZEFjdGlvbihcbiAgICAgICAgICB3b3JsZCxcbiAgICAgICAgICBgQ2FuY2VsIHByb3Bvc2FsICR7YXdhaXQgZGVzY3JpYmVQcm9wb3NhbCh3b3JsZCwgZ292ZXJub3IsIHByb3Bvc2FsSWQpfSBmcm9tICR7ZGVzY3JpYmVVc2VyKHdvcmxkLCBmcm9tKX1gLFxuICAgICAgICAgIGludm9rYXRpb25cbiAgICAgICAgKVxuICAgICAgfSxcbiAgICAgIHsgbmFtZVBvczogMSB9XG4gICAgKSxcbiAgXTtcbn1cblxuZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIHByb2Nlc3NQcm9wb3NhbEV2ZW50KHdvcmxkOiBXb3JsZCwgZ292ZXJub3I6IEdvdmVybm9yLCBldmVudDogRXZlbnQsIGZyb206IHN0cmluZyB8IG51bGwpOiBQcm9taXNlPFdvcmxkPiB7XG4gIHJldHVybiBhd2FpdCBwcm9jZXNzQ29tbWFuZEV2ZW50PGFueT4oJ1Byb3Bvc2FsJywgcHJvcG9zYWxDb21tYW5kcyhnb3Zlcm5vciksIHdvcmxkLCBldmVudCwgZnJvbSk7XG59XG4iXX0=

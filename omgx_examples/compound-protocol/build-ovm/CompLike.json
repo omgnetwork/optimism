@@ -1,0 +1,1160 @@
+{
+  "contractName": "CompLike",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegatee",
+          "type": "address"
+        }
+      ],
+      "name": "delegate",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16-develop.2020.11.10+ovm+commit.00cdd204\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"delegatee\",\"type\":\"address\"}],\"name\":\"delegate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"project:/contracts/CCompLikeDelegate.sol\":\"CompLike\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":1},\"remappings\":[]},\"sources\":{\"project:/contracts/CCompLikeDelegate.sol\":{\"keccak256\":\"0x491ab62ad9c15cfd36e0e9d1e0cfa3f8d8a783a872bdf780d5e300f55dc1b0b5\",\"urls\":[\"bzz-raw://c5f939010b58010b5c4f64b7ffe75c8adbe7b25ec126868d78494bd6ca10860d\",\"dweb:/ipfs/QmeyonNxmquJKyncZwGf2F5SppxZkmaPgMF7ywMV3Pw3ti\"]},\"project:/contracts/CErc20.sol\":{\"keccak256\":\"0xd25508910f098ca45a26e649ebf50a3a0589b8c8f82ff3c8fcb220e4ebe3f624\",\"urls\":[\"bzz-raw://a62c7ffacddb40357b8bcab15cf409e92e2653cc6406d88372aae5dbe4dfb4b4\",\"dweb:/ipfs/QmYBW5BYyo3PWDK2RscUpiaoi9zTahfAKR8FD1SVQrxq92\"]},\"project:/contracts/CErc20Delegate.sol\":{\"keccak256\":\"0xf6cf9f8db3a8ba5fa575528d1991b728709d43ce0702e4b39f84409e84261990\",\"urls\":[\"bzz-raw://79063716a4c3326648c59f8da570a7376b3379f6a7d657903da8aa1366b9f1a1\",\"dweb:/ipfs/QmYpHVZog14x7q5QYWLi5q7ZcVpbopoxUqwAMusYwZrSwi\"]},\"project:/contracts/CToken.sol\":{\"keccak256\":\"0x3a9977b2f71cfb034173e6996d8e0f393e54e775fd6b9b628231fe7121970843\",\"urls\":[\"bzz-raw://2f2e73a8a02b5ba9559a2798162878b2e6e8f80bb541d5c85794fb13e72a79b9\",\"dweb:/ipfs/QmYDUTVAH6fW8si7MZUQsB2X6gdnH7JZDHA9iF8Mdz4inc\"]},\"project:/contracts/CTokenInterfaces.sol\":{\"keccak256\":\"0x4d15183c467750e614965dab7999d97ac039a691e28b90cbbe99df4a09244492\",\"urls\":[\"bzz-raw://70348fc88c5a3380b79c656bd44ec329415d1d3a2da786af44d478fad965500a\",\"dweb:/ipfs/QmTa48kqGSWJM8iqHey8PYnvm3uBnw3iRH7ib6wnNNc85M\"]},\"project:/contracts/CarefulMath.sol\":{\"keccak256\":\"0x0647348f27e41d22555d99eebd217dee02a4d737df6accd7cce5347a7487c7de\",\"urls\":[\"bzz-raw://08882d26c11a6d240949a5afba79a74694a8b651093c05c5ae4cc359a0181c22\",\"dweb:/ipfs/QmVXb1tDswuhMRNuDLajzohdkvx2kBmqu1Rxn1BAKUfhkV\"]},\"project:/contracts/ComptrollerInterface.sol\":{\"keccak256\":\"0xede7670d2dd7b25d0187aecd2c28b7b5ca7d7c1bdac144fbedecf5d4bdd92a6b\",\"urls\":[\"bzz-raw://ffeffe133548cc3b8e97b040b12ae5e041d84f9b482f45b7d536d78eaf6c1550\",\"dweb:/ipfs/QmWYsBjz19U4aBbJmQ96A5sa23UKZnaS3k8oN8bNTyAUsz\"]},\"project:/contracts/EIP20Interface.sol\":{\"keccak256\":\"0xfd8ed2eac6d0b4d9ee6b32628ba68bae17544b66f190a5f7ce0c6ad024579dc8\",\"urls\":[\"bzz-raw://701be308137fe36f221f1d7c815247a272638df40917e7d1456b3b16e8402897\",\"dweb:/ipfs/QmPDkPoKiWXMjwpGa65JHBjo5NH8AA3q1nMhsewfUZHjpx\"]},\"project:/contracts/EIP20NonStandardInterface.sol\":{\"keccak256\":\"0x9719f12e4b80b51147ac195553a198cf8b0c516e7e4d04fc324a23ed15cbafb2\",\"urls\":[\"bzz-raw://50c3ba49b80106c88b0171390aa4127edc86f7b29607abe3dc6d08eaefebf837\",\"dweb:/ipfs/QmP6AHNmFdwYwWUeHnhYi3drCQy4dpnnqUbkMeU3oAtokj\"]},\"project:/contracts/ErrorReporter.sol\":{\"keccak256\":\"0x5179afb1071c0fd555e5c1f1d2565f72dbe1740cc3dd02f6e52037f150afc5c9\",\"urls\":[\"bzz-raw://691454eb195c6ec77409cf681ef6929c8102e65d25dd563bf2a93c04eaceeb9f\",\"dweb:/ipfs/QmegumxJuZ5yeDmJoahzGfH4EV4d1XFvmH1vNfdcdcrWJi\"]},\"project:/contracts/Exponential.sol\":{\"keccak256\":\"0x6ff054d65a0289dbb43c9f437d6909f9cf1207c9b8f984b3cb8e97a9de76a434\",\"urls\":[\"bzz-raw://2e0ccc4b6f730a11021ea1532a93b2208fbe8a69ab910a04d675839e8b15d46d\",\"dweb:/ipfs/QmNTXA1huhPwFtQHPeQqn9H9tbTdmFXZACaEAzEPQDcWa6\"]},\"project:/contracts/ExponentialNoError.sol\":{\"keccak256\":\"0x7cb184b7cee71a5e707053dfba7eebbd46f11974004028100510ccce19b6694d\",\"urls\":[\"bzz-raw://63f0452c7f317ac3eab83456076701025374dec7c2ead5e890ebc09d760bd9d3\",\"dweb:/ipfs/QmfNuHEXCoaVYk8qwGnAy4iwubQoEq6HV1svzwHRGqBb2V\"]},\"project:/contracts/InterestRateModel.sol\":{\"keccak256\":\"0x929282d73c79e6d700ebe79f9fafc1e414b3848acff5a56d6740afd1dc908678\",\"urls\":[\"bzz-raw://77dcd4af0c065447f01358ebd4b35747e8c75963f6cd450df605a3eb62747056\",\"dweb:/ipfs/QmPri5JmuE5KDkgC55eJTEYZHNJJ1kfN5t5WYZRmRFSz6T\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.5.16;\n\nimport \"./CErc20Delegate.sol\";\n\ninterface CompLike {\n  function delegate(address delegatee) external;\n}\n\n/**\n * @title Compound's CCompLikeDelegate Contract\n * @notice CTokens which can 'delegate votes' of their underlying ERC-20\n * @author Compound\n */\ncontract CCompLikeDelegate is CErc20Delegate {\n  /**\n   * @notice Construct an empty delegate\n   */\n  constructor() public CErc20Delegate() {}\n\n  /**\n   * @notice Admin call to delegate the votes of the COMP-like underlying\n   * @param compLikeDelegatee The address to delegate votes to\n   */\n  function _delegateCompLikeTo(address compLikeDelegatee) external {\n    require(msg.sender == admin, \"only the admin may set the comp-like delegate\");\n    CompLike(underlying).delegate(compLikeDelegatee);\n  }\n}\n",
+  "sourcePath": "/Users/jesusmeza/Developer/omgx/snapshot-optimism/omgx_examples/compound-protocol/contracts/CCompLikeDelegate.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/CCompLikeDelegate.sol",
+    "exportedSymbols": {
+      "CCompLikeDelegate": [
+        325
+      ],
+      "CompLike": [
+        295
+      ]
+    },
+    "id": 326,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 288,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".16"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:1"
+      },
+      {
+        "absolutePath": "project:/contracts/CErc20Delegate.sol",
+        "file": "./CErc20Delegate.sol",
+        "id": 289,
+        "nodeType": "ImportDirective",
+        "scope": 326,
+        "sourceUnit": 1233,
+        "src": "26:30:1",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 295,
+        "linearizedBaseContracts": [
+          295
+        ],
+        "name": "CompLike",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 294,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "delegate",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 292,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 291,
+                  "name": "delegatee",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 294,
+                  "src": "99:17:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 290,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "99:7:1",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "98:19:1"
+            },
+            "returnParameters": {
+              "id": 293,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "126:0:1"
+            },
+            "scope": 295,
+            "src": "81:46:1",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 326,
+        "src": "58:71:1"
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 296,
+              "name": "CErc20Delegate",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 1232,
+              "src": "310:14:1",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_CErc20Delegate_$1232",
+                "typeString": "contract CErc20Delegate"
+              }
+            },
+            "id": 297,
+            "nodeType": "InheritanceSpecifier",
+            "src": "310:14:1"
+          }
+        ],
+        "contractDependencies": [
+          1174,
+          1232,
+          6066,
+          6127,
+          6428,
+          6431,
+          6501,
+          6504,
+          6533,
+          6718,
+          31203,
+          31725,
+          32420
+        ],
+        "contractKind": "contract",
+        "documentation": "@title Compound's CCompLikeDelegate Contract\n@notice CTokens which can 'delegate votes' of their underlying ERC-20\n@author Compound",
+        "fullyImplemented": true,
+        "id": 325,
+        "linearizedBaseContracts": [
+          325,
+          1232,
+          6533,
+          6504,
+          1174,
+          6501,
+          6431,
+          6066,
+          31203,
+          31725,
+          32420,
+          6718,
+          6428,
+          6127
+        ],
+        "name": "CCompLikeDelegate",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 302,
+              "nodeType": "Block",
+              "src": "420:2:1",
+              "statements": []
+            },
+            "documentation": "@notice Construct an empty delegate",
+            "id": 303,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [
+              {
+                "arguments": [],
+                "id": 300,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 299,
+                  "name": "CErc20Delegate",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 1232,
+                  "src": "403:14:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_type$_t_contract$_CErc20Delegate_$1232_$",
+                    "typeString": "type(contract CErc20Delegate)"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "403:16:1"
+              }
+            ],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 298,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "393:2:1"
+            },
+            "returnParameters": {
+              "id": 301,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "420:0:1"
+            },
+            "scope": 325,
+            "src": "382:40:1",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 323,
+              "nodeType": "Block",
+              "src": "640:142:1",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_address_payable",
+                          "typeString": "address payable"
+                        },
+                        "id": 312,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 309,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 39793,
+                            "src": "654:3:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 310,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "sender",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "654:10:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address_payable",
+                            "typeString": "address payable"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "id": 311,
+                          "name": "admin",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6087,
+                          "src": "668:5:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address_payable",
+                            "typeString": "address payable"
+                          }
+                        },
+                        "src": "654:19:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "hexValue": "6f6e6c79207468652061646d696e206d6179207365742074686520636f6d702d6c696b652064656c6567617465",
+                        "id": 313,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "675:47:1",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_49c9d7834318fbd23fb0b05062dcbe05993694e29e663da07483dd74b33e77ca",
+                          "typeString": "literal_string \"only the admin may set the comp-like delegate\""
+                        },
+                        "value": "only the admin may set the comp-like delegate"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_49c9d7834318fbd23fb0b05062dcbe05993694e29e663da07483dd74b33e77ca",
+                          "typeString": "literal_string \"only the admin may set the comp-like delegate\""
+                        }
+                      ],
+                      "id": 308,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        39796,
+                        39797
+                      ],
+                      "referencedDeclaration": 39797,
+                      "src": "646:7:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 314,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "646:77:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 315,
+                  "nodeType": "ExpressionStatement",
+                  "src": "646:77:1"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 320,
+                        "name": "compLikeDelegatee",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 305,
+                        "src": "759:17:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 317,
+                            "name": "underlying",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 6430,
+                            "src": "738:10:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          ],
+                          "id": 316,
+                          "name": "CompLike",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 295,
+                          "src": "729:8:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_contract$_CompLike_$295_$",
+                            "typeString": "type(contract CompLike)"
+                          }
+                        },
+                        "id": 318,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "729:20:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_CompLike_$295",
+                          "typeString": "contract CompLike"
+                        }
+                      },
+                      "id": 319,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "delegate",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 294,
+                      "src": "729:29:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$returns$__$",
+                        "typeString": "function (address) external"
+                      }
+                    },
+                    "id": 321,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "729:48:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 322,
+                  "nodeType": "ExpressionStatement",
+                  "src": "729:48:1"
+                }
+              ]
+            },
+            "documentation": "@notice Admin call to delegate the votes of the COMP-like underlying\n@param compLikeDelegatee The address to delegate votes to",
+            "id": 324,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_delegateCompLikeTo",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 306,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 305,
+                  "name": "compLikeDelegatee",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 324,
+                  "src": "604:25:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 304,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "604:7:1",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "603:27:1"
+            },
+            "returnParameters": {
+              "id": 307,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "640:0:1"
+            },
+            "scope": 325,
+            "src": "575:207:1",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 326,
+        "src": "280:504:1"
+      }
+    ],
+    "src": "0:785:1"
+  },
+  "legacyAST": {
+    "attributes": {
+      "absolutePath": "project:/contracts/CCompLikeDelegate.sol",
+      "exportedSymbols": {
+        "CCompLikeDelegate": [
+          325
+        ],
+        "CompLike": [
+          295
+        ]
+      }
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            "^",
+            "0.5",
+            ".16"
+          ]
+        },
+        "id": 288,
+        "name": "PragmaDirective",
+        "src": "0:24:1"
+      },
+      {
+        "attributes": {
+          "SourceUnit": 1233,
+          "absolutePath": "project:/contracts/CErc20Delegate.sol",
+          "file": "./CErc20Delegate.sol",
+          "scope": 326,
+          "symbolAliases": [
+            null
+          ],
+          "unitAlias": ""
+        },
+        "id": 289,
+        "name": "ImportDirective",
+        "src": "26:30:1"
+      },
+      {
+        "attributes": {
+          "baseContracts": [
+            null
+          ],
+          "contractDependencies": [
+            null
+          ],
+          "contractKind": "interface",
+          "documentation": null,
+          "fullyImplemented": false,
+          "linearizedBaseContracts": [
+            295
+          ],
+          "name": "CompLike",
+          "scope": 326
+        },
+        "children": [
+          {
+            "attributes": {
+              "body": null,
+              "documentation": null,
+              "implemented": false,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "delegate",
+              "scope": 295,
+              "stateMutability": "nonpayable",
+              "superFunction": null,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "name": "delegatee",
+                      "scope": 294,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 290,
+                        "name": "ElementaryTypeName",
+                        "src": "99:7:1"
+                      }
+                    ],
+                    "id": 291,
+                    "name": "VariableDeclaration",
+                    "src": "99:17:1"
+                  }
+                ],
+                "id": 292,
+                "name": "ParameterList",
+                "src": "98:19:1"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 293,
+                "name": "ParameterList",
+                "src": "126:0:1"
+              }
+            ],
+            "id": 294,
+            "name": "FunctionDefinition",
+            "src": "81:46:1"
+          }
+        ],
+        "id": 295,
+        "name": "ContractDefinition",
+        "src": "58:71:1"
+      },
+      {
+        "attributes": {
+          "contractDependencies": [
+            1174,
+            1232,
+            6066,
+            6127,
+            6428,
+            6431,
+            6501,
+            6504,
+            6533,
+            6718,
+            31203,
+            31725,
+            32420
+          ],
+          "contractKind": "contract",
+          "documentation": "@title Compound's CCompLikeDelegate Contract\n@notice CTokens which can 'delegate votes' of their underlying ERC-20\n@author Compound",
+          "fullyImplemented": true,
+          "linearizedBaseContracts": [
+            325,
+            1232,
+            6533,
+            6504,
+            1174,
+            6501,
+            6431,
+            6066,
+            31203,
+            31725,
+            32420,
+            6718,
+            6428,
+            6127
+          ],
+          "name": "CCompLikeDelegate",
+          "scope": 326
+        },
+        "children": [
+          {
+            "attributes": {
+              "arguments": null
+            },
+            "children": [
+              {
+                "attributes": {
+                  "contractScope": null,
+                  "name": "CErc20Delegate",
+                  "referencedDeclaration": 1232,
+                  "type": "contract CErc20Delegate"
+                },
+                "id": 296,
+                "name": "UserDefinedTypeName",
+                "src": "310:14:1"
+              }
+            ],
+            "id": 297,
+            "name": "InheritanceSpecifier",
+            "src": "310:14:1"
+          },
+          {
+            "attributes": {
+              "documentation": "@notice Construct an empty delegate",
+              "implemented": true,
+              "isConstructor": true,
+              "kind": "constructor",
+              "name": "",
+              "scope": 325,
+              "stateMutability": "nonpayable",
+              "superFunction": null,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 298,
+                "name": "ParameterList",
+                "src": "393:2:1"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 301,
+                "name": "ParameterList",
+                "src": "420:0:1"
+              },
+              {
+                "attributes": {
+                  "arguments": [
+                    null
+                  ]
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "argumentTypes": null,
+                      "overloadedDeclarations": [
+                        null
+                      ],
+                      "referencedDeclaration": 1232,
+                      "type": "type(contract CErc20Delegate)",
+                      "value": "CErc20Delegate"
+                    },
+                    "id": 299,
+                    "name": "Identifier",
+                    "src": "403:14:1"
+                  }
+                ],
+                "id": 300,
+                "name": "ModifierInvocation",
+                "src": "403:16:1"
+              },
+              {
+                "attributes": {
+                  "statements": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 302,
+                "name": "Block",
+                "src": "420:2:1"
+              }
+            ],
+            "id": 303,
+            "name": "FunctionDefinition",
+            "src": "382:40:1"
+          },
+          {
+            "attributes": {
+              "documentation": "@notice Admin call to delegate the votes of the COMP-like underlying\n@param compLikeDelegatee The address to delegate votes to",
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "_delegateCompLikeTo",
+              "scope": 325,
+              "stateMutability": "nonpayable",
+              "superFunction": null,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "name": "compLikeDelegatee",
+                      "scope": 324,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 304,
+                        "name": "ElementaryTypeName",
+                        "src": "604:7:1"
+                      }
+                    ],
+                    "id": 305,
+                    "name": "VariableDeclaration",
+                    "src": "604:25:1"
+                  }
+                ],
+                "id": 306,
+                "name": "ParameterList",
+                "src": "603:27:1"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 307,
+                "name": "ParameterList",
+                "src": "640:0:1"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "argumentTypes": null,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "type": "tuple()",
+                          "type_conversion": false
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_bool",
+                                  "typeString": "bool"
+                                },
+                                {
+                                  "typeIdentifier": "t_stringliteral_49c9d7834318fbd23fb0b05062dcbe05993694e29e663da07483dd74b33e77ca",
+                                  "typeString": "literal_string \"only the admin may set the comp-like delegate\""
+                                }
+                              ],
+                              "overloadedDeclarations": [
+                                39796,
+                                39797
+                              ],
+                              "referencedDeclaration": 39797,
+                              "type": "function (bool,string memory) pure",
+                              "value": "require"
+                            },
+                            "id": 308,
+                            "name": "Identifier",
+                            "src": "646:7:1"
+                          },
+                          {
+                            "attributes": {
+                              "argumentTypes": null,
+                              "commonType": {
+                                "typeIdentifier": "t_address_payable",
+                                "typeString": "address payable"
+                              },
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "operator": "==",
+                              "type": "bool"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "argumentTypes": null,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "member_name": "sender",
+                                  "referencedDeclaration": null,
+                                  "type": "address payable"
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "argumentTypes": null,
+                                      "overloadedDeclarations": [
+                                        null
+                                      ],
+                                      "referencedDeclaration": 39793,
+                                      "type": "msg",
+                                      "value": "msg"
+                                    },
+                                    "id": 309,
+                                    "name": "Identifier",
+                                    "src": "654:3:1"
+                                  }
+                                ],
+                                "id": 310,
+                                "name": "MemberAccess",
+                                "src": "654:10:1"
+                              },
+                              {
+                                "attributes": {
+                                  "argumentTypes": null,
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 6087,
+                                  "type": "address payable",
+                                  "value": "admin"
+                                },
+                                "id": 311,
+                                "name": "Identifier",
+                                "src": "668:5:1"
+                              }
+                            ],
+                            "id": 312,
+                            "name": "BinaryOperation",
+                            "src": "654:19:1"
+                          },
+                          {
+                            "attributes": {
+                              "argumentTypes": null,
+                              "hexvalue": "6f6e6c79207468652061646d696e206d6179207365742074686520636f6d702d6c696b652064656c6567617465",
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "subdenomination": null,
+                              "token": "string",
+                              "type": "literal_string \"only the admin may set the comp-like delegate\"",
+                              "value": "only the admin may set the comp-like delegate"
+                            },
+                            "id": 313,
+                            "name": "Literal",
+                            "src": "675:47:1"
+                          }
+                        ],
+                        "id": 314,
+                        "name": "FunctionCall",
+                        "src": "646:77:1"
+                      }
+                    ],
+                    "id": 315,
+                    "name": "ExpressionStatement",
+                    "src": "646:77:1"
+                  },
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "argumentTypes": null,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "type": "tuple()",
+                          "type_conversion": false
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              ],
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "member_name": "delegate",
+                              "referencedDeclaration": 294,
+                              "type": "function (address) external"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "argumentTypes": null,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": false,
+                                  "isStructConstructorCall": false,
+                                  "lValueRequested": false,
+                                  "names": [
+                                    null
+                                  ],
+                                  "type": "contract CompLike",
+                                  "type_conversion": true
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "argumentTypes": [
+                                        {
+                                          "typeIdentifier": "t_address",
+                                          "typeString": "address"
+                                        }
+                                      ],
+                                      "overloadedDeclarations": [
+                                        null
+                                      ],
+                                      "referencedDeclaration": 295,
+                                      "type": "type(contract CompLike)",
+                                      "value": "CompLike"
+                                    },
+                                    "id": 316,
+                                    "name": "Identifier",
+                                    "src": "729:8:1"
+                                  },
+                                  {
+                                    "attributes": {
+                                      "argumentTypes": null,
+                                      "overloadedDeclarations": [
+                                        null
+                                      ],
+                                      "referencedDeclaration": 6430,
+                                      "type": "address",
+                                      "value": "underlying"
+                                    },
+                                    "id": 317,
+                                    "name": "Identifier",
+                                    "src": "738:10:1"
+                                  }
+                                ],
+                                "id": 318,
+                                "name": "FunctionCall",
+                                "src": "729:20:1"
+                              }
+                            ],
+                            "id": 319,
+                            "name": "MemberAccess",
+                            "src": "729:29:1"
+                          },
+                          {
+                            "attributes": {
+                              "argumentTypes": null,
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 305,
+                              "type": "address",
+                              "value": "compLikeDelegatee"
+                            },
+                            "id": 320,
+                            "name": "Identifier",
+                            "src": "759:17:1"
+                          }
+                        ],
+                        "id": 321,
+                        "name": "FunctionCall",
+                        "src": "729:48:1"
+                      }
+                    ],
+                    "id": 322,
+                    "name": "ExpressionStatement",
+                    "src": "729:48:1"
+                  }
+                ],
+                "id": 323,
+                "name": "Block",
+                "src": "640:142:1"
+              }
+            ],
+            "id": 324,
+            "name": "FunctionDefinition",
+            "src": "575:207:1"
+          }
+        ],
+        "id": 325,
+        "name": "ContractDefinition",
+        "src": "280:504:1"
+      }
+    ],
+    "id": 326,
+    "name": "SourceUnit",
+    "src": "0:785:1"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.16"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.3",
+  "updatedAt": "2021-08-25T22:25:24.210Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}
