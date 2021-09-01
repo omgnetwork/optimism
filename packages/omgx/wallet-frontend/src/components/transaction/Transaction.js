@@ -16,7 +16,7 @@ limitations under the License. */
 import React, { useState } from 'react'
 
 import Tooltip from 'components/tooltip/Tooltip'
-import { Button as ButtonMUI } from '@material-ui/core'
+import { Button as ButtonMUI, Grid } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import LinkIcon from 'components/icons/LinkIcon'
 import * as styles from './Transaction.module.scss'
@@ -39,7 +39,7 @@ function Transaction({
 }) {
 
   const [dropDownBox, setDropDownBox] = useState(false);
-  const [dropDownBoxInit, setDropDownBoxInit] = useState(true);
+  const [dropDownBoxInit, setDropDownBoxInit] = useState(false);
 
   function renderValue() {
 
@@ -82,47 +82,6 @@ function Transaction({
     )
   }
 
-  function renderDetail() {
-    
-    if (!detail) {
-      return null
-    }
-    
-    return <>
-      <div className={`${styles.subTitle} ${styles.viewMore}`} style={{ cursor: 'pointer' }}
-        onClick={() => {
-          setDropDownBox(!dropDownBox)
-          setDropDownBoxInit(false)
-        }}
-      >
-        <div>View More</div>
-        <ExpandMoreIcon />
-      </div>
-      <div
-        className={dropDownBox ?
-          styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
-      >
-        <div className={styles.title}>
-          <a className={styles.href} href={detail.l1TxLink} target="_blank" rel="noopener noreferrer">
-            {detail.l1Hash}
-          </a>
-        </div>
-        <div className={styles.content}>
-          <div>L1 Block : {detail.l1BlockNumber}</div>
-        </div>
-        <div className={styles.content}>
-          <div>Block Hash : {detail.l1BlockHash}</div>
-        </div>
-        <div className={styles.content}>
-          <div>L1 From : {detail.l1From}</div>
-        </div>
-        <div className={styles.content}>
-          <div>L1 To : {detail.l1To}</div>
-        </div>
-      </div>
-    </>
-  }
-
   function renderDetailRedesign() {
 
     if (!detail) {
@@ -130,6 +89,9 @@ function Transaction({
     }
 
     return (<S.TableBody
+      style={{
+        justifyContent: 'center'
+      }}
     >
       <S.TableCell sx={{
         gap: "5px",
@@ -141,23 +103,55 @@ function Transaction({
           className={dropDownBox ?
             styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
         >
-          <div className={styles.title}>
+          <div className={styles.dropDownTitle}>
             <a className={styles.href} href={detail.l1TxLink} target="_blank" rel="noopener noreferrer">
               {detail.l1Hash}
             </a>
           </div>
-          <div className={styles.content}>
+          <Grid className={styles.dropDownContent} container spacing={1}>
+            <Grid item xs={2}>
+              L1 Block :
+            </Grid>
+            <Grid item xs={10}>
+              {detail.l1BlockNumber}
+            </Grid>
+          </Grid>
+          <Grid className={styles.dropDownContent} container spacing={1}>
+            <Grid item xs={2}>
+              Block Hash :
+            </Grid>
+            <Grid item xs={10}>
+              {detail.l1BlockHash}
+            </Grid>
+          </Grid>
+          <Grid className={styles.dropDownContent} container spacing={1}>
+            <Grid item xs={2}>
+              L1 From :
+            </Grid>
+            <Grid item xs={10}>
+              {detail.l1From}
+            </Grid>
+          </Grid>
+          <Grid className={styles.dropDownContent} container spacing={1}>
+            <Grid item xs={2}>
+              L1 To :
+            </Grid>
+            <Grid item xs={10}>
+              {detail.l1To}
+            </Grid>
+          </Grid>
+          {/* <div >
             <div>L1 Block : {detail.l1BlockNumber}</div>
           </div>
-          <div className={styles.content}>
+          <div className={styles.dropDownContent}>
             <div>Block Hash : {detail.l1BlockHash}</div>
           </div>
-          <div className={styles.content}>
+          <div className={styles.dropDownContent}>
             <div>L1 From : {detail.l1From}</div>
           </div>
-          <div className={styles.content}>
+          <div className={styles.dropDownContent}>
             <div>L1 To : {detail.l1To}</div>
-          </div>
+          </div> */}
         </div>
       </S.TableCell>
     </S.TableBody>)
@@ -250,7 +244,7 @@ function Transaction({
   </div>)
 
 
-  return (
+/*   return (
     <>
       <div className={styles.Transaction}>
         <div className={styles.transactionItem}>
@@ -292,7 +286,7 @@ function Transaction({
       </div>
       <div className={styles.divider}></div>
     </>
-  )
+  ) */
 }
 
 // export default React.memo(Transaction);

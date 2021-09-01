@@ -90,3 +90,9 @@ export const NetWorkStyle = styled.div`
   align-items: center;
   cursor: ${(props) => props.walletEnabled !== false ? 'inherit' : 'pointer'};
 `;
+
+export const LayerLabel = styled.div`
+  margin: 0px 10px 0 17px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+`;

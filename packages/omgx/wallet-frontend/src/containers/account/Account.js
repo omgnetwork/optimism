@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React,{useState,useEffect,useCallback} from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch, batch } from 'react-redux'
 
 import { isEqual } from 'lodash'
 
@@ -32,7 +32,7 @@ import * as S from './Account.styles'
 import { selectTokens } from 'selectors/tokenSelector'
 import PageHeader from 'components/pageHeader/PageHeader'
 import { Box, Grid, Tab, Tabs, Typography, useMediaQuery } from '@material-ui/core'
-import { fetchGas, fetchLookUpPrice } from 'actions/networkAction'
+import { fetchGas, fetchLookUpPrice, fetchTransactions } from 'actions/networkAction'
 import { selectNetwork } from 'selectors/setupSelector'
 import { useTheme } from '@emotion/react'
 import { tableHeadList } from './tableHeadList'
@@ -41,6 +41,10 @@ import Drink from '../../images/backgrounds/drink.png'
 import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon'
 
 import { openError } from 'actions/uiAction'
+import PendingTransaction from './PendingTransaction'
+import useInterval from 'util/useInterval'
+
+const POLL_INTERVAL = 2000; //milliseconds
 
 function Account () {
 
@@ -87,6 +91,14 @@ function Account () {
       dispatch(openError('You are using Mainnet Beta. WARNING: the mainnet smart contracts are not fully audited and funds may be at risk. Please exercise caution when using Mainnet Beta.'))
     }
   },[dispatch, network])
+
+  useInterval(() => {
+    batch(() => {
+      dispatch(fetchTransactions());
+    });
+
+  }, POLL_INTERVAL * 2);
+
 
   const disabled = criticalTransactionLoading || !isSynced
 
@@ -205,6 +217,13 @@ function Account () {
         </S.ContentGlass>
 
       </S.CardTag>
+      <Grid spacing={2} 
+        sx={{margin: '10px 0px'}}
+      >
+        <Grid item xs={12}>
+          <PendingTransaction />
+        </Grid>
+      </Grid>
       {isMobile ? (
         <>
           <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, my: 2}}>

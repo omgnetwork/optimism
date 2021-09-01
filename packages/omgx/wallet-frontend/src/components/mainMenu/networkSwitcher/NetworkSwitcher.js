@@ -75,6 +75,9 @@ function NetworkSwitcher({ walletEnabled }) {
             onClick={()=>{setShowAllNetworks(prev => !prev)}}
           >
             <NetworkIcon />
+            <S.LayerLabel variant="body1"  component="span">
+              Network
+            </S.LayerLabel>
             <Box sx={{
               display: 'flex',
               margin: '10px 0 10px 20px',

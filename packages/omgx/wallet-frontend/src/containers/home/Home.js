@@ -49,8 +49,6 @@ import Transactions from 'containers/transactions/History';
 
 //NFT Example Page
 import NFT from 'containers/nft/Nft';
-import MobileHeader from 'components/mobileheader/MobileHeader';
-import MobileMenu from 'components/mobilemenu/MobileMenu';
 
 import { useTheme } from '@material-ui/core/styles'
 import { Box, Container, useMediaQuery } from '@material-ui/core'
