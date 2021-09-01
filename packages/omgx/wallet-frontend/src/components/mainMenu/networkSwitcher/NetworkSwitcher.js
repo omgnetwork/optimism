@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { openModal } from 'actions/uiAction'
-import { Box } from '@material-ui/system'
+import { Box } from '@material-ui/core'
 import { useSelector, useDispatch } from 'react-redux'
 import * as S from './NetworkSwitcher.styles.js'
 import chevron from 'images/chevron.svg'

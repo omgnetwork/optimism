@@ -31,7 +31,6 @@ const PER_PAGE = 3;
 
 function PendingTransaction() {
 
-
     const [page, setPage] = useState(1);
     const unorderedTransactions = useSelector(selectTransactions, isEqual)
     const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
@@ -72,7 +71,7 @@ function PendingTransaction() {
 
     return <S.AccountWrapper >
         <S.WrapperHeading>
-            <Typography variant="h3" sx={{ opacity: "1.0", fontWeight: "700" }}>Awaiting for Transactions</Typography>
+            <Typography variant="h3" sx={{ opacity: "1.0", fontWeight: "700" }}>Pending Transactions</Typography>
             <Pager
                 currentPage={page}
                 isLastPage={pendingTransactions.length < PER_PAGE}
@@ -123,29 +122,19 @@ function PendingTransaction() {
                     <Grid item xs={2}>
                         {'L2->L1 Exit'}
                     </Grid>
-                    <Grid item xs={2}>
+                    <Grid item xs={3}>
                         {'Started : '} {moment.unix(i.timestamp).format('lll')}
                     </Grid>
                     <Grid item xs={2}>
                         {'In Progress'}
                     </Grid>
                     <Grid item xs={4}>
-                        <a
+                        <a style={{color: 'white'}}
                             href={link}
                             target={'_blank'}
                             rel='noopener noreferrer'
                         >
-                            <ButtonMUI
-                                variant="outlined"
-                                color="primary"
-                                style={{
-                                    boder: '1.4px solid #506DFA',
-                                    borderRadius: '8px',
-                                    width: '180px'
-                                }}
-                            >
-                                <LinkIcon /> Advanced Details
-                            </ButtonMUI>
+                            Advanced Details
                         </a>
                     </Grid>
                 </Grid>

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { Box } from '@material-ui/system'
+import { Box } from '@material-ui/core'
 import { useSelector, useDispatch } from 'react-redux'
 import * as S from './LayerSwitcher.styles.js'
 import { selectLayer } from 'selectors/setupSelector'
