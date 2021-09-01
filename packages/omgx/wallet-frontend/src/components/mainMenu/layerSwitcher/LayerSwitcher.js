@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { Box } from '@material-ui/system'
 import { useSelector, useDispatch } from 'react-redux'
 import * as S from './LayerSwitcher.styles.js'
@@ -13,7 +13,6 @@ import LayerIcon from 'components/icons/LayerIcon';
 function LayerSwitcher({ walletEnabled, isButton = false }) {
 
   const dispatch = useDispatch()
-  const [ showAllLayers, setShowAllLayers ] = useState(false)
   let layer = useSelector(selectLayer())
 
   if (networkService.L1orL2 !== layer) {
@@ -32,8 +31,7 @@ function LayerSwitcher({ walletEnabled, isButton = false }) {
   const dispatchSetLayer = useCallback((layer) => {
     dispatch(setLayer(layer))
     networkService.switchChain(layer)
-    setShowAllLayers(false)
-  }, [ dispatch, setShowAllLayers ])
+  }, [ dispatch ])
 
   if (!!isButton) {
     return (<>

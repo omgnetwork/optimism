@@ -23,11 +23,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import moment from 'moment';
 
 import { setActiveHistoryTab1 } from 'actions/uiAction'
-// import { setActiveHistoryTab2 } from 'actions/uiAction'
 import { fetchTransactions } from 'actions/networkAction';
 
 import { selectActiveHistoryTab1 } from 'selectors/uiSelector'
-import { selectActiveHistoryTab2 } from 'selectors/uiSelector'
 import { selectTransactions } from 'selectors/transactionSelector';
 import { selectNetwork } from 'selectors/setupSelector'
 
@@ -54,7 +52,6 @@ function History () {
   const [ searchHistory, setSearchHistory ] = useState('');
 
   const activeTab1 = useSelector(selectActiveHistoryTab1, isEqual);
-  // const activeTab2 = useSelector(selectActiveHistoryTab2, isEqual);
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual)
 
@@ -94,7 +91,7 @@ function History () {
     <>
       <PageHeader title="Transaction History" />
 
-    {/*
+    {/*TODO: fix the search history
     <Input
             icon
             placeholder='Search by hash'
