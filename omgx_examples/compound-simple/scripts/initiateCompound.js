@@ -32,7 +32,7 @@ async function main(){
 
 
     const l2_provider = new ethers.providers.JsonRpcProvider(env.L2_NODE_WEB3_URL, { chainId: 28 });
-    const wallet1 = new ethers.Wallet(env.privateKey1, l2_provider);
+    const wallet1 = new ethers.Wallet(env.pk_0, l2_provider);
 
     // const comp = new ethers.Contract(compAddress , Comp.abi , wallet1);
     const governorBravoDelegate = new ethers.Contract(governorBravoDelegateAddress , GovernorBravoDelegate.abi , wallet1);
@@ -67,9 +67,21 @@ async function main(){
       setPendingAdminData,
       eta
     );
+
+
+    const bytesHash = ethers.utils.defaultAbiCoder.encode(['bytes32'],
+    [[timelock.address, 0, "setPendingAdmin(address)", setPendingAdminData, eta]]);
+    const txhash = ethers.utils.keccak256(bytesHash)
+
+    const transaction = await timelock.queuedTransactions(txhash);
+    console.log("transaction:", transaction);
+    return;
     console.log('queued setPendingAdmin');
     console.log('execute setPendingAdmin');
 
+
+
+    console.log(txhash);
     await sleep(250 * 1000);
     for(let i = 0; i < 30; i++){
       console.log(`Attempt: ${i + 1}`)
@@ -86,11 +98,12 @@ async function main(){
         console.log('\texecuted setPendingAdmin')
         break;
       }catch(error){
-        // if(error.message === `execution reverted: Timelock::executeTransaction: Transaction hasn't surpassed time lock.`){
-            console.log("\tTransaction hasn't surpassed time lock\n");
-        // }else{
-        //   throw error;
-        // }
+        if(i === 29){
+          console.log("\tFailed. Please try again.\n");
+          return;
+        }
+        console.log(error);
+        console.log("\tTransaction hasn't surpassed time lock\n");
       }
       await sleep(15 * 1000);
     }
@@ -138,11 +151,11 @@ async function main(){
             console.log('Executed initiate');
             break;
         }catch(error){
-            // if(error.message === `execution reverted: Timelock::executeTransaction: Transaction hasn't surpassed time lock.`){
-                console.log("\tTransaction hasn't surpassed time lock\n");
-            // }else{
-            //   throw error;
-            // }
+          if(i === 29){
+            console.log("\tFailed. Please try again.\n");
+            return
+          }
+          console.log("\tTransaction hasn't surpassed time lock\n");
         }
         await sleep(15 * 1000);
     }

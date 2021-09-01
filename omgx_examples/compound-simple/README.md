@@ -17,52 +17,13 @@ $ truffle compile --config truffle-config-ovm.js
 
 Compiling your contracts...
 ===========================
-> Compiling ./contracts/BaseJumpRateModelV2.sol
-> Compiling ./contracts/CCompLikeDelegate.sol
-> Compiling ./contracts/CDaiDelegate.sol
-> Compiling ./contracts/CErc20.sol
-> Compiling ./contracts/CErc20Delegate.sol
-> Compiling ./contracts/CErc20Delegator.sol
-> Compiling ./contracts/CErc20Immutable.sol
-> Compiling ./contracts/CEther.sol
-> Compiling ./contracts/CToken.sol
-> Compiling ./contracts/CTokenInterfaces.sol
-> Compiling ./contracts/CarefulMath.sol
-> Compiling ./contracts/Comptroller.sol
-> Compiling ./contracts/ComptrollerG1.sol
-> Compiling ./contracts/ComptrollerG2.sol
-> Compiling ./contracts/ComptrollerG3.sol
-> Compiling ./contracts/ComptrollerG4.sol
-> Compiling ./contracts/ComptrollerG5.sol
-> Compiling ./contracts/ComptrollerG6.sol
-> Compiling ./contracts/ComptrollerInterface.sol
-> Compiling ./contracts/ComptrollerStorage.sol
-> Compiling ./contracts/DAIInterestRateModelV3.sol
-> Compiling ./contracts/EIP20Interface.sol
-> Compiling ./contracts/EIP20NonStandardInterface.sol
-> Compiling ./contracts/ErrorReporter.sol
-> Compiling ./contracts/Exponential.sol
-> Compiling ./contracts/ExponentialNoError.sol
-> Compiling ./contracts/Governance/Comp.sol
-> Compiling ./contracts/Governance/GovernorAlpha.sol
-> Compiling ./contracts/Governance/GovernorBravoDelegate.sol
-> Compiling ./contracts/Governance/GovernorBravoDelegator.sol
-> Compiling ./contracts/Governance/GovernorBravoInterfaces.sol
-> Compiling ./contracts/InterestRateModel.sol
-> Compiling ./contracts/JumpRateModel.sol
-> Compiling ./contracts/JumpRateModelV2.sol
-> Compiling ./contracts/LegacyInterestRateModel.sol
-> Compiling ./contracts/LegacyJumpRateModelV2.sol
-> Compiling ./contracts/Lens/CompoundLens.sol
-> Compiling ./contracts/Maximillion.sol
-> Compiling ./contracts/Migrations.sol
-> Compiling ./contracts/PriceOracle.sol
-> Compiling ./contracts/Reservoir.sol
+> Compiling ./contracts/Comp.sol
+> Compiling ./contracts/GovernorAlpha.sol
+> Compiling ./contracts/GovernorBravoDelegate.sol
+> Compiling ./contracts/GovernorBravoDelegator.sol
+> Compiling ./contracts/GovernorBravoInterfaces.sol
 > Compiling ./contracts/SafeMath.sol
-> Compiling ./contracts/SimplePriceOracle.sol
 > Compiling ./contracts/Timelock.sol
-> Compiling ./contracts/Unitroller.sol
-> Compiling ./contracts/WhitePaperInterestRateModel.sol
 
 
 > Artifacts written to /Users/jesusmeza/Developer/omgx/optimism/omgx_examples/compound-protocol/build-ovm
@@ -73,7 +34,7 @@ Compiling your contracts...
 Then deploy on the contracts onto Rinkeby L2
 
 ```bash
-$ yarn migrate:boba
+$ yarn migrate:rinkeby_l2
 ```
 
 You should expect output similar to the following:

@@ -4,52 +4,37 @@ const env = process.env;
 const mnemonicPhrase = env.mnemonic
 const HDWalletProvider = require('@truffle/hdwallet-provider')
 
+const pk_0 = env.pk_0
+const pk_1 = env.pk_1
+const pk_2 = env.pk_2
+
 module.exports = {
   contracts_build_directory: './build-ovm',
   networks: {
-    optimism: {
+    local_l2: {
       provider: function () {
         return new HDWalletProvider({
-          mnemonic: {
-            phrase: mnemonicPhrase,
-          },
-          providerOrUrl: 'http://l2geth:8545',
+          privateKeys: [ pk_0, pk_1, pk_2 ],
+          providerOrUrl: 'http://127.0.0.1:8545',
         })
       },
-      network_id: "*",
-      host:  'http://l2geth:8545',
+      network_id: 31338,
+      host:  '127.0.0.1',
       gasPrice: 15000000,
-      gas: 803900000,
+      gas: 50000000,
     },
-    boba_rinkeby: {
+    rinkeby_l2: {
       provider: function () {
         return new HDWalletProvider({
-          mnemonic: {
-            phrase: mnemonicPhrase,
-          },
-          providerOrUrl: env.L2_NODE_WEB3_URL,
+          privateKeys: [ pk_0, pk_1, pk_2 ],
+          providerOrUrl: 'https://rinkeby.boba.network',
         })
       },
       network_id: 28,
-      host: env.L2_NODE_WEB3_URL,
+      host: 'https://rinkeby.boba.network',
       gasPrice: 15000000,
       gas: 803900000,
-    },
-    L1: {
-      provider: function () {
-        return new HDWalletProvider({
-          mnemonic: {
-            phrase: mnemonicPhrase,
-          },
-          providerOrUrl: 'http://127.0.0.1:9545',
-        })
-      },
-      network_id: 31337,
-      host: '127.0.0.1',
-      port: 9545,
-      gasPrice: 15000000,
-      gas: 803900000,
-    },
+    }
   },
   compilers: {
     solc: {
