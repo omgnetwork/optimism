@@ -1,8 +1,73 @@
-# Deploying on Rinkeby-Boba Network
+# DAO explained
+
+## Overview
+
+The DAO is a fork of Compound Finance's current governance module (Governor Bravo), which is comprised of 4 main contracts:
+
+### Token
+
+`Comp.sol` encodes the token, which follows the ERC-20 standard and grants token holders voting power proportional to the number of tokens they own. These votes can be delegated to either themselves or a trusted delegate who will be able to vote on proposals on the token owner's behalf.
+
+### Governor Bravo Delegate
+
+`GovernorBravoDelegate.sol` contains the current implementation of the DAO. This contract allows token holders with voting power greater than the proposal threshold (between 50,000 - 100,000 votes) to create proposals that others can vote on. After a voting delay (up to 1 week) for participants to review the proposal, the voting period opens for at least 1 day and can last up to 2 weeks. For a proposal to pass, the number of for votes must be greater than the number of against votes and the number of for votes must meet the quorum of 400,000 votes. Once a proposal passes, it can be queued and then executed to go into effect.
+
+### Governor Bravo Delegator
+
+`GovernorBravoDelegator.sol` is the proxy that allows the DAO to be upgradeable. This contract is simply a wrapper that points to an implementation (currently `GovernorBravoDelegate`), but can be changed to a newer implementation of the DAO when appropriate.
+
+### Timelock
+
+`Timelock.sol` delays the implementation of actions passed by the governance module. The minimum delay is 2 days and can be increased up to 30 days for major changes. The purpose of this security feature is to ensure that the community is given enough time to react to and prepare for changes that are passed.
+
+## Deployment
+
+The deployment script can be found in `migrations/1_deploy.js` and can be used to deploy the DAO and provides examples of basic calls that can be made to the governance contracts.
+
+First, we deploy the token and pass in the developer address which receives the initial supply of tokens. Then, we deploy the timelock with the developer address and chosen timelock delay (between 2 and 30 days). The developer address is set as the temporary admin of the timelock. Next, we deploy the GovernorBravoDelegate contract. Finally, we pass in the timelock address, token address, developer address, GovernorBravoDelegate address, voting period, voting delay, and proposal threshold to deploy GovernorBravoDelegator.
+
+After deploying these contracts, we set GovernorBravoDelegator as the admin of the timelock contract by first queueing this transaction. The function `queueTransaction` takes in 5 arguments: target contract address, value of ether, function signature, function data, and estimated time of arrival (ETA) where the ETA must satisfy the timelock delay. Once the transaction is queued and the ETA has arrived, the transaction can be executed by calling the function `executeTransaction` with the same 5 arguments. Note: there is a grace period of 14 days from the ETA where the transaction must be executed before it becomes stale.
+
+Once GovernorBravoDelegator has been set as the admin of the Timelock contract, the `_initiate` function can be called which allows proposals to be created and the BOBA DAO is live!
+
+## Changes to Compound's Governance Contracts
+
+In `GovernorBravoDelegate.sol`, modify the `_initiate` function:
+
+- Change line 326 to `proposalCount = 1;`
+- Delete line 321
+- Delete parameter (`address governorAlpha`) in line 323
+
+```
+    /**
+      * @notice Initiate the GovernorBravo contract
+      * @dev Admin only. Sets initial proposal id which initiates the contract, ensuring a continuous proposal id count
+      */
+    function _initiate() external {
+        require(msg.sender == admin, "GovernorBravo::_initiate: admin only");
+        require(initialProposalId == 0, "GovernorBravo::_initiate: can only initiate once");
+        proposalCount = 1;
+        initialProposalId = proposalCount;
+        timelock.acceptAdmin();
+    }
+```
+
+In `GovernorBravoInterfaces.sol`, delete `GovernorAlpha` Interface:
+
+- Delete lines 179-182
+
+## Testing Notes
+
+- MINIMUM_DELAY in Timelock.sol set to 0 to allow for timely testing
+- MIN_VOTING_PERIOD in GovernorBravoDelegate.sol set to 0 to allow for timely testing
+-
+
+
+# Deploying on Rinkeby-Boba Network and Initiating
 
 
 Instructions or Deploying Compound Governance Protocol on Rinkeby-Boba.
-First create a `.env` file that follows the structure of `.env.example`. This file should contained a mnemonic phrase, and the private key linked to mnemonic phrase.
+First create a `.env` file that follows the structure of `.env.example`.
 
 ```bash
 $ yarn
@@ -13,35 +78,7 @@ You should expect the following output:
 
 ```bash
 yarn run v1.22.10
-$ truffle compile --config truffle-config-ovm.js
-
-Compiling your contracts...
-===========================
-> Compiling ./contracts/Comp.sol
-> Compiling ./contracts/GovernorAlpha.sol
-> Compiling ./contracts/GovernorBravoDelegate.sol
-> Compiling ./contracts/GovernorBravoDelegator.sol
-> Compiling ./contracts/GovernorBravoInterfaces.sol
-> Compiling ./contracts/SafeMath.sol
-> Compiling ./contracts/Timelock.sol
-
-
-> Artifacts written to /Users/jesusmeza/Developer/omgx/optimism/omgx_examples/compound-protocol/build-ovm
-> Compiled successfully using:
-   - solc: 0.5.16
-```
-
-Then deploy on the contracts onto Rinkeby L2
-
-```bash
-$ yarn migrate:rinkeby_l2
-```
-
-You should expect output similar to the following:
-
-```bash
-yarn run v1.22.10
-$ truffle migrate --network boba_rinkeby --config truffle-config-ovm.js
+$ truffle migrate --network rinkeby_l2 --config truffle-config-ovm.js
 
 Compiling your contracts...
 ===========================
@@ -51,7 +88,7 @@ Compiling your contracts...
 
 Starting migrations...
 ======================
-> Network name:    'boba_rinkeby'
+> Network name:    'rinkeby_l2'
 > Network id:      28
 > Block gas limit: 11000000 (0xa7d8c0)
 
@@ -61,154 +98,87 @@ Starting migrations...
 STARTING HERE
 0x21A235cf690798ee052f54888297Ad8F46D3F389
 
-   Deploying 'Comp'
+   Replacing 'Comp'
    ----------------
-   > transaction hash:    0x65d47be7ffd6f138fd806dbcc461eab9500a0f9dceb64a81e1b4fe040432ed2f
+   > transaction hash:    0xebe659bbbdb9ba6be983dc297f979d2a36a827a282f524adb016977777924318
    > Blocks: 0            Seconds: 0
-   > contract address:    0xef459fad4B8F53c05dE251Ad838593A98C6671fc
-   > block number:        22418
-   > block timestamp:     1630446838
+   > contract address:    0x7e5C11814DEfC1Adb8F8a9371334F7c9Fc4a3a7b
+   > block number:        22880
+   > block timestamp:     1630524555
    > account:             0x21A235cf690798ee052f54888297Ad8F46D3F389
-   > balance:             1.280675607953
-   > gas used:            3962954 (0x3c784a)
+   > balance:             1.688172744618
+   > gas used:            3979070 (0x3cb73e)
    > gas price:           0.015 gwei
    > value sent:          0 ETH
-   > total cost:          0.00005944431 ETH
+   > total cost:          0.00005968605 ETH
 
 deployed comp
 
-   Deploying 'Timelock'
+   Replacing 'Timelock'
    --------------------
-   > transaction hash:    0xa1d97c9c63b7b3798fef5b9f3990bad133f5a89e9eb8cfbc2eec3cc614d852cc
+   > transaction hash:    0xcb4c208e5f45270ab47c24d63b9371306889e0486f1d3e56f36cd4c8167f9165
    > Blocks: 0            Seconds: 0
-   > contract address:    0x1099876c30f541F8c001872198B9094b976DF687
-   > block number:        22419
-   > block timestamp:     1630446838
+   > contract address:    0x55D6151B519853aaF38A669b2248221B128E14B9
+   > block number:        22881
+   > block timestamp:     1630524555
    > account:             0x21A235cf690798ee052f54888297Ad8F46D3F389
-   > balance:             1.268617107953
-   > gas used:            3527769 (0x35d459)
+   > balance:             1.676114244618
+   > gas used:            3512614 (0x359926)
    > gas price:           0.015 gwei
    > value sent:          0 ETH
-   > total cost:          0.000052916535 ETH
+   > total cost:          0.00005268921 ETH
 
 deployed timelock
 
-   Deploying 'GovernorBravoDelegate'
+   Replacing 'GovernorBravoDelegate'
    ---------------------------------
-   > transaction hash:    0x0456aff90c9f1c99477c7b7ed5330896255b4651f026822f2cf91e05891e3c45
+   > transaction hash:    0x96048773ffa291828e157f69a0c218c1296af9ca112d370129483930a9bdb699
    > Blocks: 0            Seconds: 0
-   > contract address:    0x0c2678D4EB7EaC9c334Fb0d2b6d10Ec1dbf2cE9A
-   > block number:        22420
-   > block timestamp:     1630446838
+   > contract address:    0xe1004C6E7f490189F712441846031D76A38E5A49
+   > block number:        22882
+   > block timestamp:     1630524555
    > account:             0x21A235cf690798ee052f54888297Ad8F46D3F389
-   > balance:             1.256558607953
-   > gas used:            8712102 (0x84efa6)
+   > balance:             1.664055744618
+   > gas used:            8720274 (0x850f92)
    > gas price:           0.015 gwei
    > value sent:          0 ETH
-   > total cost:          0.00013068153 ETH
+   > total cost:          0.00013080411 ETH
 
 deployed delegate
 
-   Deploying 'GovernorBravoDelegator'
+   Replacing 'GovernorBravoDelegator'
    ----------------------------------
-   > transaction hash:    0x84fd4a347a9a2396eaae42179b2bb8c2f6b35e7437122e01f25889b90b4fd17c
+   > transaction hash:    0xf33626d5d9a31ef1fd0127a82c104a03924a19b9180db353b7237c66b062e36d
    > Blocks: 0            Seconds: 0
-   > contract address:    0x53E691925D847843D50F7864321651858197080F
-   > block number:        22421
-   > block timestamp:     1630446838
+   > contract address:    0x15fFafE1b7060f6D61ea6Bed004721e2D5be7707
+   > block number:        22883
+   > block timestamp:     1630524555
    > account:             0x21A235cf690798ee052f54888297Ad8F46D3F389
-   > balance:             1.244500107953
-   > gas used:            2044073 (0x1f30a9)
+   > balance:             1.651997244618
+   > gas used:            2046983 (0x1f3c07)
    > gas price:           0.015 gwei
    > value sent:          0 ETH
-   > total cost:          0.000030661095 ETH
+   > total cost:          0.000030704745 ETH
 
 deployed delegator
+Queue setPendingAdmin
+Time transaction was made: 1630524555
+Time at which transaction may be executed: 1630524855
+Attempt: 1
+	Timestamp: 1630524555
+	executed setPendingAdmin
    > Saving artifacts
    -------------------------------------
-   > Total cost:       0.00027370347 ETH
+   > Total cost:      0.000273884115 ETH
 
 
 Summary
 =======
 > Total deployments:   4
-> Final cost:          0.00027370347 ETH
+> Final cost:          0.000273884115 ETH
 
 
-✨  Done in 25.21s.
-```
-
-
-## Initiating Timelock and submiting a proposal
-First paste the contract addresses into the file `networks/rinkeby-boba.json`. Using the addresses above the file should look as follows.
-
-```json
-{
-"Comp":"0xef459fad4B8F53c05dE251Ad838593A98C6671fc",
-"Timelock":"0x1099876c30f541F8c001872198B9094b976DF687",
-"GovernorBravoDelegate":"0x0c2678D4EB7EaC9c334Fb0d2b6d10Ec1dbf2cE9A",
-"GovernorBravoDelegator":"0x53E691925D847843D50F7864321651858197080F"
-}
-```
-
-
-### Initiating Timelock
-This step is necessary in order to link the Governor contract to the Timelock contract.
-Run the following command. Note running this program may take some time please be patient.
-```bash
-$ yarn initiateComp
-```
-
-The output should look similar to the following:
-
-```bash
-yarn run v1.22.10
-$ node scripts/initiateCompound.js
------------Initiating Compound-----------
-
-Current Time:  1630448203
-Time at which transaction can be executed: 1630448503
-
-
-
------------queueing setPendingAdmin-----------
-
-queued setPendingAdmin
-execute setPendingAdmin
-Attempt: 1
-	Timestamp: 1630448398
-	Transaction hasn't surpassed time lock
-
-Attempt: 2
-	Timestamp: 1630448593
-	executed setPendingAdmin
-
-
-
------------queueing initiate-----------
-
-Current Time:  1630448593
-Time at which transaction can be executed: 1630448893
-queued initiate
-execute initiate
-Attempt: 1
-	Timestamp: 1630448788
-	Transaction hasn't surpassed time lock
-
-Attempt: 2
-	Timestamp: 1630448788
-	Transaction hasn't surpassed time lock
-
-...
-
-Attempt: 18
-	Timestamp: 1630448788
-	Transaction hasn't surpassed time lock
-
-Attempt: 19
-	Timestamp: 1630449178
-Executed initiate
-✨  Done in 836.14s.
+✨  Done in 320.22s.
 ```
 
 ## Submitting a Proposal, Voting, and Executing

@@ -8,6 +8,7 @@
     "compile:ovm": "truffle compile --config truffle-config-ovm.js",
     "migrate:local_l1": "truffle migrate --network local_l1 --config truffle-config.js",
     "migrate:local_l2": "truffle migrate --network local_l2 --config truffle-config-ovm.js",
+    "migrate:rinkeby_l1": "truffle migrate --network rinkeby_l1 --config truffle-config.js",
     "migrate:rinkeby_l2": "truffle migrate --network rinkeby_l2 --config truffle-config-ovm.js",
     "submitProposal": "node scripts/submitProposal.js",
     "initiateComp": "node scripts/initiateCompound.js"

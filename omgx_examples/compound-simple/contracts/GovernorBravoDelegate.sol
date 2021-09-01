@@ -15,7 +15,7 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV1, GovernorBravoE
     uint public constant MAX_PROPOSAL_THRESHOLD = 100000e18; //100,000 Comp
 
     /// @notice The minimum setable voting period
-    uint public constant MIN_VOTING_PERIOD = 1; // About 24 hours
+    uint public constant MIN_VOTING_PERIOD = 1; // About 15 seconds
 
     /// @notice The max setable voting period
     uint public constant MAX_VOTING_PERIOD = 80640; // About 2 weeks
@@ -192,7 +192,7 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV1, GovernorBravoE
       * @return Proposal state
       */
     function state(uint proposalId) public view returns (ProposalState) {
-        require(proposalCount >= proposalId && proposalId >= initialProposalId, "GovernorBravo::state: invalid proposal id");
+        require(proposalCount >= proposalId && proposalId > initialProposalId, "GovernorBravo::state: invalid proposal id");
         Proposal storage proposal = proposals[proposalId];
         if (proposal.canceled) {
             return ProposalState.Canceled;
@@ -318,13 +318,12 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV1, GovernorBravoE
     /**
       * @notice Initiate the GovernorBravo contract
       * @dev Admin only. Sets initial proposal id which initiates the contract, ensuring a continuous proposal id count
-      *  The address for the Governor to continue the proposal id count from
       */
-    function _initiate(/*address governorAlpha*/) external {
+    function _initiate() external {
         require(msg.sender == admin, "GovernorBravo::_initiate: admin only");
         require(initialProposalId == 0, "GovernorBravo::_initiate: can only initiate once");
-        //proposalCount = GovernorAlpha(governorAlpha).proposalCount();
-        initialProposalId = 1; //proposalCount;
+        proposalCount = 1;
+        initialProposalId = proposalCount;
         timelock.acceptAdmin();
     }
 

@@ -67,22 +67,12 @@ async function main(){
       setPendingAdminData,
       eta
     );
-
-
-    const bytesHash = ethers.utils.defaultAbiCoder.encode(['bytes32'],
-    [[timelock.address, 0, "setPendingAdmin(address)", setPendingAdminData, eta]]);
-    const txhash = ethers.utils.keccak256(bytesHash)
-
-    const transaction = await timelock.queuedTransactions(txhash);
-    console.log("transaction:", transaction);
-    return;
     console.log('queued setPendingAdmin');
     console.log('execute setPendingAdmin');
 
 
 
-    console.log(txhash);
-    await sleep(250 * 1000);
+    await sleep(300 * 1000);
     for(let i = 0; i < 30; i++){
       console.log(`Attempt: ${i + 1}`)
       console.log(`\tTimestamp: ${await getTimestamp(env.L2_NODE_WEB3_URL, 28)}`);
@@ -102,7 +92,7 @@ async function main(){
           console.log("\tFailed. Please try again.\n");
           return;
         }
-        console.log(error);
+        // console.log(error);
         console.log("\tTransaction hasn't surpassed time lock\n");
       }
       await sleep(15 * 1000);
@@ -125,40 +115,6 @@ async function main(){
 
 
     // Queuing the transaction that will initate the GovernorBravoDelegate contract
-    await timelock.queueTransaction(
-    governorBravo.address,
-    0,
-    '_initiate()', // function that needs to be called
-    initiateData,
-    eta
-    );
-    console.log('queued initiate');
-    console.log('execute initiate');
-
-    await sleep(250 * 1000);
-    for(let i = 0; i < 30; i++ ){
-        console.log(`Attempt: ${i + 1}`);
-        console.log(`\tTimestamp: ${await getTimestamp(env.L2_NODE_WEB3_URL, 28)}`);
-        try{
-          // Executing the transaction that will initate the GovernorBravoDelegate contract
-            await timelock.executeTransaction(
-                governorBravo.address,
-                0,
-                '_initiate()',
-                initiateData,
-                eta
-            );
-            console.log('Executed initiate');
-            break;
-        }catch(error){
-          if(i === 29){
-            console.log("\tFailed. Please try again.\n");
-            return
-          }
-          console.log("\tTransaction hasn't surpassed time lock\n");
-        }
-        await sleep(15 * 1000);
-    }
 }
 
 (async () =>{
