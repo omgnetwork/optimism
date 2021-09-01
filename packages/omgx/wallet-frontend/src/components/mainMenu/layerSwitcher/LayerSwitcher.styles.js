@@ -67,17 +67,24 @@ export const ButtonStyle = styled.div`
 
 export const LayerSwitch = styled.div`
   margin-left: 15px;
-  padding: 5px;
+  padding: 2px;
   border-radius: 16px;
   background: #3C5DFC;
   cursor: pointer;
   span {
-    padding: 5px 15px;
+    padding: 2px 15px;
     border-radius: 16px;
 
     &.active { 
       color: #3c5dfc;
       background: white;
+      padding: 2px 15px;
     }
   }
+`;
+
+export const LayerLabel = styled.div`
+  margin: 0px 10px 0 17px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
 `;

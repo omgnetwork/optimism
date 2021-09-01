@@ -65,6 +65,9 @@ function LayerSwitcher({ walletEnabled, isButton = false }) {
             }}
           >
             <LayerIcon />
+            <S.LayerLabel variant="body1"  component="span">
+                Layer
+            </S.LayerLabel>
             <S.LayerSwitch 
               onClick={()=>{dispatchSetLayer(otherLayer)}}
             >
