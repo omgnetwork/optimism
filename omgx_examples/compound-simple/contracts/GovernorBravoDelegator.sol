@@ -6,7 +6,7 @@ import "./GovernorBravoInterfaces.sol";
 contract GovernorBravoDelegator is GovernorBravoDelegatorStorage, GovernorBravoEvents {
 	constructor(
 			address timelock_,
-			address ctoken_,
+			address comp_,
 			address admin_,
 	        address implementation_,
 	        uint votingPeriod_,
@@ -18,7 +18,7 @@ contract GovernorBravoDelegator is GovernorBravoDelegatorStorage, GovernorBravoE
 
         delegateTo(implementation_, abi.encodeWithSignature("initialize(address,address,uint256,uint256,uint256)",
                                                             timelock_,
-                                                            ctoken_,
+                                                            comp_,
                                                             votingPeriod_,
                                                             votingDelay_,
                                                             proposalThreshold_));
@@ -34,7 +34,6 @@ contract GovernorBravoDelegator is GovernorBravoDelegatorStorage, GovernorBravoE
      * @param implementation_ The address of the new implementation for delegation
      */
     function _setImplementation(address implementation_) public {
-        
         require(msg.sender == admin, "GovernorBravoDelegator::_setImplementation: admin only");
         require(implementation_ != address(0), "GovernorBravoDelegator::_setImplementation: invalid implementation address");
 

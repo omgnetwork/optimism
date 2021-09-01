@@ -68,7 +68,7 @@ contract GovernorBravoDelegateStorageV1 is GovernorBravoDelegatorStorage {
     /// @notice The duration of voting on a proposal, in blocks
     uint public votingPeriod;
 
-    /// @notice The number of votes required for a voter to become a proposer
+    /// @notice The number of votes required in order for a voter to become a proposer
     uint public proposalThreshold;
 
     /// @notice Initial proposal id set at become
@@ -77,11 +77,11 @@ contract GovernorBravoDelegateStorageV1 is GovernorBravoDelegatorStorage {
     /// @notice The total number of proposals
     uint public proposalCount;
 
-    /// @notice The address of the Timelock
+    /// @notice The address of the Compound Protocol Timelock
     TimelockInterface public timelock;
 
-    /// @notice The address of the CToken governance token
-    CTokenInterface public ctoken;
+    /// @notice The address of the Compound governance token
+    CompInterface public comp;
 
     /// @notice The official record of all proposals ever proposed
     mapping (uint => Proposal) public proposals;
@@ -172,6 +172,6 @@ interface TimelockInterface {
     function executeTransaction(address target, uint value, string calldata signature, bytes calldata data, uint eta) external payable returns (bytes memory);
 }
 
-interface CTokenInterface {
+interface CompInterface {
     function getPriorVotes(address account, uint blockNumber) external view returns (uint96);
 }

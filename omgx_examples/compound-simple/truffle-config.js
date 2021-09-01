@@ -18,66 +18,66 @@
  *
  */
 
-const HDWalletProvider = require("@truffle/hdwallet-provider");
+ const HDWalletProvider = require("@truffle/hdwallet-provider");
 
-require('dotenv').config();
+ require('dotenv').config();
 
-const env = process.env;
-const pk_0 = env.pk_0
-const pk_1 = env.pk_1
-const pk_2 = env.pk_2
-const REACT_APP_INFURA_ID = env.REACT_APP_INFURA_ID
+ const env = process.env;
+ const pk_0 = env.pk_0
+ const pk_1 = env.pk_1
+ const pk_2 = env.pk_2
+ const REACT_APP_INFURA_ID = env.REACT_APP_INFURA_ID
 
-module.exports = {
+ module.exports = {
 
-  contracts_build_directory: ".build",
+   contracts_build_directory: ".build",
 
-  networks: {
-    development: {
-      host: "127.0.0.1", // Localhost (default: none)
-      port: 8545,        // Standard Ethereum port (default: none)
-      network_id: "*",   // Any network (default: none)
-    },
-    local_l1: {
-      provider: function () {
-        return new HDWalletProvider({
-          privateKeys: [pk_0, pk_1, pk_2],
-          providerOrUrl: 'http://127.0.0.1:9545',
-        })
-      },
-      network_id: 31337,
-      host: '127.0.0.1',
-      port: 9545,
-      //gasPrice: 15000000,
-      //gas: 803900000,
-    },
-    rinkeby_l1: {
-      provider: function () {
-        return new HDWalletProvider({
-          privateKeys: [pk_0, pk_1, pk_2],
-          providerOrUrl: `https://rinkeby.infura.io/v3/${REACT_APP_INFURA_ID}`,
-        })
-      },
-      network_id: 28,
-      host: `https://rinkeby.infura.io/v3/${REACT_APP_INFURA_ID}`,
-      gasPrice: 15000000,
-      gas: 165000000,
-    },
-  },
-  // Set default mocha options here, use special reporters etc.
-  mocha: {
-    // timeout: 100000
-  },
-  // Configure your compilers
-  compilers: {
-    solc: {
-      version: "0.5.16", // Fetch exact version from solc-bin (default: truffle's version)
-      settings: {
-        optimizer: {
-          enabled: true,
-          runs: 1,
-        },
-      },
-    },
-  },
-}
+   networks: {
+     development: {
+       host: "127.0.0.1", // Localhost (default: none)
+       port: 8545,        // Standard Ethereum port (default: none)
+       network_id: "*",   // Any network (default: none)
+     },
+     local_l1: {
+       provider: function () {
+         return new HDWalletProvider({
+           privateKeys: [pk_0, pk_1, pk_2],
+           providerOrUrl: 'http://127.0.0.1:9545',
+         })
+       },
+       network_id: 31337,
+       host: '127.0.0.1',
+       port: 9545,
+       //gasPrice: 15000000,
+       //gas: 803900000,
+     },
+     rinkeby_l1: {
+       provider: function () {
+         return new HDWalletProvider({
+           privateKeys: [pk_0, pk_1, pk_2],
+           providerOrUrl: `https://rinkeby.infura.io/v3/${REACT_APP_INFURA_ID}`,
+         })
+       },
+       network_id: 28,
+       host: `https://rinkeby.infura.io/v3/${REACT_APP_INFURA_ID}`,
+       gasPrice: 15000000,
+       gas: 165000000,
+     },
+   },
+   // Set default mocha options here, use special reporters etc.
+   mocha: {
+     // timeout: 100000
+   },
+   // Configure your compilers
+   compilers: {
+     solc: {
+       version: "0.5.16", // Fetch exact version from solc-bin (default: truffle's version)
+       settings: {
+         optimizer: {
+           enabled: true,
+           runs: 1,
+         },
+       },
+     },
+   },
+ }
