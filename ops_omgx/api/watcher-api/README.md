@@ -27,7 +27,7 @@
     from: "FROM_ACCOUNT",
     to: "TO_ACCOUNT",
     timestamp: "BLOCK_TIMESTAMP",
-    exitL2: "EXIT_L2" // True or False
+    exitL2: "EXIT_L2", // True or False
     crossDomainMessage: {
       crossDomainMessage: "CROSS_DOMAIN_MESSAGE", // whether the transaction sent cross domain message
       crossDomainMessageFinailze: "CROSS_DOMAIN_MESSAGE_FINALIZED", // whether the cross domain message is finalized on L1
