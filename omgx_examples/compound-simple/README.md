@@ -72,7 +72,6 @@ In `GovernorBravoInterfaces.sol`, delete `GovernorAlpha` Interface:
 
 - MINIMUM_DELAY in Timelock.sol set to 0 to allow for timely testing
 - MIN_VOTING_PERIOD in GovernorBravoDelegate.sol set to 0 to allow for timely testing
--
 
 # Deploying on Rinkeby-Boba Network and Initiating
 
