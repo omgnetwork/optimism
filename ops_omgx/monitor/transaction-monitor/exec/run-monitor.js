@@ -2,6 +2,7 @@
 
 const BlockMonitorService = require('../services/blockMonitor');
 const stateRootMonitorService = require('../services/stateRootMonitor');
+const exitMonitorService = require('../services/exitMonitor');
 
 const loop = async (func) => {
   while (true) {
@@ -18,6 +19,12 @@ const loop = async (func) => {
 }
 
 const main = async () => {
+  // liquidity pool
+  const exitService = new exitMonitorService();
+  await exitService.initConnection();
+
+  loop(() => exitService.startExitMonitor())
+
   // state root
   const stateRootService = new stateRootMonitorService();
   await stateRootService.initConnection();

@@ -131,7 +131,7 @@ class stateRootMonitorService extends OptimismEnv {
     }
 
     this.startBlock = endBlock;
-    this.endBlock = Number(endBlock) + this.stateRootMonitorLogInterval;
+    this.endBlock = Number(endBlock) + Number(this.stateRootMonitorLogInterval);
     this.latestL1Block = latestL1Block;
     this.latestL2Block = latestL2Block;
 
@@ -159,7 +159,7 @@ class stateRootMonitorService extends OptimismEnv {
     async endDatabaseService(){
       await this.databaseConnectedMutex.acquire().then(async (release) => {
           try {
-            if(this.databaseConnected && !this.transactionMonitorSQL && !this.crossDomainMessageMonitorSQL){
+            if(this.databaseConnected){
                 this.databaseService.con.end();
                 this.databaseConnected = false;
             }

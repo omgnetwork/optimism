@@ -90,6 +90,21 @@ class DatabaseService extends OptimismEnv{
         PRIMARY KEY ( blockNumber )
       )`
     );
+    await this.query(`CREATE TABLE IF NOT EXISTS exitL2
+    (
+      hash VARCHAR(255) NOT NULL,
+      blockHash VARCHAR(255) NOT NULL,
+      blockNumber INT NOT NULL,
+      exitSender VARCHAR(255),
+      exitTo VARCHAR(255),
+      exitToken VARCHAR(255),
+      exitAmount VARCHAR(255),
+      exitReceive VARCHAR(255),
+      exitFeeRate VARCHAR(255),
+      fastRelay BOOL,
+      PRIMARY KEY ( blockNumber )
+    )`
+  );
     this.logger.info('Initialized the database.');
   }
 
@@ -186,6 +201,22 @@ class DatabaseService extends OptimismEnv{
   `);
   }
 
+  async insertExitData(exitData) {
+    await this.query(`USE ${this.MySQLDatabaseName}`);
+    await this.query(`INSERT IGNORE INTO exitL2
+      SET hash='${exitData.hash}',
+      blockHash='${exitData.blockHash}',
+      blockNumber=${Number(exitData.blockNumber)},
+      exitSender='${exitData.exitSender}',
+      exitTo='${exitData.exitTo}',
+      exitToken='${exitData.exitToken}',
+      exitAmount='${exitData.exitAmount}',
+      exitReceive='${exitData.exitReceive}',
+      exitFeeRate='${exitData.exitFeeRate}',
+      fastRelay=${exitData.fastRelay}
+  `);
+  }
+
   async getNewestBlockFromBlockTable() {
     await this.query(`USE ${this.MySQLDatabaseName}`);
     return await this.query(`SELECT MAX(blockNumber) from block`);
@@ -194,6 +225,11 @@ class DatabaseService extends OptimismEnv{
   async getNewestBlockFromStateRootTable() {
     await this.query(`USE ${this.MySQLDatabaseName}`);
     return await this.query(`SELECT MAX(stateRootBlockNumber) from stateRoot`);
+  }
+
+  async getNewestBlockFromExitTable() {
+    await this.query(`USE ${this.MySQLDatabaseName}`);
+    return await this.query(`SELECT MAX(blockNumber) from exitL2`);
   }
 }
 
