@@ -43,7 +43,9 @@ def watcher_getTransactions(event, context):
         stateRootHash, stateRootBlockNumber, stateRootBlockHash, stateRootBlockTimestamp,
         receipt.hash, receipt.blockNumber, `from`, `to`, timestamp, crossDomainMessage, crossDomainMessageFinalize, receipt.fastRelay, l1Hash, l1BlockNumber, l1BlockHash, l1From, l1To,
         exitSender, exitTo, exitToken, exitAmount, exitReceive, exitFeeRate, exitL2.status
-        FROM stateRoot, receipt
+        FROM receipt
+        LEFT JOIN stateRoot
+        on receipt.blockNumber = stateRoot.blockNumber
         LEFT JOIN exitL2
         ON receipt.blockNumber = exitL2.blockNumber
         WHERE stateRoot.blockNumber = receipt.blockNumber AND
