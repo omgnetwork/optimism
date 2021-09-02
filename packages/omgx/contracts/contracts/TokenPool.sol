@@ -23,6 +23,7 @@ contract TokenPool is Ownable {
         public
         onlyOwner()
     {
+        require(_tokenAddress != address(0), "token address cannot be zero");
         tokenAddress = _tokenAddress;
     }
 
