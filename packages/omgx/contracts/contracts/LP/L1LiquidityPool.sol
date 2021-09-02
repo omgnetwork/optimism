@@ -9,11 +9,12 @@ import "../libraries/OVM_CrossDomainEnabledFast.sol";
 /* External Imports */
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @dev An L1 LiquidityPool implementation
  */
-contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
+contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -313,6 +314,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
     )
         external
         payable
+        nonReentrant
     {
         // check whether user sends ETH or ERC20
         if (msg.value != 0) {
