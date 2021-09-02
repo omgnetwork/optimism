@@ -203,6 +203,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
         onlyOwner()
         onlyNotInitialized()
     {
+        require(_l1CrossDomainMessenger != address(0) && _l1CrossDomainMessengerFast != address(0) && _L2LiquidityPoolAddress != address(0), "zero address not allowed");
         senderMessenger = _l1CrossDomainMessenger;
         relayerMessenger = _l1CrossDomainMessengerFast;
         L2LiquidityPoolAddress = _L2LiquidityPoolAddress;
@@ -262,6 +263,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast {
         public
         onlyOwner()
     {
+        require(_l1TokenAddress != _l2TokenAddress, "l1 and l2 token addresses cannot be same");
         // use with caution, can register only once
         PoolInfo storage pool = poolInfo[_l1TokenAddress];
         // l2 token address equal to zero, then pair is not registered.

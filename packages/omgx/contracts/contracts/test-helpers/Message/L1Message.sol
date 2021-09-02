@@ -2,7 +2,7 @@
 pragma solidity >0.5.0;
 
 /* Library Imports */
-import "../libraries/OVM_CrossDomainEnabledFast.sol";
+import "../../libraries/OVM_CrossDomainEnabledFast.sol";
 import { L2Message } from "./L2Message.sol";
 
 contract L1Message is OVM_CrossDomainEnabledFast {
