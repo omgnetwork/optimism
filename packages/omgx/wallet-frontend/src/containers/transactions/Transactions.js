@@ -34,21 +34,24 @@ import { TransactionHeadList } from './TransactionHeadList';
 const PER_PAGE = 8;
 
 function Transactions({ searchHistory, transactions, chainLink }) {
-  const [page, setPage] = useState(1);
-  const loading = useSelector(selectLoading(['EXIT/GETALL']));
+  
+  const [page, setPage] = useState(1)
+  
+  const loading = useSelector(selectLoading(['EXIT/GETALL']))
+  
   useEffect(() => {
     setPage(1);
-  }, [searchHistory]);
+  }, [searchHistory])
 
   const _transactions = transactions.filter(i => {
-    return i.hash.includes(searchHistory);
-  });
+    return i.hash.includes(searchHistory)
+  })
 
-  const startingIndex = page === 1 ? 0 : ((page - 1) * PER_PAGE);
-  const endingIndex = page * PER_PAGE;
-  const paginatedTransactions = _transactions.slice(startingIndex, endingIndex);
+  const startingIndex = page === 1 ? 0 : ((page - 1) * PER_PAGE)
+  const endingIndex = page * PER_PAGE
+  const paginatedTransactions = _transactions.slice(startingIndex, endingIndex)
 
-  let totalNumberOfPages = Math.ceil(_transactions.length / PER_PAGE);
+  let totalNumberOfPages = Math.ceil(_transactions.length / PER_PAGE)
 
   //if totalNumberOfPages === 0, set to one so we don't get the strange "page 1 of 0" display
   if (totalNumberOfPages === 0) totalNumberOfPages = 1
@@ -82,28 +85,39 @@ function Transactions({ searchHistory, transactions, chainLink }) {
               <div className={styles.disclaimer}>Loading...</div>
             )}
             {paginatedTransactions.map((i, index) => {
+
               const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
-              
+              const time = moment.unix(i.timeStamp).format('lll')
+
+              let details = null
+
+              if( i.crossDomainMessage && i.crossDomainMessage.l1BlockNumber ) {
+                details = {
+                  l1BlockHash: i.crossDomainMessage.l1BlockHash,
+                  l1BlockNumber: i.crossDomainMessage.l1BlockNumber,
+                  l1From: i.crossDomainMessage.l1From,
+                  l1Hash: i.crossDomainMessage.l1Hash,
+                  l1To: i.crossDomainMessage.l1To,
+                  l1TxLink: chainLink({
+                    chain: "L1",
+                    hash: i.crossDomainMessage.l1Hash
+                  })
+                }
+              }
+
+              console.log("Details:",details)
+              console.log("i:",i)
+
               return (
                 <Transaction
                   key={index}
                   link={chainLink(i)}
-                  title={`${truncate(i.hash, 8, 6, '...')}`}
-                  midTitle={moment.unix(i.timestamp).format('lll')}
+                  title={`Hash: ${i.hash}`}
+                  midTitle={moment.unix(i.timeStamp).format('lll')}
                   blockNumber={`Block ${i.blockNumber}`}
                   chain={`${i.chain} Chain`}
-                  typeTX={`${metaData}`}
-                  detail={!!i.crossDomainMessage?.crossDomainMessage ? {
-                    l1BlockHash: truncate(i.crossDomainMessage.l1BlockHash, 8, 6, '...'),
-                    l1BlockNumber: i.crossDomainMessage.l1BlockNumber,
-                    l1From: i.crossDomainMessage.l1From,
-                    l1Hash: truncate(i.crossDomainMessage.l1Hash, 8, 6, '...'),
-                    l1To: i.crossDomainMessage.l1To,
-                    l1TxLink: chainLink({
-                      chain: "L1",
-                      hash: i.crossDomainMessage.l1Hash
-                    })
-                  } : null}
+                  typeTX={`TX Type: ${metaData}`}
+                  detail={details}
                 />
               )
             })}
@@ -115,5 +129,4 @@ function Transactions({ searchHistory, transactions, chainLink }) {
   )
 }
 
-// export default React.memo(Transactions);
-export default React.memo(Transactions);
+export default React.memo(Transactions)

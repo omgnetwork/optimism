@@ -32,7 +32,7 @@ import * as styles from './Transactions.module.scss'
 import * as S from './history.styles';
 import { TransactionHeadList } from './TransactionHeadList'
 
-const PER_PAGE = 8;
+const PER_PAGE = 8
 
 function Exits({ searchHistory, transactions, chainLink }) {
 
@@ -53,27 +53,40 @@ function Exits({ searchHistory, transactions, chainLink }) {
   })
 
   const renderExits = _exits.map((i, index) => {
+
     const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
 
     let tradExit = false
     let isExitable = false
-    let midTitle = 'Swapped: ' + moment.unix(i.timestamp).format('lll')
+
+    let midTitle = 'Swapped: ' + moment.unix(i.timeStamp).format('lll')
 
     const to = i.to.toLowerCase()
 
     //are we dealing with a traditional exit?
     if (to === networkService.L2StandardBridgeAddress.toLowerCase()) {
 
+      //console.log("i:", i)
+
       tradExit = true
-      isExitable = moment().isAfter(moment.unix(i.crossDomainMessageEstimateFinalizedTime))
+
+      isExitable = moment().isAfter(moment.unix(i.crossDomainMessage.crossDomainMessageEstimateFinalizedTime))
 
       if (isExitable) {
         midTitle = 'Ready to exit - initiated:' + moment.unix(i.timeStamp).format('lll')
       } else {
-        const secondsToGo = i.crossDomainMessageEstimateFinalizedTime - Math.round(Date.now() / 1000)
+
+        const secondsToGo = i.crossDomainMessage.crossDomainMessageEstimateFinalizedTime - Math.round(Date.now() / 1000)
+        //console.log("Seconds:", secondsToGo)
         const daysToGo = Math.floor(secondsToGo / (3600 * 24))
         const hoursToGo = Math.round((secondsToGo % (3600 * 24)) / 3600)
-        const time = moment.unix(i.timeStamp).format("mm/DD hh:MM");
+
+        //console.log("daysToGo:", daysToGo)
+        //console.log("hoursToGo:", hoursToGo)
+        const time = moment.unix(i.timeStamp).format('MM/DD/YYYY hh:mm a')//.format("mm/dd hh:mm")
+
+        //console.log("time:", time)
+        //console.log("time moment:", moment.unix(i.timeStamp))
         midTitle = `7 day window started ${time}. ${daysToGo} days and ${hoursToGo} hours remaining`
       }
 

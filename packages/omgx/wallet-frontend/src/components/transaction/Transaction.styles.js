@@ -10,17 +10,19 @@ export const DropdownWrapper = styled(Box)`
 `;
 
 export const TableCell = styled(Box)`
+  padding: 5px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  width: 20%;
 `;
 
 export const TableBody = styled(Box)`
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 5px;
   text-align: center;
+  background: grey;
+  border-radius: 8px;
 `;

@@ -4,11 +4,7 @@ export const TransactionHeadList = [
         isSort: false,
     },
     {
-        label: 'Result',
-        isSort: false,
-    },
-    {
-        label: 'My Deposits',
+        label: 'Block',
         isSort: false,
     },
     {

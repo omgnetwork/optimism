@@ -45,17 +45,19 @@ const POLL_INTERVAL = 5000; //milliseconds
 
 function History () {
 
-  const dispatch = useDispatch();
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const dispatch = useDispatch()
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
 
-  const [ searchHistory, setSearchHistory ] = useState('');
+  const [ searchHistory, setSearchHistory ] = useState('')
 
-  const activeTab1 = useSelector(selectActiveHistoryTab1, isEqual);
+  const activeTab1 = useSelector(selectActiveHistoryTab1, isEqual)
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual)
-
-  const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
+  
+  //sort transactions by timeStamp
+  const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc') 
+  //'desc' or 'asc'
 
   const transactions = orderedTransactions.filter((i)=>{
     if(startDate && endDate) {
@@ -91,7 +93,8 @@ function History () {
     <>
       <PageHeader title="Transaction History" />
 
-    {/*TODO: fix the search history
+    {
+    /*TODO: fix the search history
     <Input
             icon
             placeholder='Search by hash'

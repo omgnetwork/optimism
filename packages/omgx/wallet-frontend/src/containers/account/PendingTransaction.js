@@ -40,8 +40,25 @@ function PendingTransaction() {
             && !!i.crossDomainMessage.crossDomainMessage
             && !i.crossDomainMessage.crossDomainMessageFinailze
             && i.to !== null
-            && (i.to.toLowerCase() === networkService.L2LPAddress.toLowerCase()
-                || i.to.toLowerCase() === networkService.L2StandardBridgeAddress.toLowerCase())
+            && (i.to.toLowerCase() === networkService.L2LPAddress.toLowerCase() ||
+                i.to.toLowerCase() === networkService.L2StandardBridgeAddress.toLowerCase())
+        ) {
+            return true;
+        }
+        return false;
+    })
+
+/*
+When someone exits L2:
+response.crossDomainMessage.crossDomainMessage is 1
+response.exit data is populated. 
+response.stateRoot is blank.
+*/
+    const pendingExitsStage0 = orderedTransactions.filter((i) => {
+        console.log("pending i:",i)
+        if (i.crossDomainMessage &&
+            i.crossDomainMessage.crossDomainMessage === 1 &&
+            i.exit //is populated
         ) {
             return true;
         }
@@ -51,6 +68,7 @@ function PendingTransaction() {
     let totalNumberOfPages = Math.ceil(pendingTransactions.length / PER_PAGE);
 
     console.log(['pendingTransactions', pendingTransactions])
+    console.log(['pendingExitsStage0', pendingExitsStage0])
 
     const currentNetwork = useSelector(selectNetwork());
 
@@ -82,8 +100,9 @@ function PendingTransaction() {
         </S.WrapperHeading>
         
         {
-            pendingTransactions && !pendingTransactions.length
-            && <Box
+            pendingTransactions && 
+            !pendingTransactions.length &&
+            <Box
                 sx={{
                     background: 'rgba(9, 22, 43, 0.5)',
                     borderRadius: '12px',
@@ -105,9 +124,9 @@ function PendingTransaction() {
         }
 
         {
-            pendingTransactions
-            && !!pendingTransactions.length
-            && pendingTransactions.map((i) => {
+            pendingTransactions &&
+            !!pendingTransactions.length &&
+            pendingTransactions.map((i) => {
                 let link = chainLink(i);
                 return <Grid
                     key={i.hash}
@@ -123,7 +142,7 @@ function PendingTransaction() {
                         {'L2->L1 Exit'}
                     </Grid>
                     <Grid item xs={4}>
-                        {'Started : '} {moment.unix(i.timestamp).format('lll')}
+                        {'Started : '} {moment.unix(i.timeStamp).format('lll')}
                     </Grid>
                     <Grid item xs={2}>
                         {'In Progress'}
@@ -134,7 +153,7 @@ function PendingTransaction() {
                             target={'_blank'}
                             rel='noopener noreferrer'
                         >
-                            Advanced Details
+                            Details
                         </a>
                     </Grid>
                 </Grid>

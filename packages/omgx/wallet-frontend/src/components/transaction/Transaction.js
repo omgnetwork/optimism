@@ -94,7 +94,7 @@ function Transaction({
       }}
     >
       <S.TableCell sx={{
-        gap: "5px",
+        gap: '5px',
         width: '98% !important',
         padding: '5px',
         alignItems: 'flex-start !important',
@@ -158,24 +158,30 @@ function Transaction({
   }
 
 
-  return (<
+  return (
+  <
     div style={{
       padding: '10px',
       borderRadius: '8px',
       background: `${!!dropDownBox ? 'rgba(255, 255, 255, 0.03)' : ''}`
     }}
   >
-    <S.TableBody
-
-    >
-      <S.TableCell sx={{ gap: "5px" }}>
-        <div>{chain}</div>
+    <S.TableBody>
+      <S.TableCell 
+        sx={{ gap: '5px' }}
+        style={{ width: '50%' }}
+      >
+        <div>{chain}&nbsp;&nbsp;&nbsp;<span style={{fontSize:'0.8em'}}>{midTitle}</span></div>
+        <div style={{fontSize:'0.8em'}}>{title}</div>
+        <div 
+          className={styles.muted}
+          style={{fontSize: '0.8em'}}
+         >{typeTX}</div>
       </S.TableCell>
-      <S.TableCell sx={{ gap: "5px" }}>
-        <div className={styles.muted}>{midTitle}</div>
-      </S.TableCell>
-      <S.TableCell sx={{ gap: "5px" }}>
-        <div>{title}</div>
+      <S.TableCell 
+        sx={{ gap: '5px' }}
+        style={{ width: '20%' }}
+      >
         <div className={styles.muted}>{blockNumber}</div>
       </S.TableCell>
       <S.TableCell sx={{ gap: "5px" }}>
@@ -184,21 +190,11 @@ function Transaction({
             href={link}
             target={'_blank'}
             rel='noopener noreferrer'
+            style={{color: 'white'}}
           >
-            <ButtonMUI
-              variant="outlined"
-              color="primary"
-              style={{
-                boder: '1.4px solid #506DFA',
-                borderRadius: '8px',
-                width: '180px'
-              }}
-            >
-              <LinkIcon /> Advanced Details
-            </ButtonMUI>
+            Details
           </a>
         }
-
         {button && <ButtonMUI
           variant="contained"
           color="primary"
@@ -214,16 +210,7 @@ function Transaction({
 
       </S.TableCell>
     </S.TableBody>
-    <S.TableBody
-
-    >
-      <S.TableCell sx={{
-        gap: "5px",
-        width: '80% !important',
-        alignItems: 'flex-start !important',
-      }}>
-        <div className={styles.muted}>{typeTX}</div>
-      </S.TableCell>
+    <S.TableBody>
       {!!detail && <S.TableCell sx={{
         gap: '5px',
         alignItems: 'flex-end !important',
