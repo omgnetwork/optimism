@@ -35,40 +35,90 @@ function PendingTransaction() {
     const unorderedTransactions = useSelector(selectTransactions, isEqual)
     const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
 
-    const pendingTransactions = orderedTransactions.filter((i) => {
-        if (i.crossDomainMessage
-            && !!i.crossDomainMessage.crossDomainMessage
-            && !i.crossDomainMessage.crossDomainMessageFinailze
-            && i.to !== null
-            && (i.to.toLowerCase() === networkService.L2LPAddress.toLowerCase() ||
-                i.to.toLowerCase() === networkService.L2StandardBridgeAddress.toLowerCase())
+    // let exitL2 = orderedTransactions.filter((i) => {
+    //     if (i.crossDomainMessage &&
+    //         i.crossDomainMessage.crossDomainMessage === 1 &&
+    //         i.crossDomainMessage.crossDomainMessageFinailze === 0 &&
+    //         i.exitL2 
+    //     ) {
+    //         return true;
+    //     }
+    //     return false;
+    // })
+    // exitL2 = exitL2.map(v => ({...v, label: 'L2->L1 exit', labelStatus: 'All exits'}))
+
+    let pending = orderedTransactions.filter((i) => {
+        if (i.crossDomainMessage &&
+            i.crossDomainMessage.crossDomainMessage === 1 &&
+            i.crossDomainMessage.crossDomainMessageFinailze === 0 &&
+            i.exit.status === "pending" 
         ) {
             return true;
         }
         return false;
     })
 
-/*
-When someone exits L2:
-response.crossDomainMessage.crossDomainMessage is 1
-response.exit data is populated. 
-response.stateRoot is blank.
-*/
-    const pendingExitsStage0 = orderedTransactions.filter((i) => {
-        console.log("pending i:",i)
-        if (i.crossDomainMessage &&
-            i.crossDomainMessage.crossDomainMessage === 1 &&
-            i.exit //is populated
-        ) {
-            return true;
-        }
-        return false;
+    //exit that is not final and we do not have a state root hash yet
+    let pendingExitsStage0 = pending.filter((i) => {
+        if (!i.stateRoot.stateRootHash && i.exit.fastRelay) //this means it's very early - no stateRootHash yet
+            return true
+        return false
     })
+    pendingExitsStage0 = pendingExitsStage0.map(v => ({
+        ...v, 
+        label: 'L2->L1 Fast Exit', 
+        labelStatus: 'Step 0, No SR Hash yet, Pending',
+        completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
+      })
+    )
+
+    //exit that is not final, but we have a state root hash
+    let pendingExitsStage1 = pending.filter((i) => {
+        if (i.stateRoot.stateRootHash && i.exit.fastRelay) //ok, we have a stateRootHash
+            /*
+            i.to !== null &&
+            ( i.to.toLowerCase() === networkService.L2LPAddress.toLowerCase() ||
+              i.to.toLowerCase() === networkService.L2StandardBridgeAddress.toLowerCase()
+            )
+            */
+        {
+            return true
+        }
+        return false
+    })
+    pendingExitsStage1 = pendingExitsStage1.map(v => ({
+        ...v, 
+        label: 'L2->L1 Fast Exit', 
+        labelStatus: 'Step 1, Have SR Hash, Pending',
+        completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
+      })
+    )
+
+    //exit that is not final, but we have a state root hash
+    let pendingTradExits = pending.filter((i) => {
+        if (i.stateRoot.stateRootHash && !i.exit.fastRelay) //ok, we have a stateRootHash
+        {
+            return true
+        }
+        return false
+    })
+    pendingTradExits = pendingTradExits.map(v => ({
+        ...v, 
+        label: 'L2->L1 Trad Exit', 
+        labelStatus: 'In 7 day window',
+        completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
+      })
+    )
+
+    const pendingTransactions = [
+        ...pendingTradExits,
+        ...pendingExitsStage0,
+        ...pendingExitsStage1
+    ]
 
     let totalNumberOfPages = Math.ceil(pendingTransactions.length / PER_PAGE);
 
     console.log(['pendingTransactions', pendingTransactions])
-    console.log(['pendingExitsStage0', pendingExitsStage0])
 
     const currentNetwork = useSelector(selectNetwork());
 
@@ -127,7 +177,14 @@ response.stateRoot is blank.
             pendingTransactions &&
             !!pendingTransactions.length &&
             pendingTransactions.map((i) => {
-                let link = chainLink(i);
+                console.log(i)
+
+                let completionTime = 'Not available'
+
+                if(i.completion) 
+                    completionTime = moment.unix(i.completion).format('lll')
+                
+                let link = chainLink(i)
                 return <Grid
                     key={i.hash}
                     container
@@ -139,15 +196,16 @@ response.stateRoot is blank.
                     }}
                 >
                     <Grid item xs={2}>
-                        {'L2->L1 Exit'}
+                        {i.label}
                     </Grid>
                     <Grid item xs={4}>
-                        {'Started : '} {moment.unix(i.timeStamp).format('lll')}
-                    </Grid>
-                    <Grid item xs={2}>
-                        {'In Progress'}
+                        {'Started: '}{moment.unix(i.timeStamp).format('lll')}<br/>
+                        {'Completion estimated: '}{completionTime}
                     </Grid>
                     <Grid item xs={3}>
+                        {i.labelStatus}
+                    </Grid>
+                    <Grid item xs={1}>
                         <a style={{color: 'white'}}
                             href={link}
                             target={'_blank'}

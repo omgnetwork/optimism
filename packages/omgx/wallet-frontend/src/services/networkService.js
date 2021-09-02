@@ -793,13 +793,16 @@ class NetworkService {
     // NOT SUPPORTED on LOCAL
     if (this.masterSystemConfig === 'local') return
 
+    console.log("Getting transactions...")
+    
     let txL1
     let txL2
 
     const responseL1 = await etherScanInstance(
       this.masterSystemConfig,
-      /*this.L1orL2*/ 'L1'
+      'L1'
     ).get(`&address=${this.account}`)
+
     if (responseL1.status === 200) {
       const transactionsL1 = await responseL1.data
       if (transactionsL1.status === '1') {
@@ -816,7 +819,9 @@ class NetworkService {
       fromRange: 0,
       toRange: 1000,
     })
+
     if (responseL2.status === 201) {
+      //add the chain: 'L2' field 
       txL2 = responseL2.data.map(v => ({...v, chain: 'L2'}))
       const annotated = await this.parseTransaction( [...txL1, ...txL2] )
       return annotated
@@ -862,7 +867,6 @@ class NetworkService {
       }
 
       if (to === this.L2StandardBridgeAddress.toLowerCase()) {
-        //0x4200000000000000000000000000000000000010
         //console.log("L2 Standard Bridge")
         return Object.assign({}, item, { typeTX: 'L2 Standard Bridge' })
       }
