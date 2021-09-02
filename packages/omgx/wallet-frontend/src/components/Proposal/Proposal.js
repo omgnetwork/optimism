@@ -22,22 +22,24 @@ import { openAlert } from 'actions/uiAction';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Button from 'components/button/Button';
 
-
 import * as styles from './Proposal.module.scss';
 import networkService from 'services/networkService';
-
 
 function Proposal({
     id,
     proposal,
 }) {
-    const dispatch = useDispatch();
-    const { delegate } = networkService;
-    const [dropDownBox, setDropDownBox] = useState(false);
-    const [dropDownBoxInit, setDropDownBoxInit] = useState(true);
+    const dispatch = useDispatch()
+    
+    const { delegate } = networkService
 
-    const [votePercent, setVotePercent] = useState(undefined);
-    const [totalVotes, setTotalVotes] = useState(undefined);
+    const [dropDownBox, setDropDownBox] = useState(false)
+    const [dropDownBoxInit, setDropDownBoxInit] = useState(true)
+
+    const [votePercent, setVotePercent] = useState(undefined)
+    const [totalVotes, setTotalVotes] = useState(undefined)
+
+    console.log("Delegate address:", delegate.address)
 
     useEffect(() => {
         const init = async () => {
@@ -92,7 +94,7 @@ function Proposal({
                 <div>For Votes : <span>10</span> </div>
                 <div>Against Votes : <span>1231</span> </div>
                 <div>Abstain Votes : <span>8912</span> </div>
-                <div>Vote Percentage : {votePercent} % </div>
+                <div>Vote Percentage : {votePercent}% </div>
                 <div>Total Votes : {totalVotes} </div>
             </div>
         </div>

@@ -27,14 +27,13 @@ import { selectLoading } from 'selectors/loadingSelector';
 
 function ProposalList() {
 
-    const dispatch = useDispatch();
-    const loading = useSelector(selectLoading(['PROPOSAL/GET']));
-
-    const proposals = useSelector(selectProposals);
+    const dispatch = useDispatch()
+    const loading = useSelector(selectLoading(['PROPOSAL/GET']))
+    const proposals = useSelector(selectProposals)
 
     return <>
         <div className={styles.containerAction}>
-            <p className={styles.listTitle}> Proposal List </p>
+            <p className={styles.listTitle}>Proposal List</p>
             <Button
                 type="outline"
                 onClick={() => {

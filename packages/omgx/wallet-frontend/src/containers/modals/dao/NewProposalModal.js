@@ -12,26 +12,27 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
 
-import { closeModal } from 'actions/uiAction';
+import { closeModal } from 'actions/uiAction'
 
-import * as styles from './daoModal.module.scss';
+import * as styles from './daoModal.module.scss'
 
-import Modal from 'components/modal/Modal';
-import Button from 'components/button/Button';
-import Input from 'components/input/Input';
-import ProposalAction from './ProposalAction';
+import Modal from 'components/modal/Modal'
+import Button from 'components/button/Button'
+import Input from 'components/input/Input'
+import ProposalAction from './ProposalAction'
 
 function NewProposalModal({ open }) {
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
 
-    const [actionList, setActionList] = useState([]);
-    const [contracts, setContracts] = useState(['select']);
+    const [title, setTitle] = useState('')
+    const [description, setDescription] = useState('')
 
-    const [calldata, setCalldata] = useState(undefined);
+    const [actionList, setActionList] = useState([])
+    const [contracts, setContracts] = useState(['select'])
+
+    const [calldata, setCalldata] = useState(undefined)
 
     const dispatch = useDispatch()
 
@@ -50,8 +51,8 @@ function NewProposalModal({ open }) {
     }
 
     const addAction = () => {
-        setActionList([...actionList, '']);
-        setContracts([...contracts, 'select']);
+        setActionList([...actionList, ''])
+        setContracts([...contracts, 'select'])
     }
 
 
