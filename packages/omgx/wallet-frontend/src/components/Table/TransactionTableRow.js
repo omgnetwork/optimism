@@ -18,6 +18,7 @@ import {
     StyledTableRow
 } from './table.styles';
 import { useTheme } from '@emotion/react';
+import networkService from 'services/networkService';
 
 
 function TransactionTableRow({ chainLink, index, ...data }) {
@@ -25,27 +26,66 @@ function TransactionTableRow({ chainLink, index, ...data }) {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+    const to = data.to.toLowerCase()
+    const isExit = data.to !== null && (
+      to === networkService.L2LPAddress.toLowerCase() ||
+      to === networkService.L2StandardBridgeAddress.toLowerCase()
+    )
+
+    const isDeposit = data.to !== null && (
+      to === networkService.L1LPAddress.toLowerCase() ||
+      to === networkService.L1_ETH_Address.toLowerCase() ||
+      to === networkService.L1StandardBridgeAddress.toLowerCase()
+    )
+
+    let midTitle;
+    let tradExit = false
+    let isExitable = false
+
+    const metaData = typeof (data.typeTX) === 'undefined' ? '' : data.typeTX
+    if (isExit) {
+      midTitle = 'Swapped'
+    }
+
+    //are we dealing with a traditional exit?
+    if (to === networkService.L2StandardBridgeAddress.toLowerCase()) {
+
+      tradExit = true
+      isExitable = moment().isAfter(moment.unix(data.crossDomainMessageEstimateFinalizedTime))
+
+      if (isExitable) {
+        midTitle = 'Ready to exit';
+      } else {
+        const secondsToGo = data.crossDomainMessageEstimateFinalizedTime - Math.round(Date.now() / 1000)
+        const daysToGo = Math.floor(secondsToGo / (3600 * 24))
+        const hoursToGo = Math.round((secondsToGo % (3600 * 24)) / 3600)
+        const time = moment.unix(data.S).format("mm/DD hh:MM");
+        midTitle = `7 day window started ${time}. ${daysToGo} days and ${hoursToGo} hours remaining`
+      }
+
+    }
+
     return <React.Fragment key={index}>
         {isMobile ? (
           <Box sx={{p: 1, mb: 1, backgroundColor: 'rgba(255, 255, 255, 0.01)', borderRadius: '6px'}}>
             <Box sx={{p: 4, backgroundColor: 'rgba(255, 255, 255, 0.04)', borderRadius: '6px'}}>
               <Box sx={{display: 'flex', justifyContent: 'space-between', alignItem: 'center', mb: 3}}>
                 <Box>
-                  <CellTitle variant="h3" component="div"> L2 - L1 Exit </CellTitle>
-                  <CellSubTitle variant="body2" component="div"> Fast Offramp </CellSubTitle>
+                  <CellTitle variant="h3" component="div">{data.chain} Chain</CellTitle>
+                  <CellSubTitle variant="body2" component="div">{data.typeTX}</CellSubTitle>
                 </Box>
-                <L2ToL1Icon />
+                {/* <L2ToL1Icon /> */}
               </Box>
 
               <Box>
-                <CellTitle variant="h3" component="div" color="#06D3D3"> Swapped </CellTitle>
-                <CellSubTitle variant="body2" component="div"> {moment.unix(data.timeStamp).format('lll')} </CellSubTitle>
+                <CellTitle variant="h3" component="div" color="#06D3D3">(static) Swapped </CellTitle>
+                <CellSubTitle variant="body2" component="div"> {moment.unix(data.S).format('lll')} </CellSubTitle>
               </Box>
 
               <Box sx={{display: 'flex', justifyContent: 'space-between', alignItem: 'center', mt: 3}}>
                 <Box>
-                  <CellTitle variant="h3" component="div"> {truncate(data.hash, 8, 6, '...')} </CellTitle>
-                  <CellSubTitle variant="body2" component="div"> Block {data.blockNumber} </CellSubTitle>
+                  <CellTitle variant="h3" component="div">{truncate(data.hash, 8, 6, '...')}</CellTitle>
+                  <CellSubTitle variant="body2" component="div">Block {data.blockNumber}</CellSubTitle>
                 </Box>
                 <a
                   href={chainLink(data)}
@@ -59,7 +99,7 @@ function TransactionTableRow({ chainLink, index, ...data }) {
                     color="primary"
                     size="large"
                   >
-                      More
+                    More
                   </Button>
                   </a>
               </Box>
@@ -86,19 +126,16 @@ function TransactionTableRow({ chainLink, index, ...data }) {
                 justify='space-between'
                 alignItems='center'
               >
-                {/* <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}> */}
-                <L2ToL1Icon />
+                {/* <L2ToL1Icon /> */}
                 <Box
                   sx={{
-                      marginLeft: '30px',
+                      // marginLeft: '30px',
                       display: 'flex',
                       flexDirection: 'column',
-                  }}
-                >
-                  <CellTitle variant="body1"> L2 - L1 Exit </CellTitle>
-                  <CellSubTitle variant="body2"> Fast Offramp </CellSubTitle>
+                  }}>
+                  <CellTitle variant="body1">{isExit ? 'L2->L1 Exit' : isDeposit ? 'L1->L2 Deposit' : `${data.chain} Chain`}</CellTitle>
+                  <CellSubTitle variant="body2">{metaData}</CellSubTitle>
                 </Box>
-                {/* </Box> */}
               </Grid>
             </StyledTableCell>
             <StyledTableCell>
@@ -114,8 +151,8 @@ function TransactionTableRow({ chainLink, index, ...data }) {
                     flexDirection: 'column',
                   }}
                 >
-                  <CellTitle variant="body1" color="#06D3D3"> Swapped </CellTitle>
-                  <CellSubTitle variant="body2"> {moment.unix(data.timeStamp).format('lll')} </CellSubTitle>
+                  {midTitle ? <CellTitle variant="body1" color="#06D3D3">{midTitle}</CellTitle> : null}
+                  <CellSubTitle variant="body2">{moment.unix(data.timeStamp).format('lll')}</CellSubTitle>
                 </Box>
               </Grid>
             </StyledTableCell>
@@ -159,7 +196,7 @@ function TransactionTableRow({ chainLink, index, ...data }) {
                     </a>
                 </Grid>
             </StyledTableCell>
-            <StyledTableCell>
+            {/* <StyledTableCell>
                 <Grid
                     sx={{
                         cursor: 'pointer'
@@ -176,7 +213,7 @@ function TransactionTableRow({ chainLink, index, ...data }) {
                             <UpIcon /> : <DownIcon /> : null
                     }
                 </Grid>
-            </StyledTableCell>
+            </StyledTableCell> */}
         </StyledTableRow>
         )}
         {
@@ -280,7 +317,7 @@ hash: "0x45bea808dac6618405d5161e7ea0d3611ac8f5ee535355059c6e46a259174276"
 input: "0x"
 isError: "0"
 nonce: "2211"
-timeStamp: "1629174050"
+S: "1629174050"
 to: "0x52270d8234b864dcac9947f510ce9275a8a116db"
 transactionIndex: "2"
 txreceipt_status: "1"

@@ -19,6 +19,7 @@ import { isEqual, orderBy } from 'lodash';
 import { useSelector } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import networkService from 'services/networkService'
 
 import moment from 'moment';
 
@@ -33,16 +34,18 @@ import { selectNetwork } from 'selectors/setupSelector'
 
 import Tabs from 'components/tabs/Tabs'
 
-import Exits from './Exits';
-import Deposits from './Deposits';
+import ExitsOld from './Exits';
+import DepositsOld from './Deposits';
+import TransactionsOld from './Transactions';
 
 import * as styles from './Transactions.module.scss';
 
 import { getAllNetworks } from 'util/masterConfig';
 import useInterval from 'util/useInterval';
 import PageHeader from 'components/pageHeader/PageHeader';
-import TransactionsOld from './Transactions';
 import Transactions from './../history/transactions';
+import Deposits from './../history/deposits';
+import Exits from './..//history/exits';
 import { Box, Typography, useMediaQuery } from '@material-ui/core';
 import { useTheme } from '@emotion/react';
 
@@ -63,7 +66,7 @@ function History () {
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual)
 
-  const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
+  const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc').map((i) => !i.timeStamp ? ({...i, timeStamp: String(i.timestamp)}) : i);
 
   const transactions = orderedTransactions.filter((i)=>{
     if(startDate && endDate) {
@@ -71,6 +74,33 @@ function History () {
     }
     return true;
   })
+
+  const deposits = transactions.filter(i => {
+    return i.hash.includes(searchHistory) && (
+      i.to !== null && (
+        i.to.toLowerCase() === networkService.L1LPAddress.toLowerCase() ||
+        i.to.toLowerCase() === networkService.L1_ETH_Address.toLowerCase() ||
+        i.to.toLowerCase() === networkService.L1StandardBridgeAddress.toLowerCase()
+      )
+    )
+  })
+
+  const exits = transactions.filter(i => {
+    return i.hash.includes(searchHistory) && (
+      i.to !== null && (
+        i.to.toLowerCase() === networkService.L2LPAddress.toLowerCase() ||
+        //i.to.toLowerCase() === networkService.L2_ETH_Address.toLowerCase() ||
+        //i.to.toLowerCase() === networkService.L2_TEST_Address.toLowerCase() ||
+        i.to.toLowerCase() === networkService.L2StandardBridgeAddress.toLowerCase()
+      )
+    )
+  })
+
+  const tabsContent = {
+    All: transactions,
+    Deposits: deposits,
+    Exits: exits
+  }
 
   const currentNetwork = useSelector(selectNetwork());
 
@@ -108,97 +138,49 @@ function History () {
             activeTab={activeTab1}
             tabs={['All', 'Deposits', 'Exits']}
           />
-          <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 2, width: {xs: '100%', md: 'initial' }}}>
+          <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', width: {xs: '100%', md: 'initial' }}}>
             {!isMobile ? (
               <Typography variant="h4" sx={{color: 'rgba(255, 255, 255, 0.7)', whiteSpace: 'nowrap'}}>Show period from</Typography>
             ) : null}
-            <DatePicker
-              wrapperClassName={styles.datePickerInput}
-              popperClassName={styles.popperStyle}
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              selectsStart
-              startDate={startDate}
-              endDate={endDate}
-              placeholderText={isMobile ? 'From' : ''}
-            />
+            <Box sx={{width: '100%', m: {xs: '0 10px 0 0', md: '0 15px'}}}>
+              <DatePicker
+                wrapperClassName={styles.datePickerInput}
+                popperClassName={styles.popperStyle}
+                selected={startDate}
+                onChange={(date) => setStartDate(date)}
+                selectsStart
+                startDate={startDate}
+                endDate={endDate}
+                placeholderText={isMobile ? 'From' : ''}
+              />
+            </Box>
 
             {!isMobile ? (
               <Typography variant="h4" sx={{color: 'rgba(255, 255, 255, 0.7)'}}>to </Typography>
             ) : null}
-            <DatePicker
-              wrapperClassName={styles.datePickerInput}
-              popperClassName={styles.popperStyle}
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
-              selectsEnd
-              startDate={startDate}
-              endDate={endDate}
-              minDate={startDate}
-              placeholderText={isMobile ? 'To' : ''}
-            />
+            <Box sx={{width: '100%', m: {xs: '0 0 0 10px', md: '0 15px'}}}>
+              <DatePicker
+                wrapperClassName={styles.datePickerInput}
+                popperClassName={styles.popperStyle}
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                selectsEnd
+                startDate={startDate}
+                endDate={endDate}
+                minDate={startDate}
+                placeholderText={isMobile ? 'To' : ''}
+              />
+            </Box>
           </Box>
         </Box>
 
-        {activeTab1 === 'All' && (
-          // <TransactionsOld
-          //   searchHistory={searchHistory}
-          //   transactions={transactions}
-          //   chainLink={chainLink}
-          // />
-          <Transactions
-            transactions={transactions}
-            chainLink={chainLink}
-          />
-        )}
 
-        {activeTab1 === 'Deposits' &&
-          <Deposits
-            searchHistory={searchHistory}
-            transactions={transactions}
-            chainLink={chainLink}
-          />
-        }
-
-        {activeTab1 === 'Exits' &&
-          <Exits
-            searchHistory={searchHistory}
-            transactions={transactions}
-            chainLink={chainLink}
-          />
-        }
+        <Transactions
+          transactions={tabsContent[activeTab1]}
+          chainLink={chainLink}
+        />
+        <hr />
       </Box>
-
-      {/*
-      <Input
-              icon
-              placeholder='Search by hash'
-              value={searchHistory}
-              onChange={i => {
-                setSearchHistory(i.target.value);
-              }}
-              className={styles.searchBar}
-            />
-
-      */}
-
-        {/* <div className={styles.section}>
-          <Tabs
-            onClick={tab => {
-              dispatch(setActiveHistoryTab2(tab));
-            }}
-            activeTab={activeTab2}
-            tabs={[ 'Exits', 'TBD' ]}
-          />
-
-          {activeTab2 === 'Exits' &&
-            <Exits
-              searchHistory={searchHistory}
-              transactions={transactions}
-              chainLink={chainLink}
-            />
-          }
-        </div> */}
     </>
   );
 }

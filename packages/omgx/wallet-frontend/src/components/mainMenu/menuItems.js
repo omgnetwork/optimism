@@ -18,12 +18,6 @@ export const menuItems = [
     url: "#",
   },
   {
-    key: 'NFT',
-    icon: "NFTIcon",
-    title: "NFT",
-    url: "/"
-  },
-  {
     key: 'Learn',
     icon: "LearnIcon",
     title: "Learn",

@@ -71,38 +71,46 @@ function NetworkSwitcher({ walletEnabled }) {
       <S.WallerPickerWrapper>
         <S.Menu>
 
-          <S.NetWorkStyle 
-            onClick={()=>{setShowAllNetworks(prev => !prev)}}
-          >
+          <S.NetWorkStyle>
             <NetworkIcon />
+            <S.Label variant="body2">Network</S.Label>
             <Box sx={{
               display: 'flex',
-              margin: '10px 0 10px 20px',
+              margin: '10px 0 10px 15px',
               color: 'white',
               alignItems: 'center',
-              gap: 2
-            }} >
-              <Typography variant="body1">{masterConfig}</Typography>
+              gap: 2,
+              position: 'relative',
+            }}
+            onClick={()=>{setShowAllNetworks(prev => !prev)}}>
+              <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', textTransform: 'capitalize'}}>
+                {masterConfig}
+                <S.Chevron
+                  open={showAllNetworks}
+                  src={chevron}
+                  alt='chevron'
+                />
+              </Typography>
+              {showAllNetworks ? (
+                <S.Dropdown ref={dropdownNode}>
+                  {!!allNetworks.length && showAllNetworks && allNetworks.map((network) => (
+                    <Typography
+                    key={network}
+                    onClick={()=>dispatchSetNetwork(network)}
+                    color={masterConfig === network ? 'secondary' : null}
+                    >
+                      {network}
+                    </Typography>))
+                  }
+                </S.Dropdown>
+              ) : null}
             </Box>
 
-            <S.Chevron
-              open={showAllNetworks}
-              src={chevron}
-              alt='chevron'
-            />
+
 
           </S.NetWorkStyle>
 
-          <S.Dropdown ref={dropdownNode}>
-            {!!allNetworks.length && showAllNetworks && allNetworks.map((network) => (
-              <div
-                key={network}
-                onClick={()=>dispatchSetNetwork(network)}
-              >
-                {network}
-              </div>))
-            }
-          </S.Dropdown>
+
 
         </S.Menu>
       </S.WallerPickerWrapper>

@@ -23,6 +23,7 @@ function StyledTable({
     isTransaction,
     tableData,
     chainLink,
+    metaData
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -46,7 +47,7 @@ function StyledTable({
               {tableHeadList && tableHeadList.length > 0 ?
                 tableHeadList.map((head) => {
                   return (
-                    <StyledTableCell key={head.label} sx={{backgroundColor: '#0D182A', color: 'rgba(255, 255, 255, 0.7) !important'}}>
+                    <StyledTableCell key={head.label} sx={{backgroundColor: '#0D182A', color: 'rgba(255, 255, 255, 0.7) !important'}} width={head.width}>
                       <Box sx={{display: "flex", justifyContent: head.isSort ? "flex-start" : "space-between", alignItems: "center", gap: "10px"}}>
                         <Typography variant="body2" component="span">{head.label}</Typography>
                         {head.isSort ? <SortIcon /> : null}
@@ -68,6 +69,7 @@ function StyledTable({
                     index={index}
                     chainLink={chainLink}
                     key={index}
+                    metaData={metaData}
                     {...item}
                   />
                 )}

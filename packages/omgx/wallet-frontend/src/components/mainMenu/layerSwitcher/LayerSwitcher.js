@@ -65,20 +65,21 @@ function LayerSwitcher({ walletEnabled, isButton = false }) {
             }}
           >
             <LayerIcon />
-            <S.LayerSwitch 
+            <S.Label variant="body2">Layer</S.Label>
+            <S.LayerSwitch
               onClick={()=>{dispatchSetLayer(otherLayer)}}
             >
               <Typography
                 className={layer === 'L1' ? 'active': ''}
-                variant="body1"
+                variant="body2"
                 component="span">
-                  L1
+                  1
               </Typography>
-              <Typography 
+              <Typography
                 className={layer === 'L2' ? 'active': ''}
-                variant="body1" 
+                variant="body2"
                 component="span">
-                  L2
+                  2
               </Typography>
             </S.LayerSwitch>
           </Box>
@@ -89,7 +90,7 @@ function LayerSwitcher({ walletEnabled, isButton = false }) {
             </Box>
           </S.NetWorkStyle>
 
-          <S.ButtonStyle 
+          <S.ButtonStyle
             onClick={()=>{dispatchSetLayer(otherLayer)}}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >

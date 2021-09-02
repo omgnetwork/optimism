@@ -1,16 +1,23 @@
 import styled from '@emotion/styled';
+import { Typography } from '@material-ui/core';
 
 export const WalletPickerContainer = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
+  margin-left: -5px;
 
   @include mobile {
     font-size: 0.9em;
     padding: 10px;
   }
 `;
+
+export const Label = styled(Typography)(({ theme }) => ({
+  marginLeft: theme.spacing(1),
+  color: theme.palette.text.disabled,
+}));
 
 export const WalletPickerWrapper = styled.div`
   display: flex;
@@ -67,15 +74,21 @@ export const ButtonStyle = styled.div`
 
 export const LayerSwitch = styled.div`
   margin-left: 15px;
-  padding: 5px;
-  border-radius: 16px;
+  padding: 3px;
+  border-radius: 100px;
   background: #3C5DFC;
   cursor: pointer;
+  display: flex;
+  height: 28px;
   span {
-    padding: 5px 15px;
-    border-radius: 16px;
+    padding: 2px 15px;
+    font-weight: bold;
+    border-radius: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-    &.active { 
+    &.active {
       color: #3c5dfc;
       background: white;
     }
