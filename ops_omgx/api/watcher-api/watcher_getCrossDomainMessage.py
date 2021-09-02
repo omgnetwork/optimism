@@ -37,8 +37,10 @@ def watcher_getCrossDomainMessage(event, context):
       cur = con.cursor()
       cur.execute("""SELECT
         stateRootHash, stateRootBlockNumber, stateRootBlockHash, stateRootBlockTimestamp,
-        receipt.hash, receipt.blockNumber, `from`, `to`, timestamp, crossDomainMessage, crossDomainMessageFinalize, fastRelay, l1Hash, l1BlockNumber, l1BlockHash, l1From, l1To
+        receipt.hash, receipt.blockNumber, `from`, `to`, timestamp, crossDomainMessage, crossDomainMessageFinalize, receipt.fastRelay, l1Hash, l1BlockNumber, l1BlockHash, l1From, l1To
         FROM stateRoot, receipt
+        LEFT JOIN exitL2
+        ON receipt.blockNumber = exitL2.blockNumber
         WHERE stateRoot.blockNumber = receipt.blockNumber AND receipt.hash=%s""", (receiptHash))
       transactionDataRaw = cur.fetchall()[0]
       # No cross domain message
@@ -54,12 +56,17 @@ def watcher_getCrossDomainMessage(event, context):
         else:
           # Estimate time is 7 days
           crossDomainMessageEstimateFinalizedTime = crossDomainMessageSendTime + 60 * 60 * 24 * 7
+      # exitL2
+      if transactionDataRaw[17] != None: exitL2 = True
+      else: exitL2 = False
+
       transactionData = {
         "hash": transactionDataRaw[4],
         "blockNumber": int(transactionDataRaw[5]),
         "from": transactionDataRaw[6],
         "to": transactionDataRaw[7],
         "timestamp": transactionDataRaw[8],
+        "exitL2": exitL2,
         "crossDomainMessage": {
           "crossDomainMessage": transactionDataRaw[9],
           "crossDomainMessageFinailze": transactionDataRaw[10],
@@ -77,6 +84,15 @@ def watcher_getCrossDomainMessage(event, context):
           "stateRootBlockNumber": transactionDataRaw[1],
           "stateRootBlockHash": transactionDataRaw[2],
           "stateRootBlockTimestamp": transactionDataRaw[3]
+        },
+        "exit": {
+          "exitSender": transactionDataRaw[17],
+          "exitTo": transactionDataRaw[18],
+          "exitToken": transactionDataRaw[19],
+          "exitAmount": transactionDataRaw[20],
+          "exitReceive": transactionDataRaw[21],
+          "exitFeeRate": transactionDataRaw[22],
+          "fastRelay": fastRelay,
         }
       }
     except Exception as e:

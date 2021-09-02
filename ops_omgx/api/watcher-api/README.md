@@ -27,6 +27,7 @@
     from: "FROM_ACCOUNT",
     to: "TO_ACCOUNT",
     timestamp: "BLOCK_TIMESTAMP",
+    exitL2: "EXIT_L2" // True or False
     crossDomainMessage: {
       crossDomainMessage: "CROSS_DOMAIN_MESSAGE", // whether the transaction sent cross domain message
       crossDomainMessageFinailze: "CROSS_DOMAIN_MESSAGE_FINALIZED", // whether the cross domain message is finalized on L1
@@ -44,6 +45,15 @@
       stateRootBlockNumber: "L1_STATE_ROOT_BLOCK_NUMBER",
       stateRootBlockHash: "L1_STATE_ROOT_BLOCK_HASH",
       stateRootBlockTimestamp: "L1_STATE_ROOT_BLOCK_TIMESTAMP"
+    },
+    exit: {
+      exitSender: "EXIT_SENDER", // The address of L2 token sender
+      exitTo: "EXIT_RECEIVER", // The address of L1 token receiver
+      exitToken: "EXIT_TOKEN", // L2 token address
+      exitAmount: "EXIT_AMOUNT", // L2 exit amount, which doesn't consider fee
+      exitReceive: "EXIT_RECEIVE", // L1 received amount
+      exitFeeRate: "EXIT_FEE",
+      fastRelay: "FAST_RELAY", 
     }
   }
 ]
