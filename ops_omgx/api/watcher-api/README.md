@@ -54,6 +54,7 @@
       exitReceive: "EXIT_RECEIVE", // L1 received amount
       exitFeeRate: "EXIT_FEE",
       fastRelay: "FAST_RELAY", 
+      status: "STATUS" // pending || succeeded || reverted
     }
   }
 ]

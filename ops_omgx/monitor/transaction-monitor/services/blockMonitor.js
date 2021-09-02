@@ -329,6 +329,27 @@ class BlockMonitorService extends OptimismEnv {
       receiptData.l1BlockHash = l1Receipt.blockHash.toString();
       receiptData.l1From = l1Receipt.from.toString();
       receiptData.l1To = l1Receipt.to.toString();
+
+      const L1LiquidityPoolLog = await this.L1LiquidityPoolContract.queryFilter(
+        this.L1LiquidityPoolContract.filters.ClientPayL1(),
+        Number(receiptData.l1BlockNumber),
+        Number(receiptData.l1BlockNumber)
+      )
+
+      const filteredL1LiquidityPoolLog = L1LiquidityPoolLog.filter(i => i.transactionHash === matches[0].transactionHash)
+      if (filteredL1LiquidityPoolLog.length) {
+        this.logger.info("Found successful L2 exit", { status: 'succeeded', blockNumber: receiptData.blockNumber });
+        await this.databaseService.updateExitData({
+          status: 'succeeded',
+          blockNumber: receiptData.blockNumber,
+        })
+      } else {
+        this.logger.info("Found failure L2 exit", { status: 'reverted', blockNumber: receiptData.blockNumber });
+        await this.databaseService.updateExitData({
+          status: 'reverted',
+          blockNumber: receiptData.blockNumber,
+        })
+      }
     }
 
     receiptData.crossDomainMessageFinalize = crossDomainMessageFinalize;

@@ -37,12 +37,12 @@ def watcher_getTransactions(event, context):
       # stateRootHash, stateRootBlockNumber, stateRootBlockHash, stateRootBlockTimestamp,
       # 4             5                     6       7    8          9                   10                          11         12      13             14           15      16
       # receipt.hash, receipt.blockNumber, `from`, `to`, timestamp, crossDomainMessage, crossDomainMessageFinalize, fastRelay, l1Hash, l1BlockNumber, l1BlockHash, l1From, l1To
-      # 17          18      19         20          21          22
-      # exitSender, exitTo, exitToken, exitAmount, exitReceive, exitFeeRate
+      # 17          18      19         20          21          22            23
+      # exitSender, exitTo, exitToken, exitAmount, exitReceive, exitFeeRate, status
       cur.execute("""SELECT
         stateRootHash, stateRootBlockNumber, stateRootBlockHash, stateRootBlockTimestamp,
         receipt.hash, receipt.blockNumber, `from`, `to`, timestamp, crossDomainMessage, crossDomainMessageFinalize, receipt.fastRelay, l1Hash, l1BlockNumber, l1BlockHash, l1From, l1To,
-        exitSender, exitTo, exitToken, exitAmount, exitReceive, exitFeeRate
+        exitSender, exitTo, exitToken, exitAmount, exitReceive, exitFeeRate, exitL2.status
         FROM stateRoot, receipt
         LEFT JOIN exitL2
         ON receipt.blockNumber = exitL2.blockNumber
@@ -73,7 +73,7 @@ def watcher_getTransactions(event, context):
           "blockNumber": int(transactionDataRaw[5]),
           "from": transactionDataRaw[6],
           "to": transactionDataRaw[7],
-          "timestamp": transactionDataRaw[8],
+          "timeStamp": transactionDataRaw[8],
           "exitL2": exitL2,
           "crossDomainMessage": {
             "crossDomainMessage": transactionDataRaw[9],
@@ -91,7 +91,7 @@ def watcher_getTransactions(event, context):
             "stateRootHash": transactionDataRaw[0],
             "stateRootBlockNumber": transactionDataRaw[1],
             "stateRootBlockHash": transactionDataRaw[2],
-            "stateRootBlockTimestamp": transactionDataRaw[3]
+            "stateRootBlockTimeStamp": transactionDataRaw[3]
           },
           "exit": {
             "exitSender": transactionDataRaw[17],
@@ -101,6 +101,7 @@ def watcher_getTransactions(event, context):
             "exitReceive": transactionDataRaw[21],
             "exitFeeRate": transactionDataRaw[22],
             "fastRelay": fastRelay,
+            "status": transactionDataRaw[23]
           }
         })
 

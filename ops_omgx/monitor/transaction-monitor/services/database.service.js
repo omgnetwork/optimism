@@ -102,6 +102,7 @@ class DatabaseService extends OptimismEnv{
       exitReceive VARCHAR(255),
       exitFeeRate VARCHAR(255),
       fastRelay BOOL,
+      status VARCHAR(255),
       PRIMARY KEY ( blockNumber )
     )`
   );
@@ -213,7 +214,15 @@ class DatabaseService extends OptimismEnv{
       exitAmount='${exitData.exitAmount}',
       exitReceive='${exitData.exitReceive}',
       exitFeeRate='${exitData.exitFeeRate}',
-      fastRelay=${exitData.fastRelay}
+      fastRelay=${exitData.fastRelay},
+      status='pending'
+  `);
+  }
+
+  async updateExitData(exitData) {
+    await this.query(`UPDATE exitL2
+      SET status='${exitData.status}'
+      WHERE blockNumber=${Number(exitData.blockNumber)}
   `);
   }
 
