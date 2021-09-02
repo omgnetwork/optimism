@@ -1,5 +1,9 @@
 const { ethers } = require('ethers')
-require('dotenv');
+var path = require('path')
+var dirtree = require('directory-tree')
+var fs = require('fs')
+
+require('dotenv')
 
 const sleep = (timeout) => {
   return new Promise((resolve, reject) => {
@@ -59,11 +63,31 @@ module.exports = async function (deployer) {
   const governorBravoDelegator = await GovernorBravoDelegator.deployed()
   console.log('deployed delegator')
 
-  console.log('Queue setPendingAdmin');
+  console.log('Saving Contract Addresses')
+
+  let contracts = {
+    DAO_GovernorBravoDelegate: governorBravoDelegate.address,
+    DAO_GovernorBravoDelegator: governorBravoDelegator.address,
+    DAO_Comp: comp.address,
+    DAO_Timelock: timelock.address,
+  }
+
+  const addresses = JSON.stringify(contracts, null, 2)
+  console.log(addresses)
+
+  const dumpsPath = path.resolve(__dirname, "../networks")
+
+  if (!fs.existsSync(dumpsPath)) {
+    fs.mkdirSync(dumpsPath, { recursive: true })
+  }
+  const addrsPath = path.resolve(dumpsPath, 'addresses.json')
+  fs.writeFileSync(addrsPath, addresses)
+
+  console.log('Queue setPendingAdmin')
 
   const GovernorBravo = await GovernorBravoDelegate.at(
     governorBravoDelegator.address
-  );
+  )
 
   const eta = (await getTimestamp()) + 300; //wait for 300 seconds
   
@@ -82,7 +106,6 @@ module.exports = async function (deployer) {
 
   console.log(`Time transaction was made: ${await getTimestamp()}`)
   console.log(`Time at which transaction may be executed: ${eta}`)
-  
   console.log(`Please be patient and wait for 300 seconds...`)
 
   await sleep(300 * 1000)

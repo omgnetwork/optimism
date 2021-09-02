@@ -58,7 +58,7 @@ function Proposal({
             }
         };
         init();
-    }, []);
+    }, [delegate, id, proposal])
 
 
     const updateVote = async (e, userVote, label) => {
@@ -67,7 +67,6 @@ function Proposal({
         // show alert
         dispatch(openAlert(`${label}`));
     }
-
 
     return (<div
         className={styles.proposalCard}

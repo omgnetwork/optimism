@@ -11,18 +11,6 @@ const pk_2 = env.pk_2
 module.exports = {
   contracts_build_directory: './build-ovm',
   networks: {
-    local_l2: {
-      provider: function () {
-        return new HDWalletProvider({
-          privateKeys: [ pk_0, pk_1, pk_2 ],
-          providerOrUrl: 'http://127.0.0.1:8545',
-        })
-      },
-      network_id: 31338,
-      host:  '127.0.0.1',
-      gasPrice: 15000000,
-      gas: 50000000,
-    },
     rinkeby_l2: {
       provider: function () {
         return new HDWalletProvider({

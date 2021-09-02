@@ -56,10 +56,10 @@ import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol
 import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
 
 // DAO 
-import Boba from "../deployment/artifacts/contracts/Boba/Boba.json";
-import GovernorBravoDelegate from "../deployment/artifacts/contracts/GovernorBravoDelegate/GovernorBravoDelegate.json";
-import GovernorBravoDelegator from "../deployment/artifacts/contracts/GovernorBravoDelegator/GovernorBravoDelegator.json";
-import Timelock from "../deployment/artifacts/contracts/Timelock/Timelock.json";
+import Comp from "../deployment/rinkeby/json/Comp.json";
+import GovernorBravoDelegate from "../deployment/rinkeby/json/GovernorBravoDelegate.json";
+import GovernorBravoDelegator from "../deployment/rinkeby/json/GovernorBravoDelegator.json";
+import Timelock from "../deployment/rinkeby/json/Timelock.json";
 
 import { powAmount, logAmount } from 'util/amountConvert'
 import { accDiv, accMul } from 'util/calculation'
@@ -142,7 +142,7 @@ class NetworkService {
     this.L2GasLimit = 10000000
 
     // Dao
-    this.boba = null
+    this.comp = null
     this.delegate = null
     this.delegator = null
     this.timelock = null
@@ -610,26 +610,26 @@ class NetworkService {
         },
       })
 
-      this.boba = new ethers.Contract(
-        Boba.networks[this.networkId].address,
-        Boba.abi,
+      this.comp = new ethers.Contract(
+        addresses.DAO_Comp,
+        Comp.abi,
         this.provider.getSigner()
       );
 
       this.delegate = new ethers.Contract(
-        GovernorBravoDelegator.networks[this.networkId].address,
+        addresses.DAO_GovernorBravoDelegate,
         GovernorBravoDelegate.abi,
         this.provider.getSigner()
       );
 
       this.delegator = new ethers.Contract(
-        GovernorBravoDelegator.networks[this.networkId].address,
+        addresses.DAO_GovernorBravoDelegator,
         GovernorBravoDelegator.abi,
         this.provider.getSigner()
       );
 
       this.timelock = new ethers.Contract(
-        Timelock.networks[this.networkId].address,
+        addresses.DAO_Timelock,
         Timelock.abi,
         this.provider.getSigner()
       );
@@ -1947,17 +1947,17 @@ class NetworkService {
   }
 
   /***********************************************/
-  /*****         DAO Function                *****/
+  /*****         DAO Functions               *****/
   /***********************************************/
 
   // get DAO Balance
   async getDaoBalance() {
     try {
-      let balance = await this.boba.balanceOf(this.account);
+      let balance = await this.comp.balanceOf(this.account)
       return { balance: formatEther(balance) }
     } catch (error) {
-      console.log('Error : DAO Balance', error);
-      throw new Error(error.message);
+      console.log('Error: DAO Balance', error)
+      throw new Error(error.message)
     }
   }
 
@@ -1965,43 +1965,42 @@ class NetworkService {
   // get DAO Votes
   async getDaoVotes() {
     try {
-      let votes = await this.boba.getCurrentVotes(this.account);
+      let votes = await this.comp.getCurrentVotes(this.account)
       return { votes: formatEther(votes) }
     } catch (error) {
-      console.log('Error : DAO Votes', error);
+      console.log('Error: DAO Votes', error)
       throw new Error(error.message);
     }
   }
 
-  //Transfer dao funds
+  //Transfer DAO funds
   async transferDao({ recipient, amount }) {
     try {
-      const tx = await this.boba.transfer(recipient, parseEther(amount.toString()));
-      await tx.wait();
+      const tx = await this.comp.transfer(recipient, parseEther(amount.toString()))
+      await tx.wait()
       return tx
     } catch (error) {
-      console.log('Error : DAO tranfer', error);
+      console.log('Error: DAO Transfer', error)
       throw new Error(error.message);
     }
   }
 
-  //Delegate dao
+  //Delegate DAO
   async delegateVotes({ recipient }) {
     try {
-      const tx = await this.boba.delegate(recipient);
-      await tx.wait();
+      const tx = await this.comp.delegate(recipient)
+      await tx.wait()
       return tx
     } catch (error) {
-      console.log('Error : DAO Delegate', error);
-      throw new Error(error.message);
+      console.log('Error: DAO Delegate', error)
+      throw new Error(error.message)
     }
   }
-
 
   //Create Proposal
   async createProposal(payload) {
     try {
-      let res = await this.delegate.propose(payload);
+      let res = await this.delegate.propose(payload)
       return res;
     } catch (error) {
       console.log(error);
@@ -2013,8 +2012,8 @@ class NetworkService {
   async fetchProposals() {
     try {
       let proposalList = [];
-      const proposalCounts = await this.delegate.proposalCount();
-      const totalProposal = await proposalCounts.toNumber();
+      const proposalCounts = await this.delegate.proposalCount()
+      const totalProposal = await proposalCounts.toNumber()
       const filter = this.delegate.filters.ProposalCreated(
         null,
         null,
