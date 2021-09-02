@@ -46,7 +46,7 @@ def watcher_getCrossDomainMessage(event, context):
         on receipt.blockNumber = stateRoot.blockNumber
         LEFT JOIN exitL2
         ON receipt.blockNumber = exitL2.blockNumber
-        WHERE stateRoot.blockNumber = receipt.blockNumber AND receipt.hash=%s""", (receiptHash))
+        WHERE receipt.hash=%s""", (receiptHash))
       transactionDataRaw = cur.fetchall()[0]
       # No cross domain message
       if transactionDataRaw[9] == False:

@@ -48,8 +48,7 @@ def watcher_getTransactions(event, context):
         on receipt.blockNumber = stateRoot.blockNumber
         LEFT JOIN exitL2
         ON receipt.blockNumber = exitL2.blockNumber
-        WHERE stateRoot.blockNumber = receipt.blockNumber AND
-        `from`=%s ORDER BY CAST(receipt.blockNumber as unsigned) DESC LIMIT %s OFFSET %s""", (address, toRange - fromRange, fromRange))
+        WHERE `from`=%s ORDER BY CAST(receipt.blockNumber as unsigned) DESC LIMIT %s OFFSET %s""", (address, toRange - fromRange, fromRange))
       transactionsDataRaw = cur.fetchall()
       print(transactionsDataRaw)
       for transactionDataRaw in transactionsDataRaw:
