@@ -58,13 +58,17 @@ def watcher_getTransactions(event, context):
         else:
           # Has cross domain message
           # crossDomainMessageSendTime is stateRootBlockTimestamp
-          crossDomainMessageSendTime, fastRelay = transactionDataRaw[3], transactionDataRaw[11]
+          if transactionDataRaw[3] != None:
+            crossDomainMessageSendTime = transactionDataRaw[3]
+          else:
+            crossDomainMessageSendTime = transactionDataRaw[8]
+          fastRelay = transactionDataRaw[11]
           if fastRelay == True:
             # Estimate time is 5 minutes
-            crossDomainMessageEstimateFinalizedTime = crossDomainMessageSendTime + 60 * 5
+            crossDomainMessageEstimateFinalizedTime = int(crossDomainMessageSendTime) + 60 * 5
           else:
             # Estimate time is 7 days
-            crossDomainMessageEstimateFinalizedTime = crossDomainMessageSendTime + 60 * 60 * 24 * 7
+            crossDomainMessageEstimateFinalizedTime = int(crossDomainMessageSendTime) + 60 * 60 * 24 * 7
         # exitL2
         if transactionDataRaw[17] != None: exitL2 = True
         else: exitL2 = False
