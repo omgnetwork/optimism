@@ -10,8 +10,9 @@ import { Container, Drawer, IconButton, useMediaQuery } from '@material-ui/core'
 import WalletAddress from 'components/walletAddress/WalletAddress'
 import { makeStyles } from '@material-ui/styles'
 import { ReactComponent as CloseIcon } from './../../images/icons/close-modal.svg'
-import { ReactComponent as NavIcon } from './../../images/icons/nav-collapsed.svg'
+import NavIcon from '../icons/NavIcon'
 import ThemeSwitcher from './themeSwitcher/ThemeSwitcher'
+import { Box } from '@material-ui/system'
 
 const useStyles = makeStyles({
   root: {
@@ -31,7 +32,9 @@ function MainMenu ({ light, setLight, pageDisplay, handleSetPage }) {
       {isMobile ? (
         <Container>
           <S.MobileNavTag>
-            <NavIcon onClick={() => setOpen(!open)} />
+            <Box onClick={() => setOpen(!open)} sx={{cursor: 'pointer'}}>
+              <NavIcon />
+            </Box>
 
             <Drawer open={open} onClose={() => setOpen(false)} classes={{paper: classes.root}}>
               <S.StyleDrawer theme={theme}>
@@ -51,7 +54,7 @@ function MainMenu ({ light, setLight, pageDisplay, handleSetPage }) {
                   <LayerSwitcher />
                 </S.DrawerHeader>
 
-                <MenuItems pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
+                <MenuItems pageDisplay={pageDisplay} handleSetPage={handleSetPage} setOpen={setOpen} />
               </S.StyleDrawer>
             </Drawer>
 
@@ -66,7 +69,7 @@ function MainMenu ({ light, setLight, pageDisplay, handleSetPage }) {
           </Link>
           <NetworkSwitcher />
           <LayerSwitcher />
-          <MenuItems pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
+          <MenuItems pageDisplay={pageDisplay} handleSetPage={handleSetPage} setOpen={setOpen}/>
           <ThemeSwitcher light={light} setLight={setLight} />
         </S.Menu>
       )}

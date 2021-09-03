@@ -4,7 +4,7 @@ import { Box, Typography } from '@material-ui/core'
 export const Wrapper = styled(Box)`
   width: 100%;
   border-radius: 8px;
-  background-color: #152032;
+  background-color: ${props => props.theme.palette.background.secondary};
   overflow: hidden;
 `;
 

@@ -26,6 +26,7 @@ import AlertIcon from 'components/icons/AlertIcon';
 import moment from 'moment';
 import LinkIcon from 'components/icons/LinkIcon';
 import Pager from 'components/pager/Pager';
+import { useTheme } from '@emotion/react';
 
 const PER_PAGE = 3;
 
@@ -39,7 +40,7 @@ function PendingTransaction() {
     //     if (i.crossDomainMessage &&
     //         i.crossDomainMessage.crossDomainMessage === 1 &&
     //         i.crossDomainMessage.crossDomainMessageFinailze === 0 &&
-    //         i.exitL2 
+    //         i.exitL2
     //     ) {
     //         return true;
     //     }
@@ -51,7 +52,7 @@ function PendingTransaction() {
         if (i.crossDomainMessage &&
             i.crossDomainMessage.crossDomainMessage === 1 &&
             i.crossDomainMessage.crossDomainMessageFinailze === 0 &&
-            i.exit.status === "pending" 
+            i.exit.status === "pending"
         ) {
             return true;
         }
@@ -60,14 +61,14 @@ function PendingTransaction() {
 
     //exit that is not final and we do not have a state root hash yet
     let pendingExitsStage0 = pending.filter((i) => {
-        if (!i.stateRoot.stateRootHash && i.exit.fastRelay) 
+        if (!i.stateRoot.stateRootHash && i.exit.fastRelay)
         //this means it's very early - no stateRootHash yet
             return true
         return false
     })
     pendingExitsStage0 = pendingExitsStage0.map(v => ({
-        ...v, 
-        label: 'L2->L1 Fast Exit', 
+        ...v,
+        label: 'L2->L1 Fast Exit',
         labelStatus: 'Step 0, No SR Hash yet, Pending',
         completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
       })
@@ -75,7 +76,7 @@ function PendingTransaction() {
 
     //exit that is not final, but we have a state root hash
     let pendingExitsStage1 = pending.filter((i) => {
-        if (i.stateRoot.stateRootHash && i.exit.fastRelay) 
+        if (i.stateRoot.stateRootHash && i.exit.fastRelay)
         //ok, we have a stateRootHash
             /*
             i.to !== null &&
@@ -89,8 +90,8 @@ function PendingTransaction() {
         return false
     })
     pendingExitsStage1 = pendingExitsStage1.map(v => ({
-        ...v, 
-        label: 'L2->L1 Fast Exit', 
+        ...v,
+        label: 'L2->L1 Fast Exit',
         labelStatus: 'Step 1, Have SR Hash, Pending',
         completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
       })
@@ -105,8 +106,8 @@ function PendingTransaction() {
         return false
     })
     pendingTradExits = pendingTradExits.map(v => ({
-        ...v, 
-        label: 'L2->L1 Trad Exit', 
+        ...v,
+        label: 'L2->L1 Trad Exit',
         labelStatus: 'In 7 day window',
         completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
       })
@@ -133,6 +134,7 @@ function PendingTransaction() {
 
     const currentNetwork = useSelector(selectNetwork());
     const nw = getAllNetworks();
+    const theme = useTheme();
 
     const chainLink = (item) => {
         let network = nw[currentNetwork];
@@ -168,16 +170,16 @@ function PendingTransaction() {
                 onClickBack={()=>setPage(page - 1)}
             />
         </S.WrapperHeading>
-        
+
         {
-            pendingTransactions && 
+            pendingTransactions &&
             !pendingTransactions.length &&
             <Box
                 sx={{
-                    background: 'rgba(9, 22, 43, 0.5)',
+                    background: theme.palette.background.secondary,
                     borderRadius: '12px',
                     margin: '5px',
-                    padding: '5px 20px',
+                    padding: '10px 20px',
                     display: 'flex',
                     justifyContent: 'flex-start'
                 }}
@@ -197,16 +199,16 @@ function PendingTransaction() {
             paginatedTransactions &&
             paginatedTransactions.length > 0 &&
             paginatedTransactions.map((i) => {
-                
+
                 console.log(i)
 
                 let completionTime = 'Not available'
 
-                if(i.completion) 
+                if(i.completion)
                     completionTime = moment.unix(i.completion).format('lll')
-                
+
                 let link = chainLink(i)
-                
+
                 return <Grid
                     key={i.hash}
                     container

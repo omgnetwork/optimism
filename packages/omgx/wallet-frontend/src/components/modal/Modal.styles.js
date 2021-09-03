@@ -1,4 +1,5 @@
 import { Box, IconButton } from '@material-ui/core';
+import { dark } from '@material-ui/core/styles/createPalette';
 import { styled } from '@material-ui/system';
 import ModalUnstyled from '@material-ui/unstyled/ModalUnstyled';
 
@@ -29,10 +30,9 @@ export const Backdrop = styled('div')`
 `;
 
 export const Style = styled(Box)`
-  background: ${(props) => props.transparent ? 'transparent' : 'rgba(32, 29, 49, 0.8)'};
-  box-shadow: ${(props) => props.transparent ? 'none' : '-13px 15px 39px rgba(0, 0, 0, 0.16), inset 123px 116px 230px rgba(255, 255, 255, 0.03)'};
+  background: ${(props) => props.transparent ? props.theme.palette.background.modalTransparent : props.theme.palette.background.modal};
   backdrop-filter: ${(props) => props.transparent ? 'none' :'blur(66px)'};
-  padding: ${(props) => props.transparent ? '0' : '40px'};
+  padding: ${(props) => props.transparent ? '20px' : '40px'};
   border: 0;
   outline: 0;
   box-sizing: border-box;
@@ -43,8 +43,8 @@ export const Style = styled(Box)`
 export const IconButtonTag = styled(IconButton)(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
     position: 'absolute',
-    top: -20,
-    right: 15,
+    top: 0,
+    right: 20,
   },
   [theme.breakpoints.up('md')]: {
   },

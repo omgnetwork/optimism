@@ -93,6 +93,6 @@ export const NetWorkStyle = styled.div`
 
 export const LayerLabel = styled.div`
   margin: 0px 10px 0 17px;
-  color: rgba(255, 255, 255, 0.7);
+  opacity: 0.7;
   font-size: 16px;
 `;

@@ -18,9 +18,10 @@ import { NavigateNext, NavigateBefore } from '@material-ui/icons';
 
 import * as styles from './Pager.module.scss';
 import * as S from './Pager.styles';
+import { useTheme } from '@emotion/react';
 
 function Pager ({ currentPage, totalPages, isLastPage, onClickNext, onClickBack, label }) {
-
+  const theme = useTheme();
   return (
     <S.PagerContainer>
       <div className={styles.numberLeft}>{label}</div>
@@ -30,23 +31,25 @@ function Pager ({ currentPage, totalPages, isLastPage, onClickNext, onClickBack,
         </S.PagerLabel>
 
         <S.PagerNavigation
-          variant="outlined"
+          variant={theme.palette.mode === "light" ? "contained" : "outlined"}
           size="small"
           color='primary'
           disabled={currentPage === 1}
           onClick={onClickBack}
         >
-          <NavigateBefore className={styles.icon} />
+          <NavigateBefore />
         </S.PagerNavigation>
+
         <S.PagerNavigation
-          variant="outlined"
+          variant={theme.palette.mode === "light" ? "contained" : "outlined"}
           size="small"
           color='primary'
           disabled={isLastPage}
           onClick={onClickNext}
         >
-          <NavigateNext className={styles.icon} />
+          <NavigateNext />
         </S.PagerNavigation>
+
       </S.PagerContent>
     </S.PagerContainer>
   )

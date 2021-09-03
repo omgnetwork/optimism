@@ -21,6 +21,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import LinkIcon from 'components/icons/LinkIcon'
 import * as styles from './Transaction.module.scss'
 import * as S from './Transaction.styles'
+import { useTheme } from '@emotion/react'
 
 function Transaction({
   link,
@@ -40,6 +41,7 @@ function Transaction({
 
   const [dropDownBox, setDropDownBox] = useState(false);
   const [dropDownBoxInit, setDropDownBoxInit] = useState(false);
+  const theme = useTheme()
 
   function renderValue() {
 
@@ -130,41 +132,41 @@ function Transaction({
     div style={{
       padding: '10px',
       borderRadius: '8px',
-      background: '#192333',
+      background: theme.palette.background.secondary,
     }}
   >
     <S.TableBody>
-      
-      <S.TableCell 
+
+      <S.TableCell
         sx={{ gap: '5px' }}
         style={{ width: '50%' }}
       >
         <div>{chain}</div>
         <div style={{fontSize:'0.8em'}}>{midTitle}</div>
-        <div style={{fontSize:'0.8em'}}>{title}</div>
+        <div style={{fontSize:'0.8em', }}>{title}</div>
         <div className={styles.muted} style={{fontSize: '0.8em'}}>{typeTX}</div>
       </S.TableCell>
 
-      <S.TableCell 
+      <S.TableCell
         sx={{ gap: '5px' }}
         style={{ width: '20%' }}
       >
         <div className={styles.muted}>{blockNumber}</div>
       </S.TableCell>
-      
+
       <S.TableCell sx={{ gap: "5px" }}>
         {link &&
           <a
             href={link}
             target={'_blank'}
             rel='noopener noreferrer'
-            style={{color: 'white'}}
+            style={{color: theme.palette.mode === 'light' ? 'black' : 'white'}}
           >
             Blockexplorer
           </a>
         }
-        {!!detail && 
-          <S.TableCell 
+        {!!detail &&
+          <S.TableCell
             sx={{
               gap: '5px',
               cursor: 'pointer',
@@ -174,10 +176,10 @@ function Transaction({
               setDropDownBoxInit(false)
             }}
           >
-            More Information 
+            More Information
           </S.TableCell>
         }
-        {button && 
+        {button &&
           <ButtonMUI
             variant="contained"
             color="primary"

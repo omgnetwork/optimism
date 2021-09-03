@@ -41,7 +41,6 @@ function LayerSwitcher({ walletEnabled, isButton = false }) {
         variant="contained"
         sx={{
           textTransform: 'uppercase',
-          padding: '10px 20px',
           fontSize: '16px',
         }}
         >
@@ -66,7 +65,7 @@ function LayerSwitcher({ walletEnabled, isButton = false }) {
             <S.LayerLabel variant="body1"  component="span">
                 Layer
             </S.LayerLabel>
-            <S.LayerSwitch 
+            <S.LayerSwitch
               onClick={()=>{dispatchSetLayer(otherLayer)}}
             >
               <Typography
@@ -75,9 +74,9 @@ function LayerSwitcher({ walletEnabled, isButton = false }) {
                 component="span">
                   L1
               </Typography>
-              <Typography 
+              <Typography
                 className={layer === 'L2' ? 'active': ''}
-                variant="body1" 
+                variant="body1"
                 component="span">
                   L2
               </Typography>
@@ -90,7 +89,7 @@ function LayerSwitcher({ walletEnabled, isButton = false }) {
             </Box>
           </S.NetWorkStyle>
 
-          <S.ButtonStyle 
+          <S.ButtonStyle
             onClick={()=>{dispatchSetLayer(otherLayer)}}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
