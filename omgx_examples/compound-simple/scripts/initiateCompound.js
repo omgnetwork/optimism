@@ -115,6 +115,35 @@ async function main(){
 
 
     // Queuing the transaction that will initate the GovernorBravoDelegate contract
+
+    await timelock.queueTransaction(
+    governorBravo.address,
+    0,
+    '_initiate()',
+    initiateData,
+    eta
+    )
+    console.log('queued initiate');
+    console.log('execute initiate');
+    for(let i = 0; i < 15; i++ ){
+        await sleep(120 * 1000);
+        console.log(`Timestamp: ${await getTimestamp(env.L2_NODE_WEB3_URL, 28)}`);
+        try{
+            await timelock.executeTransaction(
+                governorBravo.address,
+                0,
+                '_initiate()',
+                initiateData,
+                eta
+            )
+            console.log('Executed initiate');
+            break;
+        }catch(error){
+            console.log("\n\n\n-----FAILED-----\n\n\n");
+            console.log(JSON.stringify(error));
+            console.log("\n\n\n-----RETRYING-----\n\n\n");
+        }
+    }
 }
 
 (async () =>{

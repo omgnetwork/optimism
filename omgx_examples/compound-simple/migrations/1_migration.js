@@ -16,6 +16,7 @@ async function  getTimestamp(){
   return timestamp;
 }
 
+
 module.exports = async function (deployer) {
 
   const accounts = await web3.eth.getAccounts();
@@ -29,7 +30,6 @@ module.exports = async function (deployer) {
 
   console.log('STARTING HERE')
   console.log(user)
-  
   // Deploy Comp
   await deployer.deploy(Comp, user)
   const comp = await Comp.deployed()
@@ -54,23 +54,24 @@ module.exports = async function (deployer) {
     governorBravoDelegate.address,
     10, // the duration of the voting period in blocks
     10, // the duration of the time between when a proposal is proposed and when the voting period starts
-    ethers.utils.parseEther('100000')
+    ethers.utils.parseEther('100000') // the votes necessary to make a proposal
   )
   const governorBravoDelegator = await GovernorBravoDelegator.deployed()
   console.log('deployed delegator')
 
   console.log('Queue setPendingAdmin');
 
-  const GovernorBravo = await GovernorBravoDelegate.at(
-    governorBravoDelegator.address
-  );
 
-  const eta = (await getTimestamp()) + 300; //wait for 300 seconds
-  
+
+  let eta = (await getTimestamp()) + 300;
   const setPendingAdminData = ethers.utils.defaultAbiCoder.encode( // the parameters for the setPendingAdmin function
     ['address'],
     [governorBravoDelegator.address]
     );
+
+  const governorBravo = await GovernorBravoDelegate.at(
+    governorBravoDelegator.address
+  );
 
   await timelock.queueTransaction(
     timelock.address,
@@ -78,24 +79,20 @@ module.exports = async function (deployer) {
     'setPendingAdmin(address)', // the function to be called
     setPendingAdminData,
     eta
-  )
+  );
+  console.log(`Time transaction was made: ${await getTimestamp()}`);
+  console.log(`Time at which transaction may be executed: ${eta}`);
 
-  console.log(`Time transaction was made: ${await getTimestamp()}`)
-  console.log(`Time at which transaction may be executed: ${eta}`)
-  
-  console.log(`Please be patient and wait for 300 seconds...`)
-
-  await sleep(300 * 1000)
-
+  await sleep(300 * 1000);
   for(let i = 0; i < 30; i++){
     console.log(`Attempt: ${i + 1}`)
-    console.log(`\tTimestamp: ${await getTimestamp()}`)
+    console.log(`\tTimestamp: ${await getTimestamp()}`);
     try{
       // Execute the transaction that will set the admin of Timelock to the GovernorBravoDelegator contract
       await timelock.executeTransaction(
         timelock.address,
         0,
-        'setPendingAdmin(address)',
+        'setPendingAdmin(address)', // the function to be called
         setPendingAdminData,
         eta
       );
@@ -111,6 +108,46 @@ module.exports = async function (deployer) {
     }
     await sleep(15 * 1000);
   }
-  GovernorBravo._initiate();
 
+    eta = (await getTimestamp()) + 300;
+    var initiateData = ethers.utils.defaultAbiCoder.encode( // parameters to initate the GovernorBravoDelegate contract
+    ['bytes'],
+    [[]]
+    );
+
+    console.log(`Current time: ${await getTimestamp()}`);
+    console.log(`Time at which transaction can be executed: ${(await getTimestamp()) + 300}`);
+
+    await timelock.queueTransaction(
+    governorBravo.address,
+    0,
+    '_initiate()',
+    initiateData,
+    eta
+    )
+    console.log('queued initiate');
+    console.log('execute initiate');
+    await sleep(300 * 1000);
+    for(let i = 0; i < 30; i++ ){
+        console.log(`Timestamp: ${await getTimestamp()}`);
+        try{
+            await timelock.executeTransaction(
+                governorBravo.address,
+                0,
+                '_initiate()',
+                initiateData,
+                eta
+            )
+            console.log('Executed initiate');
+            break;
+        }catch(error){
+          if(i === 29){
+            console.log("\tFailed. Please try again.\n");
+            return;
+          }
+            // console.log(error)
+            console.log("\tTransaction hasn't surpassed time lock\n");
+        }
+        await sleep(15 * 1000);
+    }
 }

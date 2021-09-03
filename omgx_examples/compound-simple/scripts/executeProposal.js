@@ -4,6 +4,7 @@ const GovernorBravoDelegate = require('../build-ovm/GovernorBravoDelegate.json')
 const GovernorBravoDelegator = require('../build-ovm/GovernorBravoDelegator.json');
 const Comp = require('../build-ovm/Comp.json');
 const addresses = require('../networks/rinkeby-l2.json');
+const BigNumber = require('bignumber.js');
 require('dotenv').config();
 
 const env = process.env;
@@ -61,45 +62,44 @@ async function main(){
         'Executed',
     ];
 
-    let addresses = [governorBravo.address]; // the address of the contract where the function will be called
-    let values = [0]; // the eth necessary to send to the contract above
-    let signatures = ['_setProposalThreshold(uint256)']; // the function that will carry out the proposal
-    let calldatas = [ethers.utils.defaultAbiCoder.encode( // the parameter for the above function
-        ['uint256'],
-        [DECIMALS * BigInt(65000)] // 65000 * 10^18
-    )];
-    let description = '#Changing Proposal Threshold to 65000 Comp'; // the description of the proposal
 
-    console.log(
-        'wallet1 current votes: ',
-        (await comp.getCurrentVotes(wallet1.address)).toString()
-    );
-
-    console.log(`Proposing`);
-
-
-
-    // submitting the proposal
-    await governorBravo.connect(wallet1).propose(
-    	addresses,
-    	values,
-    	signatures,
-    	calldatas,
-    	description
-    );
-    console.log()
-    sleep(15 * 1000);
     const proposalID = (await governorBravo.proposalCount())._hex;
     console.log(`Proposed. Proposal ID: ${proposalID}`);
+
+    console.log(`Executing Proposal`);
+    // DO THIS FOURTH
+    for(let i= 0; i < 30; i++){
+
+        console.log(`Attempt: ${i + 1}`);
+        try{
+            await governorBravo.execute(proposalID);
+            console.log('Success: Executed');
+            break;
+        }catch(error){
+            if(i == 29){
+                await governorBravo.cancel(proposalID);
+                console.log(`Proposal failed and has been canceled, please try again`);
+                console.log(error)
+                return;
+            }
+
+            console.log(`\tproposal can only be executed if it is queued`);
+        }
+        await sleep(15 * 1000);
+    }
+
+
+    let proposalCount = await governorBravo.proposalCount();
+    console.log(proposalCount.toString());
     // let proposal = await governorBravo.proposals(proposalID)
     // console.log(proposal);
-
-    console.log(`Block Number: ${await getBlockNumber(env.L2_NODE_WEB3_URL, 28)}`);
-    let state = await governorBravo.state(proposalID);
+    state = await governorBravo.state(proposalID);
     console.log('State is : ', proposalStates[state]);
-
-    console.log(`Waiting for voting delay.`);
-    await sleep(150 * 1000);
+    console.log(JSON.stringify(await governorBravo.getActions(proposalID)));
+    console.log('BlockNum : ', await l2_provider.getBlockNumber());
+    const proposalThreshold = BigInt(await governorBravo.proposalThreshold());
+    console.log('Proposal Threshold : ', proposalThreshold.toString());
+    console.log('proposalId : ', proposalID.toString());
 }
 
 (async () =>{

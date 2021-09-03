@@ -1,15 +1,3 @@
-- [DAO explained](#dao-explained)
-  * [Overview](#overview)
-    + [Token](#token)
-    + [Governor Bravo Delegate](#governor-bravo-delegate)
-    + [Governor Bravo Delegator](#governor-bravo-delegator)
-    + [Timelock](#timelock)
-  * [Deployment](#deployment)
-  * [Changes to Compound's Governance Contracts](#changes-to-compound-s-governance-contracts)
-  * [Testing Notes](#testing-notes)
-- [Deploying on Rinkeby-Boba Network and Initiating](#deploying-on-rinkeby-boba-network-and-initiating)
-  * [Submitting a Proposal, Voting, and Executing](#submitting-a-proposal--voting--and-executing)
-  
 # DAO explained
 
 ## Overview
@@ -74,11 +62,12 @@ In `GovernorBravoInterfaces.sol`, delete `GovernorAlpha` Interface:
 - MIN_VOTING_PERIOD in GovernorBravoDelegate.sol set to 0 to allow for timely testing
 -
 
+
 # Deploying on Rinkeby-Boba Network and Initiating
 
-Instructions for Deploying Compound Governance Protocol on Rinkeby-Boba.
 
-First create a `.env` file that follows the structure of `.env.example`. Then compile your contracts, which will also create the build artifacts in `build-ovm` folder.
+Instructions or Deploying Compound Governance Protocol on Rinkeby-Boba.
+First create a `.env` file that follows the structure of `.env.example`.
 
 ```bash
 $ yarn
@@ -86,29 +75,6 @@ $ yarn compile:ovm
 ```
 
 You should expect the following output:
-
-```bash
-yarn run v1.22.11
-$ truffle compile --config truffle-config-ovm.js
-
-Compiling your contracts...
-===========================
-> Compiling ./contracts/Comp.sol
-> Compiling ./contracts/GovernorBravoDelegate.sol
-> Compiling ./contracts/GovernorBravoDelegator.sol
-> Compiling ./contracts/GovernorBravoInterfaces.sol
-> Compiling ./contracts/SafeMath.sol
-> Compiling ./contracts/Timelock.sol
-
-> Artifacts written to optimism/omgx_examples/compound-simple/build-ovm
-> Compiled successfully using:
-   - solc: 0.5.16
-
-✨  Done in 10.05s.
-
-```
-
-Next, deploy the DAO to Boba with `yarn migrate:rinkeby_l2`. **THIS WILL TAKE TIME - AT LEAST 6 MINUTES** You should expect the following output:
 
 ```bash
 yarn run v1.22.10
@@ -134,13 +100,13 @@ STARTING HERE
 
    Replacing 'Comp'
    ----------------
-   > transaction hash:    0xebe659bbbdb9ba6be983dc297f979d2a36a827a282f524adb016977777924318
+   > transaction hash:    0xff48ed5d650f00e1cd4222a637a1b33b84303c8f90915183b4d76f4f00a9f214
    > Blocks: 0            Seconds: 0
-   > contract address:    0x7e5C11814DEfC1Adb8F8a9371334F7c9Fc4a3a7b
-   > block number:        22880
-   > block timestamp:     1630524555
+   > contract address:    0x286b85cAcc1dca2AdA813a72De696de141a99bE8
+   > block number:        23252
+   > block timestamp:     1630690954
    > account:             0x21A235cf690798ee052f54888297Ad8F46D3F389
-   > balance:             1.688172744618
+   > balance:             0.645055149168
    > gas used:            3979070 (0x3cb73e)
    > gas price:           0.015 gwei
    > value sent:          0 ETH
@@ -150,13 +116,13 @@ deployed comp
 
    Replacing 'Timelock'
    --------------------
-   > transaction hash:    0xcb4c208e5f45270ab47c24d63b9371306889e0486f1d3e56f36cd4c8167f9165
+   > transaction hash:    0xcd6784889f0d673b1490448117eff72b53f7c5c29cd00e5d9042a05f3e61eeb6
    > Blocks: 0            Seconds: 0
-   > contract address:    0x55D6151B519853aaF38A669b2248221B128E14B9
-   > block number:        22881
-   > block timestamp:     1630524555
+   > contract address:    0xC44D6745a1e0Fd5456646E0f05EE4704b283E6B0
+   > block number:        23253
+   > block timestamp:     1630690954
    > account:             0x21A235cf690798ee052f54888297Ad8F46D3F389
-   > balance:             1.676114244618
+   > balance:             0.632996649168
    > gas used:            3512614 (0x359926)
    > gas price:           0.015 gwei
    > value sent:          0 ETH
@@ -166,13 +132,13 @@ deployed timelock
 
    Replacing 'GovernorBravoDelegate'
    ---------------------------------
-   > transaction hash:    0x96048773ffa291828e157f69a0c218c1296af9ca112d370129483930a9bdb699
+   > transaction hash:    0xb0c26ff5fae425b5853bbb31b8ad9285a791589652f975da5d6f50ef5be2422a
    > Blocks: 0            Seconds: 0
-   > contract address:    0xe1004C6E7f490189F712441846031D76A38E5A49
-   > block number:        22882
-   > block timestamp:     1630524555
+   > contract address:    0x1a078ae5651591BA4A5c447D29eA68D44Bf30f62
+   > block number:        23254
+   > block timestamp:     1630690954
    > account:             0x21A235cf690798ee052f54888297Ad8F46D3F389
-   > balance:             1.664055744618
+   > balance:             0.620938149168
    > gas used:            8720274 (0x850f92)
    > gas price:           0.015 gwei
    > value sent:          0 ETH
@@ -182,133 +148,222 @@ deployed delegate
 
    Replacing 'GovernorBravoDelegator'
    ----------------------------------
-   > transaction hash:    0xf33626d5d9a31ef1fd0127a82c104a03924a19b9180db353b7237c66b062e36d
+   > transaction hash:    0x7447d9db393c5066f1c17946d19e9ee06dfcb4a1180d7e3bc4efda56b2c04144
    > Blocks: 0            Seconds: 0
-   > contract address:    0x15fFafE1b7060f6D61ea6Bed004721e2D5be7707
-   > block number:        22883
-   > block timestamp:     1630524555
+   > contract address:    0xCD7239aeCBc66b1A77D5b19e7CF00380fA9Bf529
+   > block number:        23255
+   > block timestamp:     1630690954
    > account:             0x21A235cf690798ee052f54888297Ad8F46D3F389
-   > balance:             1.651997244618
-   > gas used:            2046983 (0x1f3c07)
+   > balance:             0.608879649168
+   > gas used:            2044985 (0x1f3439)
    > gas price:           0.015 gwei
    > value sent:          0 ETH
-   > total cost:          0.000030704745 ETH
+   > total cost:          0.000030674775 ETH
 
 deployed delegator
 Queue setPendingAdmin
-Time transaction was made: 1630524555
-Time at which transaction may be executed: 1630524855
+Time transaction was made: 1630690954
+Time at which transaction may be executed: 1630691254
 Attempt: 1
-	Timestamp: 1630524555
+	Timestamp: 1630690954
+	Transaction hasn't surpassed time lock
+
+Attempt: 2
+	Timestamp: 1630691149
+	Transaction hasn't surpassed time lock
+
+Attempt: 3
+	Timestamp: 1630691149
+	Transaction hasn't surpassed time lock
+
+Attempt: 4
+	Timestamp: 1630691149
+	Transaction hasn't surpassed time lock
+
+Attempt: 5
+	Timestamp: 1630691149
+	Transaction hasn't surpassed time lock
+
+Attempt: 6
+	Timestamp: 1630691149
 	executed setPendingAdmin
+Current time: 1630691344
+Time at which transaction can be executed: 1630691644
+queued initiate
+execute initiate
+Timestamp: 1630691344
+	Transaction hasn't surpassed time lock
+
+Timestamp: 1630691539
+	Transaction hasn't surpassed time lock
+
+Timestamp: 1630691539
+	Transaction hasn't surpassed time lock
+
+Timestamp: 1630691539
+	Transaction hasn't surpassed time lock
+
+Timestamp: 1630691539
+Executed initiate
    > Saving artifacts
    -------------------------------------
-   > Total cost:      0.000273884115 ETH
+   > Total cost:      0.000273854145 ETH
 
 
 Summary
 =======
 > Total deployments:   4
-> Final cost:          0.000273884115 ETH
+> Final cost:          0.000273854145 ETH
 
 
-✨  Done in 320.22s.
+✨  Done in 768.54s.
 ```
 
-## Submitting a Proposal, Voting, and Executing
+# Using Compound Governance Protocol
+This section will guide you in delegating votes, submitting a poroposal, voting on it, queueing it and executing it. The files in the `scripts` folder can be used to accomplish all of these tasks and more.
 
-This section will guide you in submitting a proposal, voting on it, and executing it. The file `scripts/submitProposal.js` does all of this. The proposal that it will submit is one that reduces the number of votes necessary to submit a proposal to 65000.
 
-Running this script will take approximately 15 minutes.
+First paste the contract addresses, generated from the previous section, into the file `networks/rinkeby-l2.json`. Using the addresses above the file should look as follows.
+
+```json
+{
+"Comp":"0x286b85cAcc1dca2AdA813a72De696de141a99bE8",
+"Timelock":"0xC44D6745a1e0Fd5456646E0f05EE4704b283E6B0",
+"GovernorBravoDelegate":"0x1a078ae5651591BA4A5c447D29eA68D44Bf30f62",
+"GovernorBravoDelegator":"0xCD7239aeCBc66b1A77D5b19e7CF00380fA9Bf529"
+}
+```
+
+## Delegating Votes
+
+First Comp must be trasnferred to other entities so that they may have voting power. Then these entities can delegate votes.
+The file `scripts/delegateVotes.js` accomplishes this goal.
+Run the following command.
 
 ```bash
-$ yarn submitProposal
+$ yarn delegateVotes
 ```
-
 You should expect output similar to the following:
 
 ```bash
 yarn run v1.22.10
-$ node scripts/submitProposal.js
-Comp power:  10000000000000000000000000
-current votes:  10000000000000000000000000
+$ node scripts/delegateVotes.js
+Wallet1: Comp power:  10000000000000000000000000
+Wallet2: Comp power:  1000000000000000000000000
+Wallet3: Comp power:  1000000000000000000000000
+wallet1 current votes:  8000000000000000000000000
+wallet2 current votes:  1000000000000000000000000
+wallet3 current votes:  1000000000000000000000000
 Wait 5 minutes to make sure votes are processed.
-Proposing
+✨  Done in 405.07s.
+```
+
+## Submitting a Proposal
+
+After the voting power has been allocated proposals can be submitted. The proposal to be submitted by `scripts/submitProposal.js` is to reduce the number of votes necessary to make a proposal to 65000 votes.
+Run the following command.
+
+```bash
+$ yarn submitProposal
+```
+You should expect output similar to the following:
+```bash
+```
+
+## Casting Votes
+After a proposal has been submitted votes must cast during the voting period. If enough votes are in favor of the proposal, then the proposal can be queued and executed. Votes will be cast by `scripts/castVotes.js`.
+
+
+Run the following command.
+
+```bash
+$ yarn castVotes
+```
+You should expect output similar to the following:
+```bash
+yarn run v1.22.10
+$ node scripts/castVotes.js
+Proposed. Proposal ID: 0x03
+State of Proposal 0x03 is : Pending
 Casting Votes
 Attempt: 1
+	State of Proposal 0x03 is : Pending
 	Voting is closed
 
 Attempt: 2
+	State of Proposal 0x03 is : Pending
 	Voting is closed
 
 Attempt: 3
-	Voting is closed
+	State of Proposal 0x03 is : Active
+	Success: vote cast by wallet1
+	Success: vote cast by wallet2
+	Success: vote cast by wallet3
+Waiting for voting period to end.
+✨  Done in 206.16s.
+```
 
-Attempt: 4
-	Voting is closed
+## Queueing a Proposal
+After the voting period has ended a proposal can be queued if it has succeed, if it has recieved enough votes in favor. The proposal can be queued using `scripts/queueProposal.js`.
 
-Attempt: 5
-	Voting is closed
+Run the following command.
 
-Attempt: 6
-	Voting is closed
-
-Attempt: 7
-	Voting is closed
-
-Attempt: 8
-	Voting is closed
-
-Attempt: 9
-Success: vote cast
+```bash
+$ yarn queueProposal
+```
+You should expect output similar to the following:
+```bash
+yarn run v1.22.10
+$ node scripts/queueProposal.js
+Proposed. Proposal ID: 0x03
 Queuing Proposal
 Attempt: 1
-	proposal can only be queued if it is succeeded
-Attempt: 2
-	proposal can only be queued if it is succeeded
-Attempt: 3
-	proposal can only be queued if it is succeeded
-...
-
-Attempt: 20
-	proposal can only be queued if it is succeeded
-Attempt: 21
-	proposal can only be queued if it is succeeded
-Attempt: 22
 Success: Queued
+State is :  Queued
+✨  Done in 5.44s.
+
+```
+
+## Executing a Proposal
+The last step is to execute the proposal, this means that the proposal will take effect. This can only happen after the proposal has been queued.
+
+Run the following command.
+
+```bash
+$ yarn executeProposal
+```
+You should expect output similar to the following:
+```bash
+yarn run v1.22.10
+$ node scripts/executeProposal.js
+Proposed. Proposal ID: 0x03
 Executing Proposal
 Attempt: 1
 Success: Executed
-2
-[
-  BigNumber { _hex: '0x02', _isBigNumber: true },
-  '0x21A235cf690798ee052f54888297Ad8F46D3F389',
-  BigNumber { _hex: '0x612eb722', _isBigNumber: true },
-  BigNumber { _hex: '0x8c9598', _isBigNumber: true },
-  BigNumber { _hex: '0x8c95a2', _isBigNumber: true },
-  BigNumber { _hex: '0x084595161401484a000000', _isBigNumber: true },
-  BigNumber { _hex: '0x00', _isBigNumber: true },
-  BigNumber { _hex: '0x00', _isBigNumber: true },
-  false,
-  true,
-  id: BigNumber { _hex: '0x02', _isBigNumber: true },
-  proposer: '0x21A235cf690798ee052f54888297Ad8F46D3F389',
-  eta: BigNumber { _hex: '0x612eb722', _isBigNumber: true },
-  startBlock: BigNumber { _hex: '0x8c9598', _isBigNumber: true },
-  endBlock: BigNumber { _hex: '0x8c95a2', _isBigNumber: true },
-  forVotes: BigNumber { _hex: '0x084595161401484a000000', _isBigNumber: true },
-  againstVotes: BigNumber { _hex: '0x00', _isBigNumber: true },
-  abstainVotes: BigNumber { _hex: '0x00', _isBigNumber: true },
-  canceled: false,
-  executed: true
-]
+3
 State is :  Executed
-[["0x53E691925D847843D50F7864321651858197080F"],[{"type":"BigNumber","hex":"0x00"}],["_setProposalThreshold(uint256)"],["0x000000000000000000000000000000000000000000000dc3a8351f3d86a00000"]]
-Timestamp :  1630451490
-BlockNum :  22500
+[["0x19e824199b5B13D33561c85978560E82F3D07106"],[{"type":"BigNumber","hex":"0x00"}],["_setProposalThreshold(uint256)"],["0x000000000000000000000000000000000000000000000dc3a8351f3d86a00000"]]
+BlockNum :  23342
 Proposal Threshold :  65000000000000000000000
-proposalId :  0x02
-✨  Done in 611.37s.
+proposalId :  0x03
+✨  Done in 6.26s.
 ```
+Congratulations! You have successfuly executed a proposal on a Decentralized Autonomous Organization!
+
+## Canceling a Proposal
+If at any point you wish to cancel a proposal you can cancel it by using the proposal id. Only the entity that proposed a proposal can cancel the proposal. The proposal can be canceled with `scripts/cancelProposal.js`.
+
+In order to cancel a proposal first change line 33 of `scripts/cancelProposal.js`.
+
+```js
+const proposalID = 1; // proposal to cancel
+```
+
+Then run the following command.
+
+```bash
+$ yarn cancelProposal
+```
+
 
 
