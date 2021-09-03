@@ -12,6 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
+
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -20,19 +21,19 @@ import { transferDao } from 'actions/daoAction';
 
 import * as styles  from './daoModal.module.scss'
 
-import Modal from 'components/modal/Modal';
-import Button from 'components/button/Button';
-import Input from 'components/input/Input';
+import Modal from 'components/modal/Modal'
+import Button from 'components/button/Button'
+import Input from 'components/input/Input'
 
 function TransferDaoModal({ open }) {
 
-    const [recipient, setRecipient] = useState('');
-    const [amount, setAmount] = useState('');
+    const [recipient, setRecipient] = useState('')
+    const [amount, setAmount] = useState('')
     const dispatch = useDispatch()
 
     function handleClose() {
-        setRecipient('');
-        setAmount('');
+        setRecipient('')
+        setAmount('')
         dispatch(closeModal('transferDaoModal'))
     }
 
@@ -40,11 +41,11 @@ function TransferDaoModal({ open }) {
         let res = await dispatch(transferDao({recipient, amount}));
 
         if(res) {
-            dispatch(openAlert(`Boba transfer has been done`));
-            handleClose();
+            dispatch(openAlert(`Governance token transferred`))
+            handleClose()
         } else {
-            dispatch(openError(`Failed to tranfer boba`));
-            handleClose();
+            dispatch(openError(`Failed to transfer governance token`))
+            handleClose()
         }
     }
 

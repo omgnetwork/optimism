@@ -44,17 +44,16 @@ const ProposalAction = ({
 
     const onContractChange = (e) => {
 
-        let newContracts = contracts;
-        newContracts[index] = e.target.value;
-        setContract(e.target.value);
-        setContracts(newContracts);
+        let newContracts = contracts
+        newContracts[index] = e.target.value
+        setContract(e.target.value)
+        setContracts(newContracts)
 
         // resetting action on change of contract;
-        let newActions = actionList;
-        newActions[index] = "";
-        setAction("");
-        setActionList(newActions);
-
+        let newActions = actionList
+        newActions[index] = ""
+        setAction("")
+        setActionList(newActions)
 
         let newOptions = ['asdf', 'test'];
 
@@ -104,7 +103,6 @@ const ProposalAction = ({
         setCallData(utils.defaultAbiCoder.encode(paramTypes, params));
     }
 
-
     return <div className={styles.actionContainer}>
         <h4># {index + 1}</h4>
         <div className={styles.actionContent}>
@@ -113,7 +111,6 @@ const ProposalAction = ({
                     height: '30px',
                     borderRadius: '8px'
                 }}
-
                 value={contract}
                 onChange={(e) => { onContractChange(e) }}
             >
@@ -122,7 +119,6 @@ const ProposalAction = ({
                 <option value={delegate.address}>Governor Bravo Delegate</option>
                 <option value={timelock.address}>Timelock</option>
             </select>
-
 
             {options.length === 0 ? null : (
                 <select
@@ -139,6 +135,7 @@ const ProposalAction = ({
                     ))}
                 </select>
             )}
+
             {options.length > 0 && action ? params.map((p, pIndex) => {
                 const { name } = p;
 

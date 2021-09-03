@@ -46,8 +46,9 @@ function DAO() {
                 <div className={styles.action}>
                     <div className={styles.tranferContainer}>
                         <div className={styles.info}>
-                            <h3 className={styles.title}>{balance} BOBA</h3>
+                            <h3 className={styles.title}>{balance} Comp</h3>
                             <h4 className={styles.subTitle}>Wallet Balance</h4>
+                            <div className={styles.helpText}>Expanation Here - Help Text Help Text Help Text?</div>
                         </div>
                         <Button
                             type="primary"
@@ -60,12 +61,13 @@ function DAO() {
                                 borderRadius: '8px',
                                 alignSelf: 'center'
                             }}
-                        > Transfer Boba</Button>
+                        > Transfer Governance Token</Button>
                     </div>
                     <div className={styles.delegateCotainer}>
                         <div className={styles.info}>
                             <h3 className={styles.title}>{votes} Votes</h3>
                             <h4 className={styles.subTitle}>Voting Power</h4>
+                            <div className={styles.helpText}>Expanation Here - What does it mean to delegate Votes?</div>
                         </div>
                         <Button
                             type="primary"
@@ -79,7 +81,7 @@ function DAO() {
                                 alignSelf: 'center'
                             }}
 
-                        > Delegates Votes</Button>
+                        > Delegate Votes</Button>
                     </div>
                 </div>
                 <div className={styles.proposal}>
