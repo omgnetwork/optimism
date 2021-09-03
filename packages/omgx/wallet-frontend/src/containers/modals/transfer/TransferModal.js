@@ -99,7 +99,7 @@ function TransferModal ({ open, token }) {
           onChange={i => setRecipient(i.target.value)}
           fullWidth
           paste
-          sx={{fontSize: '50px', boxShadow: '-13px 15px 19px rgba(0, 0, 0, 0.15), inset 53px 36px 120px rgba(255, 255, 255, 0.06)', backgroundColor: 'rgba(9, 22, 43, 0.5)'}}
+          sx={{fontSize: '50px'}}
         />
 
         <Input

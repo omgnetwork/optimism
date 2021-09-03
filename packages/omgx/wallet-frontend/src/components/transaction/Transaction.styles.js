@@ -15,6 +15,7 @@ export const TableCell = styled(Box)`
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  word-break: break-all
 `;
 
 export const TableBody = styled(Box)`

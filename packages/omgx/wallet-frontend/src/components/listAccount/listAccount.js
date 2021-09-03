@@ -14,7 +14,7 @@ import EthereumIcon from 'components/icons/EthereumIcon'
 import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher'
 
 class ListAccount extends React.Component {
-  
+
   constructor(props) {
     super(props)
     const { token, chain, networkLayer, disabled } = this.props
@@ -94,7 +94,7 @@ class ListAccount extends React.Component {
                 <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div" sx={{fontWeight:"700"}}>
                   $ 1,556,43
                 </S.TextTableCell>
-              </S.TableCell> 
+              </S.TableCell>
             */}
 
               <S.TableCell
@@ -131,9 +131,8 @@ class ListAccount extends React.Component {
           <Fade in={dropDownBox}>
             <S.DropdownWrapper>
               {!enabled && chain === 'L1' &&
-                  <S.AccountAlertBox
-                  >
-                    <Typography variant="body2" component="p">
+                  <S.AccountAlertBox>
+                    <Typography variant="body2" component="p" sx={{flex: 2}}>
                       MetaMask is set to L2. To transact on L1, - SWITCH LAYER to L1
                     </Typography>
                     <LayerSwitcher isButton={true} />
@@ -142,7 +141,7 @@ class ListAccount extends React.Component {
 
               {!enabled && chain === 'L2' &&
                 <S.AccountAlertBox>
-                  <Typography variant="body2" component="p">
+                  <Typography variant="body2" component="p" sx={{flex: 2}}>
                     MetaMask is set to L1. To transact on L2, - SWITCH LAYER to L2
                   </Typography>
                   <LayerSwitcher isButton={true} />

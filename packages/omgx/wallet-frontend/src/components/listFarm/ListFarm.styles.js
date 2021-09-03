@@ -2,9 +2,9 @@ import { styled } from '@material-ui/core/styles'
 import { Box, Grid } from '@material-ui/core';
 
 export const Wrapper = styled(Box)(({ theme, ...props }) => ({
-  borderBottom: '1px solid #192537',
+  borderBottom: theme.palette.mode === 'light' ? '1px solid #c3c5c7' : '1px solid #192537',
   borderRadius: props.dropDownBox ? '8px' : '0',
-  background: props.dropDownBox ? '#142031' : '#0D182A',
+  background: props.dropDownBox ? theme.palette.background.dropdown : theme.palette.background.secondary,
   [theme.breakpoints.down('md')]: {
     padding: ' 30px 10px',
   },
@@ -27,7 +27,7 @@ export const DropdownWrapper = styled(Box)`
   width: 100%;
   padding: 16px;
   margin-top: 16px;
-  background-color: #0F1B2F;
+  background-color: ${props => props.theme.palette.background.secondary};
   border-radius: 12px;
   text-align: center;
 `;

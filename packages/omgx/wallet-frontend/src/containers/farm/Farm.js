@@ -174,9 +174,9 @@ class Farm extends React.Component {
 
         <Box sx={{ my: 3, width: '100%' }}>
           <Box sx={{ mb: 2 }}>
-            <Tabs 
+            <Tabs
               activeTab={value}
-              onClick={(t) => this.handleChange(null, t)} 
+              onClick={(t) => this.handleChange(null, t)}
               aria-label="basic tabs example"
               tabs={["L1 Liquidity Pool", "L2 Liquidity Pool"]}
             />
@@ -185,8 +185,8 @@ class Farm extends React.Component {
           {networkLayer === 'L2' && value === 'L1 Liquidity Pool' &&
             <S.LayerAlert>
               <Box className="info">
-                <AlertIcon /> 
-                <Typography 
+                <AlertIcon />
+                <Typography
                   sx={{wordBreak:'break-all', marginLeft: '10px'}}
                   variant="body1"
                   component="p"
@@ -202,9 +202,9 @@ class Farm extends React.Component {
             <S.LayerAlert>
               <Box className="info">
                 <AlertIcon />
-                <Typography 
+                <Typography
                   sx={{wordBreak:'break-all', marginLeft: '10px'}}
-                  variant="body1"
+                  variant="body2"
                   component="p"
                 >
                   Note: MetaMask is set to L1. To interact with the L2 liquidity pool, please switch MetaMask to L2.

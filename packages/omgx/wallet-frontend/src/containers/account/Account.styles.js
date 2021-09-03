@@ -15,7 +15,7 @@ export const TableHeading = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  backgroundColor: "rgba(255, 255, 255, 0.04);",
+  backgroundColor: theme.palette.background.secondary,
 
   [theme.breakpoints.down('md')]: {
     marginBottom: "5px",
@@ -36,7 +36,7 @@ export const AccountWrapper = styled(Box)(({ theme }) => ({
     backgroundColor: "transparent",
   },
   [theme.breakpoints.up('md')]: {
-    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    backgroundColor: theme.palette.background.secondary,
     borderRadius: "10px",
     padding: "20px",
   },
@@ -55,7 +55,7 @@ export const CardTag = styled(Card)(({ theme }) => ({
 
 export const CardContentTag = styled(CardContent)(({ theme }) => ({
   clipPath: 'polygon(0 0, 93% 0, 100% 100%, 0% 100%)',
-  backgroundColor: 'rgba(255, 255, 255, 0.04)',
+  backgroundColor: theme.palette.background.secondary,
   borderRadius: '6px',
   flex: 12,
   [theme.breakpoints.down('md')]: {

@@ -23,6 +23,7 @@ import {
   useMediaQuery
 } from '@material-ui/core';
 import { ReactComponent as CloseIcon } from './../../images/icons/close-modal.svg';
+// import CloseIcon  from '../icons/CloseIcon.js';
 import * as S from "./Modal.styles"
 import { useTheme } from '@emotion/react';
 

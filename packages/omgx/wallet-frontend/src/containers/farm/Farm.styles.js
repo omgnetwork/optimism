@@ -8,7 +8,7 @@ export const TableHeading = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  backgroundColor: "#0D182A",
+  background: theme.palette.background.secondary,
 
   [theme.breakpoints.down('md')]: {
     marginBottom: "5px",
@@ -27,10 +27,11 @@ export const LayerAlert = styled(Box)`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 30px;
   padding: 27px 50px;
   border-radius: 8px;
   margin: 20px 0px;
-  background: linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%);
+  background: ${props => props.theme.palette.background.secondary};
 
   .info {
     display: flex;

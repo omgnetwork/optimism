@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import {Typography, Box} from '@material-ui/core'
 
 export const HistoryContainer = styled.div`
-    background: linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%);
+    background: ${props => props.theme.palette.background.secondary};
     border-radius: 8px;
     margin-bottom: 20px;
 `;
@@ -19,7 +19,7 @@ export const TableHeadingItem = styled(Typography)`
   width: 20%;
   gap: 5px;
   text-align: flex-start;
-  color: rgba(255, 255, 255, 0.7);
+  opacity: 0.7;
 `;
 
 

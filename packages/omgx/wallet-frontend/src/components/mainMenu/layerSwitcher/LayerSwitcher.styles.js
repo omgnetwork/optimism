@@ -75,7 +75,7 @@ export const LayerSwitch = styled.div`
     padding: 2px 15px;
     border-radius: 16px;
 
-    &.active { 
+    &.active {
       color: #3c5dfc;
       background: white;
       padding: 2px 15px;
@@ -85,6 +85,6 @@ export const LayerSwitch = styled.div`
 
 export const LayerLabel = styled.div`
   margin: 0px 10px 0 17px;
-  color: rgba(255, 255, 255, 0.7);
+  opacity: 0.7;
   font-size: 16px;
 `;

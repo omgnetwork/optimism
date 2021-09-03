@@ -61,7 +61,12 @@ function App () {
         main: '#CCFF00',
       },
       background: {
-        default: light ? "#fff" : "#061122"
+        default: light ? "#fff" : "#061122",
+        secondary: light ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.04)',
+        dropdown: light ? '#dadada' : '#142031',
+        modal: light ? "#fff" : 'rgba(32, 29, 49, 0.8)',
+        modalTransparent: light ? "#fff" : 'transparent',
+        input: light ? "#fff" : "rgba(9, 22, 43, 0.5)"
       },
       neutral: {
         main: '#fff',
@@ -102,7 +107,7 @@ function App () {
         styleOverrides: {
           root: {
             background: light ? 'rgba(0,0,0,0.06)' : "rgba(255,255,255,0.06)",
-            borderRadius: 10,
+            // borderRadius: 10,
           },
         },
       },
@@ -114,8 +119,9 @@ function App () {
             boxShadow: "box-shadow: 0px 0px 7px rgba(73, 107, 239, 0.35)",
             minWidth: "0",
             "&.Mui-disabled": {
-              background: 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)',
-              color: 'rgba(255, 255, 255, 0.5)',
+              background: light ? 'transparent' : 'rgba(255, 255, 255, 0.04)',
+              color: light ? 'rgba(0, 0, 0, 0.5)' :'rgba(255, 255, 255, 0.5)',
+              border: light ? '1px solid rgba(0, 0, 0, 0.5)' : 'none',
             }
           },
         },
@@ -133,7 +139,7 @@ function App () {
           {
             props: { variant: 'outlined', color: 'primary' },
             style: {
-              color: '#fff',
+              color: light ? '#000' : '#fff',
               borderWidth: '1.4px',
               filter: "drop-shadow(0px 0px 7px rgba(73, 107, 239, 0.35))",
               "&:hover": {
@@ -149,6 +155,21 @@ function App () {
               "&:hover": {
                 opacity: 0.9,
                 transition: 'opacity 0.3s ease-in-out',
+              }
+            },
+          },
+          {
+            props: { variant: 'outlined', color: 'neutral' },
+            style: {
+              color: light ? "#000" : "#fff",
+              borderWidth: '1.4px',
+              borderColor: light ? "#000" : "#fff",
+              "&:hover": {
+                opacity: 0.9,
+                borderWidth: '1.4px',
+                transition: 'opacity 0.3s ease-in-out',
+                borderColor: light ? "#000" : "#fff",
+                boxShadow: 'inset 2px 2px 13px rgba(0, 0, 0, 0.15)',
               }
             },
           },

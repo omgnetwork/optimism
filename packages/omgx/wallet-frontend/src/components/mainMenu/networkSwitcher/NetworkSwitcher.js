@@ -62,7 +62,6 @@ function NetworkSwitcher({ walletEnabled }) {
 
 
     <S.WalletPickerContainer>
-
       <WrongNetworkModal
         open={wrongNetworkModalState}
         onClose={resetSelection}
@@ -71,7 +70,7 @@ function NetworkSwitcher({ walletEnabled }) {
       <S.WallerPickerWrapper>
         <S.Menu>
 
-          <S.NetWorkStyle 
+          <S.NetWorkStyle
             onClick={()=>{setShowAllNetworks(prev => !prev)}}
           >
             <NetworkIcon />
@@ -81,7 +80,6 @@ function NetworkSwitcher({ walletEnabled }) {
             <Box sx={{
               display: 'flex',
               margin: '10px 0 10px 20px',
-              color: 'white',
               alignItems: 'center',
               gap: 2
             }} >

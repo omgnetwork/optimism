@@ -54,9 +54,9 @@ function History () {
   const activeTab1 = useSelector(selectActiveHistoryTab1, isEqual)
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual)
-  
+
   //sort transactions by timeStamp
-  const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc') 
+  const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
   //'desc' or 'asc'
 
   const transactions = orderedTransactions.filter((i)=>{
@@ -109,7 +109,7 @@ function History () {
 
       <div className={styles.header}>
         <div className={styles.actions}>
-          <div style={{margin: '0px 10px'}}>Show period from </div>
+          <div style={{margin: '0px 10px', opacity: 0.7}}>Show period from </div>
           <DatePicker
             wrapperClassName={styles.datePickerInput}
             selected={startDate}
@@ -119,7 +119,7 @@ function History () {
             endDate={endDate}
           />
 
-          <div style={{margin: '0px 10px'}}>to </div>
+          <div style={{margin: '0px 10px', opacity: 0.7}}>to </div>
           <DatePicker
             wrapperClassName={styles.datePickerInput}
             selected={endDate}
@@ -149,12 +149,13 @@ function History () {
             />
           )}
 
-          {activeTab1 === 'Deposits' && <
-            Deposits
-            searchHistory={searchHistory}
-            transactions={transactions}
-            chainLink={chainLink}
-          />}
+          {activeTab1 === 'Deposits' &&
+            <Deposits
+              searchHistory={searchHistory}
+              transactions={transactions}
+              chainLink={chainLink}
+            />
+          }
 
           {activeTab1 === 'Exits' &&
             <Exits
