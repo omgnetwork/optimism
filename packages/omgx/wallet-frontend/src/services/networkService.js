@@ -1512,13 +1512,14 @@ class NetworkService {
       if (!res) return false
     }
 
-    updateSignatureStatus_exitTRAD(true)
     const tx = await this.L2StandardBridgeContract.withdraw(
       currencyAddress,
       parseUnits(value, decimals),
       this.L1GasLimit,
       utils.formatBytes32String(new Date().getTime().toString())
-    )    
+    )
+    //can close window now
+    updateSignatureStatus_exitTRAD(true)    
     await tx.wait()
 
     const [L2ToL1msgHash] = await this.watcher.getMessageHashesFromL2Tx(tx.hash)
