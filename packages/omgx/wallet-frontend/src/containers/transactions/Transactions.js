@@ -105,8 +105,8 @@ function Transactions({ searchHistory, transactions, chainLink }) {
                 }
               }
 
-              console.log("Details:",details)
-              console.log("i:",i)
+              //console.log("Details:",details)
+              //console.log("i:",i)
 
               return (
                 <Transaction

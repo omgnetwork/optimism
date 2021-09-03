@@ -22,7 +22,5 @@ export const TableBody = styled(Box)`
   align-items: flex-start;
   justify-content: flex-start;
   gap: 5px;
-  text-align: center;
-  background: grey;
-  border-radius: 8px;
+  text-align: left;
 `;

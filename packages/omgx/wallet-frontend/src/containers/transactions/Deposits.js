@@ -62,7 +62,6 @@ function Deposits({ searchHistory, transactions, chainLink }) {
   //if totalNumberOfPages === 0, set to one so we don't get the strange "page 1 of 0" display
   if (totalNumberOfPages === 0) totalNumberOfPages = 1
 
-
   return (
     <div className={styles.transactionSection}>
       <S.HistoryContainer>
@@ -70,8 +69,8 @@ function Deposits({ searchHistory, transactions, chainLink }) {
           currentPage={page}
           isLastPage={paginatedDeposits.length < PER_PAGE}
           totalPages={totalNumberOfPages}
-          onClickNext={() => setPage(page + 1)}
-          onClickBack={() => setPage(page - 1)}
+          onClickNext={()=>setPage(page + 1)}
+          onClickBack={()=>setPage(page - 1)}
         />
 
         <Grid item xs={12}>
@@ -101,11 +100,11 @@ function Deposits({ searchHistory, transactions, chainLink }) {
                   <Transaction
                     key={index}
                     link={chainLink(i)}
-                    title={truncate(i.hash, 8, 6, '...')}
+                    title={`Hash: ${i.hash}`}
                     midTitle={moment.unix(i.timeStamp).format('lll')}
                     blockNumber={`Block ${i.blockNumber}`}
                     chain={`L1->L2 Deposit`}
-                    typeTX={`${label}`}
+                    typeTX={`TX Type: ${label}`}
                     detail={null} 
                   />
                 )

@@ -60,7 +60,8 @@ function PendingTransaction() {
 
     //exit that is not final and we do not have a state root hash yet
     let pendingExitsStage0 = pending.filter((i) => {
-        if (!i.stateRoot.stateRootHash && i.exit.fastRelay) //this means it's very early - no stateRootHash yet
+        if (!i.stateRoot.stateRootHash && i.exit.fastRelay) 
+        //this means it's very early - no stateRootHash yet
             return true
         return false
     })
@@ -74,7 +75,8 @@ function PendingTransaction() {
 
     //exit that is not final, but we have a state root hash
     let pendingExitsStage1 = pending.filter((i) => {
-        if (i.stateRoot.stateRootHash && i.exit.fastRelay) //ok, we have a stateRootHash
+        if (i.stateRoot.stateRootHash && i.exit.fastRelay) 
+        //ok, we have a stateRootHash
             /*
             i.to !== null &&
             ( i.to.toLowerCase() === networkService.L2LPAddress.toLowerCase() ||
@@ -116,12 +118,20 @@ function PendingTransaction() {
         ...pendingExitsStage1
     ]
 
+    //let totalNumberOfPages = Math.ceil(pendingTransactions.length / PER_PAGE);
+
+    const startingIndex = page === 1 ? 0 : ((page - 1) * PER_PAGE);
+    const endingIndex = page * PER_PAGE;
+    const paginatedTransactions = pendingTransactions.slice(startingIndex, endingIndex);
+
     let totalNumberOfPages = Math.ceil(pendingTransactions.length / PER_PAGE);
+
+    //if totalNumberOfPages === 0, set to one so we don't get the strange "page 1 of 0" display
+    if (totalNumberOfPages === 0) totalNumberOfPages = 1
 
     console.log(['pendingTransactions', pendingTransactions])
 
     const currentNetwork = useSelector(selectNetwork());
-
     const nw = getAllNetworks();
 
     const chainLink = (item) => {
@@ -137,15 +147,25 @@ function PendingTransaction() {
         return '';
     }
 
+/*
+        <Pager
+          currentPage={page}
+          isLastPage={paginatedDeposits.length < PER_PAGE}
+          totalPages={totalNumberOfPages}
+          onClickNext={() => setPage(page + 1)}
+          onClickBack={() => setPage(page - 1)}
+        />
+*/
+
     return <S.AccountWrapper >
         <S.WrapperHeading>
             <Typography variant="h3" sx={{ opacity: "1.0", fontWeight: "700" }}>Pending Transactions</Typography>
             <Pager
                 currentPage={page}
-                isLastPage={pendingTransactions.length < PER_PAGE}
+                isLastPage={paginatedTransactions.length < PER_PAGE}
                 totalPages={totalNumberOfPages}
-                onClickNext={() => setPage(page + 1)}
-                onClickBack={() => setPage(page - 1)}
+                onClickNext={()=>setPage(page + 1)}
+                onClickBack={()=>setPage(page - 1)}
             />
         </S.WrapperHeading>
         
@@ -174,9 +194,10 @@ function PendingTransaction() {
         }
 
         {
-            pendingTransactions &&
-            !!pendingTransactions.length &&
-            pendingTransactions.map((i) => {
+            paginatedTransactions &&
+            paginatedTransactions.length > 0 &&
+            paginatedTransactions.map((i) => {
+                
                 console.log(i)
 
                 let completionTime = 'Not available'
@@ -185,6 +206,7 @@ function PendingTransaction() {
                     completionTime = moment.unix(i.completion).format('lll')
                 
                 let link = chainLink(i)
+                
                 return <Grid
                     key={i.hash}
                     container
