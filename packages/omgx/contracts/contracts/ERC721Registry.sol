@@ -11,7 +11,7 @@ contract ERC721Registry {
         address[] addresses;
     }
 
-    mapping (address => wallet) public locations;
+    mapping (address => wallet) private locations;
 
     /**
      * @dev Emitted when a NFT contract addresss is added to a user's wallet.
