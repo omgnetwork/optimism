@@ -13,10 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-export function selectSignatureStatus_exitL2LP (state) {
-  return state.signature.exitL2LPsigned
+export function selectSignatureStatus_exitLP (state) {
+  return state.signature.exitLPsigned
 }
 
 export function selectSignatureStatus_exitTRAD (state) {
   return state.signature.exitTRADsigned
+}
+
+export function selectSignatureStatus_depositLP (state) {
+  return state.signature.depositLPsigned
+}
+
+export function selectSignatureStatus_depositTRAD (state) {
+  return state.signature.depositTRADsigned
 }

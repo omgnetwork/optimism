@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { depositETHL2, depositErc20 } from 'actions/networkAction'
@@ -10,6 +10,7 @@ import Input from 'components/input/Input'
 import GasPicker from 'components/gaspicker/GasPicker'
 
 import { selectLoading } from 'selectors/loadingSelector'
+import { selectSignatureStatus_depositTRAD } from 'selectors/signatureSelector'
 import { amountToUsd, logAmount, powAmount } from 'util/amountConvert'
 
 import * as S from './InputSteps.styles'
@@ -25,7 +26,8 @@ function InputStep({ handleClose, token }) {
   const [gasPrice, setGasPrice] = useState()
   const [selectedSpeed, setSelectedSpeed] = useState('normal')
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
-  const lookupPrice = useSelector(selectLookupPrice);
+  const signatureStatus = useSelector(selectSignatureStatus_depositTRAD)
+  const lookupPrice = useSelector(selectLookupPrice)
 
   async function doDeposit() {
 
@@ -75,7 +77,18 @@ function InputStep({ handleClose, token }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  useEffect(() => {
+    if (signatureStatus && depositLoading) {
+      //we are all set - can close the window
+      //transaction has been sent and signed
+      handleClose()
+    }
+  }, [ signatureStatus, depositLoading ])
+
   console.log("Loading:", depositLoading)
+
+  let buttonLabel_1 = 'CANCEL'
+  if( depositLoading ) buttonLabel_1 = 'CLOSE WINDOW'
 
   return (
     <>
@@ -104,16 +117,13 @@ function InputStep({ handleClose, token }) {
       {renderGasPicker}
 
       <S.WrapperActions>
-        {!isMobile ? (
-          <Button
-            onClick={handleClose}
-            color="neutral"
-            size="large"
-          >
-            Cancel
-          </Button>
-        ) : null}
-
+        <Button
+          onClick={handleClose}
+          color="neutral"
+          size="large"
+        >
+          {buttonLabel_1}
+        </Button>
         <Button
           onClick={doDeposit}
           color='primary'

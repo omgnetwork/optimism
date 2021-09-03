@@ -16,17 +16,16 @@ limitations under the License. */
 import React, { useState } from 'react';
 import {Button as ButtonMUI, Box, Grid, Typography } from '@material-ui/core'
 import * as S from './Account.styles'
-import { useSelector } from 'react-redux';
-import { isEqual, orderBy } from 'lodash';
-import { selectTransactions } from 'selectors/transactionSelector';
-import { selectNetwork } from 'selectors/setupSelector';
-import { getAllNetworks } from 'util/masterConfig';
-import networkService from 'services/networkService';
-import AlertIcon from 'components/icons/AlertIcon';
-import moment from 'moment';
-import LinkIcon from 'components/icons/LinkIcon';
-import Pager from 'components/pager/Pager';
-import { useTheme } from '@emotion/react';
+import { useSelector } from 'react-redux'
+import { isEqual, orderBy } from 'lodash'
+import { selectTransactions } from 'selectors/transactionSelector'
+import { selectNetwork } from 'selectors/setupSelector'
+import { getAllNetworks } from 'util/masterConfig'
+
+import AlertIcon from 'components/icons/AlertIcon'
+import moment from 'moment'
+import Pager from 'components/pager/Pager'
+import { useTheme } from '@emotion/react'
 
 const PER_PAGE = 3;
 

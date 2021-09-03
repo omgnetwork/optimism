@@ -22,8 +22,11 @@ import Input from 'components/input/Input'
 
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectLookupPrice } from 'selectors/lookupSelector'
+import { selectSignatureStatus_depositLP } from 'selectors/signatureSelector'
+
 import networkService from 'services/networkService'
 import { powAmount, logAmount, amountToUsd } from 'util/amountConvert'
 import * as S from './InputSteps.styles'
@@ -39,7 +42,8 @@ function InputStepFast({ handleClose, token }) {
 
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
   const approvalLoading = useSelector(selectLoading(['APPROVE/CREATE']))
-  const lookupPrice = useSelector(selectLookupPrice);
+  const lookupPrice = useSelector(selectLookupPrice)
+  const signatureStatus = useSelector(selectSignatureStatus_depositLP)
 
   function setAmount(value) {
     if (
@@ -131,16 +135,27 @@ function InputStepFast({ handleClose, token }) {
     }
   }, [token])
 
+  useEffect(() => {
+    if (signatureStatus && depositLoading) {
+      //we are all set - can close the window
+      //transaction has been sent and signed
+      handleClose()
+    }
+  }, [ signatureStatus, depositLoading ])
+
   const label = 'There is a ' + feeRate + '% fee.'
 
-  let buttonLabel = 'Deposit'
+  let buttonLabel_1 = 'CANCEL'
+  if( depositLoading || approvalLoading ) buttonLabel_1 = 'CLOSE WINDOW'
+
+  let buttonLabel_2 = 'Deposit'
 
   if(depositLoading) {
-    buttonLabel = "Depositing..."
+    buttonLabel_2 = "Depositing..."
   } else if (approvalLoading) {
-    buttonLabel = "Approving..."
+    buttonLabel_2 = "Approving..."
   }
-
+  
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -183,16 +198,20 @@ function InputStepFast({ handleClose, token }) {
         </Typography>
       )}
 
+      {(depositLoading || approvalLoading) && (
+        <Typography variant="body2" sx={{mt: 2, color: 'green'}}>
+          This window will automatically close when your transaction has been signed and submitted.
+        </Typography>
+      )}
+
       <S.WrapperActions>
-        {!isMobile ? (
-          <Button
-            onClick={handleClose}
-            color="neutral"
-            size="large"
-          >
-            Cancel
-          </Button>
-        ) : null}
+        <Button
+          onClick={handleClose}
+          color="neutral"
+          size="large"
+        >
+          {buttonLabel_1}
+        </Button>
         <Button
           onClick={doDeposit}
           color='primary'
@@ -205,7 +224,7 @@ function InputStepFast({ handleClose, token }) {
           fullWidth={isMobile}
           newStyle
         >
-          {buttonLabel}
+          {buttonLabel_2}
         </Button>
       </S.WrapperActions>
     </>

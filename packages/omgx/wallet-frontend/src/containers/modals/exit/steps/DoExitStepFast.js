@@ -21,7 +21,7 @@ import { depositL2LP } from 'actions/networkAction'
 import { openAlert, openError } from 'actions/uiAction'
 
 import { selectLoading } from 'selectors/loadingSelector'
-import { selectSignatureStatus_exitL2LP } from 'selectors/signatureSelector'
+import { selectSignatureStatus_exitLP } from 'selectors/signatureSelector'
 import { selectLookupPrice } from 'selectors/lookupSelector'
 
 import Button from 'components/button/Button'
@@ -45,7 +45,7 @@ function DoExitStepFast({ handleClose, token }) {
 
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
   const lookupPrice = useSelector(selectLookupPrice)
-  const signatureStatus = useSelector(selectSignatureStatus_exitL2LP)
+  const signatureStatus = useSelector(selectSignatureStatus_exitLP)
 
   function setAmount(value) {
     if (

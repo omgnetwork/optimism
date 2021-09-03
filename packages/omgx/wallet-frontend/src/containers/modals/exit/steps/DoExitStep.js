@@ -20,7 +20,7 @@ import { useTheme } from '@emotion/react'
 
 import { Typography, useMediaQuery } from '@material-ui/core'
 
-import { exitOMGX } from 'actions/networkAction'
+import { exitBOBA } from 'actions/networkAction'
 import { openAlert, openError } from 'actions/uiAction'
 
 import Button from 'components/button/Button'
@@ -46,7 +46,7 @@ function DoExitStep({ handleClose, token }) {
 
   async function doExit() {
 
-    let res = await dispatch(exitOMGX(token.address, value))
+    let res = await dispatch(exitBOBA(token.address, value))
 
     //person will receive ETH on the L1, not oETH
     let currencyL1 = token.symbol

@@ -15,12 +15,18 @@ limitations under the License. */
 
 import store from 'store';
 
-export async function updateSignatureStatus_exitL2LP ( sigStatus ) {
-  const state = store.getState()
-  store.dispatch({type: 'EXIT/L2LP/SIGNED',payload: sigStatus})
+export async function updateSignatureStatus_exitLP ( sigStatus ) {
+  store.dispatch({type: 'EXIT/LP/SIGNED',payload: sigStatus})
 }
 
 export async function updateSignatureStatus_exitTRAD ( sigStatus ) {
-  const state = store.getState()
   store.dispatch({type: 'EXIT/TRAD/SIGNED',payload: sigStatus})
+}
+
+export async function updateSignatureStatus_depositLP ( sigStatus ) {
+  store.dispatch({type: 'DEPOSIT/LP/SIGNED',payload: sigStatus})
+}
+
+export async function updateSignatureStatus_depositTRAD ( sigStatus ) {
+  store.dispatch({type: 'DEPOSIT/TRAD/SIGNED',payload: sigStatus})
 }
