@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useState} from 'react'
 import { ReactComponent as Logo } from './../../images/logo-boba.svg'
 import * as S from "./MainMenu.styles"
 import { Link } from 'react-router-dom'
@@ -11,6 +11,7 @@ import WalletAddress from 'components/walletAddress/WalletAddress'
 import { makeStyles } from '@material-ui/styles'
 import { ReactComponent as CloseIcon } from './../../images/icons/close-modal.svg'
 import { ReactComponent as NavIcon } from './../../images/icons/nav-collapsed.svg'
+import ThemeSwitcher from './themeSwitcher/ThemeSwitcher'
 
 const useStyles = makeStyles({
   root: {
@@ -19,19 +20,11 @@ const useStyles = makeStyles({
   },
 });
 
-function MainMenu ({ pageDisplay, handleSetPage }) {
-  const themeFromLocalStorage = localStorage.getItem('theme');
-  const [light, setLight] = useState(themeFromLocalStorage === 'light');
+function MainMenu ({ light, setLight, pageDisplay, handleSetPage }) {
   const [ open, setOpen ] = useState(false);
-
   const classes = useStyles()
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-  useEffect(() => {
-    localStorage.setItem('theme', light ? 'light' : 'dark');
-  }, [light]);
 
   return (
     <>
@@ -74,7 +67,7 @@ function MainMenu ({ pageDisplay, handleSetPage }) {
           <NetworkSwitcher />
           <LayerSwitcher />
           <MenuItems pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
-          {/* <ThemeSwitcher light={light} setLight={setLight} /> */}
+          <ThemeSwitcher light={light} setLight={setLight} />
         </S.Menu>
       )}
     </>

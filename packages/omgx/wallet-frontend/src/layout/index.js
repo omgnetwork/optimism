@@ -242,7 +242,7 @@ function App () {
                       // <Route {...routeProps} enabled={enabled} onEnable={setEnabled} key={routeProps.path} />
                     })
                   } */}
-                  <Route exact path="/" component={enabled ? Home : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />} />
+                  <Route exact path="/" component={enabled ? () => <Home light={light} setLight={setLight} /> : ()=> <WalletPicker enabled={enabled} onEnable={setEnabled} />} />
                 </Switch>
               </Suspense>
 

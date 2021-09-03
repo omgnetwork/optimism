@@ -57,7 +57,7 @@ import FarmWrapper from 'containers/farm/FarmWrapper'
 
 const POLL_INTERVAL = 5000 //milliseconds
 
-function Home () {
+function Home ({ light, setLight }) {
 
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -143,7 +143,7 @@ function Home () {
       />
 
       <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
-          <MainMenu pageDisplay={pageDisplay} handleSetPage={handleSetPage} />
+          <MainMenu pageDisplay={pageDisplay} handleSetPage={handleSetPage} light={light} setLight={setLight} />
           {/* The Top SubMenu Bar, non-mobile */}
 
           {/* <div className={styles.secondtab}>
