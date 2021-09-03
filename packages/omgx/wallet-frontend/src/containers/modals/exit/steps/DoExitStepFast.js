@@ -14,18 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React, { useState, useEffect } from 'react'
+
 import { useDispatch, useSelector } from 'react-redux'
+
 import { depositL2LP } from 'actions/networkAction'
 import { openAlert, openError } from 'actions/uiAction'
+
 import { selectLoading } from 'selectors/loadingSelector'
+import { selectSignatureStatus_exitL2LP } from 'selectors/signatureSelector'
+import { selectLookupPrice } from 'selectors/lookupSelector'
 
 import Button from 'components/button/Button'
+import Input from 'components/input/Input'
 
 import { amountToUsd, logAmount, powAmount } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
-import Input from 'components/input/Input'
-import { selectLookupPrice } from 'selectors/lookupSelector'
 import { Typography, useMediaQuery } from '@material-ui/core'
 import { useTheme } from '@emotion/react'
 import * as S from './DoExitSteps.styles'
@@ -40,7 +44,8 @@ function DoExitStepFast({ handleClose, token }) {
   const [disabledSubmit, setDisabledSubmit] = useState(true)
 
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
-  const lookupPrice = useSelector(selectLookupPrice);
+  const lookupPrice = useSelector(selectLookupPrice)
+  const signatureStatus = useSelector(selectSignatureStatus_exitL2LP)
 
   function setAmount(value) {
     if (
@@ -77,8 +82,8 @@ function DoExitStepFast({ handleClose, token }) {
 
     if (res) {
       dispatch(openAlert(`${token.symbol} was deposited into the L2 liquidity pool.
-        You will receive ${receivableAmount(value)} ${currencyL1} on L1.`));
-      handleClose();
+        You will receive ${receivableAmount(value)} ${currencyL1} on L1.`))
+      handleClose()
     } else {
       dispatch(openError(`Failed to fast exit funds from L2`));
     }
@@ -94,14 +99,26 @@ function DoExitStepFast({ handleClose, token }) {
         setFeeRate(feeRate)
       })
     }
-  }, [token])
+  }, [ token ])
+
+  useEffect(() => {
+    if (signatureStatus && exitLoading) {
+      //we are all set - can close the window
+      //transaction has been sent and signed
+      handleClose()
+    }
+  }, [ signatureStatus, exitLoading ])
 
   const label = 'There is a ' + feeRate + '% fee.'
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
+  let buttonLabel = 'CANCEL'
+  if( exitLoading ) buttonLabel = 'CLOSE WINDOW'
 
   return (
     <>
+
       <Typography variant="h2" sx={{fontWeight: 700, mb: 1}}>
         Fast Exit
       </Typography>
@@ -151,28 +168,32 @@ function DoExitStepFast({ handleClose, token }) {
         </Typography>
       )}
 
+      {exitLoading && (
+        <Typography variant="body2" sx={{mt: 2, color: 'green'}}>
+          This window will automatically close when your transaction has been signed and submitted.
+        </Typography>
+      )}
+
       <S.WrapperActions>
-        {!isMobile ? (
           <Button
             onClick={handleClose}
-            color="neutral"
-            size="large"
+            color='neutral'
+            size='large'
           >
-            Cancel
+            {buttonLabel}
           </Button>
-        ) : null}
           <Button
             onClick={doExit}
             color='primary'
-            variant="contained"
+            variant='contained'
             loading={exitLoading}
             tooltip='Your exit is still pending. Please wait for confirmation.'
             disabled={disabledSubmit}
             triggerTime={new Date()}
             fullWidth={isMobile}
-            size="large"
+            size='large'
           >
-            Exit
+            Exit L2
           </Button>
       </S.WrapperActions>
     </>

@@ -14,6 +14,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+//import { useDispatch } from 'react-redux'
+
 import { parseUnits, parseEther } from '@ethersproject/units'
 import { Watcher } from '@eth-optimism/watcher'
 
@@ -33,6 +35,11 @@ import {
   addNFTContract,
   getNFTContracts,
 } from 'actions/nftAction'
+
+import {
+  updateSignatureStatus_exitL2LP,
+  updateSignatureStatus_exitTRAD
+} from 'actions/signAction'
 
 import { WebWalletError } from 'services/errorService'
 
@@ -1481,6 +1488,8 @@ class NetworkService {
   //updated
   async exitOMGX(currencyAddress, value) {
 
+    updateSignatureStatus_exitTRAD(false)
+
     const allowance = await this.checkAllowance(
       currencyAddress,
       this.L2StandardBridgeAddress
@@ -1503,12 +1512,13 @@ class NetworkService {
       if (!res) return false
     }
 
+    updateSignatureStatus_exitTRAD(true)
     const tx = await this.L2StandardBridgeContract.withdraw(
       currencyAddress,
       parseUnits(value, decimals),
       this.L1GasLimit,
       utils.formatBytes32String(new Date().getTime().toString())
-    )
+    )    
     await tx.wait()
 
     const [L2ToL1msgHash] = await this.watcher.getMessageHashesFromL2Tx(tx.hash)
@@ -1881,6 +1891,8 @@ class NetworkService {
   /**************************************************************/
   async depositL2LP(currencyAddress, depositAmount_string) {
 
+    updateSignatureStatus_exitL2LP(false)
+
     const L2ERC20Contract = new ethers.Contract(
       currencyAddress,
       L2ERC20Json.abi,
@@ -1891,8 +1903,6 @@ class NetworkService {
       this.account,
       this.L2LPAddress
     )
-
-    //const decimals = await L2ERC20Contract.decimals()
 
     let depositAmount_BN = new BN(depositAmount_string)
 
@@ -1909,6 +1919,9 @@ class NetworkService {
       depositAmount_string,
       currencyAddress
     )
+
+    updateSignatureStatus_exitL2LP(true)
+    //so at this point the tx has been submitted, and we are waiting...
     await depositTX.wait()
 
     // Waiting for the response from L1
@@ -1924,97 +1937,6 @@ class NetworkService {
 
     return L1Receipt
   }
-
-  // async getPriorityTokens() {
-  //   try {
-
-  //     return priorityTokens.map((token) => {
-
-  //       let L1 = ''
-  //       let L2 = ''
-
-  //       if (token.symbol === 'ETH') {
-  //         L1 = this.L1_ETH_Address
-  //         L2 = this.L2_ETH_Address
-  //       } else {
-  //         L1 = this.tokenAddresses[token.symbol].L1
-  //         L2 = this.tokenAddresses[token.symbol].L2
-  //       }
-
-  //       return {
-  //         symbol: token.symbol,
-  //         icon: token.icon,
-  //         name: token.name,
-  //         L1,
-  //         L2,
-  //       }
-
-  //     })
-
-  //   } catch (error) {
-  //     return error
-  //   }
-  // }
-
-  // async getSwapTokens() {
-  //   try {
-
-  //     return swapTokens.map((token) => {
-
-  //       let L1 = ''
-  //       let L2 = ''
-
-  //       if (token.symbol === 'ETH') {
-  //         L1 = this.L1_ETH_Address
-  //         L2 = this.L2_ETH_Address
-  //       } else {
-  //         L1 = this.tokenAddresses[token.symbol].L1
-  //         L2 = this.tokenAddresses[token.symbol].L2
-  //       }
-
-  //       return {
-  //         symbol: token.symbol,
-  //         icon: token.icon,
-  //         name: token.name,
-  //         L1,
-  //         L2,
-  //       }
-  //     })
-
-  //   } catch (error) {
-  //     return error
-  //   }
-  // }
-
-  // async getDropdownTokens() {
-  //   try {
-
-  //     return dropdownTokens.map((token) => {
-
-  //       let L1 = ''
-  //       let L2 = ''
-
-  //       if (token.symbol === 'ETH') {
-  //         L1 = this.L1_ETH_Address
-  //         L2 = this.L2_ETH_Address
-  //       } else {
-  //         L1 = this.tokenAddresses[token.symbol].L1
-  //         L2 = this.tokenAddresses[token.symbol].L2
-  //       }
-
-  //       return {
-  //         symbol: token.symbol,
-  //         icon: token.icon,
-  //         name: token.name,
-  //         L1,
-  //         L2,
-  //       }
-  //     })
-
-  //   } catch (error) {
-  //     return error
-  //   }
-  // }
 
   async fetchLookUpPrice(params) {
     try {

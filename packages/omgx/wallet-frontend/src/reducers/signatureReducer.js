@@ -13,26 +13,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-const initialLoadingState = {};
+import { keyBy } from 'lodash'
 
-function loadingReducer (state = initialLoadingState, action) {
-  
-  const segments = action.type.split('/')
-  const requestName = `${segments[0]}/${segments[1]}`
-  const requestState = segments[2]
+const initialState = {
+  exitL2LPsigned: false,
+  exitTRADsigned: false
+}
 
-  if (
-    requestState !== 'REQUEST' &&
-    requestState !== 'SUCCESS' &&
-    requestState !== 'ERROR'
-  ) {
-    return state;
-  }
-
-  return {
-    ...state,
-    [requestName]: requestState === 'REQUEST'
+function signatureReducer (state = initialState, action) {
+  switch (action.type) {
+    case 'EXIT/L2LP/SIGNED':
+      console.log('exitL2LPsigned:',action.payload)
+      return {
+        ...state,
+        exitL2LPsigned: action.payload
+      }
+      case 'EXIT/TRAD/SIGNED':
+      console.log('exitTRADsigned:',action.payload)
+      return {
+        ...state,
+        exitTRADsigned: action.payload
+      }
+    default:
+      return state;
   }
 }
 
-export default loadingReducer
+export default signatureReducer;

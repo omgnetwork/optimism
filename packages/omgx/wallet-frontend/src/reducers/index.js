@@ -31,11 +31,13 @@ import setupReducer from './setupReducer';
 import notificationReducer from './notificationReducer';
 import farmReduer from './farmReducer';
 import lookupReducer from './lookupReducer';
+import signatureReducer from './signatureReducer';
 
 const rootReducer = combineReducers({
   loading: loadingReducer,
   deposit: depositReducer,
   transaction: transactionReducer,
+  signature: signatureReducer,
   status: statusReducer,
   balance: balanceReducer,
   exit: exitReducer,

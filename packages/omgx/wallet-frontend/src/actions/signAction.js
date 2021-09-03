@@ -13,26 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-const initialLoadingState = {};
+import store from 'store';
 
-function loadingReducer (state = initialLoadingState, action) {
-  
-  const segments = action.type.split('/')
-  const requestName = `${segments[0]}/${segments[1]}`
-  const requestState = segments[2]
-
-  if (
-    requestState !== 'REQUEST' &&
-    requestState !== 'SUCCESS' &&
-    requestState !== 'ERROR'
-  ) {
-    return state;
-  }
-
-  return {
-    ...state,
-    [requestName]: requestState === 'REQUEST'
-  }
+export async function updateSignatureStatus_exitL2LP ( sigStatus ) {
+  const state = store.getState()
+  store.dispatch({type: 'EXIT/L2LP/SIGNED',payload: sigStatus})
 }
 
-export default loadingReducer
+export async function updateSignatureStatus_exitTRAD ( sigStatus ) {
+  const state = store.getState()
+  store.dispatch({type: 'EXIT/TRAD/SIGNED',payload: sigStatus})
+}
