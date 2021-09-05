@@ -28,8 +28,6 @@ import { getToken } from 'actions/tokenAction'
 import {
   addNFT,
   getNFTs,
-  addNFTFactory,
-  getNFTFactories,
   addNFTContract,
   getNFTContracts,
 } from 'actions/nftAction'
@@ -157,18 +155,14 @@ class NetworkService {
       console.log('chainChanged')
       localStorage.setItem('changeChain', true)
       window.location.reload()
-      // window.location.href = `?change_chain`
     })
   }
 
-  async mintAndSendNFT(receiverAddress, contractAddress, ownerName, tokenURI, type) {
+  async mintAndSendNFT(receiverAddress, contractAddress, tokenURI) {
 
     try {
 
-      let meta = ownerName + '#' + Date.now().toString() + '#' + tokenURI + '#' + type
-
-      console.log('meta:', meta)
-      console.log('receiverAddress:', receiverAddress)
+      let meta = Date.now().toString() + '#' + tokenURI + '#'
 
       const contract = new ethers.Contract(
         contractAddress,
@@ -191,17 +185,19 @@ class NetworkService {
         this.L2Provider
       )
 
+      //what types of NFTs does this address already own? 
       const addresses = await registry.lookupAddress(
         receiverAddress
       )
 
-      console.log("the receiver's NFT contract addresses:", addresses)
-
+      //console.log("the receiver's NFT contract addresses:", addresses)
+      
+      //the receiverAddress already knows about this contract
       const alreadyHaveAddresss = addresses.find((str) => str.toLowerCase() === contractAddress.toLowerCase())
 
       if (alreadyHaveAddresss) {
         //we are done - no need to double register addresss
-        console.log('done - no need to double register address')
+        console.log('Done - no need to double register address')
       } else {
         //register address for the recipiant
         let reg = await registry.connect(
@@ -210,7 +206,7 @@ class NetworkService {
           receiverAddress,
           contractAddress
         )
-        console.log("Reg:",reg)
+        //console.log("Reg:",reg)
         console.log(`Contract registered in recipient's wallet`)
       }
 
@@ -221,79 +217,14 @@ class NetworkService {
     }
   }
 
-  async addNFTFactoryNS( address ) {
-
-    let contract = new ethers.Contract(
-      address,
-      L2ERC721Json.abi,
-      this.L2Provider
-    )
-
-    let haveRights = false
-
-    try {
-
-      let owner = await contract.owner()
-      owner = owner.toLowerCase()
-
-      if ( this.account.toLowerCase() === owner )
-        haveRights = true
-
-      let nftName = await contract.name()
-      let nftSymbol = await contract.symbol()
-      let genesis = await contract.getGenesis()
-
-      let genesisContractAddress = genesis[0]
-
-      if( genesisContractAddress === '0x0000000000000000000000000000000000000000') {
-        //special case - this is the default NFT factory....
-        genesisContractAddress = this.ERC721Address
-      }
-
-      let simpleAddress = '0x0000000000000000000000000000000000000042'
-      let feeRecipient = simpleAddress
-
-      if( genesisContractAddress !== simpleAddress) {
-        //this is a derived NFT
-        //wallet address of whomever owns the parent
-        const genesisContract = new ethers.Contract(
-          genesisContractAddress,
-          L2ERC721Json.abi,
-          this.L2Provider
-        )
-        feeRecipient = await genesisContract.owner()
-      }
-
-      addNFTFactory({
-        name: nftName,
-        symbol: nftSymbol,
-        owner,
-        layer: 'L2',
-        address,
-        originAddress: genesis[0],
-        originID: genesis[1],
-        originChain: genesis[2],
-        originFeeRecipient: feeRecipient,
-        haveRights
-      })
-
-    } catch (error) {
-      console.log("addNFTFactoryNS cache is stale or bad address:", error)
-    }
-
-  }
-
-  async deployNewNFTContract(
+  async deployNFTContract(
       nftSymbol,
-      nftName,
-      oriAddress,
-      oriID,
-      oriChain)
+      nftName)
   {
 
     try {
 
-      console.log("Deploying new NFT factory")
+      console.log("Deploying NFT Contract")
 
       let Factory__L2ERC721 = new ContractFactory(
         L2ERC721Json.abi,
@@ -305,16 +236,31 @@ class NetworkService {
         nftSymbol,
         nftName,
         BigNumber.from(String(0)), //starting index for the tokenIDs
-        oriAddress,
-        oriID,
-        oriChain
+        '0x0000000000000000000000000000000000000042',
+        'simple',
+        'boba_L2'
       )
 
       await contract.deployTransaction.wait()
+      console.log('New NFT ERC721 contract deployed to:', contract.address)
 
-      this.addNFTFactoryNS( contract.address )
+      const registry = new ethers.Contract(
+        this.ERC721RegAddress,
+        L2ERC721RegJson.abi,
+        this.L2Provider
+      )
 
-      console.log('New NFT ERC721 deployed to:', contract.address)
+      //register address for the contract owner
+      let reg = await registry.connect(
+        this.provider.getSigner()
+      ).registerAddress(
+        this.account,
+        contract.address
+      )
+      console.log(`New NFT ERC721 contract registered in Boba NFT registry`)
+
+      //addNFTContract({address: contract.address})
+      //this will get picked up automatically from the blockchain
 
       return true
     } catch (error) {
@@ -562,20 +508,20 @@ class NetworkService {
       )
 
       //this one is always there...
-      await addNFTContract(this.ERC721Contract.address)
+      //await addNFTContract(this.ERC721Contract.address)
 
       //yes, this looks weird, but think before you change it...
       //there may be some in the cache, and this makes sure we get them all, and if not,
       //we at least have the basic one
-      const NFTcontracts = Object.values(await getNFTContracts())
+      //const NFTcontracts = Object.values(await getNFTContracts())
 
       //Add factories based on cached contract addresses
       //this information is also used for the balance lookup
-      for(var i = 0; i < NFTcontracts.length; i++) {
-        const address = NFTcontracts[i]
-        console.log("Adding NFT contract:",address)
-        this.addNFTFactoryNS( address )
-      }
+      //for(var i = 0; i < NFTcontracts.length; i++) {
+      // const address = NFTcontracts[i]
+      //  console.log("Adding NFT contract:",address)
+      //  this.addNFTFactoryNS( address )
+      //}
 
       this.watcher = new Watcher({
         l1: {
@@ -772,22 +718,6 @@ class NetworkService {
     } 
   }
 
-
-    
-  //   console.log("MetaMask: Trying to add ", chainParam)
-    
-  //   // connect to the wallet
-  //   this.provider = new ethers.providers.Web3Provider(window.ethereum)
-  //   let res = await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
-
-  //   if( res === null ){
-  //     console.log("MetaMask - Added new RPC")
-  //   } else {
-  //     console.log("MetaMask - Error adding new RPC: ", res)
-  //   }
-    
-  // }
-
   async getTransactions() {
 
     // NOT SUPPORTED on LOCAL
@@ -946,52 +876,74 @@ class NetworkService {
 
   }
 
+  //goal is to find your NFTs and NFT contracts based on local cache and registry data 
   async fetchNFTs() {
 
-    /*
-      Metacomment on how this is coded:
-      Is it messy? Yes.
-      Does it use arrow functions well? No.
-      Is it elegant? No.
-      Is it hard to maintain and understand? Yes.
-      Does it work? Yes.
-    */
+    //the current list of contracts we know about
+    //based in part on the cache and anything we recently generated in this session
+    //console.log("NFTContracts 1:",await getNFTContracts())
 
-    //console.log('fetchNFTs')
+    let NFTContracts = Object.entries(await getNFTContracts())
+    //console.log("Step 1 - NFTContracts:",NFTContracts)
 
-    //the current list of factories we know about
-    //based in part on the cahce, and anything we recently generated in this session
-    let NFTfactories = Object.entries(await getNFTFactories())
+    //list of NFT contract addresses we know about, locally
+    const localCache = NFTContracts.map(item => {
+      return item[0].toLowerCase()
+    })
 
-    //list of NFT factory addresses we know about, locally
-    const localCache = NFTfactories.map(item => {return item[0].toLowerCase()})
+    //console.log("Step 2 - localCache addresses:",localCache)
 
-    //the user's blockchain NFT registry
-    const registry = new ethers.Contract(this.ERC721RegAddress,L2ERC721RegJson.abi,this.L2Provider)
+    //the Boba NFT registry
+    const registry = new ethers.Contract(
+      this.ERC721RegAddress,
+      L2ERC721RegJson.abi,
+      this.L2Provider
+    )
+    
+    //This account's NFT contract addresses in that registry
     const addresses = await registry.lookupAddress(this.account)
-    //console.log("Blockchain NFT wallet:", addresses)
+    //console.log("Step 3 - Blockchain NFT wallet addresses:", addresses)
 
-    //make sure we have all the factories relevant to this user
+    //make sure we have all the contracts relevant to this user
     for(let i = 0; i < addresses.length; i++) {
-      const newAddress = addresses[i]
-      var inCache = (localCache.indexOf(newAddress.toLowerCase()) > -1)
+      const address = addresses[i]
+      var inCache = (localCache.indexOf(address.toLowerCase()) > -1)
       if(!inCache) {
-        console.log("Found a new NFT contract:",newAddress)
-        await addNFTContract( newAddress )
-        this.addNFTFactoryNS( newAddress )
+        console.log("Found a new NFT contract - adding:",address)
+        //Add to local NFT contracts structure
+        const contract = new ethers.Contract(
+          address,
+          L2ERC721Json.abi,
+          this.L2Provider
+        )
+
+        //always the same, no need to have in the loop
+        let nftName = await contract.name()
+        let nftSymbol = await contract.symbol()
+        let owner = await contract.owner()
+
+        const newContract = {
+          name: nftName,
+          symbol: nftSymbol,
+          owner: owner.toLowerCase(), 
+          address,
+        }
+
+        console.log("newContract just added:",newContract)
+
+        await addNFTContract( newContract )
       }
     }
 
     //How many NFTs do you have right now?
     let numberOfNFTS = 0
 
-    //need to call this again because it might have changed since the iniital call
-    NFTfactories = Object.entries(await getNFTFactories())
+    NFTContracts = Object.entries(await getNFTContracts())
 
-    for(let i = 0; i < NFTfactories.length; i++) {
+    for(let i = 0; i < NFTContracts.length; i++) {
 
       let contract = new ethers.Contract(
-        NFTfactories[i][1].address,
+        NFTContracts[i][1].address,
         L2ERC721Json.abi,
         this.L2Provider
       )
@@ -1000,22 +952,6 @@ class NetworkService {
       const balance = await contract.connect(
         this.L2Provider
       ).balanceOf(this.account)
-
-      const rights = NFTfactories[i][1].haveRights
-      //console.log("NFT Rights:", rights)
-
-      let owner = await contract.owner()
-      owner = owner.toLowerCase()
-
-      if ( this.account.toLowerCase() === owner && rights === false ) {
-        //we need to give rights
-        //haveRights = true
-        //ToDo
-      } else if ( this.account.toLowerCase() !== owner && rights === true ) {
-        //we need to remove rights
-        //haveRights = false
-        //ToDo
-      }
 
       numberOfNFTS = numberOfNFTS + Number(balance.toString())
 
@@ -1029,9 +965,9 @@ class NetworkService {
 
       console.log('NFT change - need to add one or more NFTs')
 
-      for(let i = 0; i < NFTfactories.length; i++) {
+      for(let i = 0; i < NFTContracts.length; i++) {
 
-        const address = NFTfactories[i][1].address
+        const address = NFTContracts[i][1].address
 
         const contract = new ethers.Contract(
           address,
@@ -1046,27 +982,6 @@ class NetworkService {
         //always the same, no need to have in the loop
         let nftName = await contract.name()
         let nftSymbol = await contract.symbol()
-        let genesis = await contract.getGenesis()
-        let feeRecipient = '0x0000000000000000000000000000000000000042'
-
-        let genesisContractAddress = genesis[0]
-
-        if( genesisContractAddress === '0x0000000000000000000000000000000000000000') {
-          //special case - this is just the default NFT factory....
-          genesisContractAddress = this.ERC721Address
-        }
-
-        if( genesisContractAddress !== '0x0000000000000000000000000000000000000042') {
-          const genesisContract = new ethers.Contract(
-            genesisContractAddress,
-            L2ERC721Json.abi,
-            this.L2Provider
-          )
-          //console.log("genesisContract:", genesisContract)
-
-          feeRecipient = await genesisContract.owner()
-          //console.log("NFT feeRecipient:", feeRecipient)
-        }
 
         //can have more than 1 per contract
         for (let i = 0; i < Number(balance.toString()); i++) {
@@ -1081,15 +996,10 @@ class NetworkService {
           )
 
           const nftMeta = await contract.getTokenURI(tokenID)
+          
           const meta = nftMeta.split('#')
-          const time = new Date(parseInt(meta[1]))
-
-          let type = 0
-          //new flavor of NFT has type field
-          //default to zero for old NFTs
-          if(meta.length === 4) {
-            type = parseInt(meta[3])
-          }
+          
+          const time = new Date(parseInt(meta[0]))
 
           const mintedTime = String(
               time.toLocaleString('en-US', {
@@ -1106,28 +1016,19 @@ class NetworkService {
 
           const NFT = {
             UUID,
-            owner: meta[0],
             mintedTime,
-            url: meta[2],
+            url: meta[1],
             tokenID,
             name: nftName,
             symbol: nftSymbol,
             address,
-            originAddress: genesis[0],
-            originID: genesis[1],
-            originChain: genesis[2],
-            originFeeRecipient: feeRecipient,
-            type
           }
 
-          await addNFT( NFT)
+          await addNFT( NFT )
 
         }
-
       }
-
     }
-
   }
 
   async addTokenList() {

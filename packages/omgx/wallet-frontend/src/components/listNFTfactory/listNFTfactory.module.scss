@@ -3,11 +3,13 @@
 $dropDownHeight: 92px;
 
 .ListNFT {
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  
+  box-shadow: white 0px 0px 9px 0px;
   border-radius: 5px;
   margin-top: 10px;
   padding: 10px;
-  border: 1px solid $green;
+  border: 1px solid $gray4;
+  background: white;
 
   .topContainer {
     cursor: pointer;
@@ -32,12 +34,12 @@ $dropDownHeight: 92px;
       justify-content: flex-start;
       align-items: flex-start;
       padding: 10px;
-      padding-left: 0px;
+      padding-left: 10px;
       min-width: 250px;
     }
     .Table3 {
       display: flex;
-      padding: 10px;
+      width: 120px;
       justify-content: center;
       align-items: center;
     }
@@ -46,23 +48,17 @@ $dropDownHeight: 92px;
   .dropDownContainer {
     animation: openDropDown 1s;
     overflow: hidden;
-    background-color: #152132;
     display: flex;
-    padding-top: 10px;
     flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
+    padding-top: 10px;
   }
 
   .closeDropDown {
     height: 0px;
     animation: closeDropDown 1s;
     overflow: hidden;
-    background-color: #152132;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
   }
 
   .dropDownInit {
@@ -73,9 +69,12 @@ $dropDownHeight: 92px;
   .boxContainer {
     display: flex;
     flex-direction: column;
-    width: 90%;
-    padding: 0px;
+    padding: 8px;
     margin: 8px;
+    justify-content: flex-start;
+    align-items: center;
+    border-radius: 8px;
+    background: #565656;
   }
 
   .boxOrigin {
@@ -118,15 +117,14 @@ $dropDownHeight: 92px;
 
   /*************************/
   .BasicText {
-    font-size: 1em;
+    font-size: 0.9em;
     font-weight: 700;
+    color: $gray3;
   }
 
-  .BasicLightText {
+  .BasicTextLight {
     font-size: 0.7em;
-    font-weight: 700;
     color: $gray4;
-    padding-top: 2px;
   }
 
   .LargeBlueText {
@@ -138,11 +136,11 @@ $dropDownHeight: 92px;
   .LinkText {
     font-size: 1em;
     font-weight: 700;
-    color: $green;
+    color: $gray4;
   }
 
   .LinkButton {
-    color: $green;
+    color: $gray4;
   }
   /************************/
 
@@ -150,7 +148,6 @@ $dropDownHeight: 92px;
     border-radius: 10px;
     width: 100px !important;
     flex: none;
-    color: white;
     padding-top: 10px;
     padding-bottom: 10px;
   }
@@ -159,7 +156,6 @@ $dropDownHeight: 92px;
     border-radius: 10px;
     width: calc(100% - 30px);
     flex: none;
-    color: white;
     padding-top: 10px;
     padding-bottom: 10px;
   }

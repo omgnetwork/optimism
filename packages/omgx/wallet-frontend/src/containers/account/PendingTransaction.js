@@ -130,7 +130,7 @@ function PendingTransaction() {
     //if totalNumberOfPages === 0, set to one so we don't get the strange "page 1 of 0" display
     if (totalNumberOfPages === 0) totalNumberOfPages = 1
 
-    console.log(['pendingTransactions', pendingTransactions])
+    //console.log(['pendingTransactions', pendingTransactions])
 
     const currentNetwork = useSelector(selectNetwork());
     const nw = getAllNetworks();
@@ -148,16 +148,6 @@ function PendingTransaction() {
         }
         return '';
     }
-
-/*
-        <Pager
-          currentPage={page}
-          isLastPage={paginatedDeposits.length < PER_PAGE}
-          totalPages={totalNumberOfPages}
-          onClickNext={() => setPage(page + 1)}
-          onClickBack={() => setPage(page - 1)}
-        />
-*/
 
     return <S.AccountWrapper >
         <S.WrapperHeading>
