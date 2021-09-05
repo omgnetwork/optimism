@@ -16,6 +16,15 @@ export const sequencerAddress = process.env.SEQUENCER_ADDRESS
 export const proposerAddress = process.env.PROPOSER_ADDRESS
 export const fastRelayerAddress = process.env.FAST_RELAYER_ADDRESS
 
+// export const deployerPrivateKey = process.env.DEPLOYER_PRIVATE_KEY
+export const l1StandardAddress = process.env.L1_STANDARD_BRIDGE_ADDRESS
+export const l1MessengerAddress = process.env.L1_MESSENGER_ADDRESS
+export const l1FastMessengerAddress = process.env.L1_FAST_MESSENGER_ADDRESS
+export const l2StandardAddress = '0x4200000000000000000000000000000000000010'
+export const l2MessengerAddress = '0x4200000000000000000000000000000000000007'
+
+export const blockFetchRange = parseInt(process.env.BLOCK_FETCH_RANGE, 10) || 100
+
 export const walletPKey = process.env.WALLET_PRIVATE_KEY
 export const l2GasLimit = process.env.L2_GAS_LIMIT
 

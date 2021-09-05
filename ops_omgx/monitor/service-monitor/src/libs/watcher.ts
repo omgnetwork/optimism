@@ -35,7 +35,7 @@ export class Watcher {
 
   public async getL1TransactionReceipt (
     l2ToL1MsgHash: string,
-    pollForPending: boolean = true
+    pollForPending: boolean = true,
   ): Promise<TransactionReceipt> {
     logger.debug(' Calling getL1TransactionReceipt')
     return this.getTransactionReceipt(this.l1, l2ToL1MsgHash, pollForPending)
@@ -43,7 +43,7 @@ export class Watcher {
 
   public async getL2TransactionReceipt (
     l1ToL2MsgHash: string,
-    pollForPending: boolean = true
+    pollForPending: boolean = true,
   ): Promise<TransactionReceipt> {
     logger.debug('Calling getL2TransactionReceipt')
     return this.getTransactionReceipt(this.l2, l1ToL2MsgHash, pollForPending)
@@ -51,7 +51,7 @@ export class Watcher {
 
   public async getMessageHashesFromTx (
     layer: Layer,
-    txHash: string
+    txHash: string,
   ): Promise<string[]> {
 
     const receipt = await layer.provider.getTransactionReceipt(txHash)
@@ -63,16 +63,16 @@ export class Watcher {
 
     const msgHashes = []
 
-    logger.debug('Interate over ' + receipt.logs.length + ' of logs for txHash ' + txHash)
+    // logger.debug('Interate over ' + receipt.logs.length + ' of logs for txHash ' + txHash)
     for (const log of receipt.logs) {
-      logger.debug('log.address', { address: log.address, messengerAddress: layer.messengerAddress })
+      // logger.debug('log.address', { address: log.address, messengerAddress: layer.messengerAddress })
       if (
         log.address === layer.messengerAddress &&
         log.topics[0] === ethers.utils.id('SentMessage(bytes)')
       ) {
         const [message] = ethers.utils.defaultAbiCoder.decode(
           ['bytes'],
-          log.data
+          log.data,
         )
         msgHashes.push(ethers.utils.solidityKeccak256(['bytes'], [message]))
       }
@@ -83,19 +83,19 @@ export class Watcher {
   public async getTransactionReceipt (
     layer: Layer,
     msgHash: string,
-    pollForPending: boolean = true
+    pollForPending: boolean = true,
   ): Promise<TransactionReceipt> {
 
-    logger.debug('Watcher::getTransactionReceipt')
+    // logger.debug('Watcher::getTransactionReceipt')
 
     const blockNumber = await layer.provider.getBlockNumber()
     const startingBlock = Math.max(blockNumber - this.NUM_BLOCKS_TO_FETCH, 0)
 
-    logger.debug('Layer:', { layer })
+    // logger.debug('Layer:', { layer })
 
-    logger.debug('Address: ' + layer.messengerAddress)
-    logger.debug('topic: ' + ethers.utils.id(`RelayedMessage(bytes32)`))
-    logger.debug('fromBlock: ' + startingBlock)
+    // logger.debug('Address: ' + layer.messengerAddress)
+    // logger.debug('topic: ' + ethers.utils.id(`RelayedMessage(bytes32)`))
+    // logger.debug('fromBlock: ' + startingBlock)
 
     const filter = {
       address: layer.messengerAddress,
@@ -104,16 +104,17 @@ export class Watcher {
     }
 
     const logs = await layer.provider.getLogs(filter)
-    logger.debug('Looking for: ' + msgHash)
-    // logger.debug("Current logs:", logs)
+    // logger.debug('Looking for: ' + msgHash)
+    // logger.debug('Current logs:', logs)
 
     const matches = logs.filter((log: any) => log.data === msgHash)
+    // logger.debug('matched: ', matches)
 
     // Message was relayed in the past
     if (matches.length > 0) {
       if (matches.length > 1) {
         throw Error(
-          ' Found multiple transactions relaying the same message hash.'
+          ' Found multiple transactions relaying the same message hash.',
         )
       }
       return layer.provider.getTransactionReceipt(matches[0].transactionHash)
@@ -125,7 +126,7 @@ export class Watcher {
 
     // Message has yet to be relayed, poll until it is found
     return new Promise(async (resolve, reject) => {
-      logger.debug('Watcher polling::layer.provider.getTransactionReceipt pre filter')
+      // logger.debug('Watcher polling::layer.provider.getTransactionReceipt pre filter')
 
       // check timeout
       const timeout = setTimeout(() => {
@@ -135,10 +136,10 @@ export class Watcher {
 
       // listener that triggers on filter event
       layer.provider.on(filter, async (log: any) => {
-        logger.debug('Watcher polling::layer.provider.getTransactionReceipt post filter')
-        logger.debug(log)
+        // logger.debug('Watcher polling::layer.provider.getTransactionReceipt post filter')
+        // logger.debug(log)
         if (log.data === msgHash) {
-          logger.debug('FOUND')
+          // logger.debug('FOUND')
           clearTimeout(timeout)
           try {
             const txReceipt = await layer.provider.getTransactionReceipt(log.transactionHash)

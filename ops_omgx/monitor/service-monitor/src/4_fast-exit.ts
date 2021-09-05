@@ -27,7 +27,7 @@ const getL2ETHGateway = (wallet: Wallet) => {
   const OVM_ETH = new Contract(
     configs.addressOvmEth,
     getContractInterface('OVM_ETH') as any,
-    wallet
+    wallet,
   )
   return OVM_ETH
 }
@@ -41,7 +41,7 @@ export const fastExit = async () => {
   const L2LiquidityPool = new Contract(
     configs.l2PoolAddress,
     L2LiquidityPoolJson.abi,
-    l2Wallet
+    l2Wallet,
   )
 
   // const L2DepositedERC20 = new Contract(
@@ -68,7 +68,7 @@ export const fastExit = async () => {
   const approveL2TX = await L2ETHGateway.connect(l2Wallet).approve(
     L2LiquidityPool.address,
     fastExitAmount,
-    { gasLimit: configs.l2GasLimit }
+    { gasLimit: configs.l2GasLimit },
   )
   await approveL2TX.wait()
   logger.info('Approve TX... Done')
@@ -79,9 +79,9 @@ export const fastExit = async () => {
     L2LiquidityPool.connect(l2Wallet).clientDepositL2(
       fastExitAmount,
       L2ETHGateway.address,
-      { gasLimit: configs.l2GasLimit }
+      { gasLimit: configs.l2GasLimit },
     ),
-    Direction.L2ToL1
+    Direction.L2ToL1,
   )
   logger.info('Cross Domain Fast Exit...Done')
 
@@ -96,3 +96,5 @@ export const fastExit = async () => {
     // l2ERCBalance: utils.formatEther(l2ERCBalanceAfter),
   })
 }
+
+fastExit().catch(logger.error)

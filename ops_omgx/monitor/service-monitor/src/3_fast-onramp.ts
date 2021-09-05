@@ -30,7 +30,7 @@ export const fastOnRamp = async () => {
   const L1LiquidityPool = new Contract(
     configs.l1PoolAddress,
     L1LiquidityPoolJson.abi,
-    l1Wallet
+    l1Wallet,
   )
 
   const depositAmount = utils.parseEther(configs.dummyEthAmount)
@@ -51,7 +51,7 @@ export const fastOnRamp = async () => {
       '0x0000000000000000000000000000000000000000',
       { value: depositAmount },
     ),
-    Direction.L1ToL2
+    Direction.L1ToL2,
   )
 
   const l1BalanceAfter = await l1Provider.getBalance(l1Wallet.getAddress())

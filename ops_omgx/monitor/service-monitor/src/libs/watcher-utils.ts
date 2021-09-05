@@ -10,12 +10,12 @@ import logger from '../logger'
 export const initWatcher = async (
   l1Provider: JsonRpcProvider,
   l2Provider: JsonRpcProvider,
-  AddressManager: Contract
+  AddressManager: Contract,
 ) => {
 
   // const l1MessengerAddress = '0xF10EEfC14eB5b7885Ea9F7A631a21c7a82cf5D76'
   const l1MessengerAddress = await AddressManager.getAddress('Proxy__OVM_L1CrossDomainMessenger')
-  logger.info('l1MessengerAddress: ' + l1MessengerAddress)
+  // logger.info('l1MessengerAddress: ' + l1MessengerAddress)
 
   return new Watcher({
     l1: {
@@ -37,7 +37,7 @@ export const initFastWatcher = async (
 
   // const l1MessengerAddress = '0xF296F4ca6A5725F55EdF1C67F80204871E65F87d'
   const l1MessengerAddress = await AddressManager.getAddress('OVM_L1CrossDomainMessengerFast')
-  logger.info('l1FastMessengerAddress: ' + l1MessengerAddress)
+  // logger.info('l1FastMessengerAddress: ' + l1MessengerAddress)
 
   return new Watcher({
     l1: {
@@ -65,7 +65,7 @@ export enum Direction {
 export const waitForXDomainTransaction = async (
   watcher: Watcher,
   tx: Promise<TransactionResponse> | TransactionResponse,
-  direction: Direction
+  direction: Direction,
 ): Promise<CrossDomainMessagePair> => {
 
   // await it if needed

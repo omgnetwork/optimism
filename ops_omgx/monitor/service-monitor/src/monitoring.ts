@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import abiDecoder from 'abi-decoder'
 import web3 from 'web3'
+import { BigNumber } from 'ethers'
 import {
   TransactionReceipt,
   TransactionResponse,
@@ -47,7 +48,7 @@ const logError = (message: string, key: string, extra = {}) => {
 
 const checkNetwork = (
   l1Provider: WebSocketProvider,
-  l2Provider: WebSocketProvider
+  l2Provider: WebSocketProvider,
 ) => {
   let result = true
   if (!l1Provider || l1Provider._websocket.readyState !== 1) {
@@ -70,9 +71,9 @@ const checkNetwork = (
 const logBalance = (
   provider: WebSocketProvider,
   blockNumber: number,
-  networkName: configs.OMGXNetwork
+  networkName: configs.OMGXNetwork,
 ) => {
-  let promiseData: Promise<unknown>[]
+  let promiseData: Promise<BigNumber>[]
   if (networkName === configs.OMGXNetwork.L1) {
     promiseData = [
       provider.getBalance(configs.l1PoolAddress),
@@ -148,18 +149,18 @@ const logTransaction = (
   socket: WebSocketProvider,
   trans: TransactionResponse,
   networkName: configs.OMGXNetwork,
-  metadata = {}
+  metadata = {},
 ) => {
   // check from/to address is pool address
   const poolAddress =
     networkName === configs.OMGXNetwork.L1
       ? configs.l1PoolAddress
       : configs.l2PoolAddress
-  logger.debug({
-    from: trans.from,
-    to: trans.to,
-    poolAddress,
-  })
+  // logger.debug({
+  //   from: trans.from,
+  //   to: trans.to,
+  //   poolAddress,
+  // })
   if (trans.from !== poolAddress && trans.to !== poolAddress) {
     return
   }
@@ -192,14 +193,14 @@ const logTransaction = (
     .catch(
       logError('Error while getting transaction receipt', 'transaction', {
         ...metadata,
-      })
+      }),
     )
 }
 
 const logData = (
   socket: WebSocketProvider,
   blockNumber: string,
-  networkName: configs.OMGXNetwork
+  networkName: configs.OMGXNetwork,
 ) => {
   const poolAddress =
     networkName === configs.OMGXNetwork.L1
@@ -232,7 +233,7 @@ const onConnected = (networkName: configs.OMGXNetwork) => {
 
 const onError = (
   networkName: configs.OMGXNetwork,
-  provider: WebSocketProvider
+  provider: WebSocketProvider,
 ) => {
   return async (event: { message: any; target: { _url: string } }) => {
     logger.error(`${networkName} network failed to connect`, {
@@ -262,7 +263,7 @@ const resetHangTimeout = () => {
 
 export const setupProvider = (
   networkName: configs.OMGXNetwork,
-  url: string
+  url: string,
 ) => {
   const provider = new WebSocketProvider(url)
   provider._websocket.addEventListener('open', onConnected(networkName))
