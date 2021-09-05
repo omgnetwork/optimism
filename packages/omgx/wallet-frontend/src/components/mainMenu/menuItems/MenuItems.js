@@ -43,7 +43,11 @@ function MenuItems ({handleSetPage, pageDisplay, setOpen }) {
                 // to={item.url}
                 selected={isActive}
               >
-                <Icon color={isActive || activeItem === title ? theme.palette.secondary.main : colorIcon} />{item.title}
+                <Icon 
+                  color={isActive || activeItem === title ? theme.palette.secondary.main : colorIcon}
+                  width={'20px'} 
+                />
+                  {item.title}
               </S.MenuItem>
             </li>
           )

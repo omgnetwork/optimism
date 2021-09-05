@@ -1,7 +1,8 @@
 import * as React from "react";
 function DAOIcon({ color }) {
     return (
-      <svg width="41" height="40"
+      <svg 
+          width="21" height="20"
           viewBox="0 0 41 40"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
