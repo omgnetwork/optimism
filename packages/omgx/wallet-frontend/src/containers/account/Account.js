@@ -20,7 +20,6 @@ import { isEqual } from 'lodash'
 
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectIsSynced } from 'selectors/statusSelector'
-
 import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector'
 
 import ListAccount from 'components/listAccount/listAccount'
@@ -70,7 +69,7 @@ function Account () {
       } else {
         return i.symbolL1.toLowerCase()
       }
-    });
+    })
     dispatch(fetchLookUpPrice(symbolList))
   },[tokenList,dispatch])
 
@@ -78,7 +77,7 @@ function Account () {
     dispatch(fetchGas({
       network: network || 'local',
       networkLayer
-    }));
+    }))
   }, [dispatch, network, networkLayer])
 
   useEffect(()=>{
@@ -94,10 +93,9 @@ function Account () {
 
   useInterval(() => {
     batch(() => {
-      dispatch(fetchTransactions());
-    });
-
-  }, POLL_INTERVAL * 2);
+      dispatch(fetchTransactions())
+    })
+  }, POLL_INTERVAL * 2)
 
 
   const disabled = criticalTransactionLoading || !isSynced

@@ -17,8 +17,6 @@ import React, { useState } from 'react'
 
 import Tooltip from 'components/tooltip/Tooltip'
 import { Button as ButtonMUI, Grid } from '@material-ui/core'
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-import LinkIcon from 'components/icons/LinkIcon'
 import * as styles from './Transaction.module.scss'
 import * as S from './Transaction.styles'
 import { useTheme } from '@emotion/react'

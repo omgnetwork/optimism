@@ -14,6 +14,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+//import { useDispatch } from 'react-redux'
+
 import { parseUnits, parseEther } from '@ethersproject/units'
 import { Watcher } from '@eth-optimism/watcher'
 
@@ -31,6 +33,13 @@ import {
   addNFTContract,
   getNFTContracts,
 } from 'actions/nftAction'
+
+import {
+  updateSignatureStatus_exitLP,
+  updateSignatureStatus_exitTRAD,
+  updateSignatureStatus_depositLP,
+  updateSignatureStatus_depositTRAD
+} from 'actions/signAction'
 
 import { WebWalletError } from 'services/errorService'
 
@@ -1044,13 +1053,7 @@ class NetworkService {
     try {
       // Always check ETH and oETH
       const layer1Balance = await this.L1Provider.getBalance(this.account)
-      //console.log('ETH balance on L1:', layer1Balance.toString())
-
       const layer2Balance = await this.L2Provider.getBalance(this.account)
-      //console.log("oETH balance on L2:", layer2Balance.toString())
-
-      //const ethToken = await getToken(this.L1_ETH_Address)
-      //console.log('Checking ethToken:', ethToken)
 
       const layer1Balances = [
         {
@@ -1124,6 +1127,9 @@ class NetworkService {
 
   //Move ETH from L1 to L2 using the standard deposit system
   depositETHL2 = async (value = '1', gasPrice) => {
+
+    updateSignatureStatus_depositTRAD(false)
+
     try {
       const depositTxStatus = await this.L1StandardBridgeContract.depositETH(
         this.L2GasLimit,
@@ -1133,6 +1139,10 @@ class NetworkService {
           gasPrice: ethers.utils.parseUnits(`${gasPrice}`, 'wei'),
         }
       )
+      //closes the Deposit modal
+      updateSignatureStatus_depositTRAD(true)
+      
+      //at this point the tx has been submitted, and we are waiting...
       await depositTxStatus.wait()
 
       const [l1ToL2msgHash] = await this.watcher.getMessageHashesFromL1Tx(
@@ -1257,11 +1267,6 @@ class NetworkService {
       )
       await approveStatus.wait()
 
-      // let allowance_BN = await ERC20Contract.allowance(
-      //   this.account,
-      //   this.L1LPAddress
-      // )
-
       return true
     } catch (error) {
       return false
@@ -1335,6 +1340,8 @@ class NetworkService {
   //Used to move ERC20 Tokens from L1 to L2
   async depositErc20(value, currency, gasPrice, currencyL2) {
 
+    updateSignatureStatus_depositTRAD(false)
+
     try {
       //could use any ERC20 here...
       const L1_TEST_Contract = this.L1_TEST_Contract.attach(currency)
@@ -1352,6 +1359,11 @@ class NetworkService {
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString())
       )
+      
+      //closes the Deposit modal
+      updateSignatureStatus_depositTRAD(true)
+      
+      //at this point the tx has been submitted, and we are waiting...
       await depositTxStatus.wait()
 
       const [l1ToL2msgHash] = await this.watcher.getMessageHashesFromL1Tx(
@@ -1378,9 +1390,10 @@ class NetworkService {
     }
   }
 
-  //Standard 7 day exit from OMGX
-  //updated
-  async exitOMGX(currencyAddress, value) {
+  //Standard 7 day exit from BOBA
+  async exitBOBA(currencyAddress, value) {
+
+    updateSignatureStatus_exitTRAD(false)
 
     const allowance = await this.checkAllowance(
       currencyAddress,
@@ -1410,6 +1423,8 @@ class NetworkService {
       this.L1GasLimit,
       utils.formatBytes32String(new Date().getTime().toString())
     )
+    //can close window now
+    updateSignatureStatus_exitTRAD(true)    
     await tx.wait()
 
     const [L2ToL1msgHash] = await this.watcher.getMessageHashesFromL2Tx(tx.hash)
@@ -1695,10 +1710,11 @@ class NetworkService {
   }
 
   /***********************************************************/
-  /***** SWAP ON to OMGX by depositing funds to the L1LP *****/
+  /***** SWAP ON to BOBA by depositing funds to the L1LP *****/
   /***********************************************************/
   async depositL1LP(currency, value) {
 
+    updateSignatureStatus_depositLP(false)
     const decimals = 18 //bit dangerous?
     let depositAmount = powAmount(value, decimals)
 
@@ -1707,6 +1723,9 @@ class NetworkService {
       currency,
       currency === this.L1_ETH_Address ? { value: depositAmount } : {}
     )
+
+    updateSignatureStatus_depositLP(true)
+    //at this point the tx has been submitted, and we are waiting...
     await depositTX.wait()
 
     // Waiting the response from L2
@@ -1778,9 +1797,11 @@ class NetworkService {
   }
 
   /**************************************************************/
-  /***** SWAP OFF from OMGX by depositing funds to the L2LP *****/
+  /***** SWAP OFF from BOBA by depositing funds to the L2LP *****/
   /**************************************************************/
   async depositL2LP(currencyAddress, depositAmount_string) {
+
+    updateSignatureStatus_exitLP(false)
 
     const L2ERC20Contract = new ethers.Contract(
       currencyAddress,
@@ -1792,8 +1813,6 @@ class NetworkService {
       this.account,
       this.L2LPAddress
     )
-
-    //const decimals = await L2ERC20Contract.decimals()
 
     let depositAmount_BN = new BN(depositAmount_string)
 
@@ -1810,6 +1829,9 @@ class NetworkService {
       depositAmount_string,
       currencyAddress
     )
+
+    updateSignatureStatus_exitLP(true)
+    //at this point the tx has been submitted, and we are waiting...
     await depositTX.wait()
 
     // Waiting for the response from L1
@@ -1825,97 +1847,6 @@ class NetworkService {
 
     return L1Receipt
   }
-
-  // async getPriorityTokens() {
-  //   try {
-
-  //     return priorityTokens.map((token) => {
-
-  //       let L1 = ''
-  //       let L2 = ''
-
-  //       if (token.symbol === 'ETH') {
-  //         L1 = this.L1_ETH_Address
-  //         L2 = this.L2_ETH_Address
-  //       } else {
-  //         L1 = this.tokenAddresses[token.symbol].L1
-  //         L2 = this.tokenAddresses[token.symbol].L2
-  //       }
-
-  //       return {
-  //         symbol: token.symbol,
-  //         icon: token.icon,
-  //         name: token.name,
-  //         L1,
-  //         L2,
-  //       }
-
-  //     })
-
-  //   } catch (error) {
-  //     return error
-  //   }
-  // }
-
-  // async getSwapTokens() {
-  //   try {
-
-  //     return swapTokens.map((token) => {
-
-  //       let L1 = ''
-  //       let L2 = ''
-
-  //       if (token.symbol === 'ETH') {
-  //         L1 = this.L1_ETH_Address
-  //         L2 = this.L2_ETH_Address
-  //       } else {
-  //         L1 = this.tokenAddresses[token.symbol].L1
-  //         L2 = this.tokenAddresses[token.symbol].L2
-  //       }
-
-  //       return {
-  //         symbol: token.symbol,
-  //         icon: token.icon,
-  //         name: token.name,
-  //         L1,
-  //         L2,
-  //       }
-  //     })
-
-  //   } catch (error) {
-  //     return error
-  //   }
-  // }
-
-  // async getDropdownTokens() {
-  //   try {
-
-  //     return dropdownTokens.map((token) => {
-
-  //       let L1 = ''
-  //       let L2 = ''
-
-  //       if (token.symbol === 'ETH') {
-  //         L1 = this.L1_ETH_Address
-  //         L2 = this.L2_ETH_Address
-  //       } else {
-  //         L1 = this.tokenAddresses[token.symbol].L1
-  //         L2 = this.tokenAddresses[token.symbol].L2
-  //       }
-
-  //       return {
-  //         symbol: token.symbol,
-  //         icon: token.icon,
-  //         name: token.name,
-  //         L1,
-  //         L2,
-  //       }
-  //     })
-
-  //   } catch (error) {
-  //     return error
-  //   }
-  // }
 
   async fetchLookUpPrice(params) {
     try {
