@@ -152,8 +152,8 @@ function Home ({ light, setLight }) {
       <TransferModal open={transferModalState} token={token} fast={fast} />
       <ExitModal     open={exitModalState}     token={token} fast={fast} />
 
-      <AddTokenModal open={addTokenModalState} />
-      <FarmDepositModal open={farmDepositModalState} />
+      <AddTokenModal     open={addTokenModalState} />
+      <FarmDepositModal  open={farmDepositModalState} />
       <FarmWithdrawModal open={farmWithdrawModalState} />
 
       <TransferDaoModal open={tranferBobaDaoModalState} />

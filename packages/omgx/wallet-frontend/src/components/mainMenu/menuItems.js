@@ -15,12 +15,18 @@ export const menuItems = [
     key: 'Farm',
     icon: "EarnIcon",
     title: "Earn",
-    url: "#",
+    url: "/earn",
   },
   {
     key: 'NFT',
     icon: "NFTIcon",
     title: "NFT",
-    url: "/"
+    url: "/nft"
+  },
+  {
+    key: 'DAO',
+    icon: "DAOIcon",
+    title: "DAO",
+    url: "/dao"
   },
 ]
