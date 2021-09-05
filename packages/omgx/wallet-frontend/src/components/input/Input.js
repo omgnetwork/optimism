@@ -61,6 +61,7 @@ function Input({
   const theme = useTheme();
 
   return (
+
     <S.Wrapper newstyle={newStyle ? 1 : 0}>
       {unit && (
         <S.UnitContent>
@@ -114,43 +115,6 @@ function Input({
         </Box>
       )}
     </S.Wrapper>
-      /* <div className={[styles.Input, className].join(' ')}>
-        {label &&
-          <Typography variant="body1" component="div" sx={{opacity: 0.7}}>
-            {label}
-          </Typography>
-        }
-        <div className={[styles.field, overMax ? styles.error : ''].join(' ')}>
-          {icon && <Search className={styles.icon} />}
-          <input
-            className={[styles.input, small ? styles.small : ''].join(' ')}
-            placeholder={placeholder}
-            type={type}
-            value={value}
-            onChange={onChange}
-            disabled={disabled}
-          />
-          {unit && (
-            <Box sx={{display: 'flex', flexDirection: 'column', gap: '5px'}}>
-                {unit}
-              <Typography variant="body2" component="p" sx={{opacity: 0.7}}>
-                Available: {Number(maxValue).toFixed(3)}
-              </Typography>
-
-              {maxValue && value !== maxValue && (
-                <Button onClick={handleMaxClick} variant="small" >
-                  Use All
-                </Button>
-              )}
-            </Box>
-          )}
-          {paste && (
-            <div onClick={handlePaste} className={styles.paste}>
-              // Paste
-            </div>
-          )}
-        </div>
-      </div> */
   )
 }
 

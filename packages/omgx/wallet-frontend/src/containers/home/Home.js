@@ -40,8 +40,20 @@ import ExitModal from 'containers/modals/exit/ExitModal';
 
 import LedgerConnect from 'containers/modals/ledger/LedgerConnect';
 import AddTokenModal from 'containers/modals/addtoken/AddTokenModal';
+
+//Farm
 import FarmDepositModal from 'containers/modals/farm/FarmDepositModal';
 import FarmWithdrawModal from 'containers/modals/farm/FarmWithdrawModal';
+
+//DAO
+import DAO from 'containers/dao/Dao';
+import TransferDaoModal from 'containers/modals/dao/TransferDaoModal';
+import DelegateDaoModal from 'containers/modals/dao/DelegateDaoModal';
+import NewProposalModal from 'containers/modals/dao/NewProposalModal';
+
+import logo from 'images/logo-boba.svg';
+import * as styles from './Home.module.scss';
+import { fetchDaoBalance, fetchDaoVotes } from 'actions/daoAction';
 
 //Wallet Functions
 import Account from 'containers/account/Account';
@@ -80,6 +92,11 @@ function Home ({ light, setLight }) {
   const farmDepositModalState = useSelector(selectModalState('farmDepositModal'))
   const farmWithdrawModalState = useSelector(selectModalState('farmWithdrawModal'))
 
+  // DAO modal
+  const tranferBobaDaoModalState = useSelector(selectModalState('transferDaoModal'))
+  const delegateBobaDaoModalState = useSelector(selectModalState('delegateDaoModal'))
+  const proposalBobaDaoModalState = useSelector(selectModalState('newProposalModal'))
+
   const walletMethod = useSelector(selectWalletMethod())
   //const transactions = useSelector(selectlayer2Transactions, isEqual);
 
@@ -115,6 +132,10 @@ function Home ({ light, setLight }) {
     dispatch(fetchBalances());
     dispatch(addTokenList());
     dispatch(fetchNFTs());
+
+    // get Dao balance / Votes
+    dispatch(fetchDaoBalance());
+    dispatch(fetchDaoVotes());
   }, POLL_INTERVAL);
 
   useEffect(() => {
@@ -135,6 +156,10 @@ function Home ({ light, setLight }) {
       <FarmDepositModal open={farmDepositModalState} />
       <FarmWithdrawModal open={farmWithdrawModalState} />
 
+      <TransferDaoModal open={tranferBobaDaoModalState} />
+      <DelegateDaoModal open={delegateBobaDaoModalState} />
+      <NewProposalModal open={proposalBobaDaoModalState} />
+
       <LedgerConnect
         open={walletMethod === 'browser'
           ? ledgerConnectModalState
@@ -145,33 +170,6 @@ function Home ({ light, setLight }) {
       <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
           <MainMenu pageDisplay={pageDisplay} handleSetPage={handleSetPage} light={light} setLight={setLight} />
           {/* The Top SubMenu Bar, non-mobile */}
-
-          {/* <div className={styles.secondtab}>
-            <span
-              className={pageDisplay === "AccountNow" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("AccountNow")}}
-            >
-              Wallet
-            </span>
-            <span
-              className={pageDisplay === "History" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("History")}}
-            >
-              History
-            </span>
-            <span
-              className={pageDisplay === "Farm" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("Farm")}}
-            >
-              Earn
-            </span>
-            <span
-              className={pageDisplay === "NFT" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("NFT")}}
-            >
-              NFT
-            </span>
-          </div> */}
 
         <Container maxWidth="lg">
           {pageDisplay === "AccountNow" &&
@@ -189,6 +187,9 @@ function Home ({ light, setLight }) {
           }
           {pageDisplay === "Farm" &&
             <FarmWrapper/>
+          }
+          {pageDisplay === "DAO" &&
+            <DAO/>
           }
         </Container>
       </Box>
