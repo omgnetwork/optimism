@@ -30,8 +30,8 @@ export WS=`/opt/secret2env -name $SECRETNAME|grep -w WS|sed 's/WS=//g'`
 export WS_ADDR=`/opt/secret2env -name $SECRETNAME|grep -w WS_ADDR|sed 's/WS_ADDR=//g'`
 export WS_API=`/opt/secret2env -name $SECRETNAME|grep -w WS_API|sed 's/WS_API=//g'`
 export WS_ORIGINS=`/opt/secret2env -name $SECRETNAME|grep -w WS_ORIGINS|sed 's/WS_ORIGINS=//g'`
-ROLLUP_BACKEND: 'l2'
-ROLLUP_VERIFIER_ENABLE: 'true'
+export ROLLUP_BACKEND='l2'
+export ROLLUP_VERIFIER_ENABLE='true'
 
 RETRIES=${RETRIES:-40}
 VERBOSITY=${VERBOSITY:-6}

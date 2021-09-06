@@ -217,7 +217,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "replica_dtl", "service": "replica_dtl"}]'
           Essential: true
-          Memory: "100"
+          Memory: "256"
         - Image: 942431445534.dkr.ecr.us-east-1.amazonaws.com/omgx/nginx-eth-proxy:data_tr_layer
           Name: replica-dtl-nginx
           PortMappings:
@@ -239,7 +239,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "replica-dtl-nginx", "service": "replica-dtl-nginx"}]'
           Essential: true
-          Memory: "64"
+          Memory: "128"
           Links:
             - data_transport_layer
       NetworkMode: bridge
@@ -250,7 +250,7 @@ Resources:
     DependsOn: DataTransportLayerReplicaListenerRule
     Properties:
       Cluster:
-        Fn::ImportValue: !Sub "${InfrastructureStackName}:EcsCluster"
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:EcsClusterReplica"
       LoadBalancers:
         - ContainerName: replica-dtl-nginx
           ContainerPort: 80
@@ -261,5 +261,5 @@ Resources:
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA
-      ServiceName: "replica_dtl"
+      ServiceName: "replica-dtl"
       TaskDefinition: !Ref TaskDefinition

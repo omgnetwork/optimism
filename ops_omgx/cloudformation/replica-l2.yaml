@@ -133,9 +133,6 @@ Resources:
         - Name: l2-node
           Host:
             SourcePath: "/mnt/efs/replica_l2"
-        - Name: l2-key
-          Host:
-            SourcePath: "/mnt/efs/geth_l2/geth/nodekey"
       ContainerDefinitions:
         - Image: !Sub "${ECRRegistry}/${DockerPrefix}/${ReplicaL2Image}:${ImageTag}"
           Name: geth_l2
@@ -176,8 +173,6 @@ Resources:
           MountPoints:
             - ContainerPath: "/root/.ethereum"
               SourceVolume: l2-node
-            - ContainerPath: "/root/nodekey"
-              SourceVolume: l2-key
           DockerLabels:
             com.datadoghq.ad.check_names: '["geth_l2"]'
             com.datadoghq.ad.init_configs: '[{}]'
@@ -192,7 +187,7 @@ Resources:
             - Name: nproc
               SoftLimit: 8192
               HardLimit: 8192
-          Name: l2_proxy
+          Name: replica-l2-proxy
           PortMappings:
             - ContainerPort: 80
               HostPort: 0
@@ -202,7 +197,7 @@ Resources:
             - Name: ETH_CALLS_ALLOWED
               Value: web3_clientVersion,eth_chainId,eth_getProof,rollup_getInfo,web3_sha3,net_version,net_peerCount,net_listening,eth_protocolVersion,eth_syncing,eth_coinbase,eth_mining,eth_hashrate,eth_gasPrice,eth_accounts,eth_blockNumber,eth_getBalance,eth_getStorageAt,eth_getTransactionCount,eth_getBlockTransactionCountByHash,eth_getBlockTransactionCountByNumber,eth_getUncleCountByBlockHash,eth_getUncleCountByBlockNumber,eth_getCode,eth_sign,eth_signTransaction,eth_sendTransaction,eth_sendRawTransaction,eth_call,eth_estimateGas,eth_getBlockByHash,eth_getBlockByNumber,eth_getTransactionByHash,eth_getTransactionByBlockHashAndIndex,eth_getTransactionByBlockNumberAndIndex,eth_getTransactionReceipt,eth_getUncleByBlockHashAndIndex,eth_getUncleByBlockNumberAndIndex,eth_getCompilers,eth_compileLLL,eth_compileSolidity,eth_compileSerpent,eth_newFilter,eth_newBlockFilter,eth_newPendingTransactionFilter,eth_uninstallFilter,eth_getFilterChanges,eth_getFilterLogs,eth_getLogs,eth_getWork,eth_submitWork,eth_submitHashrate,db_putString,db_getString,db_putHex,db_getHex,shh_post,shh_version,shh_newIdentity,shh_hasIdentity,shh_newGroup,shh_addToGroup,shh_newFilter,shh_uninstallFilter,shh_getFilterChanges,shh_getMessages,eth_getBlockRange
           DockerLabels:
-            com.datadoghq.ad.check_names: '["nginx"]'
+            com.datadoghq.ad.check_names: '["replica-l2-proxy"]'
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "replica-l2-proxy", "service": "replica-l2-proxy"}]'
           Essential: true
@@ -216,7 +211,7 @@ Resources:
     Type: AWS::ECS::Service
     Properties:
       Cluster:
-        Fn::ImportValue: !Sub "${InfrastructureStackName}:EcsCluster"
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:EcsClusterReplica"
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA

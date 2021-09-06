@@ -15,7 +15,7 @@ SUBCMD=
 FORCE=no
 AWS_ECR="942431445534.dkr.ecr.${REGION}.amazonaws.com"
 SKIPSERVICE=
-DOCKER_IMAGES_LIST=`ls ${PATH_TO_CFN}|egrep -v '^0|^datadog|^optimism|^graph|^replica-dtl'|sed 's/.yaml//g'`
+DOCKER_IMAGES_LIST=`ls ${PATH_TO_CFN}|egrep -v '^0|^datadog|^optimism|^graph'|sed 's/.yaml//g'`
 ENV_PREFIX=
 FORCE=no
 
@@ -189,6 +189,9 @@ function verify_images_in_ecr {
           if [[ ${SERVICE_NAME} == "replica-l2" ]]; then
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/l2geth" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
             docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
+          elif [[ ${SERVICE_NAME} == "omgx-gas-price-oracle" ]]; then
+              docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${image}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/omgx_gas-price-oracle" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+              docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
           else
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${image}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
             docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
@@ -196,6 +199,9 @@ function verify_images_in_ecr {
         else
           if [[ ${SERVICE_NAME} == "replica-l2" ]]; then
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/l2geth" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
+            docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
+          elif [[ ${SERVICE_NAME} == "omgx-gas-price-oracle" ]]; then
+            docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/omgx_gas-price-oracle" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
             docker push ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG}
           else
             docker build . -t ${AWS_ECR}/${REGISTRY_PREFIX}/${SERVICE_NAME}:${DEPLOYTAG} --build-arg BUILD_IMAGE="${REGISTRY_PREFIX}/${SERVICE_NAME}" --build-arg BUILD_IMAGE_VERSION="${FROMTAG}"
@@ -430,11 +436,16 @@ function destroy_dev_services {
 
   function restart_service {
       local force="${1:-}"
-      ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|tail -1|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'`
+      ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|grep -vi replica|tail -1|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'`
+      ECS_CLUSTER_REPLICA=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|grep -i replica|tail -1|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'`
       SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
+      SERVICE4RESTARTREPLICA=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER_REPLICA|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
       CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
+      CONTAINER_INSTANCE_REPLICA=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER_REPLICA|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
       ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|egrep -vi ^datadog|tr '\n' ' '`
+      ECS_TASKS_REPLICA=`aws ecs list-tasks --cluster $ECS_CLUSTER_REPLICA --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|egrep -vi ^datadog|tr '\n' ' '`
       EC2_INSTANCE=`aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId'`
+      EC2_INSTANCE_REPLICA=`aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER_REPLICA --container-instance $CONTAINER_INSTANCE_REPLICA|jq '.containerInstances[0] .ec2InstanceId'`
       if [ -z ${SERVICE_NAME} ]; then
         info "Restarting ${ECS_CLUSTER}"
         if [[ "${force}" == "yes" ]] ; then
@@ -473,7 +484,7 @@ function destroy_dev_services {
 
     function stop_cluster {
         local force="${1:-}"
-        ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|tail -1|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'`
+        ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|grep -vi replica|tail -1|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'`
         SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|egrep -vi ^datadog|tr '\n' ' '|sed 's#"##g'`
         DATADOGTASK=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION} --service-name Datadog-prod|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|tr '\n' ' '`
         CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
