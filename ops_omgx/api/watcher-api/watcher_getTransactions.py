@@ -82,7 +82,7 @@ def watcher_getTransactions(event, context):
           "exitL2": exitL2,
           "crossDomainMessage": {
             "crossDomainMessage": transactionDataRaw[9],
-            "crossDomainMessageFinailze": transactionDataRaw[10],
+            "crossDomainMessageFinalize": transactionDataRaw[10],
             "crossDomainMessageSendTime": crossDomainMessageSendTime,
             "crossDomainMessageEstimateFinalizedTime": crossDomainMessageEstimateFinalizedTime,
             "fastRelay": fastRelay,

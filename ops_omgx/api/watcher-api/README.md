@@ -30,7 +30,7 @@
     exitL2: "EXIT_L2", // True or False
     crossDomainMessage: {
       crossDomainMessage: "CROSS_DOMAIN_MESSAGE", // whether the transaction sent cross domain message
-      crossDomainMessageFinailze: "CROSS_DOMAIN_MESSAGE_FINALIZED", // whether the cross domain message is finalized on L1
+      crossDomainMessageFinalize: "CROSS_DOMAIN_MESSAGE_FINALIZED", // whether the cross domain message is finalized on L1
       crossDomainMessageSendTime: "CROSS_DOMAIN_MESSAGE_FINALIZED_TIME", // when the cross domain message is finalized
       crossDomainMessageEstimateFinalizedTime: "ESTIMATE_CROSS_DOMAIN_MESSAGE_FINALIZED_TIME",
       fastRelay: "FAST_RELAY", // Whether the message is using the fast message relayer
@@ -38,7 +38,7 @@
       l1BlockNumber: "L1_BLOCK_NUMBER",
       l1BlockHash: "L1_BLOCK_HASH",
       l1From: "L1_FROM",
-      l1To: "L1_TO" 
+      l1To: "L1_TO"
     },
     stateRoot: {
       stateRootHash: "L1_STATE_ROOT_HASH",
@@ -53,7 +53,7 @@
       exitAmount: "EXIT_AMOUNT", // L2 exit amount, which doesn't consider fee
       exitReceive: "EXIT_RECEIVE", // L1 received amount
       exitFeeRate: "EXIT_FEE",
-      fastRelay: "FAST_RELAY", 
+      fastRelay: "FAST_RELAY",
       status: "STATUS" // pending || succeeded || reverted
     }
   }
@@ -104,7 +104,7 @@
   to: "TO_ACCOUNT"
   timeStamp: "BLOCK_TIMESTAMP",
   crossDomainMessage: "CROSS_DOMAIN_MESSAGE", // whether the transaction sent cross domain message
-  crossDomainMessageFinailze: "CROSS_DOMAIN_MESSAGE_FINALIZED", // whether the cross domain message is finalized on L1
+  crossDomainMessageFinalize: "CROSS_DOMAIN_MESSAGE_FINALIZED", // whether the cross domain message is finalized on L1
   crossDomainMessageSendTime: "CROSS_DOMAIN_MESSAGE_FINALIZED_TIME", // when the cross domain message is finalized
   crossDomainMessageEstimateFinalizedTime: "ESTIMATE_CROSS_DOMAIN_MESSAGE_FINALIZED_TIME",
   fastRelay: "FAST_RELAY" // Whether the message is using the fast message relayer
