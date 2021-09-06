@@ -1,16 +1,22 @@
 import styled from '@emotion/styled';
+import { Typography } from '@material-ui/core';
 
 export const WalletPickerContainer = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-
+  margin-left: -5px;
   @include mobile {
     font-size: 0.9em;
     padding: 10px;
   }
 `;
+
+export const Label = styled(Typography)(({ theme }) => ({
+  marginLeft: theme.spacing(1),
+  color: theme.palette.text.disabled,
+}));
 
 export const WallerPickerWrapper = styled.div`
   display: flex;
@@ -54,8 +60,10 @@ export const Dropdown = styled.div`
   position: absolute;
   left: 0;
   top: 27px;
-  background: rgba(0,0,0,0.9);
-  border-radius: 20px;
+  background: #09162B;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: -13px 15px 39px rgba(0, 0, 0, 0.16), inset 53px 36px 120px rgba(255, 255, 255, 0.06);
   @include mobile {
     right: unset;
     left: 10px;
@@ -65,34 +73,18 @@ export const Dropdown = styled.div`
     background-color: gray;
     transition: all 200ms ease-in-out;
     padding: 10px 15px;
-    /* cursor: pointer; */
     &:hover {
       background-color: gray;
     }
   }
-  > div {
+  > p {
     cursor: pointer;
-    color: #1CD8D2;
-    font-weight: 600;
-    border: 4px solid #CCFF00;
-    border-radius: 20px;
-    margin: 5px;
-    padding-top: 1px;
-    padding-left: 10px;
-    padding-right: 10px;
   }
 `;
 
 export const NetWorkStyle = styled.div`
-  /* margin-left: 10px; */
   display: flex;
   flex-direction: row;
   align-items: center;
   cursor: ${(props) => props.walletEnabled !== false ? 'inherit' : 'pointer'};
-`;
-
-export const LayerLabel = styled.div`
-  margin: 0px 10px 0 17px;
-  opacity: 0.7;
-  font-size: 16px;
 `;
