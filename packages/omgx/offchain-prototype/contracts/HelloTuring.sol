@@ -68,4 +68,20 @@ contract HelloTuring {
     c = abi.decode(encResponse,(uint256));
     return c;
   }
+
+  function MultNumbers(uint112 a, uint112 b) public view returns (uint256) {
+    uint256 c;
+    bytes memory encRequest = abi.encode(a, b);
+    bytes memory encResponse = myHelper.TuringCall(2, encRequest);
+    c = abi.decode(encResponse,(uint256));
+    return c;
+  }
+
+  function isCatOrDog(string memory url) public view returns (string memory) {
+    string memory result;
+    bytes memory encRequest = abi.encode(url);
+    bytes memory encResponse = myHelper.TuringCall(3, encRequest);
+    result = abi.decode(encResponse, (string));
+    return result;
+  }
 }
