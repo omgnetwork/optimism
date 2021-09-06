@@ -1,21 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { isEqual } from 'lodash'
-
-import { openAlert, openError } from 'actions/uiAction'
-
-import Button from 'components/button/Button'
-import Input from 'components/input/Input'
-
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-
-import networkService from 'services/networkService'
-
-import { transfer } from 'actions/networkAction'
-
 import * as styles from './listNFT.module.scss'
-
-import truncate from 'truncate-middle'
 
 class listNFT extends React.Component {
 
@@ -46,7 +32,7 @@ class listNFT extends React.Component {
   componentDidUpdate(prevState) {
 
     const {
-      name, symbol, owner, address, 
+      name, symbol, address, 
       UUID, time, URL
     } = this.props;
 

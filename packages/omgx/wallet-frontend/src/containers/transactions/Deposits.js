@@ -17,7 +17,7 @@ import React, { useState, useEffect } from 'react'
 import { Grid, Box } from '@material-ui/core'
 import { useSelector } from 'react-redux'
 import moment from 'moment'
-import truncate from 'truncate-middle'
+//import truncate from 'truncate-middle'
 
 import { selectLoading } from 'selectors/loadingSelector'
 

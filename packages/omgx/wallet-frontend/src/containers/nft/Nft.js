@@ -104,7 +104,7 @@ class Nft extends React.Component {
     } = this.state;
 
     const numberOfNFTs = Object.keys(list).length
-    const numberOfContracts = Object.keys(contracts).length
+    //const numberOfContracts = Object.keys(contracts).length
 
     return (
       <>

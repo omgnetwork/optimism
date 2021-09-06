@@ -141,7 +141,7 @@ function InputStepFast({ handleClose, token }) {
       //transaction has been sent and signed
       handleClose()
     }
-  }, [ signatureStatus, depositLoading ])
+  }, [ signatureStatus, depositLoading, handleClose ])
 
   const label = 'There is a ' + feeRate + '% fee.'
 
