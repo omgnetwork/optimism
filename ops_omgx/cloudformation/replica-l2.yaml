@@ -16,7 +16,7 @@ Parameters:
 
   ReplicaL2Image:
     Type: String
-    Default: replica-l2
+    Default: l2geth
 
   DockerPrefix:
     Type: String
@@ -146,6 +146,10 @@ Resources:
               Value: !Ref SecretName
             - Name: RETRIES
               Value: 3600
+            - Name: ROLLUP_BACKEND
+              Value: l2
+            - Name: ROLLUP_VERIFIER_ENABLE
+              Value: true
             - Name: DEPLOYER_HTTP
               Value: !Sub
                 - "https://${EndpointAddress}:8081"
