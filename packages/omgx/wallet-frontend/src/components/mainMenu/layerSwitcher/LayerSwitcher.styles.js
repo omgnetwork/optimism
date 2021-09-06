@@ -68,7 +68,6 @@ export const ButtonStyle = styled.div`
   cursor: ${(props) => props.walletEnabled !== false ? 'inherit' : 'pointer'};
 `;
 
-
 export const LayerSwitch = styled.div`
   margin-left: 15px;
   padding: 3px;
