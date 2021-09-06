@@ -1,5 +1,24 @@
 # @eth-optimism/core-utils
 
+## 0.5.4
+
+### Patch Changes
+
+- 085b35ba: Watcher: Even lower num blocks to fetch
+
+## 0.5.3
+
+### Patch Changes
+
+- 2aa4416e: Watcher: Make blocks to fetch a config option
+- 0b8180b0: Lower NUM_BLOCKS_TO_FETCH in Watcher
+
+## 0.5.2
+
+### Patch Changes
+
+- 918c08ca: Bump ethers dependency to 5.4.x to support eip1559
+
 ## 0.5.1
 
 ### Patch Changes

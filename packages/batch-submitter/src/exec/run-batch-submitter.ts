@@ -161,6 +161,7 @@ export const run = async () => {
   }
 
   const getProposerSigner = async (): Promise<Signer> => {
+
     const l1Provider = new StaticJsonRpcProvider(requiredEnvVars.L1_NODE_WEB3_URL)
 
     if (useHardhat) {

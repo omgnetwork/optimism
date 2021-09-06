@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import { parseUnits, parseEther } from '@ethersproject/units'
+import { parseUnits, parseEther, formatEther } from '@ethersproject/units'
 import { Watcher } from '@eth-optimism/watcher'
 
 import { ethers, BigNumber, utils, ContractFactory } from 'ethers'
@@ -45,7 +45,7 @@ import L1LPJson from '../deployment/artifacts/contracts/LP/L1LiquidityPool.sol/L
 import L2LPJson from '../deployment/artifacts-ovm/contracts/LP/L2LiquidityPool.sol/L2LiquidityPool.json'
 
 //Standard ERC20 jsons - should be very similar?
-import L1ERC20Json from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.json'
+import L1ERC20Json from '../deployment/artifacts/contracts/test-helpers/L1ERC20.sol/L1ERC20.json'
 import L2ERC20Json from '../deployment/artifacts-ovm/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
 
 //OMGX L2 Contracts
@@ -54,6 +54,12 @@ import L2ERC721RegJson from '../deployment/artifacts-ovm/contracts/ERC721Registr
 
 import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol/TokenPool.json'
 import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
+
+// DAO 
+import Comp from "../deployment/rinkeby/json/Comp.json";
+import GovernorBravoDelegate from "../deployment/rinkeby/json/GovernorBravoDelegate.json";
+import GovernorBravoDelegator from "../deployment/rinkeby/json/GovernorBravoDelegator.json";
+import Timelock from "../deployment/rinkeby/json/Timelock.json";
 
 import { powAmount, logAmount } from 'util/amountConvert'
 import { accDiv, accMul } from 'util/calculation'
@@ -134,6 +140,12 @@ class NetworkService {
     // gas
     this.L1GasLimit = 9999999
     this.L2GasLimit = 10000000
+
+    // Dao
+    this.comp = null
+    this.delegate = null
+    this.delegator = null
+    this.timelock = null
   }
 
   async enableBrowserWallet() {
@@ -363,7 +375,7 @@ class NetworkService {
       } else if (masterSystemConfig === 'mainnet') {
         addresses = mainnetAddresses
         console.log('Mainnet Addresses:', addresses)
-      } else if (masterSystemConfig === 'rinkeby_integration') {
+      } else if (masterSystemConfig === 'rinkeby-integration') {
         addresses = rinkebyIntegrationAddresses
         console.log('Rinkeby Integration Addresses:', addresses)
       }
@@ -391,7 +403,7 @@ class NetworkService {
       //and then, also, either L1 or L2
 
       //at this point, we only know whether we want to be on local or rinkeby etc
-      if (masterSystemConfig === 'local' && network.chainId === 28) {
+      if (masterSystemConfig === 'local' && network.chainId === 31338) {
         //ok, that's reasonable
         //local deployment, L2
         this.L1orL2 = 'L2'
@@ -411,7 +423,7 @@ class NetworkService {
         //ok, that's reasonable
         //rinkeby, L1
         this.L1orL2 = 'L1'
-      } else if (masterSystemConfig === 'rinkeby_integration' && network.chainId === 28) {
+      } else if (masterSystemConfig === 'rinkeby_integration' && network.chainId === 29) {
         //ok, that's reasonable
         //rinkeby, L2
         this.L1orL2 = 'L2'
@@ -597,6 +609,30 @@ class NetworkService {
           messengerAddress: this.L2MessengerAddress,
         },
       })
+
+      this.comp = new ethers.Contract(
+        addresses.DAO_Comp,
+        Comp.abi,
+        this.provider.getSigner()
+      );
+
+      this.delegate = new ethers.Contract(
+        addresses.DAO_GovernorBravoDelegate,
+        GovernorBravoDelegate.abi,
+        this.provider.getSigner()
+      );
+
+      this.delegator = new ethers.Contract(
+        addresses.DAO_GovernorBravoDelegator,
+        GovernorBravoDelegator.abi,
+        this.provider.getSigner()
+      );
+
+      this.timelock = new ethers.Contract(
+        addresses.DAO_Timelock,
+        Timelock.abi,
+        this.provider.getSigner()
+      );
 
       this.bindProviderListeners()
 
@@ -1678,11 +1714,8 @@ class NetworkService {
       tokenAddressLC === this.L1_ETH_Address
     ) {
       balance = await this.L1Provider.getBalance(this.L1LPAddress)
-    } else if (
-      tokenAddressLC === this.L2_TEST_Address.toLowerCase() ||
-      tokenAddressLC === this.L1_TEST_Address.toLowerCase()
-    ) {
-      balance = await this.L1_TEST_Contract.connect(this.L1Provider).balanceOf(
+    } else {
+      balance = await this.L1_TEST_Contract.attach(tokenAddress).connect(this.L1Provider).balanceOf(
         this.L1LPAddress
       )
     }
@@ -1710,12 +1743,8 @@ class NetworkService {
       balance = await this.L2_ETH_Contract.connect(this.L2Provider).balanceOf(
         this.L2LPAddress
       )
-    } else if (
-      tokenAddressLC === this.L2_TEST_Address.toLowerCase() ||
-      tokenAddressLC === this.L1_TEST_Address.toLowerCase()
-    ) {
-      //we are dealing with TEST
-      balance = await this.L2_TEST_Contract.connect(this.L2Provider).balanceOf(
+    } else {
+      balance = await this.L2_TEST_Contract.attach(tokenAddress).connect(this.L2Provider).balanceOf(
         this.L2LPAddress
       )
     }
@@ -1914,6 +1943,105 @@ class NetworkService {
       slow: 1000000000,
       normal: 2000000000,
       fast: 10000000000
+    }
+  }
+
+  /***********************************************/
+  /*****         DAO Functions               *****/
+  /***********************************************/
+
+  // get DAO Balance
+  async getDaoBalance() {
+    try {
+      let balance = await this.comp.balanceOf(this.account)
+      return { balance: formatEther(balance) }
+    } catch (error) {
+      console.log('Error: DAO Balance', error)
+      throw new Error(error.message)
+    }
+  }
+
+
+  // get DAO Votes
+  async getDaoVotes() {
+    try {
+      let votes = await this.comp.getCurrentVotes(this.account)
+      return { votes: formatEther(votes) }
+    } catch (error) {
+      console.log('Error: DAO Votes', error)
+      throw new Error(error.message);
+    }
+  }
+
+  //Transfer DAO funds
+  async transferDao({ recipient, amount }) {
+    try {
+      const tx = await this.comp.transfer(recipient, parseEther(amount.toString()))
+      await tx.wait()
+      return tx
+    } catch (error) {
+      console.log('Error: DAO Transfer', error)
+      throw new Error(error.message);
+    }
+  }
+
+  //Delegate DAO
+  async delegateVotes({ recipient }) {
+    try {
+      const tx = await this.comp.delegate(recipient)
+      await tx.wait()
+      return tx
+    } catch (error) {
+      console.log('Error: DAO Delegate', error)
+      throw new Error(error.message)
+    }
+  }
+
+  //Create Proposal
+  async createProposal(payload) {
+    try {
+      let res = await this.delegate.propose(payload)
+      return res;
+    } catch (error) {
+      console.log(error);
+      throw new Error(error.message);
+    }
+  }
+
+  //Fetch Proposals
+  async fetchProposals() {
+    try {
+      let proposalList = [];
+      const proposalCounts = await this.delegate.proposalCount()
+      const totalProposal = await proposalCounts.toNumber()
+      const filter = this.delegate.filters.ProposalCreated(
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      );
+      const descriptionList = await this.delegate.queryFilter(filter);
+      for (let i = totalProposal; i > 1 && i > totalProposal - 3; i--) {
+        let proposal = await this.delegate.getActions(i);
+        let fullDescription = descriptionList[i - 2].args[8].toString();
+        let titleEnd = fullDescription.search(/\n/);
+        let title = fullDescription.substring(0, titleEnd);
+        let description = fullDescription.substring(titleEnd + 1);
+        proposalList.push({
+          proposal,
+          title,
+          description
+        })
+      }
+      return { proposalList };
+    } catch (error) {
+      console.log(error)
+      throw new Error(error.message);
     }
   }
 

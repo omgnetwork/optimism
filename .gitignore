@@ -39,3 +39,12 @@ env.yml
 
 .serverless
 __pycache__
+
+# subgraph
+build
+generated
+
+packages/omgx/subgraph/L1/yarn.lock
+packages/omgx/subgraph/L2/yarn.lock
+packages/omgx/subgraph/L1/bin
+packages/omgx/subgraph/L2/bin

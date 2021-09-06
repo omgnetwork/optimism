@@ -7,7 +7,7 @@
   margin-bottom: 5px;
 
   .label {
-    font-size: 0.7em;
+    font-size: 0.9em;
     margin-bottom: 5px;
   }
 
@@ -28,14 +28,14 @@
     .icon + .input {
       padding-left: 30px;
     }
-    .input {
+    .input{
       flex: 1;
       // background-color: $gray6;
       // color: $gray3;
       height: 40px;
       width: 130px;
       padding: 0px 5px;
-      padding-left: 40px;
+      // padding-left: 40px;
       line-height: 40px;
       border: 0;
       color: #F0A000;
@@ -57,7 +57,7 @@
       margin: 0 10px;
       position: absolute;
       right: 0;
-      background-color: $gray6;
+      // background-color: $gray6;
       display: flex;
       flex-direction: row;
       align-items: center;
