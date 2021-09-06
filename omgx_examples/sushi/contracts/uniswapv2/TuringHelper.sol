@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.6.12;
+pragma solidity ^0.7.0;
 
 import "hardhat/console.sol";
 
@@ -9,7 +9,7 @@ contract TuringHelper {
   TuringHelper Self;
   bytes[] methods;
 
-  constructor (string memory _url) public {
+  constructor(string memory _url) {
     console.log("Deploying a helper contract with data source:", _url);
     data_URL = bytes(_url);
     Self = TuringHelper(address(this));

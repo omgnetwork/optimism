@@ -200,13 +200,37 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         // require(reserve0 > 0 && reserve1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY');
 
         // // API Call: Comparing off-chain price to on-chain price
-
+        // uint256 offchain_price;
         // //Hard-coding token0 and token1 address for tests (remove this code later)
         // address test0 = address(0x6B175474E89094C44Da98b954EedeAC495271d0F); //dai
         // address test1 = address(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48); //usdc
 
         // bytes memory encRequest = abi.encode(reserve0, reserve1);
         // bytes memory encResponse = myHelper.TuringCall(1, encRequest);
+        // offchain_price = abi.decode(encResponse,(uint256));
+
+        // uint256 onchain_price = reserve0.div(reserve1);
+        // uint256 priceDiff;
+        // priceDiff = ((uint256(abs(int256(onchain_price).sub(int256(offchain_price))))).mul(100)).div(onchain_price);
+
+        // // If call fails or priceDiff <= 30, then return 3
+        // feeX10 = 3;
+
+        // if(priceDiff > 30 && priceDiff <= 60)
+        // {
+        //     feeX10 = 6;
+        // }
+
+        // else if(priceDiff > 60)
+        // {
+        //     feeX10 = 10;
+        // }
+
+    //        uint256 c;
+    //bytes memory encRequest = abi.encode(reserve0, reserve1);
+    //bytes memory encResponse = myHelper.TuringCall(1, encRequest);
+    //c = abi.decode(encResponse,(uint256));
+    //feeX10 = c;
 
     uint256 offchain_price;
     bytes memory encRequest = abi.encode(token0, token1);
@@ -228,7 +252,6 @@ contract UniswapV2Pair is UniswapV2ERC20 {
     {
         feeX10 = 10;
     }
-
     }
 
     // this low-level function should be called from a contract which performs important safety checks
