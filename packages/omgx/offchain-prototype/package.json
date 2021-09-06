@@ -27,6 +27,7 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
+    "@uniswap/sdk": "^3.0.3",
     "ip": "^1.1.5"
   }
 }
