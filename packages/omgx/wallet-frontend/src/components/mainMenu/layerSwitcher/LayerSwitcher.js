@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react'
-import { Box } from '@material-ui/core'
+import React, { useState, useCallback } from 'react'
+import { Box } from '@material-ui/system'
 import { useSelector, useDispatch } from 'react-redux'
 import * as S from './LayerSwitcher.styles.js'
 import { selectLayer } from 'selectors/setupSelector'
@@ -13,6 +13,7 @@ import LayerIcon from 'components/icons/LayerIcon';
 function LayerSwitcher({ walletEnabled, isButton = false }) {
 
   const dispatch = useDispatch()
+  const [ showAllLayers, setShowAllLayers ] = useState(false)
   let layer = useSelector(selectLayer())
 
   if (networkService.L1orL2 !== layer) {
@@ -31,7 +32,8 @@ function LayerSwitcher({ walletEnabled, isButton = false }) {
   const dispatchSetLayer = useCallback((layer) => {
     dispatch(setLayer(layer))
     networkService.switchChain(layer)
-  }, [ dispatch ])
+    setShowAllLayers(false)
+  }, [ dispatch, setShowAllLayers ])
 
   if (!!isButton) {
     return (<>
@@ -41,6 +43,7 @@ function LayerSwitcher({ walletEnabled, isButton = false }) {
         variant="contained"
         sx={{
           textTransform: 'uppercase',
+          padding: '10px 20px',
           fontSize: '16px',
         }}
         >
@@ -52,52 +55,34 @@ function LayerSwitcher({ walletEnabled, isButton = false }) {
   return (
     <S.WalletPickerContainer>
       <S.WalletPickerWrapper>
-        {/* <S.Menu> */}
-
-          <Box
-            sx={{
-              display: 'flex',
-              width: '100%',
-              alignItems: 'center'
-            }}
-          >
-            <LayerIcon />
-            <S.LayerLabel variant="body1"  component="span">
-                Layer
-            </S.LayerLabel>
-            <S.LayerSwitch
-              onClick={()=>{dispatchSetLayer(otherLayer)}}
-            >
-              <Typography
-                className={layer === 'L1' ? 'active': ''}
-                variant="body1"
-                component="span">
-                  L1
-              </Typography>
-              <Typography
-                className={layer === 'L2' ? 'active': ''}
-                variant="body1"
-                component="span">
-                  L2
-              </Typography>
-            </S.LayerSwitch>
-          </Box>
-
-          {/* <S.NetWorkStyle>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
-              <Typography variant="body1">LAYER: {layer}</Typography>
-            </Box>
-          </S.NetWorkStyle>
-
-          <S.ButtonStyle
+        <Box
+          sx={{
+            display: 'flex',
+            width: '100%',
+            alignItems: 'center'
+          }}
+        >
+          <LayerIcon />
+          <S.Label variant="body2">Layer</S.Label>
+          <S.LayerSwitch
             onClick={()=>{dispatchSetLayer(otherLayer)}}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2}} >
-              SWITCH LAYER
-            </Box>
-          </S.ButtonStyle> */}
-
-        {/* </S.Menu> */}
+            <Typography
+              className={layer === 'L1' ? 'active': ''}
+              variant="body2"
+              component="span"
+              color="white">
+                1
+            </Typography>
+            <Typography
+              className={layer === 'L2' ? 'active': ''}
+              variant="body2"
+              component="span"
+              color="white">
+                2
+            </Typography>
+          </S.LayerSwitch>
+        </Box>
       </S.WalletPickerWrapper>
     </S.WalletPickerContainer>
   )

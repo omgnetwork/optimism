@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { openModal } from 'actions/uiAction'
-import { Box } from '@material-ui/core'
+import { Box } from '@material-ui/system'
 import { useSelector, useDispatch } from 'react-redux'
 import * as S from './NetworkSwitcher.styles.js'
 import chevron from 'images/chevron.svg'
@@ -59,52 +59,47 @@ function NetworkSwitcher({ walletEnabled }) {
   }
 
   return (
-
-
     <S.WalletPickerContainer>
       <WrongNetworkModal
         open={wrongNetworkModalState}
         onClose={resetSelection}
       />
-
       <S.WallerPickerWrapper>
         <S.Menu>
-
-          <S.NetWorkStyle
-            onClick={()=>{setShowAllNetworks(prev => !prev)}}
-          >
+          <S.NetWorkStyle>
             <NetworkIcon />
-            <S.LayerLabel variant="body1"  component="span">
-              Network
-            </S.LayerLabel>
+            <S.Label variant="body2">Network</S.Label>
             <Box sx={{
               display: 'flex',
-              margin: '10px 0 10px 20px',
+              margin: '10px 0 10px 15px',
               alignItems: 'center',
-              gap: 2
-            }} >
-              <Typography variant="body1">{masterConfig}</Typography>
+              gap: 2,
+              position: 'relative',
+            }}
+            onClick={()=>{setShowAllNetworks(prev => !prev)}}>
+              <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', textTransform: 'capitalize'}}>
+                {masterConfig}
+                <S.Chevron
+                  open={showAllNetworks}
+                  src={chevron}
+                  alt='chevron'
+                />
+              </Typography>
+              {showAllNetworks ? (
+                <S.Dropdown ref={dropdownNode}>
+                  {!!allNetworks.length && showAllNetworks && allNetworks.map((network) => (
+                    <Typography
+                      key={network}
+                      onClick={()=>dispatchSetNetwork(network)}
+                      color={masterConfig === network ? 'secondary' : 'white'}
+                    >
+                      {network}
+                    </Typography>))
+                  }
+                </S.Dropdown>
+              ) : null}
             </Box>
-
-            <S.Chevron
-              open={showAllNetworks}
-              src={chevron}
-              alt='chevron'
-            />
-
           </S.NetWorkStyle>
-
-          <S.Dropdown ref={dropdownNode}>
-            {!!allNetworks.length && showAllNetworks && allNetworks.map((network) => (
-              <div
-                key={network}
-                onClick={()=>dispatchSetNetwork(network)}
-              >
-                {network}
-              </div>))
-            }
-          </S.Dropdown>
-
         </S.Menu>
       </S.WallerPickerWrapper>
     </S.WalletPickerContainer>
