@@ -81,7 +81,9 @@ In `GovernorBravoInterfaces.sol`, delete `GovernorAlpha` Interface:
 
 # Deploying on Rinkeby-Boba Network and Initiating
 
-Instructions or Deploying Compound Governance Protocol on Rinkeby-Boba. **PLEASE BE PATIENT - THIS TAKES A LONG TIME** First create a `.env` file that follows the structure of `.env.example`. Then, run
+Instructions or Deploying Compound Governance Protocol on Rinkeby-Boba. 
+**PLEASE BE PATIENT - THIS TAKES A LONG TIME** 
+First create a `.env` file that follows the structure of `.env.example`. Then, run
 
 ```bash
 $ yarn
