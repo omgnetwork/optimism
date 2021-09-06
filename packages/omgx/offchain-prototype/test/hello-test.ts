@@ -42,7 +42,7 @@ describe("HelloTest", function() {
   req.on('end', function () {
     var jBody = JSON.parse(body)
     //console.log ("jBody", jBody)
-          if (jBody.method === "hello") {
+    if (jBody.method === "hello") {
       res.writeHead(200, {'Content-Type': 'application/json'});
       var answer = "(UNDEFINED)"
       var v3=jBody.params[0]
@@ -76,7 +76,7 @@ describe("HelloTest", function() {
       res.writeHead(200, {'Content-Type': 'application/json'});
       console.log ("      (HTTP) Returning off-chain response:", args, "->", sum)
       var jResp2 = {
-              "jsonrpc": "2.0",
+        "jsonrpc": "2.0",
         "id": jBody.id,
         "result": abiDecoder.encodeParameter('uint256', sum)
       }

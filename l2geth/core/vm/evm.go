@@ -18,8 +18,6 @@ package vm
 
 import (
 	"bytes"
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"math/big"
 	"strings"
@@ -124,7 +122,7 @@ func run(evm *EVM, contract *Contract, input []byte, readOnly bool) ([]byte, err
 		// OVM_ENABLED
 		// Only log for non `eth_call`s
 		if evm.Context.EthCallSender == nil {
-			log.Debug("Calling contract", "ID", evm.Id, "Address", contract.Address().Hex(), "Data", hexutil.Encode(input))
+			log.Debug("Calling contract", "Address", contract.Address().Hex(), "Data", hexutil.Encode(input))
 		}
 
 		// Uncomment to make Safety checker always returns true.
@@ -136,7 +134,7 @@ func run(evm *EVM, contract *Contract, input []byte, readOnly bool) ([]byte, err
 		if contract.Address() == evm.Context.OvmStateManager.Address {
 			// The caller must be the execution manager
 			if contract.Caller() != evm.Context.OvmExecutionManager.Address {
-				log.Error("StateManager called by non ExecutionManager", "ID", evm.Id, "caller", contract.Caller().Hex())
+				log.Error("StateManager called by non ExecutionManager", "caller", contract.Caller().Hex())
 				return nil, ErrOvmSandboxEscape
 			}
 			return callStateManager(input, evm, contract)
@@ -266,8 +264,6 @@ type EVM struct {
 	// available gas is calculated in gasCall* according to the 63/64 rule and later
 	// applied in opCall*.
 	callGasTemp uint64
-
-	Id string
 }
 
 // NewEVM returns a new EVM. The returned EVM is not thread safe and should
@@ -284,9 +280,6 @@ func NewEVM(ctx Context, statedb StateDB, chainConfig *params.ChainConfig, vmCon
 		ctx.OvmL2StandardBridge = chainConfig.StateDump.Accounts["OVM_L2StandardBridge"]
 	}
 
-	id := make([]byte, 4)
-	rand.Read(id)
-
 	evm := &EVM{
 		Context:      ctx,
 		StateDB:      statedb,
@@ -294,8 +287,6 @@ func NewEVM(ctx Context, statedb StateDB, chainConfig *params.ChainConfig, vmCon
 		chainConfig:  chainConfig,
 		chainRules:   chainConfig.Rules(ctx.BlockNumber),
 		interpreters: make([]Interpreter, 0, 1),
-
-		Id: hex.EncodeToString(id),
 	}
 
 	if chainConfig.IsEWASM(ctx.BlockNumber) {
@@ -640,7 +631,7 @@ log.Debug("MMDBG entering Call", "depth", evm.depth, "addr", addr, "input", hexu
 				}
 			}
 			if evm.Context.EthCallSender == nil {
-				log.Debug("Reached the end of an OVM execution", "ID", evm.Id, "Return Data", hexutil.Encode(ret), "Error", err)
+				log.Debug("Reached the end of an OVM execution", "Return Data", hexutil.Encode(ret), "Error", err)
 			}
 		}
 	}
@@ -879,7 +870,7 @@ func (evm *EVM) Create(caller ContractRef, code []byte, gas uint64, value *big.I
 		contractAddr = evm.OvmADDRESS()
 
 		if evm.Context.EthCallSender == nil {
-			log.Debug("[EM] Creating contract.", "ID", evm.Id, "New contract address", contractAddr.Hex(), "Caller Addr", caller.Address().Hex(), "Caller nonce", evm.StateDB.GetNonce(caller.Address()))
+			log.Debug("[EM] Creating contract.", "New contract address", contractAddr.Hex(), "Caller Addr", caller.Address().Hex(), "Caller nonce", evm.StateDB.GetNonce(caller.Address()))
 		}
 	}
 
@@ -905,7 +896,7 @@ func (evm *EVM) Create2(caller ContractRef, code []byte, gas uint64, endowment *
 		contractAddr = evm.OvmADDRESS()
 
 		if evm.Context.EthCallSender == nil {
-			log.Debug("[EM] Creating contract [create2].", "ID", evm.Id, "New contract address", contractAddr.Hex(), "Caller Addr", caller.Address().Hex(), "Caller nonce", evm.StateDB.GetNonce(caller.Address()))
+			log.Debug("[EM] Creating contract [create2].", "New contract address", contractAddr.Hex(), "Caller Addr", caller.Address().Hex(), "Caller nonce", evm.StateDB.GetNonce(caller.Address()))
 		}
 	}
 

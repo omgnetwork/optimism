@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.6.12;
+pragma solidity 0.6.12;
 
 import "hardhat/console.sol";
 
@@ -15,7 +15,7 @@ contract HelloTuring {
   mapping (address => string) locales;
   mapping (address => string) cachedGreetings;
 
-  constructor (address _helper) public {
+  constructor(address _helper) public {
     console.log("Deploying a contract with helper address:", _helper);
     helperAddr = _helper;
     myHelper = Helper(helperAddr);
