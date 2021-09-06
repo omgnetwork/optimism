@@ -1,9 +1,8 @@
 /* External Imports */
 import { Promise as bPromise } from 'bluebird'
-import { ethers, Contract, providers } from 'ethers'
+import { ethers, Contract, providers, BigNumber } from 'ethers'
 import { TransactionReceipt } from '@ethersproject/abstract-provider'
-import { getContractInterface, getContractFactory } from 'old-contracts'
-import { getContractInterface as getNewContractInterface } from '@eth-optimism/contracts'
+import { getContractInterface } from '@eth-optimism/contracts'
 import {
   L2Block,
   RollupInfo,
@@ -12,7 +11,6 @@ import {
   QueueOrigin,
 } from '@eth-optimism/core-utils'
 import { Logger, Metrics } from '@eth-optimism/common-ts'
-import { getBatchSignerAddress, getTransactionCount } from './provider-helper'
 
 /* Internal Imports */
 import {
@@ -23,7 +21,11 @@ import {
 } from '../transaction-chain-contract'
 
 import { BlockRange, BatchSubmitter, BatchSigner } from '.'
-import { TransactionSubmitter } from '../utils'
+import {
+  TransactionSubmitter,
+  AppendQueueBatch,
+  AppendSequencerBatch,
+} from '../utils'
 
 export interface AutoFixBatchOptions {
   fixDoublePlayedDeposits: boolean
@@ -113,14 +115,17 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       return
     }
 
-    const unwrapped_OVM_CanonicalTransactionChain = (
-      await getContractFactory('OVM_CanonicalTransactionChain', this.l1Provider)
-    ).attach(ctcAddress)
+    const unwrapped_OVM_CanonicalTransactionChain = new Contract(
+      ctcAddress,
+      getContractInterface('OVM_CanonicalTransactionChain'),
+      this.l1Provider
+    )
 
     this.chainContract = new CanonicalTransactionChainContract(
       unwrapped_OVM_CanonicalTransactionChain.address,
       getContractInterface('OVM_CanonicalTransactionChain'),
-      this.l1Provider
+      // this is OK because it only gets called when non-vault
+      this.batchSigner.signer
     )
     this.logger.info('Initialized new CTC', {
       address: this.chainContract.address,
@@ -233,10 +238,10 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       batchStart: batchParams.shouldStartAtElement,
       batchElements: batchParams.totalElementsToAppend,
     })
-    this.logger.info('Submitting batch.', {
-      calldata: batchParams,
-      l1tipHeight,
-    })
+    // this.logger.info('Submitting batch.', {
+    //   calldata: batchParams,
+    //   l1tipHeight,
+    // })
 
     return this.submitAppendSequencerBatch(batchParams)
   }
@@ -246,12 +251,22 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
    ********************/
 
   private async submitAppendQueueBatch(): Promise<TransactionReceipt> {
-    const tx = await this.chainContract.populateTransaction.appendQueueBatch(
-      ethers.constants.MaxUint256 // Completely empty the queue by appending (up to) an enormous number of queue elements.
-    )
+     const appendQueueBatch = (
+      appendQueueBatchArg: Function,
+      numQueuedTransactionsArg: BigNumber
+    ): AppendQueueBatch => {
+      return {
+        appendQueueBatch: appendQueueBatchArg,
+        numQueuedTransactions: numQueuedTransactionsArg,
+        type: 'AppendQueueBatch',
+      }
+    }
     const submitTransaction = (): Promise<TransactionReceipt> => {
       return this.transactionSubmitter.submitTransaction(
-        tx,
+        appendQueueBatch(
+          this.chainContract.populateTransaction.appendQueueBatch,
+          ethers.constants.MaxUint256
+        ),
         this._makeHooks('appendQueueBatch')
       )
     }
@@ -262,13 +277,23 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
   private async submitAppendSequencerBatch(
     batchParams: AppendSequencerBatchParams
   ): Promise<TransactionReceipt> {
-    const tx =
-      await this.chainContract.customPopulateTransaction.appendSequencerBatch(
-        batchParams
-      )
+    const appendSequencerBatch = (
+      appendSequencerBatchArg: Function,
+      batchParamsArg: any
+    ): AppendSequencerBatch => {
+      return {
+        appendSequencerBatch: appendSequencerBatchArg,
+        batchParams: batchParamsArg,
+        type: 'AppendSequencerBatch',
+      }
+    }
+
     const submitTransaction = (): Promise<TransactionReceipt> => {
       return this.transactionSubmitter.submitTransaction(
-        tx,
+        appendSequencerBatch(
+          this.chainContract.customPopulateTransaction.appendSequencerBatch,
+          batchParams
+        ),
         this._makeHooks('appendSequencerBatch')
       )
     }
@@ -609,7 +634,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
   }> {
     const manager = new Contract(
       this.addressManagerAddress,
-      getNewContractInterface('Lib_AddressManager'),
+      getContractInterface('Lib_AddressManager'),
       this.l1Provider
     )
 
@@ -618,7 +643,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     )
     const container = new Contract(
       addr,
-      getNewContractInterface('iOVM_ChainStorageContainer'),
+      getContractInterface('iOVM_ChainStorageContainer'),
       this.l1Provider
     )
 

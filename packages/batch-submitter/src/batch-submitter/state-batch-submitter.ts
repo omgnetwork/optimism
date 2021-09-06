@@ -2,7 +2,7 @@
 import { Promise as bPromise } from 'bluebird'
 import { Contract, providers } from 'ethers'
 import { TransactionReceipt } from '@ethersproject/abstract-provider'
-import { getContractFactory } from 'old-contracts'
+import { getContractInterface } from '@eth-optimism/contracts'
 import {
   L2Block,
   RollupInfo,
@@ -13,7 +13,7 @@ import { Logger, Metrics } from '@eth-optimism/common-ts'
 import { getBatchSignerAddress, getTransactionCount } from './provider-helper'
 /* Internal Imports */
 import { BlockRange, BatchSubmitter, BatchSigner } from '.'
-import { TransactionSubmitter } from '../utils'
+import { TransactionSubmitter, AppendStateBatch } from '../utils'
 
 export class StateBatchSubmitter extends BatchSubmitter {
   // TODO: Change this so that we calculate start = scc.totalElements() and end = ctc.totalElements()!
@@ -95,12 +95,17 @@ export class StateBatchSubmitter extends BatchSubmitter {
       return
     }
 
-    this.chainContract = (
-      await getContractFactory('OVM_StateCommitmentChain', this.l1Provider)
-    ).attach(sccAddress)
-    this.ctcContract = (
-      await getContractFactory('OVM_CanonicalTransactionChain', this.l1Provider)
-    ).attach(ctcAddress)
+    this.chainContract = new Contract(
+      sccAddress,
+      getContractInterface('OVM_StateCommitmentChain'),
+      this.l1Provider
+    )
+
+    this.ctcContract = new Contract(
+      ctcAddress,
+      getContractInterface('OVM_CanonicalTransactionChain'),
+      this.l1Provider
+    )
 
     this.logger.info('Connected Optimism contracts', {
       stateCommitmentChain: this.chainContract.address,
@@ -171,17 +176,27 @@ export class StateBatchSubmitter extends BatchSubmitter {
       return
     }
 
-    const offsetStartsAtIndex = startBlock - this.blockOffset
     this.logger.debug('Submitting batch.', { calldata })
-
-    // Generate the transaction we will repeatedly submit
-    const tx = await this.chainContract.populateTransaction.appendStateBatch(
-      batch,
-      offsetStartsAtIndex
-    )
+    const offsetStartsAtIndex = startBlock - this.blockOffset
     const submitTransaction = (): Promise<TransactionReceipt> => {
+      const appendStateBatch = (
+        appendStateBatchArg: Function,
+        batchArg: any[],
+        offsetStartsAtIndexArg: number
+      ): AppendStateBatch => {
+        return {
+          appendStateBatch: appendStateBatchArg,
+          batch: batchArg,
+          offsetStartsAtIndex: offsetStartsAtIndexArg,
+          type: 'AppendStateBatch',
+        }
+      }
       return this.transactionSubmitter.submitTransaction(
-        tx,
+        appendStateBatch(
+          this.chainContract.populateTransaction.appendStateBatch,
+          batch,
+          offsetStartsAtIndex
+        ),
         this._makeHooks('appendStateBatch')
       )
     }

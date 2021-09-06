@@ -14,7 +14,6 @@ import { BatchSigner } from '../batch-submitter/batch-submitter'
 import {
   getBatchSignerAddress,
   getTransactionCountBlock,
-  sendTransaction,
 } from '../batch-submitter/provider-helper'
 /* Internal Imports */
 import {
@@ -155,21 +154,30 @@ export const run = async () => {
       await l1ProviderTmp.send('hardhat_impersonateAccount', [
         DEBUG_IMPERSONATE_SEQUENCER_ADDRESS,
       ])
-      return {signer: l1ProviderTmp.getSigner(DEBUG_IMPERSONATE_SEQUENCER_ADDRESS), address: undefined}
+      return {
+        signer: l1ProviderTmp.getSigner(DEBUG_IMPERSONATE_SEQUENCER_ADDRESS),
+        address: undefined,
+      }
     }
 
+    // if the SEQUENCER_ADDRESS is present
+    // it takes precedence over a sequencer private key
+    // this means all eth transactions go through the vault
     if (SEQUENCER_ADDRESS) {
-      return {signer: undefined, address: SEQUENCER_ADDRESS};
-    }
-    else if (SEQUENCER_PRIVATE_KEY) {
+      console.log('VAULT IN BATCH SUBMITTER ENABLED for sequencer')
+      return { signer: undefined, address: SEQUENCER_ADDRESS }
+    } else if (SEQUENCER_PRIVATE_KEY) {
+      console.log('SEQUENCER_PRIVATE_KEY')
       return {
         signer: new Wallet(SEQUENCER_PRIVATE_KEY, l1ProviderTmp),
         address: undefined,
       }
     } else if (SEQUENCER_MNEMONIC) {
-      return {signer: Wallet.fromMnemonic(SEQUENCER_MNEMONIC, SEQUENCER_HD_PATH).connect(
-        l1ProviderTmp
-      ), address: undefined}
+      const sig = Wallet.fromMnemonic(
+        SEQUENCER_MNEMONIC,
+        SEQUENCER_HD_PATH
+      ).connect(l1ProviderTmp)
+      return { signer: sig, address: undefined }
     }
     throw new Error(
       'Must pass one of SEQUENCER_PRIVATE_KEY, MNEMONIC, SEQUENCER_MNEMONIC or SEQUENCER_ADDRESS'
@@ -194,18 +202,23 @@ export const run = async () => {
       }
     }
 
+    // if the PROPOSER_ADDRESS is present
+    // it takes precedence over a sequencer private key
+    // this means all eth transactions go through the vault
     if (PROPOSER_ADDRESS) {
+      console.log('VAULT IN BATCH SUBMITTER ENABLED')
       return { address: PROPOSER_ADDRESS, signer: undefined }
-    }
-    else if (PROPOSER_PRIVATE_KEY) {
+    } else if (PROPOSER_PRIVATE_KEY) {
       return {
         signer: new Wallet(PROPOSER_PRIVATE_KEY, l1ProviderTmp),
         address: undefined,
       }
     } else if (PROPOSER_MNEMONIC) {
-      return { signer: Wallet.fromMnemonic(PROPOSER_MNEMONIC, PROPOSER_HD_PATH).connect(
-        l1ProviderTmp
-      ), address: undefined }
+      const sig = Wallet.fromMnemonic(
+        PROPOSER_MNEMONIC,
+        PROPOSER_HD_PATH
+      ).connect(l1ProviderTmp)
+      return { signer: sig, address: undefined }
     }
     throw new Error(
       'Must pass one of PROPOSER_PRIVATE_KEY, MNEMONIC, PROPOSER_MNEMONIC or PROPOSER_ADDRESS'
@@ -415,7 +428,8 @@ export const run = async () => {
   const txBatchTxSubmitter: TransactionSubmitter =
     //TODO INO ynatm needs to get BatchSigner passed in and decide what to do with the transaction (figure out the route)
     new YnatmTransactionSubmitter(
-      sequencerSigner.signer,
+      sequencerSigner,
+      l1Provider,
       resubmissionConfig,
       requiredEnvVars.NUM_CONFIRMATIONS
     )
@@ -443,10 +457,12 @@ export const run = async () => {
   const stateBatchTxSubmitter: TransactionSubmitter =
     //TODO INO ynatm needs to get BatchSigner passed in and decide what to do with the transaction (figure out the route)
     new YnatmTransactionSubmitter(
-      proposerSigner.signer,
+      proposerSigner,
+      l1Provider,
       resubmissionConfig,
       requiredEnvVars.NUM_CONFIRMATIONS
     )
+
   const stateBatchSubmitter = new StateBatchSubmitter(
     proposerSigner,
     l1Provider,
@@ -473,17 +489,27 @@ export const run = async () => {
   ): Promise<void> => {
     // Clear all pending transactions
     if (clearPendingTxs) {
+      //https://github.com/ethereum-optimism/batch-submitter/pull/17
+      //this seems to be a develop-debug feature chunk of code
+      //and it wont work with Vault
       try {
         const address = await getBatchSignerAddress(sequencerSigner)
-        const pendingTxs = await getTransactionCountBlock(l1Provider, address, 'pending')
-        const latestTxs = await getTransactionCountBlock(l1Provider, address, 'latest')
+        const pendingTxs = await getTransactionCountBlock(
+          l1Provider,
+          address,
+          'pending'
+        )
+        const latestTxs = await getTransactionCountBlock(
+          l1Provider,
+          address,
+          'latest'
+        )
         if (pendingTxs > latestTxs) {
           logger.info(
             'Detected pending transactions. Clearing all transactions!'
           )
           for (let i = latestTxs; i < pendingTxs; i++) {
-            //this needs to be implement on the vault!
-            const response = await sendTransaction(sequencerSigner, {
+            const response = await sequencerSigner.signer.sendTransaction({
               to: address,
               value: 0,
               nonce: i,

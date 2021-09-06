@@ -41,13 +41,12 @@ vault policy write append-state-batch-proposer append-state-batch-proposer.hcl
 node index.js $ACCOUNT0
 node index.js $ACCOUNT1
 echo "Creating tokens helper file"
-rm $DIR/tokens.sh || true
-touch $DIR/tokens.sh
+rm $DIR/tokens_and_accounts.sh || true
+touch $DIR/tokens_and_accounts.sh
 PROPOSER_TOKEN=$(vault token create -field=token -period=10m -policy=append-state-batch-proposer)
 SEQUENCER_TOKEN=$(vault token create -field=token -period=10m -policy=append-sequencer-batch)
-echo "#!/bin/bash" >> $DIR/tokens.sh
-echo "export PROPOSER_TOKEN=$PROPOSER_TOKEN" >> $DIR/tokens.sh
-echo "export SEQUENCER_TOKEN=$SEQUENCER_TOKEN" >> $DIR/tokens.sh
-echo "export SEQUENCER_ADDRESS=$ACCOUNT0" >> $DIR/tokens.sh
-echo "export PROPOSER_ADDRESS=$ACCOUNT1" >> $DIR/tokens.sh
-cat $DIR/tokens.sh
+echo "export PROPOSER_TOKEN=$PROPOSER_TOKEN" >> $DIR/tokens_and_accounts.sh
+echo "export SEQUENCER_TOKEN=$SEQUENCER_TOKEN" >> $DIR/tokens_and_accounts.sh
+echo "export SEQUENCER_ADDRESS=$ACCOUNT0" >> $DIR/tokens_and_accounts.sh
+echo "export PROPOSER_ADDRESS=$ACCOUNT1" >> $DIR/tokens_and_accounts.sh
+cat $DIR/tokens_and_accounts.sh

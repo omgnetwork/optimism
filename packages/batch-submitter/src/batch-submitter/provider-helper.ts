@@ -1,5 +1,6 @@
 import { BatchSigner } from '.'
-import {providers} from 'ethers'
+
+import { providers } from 'ethers'
 
 export const getBalance = async (
   provider: providers.JsonRpcProvider,
@@ -13,7 +14,7 @@ export const getBatchSignerAddress = async (
 ): Promise<string> => {
   if (batchSigner.address === undefined) {
     return batchSigner.signer.getAddress()
-  } else{
+  } else {
     return batchSigner.address
   }
 }
@@ -32,12 +33,3 @@ export const getTransactionCountBlock = async (
 ) => {
   return provider.getTransactionCount(address, block)
 }
-
-export const sendTransaction = async (batchSigner: BatchSigner, obj: any) => {
-  //if (batchSigner.address === undefined) {
-  return batchSigner.signer.sendTransaction(obj)
-  //} else{
-    //TODO call vault!
-  //}
-}
-

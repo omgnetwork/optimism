@@ -1,10 +1,11 @@
-import { Signer, utils, ethers, PopulatedTransaction } from 'ethers'
+import { Signer, utils, ethers, PopulatedTransaction, BigNumber } from 'ethers'
 import {
   TransactionReceipt,
   TransactionResponse,
 } from '@ethersproject/abstract-provider'
 import * as ynatm from '@eth-optimism/ynatm'
-
+import { BatchSigner } from '../batch-submitter/batch-submitter'
+import { StaticJsonRpcProvider } from '@ethersproject/providers'
 export interface ResubmissionConfig {
   resubmissionTimeout: number
   minGasPriceInGwei: number
@@ -12,25 +13,43 @@ export interface ResubmissionConfig {
   gasRetryIncrement: number
 }
 
-export type SubmitTransactionFn = (
-  tx: PopulatedTransaction
-) => Promise<TransactionReceipt>
+export interface AppendQueueBatch {
+  appendQueueBatch: Function
+  numQueuedTransactions: BigNumber
+  type: 'AppendQueueBatch'
+}
+
+export interface AppendStateBatch {
+  appendStateBatch: Function
+  batch: any[]
+  offsetStartsAtIndex: number
+  type: 'AppendStateBatch'
+}
+
+export interface AppendSequencerBatch {
+  appendSequencerBatch: Function
+  batchParams: any
+  type: 'AppendSequencerBatch'
+}
 
 export interface TxSubmissionHooks {
   beforeSendTransaction: (tx: PopulatedTransaction) => void
   onTransactionResponse: (txResponse: TransactionResponse) => void
 }
 
-const getGasPriceInGwei = async (signer: Signer): Promise<number> => {
+const getGasPriceInGwei = async (
+  provider: StaticJsonRpcProvider
+): Promise<number> => {
   return parseInt(
-    ethers.utils.formatUnits(await signer.getGasPrice(), 'gwei'),
+    ethers.utils.formatUnits(await provider.getGasPrice(), 'gwei'),
     10
   )
 }
 
 export const submitTransactionWithYNATM = async (
-  tx: PopulatedTransaction,
-  signer: Signer,
+  call: AppendQueueBatch | AppendStateBatch | AppendSequencerBatch,
+  batchSigner: BatchSigner,
+  provider: StaticJsonRpcProvider,
   config: ResubmissionConfig,
   numConfirmations: number,
   hooks: TxSubmissionHooks
@@ -38,18 +57,38 @@ export const submitTransactionWithYNATM = async (
   const sendTxAndWaitForReceipt = async (
     gasPrice
   ): Promise<TransactionReceipt> => {
+    let tx
+    //if (batchSigner.address === undefined) {
+    if (call.type === 'AppendQueueBatch') {
+      tx = await call.appendQueueBatch(tx.appendQueueBatch)
+      console.log('AppendQueueBatch')
+      console.log(tx)
+    } else if (call.type === 'AppendStateBatch') {
+      tx = await call.appendStateBatch(call.batch, call.offsetStartsAtIndex)
+      console.log('AppendStateBatch')
+      console.log(tx)
+    } else if (call.type === 'AppendSequencerBatch') {
+      tx = await call.appendSequencerBatch(call.batchParams)
+      console.log('AppendSequencerBatch')
+      console.log(tx)
+    }
     const fullTx = {
       ...tx,
       gasPrice,
     }
+    console.log('fullTx')
+    console.log(fullTx)
     hooks.beforeSendTransaction(fullTx)
-    //at this poinmt we need to decide if this is going through the Vault or straight to the Ethereum client
-    const txResponse = await signer.sendTransaction(fullTx)
+    const txResponse = await batchSigner.signer.sendTransaction(fullTx)
+    console.log('txresponse')
+    console.log(txResponse)
     hooks.onTransactionResponse(txResponse)
-    return signer.provider.waitForTransaction(txResponse.hash, numConfirmations)
-  }
+    return provider.waitForTransaction(txResponse.hash, numConfirmations)
+    // } else {
+    // }
+}
 
-  const minGasPrice = await getGasPriceInGwei(signer)
+  const minGasPrice = await getGasPriceInGwei(provider)
   const receipt = await ynatm.send({
     sendTransactionFunction: sendTxAndWaitForReceipt,
     minGasPrice: ynatm.toGwei(minGasPrice),
@@ -62,20 +101,21 @@ export const submitTransactionWithYNATM = async (
 
 export interface TransactionSubmitter {
   submitTransaction(
-    tx: PopulatedTransaction,
+    tx: AppendQueueBatch | AppendStateBatch | AppendSequencerBatch,
     hooks?: TxSubmissionHooks
   ): Promise<TransactionReceipt>
 }
 
 export class YnatmTransactionSubmitter implements TransactionSubmitter {
   constructor(
-    readonly signer: Signer,
+    readonly batchSigner: BatchSigner,
+    readonly provider: StaticJsonRpcProvider,
     readonly ynatmConfig: ResubmissionConfig,
     readonly numConfirmations: number
   ) {}
 
   public async submitTransaction(
-    tx: PopulatedTransaction,
+    tx: AppendQueueBatch | AppendStateBatch | AppendSequencerBatch,
     hooks?: TxSubmissionHooks
   ): Promise<TransactionReceipt> {
     if (!hooks) {
@@ -86,7 +126,8 @@ export class YnatmTransactionSubmitter implements TransactionSubmitter {
     }
     return submitTransactionWithYNATM(
       tx,
-      this.signer,
+      this.batchSigner,
+      this.provider,
       this.ynatmConfig,
       this.numConfirmations,
       hooks

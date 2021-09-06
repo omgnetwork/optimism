@@ -23,6 +23,7 @@ export class CanonicalTransactionChainContract extends Contract {
     appendSequencerBatch: async (
       batch: AppendSequencerBatchParams
     ): Promise<ethers.PopulatedTransaction> => {
+      //this is only called in non-vault case
       const nonce = await this.signer.getTransactionCount()
       const to = this.address
       const data = getEncodedCalldata(batch)

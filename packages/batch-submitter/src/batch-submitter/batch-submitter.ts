@@ -13,7 +13,7 @@ import {
 import { Gauge, Histogram, Counter } from 'prom-client'
 import { RollupInfo, sleep } from '@eth-optimism/core-utils'
 import { Logger, Metrics } from '@eth-optimism/common-ts'
-import { getContractFactory } from 'old-contracts'
+import { getContractInterface } from '@eth-optimism/contracts'
 import { getBalance, getBatchSignerAddress } from './provider-helper'
 
 export interface BatchSigner {
@@ -22,7 +22,7 @@ export interface BatchSigner {
   signer: Signer
 }
 /* Internal Imports */
-import { TxSubmissionHooks } from '..'
+import { TxSubmissionHooks, AppendStateBatch } from '..'
 
 export interface BlockRange {
   start: number
@@ -145,12 +145,11 @@ export abstract class BatchSubmitter {
     ctcAddress: string
     sccAddress: string
   }> {
-    const addressManager = (
-      await getContractFactory(
-        'Lib_AddressManager',
-        getBatchSignerAddress(this.batchSigner)
-      )
-    ).attach(this.addressManagerAddress)
+    const addressManager = new Contract(
+      this.addressManagerAddress,
+      getContractInterface('Lib_AddressManager'),
+      this.l1Provider
+    )
     const sccAddress = await addressManager.getAddress(
       'OVM_StateCommitmentChain'
     )
