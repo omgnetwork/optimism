@@ -76,13 +76,28 @@ function Account () {
   },[tokenList,dispatch])
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual)
+  //console.log("Transactions:",unorderedTransactions)
   
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
+  console.log("orderedTransactions:",orderedTransactions)
   
-  const pending = orderedTransactions.filter((i) => {
-      if (i.crossDomainMessage &&
+  const pendingL1 = orderedTransactions.filter((i) => {
+      if (i.chain === 'L1pending' &&
+          i.crossDomainMessage &&
           i.crossDomainMessage.crossDomainMessage === 1 &&
-          i.crossDomainMessage.crossDomainMessageFinailze === 0 &&
+          i.crossDomainMessage.crossDomainMessageFinalize === 0 &&
+          i.deposit.status === "pending"
+      ) {
+          return true
+      }
+      return false
+  })
+
+  const pendingL2 = orderedTransactions.filter((i) => {
+      if (i.chain === 'L2' &&
+          i.crossDomainMessage &&
+          i.crossDomainMessage.crossDomainMessage === 1 &&
+          i.crossDomainMessage.crossDomainMessageFinalize === 0 &&
           i.exit.status === "pending"
       ) {
           return true
@@ -90,7 +105,10 @@ function Account () {
       return false
   })
 
+
+
   console.log("Pending:", pending.length)
+  console.log("Pending:", pending)
 
   const getGasPrice = useCallback(() => {
     dispatch(fetchGas({

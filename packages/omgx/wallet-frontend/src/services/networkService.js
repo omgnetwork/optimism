@@ -779,34 +779,69 @@ class NetworkService {
     console.log("Getting transactions...")
     
     let txL1
+    let txL1pending
     let txL2
+
+    //console.log("trying")
 
     const responseL1 = await etherScanInstance(
       this.masterSystemConfig,
       'L1'
     ).get(`&address=${this.account}`)
 
+    //console.log("responseL1",responseL1)
+
     if (responseL1.status === 200) {
       const transactionsL1 = await responseL1.data
       if (transactionsL1.status === '1') {
         //thread in ChainID
-        txL1 = transactionsL1.result.map(v => ({...v, chain: 'L1'}))
+        txL1 = transactionsL1.result.map(v => ({
+          ...v,
+          blockNumber: parseInt(v.blockNumber), //fix bug - sometimes this is string, sometimes an integer
+          timeStamp: parseInt(v.timeStamp),     //fix bug - sometimes this is string, sometimes an integer 
+          chain: 'L1'
+        }))
+        //console.log("txL1",txL1)
         //return transactions.result
       }
     }
 
     const responseL2 = await omgxWatcherAxiosInstance(
       this.masterSystemConfig
-    ).post('get.transaction', {
+    ).post('get.l2.transactions', {
       address: this.account,
-      fromRange: 0,
+      fromRange:  0,
       toRange: 1000,
     })
 
     if (responseL2.status === 201) {
       //add the chain: 'L2' field 
       txL2 = responseL2.data.map(v => ({...v, chain: 'L2'}))
-      const annotated = await this.parseTransaction( [...txL1, ...txL2] )
+      //console.log("txL2",txL2)
+      //const annotated = await this.parseTransaction( [...txL1, ...txL2] )
+      //return annotated
+    }
+
+    const responseL1pending = await omgxWatcherAxiosInstance(
+      this.masterSystemConfig
+    ).post('get.l1.transactions', {
+      address: this.account,
+      fromRange:  0,
+      toRange: 1000,
+    })
+
+    if (responseL1pending.status === 201) {
+      //add the chain: 'L1pending' field 
+      txL1pending = responseL1pending.data.map(v => ({...v, chain: 'L1pending'}))
+      //console.log("txL1pending",txL1pending)
+      const annotated = await this.parseTransaction( 
+        [
+          ...txL1, 
+          ...txL2,
+          ...txL1pending //the new data product
+        ]
+      )
+      //console.log("annotated:",annotated)
       return annotated
     }
 
@@ -909,10 +944,10 @@ class NetworkService {
 
     const response = await omgxWatcherAxiosInstance(
       this.masterSystemConfig
-    ).post('get.transaction', {
+    ).post('get.l2.transactions', {
       address: this.account,
-      fromRange: 0,
-      toRange: 100,
+      fromRange:  0,
+      toRange: 1000,
     })
     if (response.status === 201) {
       const transactions = response.data
