@@ -35,13 +35,13 @@ function PendingTransaction() {
     const unorderedTransactions = useSelector(selectTransactions, isEqual)
     const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
 
-    console.log("orderedTransactions:",orderedTransactions)
+    //console.log("orderedTransactions:",orderedTransactions)
 
     const pending = orderedTransactions.filter((i) => {
         if (i.crossDomainMessage &&
             i.crossDomainMessage.crossDomainMessage === 1 &&
             i.crossDomainMessage.crossDomainMessageFinalize === 0 &&
-            i.exit.status === "pending"
+            i.action.status === "pending"
         ) {
             return true
         }
@@ -49,7 +49,7 @@ function PendingTransaction() {
     })
 
     let pendingL1 = pending.filter((i) => {
-        if (i.chain === 'L1') return true
+        if (i.chain === 'L1pending') return true
         return false
     })
 
@@ -60,7 +60,7 @@ function PendingTransaction() {
 
     //Part 1 - exit that is not final and we do not have a state root hash yet
     let pendingExitsStage0 = pendingL2.filter((i) => {
-        if (!i.stateRoot.stateRootHash && i.exit.fastRelay) return true
+        if (!i.stateRoot.stateRootHash && i.action.fast) return true
         return false
     })
     pendingExitsStage0 = pendingExitsStage0.map(v => ({
@@ -71,7 +71,7 @@ function PendingTransaction() {
 
     //Part 2 - exit that is not final, but we have a state root hash
     let pendingExitsStage1 = pendingL2.filter((i) => {
-        if (i.stateRoot.stateRootHash && i.exit.fastRelay) return true
+        if (i.stateRoot.stateRootHash && i.action.fast) return true
         return false
     })
     pendingExitsStage1 = pendingExitsStage1.map(v => ({
@@ -82,57 +82,45 @@ function PendingTransaction() {
 
     //Part 3 - exit that is not final, but we have a state root hash, and we ARE NOT using the fast message relayer
     //so this is a traditional exit 
-    let pendingTradExits = pendingL2.filter((i) => {
-        if (i.stateRoot.stateRootHash && !i.exit.fastRelay) return true
+    let pendingExitsTrad = pendingL2.filter((i) => {
+        if (i.stateRoot.stateRootHash && !i.action.fast) return true
         return false
     })
-    pendingTradExits = pendingTradExits.map(v => ({
+    pendingExitsTrad = pendingExitsTrad.map(v => ({
         ...v,label: 'L2->L1 Trad Exit',labelStatus: 'In 7 day window',
         completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
       })
     )
 
     //DEPOSIT Part 1 - deposit that is not final and we do not have a state root hash yet
-    let pendingDepositsStage0 = pendingL1.filter((i) => {
-        if (!i.stateRoot.stateRootHash && i.exit.fastRelay) return true
+    let pendingDepositsFast = pendingL1.filter((i) => {
+        if (i.action.fast) return true
         return false
     })
-    pendingDepositsStage0 = pendingDepositsStage0.map(v => ({
-        ...v,label: 'L1->L2 Fast Deposit',labelStatus: 'Step 0, No SR Hash yet, Pending',
-        completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
-      })
-    )
-
-    //DEPOSIT Part 2 - deposit that is not final but we have a state root hash
-    let pendingDepositsStage1 = pendingL1.filter((i) => {
-        if (i.stateRoot.stateRootHash && i.exit.fastRelay) return true
-        return false
-    })
-    pendingDepositsStage1 = pendingDepositsStage1.map(v => ({
-        ...v,label: 'L1->L2 Fast Deposit',labelStatus: 'Step 1, Have SR Hash, Pending',
+    pendingDepositsFast = pendingDepositsFast.map(v => ({
+        ...v,label: 'L1->L2 Fast Deposit',labelStatus: 'Pending',
         completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
       })
     )
 
     //DEPOSIT Part 3 - deposit is not final, but we have a state root hash, and we ARE NOT using the fast message relayer
     //so this is a traditional deposit 
-    let pendingTradDeposits = pendingL1.filter((i) => {
-        if (i.stateRoot.stateRootHash && !i.exit.fastRelay) return true
+    let pendingDepositsTrad = pendingL1.filter((i) => {
+        if (!i.action.fast) return true
         return false
     })
-    pendingTradDeposits = pendingTradDeposits.map(v => ({
-        ...v, label: 'L1->L2 Trad Deposit', labelStatus: 'In progress',
+    pendingDepositsTrad = pendingDepositsTrad.map(v => ({
+        ...v, label: 'L1->L2 Trad Deposit', labelStatus: 'Pending',
         completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
       })
     )
 
     const pendingTransactions = [
-        ...pendingTradExits,
+        ...pendingExitsTrad,
         ...pendingExitsStage0,
         ...pendingExitsStage1,
-        ...pendingTradDeposits,
-        ...pendingDepositsStage0,
-        ...pendingDepositsStage1
+        ...pendingDepositsTrad,
+        ...pendingDepositsFast
     ]
 
     const startingIndex = page === 1 ? 0 : ((page - 1) * PER_PAGE);
@@ -151,7 +139,7 @@ function PendingTransaction() {
     const theme = useTheme();
 
     const chainLink = (item) => {
-        let network = nw[currentNetwork];
+        let network = nw[currentNetwork]
         if (!!network && !!network[item.chain]) {
             // network object should have L1 & L2
             if (item.chain === 'L1') {
@@ -215,29 +203,6 @@ function PendingTransaction() {
                     completionTime = moment.unix(i.completion).format('lll')
 
                 let link = chainLink(i)
-
-/*
-blockHash: "0xf37d45a2601a75024ab35210bc18061eb726ef2e4a9d94530ed68c2b9c914012"
-blockNumber: "9246425"
-chain: "L1"
-confirmations: "3"
-contractAddress: ""
-cumulativeGasUsed: "2384972"
-from: "0x4161aef7ac9f8772b83cda1e5f054ade308d9049"
-gas: "506029"
-gasPrice: "2000000000"
-gasUsed: "487835"
-hash: "0x46d9849c32a1910f8ba4bc8e9b4e14d721e2c202667354dfdb3f64ed72db9fe0"
-input: "0xb1a1a8820000000000000000000000000000000000000000000000000000000000989680000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000203136333039353032383731373500000000000000000000000000000000000000"
-isError: "0"
-nonce: "8"
-timeStamp: "1630950306"
-to: "0xde085c82536a06b40d20654c2aba342f2abd7077"
-transactionIndex: "17"
-txreceipt_status: "1"
-typeTX: "Traditional"
-value: "10000000000000000"
-*/
 
                 return <Grid
                     key={i.hash}

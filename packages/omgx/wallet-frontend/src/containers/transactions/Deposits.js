@@ -26,9 +26,7 @@ import Transaction from 'components/transaction/Transaction'
 import networkService from 'services/networkService'
 
 import * as styles from './Transactions.module.scss'
-
 import * as S from './history.styles';
-import { TransactionHeadList } from './TransactionHeadList'
 
 const PER_PAGE = 10;
 
@@ -73,15 +71,6 @@ function Deposits({ searchHistory, transactions, chainLink }) {
         />
 
         <Grid item xs={12}>
-          <S.TableHeading>
-            {TransactionHeadList.map((item,headIndex) => {
-              return (
-                <S.TableHeadingItem key={headIndex} variant="body2" component="div" >
-                  {item.label}
-                </S.TableHeadingItem>
-              )
-            })}
-          </S.TableHeading>
           <Box>
             <S.Content>
               {!paginatedDeposits.length && !loading && (

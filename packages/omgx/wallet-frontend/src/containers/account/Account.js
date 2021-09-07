@@ -79,14 +79,14 @@ function Account () {
   //console.log("Transactions:",unorderedTransactions)
   
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
-  console.log("orderedTransactions:",orderedTransactions)
+  //console.log("orderedTransactions:",orderedTransactions)
   
   const pendingL1 = orderedTransactions.filter((i) => {
-      if (i.chain === 'L1pending' &&
+      if (i.chain === 'L1pending' && //use the custom API watcher for fast data on pending L1->L2 TXs
           i.crossDomainMessage &&
           i.crossDomainMessage.crossDomainMessage === 1 &&
           i.crossDomainMessage.crossDomainMessageFinalize === 0 &&
-          i.deposit.status === "pending"
+          i.action.status === "pending"
       ) {
           return true
       }
@@ -98,16 +98,19 @@ function Account () {
           i.crossDomainMessage &&
           i.crossDomainMessage.crossDomainMessage === 1 &&
           i.crossDomainMessage.crossDomainMessageFinalize === 0 &&
-          i.exit.status === "pending"
+          i.action.status === "pending"
       ) {
           return true
       }
       return false
   })
 
+  const pending = [
+    ...pendingL1,
+    ...pendingL2
+  ]
 
-
-  console.log("Pending:", pending.length)
+  //console.log("Pending:", pending.length)
   console.log("Pending:", pending)
 
   const getGasPrice = useCallback(() => {
