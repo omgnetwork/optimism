@@ -31,7 +31,7 @@
     timestamp: "BLOCK_TIMESTAMP",
     contractName: "CONTRACT_NAME", // L1StandardBridge or L1LiquidityPool
     contractAddress: "CONTRACT_ADDRESS", // Contract address
-    activity: "ACTIVITY" // event names (ETHDepositInitiated, ERC20DepositInitiated, ClientDepositL1, etc.)
+    activity: "ACTIVITY", // event names (ETHDepositInitiated, ERC20DepositInitiated, ClientDepositL1, etc.)
     depositL2: "DEPOSIT_L2", // True or False
     crossDomainMessage: {
       crossDomainMessage: "CROSS_DOMAIN_MESSAGE", // whether the transaction sent cross domain message
