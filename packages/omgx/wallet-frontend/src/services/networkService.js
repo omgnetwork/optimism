@@ -2101,6 +2101,22 @@ class NetworkService {
     }
   }
 
+  //Cast vote for proposal 
+  async castProposalVote({id, userVote}) {
+    try {
+      
+      const delegateCheck = await this.delegate.attach(this.delegator.address);
+      let res = delegateCheck.castVote(id, userVote, {
+        gasPrice: 15000000,
+        gasLimit: 8000000
+      });
+      return res;
+    } catch(error) {
+      console.log('Error: cast vote', error);
+      throw new Error(error.message);
+    }
+  }
+
 }
 
 const networkService = new NetworkService()

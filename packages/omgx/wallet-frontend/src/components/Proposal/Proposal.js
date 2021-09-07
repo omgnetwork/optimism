@@ -17,21 +17,19 @@ import React, { useState, useEffect } from 'react';
 import { utils } from 'ethers';
 import { useDispatch } from 'react-redux';
 
-import { openAlert } from 'actions/uiAction';
+import { openAlert, openError } from 'actions/uiAction';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Button from 'components/button/Button';
 
 import * as styles from './Proposal.module.scss';
 import networkService from 'services/networkService';
+import { castProposalVote } from 'actions/daoAction';
 
 function Proposal({
-    id,
     proposal,
 }) {
     const dispatch = useDispatch()
-
-    const { delegate } = networkService
 
     const [dropDownBox, setDropDownBox] = useState(false)
     const [dropDownBoxInit, setDropDownBoxInit] = useState(true)
@@ -51,11 +49,13 @@ function Proposal({
     }, [proposal])
 
 
-    const updateVote = async (e, userVote, label) => {
-        console.log('update vote');
-        await delegate.castVote(id, userVote);
-        // show alert
-        dispatch(openAlert(`${label}`));
+    const updateVote = async (id, userVote, label) => {
+        let res = await dispatch(castProposalVote({id, userVote}));
+        if(res) {
+            dispatch(openAlert(`${label}`));
+        } else {
+            dispatch(openError(`Failed to cast vote!`));
+        }
     }
 
     return (<div
@@ -71,7 +71,8 @@ function Proposal({
                 onClick={() => {
                     setDropDownBox(!dropDownBox);
                     setDropDownBoxInit(false);
-                }}>
+                }}
+            >
                 <div className={styles.proposalHeader}>
                     <div className={styles.title}>
                         <p>Proposal #{proposal.id}</p>
@@ -92,7 +93,8 @@ function Proposal({
         }
 
         {proposal.state !== 'Active' &&
-            <div>
+            <div
+            >
                 <div className={styles.proposalHeader}>
                     <div className={styles.title}>
                         <p>Proposal #{proposal.id}</p>
@@ -114,7 +116,8 @@ function Proposal({
         <div className={dropDownBox ? styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}>
             <div className={styles.proposalDetail}>
                 <Button
-                    type="outline"
+                    type="primary"
+                    variant="outlined"
                     style={{
                         maxWidth: '180px',
                         padding: '15px 10px',
@@ -122,12 +125,13 @@ function Proposal({
                         alignSelf: 'center'
                     }}
                     onClick={(e) => {
-                        updateVote(e, 1, 'Cast Vote For')
+                        updateVote(proposal.id, 1, 'Cast Vote For')
                     }}
 
                 > Cast Vote For</Button>
                 <Button
                     type="primary"
+                    variant="contained"
                     style={{
                         maxWidth: '180px',
                         padding: '15px 10px',
@@ -135,12 +139,13 @@ function Proposal({
                         alignSelf: 'center'
                     }}
                     onClick={(e) => {
-                        updateVote(e, 0, 'Cast Vote Against')
+                        updateVote(proposal.id, 0, 'Cast Vote Against')
                     }}
 
                 > Cast Vote Against</Button>
                 <Button
                     type="outline"
+                    variant="outlined"
                     style={{
                         maxWidth: '180px',
                         padding: '15px 10px',
@@ -148,7 +153,7 @@ function Proposal({
                         alignSelf: 'center'
                     }}
                     onClick={(e) => {
-                        updateVote(e, 2, 'Cast Vote Abstain')
+                        updateVote(proposal.id, 2, 'Cast Vote Abstain')
                     }}
                 > Cast Vote Abstain</Button>
             </div>

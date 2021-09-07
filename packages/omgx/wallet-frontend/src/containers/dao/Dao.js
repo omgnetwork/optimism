@@ -52,14 +52,15 @@ function DAO() {
                         </div>
                         <Button
                             type="primary"
-                            onClick={() => {
-                                dispatch(openModal('transferDaoModal'))
-                            }}
+                            variant="outlined"
                             style={{
-                                width: '60%',
+                                maxWidth: '180px',
                                 padding: '15px 10px',
                                 borderRadius: '8px',
                                 alignSelf: 'center'
+                            }}
+                            onClick={() => {
+                                dispatch(openModal('transferDaoModal'))
                             }}
                         > Transfer Governance Token</Button>
                     </div>
@@ -71,6 +72,7 @@ function DAO() {
                         </div>
                         <Button
                             type="primary"
+                            variant="outlined"
                             onClick={() => {
                                 dispatch(openModal('delegateDaoModal'))
                             }}

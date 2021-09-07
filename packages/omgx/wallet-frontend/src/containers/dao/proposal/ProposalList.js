@@ -49,7 +49,8 @@ function ProposalList() {
         <div className={styles.containerAction}>
             <p className={styles.listTitle}>Proposal List</p>
             <Button
-                type="outline"
+                type="primary"
+                variant="outlined"
                 onClick={() => {
                     dispatch(openModal('newProposalModal'))
                 }}
