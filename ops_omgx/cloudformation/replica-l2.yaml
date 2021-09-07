@@ -172,6 +172,18 @@ Resources:
                     Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
             - Name: RPC_ADDR
               Value: "0.0.0.0"
+            - Name: ROLLUP_ENABLE_L2_GAS_POLLING
+              Value: true
+            - Name: ROLLUP_ENFORCE_FEES
+              Value: true
+            - Name: GCMODE
+              Value: archive
+            - Name: NO_DISCOVER
+              Value: true
+            - Name: ETH1_SYNC_SERVICE_ENABLE
+              Value: true
+            - Name: ETH1_CONFIRMATION_DEPTH
+              Value: 0
           EntryPoint:
             - "/geth.sh"
           MountPoints:
@@ -213,9 +225,14 @@ Resources:
       Family: !Sub "L2Replica-${EnvironmentName}"
   ECSService:
     Type: AWS::ECS::Service
+    DependsOn: GoEthereumReplicaLBListenerRule
     Properties:
       Cluster:
         Fn::ImportValue: !Sub "${InfrastructureStackName}:EcsClusterReplica"
+      LoadBalancers:
+        - ContainerName: replica-l2-proxy
+          ContainerPort: 80
+          TargetGroupArn: !Ref GoEthereumReplicaLBTargetGroup
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2
       SchedulingStrategy: REPLICA

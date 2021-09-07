@@ -190,13 +190,15 @@ Resources:
               Value: !Ref SecretName
             - Name: RETRIES
               Value: 3600
+            - Name: DATA_TRANSPORT_LAYER__SYNC_FROM_L1
+              Value: true
             - Name: DATA_TRANSPORT_LAYER__SYNC_FROM_L2
               Value: true
             - Name: DATA_TRANSPORT_LAYER__L2_RPC_ENDPOINT
               Value: !Sub
-                - "http://${EndpointAddress}:8545/"
+                - "https://${EndpointAddress}/"
                 - EndpointAddress:
-                    Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerReplica:DNSName"
+                    Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
             - Name: DEPLOYER_HTTP
               Value: !Sub
                 - "https://${EndpointAddress}:8081"
