@@ -220,7 +220,7 @@ class NetworkService {
         console.log('Done - no need to double register address')
       } else {
         //register address for the recipiant
-        let reg = await registry.connect(
+        await registry.connect(
           this.provider.getSigner()
         ).registerAddress(
           receiverAddress,
@@ -271,7 +271,7 @@ class NetworkService {
       )
 
       //register address for the contract owner
-      let reg = await registry.connect(
+      await registry.connect(
         this.provider.getSigner()
       ).registerAddress(
         this.account,

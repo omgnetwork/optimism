@@ -83,7 +83,7 @@ function InputStep({ handleClose, token }) {
       //transaction has been sent and signed
       handleClose()
     }
-  }, [ signatureStatus, depositLoading ])
+  }, [ signatureStatus, depositLoading, handleClose ])
 
   console.log("Loading:", depositLoading)
 

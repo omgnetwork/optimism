@@ -107,7 +107,7 @@ function DoExitStepFast({ handleClose, token }) {
       //transaction has been sent and signed
       handleClose()
     }
-  }, [ signatureStatus, exitLoading ])
+  }, [ signatureStatus, exitLoading, handleClose ])
 
   const label = 'There is a ' + feeRate + '% fee.'
   const theme = useTheme()
