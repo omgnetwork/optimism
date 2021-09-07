@@ -50,9 +50,11 @@ function ProposalList() {
             > Create Proposal </Button>
         </div>
         <div className={styles.listContainer}>
-            {!!loading ? <div className={styles.loadingContainer}> Loading... </div> : null}
+            {!!loading && !proposals.length ? <div className={styles.loadingContainer}> Loading... </div> : null}
             {proposals.map((p, index) => {
-                return <React.Fragment key={index}><Proposal proposal={p}/></React.Fragment>
+                return <React.Fragment key={index}>
+                    <Proposal proposal={p} />
+                </React.Fragment>
             })}
         </div>
     </>

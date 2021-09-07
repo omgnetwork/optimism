@@ -2012,7 +2012,7 @@ class NetworkService {
         gasPrice: 15000000,
         gasLimit: 8000000
       };
-      let res = await this.delegate.propose(
+      let res = await delegateCheck.propose(
         address,
         values,
         signatures,
