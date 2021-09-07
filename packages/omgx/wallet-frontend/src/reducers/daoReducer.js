@@ -30,7 +30,6 @@ function daoReducer(state = initialState, action) {
       return { ...state, votes }
 
     case 'PROPOSALS/GET/SUCCESS':
-      console.log("proposalList:",action.payload)
       const { proposalList } = action.payload
       return { ...state, proposalList }
 

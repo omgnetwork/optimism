@@ -1993,9 +1993,32 @@ class NetworkService {
   }
 
   //Create Proposal
-  async createProposal(payload) {
+  async createProposal({ votingThreshold = null, text = null }) {
     try {
-      let res = await this.delegate.propose(payload)
+      const delegateCheck = await this.delegate.attach(this.delegator.address)
+      let address = [delegateCheck.address];
+      let values = [0];
+      let signatures = !text ? ['_setProposalThreshold(uint256)'] : [''] // the function that will carry out the proposal
+      let voting = !text ? ethers.utils.parseEther(votingThreshold) : 0;
+      let calldatas = [ethers.utils.defaultAbiCoder.encode( // the parameter for the above function
+        ['uint256'],
+        [voting]
+      )]
+      let description = !text ? `# Changing Proposal Threshold to ${votingThreshold} Comp` : text;
+      
+      let setGas = {
+        gasPrice: 15000000,
+        gasLimit: 8000000
+      };
+
+      let res = await delegateCheck.propose(
+        address,
+        values,
+        signatures,
+        calldatas,
+        description,
+        setGas
+      )
       return res;
     } catch (error) {
       console.log(error);
@@ -2005,23 +2028,14 @@ class NetworkService {
 
   //Fetch Proposals
   async fetchProposals() {
-    console.log('Fetching DAO proposals')
-    console.log(this.delegate)
-
+    
     const delegateCheck = await this.delegate.attach(this.delegator.address)
     
-    console.log(delegateCheck)
-
-    const proposalCounts = await delegateCheck.proposalCount()
-
+    
     try {
       let proposalList = [];
-      
       const proposalCounts = await delegateCheck.proposalCount()
-      console.log('proposalCounts:',proposalCounts)
-      
       const totalProposals = await proposalCounts.toNumber() - 1 //it's always off by one??
-      console.log('totalProposals:',totalProposals)
       
       const filter = delegateCheck.filters.ProposalCreated(
         null,
@@ -2036,43 +2050,46 @@ class NetworkService {
       )
       
       const descriptionList = await delegateCheck.queryFilter(filter);
-      console.log('descriptionList:',descriptionList)
-
       for (let i = 0; i < totalProposals; i++) {
         
-        let id = descriptionList[i].args[0]
+        let proposalID = descriptionList[i].args[0]
         //this is a number such as 2
-        console.log('list-id:',id)
-        
-/*
-const governorBravo = await governorBravoDelegate.attach(
-        governorBravoDelegator.address
-    )
-*/
+        let proposalData = await delegateCheck.proposals(proposalID)
+        const proposalStates = [
+          'Pending',
+          'Active',
+          'Canceled',
+          'Defeated',
+          'Succeeded',
+          'Queued',
+          'Expired',
+          'Executed',
+        ]
 
-        //let proposal = await governorBravo.proposals(proposalID)
-    //console.log(`Proposal:`, proposal)
-        let proposalData = await delegateCheck.proposals(descriptionList[i].args[0])
-        console.log('list-id:proposalData:',proposalData)
+        let state = await delegateCheck.state(proposalID)
+        let againstVotes = parseInt(formatEther(proposalData.againstVotes))
+        let forVotes = parseInt(formatEther(proposalData.forVotes))
+        let abstainVotes = parseInt(formatEther(proposalData.abstainVotes))
 
-        let againstVotes = parseInt(proposalData.againstVotes.toString())
-        let forVotes = parseInt(proposalData.forVotes.toString())
-        let abstainVotes = parseInt(proposalData.abstainVotes.toString())
+        let startBlock = proposalData.startBlock.toString()
+        let endBlock = proposalData.endBlock.toString()
 
         let proposal = await delegateCheck.getActions(i+2)
-        console.log('list-id:proposal:',proposal)
         
-        let description = descriptionList[i].args[8].toString();
-        console.log('list-id:description:',description)
+        let description = descriptionList[i].args[8].toString()
         
         proposalList.push({
-           id: id.toString(),
+           id: proposalID.toString(),
            proposal,
            description,
            totalVotes: forVotes + againstVotes,
            forVotes,
            againstVotes,
            abstainVotes,
+           state: proposalStates[state],
+           startBlock,
+           endBlock
+
         })
 
       }
@@ -2080,6 +2097,22 @@ const governorBravo = await governorBravoDelegate.attach(
     } catch (error) {
       console.log(error)
       throw new Error(error.message)
+    }
+  }
+
+  //Cast vote for proposal 
+  async castProposalVote({id, userVote}) {
+    try {
+      
+      const delegateCheck = await this.delegate.attach(this.delegator.address);
+      let res = delegateCheck.castVote(id, userVote, {
+        gasPrice: 15000000,
+        gasLimit: 8000000
+      });
+      return res;
+    } catch(error) {
+      console.log('Error: cast vote', error);
+      throw new Error(error.message);
     }
   }
 

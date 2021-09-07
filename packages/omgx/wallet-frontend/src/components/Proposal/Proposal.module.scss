@@ -13,13 +13,13 @@ $boxDropDownHeight: 50px;
         justify-content: space-between;
         margin: 10px;
         .title {
-            font-size: 1.2em;
+            font-size: 1.1em;
             color: $white;
             p{
               margin: 0px;
             }
-
             .muted {
+              font-size: 0.8em;
               color: $white700;
             }
         }
@@ -28,14 +28,9 @@ $boxDropDownHeight: 50px;
         padding: 10px 5px;
         display: flex;
         justify-content: space-between;
-        color: $white;
-        span {
-            font-size: 1.3em;
-            color: $white700;
-        }   
+        font-size: 0.9em;
+        color: $white700;
     }
-
-    
 }
 
 .proposalDetail {
@@ -101,14 +96,13 @@ $boxDropDownHeight: 50px;
 
   /*************************/
 
-
-
 .divider {
-    height: 0px;
+    height: 2px;
     width: 90%;
     margin: 5px auto;
     position: relative;
     z-index: 1;
+    background: white;
   
     &::before{ 
       content: "";
@@ -120,7 +114,7 @@ $boxDropDownHeight: 50px;
       z-index: -1;
       margin: -1px;
       border-radius: inherit;
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0) -0.74%, rgba(255, 255, 255, 0.0414) 8.18%, rgba(255, 255, 255, 0.0408) 90.07%, rgba(255, 255, 255, 0) 100.04%);
+      background: white;
     }
   
   }
