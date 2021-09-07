@@ -10,11 +10,12 @@ import "../libraries/OVM_CrossDomainEnabledFast.sol";
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @dev An L1 LiquidityPool implementation
  */
-contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
+contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard, Pausable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -535,6 +536,20 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
         );
     }
 
+    /**
+     * Pause fast exit finalization to not allow fast relays
+     */
+    function pauseFastRelays() external onlyOwner() {
+        _pause();
+    }
+
+    /**
+     * UnPause fast exit finalization and allow fast relays back
+     */
+    function unpauseFastRelays() external onlyOwner() {
+        _unpause();
+    }
+
     /*************************
      * Cross-chain Functions *
      *************************/
@@ -552,6 +567,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
     )
         external
         onlyFromCrossDomainAccount(address(L2LiquidityPoolAddress))
+        whenNotPaused()
     {
         bool replyNeeded = false;
 
@@ -628,6 +644,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
     )
         external
         onlyFromCrossDomainAccount(address(L2LiquidityPoolAddress))
+        whenNotPaused()
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
         uint256 userRewardFee = (_amount.mul(userRewardFeeRate)).div(1000);
