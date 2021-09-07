@@ -51,9 +51,7 @@ import TransferDaoModal from 'containers/modals/dao/TransferDaoModal';
 import DelegateDaoModal from 'containers/modals/dao/DelegateDaoModal';
 import NewProposalModal from 'containers/modals/dao/NewProposalModal';
 
-import logo from 'images/logo-boba.svg';
-import * as styles from './Home.module.scss';
-import { fetchDaoBalance, fetchDaoVotes } from 'actions/daoAction';
+import { fetchDaoBalance, fetchDaoVotes, fetchDaoProposals } from 'actions/daoAction';
 
 //Wallet Functions
 import Account from 'containers/account/Account';
@@ -129,13 +127,14 @@ function Home ({ light, setLight }) {
 
   //get all account balances
   useInterval(() => {
-    dispatch(fetchBalances());
-    dispatch(addTokenList());
-    dispatch(fetchNFTs());
+    dispatch(fetchBalances())
+    dispatch(addTokenList())
+    dispatch(fetchNFTs())
 
     // get Dao balance / Votes
-    dispatch(fetchDaoBalance());
-    dispatch(fetchDaoVotes());
+    dispatch(fetchDaoBalance())
+    dispatch(fetchDaoVotes())
+    dispatch(fetchDaoProposals())
   }, POLL_INTERVAL);
 
   useEffect(() => {

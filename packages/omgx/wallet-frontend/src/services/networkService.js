@@ -62,10 +62,10 @@ import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol
 import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
 
 // DAO 
-import Comp from "../deployment/rinkeby/json/Comp.json";
-import GovernorBravoDelegate from "../deployment/rinkeby/json/GovernorBravoDelegate.json";
-import GovernorBravoDelegator from "../deployment/rinkeby/json/GovernorBravoDelegator.json";
-import Timelock from "../deployment/rinkeby/json/Timelock.json";
+import Comp from "../deployment/rinkeby/json/Comp.json"
+import GovernorBravoDelegate from "../deployment/rinkeby/json/GovernorBravoDelegate.json"
+import GovernorBravoDelegator from "../deployment/rinkeby/json/GovernorBravoDelegator.json"
+import Timelock from "../deployment/rinkeby/json/Timelock.json"
 
 import { powAmount, logAmount } from 'util/amountConvert'
 import { accDiv, accMul } from 'util/calculation'
@@ -569,25 +569,34 @@ class NetworkService {
         addresses.DAO_Comp,
         Comp.abi,
         this.provider.getSigner()
-      );
+      )
 
       this.delegate = new ethers.Contract(
         addresses.DAO_GovernorBravoDelegate,
         GovernorBravoDelegate.abi,
         this.provider.getSigner()
-      );
+      )
 
       this.delegator = new ethers.Contract(
         addresses.DAO_GovernorBravoDelegator,
         GovernorBravoDelegator.abi,
         this.provider.getSigner()
-      );
+      )
 
       this.timelock = new ethers.Contract(
         addresses.DAO_Timelock,
         Timelock.abi,
         this.provider.getSigner()
-      );
+      )
+
+
+
+/*
+  this.comp = null
+  this.delegate = null
+  this.delegator = null
+  this.timelock = null
+*/
 
       this.bindProviderListeners()
 
@@ -1936,6 +1945,8 @@ class NetworkService {
 
   // get DAO Balance
   async getDaoBalance() {
+    //console.log("comp:",this.comp)
+    //console.log("comp:",this.comp.address)
     try {
       let balance = await this.comp.balanceOf(this.account)
       return { balance: formatEther(balance) }
@@ -1957,7 +1968,7 @@ class NetworkService {
     }
   }
 
-  //Transfer DAO funds
+  //Transfer DAO Funds
   async transferDao({ recipient, amount }) {
     try {
       const tx = await this.comp.transfer(recipient, parseEther(amount.toString()))
@@ -1969,7 +1980,7 @@ class NetworkService {
     }
   }
 
-  //Delegate DAO
+  //Delegate DAO Authority
   async delegateVotes({ recipient }) {
     try {
       const tx = await this.comp.delegate(recipient)
@@ -1982,9 +1993,32 @@ class NetworkService {
   }
 
   //Create Proposal
-  async createProposal(payload) {
+  async createProposal({ votingThreshold = null, text = null }) {
     try {
-      let res = await this.delegate.propose(payload)
+      const delegateCheck = await this.delegate.attach(this.delegator.address)
+      let address = [delegateCheck.address];
+      let values = [0];
+      let signatures = !text ? ['_setProposalThreshold(uint256)'] : [''] // the function that will carry out the proposal
+      let voting = !text ? ethers.utils.parseEther(votingThreshold) : 0;
+      let calldatas = [ethers.utils.defaultAbiCoder.encode( // the parameter for the above function
+        ['uint256'],
+        [voting]
+      )]
+      let description = !text ? `# Changing Proposal Threshold to ${votingThreshold} Comp` : text;
+      
+      let setGas = {
+        gasPrice: 15000000,
+        gasLimit: 8000000
+      };
+
+      let res = await delegateCheck.propose(
+        address,
+        values,
+        signatures,
+        calldatas,
+        description,
+        setGas
+      )
       return res;
     } catch (error) {
       console.log(error);
@@ -1994,11 +2028,16 @@ class NetworkService {
 
   //Fetch Proposals
   async fetchProposals() {
+    
+    const delegateCheck = await this.delegate.attach(this.delegator.address)
+    
+    
     try {
       let proposalList = [];
-      const proposalCounts = await this.delegate.proposalCount()
-      const totalProposal = await proposalCounts.toNumber()
-      const filter = this.delegate.filters.ProposalCreated(
+      const proposalCounts = await delegateCheck.proposalCount()
+      const totalProposals = await proposalCounts.toNumber() - 1 //it's always off by one??
+      
+      const filter = delegateCheck.filters.ProposalCreated(
         null,
         null,
         null,
@@ -2008,23 +2047,71 @@ class NetworkService {
         null,
         null,
         null
-      );
-      const descriptionList = await this.delegate.queryFilter(filter);
-      for (let i = totalProposal; i > 1 && i > totalProposal - 3; i--) {
-        let proposal = await this.delegate.getActions(i);
-        let fullDescription = descriptionList[i - 2].args[8].toString();
-        let titleEnd = fullDescription.search(/\n/);
-        let title = fullDescription.substring(0, titleEnd);
-        let description = fullDescription.substring(titleEnd + 1);
+      )
+      
+      const descriptionList = await delegateCheck.queryFilter(filter);
+      for (let i = 0; i < totalProposals; i++) {
+        
+        let proposalID = descriptionList[i].args[0]
+        //this is a number such as 2
+        let proposalData = await delegateCheck.proposals(proposalID)
+        const proposalStates = [
+          'Pending',
+          'Active',
+          'Canceled',
+          'Defeated',
+          'Succeeded',
+          'Queued',
+          'Expired',
+          'Executed',
+        ]
+
+        let state = await delegateCheck.state(proposalID)
+        let againstVotes = parseInt(formatEther(proposalData.againstVotes))
+        let forVotes = parseInt(formatEther(proposalData.forVotes))
+        let abstainVotes = parseInt(formatEther(proposalData.abstainVotes))
+
+        let startBlock = proposalData.startBlock.toString()
+        let endBlock = proposalData.endBlock.toString()
+
+        let proposal = await delegateCheck.getActions(i+2)
+        
+        let description = descriptionList[i].args[8].toString()
+        
         proposalList.push({
-          proposal,
-          title,
-          description
+           id: proposalID.toString(),
+           proposal,
+           description,
+           totalVotes: forVotes + againstVotes,
+           forVotes,
+           againstVotes,
+           abstainVotes,
+           state: proposalStates[state],
+           startBlock,
+           endBlock
+
         })
+
       }
-      return { proposalList };
+      return { proposalList }
     } catch (error) {
       console.log(error)
+      throw new Error(error.message)
+    }
+  }
+
+  //Cast vote for proposal 
+  async castProposalVote({id, userVote}) {
+    try {
+      
+      const delegateCheck = await this.delegate.attach(this.delegator.address);
+      let res = delegateCheck.castVote(id, userVote, {
+        gasPrice: 15000000,
+        gasLimit: 8000000
+      });
+      return res;
+    } catch(error) {
+      console.log('Error: cast vote', error);
       throw new Error(error.message);
     }
   }

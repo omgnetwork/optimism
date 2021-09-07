@@ -15,7 +15,6 @@ limitations under the License. */
 
 import React, { useState } from 'react'
 
-import Tooltip from 'components/tooltip/Tooltip'
 import { Button as ButtonMUI, Grid } from '@material-ui/core'
 import * as styles from './Transaction.module.scss'
 import * as S from './Transaction.styles'
@@ -40,47 +39,6 @@ function Transaction({
   const [dropDownBox, setDropDownBox] = useState(false);
   const [dropDownBoxInit, setDropDownBoxInit] = useState(false);
   const theme = useTheme()
-
-  function renderValue() {
-
-    if (button) {
-      return (
-        <div className={styles.statusContainer}>
-          <div
-            onClick={button.onClick}
-            className={styles.button}
-          >
-            {button.text}
-          </div>
-          <div>{subStatus}</div>
-        </div>
-      )
-    }
-
-    return (
-      <div className={styles.statusContainer}>
-        <div className={styles.status}>
-          <div
-            className={[
-              styles.indicator,
-              status === 'Pending' ? styles.pending : '',
-              status === 'Exited' ? styles.exited : '',
-              status === 'Failed' ? styles.failed : ''
-            ].join(' ')}
-          />
-          <span>{status}</span>
-          {status === 'Pending' && !!statusPercentage && (
-            <Tooltip title={tooltip}>
-              <span className={styles.percentage}>
-                {`(${Math.max(statusPercentage, 0)}%)`}
-              </span>
-            </Tooltip>
-          )}
-        </div>
-        <div>{subStatus}</div>
-      </div>
-    )
-  }
 
   function renderDetailRedesign() {
 

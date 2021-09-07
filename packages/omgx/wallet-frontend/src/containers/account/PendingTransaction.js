@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React, { useState } from 'react';
-import {Button as ButtonMUI, Box, Grid, Typography } from '@material-ui/core'
+import { Box, Grid, Typography } from '@material-ui/core'
 import * as S from './Account.styles'
 import { useSelector } from 'react-redux'
 import { isEqual, orderBy } from 'lodash'
@@ -37,7 +37,7 @@ function PendingTransaction() {
 
     console.log("orderedTransactions:",orderedTransactions)
 
-    let pending = orderedTransactions.filter((i) => {
+    const pending = orderedTransactions.filter((i) => {
         if (i.crossDomainMessage &&
             i.crossDomainMessage.crossDomainMessage === 1 &&
             i.crossDomainMessage.crossDomainMessageFinalize === 0 &&

@@ -20,20 +20,70 @@ import { openModal } from 'actions/uiAction';
 
 import * as styles from './Dao.module.scss';
 
+import { Box, Typography, Fade } from '@material-ui/core'
+import { useTheme } from '@emotion/react'
 
 import Button from 'components/button/Button';
 import ProposalList from './proposal/ProposalList';
 import { selectDaoBalance, selectDaoVotes } from 'selectors/daoSelector';
+import { selectLayer } from 'selectors/setupSelector';
+import AlertIcon from 'components/icons/AlertIcon';
+import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher'
+import networkService from 'services/networkService';
 
 
 function DAO() {
+    const theme = useTheme();
     const dispatch = useDispatch();
-
     const balance = useSelector(selectDaoBalance);
     const votes = useSelector(selectDaoVotes);
+    
+    let layer = useSelector(selectLayer());
 
-    console.log(['balance', balance])
-    console.log(['votes', votes])
+    if (networkService.L1orL2 !== layer) {
+        //networkService.L1orL2 is always right...
+        layer = networkService.L1orL2
+      }
+
+
+    if(layer === 'L1') {
+        return <div className={styles.container}>
+            <div className={styles.header}>
+                <h2 className={styles.title}>
+                    BOBA DAO
+                </h2>
+            </div>
+            <div className={styles.content}>
+                <Box
+                    sx={{
+                        background: theme.palette.background.secondary,
+                        borderRadius: '12px',
+                        margin: '20px 5px',
+                        padding: '10px 20px',
+                        display: 'flex',
+                        justifyContent: 'space-between'
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <AlertIcon />
+                        <Typography
+                            sx={{ wordBreak: 'break-all', marginLeft: '10px' }}
+                            variant="body1"
+                            component="p"
+                        >
+                            To use the Boba DAO, you must be on L2 - SWITCH LAYER to L2
+                        </Typography>
+                    </div>
+                    <LayerSwitcher isButton={true} />
+                </Box>
+            </div>
+        </div>
+    }
 
     return (
         <div className={styles.container}>
@@ -52,14 +102,15 @@ function DAO() {
                         </div>
                         <Button
                             type="primary"
-                            onClick={() => {
-                                dispatch(openModal('transferDaoModal'))
-                            }}
+                            variant="outlined"
                             style={{
-                                width: '60%',
+                                maxWidth: '180px',
                                 padding: '15px 10px',
                                 borderRadius: '8px',
                                 alignSelf: 'center'
+                            }}
+                            onClick={() => {
+                                dispatch(openModal('transferDaoModal'))
                             }}
                         > Transfer Governance Token</Button>
                     </div>
@@ -71,6 +122,7 @@ function DAO() {
                         </div>
                         <Button
                             type="primary"
+                            variant="outlined"
                             onClick={() => {
                                 dispatch(openModal('delegateDaoModal'))
                             }}
