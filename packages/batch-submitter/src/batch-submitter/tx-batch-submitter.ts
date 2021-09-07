@@ -238,10 +238,10 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       batchStart: batchParams.shouldStartAtElement,
       batchElements: batchParams.totalElementsToAppend,
     })
-    // this.logger.info('Submitting batch.', {
-    //   calldata: batchParams,
-    //   l1tipHeight,
-    // })
+    this.logger.info('Submitting batch.', {
+      calldata: batchParams,
+      l1tipHeight,
+    })
 
     return this.submitAppendSequencerBatch(batchParams)
   }

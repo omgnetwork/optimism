@@ -61,33 +61,29 @@ export const submitTransactionWithYNATM = async (
     //if (batchSigner.address === undefined) {
     if (call.type === 'AppendQueueBatch') {
       tx = await call.appendQueueBatch(tx.appendQueueBatch)
-      console.log('AppendQueueBatch')
-      console.log(tx)
+      // console.log('AppendQueueBatch')
+      // console.log(tx)
     } else if (call.type === 'AppendStateBatch') {
       tx = await call.appendStateBatch(call.batch, call.offsetStartsAtIndex)
-      console.log('AppendStateBatch')
-      console.log(tx)
+      // console.log('AppendStateBatch')
+      // console.log(tx)
     } else if (call.type === 'AppendSequencerBatch') {
       tx = await call.appendSequencerBatch(call.batchParams)
-      console.log('AppendSequencerBatch')
-      console.log(tx)
+      // console.log('AppendSequencerBatch')
+      // console.log(tx)
     }
     const fullTx = {
       ...tx,
       gasPrice,
     }
-    console.log('fullTx')
-    console.log(fullTx)
     hooks.beforeSendTransaction(fullTx)
+
     const txResponse = await batchSigner.signer.sendTransaction(fullTx)
-    console.log('txresponse')
-    console.log(txResponse)
     hooks.onTransactionResponse(txResponse)
     return provider.waitForTransaction(txResponse.hash, numConfirmations)
     // } else {
     // }
-}
-
+  }
   const minGasPrice = await getGasPriceInGwei(provider)
   const receipt = await ynatm.send({
     sendTransactionFunction: sendTxAndWaitForReceipt,
