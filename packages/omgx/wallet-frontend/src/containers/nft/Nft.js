@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { isEqual } from 'lodash'
+import Modal from 'components/modal/Modal';
 
 import ListNFT from 'components/listNFT/listNFT'
 import ListNFTfactory from 'components/listNFTfactory/listNFTfactory'
@@ -32,6 +33,8 @@ class Nft extends React.Component {
       newAddress: '',
       newNFTname: '',
       newNFTsymbol: '',
+      deployModalOpen: false,
+      minModalOpen: false
     }
   }
 
@@ -111,7 +114,7 @@ class Nft extends React.Component {
         <PageHeader title="NFT" />
 
         <Grid item xs={12}>
-          
+
           <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>Your NFTs</Typography>
 
           {numberOfNFTs === 1 &&
@@ -124,12 +127,12 @@ class Nft extends React.Component {
             <Typography variant="body2" component="p" sx={{mt: 1, mb: 4}}>Scanning the blockchain for your NFTs...</Typography>
           }
 
-          <Grid 
+          <Grid
             container
             direction="row"
             justifyContent="flex-start"
             alignItems="flex-start"
-            xs={12} 
+            xs={12}
           >
             {Object.keys(list).map((v, i) => {
               const key_UUID = `nft_` + i
@@ -148,14 +151,13 @@ class Nft extends React.Component {
           </Grid>
         </Grid>
 
-      <Grid
-        container
-        direction="row"
-        justifyContent="flex-start"
-        alignItems="flex-start"
-      >
-        <Grid item xs={6} style={{padding: '10px' , paddingTop: '20px'}}>
-          <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>
+        <Box display="flex" sx={{mt: 4, gap: 3}}>
+          <Button size="large" variant="contained" onClick={()=> {this.setState({deployModalOpen: true})}}>Deploy NFT contract</Button>
+          <Button size="large" variant="contained" onClick={()=> {this.setState({mintModalOpen: true})}}>Mint NFT</Button>
+        </Box>
+
+        <Modal maxWidth="md" open={this.state.deployModalOpen} onClose={()=> this.setState({deployModalOpen: false})}>
+        <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>
             Deploy new NFT Contract
           </Typography>
           <Typography variant="body2" component="p" sx={{mt: 1, mb: 4}}>
@@ -185,13 +187,14 @@ class Nft extends React.Component {
           >
             Deploy NFT contract
           </Button>
-        </Grid>
 
-        <Grid item xs={6} style={{padding: '10px', paddingTop: '20px'}}>
-          <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>
+        </Modal>
+
+        <Modal maxWidth="md" open={this.state.mintModalOpen} onClose={()=> this.setState({mintModalOpen: false})}>
+        <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>
             Mint New NFTs
           </Typography>
-            
+
           {Object.keys(contracts).map((v, i) => {
             const key_UUID = `con_` + i
             return (
@@ -201,11 +204,11 @@ class Nft extends React.Component {
                 symbol={contracts[v].symbol}
                 address={contracts[v].address}
                 layer={contracts[v].layer}
+                contracts={contracts}
               />
             )})
           }
-        </Grid>
-      </Grid>
+        </Modal>
       </>
     )
   }

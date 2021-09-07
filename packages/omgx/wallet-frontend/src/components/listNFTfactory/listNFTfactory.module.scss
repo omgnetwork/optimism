@@ -3,13 +3,6 @@
 $dropDownHeight: 92px;
 
 .ListNFT {
-  
-  box-shadow: white 0px 0px 9px 0px;
-  border-radius: 5px;
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px solid $gray4;
-  background: white;
 
   .topContainer {
     cursor: pointer;
@@ -69,12 +62,7 @@ $dropDownHeight: 92px;
   .boxContainer {
     display: flex;
     flex-direction: column;
-    padding: 8px;
-    margin: 8px;
-    justify-content: flex-start;
-    align-items: center;
-    border-radius: 8px;
-    background: #565656;
+    margin-top: 20px;
   }
 
   .boxOrigin {
