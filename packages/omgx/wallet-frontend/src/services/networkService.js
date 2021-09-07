@@ -2042,20 +2042,28 @@ class NetworkService {
         
         let id = descriptionList[i].args[0]
         //this is a number such as 2
-        console.log('id:',id)
+        console.log('list-id:',id)
         
-        let proposalData = await delegateCheck.proposals(id)
-        console.log('proposalData:',proposalData)
+/*
+const governorBravo = await governorBravoDelegate.attach(
+        governorBravoDelegator.address
+    )
+*/
+
+        //let proposal = await governorBravo.proposals(proposalID)
+    //console.log(`Proposal:`, proposal)
+        let proposalData = await delegateCheck.proposals(descriptionList[i].args[0])
+        console.log('list-id:proposalData:',proposalData)
 
         let againstVotes = parseInt(proposalData.againstVotes.toString())
         let forVotes = parseInt(proposalData.forVotes.toString())
         let abstainVotes = parseInt(proposalData.abstainVotes.toString())
 
         let proposal = await delegateCheck.getActions(i+2)
-        console.log('proposal:',proposal)
+        console.log('list-id:proposal:',proposal)
         
         let description = descriptionList[i].args[8].toString();
-        console.log('description:',description)
+        console.log('list-id:description:',description)
         
         proposalList.push({
            id: id.toString(),

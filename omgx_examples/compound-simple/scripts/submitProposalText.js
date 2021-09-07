@@ -83,7 +83,7 @@ async function main(){
         [0]
     )]
     
-    let description = '#Arbitrary Text Here' // the description of the proposal
+    let description = '#Proposal to do a better job testing proposals' // the description of the proposal
 
     let value = await comp.balanceOf(wallet1.address)
     console.log('Wallet1: Comp power: ', value.toString())
