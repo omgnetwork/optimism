@@ -10,7 +10,7 @@ const addresses = require('../networks/addresses.json')
 require('dotenv').config()
 
 const env = process.env
-const DECIMALS  = BigInt(10**18)
+
 
 const compAddress = addresses.DAO_Comp;
 const timelockAddress = addresses.DAO_Timelock;
@@ -18,11 +18,11 @@ const governorBravoDelegateAddress = addresses.DAO_GovernorBravoDelegate;
 const governorBravoDelegatorAddress = addresses.DAO_GovernorBravoDelegator;
 
 const sleep = async (timeout) => {
-	return new Promise((resolve, reject) => {
-		setTimeout(() => {
-			resolve()
-		}, timeout)
-	})
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve()
+        }, timeout)
+    })
 }
 
 async function getBlockNumber(web3url, chainID){
@@ -47,7 +47,9 @@ async function main(){
 
     const comp = new ethers.Contract(compAddress, Comp.abi, wallet1)
 
-    const governorBravo = await governorBravoDelegate.attach(governorBravoDelegator.address)
+    const governorBravo = await governorBravoDelegate.attach(
+        governorBravoDelegator.address
+    )
 
     console.log(
         'Comp needed to propose: ',
@@ -74,14 +76,17 @@ async function main(){
 
     let addresses = [governorBravo.address] // the address of the contract where the function will be called
     let values = [0] // the eth necessary to send to the contract above
-    let signatures = ['_setProposalThreshold(uint256)'] // the function that will carry out the proposal
+    let signatures = [''] // the function that will carry out the proposal
     
     let calldatas = [ethers.utils.defaultAbiCoder.encode( // the parameter for the above function
         ['uint256'],
-        [ethers.utils.parseEther('65000')]
+        [0]
     )]
     
-    let description = '#Changing Proposal Threshold to 65000 Comp' // the description of the proposal
+    let description = '#Proposal to do a better job testing proposals' // the description of the proposal
+
+    let value = await comp.balanceOf(wallet1.address)
+    console.log('Wallet1: Comp power: ', value.toString())
 
     console.log(
         'wallet1 current votes: ',
@@ -92,11 +97,11 @@ async function main(){
 
     // submitting the proposal
     await governorBravo.connect(wallet1).propose(
-    	addresses,
-    	values,
-    	signatures,
-    	calldatas,
-    	description,
+        addresses,
+        values,
+        signatures,
+        calldatas,
+        description,
         {
             gasPrice: 15000000,
             gasLimit: 8000000
@@ -110,7 +115,7 @@ async function main(){
     console.log(`Proposed. Proposal ID: ${proposalID}`)
     
     let proposal = await governorBravo.proposals(proposalID)
-    console.log(`Full Proposal:`, proposal)
+    console.log(`Proposal:`, proposal)
 
     console.log(`Block Number: ${await getBlockNumber(env.L2_NODE_WEB3_URL, 28)}`)
     
