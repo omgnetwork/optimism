@@ -63,11 +63,14 @@ function Proposal({
 
     return (<div
         className={styles.proposalCard}
+        
         style={{
-            background: `${!!dropDownBox ? 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.019985) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)' : 'none'}`,
-            borderRadius: `${!!dropDownBox ? '12px' : ''}`
+            background: 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.1) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)',
+            borderRadius: '12px'
         }}>
-        <div
+        
+        {proposal.state === 'Active' &&
+         <div
             onClick={() => {
                 setDropDownBox(!dropDownBox);
                 setDropDownBoxInit(false);
@@ -75,25 +78,43 @@ function Proposal({
             <div className={styles.proposalHeader}>
                 <div className={styles.title}>
                     <p>Proposal #{proposal.id}</p>
-                    <p className={styles.muted}>
-                        {proposal.description}
-                    </p>
+                    <p className={styles.muted}>Title: {proposal.description}</p>
+                    <p className={styles.muted}>Status: {proposal.state}</p>
+                    <p className={styles.muted}>Start L1 Block: {proposal.startBlock} End L1 Block: {proposal.endBlock}</p>
                 </div>
-                <ExpandMoreIcon />
+                <ExpandMoreIcon /> VOTE
             </div>
             <div className={styles.proposalContent}>
-                <div>For Votes: <span>{proposal.forVotes}</span></div>
-                <div>Against Votes: <span>{proposal.againstVotes}</span></div>
-                <div>Abstain Votes: <span>{proposal.abstainVotes}</span></div>
-                <div>Vote Percentage: {votePercent}% </div>
+                <div>For: {proposal.forVotes}</div>
+                <div>Against: {proposal.againstVotes}</div>
+                <div>Abstain: {proposal.abstainVotes}</div>
+                <div>Percentage For: {votePercent}% </div>
                 <div>Total Votes: {proposal.totalVotes}</div>
             </div>
         </div>
+        }
 
-        <div
-            className={dropDownBox ?
-                styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
-        >
+        {proposal.state !== 'Active' &&
+         <div>
+            <div className={styles.proposalHeader}>
+                <div className={styles.title}>
+                    <p>Proposal #{proposal.id}</p>
+                    <p className={styles.muted}>Title: {proposal.description}</p>
+                    <p className={styles.muted}>Status: {proposal.state}</p>
+                    <p className={styles.muted}>Start L1 Block: {proposal.startBlock} End L1 Block: {proposal.endBlock}</p>
+                </div>
+            </div>
+            <div className={styles.proposalContent}>
+                <div>For: {proposal.forVotes}</div>
+                <div>Against: {proposal.againstVotes}</div>
+                <div>Abstain: {proposal.abstainVotes}</div>
+                <div>Percentage For: {votePercent}% </div>
+                <div>Total Votes: {proposal.totalVotes}</div>
+            </div>
+        </div>
+        }
+        
+        <div className={dropDownBox ? styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}>
             <div className={styles.proposalDetail}>
                 <Button
                     type="outline"
@@ -134,10 +155,8 @@ function Proposal({
                     }}
                 > Cast Vote Abstain</Button>
             </div>
-
         </div>
-        <div className={styles.divider}></div>
-    </div>)
+</div>)
 }
 
 

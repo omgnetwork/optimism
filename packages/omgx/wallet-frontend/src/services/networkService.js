@@ -2040,39 +2040,52 @@ class NetworkService {
 
       for (let i = 0; i < totalProposals; i++) {
         
-        let id = descriptionList[i].args[0]
+        let proposalID = descriptionList[i].args[0]
         //this is a number such as 2
-        console.log('list-id:',id)
+        console.log('list-id:',proposalID)
         
-/*
-const governorBravo = await governorBravoDelegate.attach(
-        governorBravoDelegator.address
-    )
-*/
-
-        //let proposal = await governorBravo.proposals(proposalID)
-    //console.log(`Proposal:`, proposal)
-        let proposalData = await delegateCheck.proposals(descriptionList[i].args[0])
+        let proposalData = await delegateCheck.proposals(proposalID)
         console.log('list-id:proposalData:',proposalData)
 
-        let againstVotes = parseInt(proposalData.againstVotes.toString())
-        let forVotes = parseInt(proposalData.forVotes.toString())
-        let abstainVotes = parseInt(proposalData.abstainVotes.toString())
+        const proposalStates = [
+          'Pending',
+          'Active',
+          'Canceled',
+          'Defeated',
+          'Succeeded',
+          'Queued',
+          'Expired',
+          'Executed',
+        ]
+
+        let state = await delegateCheck.state(proposalID)
+        console.log('State is: ', proposalStates[state])
+
+        let againstVotes = parseInt(formatEther(proposalData.againstVotes))
+        let forVotes = parseInt(formatEther(proposalData.forVotes))
+        let abstainVotes = parseInt(formatEther(proposalData.abstainVotes))
+
+        let startBlock = proposalData.startBlock.toString()
+        let endBlock = proposalData.endBlock.toString()
 
         let proposal = await delegateCheck.getActions(i+2)
         console.log('list-id:proposal:',proposal)
         
-        let description = descriptionList[i].args[8].toString();
+        let description = descriptionList[i].args[8].toString()
         console.log('list-id:description:',description)
         
         proposalList.push({
-           id: id.toString(),
+           id: proposalID.toString(),
            proposal,
            description,
            totalVotes: forVotes + againstVotes,
            forVotes,
            againstVotes,
            abstainVotes,
+           state: proposalStates[state],
+           startBlock,
+           endBlock
+
         })
 
       }
