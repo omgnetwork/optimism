@@ -47,7 +47,7 @@ function PendingTransaction() {
     // })
     // exitL2 = exitL2.map(v => ({...v, label: 'L2->L1 exit', labelStatus: 'All exits'}))
 
-    let pending = orderedTransactions.filter((i) => {
+    const pending = orderedTransactions.filter((i) => {
         if (i.crossDomainMessage &&
             i.crossDomainMessage.crossDomainMessage === 1 &&
             i.crossDomainMessage.crossDomainMessageFinailze === 0 &&
