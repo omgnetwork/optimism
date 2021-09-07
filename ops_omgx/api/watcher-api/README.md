@@ -38,21 +38,21 @@
       crossDomainMessageFinalize: "CROSS_DOMAIN_MESSAGE_FINALIZED", // whether the cross domain message is finalized on L1
       crossDomainMessageSendTime: "CROSS_DOMAIN_MESSAGE_FINALIZED_TIME", // when the cross domain message is finalized
       crossDomainMessageEstimateFinalizedTime: "ESTIMATE_CROSS_DOMAIN_MESSAGE_FINALIZED_TIME",
-      fastDeposit: "FAST_DEPOSIT", // Whether the message is using the liquidity pool
+      fast: "FAST_DEPOSIT", // Whether the message is using the liquidity pool
       l2Hash: "L2_HASH", // L2 hash of the cross domain message
       l2BlockNumber: "L2_BLOCK_NUMBER",
       l2BlockHash: "L2_BLOCK_HASH",
       l2From: "L2_FROM",
       l2To: "L2_TO"
     },
-    deposit: {
-      depositSender: "DEPOSIT_SENDER", // The address of L1 token sender
-      depositTo: "DEPOSIT_RECEIVER", // The address of L2 token receiver
-      depositToken: "DEPOSIT_TOKEN", // L1 token address
-      depositAmount: "DEPOSIT_AMOUNT", // L1 deposit amount, which doesn't consider fee
-      depositReceive: "DEPOSIT_RECEIVE", // L2 received amount
-      depositFeeRate: "DEPOSIT_FEE",
-      fastDeposit: "FAST_DEPOSIT",
+    action: {
+      sender: "DEPOSIT_SENDER", // The address of L1 token sender
+      to: "DEPOSIT_RECEIVER", // The address of L2 token receiver
+      token: "DEPOSIT_TOKEN", // L1 token address
+      amount: "DEPOSIT_AMOUNT", // L1 deposit amount, which doesn't consider fee
+      receive: "DEPOSIT_RECEIVE", // L2 received amount
+      feeRate: "DEPOSIT_FEE",
+      fast: "FAST_DEPOSIT",
       status: "STATUS" // pending || succeeded || reverted
     }
   }
@@ -89,7 +89,7 @@
       crossDomainMessageFinalize: "CROSS_DOMAIN_MESSAGE_FINALIZED", // whether the cross domain message is finalized on L1
       crossDomainMessageSendTime: "CROSS_DOMAIN_MESSAGE_FINALIZED_TIME", // when the cross domain message is finalized
       crossDomainMessageEstimateFinalizedTime: "ESTIMATE_CROSS_DOMAIN_MESSAGE_FINALIZED_TIME",
-      fastRelay: "FAST_RELAY", // Whether the message is using the fast message relayer
+      fast: "FAST_RELAY", // Whether the message is using the fast message relayer
       l1Hash: "L1_HASH", // L1 hash of the cross domain message
       l1BlockNumber: "L1_BLOCK_NUMBER",
       l1BlockHash: "L1_BLOCK_HASH",
@@ -102,14 +102,14 @@
       stateRootBlockHash: "L1_STATE_ROOT_BLOCK_HASH",
       stateRootBlockTimestamp: "L1_STATE_ROOT_BLOCK_TIMESTAMP"
     },
-    exit: {
-      exitSender: "EXIT_SENDER", // The address of L2 token sender
-      exitTo: "EXIT_RECEIVER", // The address of L1 token receiver
-      exitToken: "EXIT_TOKEN", // L2 token address
-      exitAmount: "EXIT_AMOUNT", // L2 exit amount, which doesn't consider fee
-      exitReceive: "EXIT_RECEIVE", // L1 received amount
-      exitFeeRate: "EXIT_FEE",
-      fastRelay: "FAST_RELAY",
+    action: {
+      sender: "EXIT_SENDER", // The address of L2 token sender
+      to: "EXIT_RECEIVER", // The address of L1 token receiver
+      token: "EXIT_TOKEN", // L2 token address
+      amount: "EXIT_AMOUNT", // L2 exit amount, which doesn't consider fee
+      receive: "EXIT_RECEIVE", // L1 received amount
+      feeRate: "EXIT_FEE",
+      relay: "FAST_RELAY",
       status: "STATUS" // pending || succeeded || reverted
     }
   }
@@ -163,7 +163,7 @@
   crossDomainMessageFinalize: "CROSS_DOMAIN_MESSAGE_FINALIZED", // whether the cross domain message is finalized on L1
   crossDomainMessageSendTime: "CROSS_DOMAIN_MESSAGE_FINALIZED_TIME", // when the cross domain message is finalized
   crossDomainMessageEstimateFinalizedTime: "ESTIMATE_CROSS_DOMAIN_MESSAGE_FINALIZED_TIME",
-  fastRelay: "FAST_RELAY" // Whether the message is using the fast message relayer
+  fast: "FAST_RELAY" // Whether the message is using the fast message relayer
   l1Hash: "L1_HASH", // L1 hash of the cross domain message
   l1BlockNumber: "L1_BLOCK_NUMBER",
   l1BlockHash: "L1_BLOCK_HASH",
