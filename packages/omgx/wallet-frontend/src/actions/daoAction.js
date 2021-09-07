@@ -45,5 +45,6 @@ export function fetchDaoProposals() {
 }
 
 export function createDaoProposal(payload) {
+    console.log(payload);
     return createAction('PROPOSAL/CREATE', () => networkService.createProposal(payload))
 }

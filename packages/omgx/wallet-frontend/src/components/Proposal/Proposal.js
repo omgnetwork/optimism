@@ -30,7 +30,7 @@ function Proposal({
     proposal,
 }) {
     const dispatch = useDispatch()
-    
+
     const { delegate } = networkService
 
     const [dropDownBox, setDropDownBox] = useState(false)
@@ -39,18 +39,15 @@ function Proposal({
     const [votePercent, setVotePercent] = useState(undefined)
     const [totalVotes, setTotalVotes] = useState(undefined)
 
-    console.log("Delegate address:", delegate.address)
-    console.log("Proposal(proposal):", proposal)
-
-     useEffect(() => {
-         const init = async () => {
-             if (proposal.totalVotes > 0) {
-        setVotePercent(Math.round((100 * proposal.forVotes) / proposal.totalVotes));
-    } else {
-        setVotePercent(50);
-    }
-         };
-         init();
+    useEffect(() => {
+        const init = async () => {
+            if (proposal.totalVotes > 0) {
+                setVotePercent(Math.round((100 * proposal.forVotes) / proposal.totalVotes));
+            } else {
+                setVotePercent(50);
+            }
+        };
+        init();
     }, [proposal])
 
 
@@ -63,57 +60,57 @@ function Proposal({
 
     return (<div
         className={styles.proposalCard}
-        
+
         style={{
             background: 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.1) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)',
             borderRadius: '12px'
         }}>
-        
+
         {proposal.state === 'Active' &&
-         <div
-            onClick={() => {
-                setDropDownBox(!dropDownBox);
-                setDropDownBoxInit(false);
-            }}>
-            <div className={styles.proposalHeader}>
-                <div className={styles.title}>
-                    <p>Proposal #{proposal.id}</p>
-                    <p className={styles.muted}>Title: {proposal.description}</p>
-                    <p className={styles.muted}>Status: {proposal.state}</p>
-                    <p className={styles.muted}>Start L1 Block: {proposal.startBlock} End L1 Block: {proposal.endBlock}</p>
+            <div
+                onClick={() => {
+                    setDropDownBox(!dropDownBox);
+                    setDropDownBoxInit(false);
+                }}>
+                <div className={styles.proposalHeader}>
+                    <div className={styles.title}>
+                        <p>Proposal #{proposal.id}</p>
+                        <p className={styles.muted}>Title: {proposal.description}</p>
+                        <p className={styles.muted}>Status: {proposal.state}</p>
+                        <p className={styles.muted}>Start L1 Block: {proposal.startBlock} End L1 Block: {proposal.endBlock}</p>
+                    </div>
+                    <ExpandMoreIcon /> VOTE
                 </div>
-                <ExpandMoreIcon /> VOTE
+                <div className={styles.proposalContent}>
+                    <div>For: {proposal.forVotes}</div>
+                    <div>Against: {proposal.againstVotes}</div>
+                    <div>Abstain: {proposal.abstainVotes}</div>
+                    <div>Percentage For: {votePercent}% </div>
+                    <div>Total Votes: {proposal.totalVotes}</div>
+                </div>
             </div>
-            <div className={styles.proposalContent}>
-                <div>For: {proposal.forVotes}</div>
-                <div>Against: {proposal.againstVotes}</div>
-                <div>Abstain: {proposal.abstainVotes}</div>
-                <div>Percentage For: {votePercent}% </div>
-                <div>Total Votes: {proposal.totalVotes}</div>
-            </div>
-        </div>
         }
 
         {proposal.state !== 'Active' &&
-         <div>
-            <div className={styles.proposalHeader}>
-                <div className={styles.title}>
-                    <p>Proposal #{proposal.id}</p>
-                    <p className={styles.muted}>Title: {proposal.description}</p>
-                    <p className={styles.muted}>Status: {proposal.state}</p>
-                    <p className={styles.muted}>Start L1 Block: {proposal.startBlock} End L1 Block: {proposal.endBlock}</p>
+            <div>
+                <div className={styles.proposalHeader}>
+                    <div className={styles.title}>
+                        <p>Proposal #{proposal.id}</p>
+                        <p className={styles.muted}>Title: {proposal.description}</p>
+                        <p className={styles.muted}>Status: {proposal.state}</p>
+                        <p className={styles.muted}>Start L1 Block: {proposal.startBlock} End L1 Block: {proposal.endBlock}</p>
+                    </div>
+                </div>
+                <div className={styles.proposalContent}>
+                    <div>For: {proposal.forVotes}</div>
+                    <div>Against: {proposal.againstVotes}</div>
+                    <div>Abstain: {proposal.abstainVotes}</div>
+                    <div>Percentage For: {votePercent}% </div>
+                    <div>Total Votes: {proposal.totalVotes}</div>
                 </div>
             </div>
-            <div className={styles.proposalContent}>
-                <div>For: {proposal.forVotes}</div>
-                <div>Against: {proposal.againstVotes}</div>
-                <div>Abstain: {proposal.abstainVotes}</div>
-                <div>Percentage For: {votePercent}% </div>
-                <div>Total Votes: {proposal.totalVotes}</div>
-            </div>
-        </div>
         }
-        
+
         <div className={dropDownBox ? styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}>
             <div className={styles.proposalDetail}>
                 <Button
@@ -156,7 +153,7 @@ function Proposal({
                 > Cast Vote Abstain</Button>
             </div>
         </div>
-</div>)
+    </div>)
 }
 
 

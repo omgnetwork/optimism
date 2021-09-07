@@ -1995,9 +1995,35 @@ class NetworkService {
   //Create Proposal
   async createProposal(payload) {
     try {
-      let res = await this.delegate.propose(payload)
+      console.log(['payload',payload])
+      let { votingThreshold = null, text = null } = payload;
+      console.log(['votingThreshold',votingThreshold]);
+      const delegateCheck = await this.delegate.attach(this.delegator.address)
+      let address = [delegateCheck.address];
+      let values = [0];
+      let signatures = votingThreshold ? ['_setProposalThreshold(uint256)'] : [''] // the function that will carry out the proposal
+      let voting = votingThreshold !== null ? ethers.utils.parseEther(votingThreshold) : 0;
+      let calldatas = [ethers.utils.defaultAbiCoder.encode( // the parameter for the above function
+        ['uint256'],
+        [voting]
+      )]
+      let description = votingThreshold !== null ? `# Changing Proposal Threshold to ${votingThreshold} Comp` : text;
+      let setGas = {
+        gasPrice: 15000000,
+        gasLimit: 8000000
+      };
+      let res = await this.delegate.propose(
+        address,
+        values,
+        signatures,
+        calldatas,
+        description,
+        setGas
+      )
+      console.log('new proposal creating', res);
       return res;
     } catch (error) {
+      console.log('CREATE PROPOSAL')
       console.log(error);
       throw new Error(error.message);
     }
@@ -2005,23 +2031,15 @@ class NetworkService {
 
   //Fetch Proposals
   async fetchProposals() {
-    console.log('Fetching DAO proposals')
-    console.log(this.delegate)
-
+    
     const delegateCheck = await this.delegate.attach(this.delegator.address)
     
-    console.log(delegateCheck)
-
     const proposalCounts = await delegateCheck.proposalCount()
 
     try {
       let proposalList = [];
-      
       const proposalCounts = await delegateCheck.proposalCount()
-      console.log('proposalCounts:',proposalCounts)
-      
       const totalProposals = await proposalCounts.toNumber() - 1 //it's always off by one??
-      console.log('totalProposals:',totalProposals)
       
       const filter = delegateCheck.filters.ProposalCreated(
         null,
@@ -2036,17 +2054,11 @@ class NetworkService {
       )
       
       const descriptionList = await delegateCheck.queryFilter(filter);
-      console.log('descriptionList:',descriptionList)
-
       for (let i = 0; i < totalProposals; i++) {
         
         let proposalID = descriptionList[i].args[0]
         //this is a number such as 2
-        console.log('list-id:',proposalID)
-        
         let proposalData = await delegateCheck.proposals(proposalID)
-        console.log('list-id:proposalData:',proposalData)
-
         const proposalStates = [
           'Pending',
           'Active',
@@ -2059,8 +2071,7 @@ class NetworkService {
         ]
 
         let state = await delegateCheck.state(proposalID)
-        console.log('State is: ', proposalStates[state])
-
+        
         let againstVotes = parseInt(formatEther(proposalData.againstVotes))
         let forVotes = parseInt(formatEther(proposalData.forVotes))
         let abstainVotes = parseInt(formatEther(proposalData.abstainVotes))
@@ -2069,10 +2080,8 @@ class NetworkService {
         let endBlock = proposalData.endBlock.toString()
 
         let proposal = await delegateCheck.getActions(i+2)
-        console.log('list-id:proposal:',proposal)
         
         let description = descriptionList[i].args[8].toString()
-        console.log('list-id:description:',description)
         
         proposalList.push({
            id: proposalID.toString(),

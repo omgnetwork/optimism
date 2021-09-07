@@ -31,7 +31,6 @@ function ProposalList() {
     const loading = useSelector(selectLoading(['PROPOSALS/GET']))
     const proposals = useSelector(selectProposals)
 
-    console.log('proposals in list:', proposals)
 
     return <>
         <div className={styles.containerAction}>
