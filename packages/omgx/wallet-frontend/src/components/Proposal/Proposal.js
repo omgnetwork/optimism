@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React, { useState, useEffect } from 'react';
-import { utils } from 'ethers';
+
 import { useDispatch } from 'react-redux';
 
 import { openAlert, openError } from 'actions/uiAction';
@@ -23,7 +23,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Button from 'components/button/Button';
 
 import * as styles from './Proposal.module.scss';
-import networkService from 'services/networkService';
+
 import { castProposalVote } from 'actions/daoAction';
 
 function Proposal({
@@ -35,8 +35,7 @@ function Proposal({
     const [dropDownBoxInit, setDropDownBoxInit] = useState(true)
 
     const [votePercent, setVotePercent] = useState(undefined)
-    const [totalVotes, setTotalVotes] = useState(undefined)
-
+    
     useEffect(() => {
         const init = async () => {
             if (proposal.totalVotes > 0) {

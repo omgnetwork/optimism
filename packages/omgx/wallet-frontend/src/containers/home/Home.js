@@ -51,8 +51,6 @@ import TransferDaoModal from 'containers/modals/dao/TransferDaoModal';
 import DelegateDaoModal from 'containers/modals/dao/DelegateDaoModal';
 import NewProposalModal from 'containers/modals/dao/NewProposalModal';
 
-import logo from 'images/logo-boba.svg';
-import * as styles from './Home.module.scss';
 import { fetchDaoBalance, fetchDaoVotes, fetchDaoProposals } from 'actions/daoAction';
 
 //Wallet Functions

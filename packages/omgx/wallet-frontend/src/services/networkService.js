@@ -2031,8 +2031,7 @@ class NetworkService {
     
     const delegateCheck = await this.delegate.attach(this.delegator.address)
     
-    const proposalCounts = await delegateCheck.proposalCount()
-
+    
     try {
       let proposalList = [];
       const proposalCounts = await delegateCheck.proposalCount()
