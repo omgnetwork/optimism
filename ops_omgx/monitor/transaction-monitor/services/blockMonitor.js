@@ -190,7 +190,7 @@ class BlockMonitorService extends OptimismEnv {
 
 
     this.logger.info('Searching cross domain messages...');
-    const crossDomainData = await this.databaseService.getCrossDomainData();
+    const crossDomainData = await this.databaseService.getL2CrossDomainData();
 
     // counts the number of server request
     let promiseCount = 0;

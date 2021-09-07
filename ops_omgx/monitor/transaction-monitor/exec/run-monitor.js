@@ -3,6 +3,7 @@
 const BlockMonitorService = require('../services/blockMonitor');
 const stateRootMonitorService = require('../services/stateRootMonitor');
 const exitMonitorService = require('../services/exitMonitor');
+const l1BridgeMonitorService = require('../services/l1BridgeMonitor');
 
 const loop = async (func) => {
   while (true) {
@@ -19,25 +20,32 @@ const loop = async (func) => {
 }
 
 const main = async () => {
-  // liquidity pool
-  const exitService = new exitMonitorService();
-  await exitService.initConnection();
+  // l1 bridge monitor
+  const l1BridgeService = new l1BridgeMonitorService();
+  await l1BridgeService.initConnection();
 
-  loop(() => exitService.startExitMonitor())
+  loop(() => l1BridgeService.startL1BridgeMonitor());
+  loop(() => l1BridgeService.startCrossDomainMessageMonitor());
 
-  // state root
-  const stateRootService = new stateRootMonitorService();
-  await stateRootService.initConnection();
+  // // liquidity pool
+  // const exitService = new exitMonitorService();
+  // await exitService.initConnection();
 
-  loop(() => stateRootService.startStateRootMonitor())
+  // loop(() => exitService.startExitMonitor())
 
-  // block
-  const blockService = new BlockMonitorService();
-  await blockService.initConnection();
-  await blockService.initScan();
+  // // state root
+  // const stateRootService = new stateRootMonitorService();
+  // await stateRootService.initConnection();
 
-  loop(() => blockService.startTransactionMonitor())
-  loop(() => blockService.startCrossDomainMessageMonitor())
+  // loop(() => stateRootService.startStateRootMonitor())
+
+  // // block
+  // const blockService = new BlockMonitorService();
+  // await blockService.initConnection();
+  // await blockService.initScan();
+
+  // loop(() => blockService.startTransactionMonitor())
+  // loop(() => blockService.startCrossDomainMessageMonitor())
 }
 
 (async () => {
