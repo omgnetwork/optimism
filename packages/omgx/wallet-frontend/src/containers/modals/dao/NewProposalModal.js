@@ -15,7 +15,7 @@ limitations under the License. */
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 
-import { closeModal } from 'actions/uiAction'
+import { closeModal, openAlert, openError } from 'actions/uiAction'
 
 import * as styles from './daoModal.module.scss'
 
@@ -45,8 +45,15 @@ function NewProposalModal({ open }) {
     }
 
     const submit = async () => {
-        console.log('votingThreshold ', votingThreshold,proposeText);
-        dispatch(createDaoProposal({votingThreshold, text:proposeText}));
+        let res = await dispatch(createDaoProposal({ votingThreshold, text: proposeText }));
+    
+        if (res) {
+            dispatch(openAlert(`Proposal has been submitted!`))
+            handleClose()
+        } else {
+            dispatch(openError(`Failed to create proposal`));
+            handleClose()
+        }
     }
 
     const disabledProposal = () => {
@@ -59,6 +66,7 @@ function NewProposalModal({ open }) {
 
     return (
         <Modal open={open}
+            onClose={handleClose}
             width="400px"
         >
             <h2>New Proposal</h2>

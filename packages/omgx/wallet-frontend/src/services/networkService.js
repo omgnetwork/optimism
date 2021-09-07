@@ -1995,7 +1995,6 @@ class NetworkService {
   //Create Proposal
   async createProposal({ votingThreshold = null, text = null }) {
     try {
-      
       const delegateCheck = await this.delegate.attach(this.delegator.address)
       let address = [delegateCheck.address];
       let values = [0];
@@ -2011,7 +2010,7 @@ class NetworkService {
         gasPrice: 15000000,
         gasLimit: 8000000
       };
-      
+
       let res = await delegateCheck.propose(
         address,
         values,
@@ -2020,10 +2019,8 @@ class NetworkService {
         description,
         setGas
       )
-      console.log('new proposal creating', res);
       return res;
     } catch (error) {
-      console.log('CREATE PROPOSAL')
       console.log(error);
       throw new Error(error.message);
     }
@@ -2071,7 +2068,6 @@ class NetworkService {
         ]
 
         let state = await delegateCheck.state(proposalID)
-        
         let againstVotes = parseInt(formatEther(proposalData.againstVotes))
         let forVotes = parseInt(formatEther(proposalData.forVotes))
         let abstainVotes = parseInt(formatEther(proposalData.abstainVotes))
