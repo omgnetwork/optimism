@@ -34,7 +34,7 @@ function NewProposalModal({ open }) {
 
     const onActionChange = (e) =>{
         setVotingThreshold('0');
-        setProposeText('0');
+        setProposeText('');
         setAction(e.target.value);
     }
 

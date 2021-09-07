@@ -1993,25 +1993,25 @@ class NetworkService {
   }
 
   //Create Proposal
-  async createProposal(payload) {
+  async createProposal({ votingThreshold = null, text = null }) {
     try {
-      console.log(['payload',payload])
-      let { votingThreshold = null, text = null } = payload;
-      console.log(['votingThreshold',votingThreshold]);
+      
       const delegateCheck = await this.delegate.attach(this.delegator.address)
       let address = [delegateCheck.address];
       let values = [0];
-      let signatures = votingThreshold ? ['_setProposalThreshold(uint256)'] : [''] // the function that will carry out the proposal
-      let voting = votingThreshold !== null ? ethers.utils.parseEther(votingThreshold) : 0;
+      let signatures = !text ? ['_setProposalThreshold(uint256)'] : [''] // the function that will carry out the proposal
+      let voting = !text ? ethers.utils.parseEther(votingThreshold) : 0;
       let calldatas = [ethers.utils.defaultAbiCoder.encode( // the parameter for the above function
         ['uint256'],
         [voting]
       )]
-      let description = votingThreshold !== null ? `# Changing Proposal Threshold to ${votingThreshold} Comp` : text;
+      let description = !text ? `# Changing Proposal Threshold to ${votingThreshold} Comp` : text;
+      
       let setGas = {
         gasPrice: 15000000,
         gasLimit: 8000000
       };
+      
       let res = await delegateCheck.propose(
         address,
         values,
