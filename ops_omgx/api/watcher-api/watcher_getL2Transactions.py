@@ -8,7 +8,7 @@ import time
 import requests
 import redis
 
-def watcher_getTransactions(event, context):
+def watcher_getL2Transactions(event, context):
 
   # Parse incoming event
   body = json.loads(event["body"])
@@ -131,7 +131,3 @@ def watcher_getTransactions(event, context):
     "body": json.dumps(transactionData),
   }
   return response
-
-print(watcher_getTransactions({"body": json.dumps({
-  "address":"0xfC29826180212F542B30ae8b636F1cfb5C0734Ae","fromRange":"0","toRange":"1"
-})}, "B"))

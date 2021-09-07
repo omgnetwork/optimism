@@ -4,6 +4,7 @@ const BlockMonitorService = require('../services/blockMonitor');
 const stateRootMonitorService = require('../services/stateRootMonitor');
 const exitMonitorService = require('../services/exitMonitor');
 const l1BridgeMonitorService = require('../services/l1BridgeMonitor');
+const { sleep } = require('@eth-optimism/core-utils');
 
 const loop = async (func) => {
   while (true) {
@@ -15,6 +16,7 @@ const loop = async (func) => {
         stack: error.stack,
         code: error.code,
       });
+      await sleep(1000);
     }
   }
 }
@@ -27,25 +29,25 @@ const main = async () => {
   loop(() => l1BridgeService.startL1BridgeMonitor());
   loop(() => l1BridgeService.startCrossDomainMessageMonitor());
 
-  // // liquidity pool
-  // const exitService = new exitMonitorService();
-  // await exitService.initConnection();
+  // liquidity pool
+  const exitService = new exitMonitorService();
+  await exitService.initConnection();
 
-  // loop(() => exitService.startExitMonitor())
+  loop(() => exitService.startExitMonitor())
 
-  // // state root
-  // const stateRootService = new stateRootMonitorService();
-  // await stateRootService.initConnection();
+  // state root
+  const stateRootService = new stateRootMonitorService();
+  await stateRootService.initConnection();
 
-  // loop(() => stateRootService.startStateRootMonitor())
+  loop(() => stateRootService.startStateRootMonitor())
 
-  // // block
-  // const blockService = new BlockMonitorService();
-  // await blockService.initConnection();
-  // await blockService.initScan();
+  // block
+  const blockService = new BlockMonitorService();
+  await blockService.initConnection();
+  await blockService.initScan();
 
-  // loop(() => blockService.startTransactionMonitor())
-  // loop(() => blockService.startCrossDomainMessageMonitor())
+  loop(() => blockService.startTransactionMonitor())
+  loop(() => blockService.startCrossDomainMessageMonitor())
 }
 
 (async () => {

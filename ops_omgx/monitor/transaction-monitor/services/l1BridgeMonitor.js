@@ -58,7 +58,6 @@ class l1BridgeMonitorService extends OptimismEnv {
     }
 
     await this.initOptimismEnv();
-    await this.databaseService.initDatabaseService();
     await this.databaseService.initMySQL();
 
     // fetch the last end block
@@ -70,12 +69,7 @@ class l1BridgeMonitorService extends OptimismEnv {
   }
 
   async startL1BridgeMonitor() {
-    // Create tables
-    this.l1BridgeMonitorSQL = true;
-    await this.startDatabaseService();
-
     const latestL1Block = await this.L1Provider.getBlockNumber();
-
     const endBlock = Math.min(latestL1Block, this.endBlock);
 
     const [userRewardFeeRate, ownerRewardFeeRate] = await Promise.all([
@@ -117,7 +111,7 @@ class l1BridgeMonitorService extends OptimismEnv {
             crossDomainMessage = true;
             crossDomainMessageFinalize = false;
             crossDomainMessageSendTime = timestamp;
-            crossDomainMessageEstimateFinalizedTime = timestamp + 60 * 2;
+            crossDomainMessageEstimateFinalizedTime = timestamp + Number(this.l1CrossDomainMessageWaitingTime);
             const depositSender = L1LPEvent.args.sender;
             const depositTo = L1LPEvent.args.sender;
             const depositToken = L1LPEvent.args.tokenAddress;
@@ -170,7 +164,7 @@ class l1BridgeMonitorService extends OptimismEnv {
           const crossDomainMessage = true;
           const crossDomainMessageFinalize = false;
           const crossDomainMessageSendTime = timestamp;
-          const crossDomainMessageEstimateFinalizedTime = timestamp + 60 * 2;
+          const crossDomainMessageEstimateFinalizedTime = timestamp + Number(this.l1CrossDomainMessageWaitingTime);
           const fastDeposit = false;
           const depositSender = L1StandardBridgeEvent.args._from;
           const depositTo = L1StandardBridgeEvent.args._to;
@@ -208,16 +202,10 @@ class l1BridgeMonitorService extends OptimismEnv {
     this.endBlock = Number(endBlock) + Number(this.l1BridgeMonitorLogInterval);
     this.latestL1Block = latestL1Block;
 
-    this.l1BridgeMonitorSQL = false;
-    await this.endDatabaseService();
     await sleep(this.l1BridgeMonitorInterval);
   }
 
   async startCrossDomainMessageMonitor() {
-    // Create tables
-    this.crossDomainMessageMonitorSQL = true;
-    await this.startDatabaseService();
-
     const crossDomainMessages = await this.databaseService.getL1CrossDomainData();
     for (const eachCrossDomainMessage of crossDomainMessages) {
       const [l1ToL2msgHash] = await this.watcher.getMessageHashesFromL1Tx(eachCrossDomainMessage.hash);
@@ -278,8 +266,6 @@ class l1BridgeMonitorService extends OptimismEnv {
       }
     }
 
-    this.crossDomainMessageMonitorSQL = false;
-    await this.endDatabaseService();
     await sleep(this.crossDomainMessageMonitorInterval);
   }
 
@@ -306,38 +292,6 @@ class l1BridgeMonitorService extends OptimismEnv {
     } else {
       return false;
     }
-  }
-
-  // starts up connection with mysql database safely
-  async startDatabaseService(){
-    await this.databaseConnectedMutex.acquire().then(async (release) => {
-      try {
-        if(!this.databaseConnected){
-          await this.databaseService.initDatabaseService();
-          this.databaseConnected = true;
-        }
-        release();
-      } catch (error) {
-        release();
-        throw error;
-      }
-    });
-  }
-
-  // ends connection with mysql database safely
-  async endDatabaseService(){
-    await this.databaseConnectedMutex.acquire().then(async (release) => {
-        try {
-          if(this.databaseConnected && !this.crossDomainMessageMonitorSQL && !this.l1BridgeMonitorSQL){
-              this.databaseService.con.end();
-              this.databaseConnected = false;
-          }
-          release();
-        } catch (error) {
-          release();
-          throw error;
-        }
-    });
   }
 }
 
