@@ -76,21 +76,21 @@ def watcher_getL1Transactions(event, context):
             "crossDomainMessageFinalize": transactionDataRaw[9],
             "crossDomainMessageSendTime": crossDomainMessageSendTime,
             "crossDomainMessageEstimateFinalizedTime": crossDomainMessageEstimateFinalizedTime,
-            "fastDeposit": fastDeposit,
+            "fast": fastDeposit,
             "l2Hash": transactionDataRaw[13],
             "l2BlockNumber": transactionDataRaw[14],
             "l2BlockHash": transactionDataRaw[15],
             "l2From": transactionDataRaw[16],
             "l2To": transactionDataRaw[17]
           },
-          "deposit": {
-            "depositSender": transactionDataRaw[19],
-            "depositTo": transactionDataRaw[20],
-            "depositToken": transactionDataRaw[21],
-            "depositAmount": transactionDataRaw[22],
-            "depositReceive": transactionDataRaw[23],
-            "depositFeeRate": transactionDataRaw[24],
-            "fastDeposit": fastDeposit,
+          "action": {
+            "sender": transactionDataRaw[19],
+            "to": transactionDataRaw[20],
+            "token": transactionDataRaw[21],
+            "amount": transactionDataRaw[22],
+            "receive": transactionDataRaw[23],
+            "feeRate": transactionDataRaw[24],
+            "fast": fastDeposit,
             "status": transactionDataRaw[25]
           }
         })
