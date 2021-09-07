@@ -62,10 +62,10 @@ import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol
 import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
 
 // DAO 
-import Comp from "../deployment/rinkeby/json/Comp.json";
-import GovernorBravoDelegate from "../deployment/rinkeby/json/GovernorBravoDelegate.json";
-import GovernorBravoDelegator from "../deployment/rinkeby/json/GovernorBravoDelegator.json";
-import Timelock from "../deployment/rinkeby/json/Timelock.json";
+import Comp from "../deployment/rinkeby/json/Comp.json"
+import GovernorBravoDelegate from "../deployment/rinkeby/json/GovernorBravoDelegate.json"
+import GovernorBravoDelegator from "../deployment/rinkeby/json/GovernorBravoDelegator.json"
+import Timelock from "../deployment/rinkeby/json/Timelock.json"
 
 import { powAmount, logAmount } from 'util/amountConvert'
 import { accDiv, accMul } from 'util/calculation'
@@ -569,25 +569,34 @@ class NetworkService {
         addresses.DAO_Comp,
         Comp.abi,
         this.provider.getSigner()
-      );
+      )
 
       this.delegate = new ethers.Contract(
         addresses.DAO_GovernorBravoDelegate,
         GovernorBravoDelegate.abi,
         this.provider.getSigner()
-      );
+      )
 
       this.delegator = new ethers.Contract(
         addresses.DAO_GovernorBravoDelegator,
         GovernorBravoDelegator.abi,
         this.provider.getSigner()
-      );
+      )
 
       this.timelock = new ethers.Contract(
         addresses.DAO_Timelock,
         Timelock.abi,
         this.provider.getSigner()
-      );
+      )
+
+
+
+/*
+  this.comp = null
+  this.delegate = null
+  this.delegator = null
+  this.timelock = null
+*/
 
       this.bindProviderListeners()
 
@@ -1936,6 +1945,8 @@ class NetworkService {
 
   // get DAO Balance
   async getDaoBalance() {
+    //console.log("comp:",this.comp)
+    //console.log("comp:",this.comp.address)
     try {
       let balance = await this.comp.balanceOf(this.account)
       return { balance: formatEther(balance) }
@@ -1957,7 +1968,7 @@ class NetworkService {
     }
   }
 
-  //Transfer DAO funds
+  //Transfer DAO Funds
   async transferDao({ recipient, amount }) {
     try {
       const tx = await this.comp.transfer(recipient, parseEther(amount.toString()))
@@ -1969,7 +1980,7 @@ class NetworkService {
     }
   }
 
-  //Delegate DAO
+  //Delegate DAO Authority
   async delegateVotes({ recipient }) {
     try {
       const tx = await this.comp.delegate(recipient)
@@ -1994,11 +2005,25 @@ class NetworkService {
 
   //Fetch Proposals
   async fetchProposals() {
+    console.log('Fetching DAO proposals')
+    console.log(this.delegate)
+
+    const delegateCheck = await this.delegate.attach(this.delegator.address)
+    
+    console.log(delegateCheck)
+
+    const proposalCounts = await delegateCheck.proposalCount()
+
     try {
       let proposalList = [];
-      const proposalCounts = await this.delegate.proposalCount()
-      const totalProposal = await proposalCounts.toNumber()
-      const filter = this.delegate.filters.ProposalCreated(
+      
+      const proposalCounts = await delegateCheck.proposalCount()
+      console.log('proposalCounts:',proposalCounts)
+      
+      const totalProposals = await proposalCounts.toNumber() - 1 //it's always off by one??
+      console.log('totalProposals:',totalProposals)
+      
+      const filter = delegateCheck.filters.ProposalCreated(
         null,
         null,
         null,
@@ -2008,24 +2033,45 @@ class NetworkService {
         null,
         null,
         null
-      );
-      const descriptionList = await this.delegate.queryFilter(filter);
-      for (let i = totalProposal; i > 1 && i > totalProposal - 3; i--) {
-        let proposal = await this.delegate.getActions(i);
-        let fullDescription = descriptionList[i - 2].args[8].toString();
-        let titleEnd = fullDescription.search(/\n/);
-        let title = fullDescription.substring(0, titleEnd);
-        let description = fullDescription.substring(titleEnd + 1);
+      )
+      
+      const descriptionList = await delegateCheck.queryFilter(filter);
+      console.log('descriptionList:',descriptionList)
+
+      for (let i = 0; i < totalProposals; i++) {
+        
+        let id = descriptionList[i].args[0]
+        //this is a number such as 2
+        console.log('id:',id)
+        
+        let proposalData = await delegateCheck.proposals(id)
+        console.log('proposalData:',proposalData)
+
+        let againstVotes = parseInt(proposalData.againstVotes.toString())
+        let forVotes = parseInt(proposalData.forVotes.toString())
+        let abstainVotes = parseInt(proposalData.abstainVotes.toString())
+
+        let proposal = await delegateCheck.getActions(i+2)
+        console.log('proposal:',proposal)
+        
+        let description = descriptionList[i].args[8].toString();
+        console.log('description:',description)
+        
         proposalList.push({
-          proposal,
-          title,
-          description
+           id: id.toString(),
+           proposal,
+           description,
+           totalVotes: forVotes + againstVotes,
+           forVotes,
+           againstVotes,
+           abstainVotes,
         })
+
       }
-      return { proposalList };
+      return { proposalList }
     } catch (error) {
       console.log(error)
-      throw new Error(error.message);
+      throw new Error(error.message)
     }
   }
 

@@ -28,8 +28,10 @@ import { selectLoading } from 'selectors/loadingSelector';
 function ProposalList() {
 
     const dispatch = useDispatch()
-    const loading = useSelector(selectLoading(['PROPOSAL/GET']))
+    const loading = useSelector(selectLoading(['PROPOSALS/GET']))
     const proposals = useSelector(selectProposals)
+
+    console.log('proposals in list:', proposals)
 
     return <>
         <div className={styles.containerAction}>
@@ -51,11 +53,11 @@ function ProposalList() {
         <div className={styles.listContainer}>
             {!!loading ? <div className={styles.loadingContainer}> Loading... </div> : null}
             {proposals.map((p, index) => {
-                return <React.Fragment key={index}><Proposal /></React.Fragment>
+                return <React.Fragment key={index}><Proposal proposal={p}/></React.Fragment>
             })}
         </div>
     </>
 }
 
-export default React.memo(ProposalList);
+export default React.memo(ProposalList)
 

@@ -12,6 +12,7 @@
     "submitProposalText": "node scripts/submitProposalText.js",
     "castVotes": "node scripts/castVotes.js",
     "queueProposal": "node scripts/queueProposal.js",
+    "checkProposals": "node scripts/checkProposals.js",
     "executeProposal": "node scripts/executeProposal.js",
     "cancelProposal": "node scripts/cancelProposal.js"
 

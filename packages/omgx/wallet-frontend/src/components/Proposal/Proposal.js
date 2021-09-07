@@ -40,27 +40,18 @@ function Proposal({
     const [totalVotes, setTotalVotes] = useState(undefined)
 
     console.log("Delegate address:", delegate.address)
+    console.log("Proposal(proposal):", proposal)
 
-    useEffect(() => {
-        const init = async () => {
-            if (proposal && proposal[0][0] === delegate.address) {
-                const proposalData = await delegate.proposals(id);
-                let forVotes = utils.formatEther(proposalData.forVotes);
-                forVotes = parseInt(forVotes);
-                let againstVotes = utils.formatEther(proposalData.againstVotes);
-                againstVotes = parseInt(againstVotes);
-                const totalVotes = forVotes + againstVotes;
-                setTotalVotes(totalVotes);
-
-                if (totalVotes > 0) {
-                    setVotePercent(Math.round((100 * forVotes) / totalVotes));
-                } else {
-                    setVotePercent(50);
-                }
-            }
-        };
-        init();
-    }, [delegate, id, proposal])
+     useEffect(() => {
+         const init = async () => {
+             if (proposal.totalVotes > 0) {
+        setVotePercent(Math.round((100 * proposal.forVotes) / proposal.totalVotes));
+    } else {
+        setVotePercent(50);
+    }
+         };
+         init();
+    }, [proposal])
 
 
     const updateVote = async (e, userVote, label) => {
@@ -83,19 +74,19 @@ function Proposal({
             }}>
             <div className={styles.proposalHeader}>
                 <div className={styles.title}>
-                    <p>Proposal #{Math.random() * 100}</p>
+                    <p>Proposal #{proposal.id}</p>
                     <p className={styles.muted}>
-                        signaturesignaturesignature
+                        {proposal.description}
                     </p>
                 </div>
                 <ExpandMoreIcon />
             </div>
             <div className={styles.proposalContent}>
-                <div>For Votes : <span>10</span> </div>
-                <div>Against Votes : <span>1231</span> </div>
-                <div>Abstain Votes : <span>8912</span> </div>
-                <div>Vote Percentage : {votePercent}% </div>
-                <div>Total Votes : {totalVotes} </div>
+                <div>For Votes: <span>{proposal.forVotes}</span></div>
+                <div>Against Votes: <span>{proposal.againstVotes}</span></div>
+                <div>Abstain Votes: <span>{proposal.abstainVotes}</span></div>
+                <div>Vote Percentage: {votePercent}% </div>
+                <div>Total Votes: {proposal.totalVotes}</div>
             </div>
         </div>
 
