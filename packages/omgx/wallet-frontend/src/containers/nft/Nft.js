@@ -74,18 +74,18 @@ class Nft extends React.Component {
     let originName = ''
 
     if(networkService.chainID === 28) {
-      originName = 'OMGX_Rinkeby_28'
+      originName = 'BOBA_Rinkeby_28'
     } else if (networkService.chainID === 288) {
-      originName = 'OMGX_Mainnet_288'
+      originName = 'BOBA_Mainnet_288'
     } else {
-      originName = 'OMGX_Other'
+      originName = 'BOBA_Other'
     }
 
     const deployTX = await networkService.deployNFTContract(
       newNFTsymbol,
       newNFTname,
-      '0x0000000000000000000000000000000000000042',
-      'simple',
+      '0x0000000000000000000000000000000000000042', //Legacy - can be anything
+      'simple', //Legacy - can be anything
       originName
     )
 
@@ -113,23 +113,52 @@ class Nft extends React.Component {
     } = this.state;
 
     const numberOfNFTs = Object.keys(list).length
+    const numberOfContracts = Object.keys(contracts).length
 
     return (
       <>
         <PageHeader title="NFT" />
 
         <Grid item xs={12}>
+          <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>Your NFT contracts</Typography>
+
+          <Typography variant="body2" component="p" sx={{mt: 1, mb: 2}}>
+            {numberOfContracts === 1 &&
+              <span>You have one NFT minting contract. To mint an NFT, select "Mint NFT".</span>
+            }
+            {numberOfContracts > 1 &&
+              <span>You have {numberOfContracts} minting contracts. To mint an NFT, select "Mint NFT".</span>
+            }
+            {numberOfContracts < 1 &&
+              <span>You do not have any NFT contracts. To mint NFTs, first create your own miniting contract by selecting "Deploy NFT contract".</span>
+            }
+          </Typography>
+
+        <Grid 
+          container
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+          sx={{mt: 1, mb: 5}}
+        >
+          <Button size="medium" variant="contained" sx={{marginRight: 3}} onClick={()=> {this.setState({deployModalOpen: true})}}>Deploy NFT contract</Button>
+          <Button size="medium" variant="contained" onClick={()=> {this.setState({mintModalOpen: true})}}>Mint NFT</Button>
+        </Grid>
+
+        </Grid>
+
+        <Grid item xs={12}>
 
           <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>Your NFTs</Typography>
 
           {numberOfNFTs === 1 &&
-            <Typography variant="body2" component="p" sx={{mt: 1, mb: 4}}>You have one NFT and it should be shown below.</Typography>
+            <Typography variant="body2" component="p" sx={{mt: 1, mb: 2}}>You have one NFT and it should be shown below.</Typography>
           }
           {numberOfNFTs > 1 &&
-            <Typography variant="body2" component="p" sx={{mt: 1, mb: 4}}>You have {numberOfNFTs} NFTs and they should be shown below.</Typography>
+            <Typography variant="body2" component="p" sx={{mt: 1, mb: 2}}>You have {numberOfNFTs} NFTs and they should be shown below.</Typography>
           }
           {numberOfNFTs < 1 &&
-            <Typography variant="body2" component="p" sx={{mt: 1, mb: 4}}>Scanning the blockchain for your NFTs...</Typography>
+            <Typography variant="body2" component="p" sx={{mt: 1, mb: 2}}>Scanning the blockchain for your NFTs...</Typography>
           }
 
           <Grid
@@ -156,18 +185,12 @@ class Nft extends React.Component {
           </Grid>
         </Grid>
 
-        <Box display="flex" sx={{mt: 4, gap: 3}}>
-          <Button size="large" variant="contained" onClick={()=> {this.setState({deployModalOpen: true})}}>Deploy NFT contract</Button>
-          <Button size="large" variant="contained" onClick={()=> {this.setState({mintModalOpen: true})}}>Mint NFT</Button>
-        </Box>
-
         <Modal maxWidth="md" open={this.state.deployModalOpen} onClose={()=> this.setState({deployModalOpen: false})}>
         <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>
             Deploy new NFT Contract
           </Typography>
           <Typography variant="body2" component="p" sx={{mt: 1, mb: 4}}>
-            To mint your own NFTs, you first need to deploy your NFT contract. Specify the NFT's name and symbol, and then click
-            "Deploy NFT contract".
+            Specify the NFT's symbol and name, and then click "Deploy NFT contract".
           </Typography>
           <Box sx={{display: "flex", flexDirection: "column", gap: "10px", mb: 2}}>
             <Input
@@ -195,9 +218,12 @@ class Nft extends React.Component {
 
         </Modal>
 
-        <Modal maxWidth="md" open={this.state.mintModalOpen} onClose={()=> this.setState({mintModalOpen: false})}>
-        <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>
-            Mint New NFTs
+        <Modal maxWidth="md" 
+          open={this.state.mintModalOpen} 
+          onClose={()=> this.setState({mintModalOpen: false})}
+        >
+          <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>
+            Mint an NFT
           </Typography>
 
           <ListNFTfactory
