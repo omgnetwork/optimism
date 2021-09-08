@@ -167,6 +167,7 @@ class Nft extends React.Component {
             justifyContent="flex-start"
             alignItems="flex-start"
             xs={12}
+            item
           >
             {Object.keys(list).map((v, i) => {
               const key_UUID = `nft_` + i
@@ -179,6 +180,7 @@ class Nft extends React.Component {
                   UUID={list[v].UUID}
                   URL={list[v].url}
                   time={list[v].mintedTime}
+                  attributes={list[v].attributes}
                 />)
               })
             }

@@ -69,7 +69,7 @@ import Timelock from "../deployment/rinkeby/json/Timelock.json"
 
 import { powAmount, logAmount } from 'util/amountConvert'
 import { accDiv, accMul } from 'util/calculation'
-
+import {getNftImageUrl} from 'util/nftImage'
 import { getAllNetworks } from 'util/masterConfig'
 
 import etherScanInstance from 'api/etherScanAxios'
@@ -1102,14 +1102,21 @@ class NetworkService {
 
           const UUID = address.substring(1, 6) + '_' + tokenID.toString() + '_' + this.account.substring(1, 6)
 
+          // const { url , attributes = []} = await getNftImageUrl(meta[1]);
+          // Just to test locally
+          const { url , attributes = []} = await getNftImageUrl('https://boredapeyachtclub.com/api/mutants/111');
+          
+          console.log(url, attributes)
           const NFT = {
             UUID,
             mintedTime,
-            url: meta[1],
+            // url: meta[1],
+            url,
             tokenID,
             name: nftName,
             symbol: nftSymbol,
             address,
+            attributes,
           }
 
           await addNFT( NFT )

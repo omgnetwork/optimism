@@ -42,6 +42,7 @@ export async function addNFT ( NFT ) {
     address: NFT.address,
     mintedTime: NFT.mintedTime,
     symbol:  NFT.symbol,  
+    attributes: NFT.attributes
   }
 
   store.dispatch({
