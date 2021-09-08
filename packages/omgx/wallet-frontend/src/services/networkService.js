@@ -1106,11 +1106,9 @@ class NetworkService {
           // Uncomment Just to test locally
           // const { url , attributes = []} = await getNftImageUrl('https://boredapeyachtclub.com/api/mutants/111');
           
-          console.log(url, attributes)
           const NFT = {
             UUID,
             mintedTime,
-            // url: meta[1],
             url,
             tokenID,
             name: nftName,
