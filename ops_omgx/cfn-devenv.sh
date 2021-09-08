@@ -15,7 +15,8 @@ SUBCMD=
 FORCE=no
 AWS_ECR="942431445534.dkr.ecr.${REGION}.amazonaws.com"
 SKIPSERVICE=
-DOCKER_IMAGES_LIST=`ls ${PATH_TO_CFN}|egrep -v '^0|^datadog|^optimism|^graph'|sed 's/.yaml//g'`
+ALL_DOCKER_IMAGES_LIST=`ls ${PATH_TO_CFN}|egrep -v '^0|^datadog|^optimism|^graph'|sed 's/.yaml//g'`
+DOCKER_IMAGES_LIST=`ls ${PATH_TO_CFN}|egrep -v '^0|^datadog|^optimism|^graph|^replica'|sed 's/.yaml//g'`
 ENV_PREFIX=
 FORCE=no
 
@@ -323,7 +324,7 @@ function check_dev_environment {
 function deploy_dev_services {
     if [ -z ${SERVICE_NAME} ]; then
       notice "Deploying ..."
-      for SERVICE in ${DOCKER_IMAGES_LIST}; do
+      for SERVICE in ${ALL_DOCKER_IMAGES_LIST}; do
         cd ${PATH_TO_CFN}
         info "$SERVICE provisioning ..."
         aws cloudformation create-stack \
@@ -340,7 +341,7 @@ function deploy_dev_services {
         info "$SERVICE provisioning ..."
         cd ..
       done
-      for SERVICE in ${DOCKER_IMAGES_LIST}; do
+      for SERVICE in ${ALL_DOCKER_IMAGES_LIST}; do
         aws cloudformation wait stack-create-complete --stack-name=${ENV_PREFIX}-$SERVICE
         info "Provisioned $SERVICE in ${REGION}"
       done
@@ -367,7 +368,7 @@ function deploy_dev_services {
 function update_dev_services {
     if [ -z ${SERVICE_NAME} ]; then
       notice "Updating all services"
-      for SERVICE in ${DOCKER_IMAGES_LIST}; do
+      for SERVICE in ${ALL_DOCKER_IMAGES_LIST}; do
         cd ${PATH_TO_CFN}
         info "Updating $SERVICE"
         aws cloudformation update-stack \
@@ -410,14 +411,14 @@ function update_dev_services {
 function destroy_dev_services {
     if [ -z ${SERVICE_NAME} ]; then
       notice "Destroying all services"
-      for SERVICE in ${DOCKER_IMAGES_LIST}; do
+      for SERVICE in ${ALL_DOCKER_IMAGES_LIST}; do
         cd ${PATH_TO_CFN}
         info "Removing $SERVICE"
         aws cloudformation delete-stack \
             --stack-name ${ENV_PREFIX}-$SERVICE
         cd ..
       done
-      for SERVICE in ${DOCKER_IMAGES_LIST}; do
+      for SERVICE in ${ALL_DOCKER_IMAGES_LIST}; do
           aws cloudformation wait stack-delete-complete --stack-name=${ENV_PREFIX}-$SERVICE
           info "$SERVICE delete completed"
       done
@@ -436,16 +437,16 @@ function destroy_dev_services {
 
   function restart_service {
       local force="${1:-}"
-      ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|grep -vi replica|tail -1|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'`
-      ECS_CLUSTER_REPLICA=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|grep -i replica|tail -1|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'`
-      SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
-      SERVICE4RESTARTREPLICA=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER_REPLICA|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
-      CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
-      CONTAINER_INSTANCE_REPLICA=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER_REPLICA|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
-      ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|egrep -vi ^datadog|tr '\n' ' '`
-      ECS_TASKS_REPLICA=`aws ecs list-tasks --cluster $ECS_CLUSTER_REPLICA --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|egrep -vi ^datadog|tr '\n' ' '`
+      CLUSTER_NAME=$(echo ${ENV_PREFIX}|sed 's#-replica##')
+      if [[ ${ENV_PREFIX} == *"-replica"* ]];then
+        ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep $CLUSTER_NAME|grep replica|tail -1|cut -d/ -f2|sed 's#,##g'|sed 's#"##g'`
+      else
+        ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|grep -v replica|tail -1|cut -d/ -f2|sed 's#,##g'|sed 's#"##g'`
+      fi
+      SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i $CLUSTER_NAME|cut -d/ -f3|sed 's#,##g'|tr '\n' ' '|sed 's#"##g'`
+      CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep $CLUSTER_NAME|tail -1|cut -d/ -f3|sed 's#"##g'`
+      ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep $CLUSTER_NAME|cut -d/ -f3|sed 's#"##g'|egrep -vi ^datadog|tr '\n' ' '`
       EC2_INSTANCE=`aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId'`
-      EC2_INSTANCE_REPLICA=`aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER_REPLICA --container-instance $CONTAINER_INSTANCE_REPLICA|jq '.containerInstances[0] .ec2InstanceId'`
       if [ -z ${SERVICE_NAME} ]; then
         info "Restarting ${ECS_CLUSTER}"
         if [[ "${force}" == "yes" ]] ; then
@@ -471,16 +472,6 @@ function destroy_dev_services {
           done
           info "Restarted, please allow 1-2 minutes for the new tasks to actually start"
         fi
-        info "Restarting ${ECS_CLUSTER_REPLICA}"
-        for num in $SERVICE4RESTARTREPLICA; do
-          aws ecs update-service  --region ${REGION} --cluster $ECS_CLUSTER_REPLICA --service $num --desired-count 0 >> /dev/null
-        done
-        aws ecs list-tasks --cluster $ECS_CLUSTER_REPLICA | jq -r ' .taskArns[] | [.] | @tsv' |  while IFS=$'\t' read -r taskArn; do  aws ecs stop-task --cluster $ECS_CLUSTER_REPLICA --task $taskArn >> /dev/null; done
-        sleep 10
-        for num in $SERVICE4RESTARTREPLICA; do
-          aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER_REPLICA --service $num --desired-count 1 >> /dev/null
-        done
-        info "Restarted, please allow 1-2 minutes for the new tasks to actually start"
       else
         info "Restarting ${SERVICE_NAME} on ${ECS_CLUSTER}"
         SRV=`echo ${SERVICE_NAME}`
@@ -494,11 +485,16 @@ function destroy_dev_services {
 
     function stop_cluster {
         local force="${1:-}"
-        ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|grep -vi replica|tail -1|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'`
-        SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i ${ENV_PREFIX}|cut -d/ -f3|sed 's#,##g'|egrep -vi ^datadog|tr '\n' ' '|sed 's#"##g'`
-        DATADOGTASK=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION} --service-name Datadog-prod|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|tr '\n' ' '`
-        CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
-        ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${ENV_PREFIX}|cut -d/ -f3|sed 's#"##g'|egrep -vi ^datadog|tr '\n' ' '`
+        CLUSTER_NAME=$(echo ${ENV_PREFIX}|sed 's#-replica##')
+        if [[ ${ENV_PREFIX} == *"-replica"* ]];then
+          ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep $CLUSTER_NAME|grep replica|tail -1|cut -d/ -f2|sed 's#,##g'|sed 's#"##g'`
+        else
+          ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|grep -v replica|tail -1|cut -d/ -f2|sed 's#,##g'|sed 's#"##g'`
+        fi
+        SERVICE4RESTART=`aws ecs list-services --region ${REGION} --cluster $ECS_CLUSTER|grep -i $CLUSTER_NAME|cut -d/ -f3|sed 's#,##g'|egrep -vi ^datadog|tr '\n' ' '|sed 's#"##g'`
+        DATADOGTASK=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION} --service-name Datadog-prod|grep $CLUSTER_NAME|cut -d/ -f3|sed 's#"##g'|tr '\n' ' '`
+        CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep $CLUSTER_NAME|tail -1|cut -d/ -f3|sed 's#"##g'`
+        ECS_TASKS=`aws ecs list-tasks --cluster $ECS_CLUSTER --region ${REGION}|grep ${CLUSTER_NAME|cut -d/ -f3|sed 's#"##g'|egrep -vi ^datadog|tr '\n' ' '`
         info "STOP ${ECS_CLUSTER}"
           for num in $SERVICE4RESTART; do
             aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER --service $num --desired-count 0 >> /dev/null
@@ -509,7 +505,7 @@ function destroy_dev_services {
 
 
     function ssh_to_ecs_cluster {
-        set -x
+        #set -x
         CLUSTER_NAME=$(echo ${ENV_PREFIX}|sed 's#-replica##')
         if [[ ${ENV_PREFIX} == *"-replica"* ]];then
           ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep $CLUSTER_NAME|grep replica|tail -1|cut -d/ -f2|sed 's#,##g'|sed 's#"##g'`
