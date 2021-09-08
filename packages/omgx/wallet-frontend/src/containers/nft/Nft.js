@@ -93,7 +93,11 @@ class Nft extends React.Component {
       this.props.dispatch(openError('NFT contract deployment error'))
     }
 
-    this.setState({ loading: false })
+    this.setState({ loading: false, deployModalOpen: false })
+  }
+
+  closeMintModal() {
+    this.setState({ minModalOpen: false})
   }
 
   render() {
@@ -107,7 +111,6 @@ class Nft extends React.Component {
     } = this.state;
 
     const numberOfNFTs = Object.keys(list).length
-    const numberOfContracts = Object.keys(contracts).length
 
     return (
       <>
@@ -205,6 +208,7 @@ class Nft extends React.Component {
                 address={contracts[v].address}
                 layer={contracts[v].layer}
                 contracts={contracts}
+                closeMintModal={this.closeMintModal}
               />
             )})
           }

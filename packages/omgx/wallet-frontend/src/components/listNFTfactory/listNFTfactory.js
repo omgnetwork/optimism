@@ -7,23 +7,14 @@ import { openAlert, openError } from 'actions/uiAction'
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
 
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import Select from '@material-ui/core/Select'
-import InputLabel from '@material-ui/core/InputLabel'
-import FormControl from '@material-ui/core/FormControl'
 import MenuItem from '@material-ui/core/MenuItem'
 
 import networkService from 'services/networkService'
-import root from 'images/root.png'
-
-import { transfer } from 'actions/networkAction'
 
 import * as styles from './listNFTfactory.module.scss'
 
-import truncate from 'truncate-middle'
-import { Box, Fade } from '@material-ui/core'
-
-import factoryIcon from 'images/factory.png'
+import { Box } from '@material-ui/core'
 
 class listNFTfactory extends React.Component {
 
@@ -105,6 +96,7 @@ class listNFTfactory extends React.Component {
       this.props.dispatch(openError('NFT minting error'))
     }
 
+    this.props.closeMintModal();
     this.setState({ loading: false })
   }
 
@@ -116,9 +108,6 @@ class listNFTfactory extends React.Component {
 
     const {
       name,
-      symbol,
-      address,
-      layer,
       loading,
       receiverAddress, // for new NFTs
       tokenURI,        // for new NFTs
