@@ -15,6 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React from 'react'
+import { Typography } from '@material-ui/core'
+
 import truncate from 'truncate-middle'
 import { connect } from 'react-redux'
 import { isEqual } from 'lodash'
@@ -52,7 +54,7 @@ class listNFT extends React.Component {
 
     const {
       name, symbol, address,
-      UUID, time, URL,attributes
+      UUID, time, URL, attributes
     } = this.props;
 
     if (!isEqual(prevState.name, name)) {
@@ -78,7 +80,7 @@ class listNFT extends React.Component {
     if (!isEqual(prevState.URL, URL)) {
       this.setState({ URL })
     }
-    
+
     if (!isEqual(prevState.attributes, attributes)) {
       this.setState({ attributes })
     }
@@ -108,14 +110,36 @@ class listNFT extends React.Component {
 
         <div className={styles.topContainer}>
           <div className={styles.Table2}>
-            <div className={styles.BasicText}><strong>{name}</strong> ({symbol})</div>
-            {(attributes || []).map((attr, index)=>{
-              return <div className={styles.BasicTextLight} key={index}>{attr.trait_type}: &npsp; <strong> {attr.value} </strong></div>
+            <Typography variant="h4">{name}
+              ({symbol})
+            </Typography>
+            {(attributes || []).map((attr, index) => {
+              return (<Typography variant="body2" key={index}>{attr.trait_type}: 
+                <Typography variant="body2" component="span" className={styles.muted}>
+                  {attr.value}
+                </Typography>
+              </Typography>)
             })}
-            <div className={styles.BasicTextLight}>UUID: {UUID}</div>
-            <div className={styles.BasicTextLight}>Address: {truncate(address, 8, 6, '...')} <Copy value={address} light={true} /></div>
-            <div className={styles.BasicTextLight}>URI: {URL}</div>
-            <div className={styles.BasicTextLight}>Time minted: {time}</div>
+            <Typography variant="body2">UUID:
+              <Typography variant="body2" component="span" className={styles.muted}>
+                {UUID}
+              </Typography>
+            </Typography>
+            <Typography variant="body2">Address:
+              <Typography variant="body2" component="span" className={styles.muted}>
+                {truncate(address, 8, 6, '...')} <Copy value={address} light={true} />
+              </Typography>
+            </Typography>
+            <Typography variant="body2">URI:
+              <Typography variant="body2" component="span" className={styles.muted}>
+                {truncate(URL, 8, 6, '...')} <Copy value={URL} light={true} />
+              </Typography>
+            </Typography>
+            <Typography variant="body2">Time minted:
+              <Typography variant="body2" component="span" className={styles.muted}>
+                {time}
+              </Typography>
+            </Typography>
           </div>
         </div>
 

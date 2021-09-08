@@ -1102,9 +1102,9 @@ class NetworkService {
 
           const UUID = address.substring(1, 6) + '_' + tokenID.toString() + '_' + this.account.substring(1, 6)
 
-          // const { url , attributes = []} = await getNftImageUrl(meta[1]);
+          const { url , attributes = []} = await getNftImageUrl(meta[1]);
           // Uncomment Just to test locally
-          const { url , attributes = []} = await getNftImageUrl('https://boredapeyachtclub.com/api/mutants/111');
+          // const { url , attributes = []} = await getNftImageUrl('https://boredapeyachtclub.com/api/mutants/111');
 
           // const { url , attributes = []} = await getNftImageUrl('ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/6190');
           
