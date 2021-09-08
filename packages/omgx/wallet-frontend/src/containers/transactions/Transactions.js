@@ -19,6 +19,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Grid, Box } from '@material-ui/core';
 
 import moment from 'moment';
+import truncate from 'truncate-middle';
 
 import { selectLoading } from 'selectors/loadingSelector'
 
@@ -30,7 +31,7 @@ import * as S from './history.styles'
 
 const PER_PAGE = 8;
 
-function Transactions({ searchHistory, transactions, chainLink }) {
+function Transactions({ searchHistory, transactions }) {
   
   const [page, setPage] = useState(1)
   
@@ -53,7 +54,6 @@ function Transactions({ searchHistory, transactions, chainLink }) {
   //if totalNumberOfPages === 0, set to one so we don't get the strange "page 1 of 0" display
   if (totalNumberOfPages === 0) totalNumberOfPages = 1
 
-
   return (
     <S.HistoryContainer>
       <Pager
@@ -64,17 +64,6 @@ function Transactions({ searchHistory, transactions, chainLink }) {
         onClickBack={() => setPage(page - 1)}
       />
       <Grid item xs={12}>
-        {/*
-        <S.TableHeading>
-          {TransactionHeadList.map((item) => {
-            return (
-              <S.TableHeadingItem key={item.label} variant="body2" component="div" >
-                {item.label}
-              </S.TableHeadingItem>
-            )
-        })
-        </S.TableHeading>
-        */}
         <Box>
           <S.Content>
             {!paginatedTransactions.length && !loading && (
@@ -84,37 +73,42 @@ function Transactions({ searchHistory, transactions, chainLink }) {
               <div className={styles.disclaimer}>Loading...</div>
             )}
             {paginatedTransactions.map((i, index) => {
-
               const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
-
+              const time = moment.unix(i.timeStamp).format('lll')
               let details = null
-
               const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
 
-              if( i.crossDomainMessage && i.crossDomainMessage.l1BlockNumber ) {
+              if( i.crossDomainMessage && i.crossDomainMessage.l1BlockHash ) {
                 details = {
-                  l1BlockHash: i.crossDomainMessage.l1BlockHash,
-                  l1BlockNumber: i.crossDomainMessage.l1BlockNumber,
-                  l1From: i.crossDomainMessage.l1From,
-                  l1Hash: i.crossDomainMessage.l1Hash,
-                  l1To: i.crossDomainMessage.l1To,
-                  l1TxLink: chainLink({
-                    chain: "L1",
-                    hash: i.crossDomainMessage.l1Hash
-                  })
+                  blockHash: i.crossDomainMessage.l1BlockHash,
+                  blockNumber: i.crossDomainMessage.l1BlockNumber,
+                  from: i.crossDomainMessage.l1From,
+                  hash: i.crossDomainMessage.l1Hash,
+                  to: i.crossDomainMessage.l1To,
+                }
+              }
+
+              if( i.crossDomainMessage && i.crossDomainMessage.l2BlockHash ) {
+                details = {
+                  blockHash: i.crossDomainMessage.l2BlockHash,
+                  blockNumber: i.crossDomainMessage.l2BlockNumber,
+                  from: i.crossDomainMessage.l2From,
+                  hash: i.crossDomainMessage.l2Hash,
+                  to: i.crossDomainMessage.l2To,
                 }
               }
 
               return (
                 <Transaction
                   key={index}
-                  link={chainLink(i)}
-                  title={`Hash: ${i.hash}`}
-                  midTitle={moment.unix(i.timeStamp).format('lll')}
+                  title={`${chain} Hash: ${i.hash}`}
+                  time={moment.unix(i.timeStamp).format('lll')}
                   blockNumber={`Block ${i.blockNumber}`}
                   chain={`${chain} Chain`}
                   typeTX={`TX Type: ${metaData}`}
                   detail={details}
+                  oriChain={chain}
+                  oriHash={i.hash}
                 />
               )
             })}

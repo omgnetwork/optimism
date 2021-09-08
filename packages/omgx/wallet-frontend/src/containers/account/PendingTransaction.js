@@ -182,7 +182,7 @@ function PendingTransaction() {
                 <AlertIcon />
                 <Typography
                     sx={{ wordBreak: 'break-all', marginLeft: '10px' }}
-                    variant="body1"
+                    variant="body2"
                     component="p"
                 >
                     No Pending Transactions
@@ -218,13 +218,30 @@ function PendingTransaction() {
                         {i.label}
                     </Grid>
                     <Grid item xs={4}>
+                        <Typography
+                            sx={{ wordBreak: 'break-all' }}
+                            variant="body2"
+                            component="p"
+                        >
                         {'Started: '}{moment.unix(i.timeStamp).format('lll')}<br/>
                         {'Completion estimated: '}{completionTime}
+                        </Typography>
                     </Grid>
                     <Grid item xs={3}>
+                    <Typography
+                            sx={{ wordBreak: 'break-all' }}
+                            variant="body2"
+                            component="p"
+                        >
                         {i.labelStatus}
+                    </Typography>
                     </Grid>
                     <Grid item xs={1}>
+                    <Typography
+                            sx={{ wordBreak: 'break-all' }}
+                            variant="body2"
+                            component="p"
+                    >
                         <a style={{color: 'white'}}
                             href={link}
                             target={'_blank'}
@@ -232,6 +249,7 @@ function PendingTransaction() {
                         >
                             Details
                         </a>
+                    </Typography>
                     </Grid>
                 </Grid>
             })

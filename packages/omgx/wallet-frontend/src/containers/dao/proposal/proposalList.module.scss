@@ -8,12 +8,17 @@ $boxDropDownHeight: 50px;
   justify-content: center;
   margin: 10px auto;
   flex-direction: row;
+  width: 90%;
   .listTitle {
     flex: 1;
     display: flex;
     justify-content: flex-start;
     margin: 10px auto;
+    color: $white;
+    font-size: 20px;
+    font-family: 'MrEavesXL','Messina';
     margin: 0px;
+    font-size: 1.5em;
   }
 }
 
@@ -43,15 +48,14 @@ $boxDropDownHeight: 50px;
 .listContainer {
     overflow-y: auto;
     margin: 10px auto;
+    width: 90%;
     border-radius: 8px;
     padding: 20px 10px;
     background: $background400;
 
     .loadingContainer {
-      margin: auto;
-      text-align: center;
+      padding: 10px auto;
       color: $white;
-      width: 100%;
     }
 }
 

@@ -33,14 +33,15 @@ function Proposal({
 
     const [dropDownBox, setDropDownBox] = useState(false)
     const [dropDownBoxInit, setDropDownBoxInit] = useState(true)
+
     const [votePercent, setVotePercent] = useState(undefined)
     
     useEffect(() => {
         const init = async () => {
             if (proposal.totalVotes > 0) {
-                setVotePercent(Math.round((100 * proposal.forVotes) / proposal.totalVotes))
+                setVotePercent(Math.round((100 * proposal.forVotes) / proposal.totalVotes));
             } else {
-                setVotePercent(50)
+                setVotePercent(50);
             }
         };
         init();
@@ -76,16 +77,16 @@ function Proposal({
                         <p>Proposal #{proposal.id}</p>
                         <p className={styles.muted}>Title: {proposal.description}</p>
                         <p className={styles.muted}>Status: {proposal.state}</p>
-                        <p className={styles.muted}>Start L1 Block: {proposal.startBlock} End L1 Block: {proposal.endBlock}</p>
+                        <p className={styles.muted}>Start L1 Block: {proposal.startBlock} &nbsp; &nbsp; End L1 Block: {proposal.endBlock}</p>
                     </div>
                     <ExpandMoreIcon /> VOTE
                 </div>
                 <div className={styles.proposalContent}>
-                    <div>For: {proposal.forVotes}</div>
-                    <div>Against: {proposal.againstVotes}</div>
-                    <div>Abstain: {proposal.abstainVotes}</div>
-                    <div>Percentage For: {votePercent}% </div>
-                    <div>Total Votes: {proposal.totalVotes}</div>
+                    <div className={styles.vote}>For: {proposal.forVotes}</div>
+                    <div className={styles.vote}>Against: {proposal.againstVotes}</div>
+                    <div className={styles.vote}>Abstain: {proposal.abstainVotes}</div>
+                    <div className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </div>
+                    <div className={styles.vote}>Total Votes: {proposal.totalVotes}</div>
                 </div>
             </div>
         }
@@ -102,11 +103,11 @@ function Proposal({
                     </div>
                 </div>
                 <div className={styles.proposalContent}>
-                    <div>For: {proposal.forVotes}</div>
-                    <div>Against: {proposal.againstVotes}</div>
-                    <div>Abstain: {proposal.abstainVotes}</div>
-                    <div>Percentage For: {votePercent}% </div>
-                    <div>Total Votes: {proposal.totalVotes}</div>
+                    <div className={styles.vote}>For: {proposal.forVotes}</div>
+                    <div className={styles.vote}>Against: {proposal.againstVotes}</div>
+                    <div className={styles.vote}>Abstain: {proposal.abstainVotes}</div>
+                    <div className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </div>
+                    <div className={styles.vote}>Total Votes: {proposal.totalVotes}</div>
                 </div>
             </div>
         }
@@ -160,4 +161,4 @@ function Proposal({
 }
 
 
-export default React.memo(Proposal)
+export default React.memo(Proposal);

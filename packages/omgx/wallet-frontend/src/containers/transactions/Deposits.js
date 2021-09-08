@@ -30,7 +30,7 @@ import * as S from './history.styles';
 
 const PER_PAGE = 10;
 
-function Deposits({ searchHistory, transactions, chainLink }) {
+function Deposits({ searchHistory, transactions }) {
 
   const [page, setPage] = useState(1);
 
@@ -81,19 +81,31 @@ function Deposits({ searchHistory, transactions, chainLink }) {
               )}
               {paginatedDeposits.map((i, index) => {
                 const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
-                let label = ''
-                if( metaData === 'Traditional') label = 'Deposit'
-                if( metaData === 'Fast Onramp') label = 'Fast Deposit'
+                const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
+
+                let details = null
+
+                if( i.crossDomainMessage && i.crossDomainMessage.l2BlockHash ) {
+                  details = {
+                    blockHash: i.crossDomainMessage.l2BlockHash,
+                    blockNumber: i.crossDomainMessage.l2BlockNumber,
+                    from: i.crossDomainMessage.l2From,
+                    hash: i.crossDomainMessage.l2Hash,
+                    to: i.crossDomainMessage.l2To,
+                  }
+                }
+
                 return (
                   <Transaction
                     key={index}
-                    link={chainLink(i)}
                     title={`Hash: ${i.hash}`}
-                    midTitle={moment.unix(i.timeStamp).format('lll')}
+                    time={moment.unix(i.timeStamp).format('lll')}
                     blockNumber={`Block ${i.blockNumber}`}
                     chain={`L1->L2 Deposit`}
-                    typeTX={`TX Type: ${label}`}
-                    detail={null} 
+                    typeTX={`TX Type: ${metaData}`}
+                    detail={details}
+                    oriChain={chain}
+                    oriHash={i.hash} 
                   />
                 )
               })}

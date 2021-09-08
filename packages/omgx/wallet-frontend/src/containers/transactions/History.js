@@ -66,23 +66,6 @@ function History () {
     return true;
   })
 
-  const currentNetwork = useSelector(selectNetwork());
-
-  const nw = getAllNetworks();
-
-  const chainLink = (item) => {
-    let network = nw[currentNetwork];
-    if (!!network && !!network[item.chain]) {
-      // network object should have L1 & L2
-      if(item.chain === 'L1') {
-        return `${network[item.chain].transaction}${item.hash}`;
-      } else {
-        return `${network[item.chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase()+currentNetwork.slice(1)}`;
-      }
-    }
-    return '';
-  }
-
   useInterval(() => {
     batch(() => {
       dispatch(fetchTransactions());
@@ -145,7 +128,6 @@ function History () {
             <Transactions
               searchHistory={searchHistory}
               transactions={transactions}
-              chainLink={chainLink}
             />
           )}
 
@@ -153,7 +135,6 @@ function History () {
             <Deposits
               searchHistory={searchHistory}
               transactions={transactions}
-              chainLink={chainLink}
             />
           }
 
@@ -161,28 +142,9 @@ function History () {
             <Exits
               searchHistory={searchHistory}
               transactions={transactions}
-              chainLink={chainLink}
             />
           }
         </div>
-
-        {/* <div className={styles.section}>
-          <Tabs
-            onClick={tab => {
-              dispatch(setActiveHistoryTab2(tab));
-            }}
-            activeTab={activeTab2}
-            tabs={[ 'Exits', 'TBD' ]}
-          />
-
-          {activeTab2 === 'Exits' &&
-            <Exits
-              searchHistory={searchHistory}
-              transactions={transactions}
-              chainLink={chainLink}
-            />
-          }
-        </div> */}
       </div>
     </>
   );

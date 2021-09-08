@@ -19,11 +19,14 @@ import { useSelector, useDispatch, batch } from 'react-redux'
 import { isEqual, orderBy } from 'lodash'
 
 //Selectors
+import { selectLoading } from 'selectors/loadingSelector'
+import { selectIsSynced } from 'selectors/statusSelector'
 import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector'
 import { selectTransactions } from 'selectors/transactionSelector'
 
 import ListAccount from 'components/listAccount/listAccount'
 
+import { logAmount } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
 import * as S from './Account.styles'
@@ -52,6 +55,9 @@ function Account () {
 
   const childBalance = useSelector(selectlayer2Balance, isEqual)
   const rootBalance = useSelector(selectlayer1Balance, isEqual)
+
+  const isSynced = useSelector(selectIsSynced)
+  const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]))
   const tokenList = useSelector(selectTokens)
 
   const network = useSelector(selectNetwork())
@@ -104,7 +110,8 @@ function Account () {
     ...pendingL2
   ]
 
-  //console.log("Pending:", pending)
+  //console.log("Pending:", pending.length)
+  console.log("Pending:", pending)
 
   const getGasPrice = useCallback(() => {
     dispatch(fetchGas({
@@ -259,7 +266,7 @@ function Account () {
 
       </S.CardTag>
       {pending.length > 0 &&
-        <Grid spacing={2} 
+        <Grid 
           sx={{margin: '10px 0px'}}
         >
           <Grid item xs={12}>

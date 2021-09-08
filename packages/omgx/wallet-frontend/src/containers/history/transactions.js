@@ -1,29 +1,5 @@
-import StyledTable from 'components/table';
-import React from 'react';
-
-const tableHeadList = [
-    {
-        label: 'Transactions',
-        isSort: false,
-    },
-    {
-        label: 'Result',
-        isSort: false,
-    },
-    {
-        label: 'My Deposits',
-        isSort: false,
-    },
-    {
-        label: 'External Information',
-        isSort: false,
-    },
-    {
-        label: 'More',
-        isSort: false,
-    },
-]
-
+import StyledTable from 'components/table'
+import React from 'react'
 
 function Transactions({
     transactions,
@@ -34,11 +10,10 @@ function Transactions({
         <>
             <StyledTable
                 chainLink={chainLink}
-                tableHeadList={tableHeadList}
                 isTransaction={true}
-                tableData={transactions.slice(0, 100)} /// TODO: implement the scroll pagination.
+                tableData={transactions.slice(0, 200)} /// TODO: implement the scroll pagination.
             />
         </>)
 }
 
-export default Transactions;
+export default Transactions

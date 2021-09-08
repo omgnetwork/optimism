@@ -45,7 +45,6 @@ function Exits({ searchHistory, transactions, chainLink }) {
       i.to !== null && (
         i.to.toLowerCase() === networkService.L2LPAddress.toLowerCase() ||
         //i.to.toLowerCase() === networkService.L2_ETH_Address.toLowerCase() ||
-        //i.to.toLowerCase() === networkService.L2_TEST_Address.toLowerCase() ||
         i.to.toLowerCase() === networkService.L2StandardBridgeAddress.toLowerCase()
       )
     )
@@ -54,64 +53,56 @@ function Exits({ searchHistory, transactions, chainLink }) {
   const renderExits = _exits.map((i, index) => {
 
     const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
+    const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
 
     let tradExit = false
     let isExitable = false
+    let details = null
 
-    let midTitle = 'Swapped: ' + moment.unix(i.timeStamp).format('lll')
+    let timeLabel = moment.unix(i.timeStamp).format('lll')
 
     const to = i.to.toLowerCase()
 
     //are we dealing with a traditional exit?
     if (to === networkService.L2StandardBridgeAddress.toLowerCase()) {
-
-      //console.log("i:", i)
-
       tradExit = true
 
       isExitable = moment().isAfter(moment.unix(i.crossDomainMessage.crossDomainMessageEstimateFinalizedTime))
 
       if (isExitable) {
-        midTitle = 'Ready to exit - initiated:' + moment.unix(i.timeStamp).format('lll')
+        timeLabel = 'Ready to exit - initiated:' + moment.unix(i.timeStamp).format('lll')
       } else {
-
         const secondsToGo = i.crossDomainMessage.crossDomainMessageEstimateFinalizedTime - Math.round(Date.now() / 1000)
-        //console.log("Seconds:", secondsToGo)
         const daysToGo = Math.floor(secondsToGo / (3600 * 24))
         const hoursToGo = Math.round((secondsToGo % (3600 * 24)) / 3600)
-
-        //console.log("daysToGo:", daysToGo)
-        //console.log("hoursToGo:", hoursToGo)
         const time = moment.unix(i.timeStamp).format('MM/DD/YYYY hh:mm a')//.format("mm/dd hh:mm")
-
-        //console.log("time:", time)
-        //console.log("time moment:", moment.unix(i.timeStamp))
-        midTitle = `7 day window started ${time}. ${daysToGo} days and ${hoursToGo} hours remaining`
+        timeLabel = `7 day window started ${time}. ${daysToGo} days and ${hoursToGo} hours remaining`
       }
 
+    }
+
+    if( i.crossDomainMessage && i.crossDomainMessage.l1BlockHash ) {
+      details = {
+        blockHash: i.crossDomainMessage.l1BlockHash,
+        blockNumber: i.crossDomainMessage.l1BlockNumber,
+        from: i.crossDomainMessage.l1From,
+        hash: i.crossDomainMessage.l1Hash,
+        to: i.crossDomainMessage.l1To,
+      }
     }
 
     return (
       <Transaction
         key={`${index}`}
         chain='L2->L1 Exit'
-        link={chainLink(i)}
-        title={truncate(i.hash, 8, 6, '...')}
+        title={`${chain} Hash: ${i.hash}`}
         blockNumber={`Block ${i.blockNumber}`}
-        midTitle={midTitle}
+        time={timeLabel}
         button={isExitable && tradExit ? { onClick: () => setProcessExitModal(i), text: 'Process Exit' } : undefined}
-        typeTX={`${metaData}`}
-        detail={!!i.crossDomainMessage?.crossDomainMessage ? {
-          l1BlockHash: truncate(i.crossDomainMessage.l1BlockHash, 8, 6, '...'),
-          l1BlockNumber: i.crossDomainMessage.l1BlockNumber,
-          l1From: i.crossDomainMessage.l1From,
-          l1Hash: truncate(i.crossDomainMessage.l1Hash, 8, 6, '...'),
-          l1To: i.crossDomainMessage.l1To,
-          l1TxLink: chainLink({
-            chain: "L1",
-            hash: i.crossDomainMessage.l1Hash
-          })
-        } : null}
+        typeTX={`TX Type: ${metaData}`}
+        detail={details}
+        oriChain={chain}
+        oriHash={i.hash}
       />
     )
   })

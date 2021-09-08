@@ -14,76 +14,77 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 
 import { openModal } from 'actions/uiAction';
 
 import * as styles from './Dao.module.scss';
 
-import { Box, Typography } from '@material-ui/core'
+import { Box, Typography, Fade } from '@material-ui/core'
 import { useTheme } from '@emotion/react'
 
-import PageHeader from 'components/pageHeader/PageHeader'
 import Button from 'components/button/Button';
-import AlertIcon from 'components/icons/AlertIcon';
-import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher'
-
 import ProposalList from './proposal/ProposalList';
-
 import { selectDaoBalance, selectDaoVotes } from 'selectors/daoSelector';
 import { selectLayer } from 'selectors/setupSelector';
-import networkService from 'services/networkService';
+import AlertIcon from 'components/icons/AlertIcon';
+import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher'
+import networkService from 'services/networkService'
 
+import PageHeader from 'components/pageHeader/PageHeader'
 
 function DAO() {
+
     const theme = useTheme();
     const dispatch = useDispatch();
     const balance = useSelector(selectDaoBalance);
     const votes = useSelector(selectDaoVotes);
-
+    
     let layer = useSelector(selectLayer());
 
     if (networkService.L1orL2 !== layer) {
         //networkService.L1orL2 is always right...
         layer = networkService.L1orL2
-    }
+      }
 
 
-    if (layer === 'L1') {
-        return <>
-            <PageHeader title="BOBO DAO" />
-            <div className={styles.container}>
-                <div className={styles.content}>
-                    <Box
-                        sx={{
-                            background: theme.palette.background.secondary,
-                            borderRadius: '12px',
-                            margin: '20px 5px',
-                            padding: '10px 20px',
+    if(layer === 'L1') {
+        return <div className={styles.container}>
+            <div className={styles.header}>
+                <h2 className={styles.title}>
+                    BOBA DAO
+                </h2>
+            </div>
+            <div className={styles.content}>
+                <Box
+                    sx={{
+                        background: theme.palette.background.secondary,
+                        borderRadius: '12px',
+                        margin: '20px 5px',
+                        padding: '10px 20px',
+                        display: 'flex',
+                        justifyContent: 'space-between'
+                    }}
+                >
+                    <div
+                        style={{
                             display: 'flex',
-                            justifyContent: 'space-between'
+                            alignItems: 'center',
                         }}
                     >
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                            }}
+                        <AlertIcon />
+                        <Typography
+                            sx={{ wordBreak: 'break-all', marginLeft: '10px' }}
+                            variant="body1"
+                            component="p"
                         >
-                            <AlertIcon />
-                            <Typography
-                                sx={{ wordBreak: 'break-all', marginLeft: '10px' }}
-                                variant="body1"
-                                component="p"
-                            >
-                                To use the Boba DAO, you must be on L2 - SWITCH LAYER to L2
-                            </Typography>
-                        </div>
-                        <LayerSwitcher isButton={true} />
-                    </Box>
-                </div>
+                            To use the Boba DAO, you must be on L2 - SWITCH LAYER to L2
+                        </Typography>
+                    </div>
+                    <LayerSwitcher isButton={true} />
+                </Box>
             </div>
-        </>
+        </div>
     }
 
     return (
@@ -94,7 +95,7 @@ function DAO() {
 
                 <div className={styles.content}>
                     <div className={styles.action}>
-                        <div className={styles.tranferContainer}>
+                        <div className={styles.transferContainer}>
                             <div className={styles.info}>
                                 <Typography variant="h3">{balance} Comp</Typography>
                                 <Typography variant="h4">Wallet Balance</Typography>
@@ -114,11 +115,11 @@ function DAO() {
                                 }}
                             >Transfer</Button>
                         </div>
-                        <div className={styles.delegateCotainer}>
+                        <div className={styles.delegateContainer}>
                             <div className={styles.info}>
                                 <Typography variant="h3">{votes} Votes</Typography>
                                 <Typography variant="h4">Voting Power</Typography>
-                                <Typography variant="body2" className={styles.helpText}>If you would like another wallet to be able to vote on your behalf, you can delegate voting authority. To do that, select "Delegate".</Typography>
+                                <Typography variant="body2" className={styles.helpText}>If you would like another wallet to be able to vote on your behalf, you can delegate voting authority. To do that, select "Delegate Votes".</Typography>
                             </div>
                             <Button
                                 color="primary"
@@ -136,12 +137,13 @@ function DAO() {
                             >Delegate Votes</Button>
                         </div>
                     </div>
-                    <div className={styles.proposal}>
-                        <ProposalList />
-                    </div>
+                </div>
+                <div className={styles.proposal}>
+                    <ProposalList />
                 </div>
             </div>
         </>
+    
     )
 }
 
