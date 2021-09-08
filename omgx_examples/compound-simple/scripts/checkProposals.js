@@ -49,6 +49,34 @@ async function main(){
 
     const proposalCounts = await delegate.proposalCount()
     console.log('proposalCounts:',proposalCounts)
+
+    const proposalID = (await delegate.proposalCount())._hex
+    console.log(`Proposed. Proposal ID: ${proposalID}`)
+    
+    let proposal = await delegate.proposals(proposalID)
+    console.log(`Proposal:`, proposal)
+
+    console.log(`Proposal.startBlock:`, proposal.startBlock.toString())
+    console.log(`Proposal.endBlock:`, proposal.endBlock.toString())
+
+    console.log(`Block Number: ${await getBlockNumber(env.L2_NODE_WEB3_URL, 28)}`)
+
+    //console.log(`Block Number: ${await getBlockNumber(env.L2_NODE_WEB3_URL, 28)}`)
+    
+    const proposalStates = [
+        'Pending',
+        'Active',
+        'Canceled',
+        'Defeated',
+        'Succeeded',
+        'Queued',
+        'Expired',
+        'Executed',
+    ]
+
+    let state = await delegate.state(proposalID)
+    console.log('State is: ', proposalStates[state])
+    
       // const totalProposal = await proposalCounts.toNumber()
       // const filter = this.delegate.filters.ProposalCreated(
       //   null,
@@ -134,11 +162,10 @@ async function main(){
     // console.log()
     // sleep(15 * 1000)
     
-    // const proposalID = (await governorBravo.proposalCount())._hex
-    // console.log(`Proposed. Proposal ID: ${proposalID}`)
+    //const proposalID = (await delegate.proposalCount())._hex
+    //console.log(`Proposed. Proposal ID: ${proposalID}`)
     
-    // let proposal = await governorBravo.proposals(proposalID)
-    // console.log(`Full Proposal:`, proposal)
+
 
     // console.log(`Block Number: ${await getBlockNumber(env.L2_NODE_WEB3_URL, 28)}`)
     

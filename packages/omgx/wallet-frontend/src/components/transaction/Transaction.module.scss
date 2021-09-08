@@ -176,6 +176,8 @@ $boxDropDownHeight: 50px;
 
 .dropDownContent {
   display: flex;
+  margin-left: 0px !important;
+  margin-top: -5px !important;
   div {
     display: flex;
 
@@ -213,6 +215,8 @@ $boxDropDownHeight: 50px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  width: 100%;
+  padding: 0px 10px;
 }
 
 .dropDownInit {

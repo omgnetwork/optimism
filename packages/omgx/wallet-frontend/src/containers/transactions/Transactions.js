@@ -26,10 +26,8 @@ import { selectLoading } from 'selectors/loadingSelector'
 import Transaction from 'components/transaction/Transaction'
 import Pager from 'components/pager/Pager'
 
-import * as styles from './Transactions.module.scss';
-
-import * as S from './history.styles';
-import { TransactionHeadList } from './TransactionHeadList';
+import * as styles from './Transactions.module.scss'
+import * as S from './history.styles'
 
 const PER_PAGE = 8;
 
@@ -67,6 +65,7 @@ function Transactions({ searchHistory, transactions, chainLink }) {
         onClickBack={() => setPage(page - 1)}
       />
       <Grid item xs={12}>
+        {/*
         <S.TableHeading>
           {TransactionHeadList.map((item) => {
             return (
@@ -74,8 +73,9 @@ function Transactions({ searchHistory, transactions, chainLink }) {
                 {item.label}
               </S.TableHeadingItem>
             )
-          })}
+        })
         </S.TableHeading>
+        */}
         <Box>
           <S.Content>
             {!paginatedTransactions.length && !loading && (
@@ -90,6 +90,8 @@ function Transactions({ searchHistory, transactions, chainLink }) {
               const time = moment.unix(i.timeStamp).format('lll')
 
               let details = null
+
+              const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
 
               if( i.crossDomainMessage && i.crossDomainMessage.l1BlockNumber ) {
                 details = {
@@ -115,7 +117,7 @@ function Transactions({ searchHistory, transactions, chainLink }) {
                   title={`Hash: ${i.hash}`}
                   midTitle={moment.unix(i.timeStamp).format('lll')}
                   blockNumber={`Block ${i.blockNumber}`}
-                  chain={`${i.chain} Chain`}
+                  chain={`${chain} Chain`}
                   typeTX={`TX Type: ${metaData}`}
                   detail={details}
                 />

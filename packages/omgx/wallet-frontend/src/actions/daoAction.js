@@ -47,3 +47,8 @@ export function fetchDaoProposals() {
 export function createDaoProposal(payload) {
     return createAction('PROPOSAL/CREATE', () => networkService.createProposal(payload))
 }
+
+export function castProposalVote(payload) {
+    console.log(['castProposalAction', payload])
+    return createAction('PROPOSAL/CAST/VOTE', () => networkService.castProposalVote(payload))
+}

@@ -51,18 +51,6 @@ async function main(){
         governorBravoDelegator.address
     )
 
-    console.log(
-        'Comp needed to propose: ',
-        ethers.utils.parseEther('100000').toString()
-        //original setting is 100,000
-    )
-
-    console.log(
-        'Proposing to change to: ',
-        ethers.utils.parseEther('65000').toString()
-        //reduce to 65,000
-    )
-
     const proposalStates = [
         'Pending',
         'Active',
@@ -83,16 +71,11 @@ async function main(){
         [0]
     )]
     
-    let description = '#Proposal to do a better job testing proposals' // the description of the proposal
+    let description = '#And, again' // the description of the proposal
 
     let value = await comp.balanceOf(wallet1.address)
     console.log('Wallet1: Comp power: ', value.toString())
-
-    console.log(
-        'wallet1 current votes: ',
-        (await comp.getCurrentVotes(wallet1.address)).toString()
-    )
-
+    console.log('Wallet1: Current votes: ',(await comp.getCurrentVotes(wallet1.address)).toString())
     console.log(`Proposing`)
 
     // submitting the proposal
@@ -109,7 +92,7 @@ async function main(){
     )
 
     console.log()
-    sleep(15 * 1000)
+    sleep(15 * 1000) //wait for 15 seconds
     
     const proposalID = (await governorBravo.proposalCount())._hex
     console.log(`Proposed. Proposal ID: ${proposalID}`)
@@ -122,8 +105,8 @@ async function main(){
     let state = await governorBravo.state(proposalID)
     console.log('State is: ', proposalStates[state])
 
-    console.log(`Waiting for voting delay.`)
-    await sleep(150 * 1000)
+    console.log(`Waiting for voting delay - this is until the proposal becomes active and allows votes`)
+    await sleep(150 * 1000) //wait for 150 seconds
 }
 
 (async () =>{

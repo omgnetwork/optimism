@@ -1,7 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { isEqual } from 'lodash'
-
 import * as styles from './listNFT.module.scss'
 
 class listNFT extends React.Component {

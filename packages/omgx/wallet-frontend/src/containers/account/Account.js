@@ -16,11 +16,13 @@ limitations under the License. */
 import React,{useState,useEffect,useCallback} from 'react'
 import { useSelector, useDispatch, batch } from 'react-redux'
 
-import { isEqual } from 'lodash'
+import { isEqual, orderBy } from 'lodash'
 
+//Selectors
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectIsSynced } from 'selectors/statusSelector'
 import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector'
+import { selectTransactions } from 'selectors/transactionSelector'
 
 import ListAccount from 'components/listAccount/listAccount'
 
@@ -73,6 +75,44 @@ function Account () {
     dispatch(fetchLookUpPrice(symbolList))
   },[tokenList,dispatch])
 
+  const unorderedTransactions = useSelector(selectTransactions, isEqual)
+  //console.log("Transactions:",unorderedTransactions)
+  
+  const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
+  //console.log("orderedTransactions:",orderedTransactions)
+  
+  const pendingL1 = orderedTransactions.filter((i) => {
+      if (i.chain === 'L1pending' && //use the custom API watcher for fast data on pending L1->L2 TXs
+          i.crossDomainMessage &&
+          i.crossDomainMessage.crossDomainMessage === 1 &&
+          i.crossDomainMessage.crossDomainMessageFinalize === 0 &&
+          i.action.status === "pending"
+      ) {
+          return true
+      }
+      return false
+  })
+
+  const pendingL2 = orderedTransactions.filter((i) => {
+      if (i.chain === 'L2' &&
+          i.crossDomainMessage &&
+          i.crossDomainMessage.crossDomainMessage === 1 &&
+          i.crossDomainMessage.crossDomainMessageFinalize === 0 &&
+          i.action.status === "pending"
+      ) {
+          return true
+      }
+      return false
+  })
+
+  const pending = [
+    ...pendingL1,
+    ...pendingL2
+  ]
+
+  //console.log("Pending:", pending.length)
+  console.log("Pending:", pending)
+
   const getGasPrice = useCallback(() => {
     dispatch(fetchGas({
       network: network || 'local',
@@ -87,7 +127,11 @@ function Account () {
 
   useEffect(()=>{
     if (network === 'mainnet') {
-      dispatch(openError('You are using Mainnet Beta. WARNING: the mainnet smart contracts are not fully audited and funds may be at risk. Please exercise caution when using Mainnet Beta.'))
+      dispatch(openError(
+        `You are using Mainnet Beta. 
+        WARNING: the mainnet smart contracts are not fully audited and funds may be at risk. 
+        Please exercise caution when using Mainnet Beta.`)
+      )
     }
   },[dispatch, network])
 
@@ -97,28 +141,27 @@ function Account () {
     })
   }, POLL_INTERVAL * 2)
 
+  const disabled = false //criticalTransactionLoading || !isSynced
 
-  const disabled = criticalTransactionLoading || !isSynced
+  // let balances = {
+  //   oETH : {have: false, amount: 0, amountShort: '0'}
+  // }
 
-  let balances = {
-    oETH : {have: false, amount: 0, amountShort: '0'}
-  }
+  // childBalance.reduce((acc, cur) => {
+  //   if (cur.symbol === 'oETH' && cur.balance > 0 ) {
+  //     acc['oETH']['have'] = true;
+  //     acc['oETH']['amount'] = cur.balance;
+  //     acc['oETH']['amountShort'] = logAmount(cur.balance, cur.decimals, 2);
+  //   }
+  //   return acc;
+  // }, balances)
 
-  childBalance.reduce((acc, cur) => {
-    if (cur.symbol === 'oETH' && cur.balance > 0 ) {
-      acc['oETH']['have'] = true;
-      acc['oETH']['amount'] = cur.balance;
-      acc['oETH']['amountShort'] = logAmount(cur.balance, cur.decimals, 2);
-    }
-    return acc;
-  }, balances)
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const handleChange = (event, newValue) => {
-    setActiveTab(newValue);
-  };
+    setActiveTab(newValue)
+  }
 
   const ActiveItem = ({active}) => (
     <Box display="flex" sx={{ justifyContent: 'center', gap: 1 }}>
@@ -131,13 +174,15 @@ function Account () {
 
   const L1Column = () => (
     <S.AccountWrapper >
+      
       {!isMobile ? (
         <S.WrapperHeading>
           <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>L1 ({network})</Typography>
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
           {networkLayer === 'L1' ? <ActiveItem active={true} /> : null}
         </S.WrapperHeading>
-      ) : (null)}
+        ) : (null)
+      }
 
       <S.TableHeading>
         {tableHeadList.map((item) => {
@@ -173,7 +218,8 @@ function Account () {
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
           {networkLayer === 'L2' ? <ActiveItem active={true} /> : null}
         </S.WrapperHeading>
-      ) : (null)}
+        ) : (null)
+      }
 
       <S.TableHeading sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4"}}>
         {tableHeadList.map((item) => {
@@ -204,10 +250,14 @@ function Account () {
       <PageHeader title="Wallet"/>
 
       <S.CardTag>
+        
+        
         <S.CardContentTag>
-          <S.CardInfo>Boba Balance</S.CardInfo>
-          <S.BalanceValue component ="div">{balances['oETH'].amountShort}</S.BalanceValue>
-          <Typography>oETH</Typography>
+          <S.CardInfo>Boba Balances</S.CardInfo>
+          {/*
+            <S.BalanceValue component ="div">{balances['oETH'].amountShort}</S.BalanceValue>
+            <Typography>oETH</Typography>
+          */}
         </S.CardContentTag>
 
         <S.ContentGlass>
@@ -215,13 +265,15 @@ function Account () {
         </S.ContentGlass>
 
       </S.CardTag>
-      <Grid spacing={2} 
-        sx={{margin: '10px 0px'}}
-      >
-        <Grid item xs={12}>
-          <PendingTransaction />
+      {pending.length > 0 &&
+        <Grid spacing={2} 
+          sx={{margin: '10px 0px'}}
+        >
+          <Grid item xs={12}>
+            <PendingTransaction />
+          </Grid>
         </Grid>
-      </Grid>
+      }
       {isMobile ? (
         <>
           <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, my: 2}}>
