@@ -7,7 +7,6 @@ import { openAlert, openError } from 'actions/uiAction'
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
 
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import Select from '@material-ui/core/Select'
 import MenuItem from '@material-ui/core/MenuItem'
 
@@ -15,8 +14,6 @@ import networkService from 'services/networkService'
 
 import * as styles from './listNFTfactory.module.scss'
 
-import { Typography , Fade } from '@material-ui/core'
-import factoryIcon from 'images/factory.png'
 import { Box } from '@material-ui/core'
 
 class listNFTfactory extends React.Component {
@@ -110,9 +107,6 @@ class listNFTfactory extends React.Component {
 
     const {
       name,
-      symbol,
-      address,
-      dropDownBox,
       loading,
       receiverAddress, // for new NFTs
       tokenURI,        // for new NFTs

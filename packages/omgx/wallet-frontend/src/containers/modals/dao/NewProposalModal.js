@@ -79,7 +79,7 @@ function NewProposalModal({ open }) {
                     >
                         <option>select</option>
                         <option value="change-threshold">Change Voting Threshold</option>
-                        <option value="text-proposal">Propose text</option>
+                        <option value="text-proposal">Freeform Text Proposal</option>
                     </select>
                     {action === 'change-threshold' && <Input
                         label="Enter voting threshold"

@@ -98,7 +98,7 @@ function DAO() {
                             <div className={styles.info}>
                                 <Typography variant="h3">{balance} Comp</Typography>
                                 <Typography variant="h4">Wallet Balance</Typography>
-                                <Typography variant="body2" className={styles.helpText}>Expanation Here - Help Text Help Text Help Text?</Typography>
+                                <Typography variant="body2" className={styles.helpText}>You can transfer your goveranance tokens to someone else. To do so, select "Transfer".</Typography>
                             </div>
                             <Button
                                 color="primary"
@@ -112,13 +112,13 @@ function DAO() {
                                 onClick={() => {
                                     dispatch(openModal('transferDaoModal'))
                                 }}
-                            > Transfer Governance Token</Button>
+                            >Transfer</Button>
                         </div>
                         <div className={styles.delegateCotainer}>
                             <div className={styles.info}>
                                 <Typography variant="h3">{votes} Votes</Typography>
                                 <Typography variant="h4">Voting Power</Typography>
-                                <Typography variant="body2" className={styles.helpText}>Expanation Here - What does it mean to delegate Votes?</Typography>
+                                <Typography variant="body2" className={styles.helpText}>If you would like another wallet to be able to vote on your behalf, you can delegate voting authority. To do that, select "Delegate".</Typography>
                             </div>
                             <Button
                                 color="primary"
@@ -133,7 +133,7 @@ function DAO() {
                                     alignSelf: 'center'
                                 }}
 
-                            > Delegate Votes</Button>
+                            >Delegate Votes</Button>
                         </div>
                     </div>
                     <div className={styles.proposal}>
