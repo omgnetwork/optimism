@@ -36,6 +36,8 @@ class Nft extends React.Component {
       deployModalOpen: false,
       minModalOpen: false
     }
+
+    this.closeMintModal = this.closeMintModal.bind(this)
   }
 
   componentDidMount() {
@@ -198,20 +200,10 @@ class Nft extends React.Component {
             Mint New NFTs
           </Typography>
 
-          {Object.keys(contracts).map((v, i) => {
-            const key_UUID = `con_` + i
-            return (
-              <ListNFTfactory
-                key={key_UUID}
-                name={contracts[v].name}
-                symbol={contracts[v].symbol}
-                address={contracts[v].address}
-                layer={contracts[v].layer}
-                contracts={contracts}
-                closeMintModal={this.closeMintModal}
-              />
-            )})
-          }
+          <ListNFTfactory
+            contracts={contracts}
+            closeMintModal={this.closeMintModal}
+          />
         </Modal>
       </>
     )

@@ -25,7 +25,6 @@ class listNFTfactory extends React.Component {
     const {
       name,
       symbol,
-      address,
       layer,
     } = this.props;
 
@@ -35,7 +34,7 @@ class listNFTfactory extends React.Component {
       //details of this contract
       name,
       symbol,
-      address,
+      address: '',
       layer,
 
       // loading
@@ -123,9 +122,12 @@ class listNFTfactory extends React.Component {
             </div>
             <Box sx={{mb: 2}}>
               <Select
-                value={Object.values(this.props.contracts)[0].address}
+                value={this.state.address}
                 onChange={(e) => {this.onSelectChange(e.target.value)}}
+                placeholder="Select"
+                displayEmpty
               >
+                <MenuItem value="">Select</MenuItem>
                 {Object.values(this.props.contracts).map((item) =>
                   <MenuItem
                     key={item.address}
