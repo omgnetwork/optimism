@@ -14,21 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React from 'react';
-import { useDispatch,useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { openModal } from 'actions/uiAction';
 
 import * as styles from './Dao.module.scss';
 
-import { Box, Typography, Fade } from '@material-ui/core'
+import { Box, Typography } from '@material-ui/core'
 import { useTheme } from '@emotion/react'
 
+import PageHeader from 'components/pageHeader/PageHeader'
 import Button from 'components/button/Button';
-import ProposalList from './proposal/ProposalList';
-import { selectDaoBalance, selectDaoVotes } from 'selectors/daoSelector';
-import { selectLayer } from 'selectors/setupSelector';
 import AlertIcon from 'components/icons/AlertIcon';
 import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher'
+
+import ProposalList from './proposal/ProposalList';
+
+import { selectDaoBalance, selectDaoVotes } from 'selectors/daoSelector';
+import { selectLayer } from 'selectors/setupSelector';
 import networkService from 'services/networkService';
 
 
@@ -37,110 +40,108 @@ function DAO() {
     const dispatch = useDispatch();
     const balance = useSelector(selectDaoBalance);
     const votes = useSelector(selectDaoVotes);
-    
+
     let layer = useSelector(selectLayer());
 
     if (networkService.L1orL2 !== layer) {
         //networkService.L1orL2 is always right...
         layer = networkService.L1orL2
-      }
+    }
 
 
-    if(layer === 'L1') {
-        return <div className={styles.container}>
-            <div className={styles.header}>
-                <h2 className={styles.title}>
-                    BOBA DAO
-                </h2>
-            </div>
-            <div className={styles.content}>
-                <Box
-                    sx={{
-                        background: theme.palette.background.secondary,
-                        borderRadius: '12px',
-                        margin: '20px 5px',
-                        padding: '10px 20px',
-                        display: 'flex',
-                        justifyContent: 'space-between'
-                    }}
-                >
-                    <div
-                        style={{
+    if (layer === 'L1') {
+        return <>
+            <PageHeader title="BOBO DAO" />
+            <div className={styles.container}>
+                <div className={styles.content}>
+                    <Box
+                        sx={{
+                            background: theme.palette.background.secondary,
+                            borderRadius: '12px',
+                            margin: '20px 5px',
+                            padding: '10px 20px',
                             display: 'flex',
-                            alignItems: 'center',
+                            justifyContent: 'space-between'
                         }}
                     >
-                        <AlertIcon />
-                        <Typography
-                            sx={{ wordBreak: 'break-all', marginLeft: '10px' }}
-                            variant="body1"
-                            component="p"
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                            }}
                         >
-                            To use the Boba DAO, you must be on L2 - SWITCH LAYER to L2
-                        </Typography>
-                    </div>
-                    <LayerSwitcher isButton={true} />
-                </Box>
+                            <AlertIcon />
+                            <Typography
+                                sx={{ wordBreak: 'break-all', marginLeft: '10px' }}
+                                variant="body1"
+                                component="p"
+                            >
+                                To use the Boba DAO, you must be on L2 - SWITCH LAYER to L2
+                            </Typography>
+                        </div>
+                        <LayerSwitcher isButton={true} />
+                    </Box>
+                </div>
             </div>
-        </div>
+        </>
     }
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <h2 className={styles.title}>
-                    BOBA DAO
-                </h2>
-            </div>
-            <div className={styles.content}>
-                <div className={styles.action}>
-                    <div className={styles.tranferContainer}>
-                        <div className={styles.info}>
-                            <h3 className={styles.title}>{balance} Comp</h3>
-                            <h4 className={styles.subTitle}>Wallet Balance</h4>
-                            <div className={styles.helpText}>Expanation Here - Help Text Help Text Help Text?</div>
-                        </div>
-                        <Button
-                            type="primary"
-                            variant="outlined"
-                            style={{
-                                maxWidth: '180px',
-                                padding: '15px 10px',
-                                borderRadius: '8px',
-                                alignSelf: 'center'
-                            }}
-                            onClick={() => {
-                                dispatch(openModal('transferDaoModal'))
-                            }}
-                        > Transfer Governance Token</Button>
-                    </div>
-                    <div className={styles.delegateCotainer}>
-                        <div className={styles.info}>
-                            <h3 className={styles.title}>{votes} Votes</h3>
-                            <h4 className={styles.subTitle}>Voting Power</h4>
-                            <div className={styles.helpText}>Expanation Here - What does it mean to delegate Votes?</div>
-                        </div>
-                        <Button
-                            type="primary"
-                            variant="outlined"
-                            onClick={() => {
-                                dispatch(openModal('delegateDaoModal'))
-                            }}
-                            style={{
-                                width: '60%',
-                                padding: '15px 10px',
-                                borderRadius: '8px',
-                                alignSelf: 'center'
-                            }}
+        <>
+            <PageHeader title="BOBO DAO" />
 
-                        > Delegate Votes</Button>
+            <div className={styles.container}>
+
+                <div className={styles.content}>
+                    <div className={styles.action}>
+                        <div className={styles.tranferContainer}>
+                            <div className={styles.info}>
+                                <Typography variant="h3">{balance} Comp</Typography>
+                                <Typography variant="h4">Wallet Balance</Typography>
+                                <Typography variant="body2" className={styles.helpText}>You can transfer your goveranance tokens to someone else. To do so, select "Transfer".</Typography>
+                            </div>
+                            <Button
+                                color="primary"
+                                variant="outlined"
+                                style={{
+                                    maxWidth: '180px',
+                                    padding: '15px 10px',
+                                    borderRadius: '8px',
+                                    alignSelf: 'center'
+                                }}
+                                onClick={() => {
+                                    dispatch(openModal('transferDaoModal'))
+                                }}
+                            >Transfer</Button>
+                        </div>
+                        <div className={styles.delegateCotainer}>
+                            <div className={styles.info}>
+                                <Typography variant="h3">{votes} Votes</Typography>
+                                <Typography variant="h4">Voting Power</Typography>
+                                <Typography variant="body2" className={styles.helpText}>If you would like another wallet to be able to vote on your behalf, you can delegate voting authority. To do that, select "Delegate".</Typography>
+                            </div>
+                            <Button
+                                color="primary"
+                                variant="outlined"
+                                onClick={() => {
+                                    dispatch(openModal('delegateDaoModal'))
+                                }}
+                                style={{
+                                    width: '60%',
+                                    padding: '15px 10px',
+                                    borderRadius: '8px',
+                                    alignSelf: 'center'
+                                }}
+
+                            >Delegate Votes</Button>
+                        </div>
+                    </div>
+                    <div className={styles.proposal}>
+                        <ProposalList />
                     </div>
                 </div>
-                <div className={styles.proposal}>
-                    <ProposalList />
-                </div>
             </div>
-        </div>
+        </>
     )
 }
 

@@ -33,15 +33,14 @@ function Proposal({
 
     const [dropDownBox, setDropDownBox] = useState(false)
     const [dropDownBoxInit, setDropDownBoxInit] = useState(true)
-
     const [votePercent, setVotePercent] = useState(undefined)
     
     useEffect(() => {
         const init = async () => {
             if (proposal.totalVotes > 0) {
-                setVotePercent(Math.round((100 * proposal.forVotes) / proposal.totalVotes));
+                setVotePercent(Math.round((100 * proposal.forVotes) / proposal.totalVotes))
             } else {
-                setVotePercent(50);
+                setVotePercent(50)
             }
         };
         init();
@@ -161,4 +160,4 @@ function Proposal({
 }
 
 
-export default React.memo(Proposal);
+export default React.memo(Proposal)

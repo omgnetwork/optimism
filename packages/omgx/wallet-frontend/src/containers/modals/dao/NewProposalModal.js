@@ -13,17 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 import React, { useState } from 'react'
+import {Typography} from '@material-ui/core'
+
 import { useDispatch } from 'react-redux'
 
 import { closeModal, openAlert, openError } from 'actions/uiAction'
+import { createDaoProposal } from 'actions/daoAction'
 
 import * as styles from './daoModal.module.scss'
 
 import Modal from 'components/modal/Modal'
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
-import ProposalAction from './ProposalAction'
-import { createDaoProposal } from 'actions/daoAction'
 
 function NewProposalModal({ open }) {
     const dispatch = useDispatch()
@@ -69,17 +70,16 @@ function NewProposalModal({ open }) {
             onClose={handleClose}
             width="400px"
         >
-            <h2>New Proposal</h2>
+            <Typography variant="h2">New Proposal</Typography>
             <div className={styles.modalContent}>
                 <div className={styles.proposalAction}>
-
                     <select
                         className={styles.actionPicker}
                         onChange={onActionChange}
                     >
                         <option>select</option>
                         <option value="change-threshold">Change Voting Threshold</option>
-                        <option value="text-proposal">Propose text</option>
+                        <option value="text-proposal">Freeform Text Proposal</option>
                     </select>
                     {action === 'change-threshold' && <Input
                         label="Enter voting threshold"
@@ -105,7 +105,7 @@ function NewProposalModal({ open }) {
             <div className={styles.buttons}>
                 <Button
                     onClick={handleClose}
-                    type='secondary'
+                    color='neutral'
                     className={styles.button}
                 >
                     CANCEL
@@ -114,7 +114,8 @@ function NewProposalModal({ open }) {
                 <Button
                     className={styles.button}
                     onClick={() => { submit({ useLedgerSign: false }) }}
-                    type='primary'
+                    color='primary'
+                    variant="outlined"
                     // loading={loading} // TODO: Implement loading base on the action trigger
                     disabled={disabledProposal()}
                 >
