@@ -32,7 +32,7 @@ class listNFT extends React.Component {
   componentDidUpdate(prevState) {
 
     const {
-      name, symbol, address, 
+      name, symbol, address,
       UUID, time, URL
     } = this.props;
 
@@ -70,15 +70,15 @@ class listNFT extends React.Component {
       address,
       UUID,
       time,
-      URL, 
+      URL,
     } = this.state;
 
     return (
       <div className={styles.ListNFT}>
-        
-        <img 
-          src={URL} 
-          alt="NFT URI" 
+
+        <img
+          src={URL}
+          alt="NFT URI"
           width={'100%'}
         />
 

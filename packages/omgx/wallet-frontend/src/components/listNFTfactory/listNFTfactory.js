@@ -7,23 +7,14 @@ import { openAlert, openError } from 'actions/uiAction'
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
 
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import Select from '@material-ui/core/Select'
-import InputLabel from '@material-ui/core/InputLabel'
-import FormControl from '@material-ui/core/FormControl'
 import MenuItem from '@material-ui/core/MenuItem'
 
 import networkService from 'services/networkService'
-import root from 'images/root.png'
-
-import { transfer } from 'actions/networkAction'
 
 import * as styles from './listNFTfactory.module.scss'
 
-import truncate from 'truncate-middle'
-import { Box, Fade } from '@material-ui/core'
-
-import factoryIcon from 'images/factory.png'
+import { Box } from '@material-ui/core'
 
 class listNFTfactory extends React.Component {
 
@@ -34,7 +25,6 @@ class listNFTfactory extends React.Component {
     const {
       name,
       symbol,
-      address,
       layer,
     } = this.props;
 
@@ -44,12 +34,8 @@ class listNFTfactory extends React.Component {
       //details of this contract
       name,
       symbol,
-      address,
+      address: '',
       layer,
-
-      //drop down box
-      dropDownBox: false,
-      dropDownBoxInit: true,
 
       // loading
       loading: false,
@@ -63,7 +49,7 @@ class listNFTfactory extends React.Component {
   componentDidUpdate(prevState) {
 
     const {
-      name, symbol, address, layer, 
+      name, symbol, address, layer,
     } = this.props;
 
     if (!isEqual(prevState.name, name)) {
@@ -109,17 +95,18 @@ class listNFTfactory extends React.Component {
       this.props.dispatch(openError('NFT minting error'))
     }
 
+    this.props.closeMintModal();
     this.setState({ loading: false })
+  }
+
+  onSelectChange(value) {
+    this.setState({ address: value })
   }
 
   render() {
 
     const {
       name,
-      symbol,
-      address,
-      layer,
-      dropDownBox,
       loading,
       receiverAddress, // for new NFTs
       tokenURI,        // for new NFTs
@@ -128,77 +115,57 @@ class listNFTfactory extends React.Component {
     return (
       <div className={styles.ListNFT}>
 
-        <div className={styles.topContainer}>
-
-          <div className={styles.Table1}>
-            <img 
-              className={styles.Image} 
-              src={factoryIcon} 
-              alt="icon"
-            />
-          </div>
-
-          <div className={styles.Table2}>
-            <>
-              <div className={styles.BasicText}>NFT MINTING CONTRACT</div>
-              <div className={styles.BasicText}>Name: {symbol}</div>
-              <div className={styles.BasicText}>Symbol: {name}</div>
-              <div className={styles.BasicTextLight}>Address: {address}</div>
-            </>
-          </div>
-
-          <div
-            className={styles.Table3}
-            onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
-          >
-            <div className={styles.LinkText}>Mint NFT</div>
-            <ExpandMoreIcon className={styles.LinkButton} />
-          </div>
+        <div className={styles.boxContainer}>
+          <>
+            <div className={styles.BasicLightText} style={{paddingBottom: '3px'}}>
+              To mint and send a new {name} NFT, please fill in the information and click "Mint and Send".
+            </div>
+            <Box sx={{mb: 2}}>
+              <Select
+                value={this.state.address}
+                onChange={(e) => {this.onSelectChange(e.target.value)}}
+                placeholder="Select"
+                displayEmpty
+              >
+                <MenuItem value="">Select</MenuItem>
+                {Object.values(this.props.contracts).map((item) =>
+                  <MenuItem
+                    key={item.address}
+                    value={item.address}>
+                      {item.symbol}
+                  </MenuItem>
+                )}
+              </Select>
+            </Box>
+            <Box sx={{mb: 2}}>
+              <Input
+                fullwidth
+                placeholder="Receiver Address (Ox.....)"
+                onChange={i=>{this.setState({receiverAddress: i.target.value})}}
+                value={receiverAddress}
+              />
+            </Box>
+            <Box sx={{mb: 2}}>
+              <Input
+                fullwidth
+                placeholder="NFT URL (e.g. https://jimb.stanford.edu)"
+                onChange={i=>{this.setState({tokenURI: i.target.value})}}
+                value={tokenURI}
+              />
+            </Box>
+            <Box sx={{mb: 2}}>
+              <Button
+                disabled={!receiverAddress || !tokenURI}
+                onClick={()=>{this.handleSimpleMintAndSend()}}
+                loading={loading}
+                size="large"
+                variant="contained"
+              >
+                Mint and Send
+              </Button>
+            </Box>
+          </>
         </div>
-
-        {/*********************************************/
-        /**************  Drop Down Box ****************/
-        /**********************************************/
-        }
-        {
-        /* <div
-          className={dropDownBox ?
-            styles.dropDownContainer: dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
-        > */
-        }
-        {dropDownBox ? (
-          <Fade in={dropDownBox}>
-              <div className={styles.boxContainer}>
-                <>
-                  <h3>Mint and Send</h3>
-                  <div className={styles.BasicLightText} style={{paddingBottom: '3px'}}>
-                    To mint and send a new {name} NFT, please fill in the information and click "Mint and Send".
-                  </div>
-                  <Input
-                    fullwidth
-                    placeholder="Receiver Address (Ox.....)"
-                    onChange={i=>{this.setState({receiverAddress: i.target.value})}}
-                    value={receiverAddress}
-                  />
-                  <Input
-                    fullwidth
-                    placeholder="NFT URL (e.g. https://jimb.stanford.edu)"
-                    onChange={i=>{this.setState({tokenURI: i.target.value})}}
-                    value={tokenURI}
-                  />
-                  <Button
-                    disabled={!receiverAddress || !tokenURI}
-                    onClick={()=>{this.handleSimpleMintAndSend()}}
-                    loading={loading}
-                  >
-                    Mint and Send
-                  </Button>
-                </>
-              </div>
-          </Fade>
-        ) : null }
-        {/* </div> */}
-
       </div>
     )
   }
