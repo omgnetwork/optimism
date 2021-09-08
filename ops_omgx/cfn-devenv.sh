@@ -471,6 +471,16 @@ function destroy_dev_services {
           done
           info "Restarted, please allow 1-2 minutes for the new tasks to actually start"
         fi
+        info "Restarting ${ECS_CLUSTER_REPLICA}"
+        for num in $SERVICE4RESTARTREPLICA; do
+          aws ecs update-service  --region ${REGION} --cluster $ECS_CLUSTER_REPLICA --service $num --desired-count 0 >> /dev/null
+        done
+        aws ecs list-tasks --cluster $ECS_CLUSTER_REPLICA | jq -r ' .taskArns[] | [.] | @tsv' |  while IFS=$'\t' read -r taskArn; do  aws ecs stop-task --cluster $ECS_CLUSTER_REPLICA --task $taskArn >> /dev/null; done
+        sleep 10
+        for num in $SERVICE4RESTARTREPLICA; do
+          aws ecs update-service  --region ${REGION} --service $num --cluster $ECS_CLUSTER_REPLICA --service $num --desired-count 1 >> /dev/null
+        done
+        info "Restarted, please allow 1-2 minutes for the new tasks to actually start"
       else
         info "Restarting ${SERVICE_NAME} on ${ECS_CLUSTER}"
         SRV=`echo ${SERVICE_NAME}`
@@ -499,8 +509,14 @@ function destroy_dev_services {
 
 
     function ssh_to_ecs_cluster {
-        ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|tail -1|cut -d/ -f2|sed 's#,##g'|sed 's#"##g'`
-        CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep ${ENV_PREFIX}|tail -1|cut -d/ -f3|sed 's#"##g'`
+        set -x
+        CLUSTER_NAME=$(echo ${ENV_PREFIX}|sed 's#-replica##')
+        if [[ ${ENV_PREFIX} == *"-replica"* ]];then
+          ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep $CLUSTER_NAME|grep replica|tail -1|cut -d/ -f2|sed 's#,##g'|sed 's#"##g'`
+        else
+          ECS_CLUSTER=`aws ecs list-clusters  --region ${REGION}|grep ${ENV_PREFIX}|grep -v replica|tail -1|cut -d/ -f2|sed 's#,##g'|sed 's#"##g'`
+        fi
+        CONTAINER_INSTANCE=`aws ecs list-container-instances --region ${REGION} --cluster $ECS_CLUSTER|grep $CLUSTER_NAME|tail -1|cut -d/ -f3|sed 's#"##g'`
         EC2_INSTANCE=`aws ecs describe-container-instances --region ${REGION} --cluster $ECS_CLUSTER --container-instance $CONTAINER_INSTANCE|jq '.containerInstances[0] .ec2InstanceId'|sed 's#"##g'`
         info "SSH to server $EC2_INSTANCE"
         aws ssm start-session --target $EC2_INSTANCE
@@ -509,9 +525,11 @@ function destroy_dev_services {
       function list_clusters {
           ECS_CLUSTERS=$(aws ecs list-clusters --region ${REGION}|grep infrastructure-application|cut -d/ -f2|sed 's#"##g'|sed 's#,##g')
           for ecs in $ECS_CLUSTERS; do
-          URL=$(echo $ecs|sed 's#-infrastructure-application.*#.omgx.network#')
+          URL=$(echo $ecs|sed 's#-infrastructure-application.*#\.boba.network#')
           STACK_NAME=$(echo $ecs|sed 's#-infrastructure-application.*##')
-          echo -e " --------------- \n CLUSTER: $ecs \n L2-URL: https://$URL \n STACK-NAME: $STACK_NAME \n --------------- \n"
+          ECS_CLUSTERS_REPLICA=$(aws ecs list-clusters --region ${REGION}|grep infrastructure-replica|cut -d/ -f2|sed 's#"##g'|sed 's#,##g'|sed 's#-infrastructure##g')
+          REPLICA_NAME=$(echo $ECS_CLUSTERS_REPLICA|sed 's#-EcsCluster.*##')
+          echo -e " --------------- \n CLUSTER: $ecs \n L2-URL: https://$URL \n STACK-NAME: $STACK_NAME \n REPLICA-NAME: $REPLICA_NAME \n--------------- \n"
           done
         }
 
