@@ -2,7 +2,6 @@
 // @unsupported: ovm
 pragma solidity >0.5.0 <0.8.0;
 pragma experimental ABIEncoderV2;
-import "hardhat/console.sol";
 
 /* Library Imports */
 import { Lib_OVMCodec } from "../../libraries/codec/Lib_OVMCodec.sol";
@@ -413,10 +412,10 @@ contract OVM_CanonicalTransactionChain is iOVM_CanonicalTransactionChain, Lib_Ad
             "Actual batch start index does not match expected start index."
         );
 
-        // require(
-        //     msg.sender == resolve("OVM_Sequencer"),
-        //     "Function can only be called by the Sequencer."
-        // );
+        require(
+            msg.sender == resolve("OVM_Sequencer"),
+            "Function can only be called by the Sequencer."
+        );
 
         require(
             numContexts > 0,
