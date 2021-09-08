@@ -108,6 +108,10 @@ class listNFTfactory extends React.Component {
     this.setState({ loading: false })
   }
 
+  onSelectChange(value) {
+    this.setState({ address: value })
+  }
+
   render() {
 
     const {
@@ -131,9 +135,15 @@ class listNFTfactory extends React.Component {
             <Box sx={{mb: 2}}>
               <Select
                 value={Object.values(this.props.contracts)[0].address}
-                // onChange={handleChange}
+                onChange={(e) => {this.onSelectChange(e.target.value)}}
               >
-                {Object.values(this.props.contracts).map((item) => <MenuItem value={item.address}>{item.symbol}</MenuItem>)}
+                {Object.values(this.props.contracts).map((item) =>
+                  <MenuItem
+                    key={item.address}
+                    value={item.address}>
+                      {item.symbol}
+                  </MenuItem>
+                )}
               </Select>
             </Box>
             <Box sx={{mb: 2}}>
