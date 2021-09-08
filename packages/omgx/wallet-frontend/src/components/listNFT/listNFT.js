@@ -1,8 +1,27 @@
+/* eslint-disable quotes */
+/*
+Copyright 2019-present OmiseGO Pte Ltd
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. */
+
 import React from 'react'
+import { Typography } from '@material-ui/core'
+
+import truncate from 'truncate-middle'
 import { connect } from 'react-redux'
 import { isEqual } from 'lodash'
 import * as styles from './listNFT.module.scss'
-
+import Copy from 'components/copy/Copy'
 class listNFT extends React.Component {
 
   constructor(props) {
@@ -16,6 +35,7 @@ class listNFT extends React.Component {
       UUID,
       time,
       URL,
+      attributes
     } = this.props;
 
 
@@ -26,6 +46,7 @@ class listNFT extends React.Component {
       UUID,
       time,
       URL,
+      attributes
     }
   }
 
@@ -33,7 +54,7 @@ class listNFT extends React.Component {
 
     const {
       name, symbol, address,
-      UUID, time, URL
+      UUID, time, URL, attributes
     } = this.props;
 
     if (!isEqual(prevState.name, name)) {
@@ -60,6 +81,10 @@ class listNFT extends React.Component {
       this.setState({ URL })
     }
 
+    if (!isEqual(prevState.attributes, attributes)) {
+      this.setState({ attributes })
+    }
+
   }
 
   render() {
@@ -71,6 +96,7 @@ class listNFT extends React.Component {
       UUID,
       time,
       URL,
+      attributes
     } = this.state;
 
     return (
@@ -84,11 +110,36 @@ class listNFT extends React.Component {
 
         <div className={styles.topContainer}>
           <div className={styles.Table2}>
-            <div className={styles.BasicText}><strong>{name}</strong> ({symbol})</div>
-            <div className={styles.BasicTextLight}>UUID: {UUID}</div>
-            <div className={styles.BasicTextLight}>Address: {address}</div>
-            <div className={styles.BasicTextLight}>URI: {URL}</div>
-            <div className={styles.BasicTextLight}>Time minted: {time}</div>
+            <Typography variant="h4">{name}
+              ({symbol})
+            </Typography>
+            {(attributes || []).map((attr, index) => {
+              return (<Typography variant="body2" key={index}>{attr.trait_type}: 
+                <Typography variant="body2" component="span" className={styles.muted}>
+                  {attr.value}
+                </Typography>
+              </Typography>)
+            })}
+            <Typography variant="body2">UUID:
+              <Typography variant="body2" component="span" className={styles.muted}>
+                {UUID}
+              </Typography>
+            </Typography>
+            <Typography variant="body2">Address:
+              <Typography variant="body2" component="span" className={styles.muted}>
+                {truncate(address, 8, 6, '...')} <Copy value={address} light={true} />
+              </Typography>
+            </Typography>
+            <Typography variant="body2">URI:
+              <Typography variant="body2" component="span" className={styles.muted}>
+                {truncate(URL, 8, 6, '...')} <Copy value={URL} light={true} />
+              </Typography>
+            </Typography>
+            <Typography variant="body2">Time minted:
+              <Typography variant="body2" component="span" className={styles.muted}>
+                {time}
+              </Typography>
+            </Typography>
           </div>
         </div>
 
