@@ -195,7 +195,7 @@ function PendingTransaction() {
             paginatedTransactions.length > 0 &&
             paginatedTransactions.map((i) => {
 
-                console.log(i)
+                //console.log(i)
 
                 let completionTime = 'Not available'
 

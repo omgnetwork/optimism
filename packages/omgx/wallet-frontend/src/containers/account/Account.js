@@ -111,7 +111,7 @@ function Account () {
   ]
 
   //console.log("Pending:", pending.length)
-  console.log("Pending:", pending)
+  //console.log("Pending:", pending)
 
   const getGasPrice = useCallback(() => {
     dispatch(fetchGas({
