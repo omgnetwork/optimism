@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React, {useState} from 'react';
+import {Typography} from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { openModal } from 'actions/uiAction';
@@ -47,9 +48,9 @@ function ProposalList() {
 
     return <>
         <div className={styles.containerAction}>
-            <p className={styles.listTitle}>Proposal List</p>
+            <Typography className={styles.listTitle} variant="h3">Proposal List</Typography>
             <Button
-                type="primary"
+                color="primary"
                 variant="outlined"
                 onClick={() => {
                     dispatch(openModal('newProposalModal'))
@@ -71,7 +72,14 @@ function ProposalList() {
                 onClickNext={()=>setPage(page + 1)}
                 onClickBack={()=>setPage(page - 1)}
             />
-            {!!loading && !proposals.length ? <div className={styles.loadingContainer}> Loading... </div> : null}
+
+            
+            {!!loading && !proposals.length ?
+                <div className={styles.loadingContainer}>
+                    <Typography variant="body1">Loading...</Typography>
+                </div>
+                : null}
+                
             {paginatedProposals.map((p, index) => {
                 return <React.Fragment key={index}>
                     <Proposal proposal={p} />

@@ -10,7 +10,6 @@
     h2 {
         margin-bottom: 0;
         padding-left: 10px;
-        color: $white;
     }
 
     display: flex;
@@ -32,30 +31,24 @@
         align-items: center;
 
         .tranferContainer, .delegateCotainer {
-            margin: auto;
+            // margin: auto;
             border-radius: 12px;
             padding: 20px;
             display: flex;
             flex-direction: column; 
             background: $background400;
-            max-width: 40%;
-            width: 40%;
+            // max-width: 40%;
+            // width: 40%;
             min-width: 400px;
             .info {
                 text-align: center;
-                .title {
-                    font-size: 1.4em;
-                    color: $white;
-                }
-                .subTitle {
-                    font-size: 1.2em;
-                    color: $white700;
-                    margin: 10px;
+                p {
+                    margin-bottom: 10px;
                 }
                 .helpText {
                     font-size: 0.7em;
-                    color: $white700;
                     margin: 10px;
+                    color: $white700;
                 }
             }
         }

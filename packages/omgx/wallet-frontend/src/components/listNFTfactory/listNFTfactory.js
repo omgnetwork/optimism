@@ -8,20 +8,12 @@ import Button from 'components/button/Button'
 import Input from 'components/input/Input'
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-import Select from '@material-ui/core/Select'
-import InputLabel from '@material-ui/core/InputLabel'
-import FormControl from '@material-ui/core/FormControl'
-import MenuItem from '@material-ui/core/MenuItem'
 
 import networkService from 'services/networkService'
-import root from 'images/root.png'
-
-import { transfer } from 'actions/networkAction'
 
 import * as styles from './listNFTfactory.module.scss'
 
-import truncate from 'truncate-middle'
-import { Box, Fade } from '@material-ui/core'
+import { Typography , Fade } from '@material-ui/core'
 
 import factoryIcon from 'images/factory.png'
 
@@ -118,7 +110,6 @@ class listNFTfactory extends React.Component {
       name,
       symbol,
       address,
-      layer,
       dropDownBox,
       loading,
       receiverAddress, // for new NFTs
@@ -170,7 +161,7 @@ class listNFTfactory extends React.Component {
           <Fade in={dropDownBox}>
               <div className={styles.boxContainer}>
                 <>
-                  <h3>Mint and Send</h3>
+                  <Typography variant="h3">Mint and Send</Typography>
                   <div className={styles.BasicLightText} style={{paddingBottom: '3px'}}>
                     To mint and send a new {name} NFT, please fill in the information and click "Mint and Send".
                   </div>

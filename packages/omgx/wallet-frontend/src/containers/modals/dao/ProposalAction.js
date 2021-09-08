@@ -104,7 +104,7 @@ const ProposalAction = ({
     }
 
     return <div className={styles.actionContainer}>
-        <h4># {index + 1}</h4>
+        <Typography variant="h4"># {index + 1}</Typography>
         <div className={styles.actionContent}>
             <select
                 style={{
