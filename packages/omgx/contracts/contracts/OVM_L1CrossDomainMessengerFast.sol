@@ -246,14 +246,14 @@ contract OVM_L1CrossDomainMessengerFast is iOVM_L1CrossDomainMessenger, Lib_Addr
     /**
      * Pause fast exit relays
      */
-    function pauseFastRelays() external onlyOwner() {
+    function pause() external onlyOwner() {
         _pause();
     }
 
     /**
      * UnPause fast exit relays
      */
-    function unpauseFastRelays() external onlyOwner() {
+    function unpause() external onlyOwner() {
         _unpause();
     }
 
