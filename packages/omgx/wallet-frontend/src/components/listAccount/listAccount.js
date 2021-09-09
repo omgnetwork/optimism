@@ -12,6 +12,7 @@ import { Box, Typography, Fade } from '@material-ui/core'
 import * as S from './ListAccount.styles'
 import EthereumIcon from 'components/icons/EthereumIcon'
 import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher'
+import { getCoinImage } from 'util/coinImage'
 
 class ListAccount extends React.Component {
 
@@ -65,13 +66,16 @@ class ListAccount extends React.Component {
 
     const enabled = (networkLayer === chain) ? true : false
 
+    const logo = getCoinImage(token.symbol);
+
     return (
       <>
         <S.Content>
             <S.TableBody disabled={true}>
 
               <S.TableCell sx={{gap: "10px", justifyContent: "flex-start"}}>
-                <EthereumIcon width={42} height={42}/>
+                {/* <EthereumIcon width={42} height={42}/> */}
+                <img src={logo} alt="logo" width={42} height={42} />
 
                 <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div">
                   {token.symbol}
