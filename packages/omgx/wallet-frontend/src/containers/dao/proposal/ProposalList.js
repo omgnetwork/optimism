@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React, {useState} from 'react';
+import {Typography} from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { openModal } from 'actions/uiAction';
@@ -22,6 +23,7 @@ import Button from 'components/button/Button';
 import Proposal from 'components/Proposal/Proposal';
 
 import * as styles from './proposalList.module.scss'
+import * as S from './ProposalList.styles'
 import { selectProposals } from 'selectors/daoSelector';
 import { selectLoading } from 'selectors/loadingSelector';
 import Pager from 'components/pager/Pager'
@@ -46,24 +48,20 @@ function ProposalList() {
     if (totalNumberOfPages === 0) totalNumberOfPages = 1
 
     return <>
-        <div className={styles.containerAction}>
-            <p className={styles.listTitle}>Proposal List</p>
+        <S.ContainerAction>
+            <Typography variant="h3">Proposal List</Typography>
             <Button
-                type="primary"
+                color="primary"
                 variant="outlined"
                 onClick={() => {
                     dispatch(openModal('newProposalModal'))
                 }}
-                style={{
-                    maxWidth: '180px',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    alignSelf: 'center'
-                }}
+            >
+              Create Proposal
+            </Button>
+        </S.ContainerAction>
 
-            > Create Proposal </Button>
-        </div>
-        <div className={styles.listContainer}>
+        <S.ListContainer>
             <Pager
                 currentPage={page}
                 isLastPage={paginatedProposals.length < PER_PAGE}
@@ -71,13 +69,20 @@ function ProposalList() {
                 onClickNext={()=>setPage(page + 1)}
                 onClickBack={()=>setPage(page - 1)}
             />
-            {!!loading && !proposals.length ? <div className={styles.loadingContainer}> Loading... </div> : null}
+
+
+            {!!loading && !proposals.length ?
+                <S.LoadingContainer>
+                    <Typography variant="body1">Loading...</Typography>
+                </S.LoadingContainer>
+                : null}
+
             {paginatedProposals.map((p, index) => {
                 return <React.Fragment key={index}>
                     <Proposal proposal={p} />
                 </React.Fragment>
             })}
-        </div>
+        </S.ListContainer>
     </>
 }
 

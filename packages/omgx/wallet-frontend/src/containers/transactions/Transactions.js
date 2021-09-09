@@ -31,11 +31,11 @@ import * as S from './history.styles'
 const PER_PAGE = 8;
 
 function Transactions({ searchHistory, transactions }) {
-  
+
   const [page, setPage] = useState(1)
-  
+
   const loading = useSelector(selectLoading(['EXIT/GETALL']))
-  
+
   useEffect(() => {
     setPage(1);
   }, [searchHistory])

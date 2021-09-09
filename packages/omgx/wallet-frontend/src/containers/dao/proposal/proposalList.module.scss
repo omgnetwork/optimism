@@ -3,26 +3,6 @@
 $dropDownHeight: 60px;
 $boxDropDownHeight: 50px;
 
-.containerAction {
-  display: flex;
-  justify-content: center;
-  margin: 10px auto;
-  flex-direction: row;
-  width: 90%;
-  .listTitle {
-    flex: 1;
-    display: flex;
-    justify-content: flex-start;
-    margin: 10px auto;
-    color: $white;
-    font-size: 20px;
-    font-family: 'MrEavesXL','Messina';
-    margin: 0px;
-    font-size: 1.5em;
-  }
-}
-
-
 .divider {
   height: 0px;
   width: 90%;
@@ -30,8 +10,8 @@ $boxDropDownHeight: 50px;
   position: relative;
   z-index: 1;
 
-  &::before{ 
-    content: "";
+  &::before {
+    content: '';
     position: absolute;
     top: 0;
     right: 0;
@@ -40,23 +20,12 @@ $boxDropDownHeight: 50px;
     z-index: -1;
     margin: -1px;
     border-radius: inherit;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0) -0.74%, rgba(255, 255, 255, 0.0414) 8.18%, rgba(255, 255, 255, 0.0408) 90.07%, rgba(255, 255, 255, 0) 100.04%);
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) -0.74%,
+      rgba(255, 255, 255, 0.0414) 8.18%,
+      rgba(255, 255, 255, 0.0408) 90.07%,
+      rgba(255, 255, 255, 0) 100.04%
+    );
   }
-
 }
-
-.listContainer {
-    overflow-y: auto;
-    margin: 10px auto;
-    width: 90%;
-    border-radius: 8px;
-    padding: 20px 10px;
-    background: $background400;
-
-    .loadingContainer {
-      padding: 10px auto;
-      color: $white;
-    }
-}
-
-

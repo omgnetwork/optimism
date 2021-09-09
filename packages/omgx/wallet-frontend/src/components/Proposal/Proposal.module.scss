@@ -3,94 +3,87 @@
 $dropDownHeight: 60px;
 $boxDropDownHeight: 50px;
 
-.proposalCard {
-    margin: 10px auto;
-    width: 95%;
-    padding: 5px;
-    padding-left: 10px;
-    border-radius: 8px;
-    .proposalHeader {
-        display: flex;
-        justify-content: space-between;
-        .title {
-            font-size: 1.1em;
-            color: $white;
-            p{
-              margin: 0px;
-            }
-            .muted {
-              font-size: 0.7em;
-              color: $white700;
-            }
-        }
-    }
-    .proposalContent {
-      display: flex;
-      justify-content: flex-start;
-      font-size: 0.7em;
-      color: $white700;
-      font-weight: 700;
-    }
-    .vote {
-      min-width: 120px;
-    }
-}
-
 .proposalDetail {
   display: flex;
-  justify-content: space-around; 
+  justify-content: space-around;
+  gap: 20px;
   margin: auto;
-  padding: 10px;
+  margin-top: 20px;
   width: 100%;
 }
 
 .dropDownContainer {
+  height: $dropDownHeight;
+  animation: openDropDown 1s;
+  overflow: hidden;
+  // background-color: $gray7;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.closeDropDown {
+  height: 0px;
+  animation: closeDropDown 1s;
+  overflow: hidden;
+  // background-color: $gray7;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.dropDownInit {
+  height: 0px;
+  overflow: hidden;
+}
+
+.boxContainer {
+  height: $boxDropDownHeight;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/*************************/
+@keyframes openDropDown {
+  0% {
+    height: 0px;
+  }
+  100% {
     height: $dropDownHeight;
-    animation: openDropDown 1s;
-    overflow: hidden;
-    padding: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
   }
+}
 
-  .closeDropDown {
+@keyframes closeDropDown {
+  0% {
+    height: $dropDownHeight;
+  }
+  100% {
     height: 0px;
-    animation: closeDropDown 1s;
-    overflow: hidden;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
   }
+}
 
-  .dropDownInit {
-    height: 0px;
-    overflow: hidden;
-  }
+/*************************/
 
-  .boxContainer {
-    height: $boxDropDownHeight;
-    padding: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+.divider {
+  height: 2px;
+  width: 90%;
+  margin: 5px auto;
+  position: relative;
+  z-index: 1;
+  background: white;
 
-  /*************************/
-  @keyframes openDropDown {
-    0% {
-      height: 0px;
-    }
-    100% {
-      height: $dropDownHeight;
-    }
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    margin: -1px;
+    border-radius: inherit;
+    background: white;
   }
-
-  @keyframes closeDropDown {
-    0% {
-      height: $dropDownHeight;
-    }
-    100% {
-      height: 0px;
-    }
-  }
+}

@@ -127,8 +127,8 @@ function Transaction({
           style={{ width: '50%' }}
         >
           <Typography variant="h3">{chain}</Typography>
-          <div className={styles.muted}>{time}</div>
-          <div className={styles.muted}>{oriChain}&nbsp;Hash:&nbsp;
+          <div>{time}</div>
+          <div>{oriChain}&nbsp;Hash:&nbsp;
           <a
               href={chainLink()}
               target={'_blank'}
@@ -138,8 +138,8 @@ function Transaction({
               {oriHash}
           </a>
           </div>
-          <div className={styles.muted}>{typeTX}</div>
-          
+          <div>{typeTX}</div>
+
           {!!detail &&
             <Typography
               variant="body2"
@@ -160,7 +160,7 @@ function Transaction({
           sx={{ gap: '5px' }}
           style={{ width: '20%' }}
         >
-          <div className={styles.muted}>{blockNumber}</div>
+          <div>{blockNumber}</div>
         </S.TableCell>
 
         <S.TableCell sx={{ gap: "5px" }}>
