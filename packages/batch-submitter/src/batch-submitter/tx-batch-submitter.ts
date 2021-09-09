@@ -37,7 +37,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
   private disableQueueBatchAppend: boolean
   private autoFixBatchOptions: AutoFixBatchOptions
   private transactionSubmitter: TransactionSubmitter
-  // private gasThresholdInGwei: number
+  private gasThresholdInGwei: number
 
   constructor(
     signer: Signer,
@@ -80,7 +80,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     )
     this.disableQueueBatchAppend = disableQueueBatchAppend
     this.autoFixBatchOptions = autoFixBatchOptions
-    // this.gasThresholdInGwei = gasThresholdInGwei
+    this.gasThresholdInGwei = 500
     this.transactionSubmitter = transactionSubmitter
   }
 
@@ -190,16 +190,16 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       ethers.utils.formatUnits(await this.signer.getGasPrice(), 'gwei'),
       10
     )
-    // if (gasPriceInGwei > this.gasThresholdInGwei) {
-    //   this.logger.warn(
-    //     'Gas price is higher than gas price threshold; aborting batch submission',
-    //     {
-    //       gasPriceInGwei,
-    //       gasThresholdInGwei: this.gasThresholdInGwei,
-    //     }
-    //   )
-    //   return
-    // }
+    if (gasPriceInGwei > this.gasThresholdInGwei) {
+      this.logger.warn(
+        'Gas price is higher than gas price threshold; aborting batch submission',
+        {
+          gasPriceInGwei,
+          gasThresholdInGwei: this.gasThresholdInGwei,
+        }
+      )
+      return
+    }
 
     const [batchParams, wasBatchTruncated] =
       await this._generateSequencerBatchParams(startBlock, endBlock)
