@@ -22,7 +22,7 @@ import Button from 'components/button/Button';
 import Proposal from 'components/Proposal/Proposal';
 
 import * as styles from './proposalList.module.scss'
-import { selectProposals } from 'selectors/daoSelector';
+import { selectProposals, selectProposalThreshold } from 'selectors/daoSelector';
 import { selectLoading } from 'selectors/loadingSelector';
 import Pager from 'components/pager/Pager'
 import { orderBy } from 'lodash';
@@ -35,6 +35,7 @@ function ProposalList({balance}) {
     const dispatch = useDispatch()
     const loading = useSelector(selectLoading(['PROPOSALS/GET']))
     const proposals = useSelector(selectProposals)
+    const proposalThreshold = useSelector(selectProposalThreshold)
 
     const orderedProposals = orderBy(proposals, i => i.startBlock, 'desc')
 
@@ -52,10 +53,10 @@ function ProposalList({balance}) {
                 type="primary"
                 variant="outlined"
                 onClick={() => {
-                    if(!!balance) {
-                        dispatch(openModal('newProposalModal'))
+                    if(balance < proposalThreshold) {
+                        dispatch(openError(`Insufficient governance token to create a new proposal. You need at least ${proposalThreshold} governance to create a new proposal.`))
                     } else {
-                        dispatch(openError('Insufficient governance token to create a new proposal. You need at least {GovTokenNeeded} to create a new proposal.'))
+                        dispatch(openModal('newProposalModal'))
                     }
                 }}
                 style={{
