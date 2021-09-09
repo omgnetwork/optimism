@@ -25,6 +25,7 @@ import * as styles  from './daoModal.module.scss'
 import Modal from 'components/modal/Modal'
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
+import { WrapperActionsModal } from 'components/modal/Modal.styles';
 
 function TransferDaoModal({ open }) {
 
@@ -53,14 +54,16 @@ function TransferDaoModal({ open }) {
     const disabledTransfer = amount <= 0 || !recipient;
 
     return (
-        <Modal open={open}>
-            <Typography variant="h2">Transfer Boba</Typography>
+        <Modal open={open} maxWidth="md" onClose={handleClose}>
+            <Typography variant="h2" sx={{mb: 3}}>Transfer Boba</Typography>
+
             <Input
                 label='To Address'
                 placeholder='Hash or ENS name'
                 paste
                 value={recipient}
                 onChange={i => setRecipient(i.target.value)}
+                sx={{mb: 2}}
             />
 
             <Input
@@ -70,27 +73,26 @@ function TransferDaoModal({ open }) {
                 type="number"
                 onChange={(i) => { setAmount(i.target.value) }}
             />
+            <WrapperActionsModal>
+              <Button
+                  onClick={handleClose}
+                  color='neutral'
+                  size="large"
+              >
+                  CANCEL
+              </Button>
 
-            <div className={styles.buttons}>
-                <Button
-                    onClick={handleClose}
-                    color='neutral'
-                    className={styles.button}
-                >
-                    CANCEL
-                </Button>
-
-                <Button
-                    className={styles.button}
-                    onClick={() => { submit() }}
-                    color='primary'
-                    variant="outlined"
-                    // loading={loading} // TODO: Implement loading base on the action trigger
-                    disabled={disabledTransfer}
-                >
-                    TRANSFER
-                </Button>
-            </div>
+              <Button
+                  onClick={() => { submit() }}
+                  color='primary'
+                  size="large"
+                  variant="contained"
+                  // loading={loading} // TODO: Implement loading base on the action trigger
+                  disabled={disabledTransfer}
+              >
+                  TRANSFER
+              </Button>
+            </WrapperActionsModal>
         </Modal>
     )
 }

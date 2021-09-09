@@ -23,8 +23,10 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Button from 'components/button/Button';
 
 import * as styles from './Proposal.module.scss';
+import * as S from './Proposal.styles';
 
 import { castProposalVote } from 'actions/daoAction';
+import { Typography } from '@material-ui/core';
 
 function Proposal({
     proposal,
@@ -35,7 +37,7 @@ function Proposal({
     const [dropDownBoxInit, setDropDownBoxInit] = useState(true)
 
     const [votePercent, setVotePercent] = useState(undefined)
-    
+
     useEffect(() => {
         const init = async () => {
             if (proposal.totalVotes > 0) {
@@ -57,14 +59,8 @@ function Proposal({
         }
     }
 
-    return (<div
-        className={styles.proposalCard}
-
-        style={{
-            background: 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.1) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)',
-            borderRadius: '12px'
-        }}>
-
+    return (
+      <S.ProposalCard>
         {proposal.state === 'Active' &&
             <div
                 onClick={() => {
@@ -72,43 +68,43 @@ function Proposal({
                     setDropDownBoxInit(false);
                 }}
             >
-                <div className={styles.proposalHeader}>
-                    <div className={styles.title}>
-                        <p>Proposal #{proposal.id}</p>
-                        <p className={styles.muted}>Title: {proposal.description}</p>
-                        <p className={styles.muted}>Status: {proposal.state}</p>
-                        <p className={styles.muted}>Start L1 Block: {proposal.startBlock} &nbsp; &nbsp; End L1 Block: {proposal.endBlock}</p>
+                <S.ProposalHeader>
+                    <div>
+                        <Typography variant="h3" gutterBottom>Proposal #{proposal.id}</Typography>
+                        <S.Muted variant="body2">Title: {proposal.description}</S.Muted>
+                        <S.Muted variant="body2">Status: {proposal.state}</S.Muted>
+                        <S.Muted variant="body2">Start L1 Block: {proposal.startBlock} End L1 Block: {proposal.endBlock}</S.Muted>
                     </div>
                     <ExpandMoreIcon /> VOTE
-                </div>
-                <div className={styles.proposalContent}>
-                    <div className={styles.vote}>For: {proposal.forVotes}</div>
-                    <div className={styles.vote}>Against: {proposal.againstVotes}</div>
-                    <div className={styles.vote}>Abstain: {proposal.abstainVotes}</div>
-                    <div className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </div>
-                    <div className={styles.vote}>Total Votes: {proposal.totalVotes}</div>
-                </div>
+                </S.ProposalHeader>
+                <S.ProposalContent>
+                    <div>For: {proposal.forVotes}</div>
+                    <div>Against: {proposal.againstVotes}</div>
+                    <div>Abstain: {proposal.abstainVotes}</div>
+                    <div>Percentage For: {votePercent}% </div>
+                    <div>Total Votes: {proposal.totalVotes}</div>
+                </S.ProposalContent>
             </div>
         }
 
         {proposal.state !== 'Active' &&
             <div
             >
-                <div className={styles.proposalHeader}>
-                    <div className={styles.title}>
-                        <p>Proposal #{proposal.id}</p>
-                        <p className={styles.muted}>Title: {proposal.description}</p>
-                        <p className={styles.muted}>Status: {proposal.state}</p>
-                        <p className={styles.muted}>Start L1 Block: {proposal.startBlock} End L1 Block: {proposal.endBlock}</p>
+                <S.ProposalHeader>
+                    <div>
+                        <Typography variant="h3" gutterBottom>Proposal #{proposal.id}</Typography>
+                        <S.Muted variant="body2">Title: {proposal.description}</S.Muted>
+                        <S.Muted variant="body2">Status: {proposal.state}</S.Muted>
+                        <S.Muted variant="body2">Start L1 Block: {proposal.startBlock} End L1 Block: {proposal.endBlock}</S.Muted>
                     </div>
-                </div>
-                <div className={styles.proposalContent}>
-                    <div className={styles.vote}>For: {proposal.forVotes}</div>
-                    <div className={styles.vote}>Against: {proposal.againstVotes}</div>
-                    <div className={styles.vote}>Abstain: {proposal.abstainVotes}</div>
-                    <div className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </div>
-                    <div className={styles.vote}>Total Votes: {proposal.totalVotes}</div>
-                </div>
+                </S.ProposalHeader>
+                <S.ProposalContent>
+                    <div>For: {proposal.forVotes}</div>
+                    <div>Against: {proposal.againstVotes}</div>
+                    <div>Abstain: {proposal.abstainVotes}</div>
+                    <div>Percentage For: {votePercent}% </div>
+                    <div>Total Votes: {proposal.totalVotes}</div>
+                </S.ProposalContent>
             </div>
         }
 
@@ -117,12 +113,7 @@ function Proposal({
                 <Button
                     type="primary"
                     variant="outlined"
-                    style={{
-                        maxWidth: '180px',
-                        padding: '15px 10px',
-                        borderRadius: '8px',
-                        alignSelf: 'center'
-                    }}
+                    fullWidth
                     onClick={(e) => {
                         updateVote(proposal.id, 1, 'Cast Vote For')
                     }}
@@ -131,12 +122,7 @@ function Proposal({
                 <Button
                     type="primary"
                     variant="contained"
-                    style={{
-                        maxWidth: '180px',
-                        padding: '15px 10px',
-                        borderRadius: '8px',
-                        alignSelf: 'center'
-                    }}
+                    fullWidth
                     onClick={(e) => {
                         updateVote(proposal.id, 0, 'Cast Vote Against')
                     }}
@@ -145,19 +131,14 @@ function Proposal({
                 <Button
                     type="outline"
                     variant="outlined"
-                    style={{
-                        maxWidth: '180px',
-                        padding: '15px 10px',
-                        borderRadius: '8px',
-                        alignSelf: 'center'
-                    }}
+                    fullWidth
                     onClick={(e) => {
                         updateVote(proposal.id, 2, 'Cast Vote Abstain')
                     }}
                 > Cast Vote Abstain</Button>
             </div>
         </div>
-    </div>)
+    </S.ProposalCard>)
 }
 
 

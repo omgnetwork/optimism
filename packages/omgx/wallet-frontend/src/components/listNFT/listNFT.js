@@ -114,29 +114,29 @@ class listNFT extends React.Component {
               ({symbol})
             </Typography>
             {(attributes || []).map((attr, index) => {
-              return (<Typography variant="body2" key={index}>{attr.trait_type}: 
-                <Typography variant="body2" component="span" className={styles.muted}>
+              return (<Typography variant="body2" key={index}>{attr.trait_type}:
+                <Typography variant="body2" component="span">
                   {attr.value}
                 </Typography>
               </Typography>)
             })}
             <Typography variant="body2">UUID:
-              <Typography variant="body2" component="span" className={styles.muted}>
+              <Typography variant="body2" component="span">
                 {UUID}
               </Typography>
             </Typography>
             <Typography variant="body2">Address:
-              <Typography variant="body2" component="span" className={styles.muted}>
+              <Typography variant="body2" component="span">
                 {truncate(address, 8, 6, '...')} <Copy value={address} light={true} />
               </Typography>
             </Typography>
             <Typography variant="body2">URI:
-              <Typography variant="body2" component="span" className={styles.muted}>
+              <Typography variant="body2" component="span">
                 {truncate(URL, 8, 6, '...')} <Copy value={URL} light={true} />
               </Typography>
             </Typography>
             <Typography variant="body2">Time minted:
-              <Typography variant="body2" component="span" className={styles.muted}>
+              <Typography variant="body2" component="span">
                 {time}
               </Typography>
             </Typography>
