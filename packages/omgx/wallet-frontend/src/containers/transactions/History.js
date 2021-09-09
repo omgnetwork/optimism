@@ -27,7 +27,6 @@ import { fetchTransactions } from 'actions/networkAction';
 
 import { selectActiveHistoryTab1 } from 'selectors/uiSelector'
 import { selectTransactions } from 'selectors/transactionSelector';
-import { selectNetwork } from 'selectors/setupSelector'
 
 import Tabs from 'components/tabs/Tabs'
 
@@ -36,7 +35,6 @@ import Deposits from './Deposits';
 
 import * as styles from './Transactions.module.scss';
 
-import { getAllNetworks } from 'util/masterConfig';
 import useInterval from 'util/useInterval';
 import PageHeader from 'components/pageHeader/PageHeader';
 import Transactions from './Transactions';

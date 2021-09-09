@@ -17,8 +17,7 @@ import { Box, useMediaQuery } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { createTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
 import { setWalletMethod } from 'actions/setupAction';
-import { closeAlert, closeError, setTheme } from 'actions/uiAction';
-import Alert from 'components/alert/Alert';
+import { setTheme } from 'actions/uiAction';
 import WalletPicker from 'components/walletpicker/WalletPicker';
 import Home from 'containers/home/Home';
 import Notification from 'containers/notification/Notification';
@@ -29,7 +28,7 @@ import {
   Route,
   Switch
 } from "react-router-dom";
-import { selectAlert, selectError, selectModalState } from 'selectors/uiSelector';
+import { selectModalState } from 'selectors/uiSelector';
 import { isChangingChain } from 'util/changeChain';
 //import oracleService from 'services/oracleService';
 import * as styles from './layout.module.scss';
@@ -41,13 +40,7 @@ function App () {
   const theme = useSelector(selectModalState('theme'));
   const light = theme === 'light';
 
-  const errorMessage = useSelector(selectError);
-  const alertMessage = useSelector(selectAlert);
-
   const [ enabled, setEnabled ] = useState(false);
-
-  const handleErrorClose=()=>dispatch(closeError());
-  const handleAlertClose=()=>dispatch(closeAlert());
 
   let MUItheme = createTheme({
     palette: {
@@ -237,26 +230,6 @@ function App () {
         <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row' }}>
           <S.Content>
             <div className={styles.App}>
-
-              <Alert
-                type='error'
-                duration={0}
-                open={!!errorMessage}
-                onClose={handleErrorClose}
-                position={50}
-              >
-                {errorMessage}
-              </Alert>
-
-              <Alert
-                type='success'
-                duration={0}
-                open={!!alertMessage}
-                onClose={handleAlertClose}
-                position={0}
-              >
-                {alertMessage}
-              </Alert>
 
               <Notification/>
               <Suspense fallback={<>Loading...</>}>

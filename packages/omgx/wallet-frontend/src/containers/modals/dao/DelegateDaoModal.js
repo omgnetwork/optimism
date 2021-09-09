@@ -25,6 +25,7 @@ import Modal from 'components/modal/Modal';
 import Input from 'components/input/Input';
 import Button from 'components/button/Button';
 import { delegateVotes } from 'actions/daoAction';
+import { WrapperActionsModal } from 'components/modal/Modal.styles';
 
 function DelegateDaoModal({ open }) {
     const [recipient, setRecipient] = useState('');
@@ -49,7 +50,7 @@ function DelegateDaoModal({ open }) {
     }
 
     return (
-        <Modal open={open}>
+        <Modal open={open} onClose={handleClose}>
             <Typography variant="h2">Delegate Boba</Typography>
             <Input
                 label='Delegate Address'
@@ -59,26 +60,26 @@ function DelegateDaoModal({ open }) {
                 onChange={i => setRecipient(i.target.value)}
             />
 
-            <div className={styles.buttons}>
-                <Button
-                    onClick={handleClose}
-                    color='neutral'
-                    className={styles.button}
-                >
-                    CANCEL
-                </Button>
+            <WrapperActionsModal>
+              <Button
+                  onClick={handleClose}
+                  color='neutral'
+                  size="large"
+              >
+                  CANCEL
+              </Button>
 
-                <Button
-                    className={styles.button}
-                    onClick={() => { submit() }}
-                    color='primary'
-                    variant="outlined"
-                    // loading={loading} // TODO: Implement loading base on the action trigger
-                    disabled={disabledTransfer}
-                >
-                    Delegate
-                </Button>
-            </div>
+              <Button
+                  onClick={() => { submit() }}
+                  color='primary'
+                  size="large"
+                  variant="contained"
+                  // loading={loading} // TODO: Implement loading base on the action trigger
+                  disabled={disabledTransfer}
+              >
+                  Delegate
+              </Button>
+            </WrapperActionsModal>
         </Modal>
     )
 }
