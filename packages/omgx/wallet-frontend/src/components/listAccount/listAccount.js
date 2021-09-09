@@ -130,23 +130,54 @@ class ListAccount extends React.Component {
           {dropDownBox ? (
           <Fade in={dropDownBox}>
             <S.DropdownWrapper>
-              {!enabled && chain === 'L1' &&
+                {!enabled && chain === 'L1' &&
                   <S.AccountAlertBox>
-                    <Typography variant="body2" component="p" sx={{flex: 2}}>
-                      MetaMask is set to L2. To transact on L1, - SWITCH LAYER to L1
-                    </Typography>
-                    <LayerSwitcher isButton={true} />
+                    <Box
+                      sx={{
+                        wordBreak: 'break-all',
+                        flex: 1,
+                        width: '75%'
+                      }}
+                    >
+                      <Typography variant="body2" component="p" >
+                        MetaMask is set to L2. To transact on L1, - SWITCH LAYER to L1
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        textAlign: 'center',
+                        width: '25%'
+                      }}
+                    >
+                      <LayerSwitcher isButton={true} />
+                    </Box>
                   </S.AccountAlertBox>
-              }
+                }
 
-              {!enabled && chain === 'L2' &&
-                <S.AccountAlertBox>
-                  <Typography variant="body2" component="p" sx={{flex: 2}}>
-                    MetaMask is set to L1. To transact on L2, - SWITCH LAYER to L2
-                  </Typography>
-                  <LayerSwitcher isButton={true} />
-                </S.AccountAlertBox>
-              }
+                {!enabled && chain === 'L2' &&
+                  <S.AccountAlertBox>
+                    <Box
+                      sx={{
+                        wordBreak: 'break-all',
+                        flex: 1,
+                        width: '75%'
+                      }}
+                    >
+
+                      <Typography variant="body2" component="p" sx={{ flex: 2 }}>
+                        MetaMask is set to L1. To transact on L2, - SWITCH LAYER to L2
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        textAlign: 'center',
+                        width: '25%'
+                      }}
+                    >
+                      <LayerSwitcher isButton={true} />
+                    </Box>
+                  </S.AccountAlertBox>
+                }
 
               {enabled && chain === 'L1' &&
               <>
