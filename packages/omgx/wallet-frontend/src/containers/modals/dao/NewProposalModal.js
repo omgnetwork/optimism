@@ -27,7 +27,6 @@ import Button from 'components/button/Button'
 import Input from 'components/input/Input'
 
 import { WrapperActionsModal } from 'components/modal/Modal.styles'
-import { createDaoProposal } from 'actions/daoAction'
 
 function NewProposalModal({ open }) {
     const dispatch = useDispatch()
