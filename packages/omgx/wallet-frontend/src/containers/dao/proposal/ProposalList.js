@@ -16,7 +16,7 @@ limitations under the License. */
 import React, {useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { openModal } from 'actions/uiAction';
+import { openError, openModal } from 'actions/uiAction';
 
 import Button from 'components/button/Button';
 import Proposal from 'components/Proposal/Proposal';
@@ -29,7 +29,7 @@ import { orderBy } from 'lodash';
 
 const PER_PAGE = 3;
 
-function ProposalList() {
+function ProposalList({balance}) {
 
     const [page, setPage] = useState(1);
     const dispatch = useDispatch()
@@ -52,7 +52,11 @@ function ProposalList() {
                 type="primary"
                 variant="outlined"
                 onClick={() => {
-                    dispatch(openModal('newProposalModal'))
+                    if(!!balance) {
+                        dispatch(openModal('newProposalModal'))
+                    } else {
+                        dispatch(openError('Insufficient governance token to create a new proposal. You need at least {GovTokenNeeded} to create a new proposal.'))
+                    }
                 }}
                 style={{
                     maxWidth: '180px',

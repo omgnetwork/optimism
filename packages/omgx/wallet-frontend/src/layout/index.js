@@ -17,8 +17,6 @@ import { Box, useMediaQuery } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { createTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
 import { setWalletMethod } from 'actions/setupAction';
-import { closeAlert, closeError } from 'actions/uiAction';
-import Alert from 'components/alert/Alert';
 import WalletPicker from 'components/walletpicker/WalletPicker';
 import Home from 'containers/home/Home';
 import Notification from 'containers/notification/Notification';
