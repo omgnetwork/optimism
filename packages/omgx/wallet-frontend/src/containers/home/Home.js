@@ -67,7 +67,7 @@ import FarmWrapper from 'containers/farm/FarmWrapper'
 
 const POLL_INTERVAL = 5000 //milliseconds
 
-function Home ({ light, setLight }) {
+function Home () {
 
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -75,8 +75,7 @@ function Home ({ light, setLight }) {
 
   const [ mobileMenuOpen, setMobileMenuOpen ] = useState(false)
 
-  const [ pageDisplay, setPageDisplay ] = useState("AccountNow");
-
+  const pageDisplay = useSelector(selectModalState('page'))
   const depositModalState = useSelector(selectModalState('depositModal'))
   const transferModalState = useSelector(selectModalState('transferModal'))
   const exitModalState = useSelector(selectModalState('exitModal'))
@@ -109,7 +108,6 @@ function Home ({ light, setLight }) {
   useEffect(() => {
     window.scrollTo(0, 0);
     dispatch(fetchDeposits());
-    setPageDisplay("AccountNow");
   }, [ dispatch ]);
 
   useInterval(() => {
@@ -141,10 +139,6 @@ function Home ({ light, setLight }) {
     checkVersion();
   }, [])
 
-  const handleSetPage = async (page) => {
-    setPageDisplay(page)
-  }
-
   return (
     <>
       <DepositModal  open={depositModalState}  token={token} fast={fast} />
@@ -167,7 +161,7 @@ function Home ({ light, setLight }) {
       />
 
       <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
-          <MainMenu pageDisplay={pageDisplay} handleSetPage={handleSetPage} light={light} setLight={setLight} />
+          <MainMenu />
           {/* The Top SubMenu Bar, non-mobile */}
 
         <Container maxWidth="lg">

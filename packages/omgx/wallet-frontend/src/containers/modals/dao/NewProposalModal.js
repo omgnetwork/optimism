@@ -22,7 +22,7 @@ import * as styles from './daoModal.module.scss'
 import Modal from 'components/modal/Modal'
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
-import ProposalAction from './ProposalAction'
+// import ProposalAction from './ProposalAction'
 import { createDaoProposal } from 'actions/daoAction'
 
 function NewProposalModal({ open }) {
@@ -46,7 +46,7 @@ function NewProposalModal({ open }) {
 
     const submit = async () => {
         let res = await dispatch(createDaoProposal({ votingThreshold, text: proposeText }));
-    
+
         if (res) {
             dispatch(openAlert(`Proposal has been submitted!`))
             handleClose()
