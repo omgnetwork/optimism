@@ -50,8 +50,8 @@ function DelegateDaoModal({ open }) {
     }
 
     return (
-        <Modal open={open} maxWidth="md" onClose={handleClose}>
-            <Typography variant="h2" sx={{mb: 3}}>Delegate Boba</Typography>
+        <Modal open={open} onClose={handleClose}>
+            <Typography variant="h2">Delegate Boba</Typography>
             <Input
                 label='Delegate Address'
                 placeholder='Hash'

@@ -54,9 +54,9 @@ function TransferDaoModal({ open }) {
     const disabledTransfer = amount <= 0 || !recipient;
 
     return (
-        <Modal open={open} maxWidth="md" onClose={handleClose}>
-            <Typography variant="h2" sx={{mb: 3}}>Transfer Boba</Typography>
 
+        <Modal open={open} onClose={handleClose}>
+            <Typography variant="h2">Transfer Boba</Typography>
             <Input
                 label='To Address'
                 placeholder='Hash or ENS name'

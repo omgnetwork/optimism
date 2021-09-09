@@ -73,7 +73,7 @@ function Transactions({ searchHistory, transactions }) {
             )}
             {paginatedTransactions.map((i, index) => {
               const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
-              const time = moment.unix(i.timeStamp).format('lll')
+              
               let details = null
               const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
 
