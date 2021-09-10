@@ -1246,7 +1246,7 @@ class NetworkService {
       return l2Receipt
     } catch(error) {
       console.log(error)
-      return false
+      return error
     }
   }
 
@@ -1259,9 +1259,21 @@ class NetworkService {
         parseEther(value.toString())
       )
       await tx.wait()
+      //console.log("TX return:", tx)
       return tx
     } catch (error) {
+      console.log('User canceled, for example?')
+      //throw new Error(error.message)
+      // throw new WebWalletError({
+      //   originalError: error,
+      //   customErrorMessage: 'Could not reset allowance for ERC20.',
+      //   reportToSentry: false,
+      //   reportToUi: true,
+      // })
+      //console.log('User canceled, for example?')
+      //throw new Error(error.message)
       console.log(error)
+      return error
     }
   }
 

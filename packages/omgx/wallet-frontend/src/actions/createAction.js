@@ -17,14 +17,23 @@ import { WebWalletError } from 'services/errorService';
 
 export function createAction (key, asyncAction) {
   return async function (dispatch) {
-    dispatch({ type: `${key}/REQUEST` });
+    dispatch({ type: `${key}/REQUEST` })
     try {
-      const response = await asyncAction();
-      dispatch({ type: `${key}/SUCCESS`, payload: response });
-      return true;
+      const response = await asyncAction()
+      //console.log("Async action:",response)
+
+      if(response.hasOwnProperty('code')) {
+        if(response['code'] === 4001) {
+          //user canceled TX
+          dispatch({ type: `${key}/REJECTED`, payload: response })
+          return false
+        }
+      }
+      dispatch({ type: `${key}/SUCCESS`, payload: response })
+      return true
     } catch (error) {
       // cancel request loading state
-      dispatch({ type: `${key}/ERROR` });
+      dispatch({ type: `${key}/ERROR` })
 
       const _error = error instanceof WebWalletError
         ? error
@@ -36,7 +45,7 @@ export function createAction (key, asyncAction) {
         });
 
       // perform necessary reports
-      _error.report(dispatch);
+      _error.report(dispatch)
       return false;
     }
   };
