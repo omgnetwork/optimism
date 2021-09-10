@@ -414,6 +414,7 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled, ReentrancyGuardUpgradeable, 
         address payable _to
     )
         external
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
         UserInfo storage user = userInfo[_tokenAddress][msg.sender];

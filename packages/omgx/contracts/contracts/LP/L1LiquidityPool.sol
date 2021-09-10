@@ -430,6 +430,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuardUpgradeab
         address payable _to
     )
         external
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
         UserInfo storage user = userInfo[_tokenAddress][msg.sender];
