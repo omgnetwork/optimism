@@ -124,8 +124,8 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     this.chainContract = new CanonicalTransactionChainContract(
       unwrapped_OVM_CanonicalTransactionChain.address,
       getContractInterface('OVM_CanonicalTransactionChain'),
-      // this is OK because it only gets called when non-vault
-      this.batchSigner.signer
+      // if in vault signer will be undefined
+      this.batchSigner.signer || this.l1Provider
     )
     this.logger.info('Initialized new CTC', {
       address: this.chainContract.address,
@@ -158,11 +158,10 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     this.logger.info(
       'Getting batch start and end for transaction batch submitter...'
     )
-    console.log('_getBatchStartAndEnd')
-    console.log(this)
     const startBlock =
       (await this.chainContract.getTotalElements()).toNumber() +
       this.blockOffset
+
     this.logger.info('Retrieved start block number from CTC', {
       startBlock,
     })

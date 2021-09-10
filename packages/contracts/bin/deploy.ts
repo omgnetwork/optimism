@@ -21,10 +21,12 @@ const relayer = new Wallet(process.env.RELAYER_PRIVATE_KEY)
 const getSequencerAddress = async () => {
   let address = process.env.SEQUENCER_ADDRESS
   if (address === undefined) {
+    console.log('Sequencer set from private key')
     const wallet = new Wallet(process.env.SEQUENCER_PRIVATE_KEY)
     address = await wallet.getAddress()
     return address
   } else {
+    console.log(`Sequencer set from provided address ${address}`)
     return address
   }
 }
@@ -34,8 +36,10 @@ const getProposerAddress = async () => {
   if (address === undefined) {
     const wallet = new Wallet(process.env.PROPOSER_PRIVATE_KEY)
     address = await wallet.getAddress()
+    console.log('Proposer set from private key')
     return address
   } else {
+    console.log(`Proposer set from provided address ${address}`)
     return address
   }
 }
