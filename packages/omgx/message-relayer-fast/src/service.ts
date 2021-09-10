@@ -394,6 +394,10 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           txIndex < prevTotalElements + batchSize
         )
       })
+      // No event find
+      if (selectedEvent === undefined) {
+        return undefined
+      }
       // query the new SCC event. event.args._extraData in eventCache might be wrong
       const SCCEvent: ethers.Event[] = await this.state.OVM_StateCommitmentChain.queryFilter(
         this.state.OVM_StateCommitmentChain.filters.StateBatchAppended(),
