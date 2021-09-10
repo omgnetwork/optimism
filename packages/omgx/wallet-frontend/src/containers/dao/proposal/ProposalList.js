@@ -13,31 +13,51 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React from 'react';
+import React, {useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { openModal } from 'actions/uiAction';
+import { openError, openModal } from 'actions/uiAction';
 
 import Button from 'components/button/Button';
 import Proposal from 'components/Proposal/Proposal';
 
 import * as styles from './proposalList.module.scss'
-import { selectProposals } from 'selectors/daoSelector';
+import { selectProposals, selectProposalThreshold } from 'selectors/daoSelector';
 import { selectLoading } from 'selectors/loadingSelector';
+import Pager from 'components/pager/Pager'
+import { orderBy } from 'lodash';
 
-function ProposalList() {
+const PER_PAGE = 3;
 
+function ProposalList({balance}) {
+
+    const [page, setPage] = useState(1);
     const dispatch = useDispatch()
-    const loading = useSelector(selectLoading(['PROPOSAL/GET']))
+    const loading = useSelector(selectLoading(['PROPOSALS/GET']))
     const proposals = useSelector(selectProposals)
+    const proposalThreshold = useSelector(selectProposalThreshold)
+
+    const orderedProposals = orderBy(proposals, i => i.startBlock, 'desc')
+
+    const startingIndex = page === 1 ? 0 : ((page - 1) * PER_PAGE);
+    const endingIndex = page * PER_PAGE;
+    const paginatedProposals = orderedProposals.slice(startingIndex, endingIndex);
+
+    let totalNumberOfPages = Math.ceil(orderedProposals.length / PER_PAGE);
+    if (totalNumberOfPages === 0) totalNumberOfPages = 1
 
     return <>
         <div className={styles.containerAction}>
             <p className={styles.listTitle}>Proposal List</p>
             <Button
-                type="outline"
+                type="primary"
+                variant="outlined"
                 onClick={() => {
-                    dispatch(openModal('newProposalModal'))
+                    if(balance < proposalThreshold) {
+                        dispatch(openError(`Insufficient governance token to create a new proposal. You need at least ${proposalThreshold} governance to create a new proposal.`))
+                    } else {
+                        dispatch(openModal('newProposalModal'))
+                    }
                 }}
                 style={{
                     maxWidth: '180px',
@@ -49,13 +69,22 @@ function ProposalList() {
             > Create Proposal </Button>
         </div>
         <div className={styles.listContainer}>
-            {!!loading ? <div className={styles.loadingContainer}> Loading... </div> : null}
-            {proposals.map((p, index) => {
-                return <React.Fragment key={index}><Proposal /></React.Fragment>
+            <Pager
+                currentPage={page}
+                isLastPage={paginatedProposals.length < PER_PAGE}
+                totalPages={totalNumberOfPages}
+                onClickNext={()=>setPage(page + 1)}
+                onClickBack={()=>setPage(page - 1)}
+            />
+            {!!loading && !proposals.length ? <div className={styles.loadingContainer}> Loading... </div> : null}
+            {paginatedProposals.map((p, index) => {
+                return <React.Fragment key={index}>
+                    <Proposal proposal={p} />
+                </React.Fragment>
             })}
         </div>
     </>
 }
 
-export default React.memo(ProposalList);
+export default React.memo(ProposalList)
 

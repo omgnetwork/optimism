@@ -40,10 +40,18 @@ export function delegateVotes({ recipient }) {
     return createAction('DELEGATE/VOTES/CREATE', () => networkService.delegateVotes({ recipient }))
 }
 
-export function fetchProposal() {
-    return createAction('PROPOSAL/GET', () => networkService.fetchProposals())
+export function getProposalThreshold() {
+    return createAction('PROPOSAL/THRESHOLD/GET', () => networkService.getProposalThreshold())
 }
 
-export function createProposal(payload) {
+export function fetchDaoProposals() {
+    return createAction('PROPOSALS/GET', () => networkService.fetchProposals())
+}
+
+export function createDaoProposal(payload) {
     return createAction('PROPOSAL/CREATE', () => networkService.createProposal(payload))
+}
+
+export function castProposalVote(payload) {
+    return createAction('PROPOSAL/CAST/VOTE', () => networkService.castProposalVote(payload))
 }

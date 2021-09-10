@@ -13,9 +13,11 @@ import { logAmount, powAmount } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
 
-import * as styles from './Farm.module.scss';
+import * as S from './FarmModal.styles';
+import { Typography } from '@material-ui/core';
 
 class FarmDepositModal extends React.Component {
+  
   constructor(props) {
     super(props);
 
@@ -35,23 +37,24 @@ class FarmDepositModal extends React.Component {
 
   async componentDidUpdate(prevState) {
 
-    const { open } = this.props;
-    const { stakeToken } = this.props.farm;
+    const { open } = this.props
+    const { stakeToken } = this.props.farm
 
     if (prevState.open !== open) {
-      this.setState({ open });
+      this.setState({ open })
     }
 
     if (!isEqual(prevState.farm.stakeToken, stakeToken)) {
-      let approvedAllowance = powAmount(10, 50);
+      let approvedAllowance = powAmount(10, 50) 
+      // Set to some very big number
       // There is no need to check allowance for depositing ETH
       if (stakeToken.currency !== networkService.L1_ETH_Address) {
         approvedAllowance = await networkService.checkAllowance(
           stakeToken.currency,
           stakeToken.LPAddress
-        );
+        )
       }
-      this.setState({ approvedAllowance, stakeToken });
+      this.setState({ approvedAllowance, stakeToken })
     }
 
   }
@@ -67,12 +70,12 @@ class FarmDepositModal extends React.Component {
   }
 
   handleClose() {
-    this.props.dispatch(closeModal("farmDepositModal"));
+    this.props.dispatch(closeModal("farmDepositModal"))
   }
 
   async handleApprove() {
-    
-    const { stakeToken, stakeValue } = this.state;
+
+    const { stakeToken, stakeValue } = this.state
 
     this.setState({ loading: true })
 
@@ -80,19 +83,17 @@ class FarmDepositModal extends React.Component {
 
     if (stakeToken.L1orL2Pool === 'L2LP') {
       approveTX = await networkService.approveERC20_L2LP(
-        powAmount(stakeValue, 18),
+        powAmount(stakeValue, stakeToken.decimals),
         stakeToken.currency,
       )
     } else if (stakeToken.L1orL2Pool === 'L1LP') {
       approveTX = await networkService.approveERC20_L1LP(
-        powAmount(stakeValue, 18),
+        powAmount(stakeValue, stakeToken.decimals),
         stakeToken.currency,
       )
     }
 
-    console.log("stakeToken.LPAddress:",stakeToken.LPAddress)
-    //0x2C12649A5A4FC61F146E0a3409f3e4c7FbeD15Dc
-    //for trying to stake TST
+    
 
     if (approveTX) {
       this.props.dispatch(openAlert("Amount was approved"))
@@ -104,7 +105,7 @@ class FarmDepositModal extends React.Component {
           stakeToken.LPAddress
         )
       }
-      console.log("approvedAllowance:",approvedAllowance)
+
       this.setState({ approvedAllowance, loading: false })
     } else {
       this.props.dispatch(openError("Failed to approve amount"))
@@ -113,23 +114,26 @@ class FarmDepositModal extends React.Component {
   }
 
   async handleConfirm() {
-    const { stakeToken, stakeValue } = this.state;
 
-    this.setState({ loading: true });
+    const { stakeToken, stakeValue } = this.state
+
+    this.setState({ loading: true })
 
     const addLiquidityTX = await networkService.addLiquidity(
       stakeToken.currency,
       stakeValue,
-      stakeToken.L1orL2Pool
-    );
+      stakeToken.L1orL2Pool,
+      stakeToken.decimals
+    )
+
     if (addLiquidityTX) {
-      this.props.dispatch(openAlert("Your liquidity was added"));
-      this.props.dispatch(getFarmInfo());
-      this.setState({ loading: false, stakeValue: '' });
-      this.props.dispatch(closeModal("farmDepositModal"));
+      this.props.dispatch(openAlert("Your liquidity was added"))
+      this.props.dispatch(getFarmInfo())
+      this.setState({ loading: false, stakeValue: '' })
+      this.props.dispatch(closeModal("farmDepositModal"))
     } else {
-      this.props.dispatch(openError("Failed to add liquidity"));
-      this.setState({ loading: false, stakeValue: '' });
+      this.props.dispatch(openError("Failed to add liquidity"))
+      this.setState({ loading: false, stakeValue: '' })
     }
   }
 
@@ -137,7 +141,7 @@ class FarmDepositModal extends React.Component {
     
     const {
       open,
-      stakeToken, 
+      stakeToken,
       stakeValue,
       approvedAllowance,
       loading,
@@ -145,9 +149,15 @@ class FarmDepositModal extends React.Component {
 
     return (
 
-      <Modal open={open}>
-        
-        <h2>Stake {`${stakeToken.symbol}`}</h2>
+      <Modal 
+        open={open} 
+        maxWidth="md" 
+        onClose={()=>{this.handleClose()}}
+      >
+
+        <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
+          Stake {`${stakeToken.symbol}`}
+        </Typography>
 
         <Input
           placeholder={`Amount to stake`}
@@ -156,62 +166,67 @@ class FarmDepositModal extends React.Component {
           onChange={i=>{this.setState({stakeValue: i.target.value})}}
           unit={stakeToken.symbol}
           maxValue={this.getMaxTransferValue()}
+          newStyle
+          variant="standard"
         />
 
         {Number(stakeValue) > Number(this.getMaxTransferValue()) &&
-          <div className={styles.disclaimer}>
+          <Typography variant="body2" sx={{mt: 2}}>
             You don't have enough {stakeToken.symbol} to stake.
-          </div>
+          </Typography>
         }
 
         {(new BN(approvedAllowance).gte(powAmount(stakeValue, 18)) || stakeValue === '') &&
-          <div className={styles.buttons}>
+          <S.WrapperActions>
             <Button
               onClick={()=>{this.handleClose()}}
-              type='outline'
-              className={styles.button}
+              color="neutral"
+              size="large"
             >
               CANCEL
             </Button>
             <Button
               onClick={()=>{this.handleConfirm()}}
-              type='primary'
-              className={styles.button}
               disabled={Number(this.getMaxTransferValue()) < Number(stakeValue) || stakeValue === '' || !stakeValue}
               loading={loading}
+              color='primary'
+              size="large"
+              variant="contained"
+              // fullWidth={isMobile}
             >
               STAKE!
             </Button>
-          </div>
+          </S.WrapperActions>
         }
 
         {new BN(approvedAllowance).lt(new BN(powAmount(stakeValue, 18))) &&
           <>
-            <div className={styles.disclaimer}>
+            <Typography variant="body2" sx={{mt: 2}}>
               To stake {stakeValue} {stakeToken.symbol},
               you first need to approve this amount.
-            </div>
-            <div className={styles.buttons}>
+            </Typography>
+
+            <S.WrapperActions>
               <Button
                 onClick={()=>{this.handleClose()}}
-                type='outline'
-                className={styles.button}
+                color="neutral"
+                size="large"
               >
                 CANCEL
               </Button>
               <Button
                 onClick={()=>{this.handleApprove()}}
-                type='primary'
-                className={styles.button}
                 loading={loading}
                 disabled={Number(this.getMaxTransferValue()) < Number(stakeValue)}
+                color='primary'
+                size="large"
+                variant="contained"
               >
                 APPROVE AMOUNT
               </Button>
-            </div>
+            </S.WrapperActions>
           </>
         }
-
       </Modal>
     )
   }
@@ -221,6 +236,6 @@ const mapStateToProps = state => ({
   ui: state.ui,
   farm: state.farm,
   balance: state.balance,
-});
+})
 
-export default connect(mapStateToProps)(FarmDepositModal);
+export default connect(mapStateToProps)(FarmDepositModal)
