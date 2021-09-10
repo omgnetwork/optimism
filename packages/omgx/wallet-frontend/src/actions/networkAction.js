@@ -28,7 +28,6 @@ export function fetchEthStats() {
 }
 
 export function fetchBalances() {
-  console.log("fetchBalances")
   return createAction('BALANCE/GET', () => networkService.getBalances())
 }
 
@@ -99,9 +98,9 @@ export function addExitQueue(token, gasPrice) {
   )
 }
 
-export function exitOMGX(token, value) {
+export function exitBOBA(token, value) {
   return createAction('EXIT/CREATE', () =>
-    networkService.exitOMGX(token, value)
+    networkService.exitBOBA(token, value)
   )
 }
 
@@ -112,15 +111,15 @@ export function depositL2LP(token, value) {
   )
 }
 
-export function depositETHL2(value,gasLimit) {
+export function depositETHL2(value, gasLimit) {
   return createAction('DEPOSIT/CREATE', () =>
     networkService.depositETHL2(value,gasLimit)
   )
 }
 
-export function depositL1LP(currency, value) {
+export function depositL1LP(currency, value, decimals) {
   return createAction('DEPOSIT/CREATE', () =>
-    networkService.depositL1LP(currency, value)
+    networkService.depositL1LP(currency, value, decimals)
   )
 }
 
