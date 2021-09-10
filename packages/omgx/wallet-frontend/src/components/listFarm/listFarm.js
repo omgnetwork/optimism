@@ -16,14 +16,14 @@ import networkService from 'services/networkService';
 
 import { getCoinImage } from 'util/coinImage';
 
-import { Box, Typography, Fade, Grid } from '@material-ui/core';
+import { Box, Typography, Fade, Grid, CircularProgress } from '@material-ui/core';
 import * as S from "./ListFarm.styles"
 
 class ListFarm extends React.Component {
 
   constructor(props) {
 
-    super(props);
+    super(props)
 
     const {
       poolInfo,
@@ -93,7 +93,7 @@ class ListFarm extends React.Component {
       decimals: poolInfo.decimals
     }))
 
-    this.props.dispatch(openModal('farmWithdrawModal'));
+    this.props.dispatch(openModal('farmWithdrawModal'))
   }
 
   async handleHarvest() {
@@ -126,12 +126,12 @@ class ListFarm extends React.Component {
     }
 
     if (getRewardTX) {
-      this.props.dispatch(openAlert(`${logAmount(userReward, 18, 2)} ${poolInfo.symbol} was added to your account`));
-      this.props.dispatch(getFarmInfo());
-      this.setState({ loading: false });
+      this.props.dispatch(openAlert(`${logAmount(userReward, poolInfo.decimals, 2)} ${poolInfo.symbol} was added to your account`))
+      this.props.dispatch(getFarmInfo())
+      this.setState({ loading: false })
     } else {
-      this.props.dispatch(openError("Failed to get reward"));
-      this.setState({ loading: false });
+      this.props.dispatch(openError("Failed to get reward"))
+      this.setState({ loading: false })
     }
 
   }
@@ -144,6 +144,7 @@ class ListFarm extends React.Component {
       loading, L1orL2Pool
     } = this.state;
 
+    const pageLoading = Object.keys(poolInfo).length === 0;
     const { isMobile } = this.props
 
     let userReward = 0;
@@ -162,82 +163,91 @@ class ListFarm extends React.Component {
     const disabled = !L1orL2Pool.includes(networkService.L1orL2)
     const symbol = poolInfo.symbol
     const name = poolInfo.name
+    const decimals = poolInfo.decimals
     const logo = getCoinImage(symbol)
+
+    //console.log('poolinfo',poolInfo)
 
     return (
       <S.Wrapper dropDownBox={dropDownBox}>
-        <Grid container spacing={2} direction="row" justifyContent="center" alignItems="center" >
+        {pageLoading ? (
+          <Box sx={{textAlign: 'center'}}>
+            <CircularProgress color="secondary" />
+          </Box>
+        ) : (
+          <Grid container spacing={2} direction="row" justifyContent="center" alignItems="center" >
 
-          <S.GridItemTag item xs={4} md={1.7}>
-              <img src={logo} alt="logo" width={30} />
-              <Typography variant="overline">{name}</Typography>
-          </S.GridItemTag>
+            <S.GridItemTag item xs={4} md={1.7}>
+                <img src={logo} alt="logo" width={30} />
+                <Typography variant="overline">{name}</Typography>
+            </S.GridItemTag>
 
-          <S.GridItemTag item xs={4} md={1.7}>
-            {isMobile ? (
-              <Typography variant="overline" sx={{opacity: 0.7}}>Earned</Typography>
-            ) : (null)}
-            <Typography variant="body1">
-              {userReward ?
-                `${logAmount(userReward, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </Typography>
-          </S.GridItemTag>
+            <S.GridItemTag item xs={4} md={1.7}>
+              {isMobile ? (
+                <Typography variant="overline" sx={{opacity: 0.7}}>Earned</Typography>
+              ) : (null)}
+              <Typography variant="body1">
+                {userReward ?
+                  `${logAmount(userReward, decimals, 2)}` : `0`
+                }
+              </Typography>
+            </S.GridItemTag>
 
-          <S.GridItemTag item xs={4} md={1.7}>
-            {isMobile ? (
-              <Typography variant="overline" sx={{opacity: 0.7}}>Share</Typography>
-            ) : (null)}
-            <Typography variant="body1">
-              {userInfo.amount ?
-                `${logAmount(userInfo.amount, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </Typography>
-          </S.GridItemTag>
+            <S.GridItemTag item xs={4} md={1.7}>
+              {isMobile ? (
+                <Typography variant="overline" sx={{opacity: 0.7}}>Your Stake</Typography>
+              ) : (null)}
+              <Typography variant="body1">
+                {userInfo.amount ?
+                  `${logAmount(userInfo.amount, decimals, 2)}` : `0`
+                }
+              </Typography>
+            </S.GridItemTag>
 
-          <S.GridItemTag item xs={4} md={1.7}>
-            {isMobile ? (
-              <Typography variant="overline" sx={{opacity: 0.7}}>Share</Typography>
-            ) : (null)}
-            <Typography variant="body1">
-              {userInfo.amount ?
-                `${logAmount(userInfo.amount, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </Typography>
-          </S.GridItemTag>
+            <S.GridItemTag item xs={4} md={1.7}>
+              {isMobile ? (
+                <Typography variant="overline" sx={{opacity: 0.7}}>APR</Typography>
+              ) : (null)}
+              <Typography variant="body1">
+                {userInfo.amount ?
+                  `${logAmount(poolInfo.APR, 0, 2)}` : `0`
+                }
+              </Typography>
+            </S.GridItemTag>
 
-          <S.GridItemTag item xs={4} md={1.7}>
-            {isMobile ? (
-              <Typography variant="overline" sx={{opacity: 0.7}}>Liquidity</Typography>
-            ) : (null)}
-            <Typography variant="body1">
-              {poolInfo.userDepositAmount ?
-                `${logAmount(poolInfo.userDepositAmount, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </Typography>
-          </S.GridItemTag>
+            <S.GridItemTag item xs={4} md={1.7}>
+              {isMobile ? (
+                <Typography variant="overline" sx={{opacity: 0.7}}>Liquidity</Typography>
+              ) : (null)}
+              <Typography variant="body1">
+                {poolInfo.userDepositAmount ?
+                  `${logAmount(poolInfo.userDepositAmount, decimals, 2)}` : `0`
+                }
+              </Typography>
+            </S.GridItemTag>
 
-          <S.GridItemTag item xs={4} md={1.7}>
-            {isMobile ? (
-              <Typography variant="overline" sx={{opacity: 0.7}}>Balance</Typography>
-            ) : (null)}
-            <Typography variant="body1">
-              {poolInfo.tokenBalance ?
-                `${logAmount(poolInfo.tokenBalance, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </Typography>
-          </S.GridItemTag>
+            <S.GridItemTag item xs={4} md={1.7}>
+              {isMobile ? (
+                <Typography variant="overline" sx={{opacity: 0.7}}>Balance</Typography>
+              ) : (null)}
+              <Typography variant="body1">
+                {poolInfo.tokenBalance ?
+                  `${logAmount(poolInfo.tokenBalance, decimals, 2)}` : `0`
+                }
+              </Typography>
+            </S.GridItemTag>
 
-          <S.GridItemTag item xs={12} md={1.7}>
-            <Box
-              disabled={disabled}
-              onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
-              sx={{display: 'flex', cursor: 'pointer', color: "#0ebf9a", transform: dropDownBox ? "rotate(-180deg)" : ""}}
-            >
-              <ExpandMoreIcon />
-            </Box>
-          </S.GridItemTag>
-        </Grid>
+            <S.GridItemTag item xs={12} md={1.7}>
+              <Box
+                disabled={disabled}
+                onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
+                sx={{display: 'flex', cursor: 'pointer', color: "#0ebf9a", transform: dropDownBox ? "rotate(-180deg)" : ""}}
+              >
+                <ExpandMoreIcon />
+              </Box>
+            </S.GridItemTag>
+          </Grid>
+        )}
 
         {/*********************************************/
         /**************  Drop Down Box ****************/
@@ -248,11 +258,11 @@ class ListFarm extends React.Component {
             <S.DropdownContent>
               <S.DropdownWrapper>
                 <Typography sx={{flex: 1}} variant="body2" component="div">{`${name}`} Earned</Typography>
-                <Typography sx={{flex: 1}} variant="body2" component="div" color="secondary">{logAmount(userReward, 18, 2)}</Typography>
+                <Typography sx={{flex: 1}} variant="body2" component="div" color="secondary">{logAmount(userReward, decimals, 2)}</Typography>
                 <Button
                   variant="contained"
                   fullWidth
-                  disabled={logAmount(userReward, 18) === '0' || disabled}
+                  disabled={logAmount(userReward, decimals) === '0' || disabled}
                   onClick={()=>{this.handleHarvest()}}
                   loading={loading}
                   sx={{flex: 1}}
@@ -262,9 +272,9 @@ class ListFarm extends React.Component {
               </S.DropdownWrapper>
 
               <S.DropdownWrapper>
-                {logAmount(userInfo.amount, 18) === '0' ?
+                {logAmount(userInfo.amount, decimals) === '0' ?
                   <>
-                    <Typography sx={{flex: 1}} variant="body2" component="div">Stake {`${name}`}</Typography>
+                    <Typography sx={{flex: 1}} variant="body2" component="div">Your Stake {`${name}`}</Typography>
                     <Button
                       variant="contained"
                       onClick={() => {this.handleStakeToken()}}
@@ -277,7 +287,7 @@ class ListFarm extends React.Component {
                   </> :
                   <>
                     <Typography variant="body2" component="div">{`${name}`} Staked</Typography>
-                    <Typography variant="body2" component="div" color="secondary">{logAmount(userInfo.amount, 18)}</Typography>
+                    <Typography variant="body2" component="div" color="secondary">{logAmount(userInfo.amount, decimals)}</Typography>
                     <Box sx={{display: "flex", alignItems: "center", gap: "5px"}}>
                       <Button
                         variant="outlined"
@@ -303,10 +313,6 @@ class ListFarm extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  login: state.login,
-  sell: state.sell,
-  sellTask: state.sellTask,
-  buy: state.buy,
-});
+})
 
-export default connect(mapStateToProps)(ListFarm);
+export default connect(mapStateToProps)(ListFarm)
