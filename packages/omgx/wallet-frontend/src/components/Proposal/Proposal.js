@@ -57,6 +57,14 @@ function Proposal({
         }
     }
 
+    const FormatDescription = ({description}) =>{
+        if(!!description.includes('@@')) {
+            let descList = description.split('@@');
+            return  <> {descList[0]} <a className={styles.href} target="_blank" rel="noopener noreferrer" href={descList[1]}>more details</a>  </>
+        } 
+        return <>{description}</>;
+    }
+
     return (<div
         className={styles.proposalCard}
 
@@ -75,7 +83,7 @@ function Proposal({
                 <div className={styles.proposalHeader}>
                     <div className={styles.title}>
                         <p>Proposal #{proposal.id}</p>
-                        <p className={styles.muted}>Title: {proposal.description}</p>
+                        <p className={styles.muted}>Title: <FormatDescription description={proposal.description} /></p>
                         <p className={styles.muted}>Status: {proposal.state}</p>
                         <p className={styles.muted}>Start L1 Block: {proposal.startBlock} &nbsp; &nbsp; End L1 Block: {proposal.endBlock}</p>
                         {proposal.state === 'Active' &&
@@ -151,4 +159,4 @@ function Proposal({
 }
 
 
-export default React.memo(Proposal);
+export default React.memo(Proposal)
