@@ -65,11 +65,11 @@ function Proposal({
             borderRadius: '12px'
         }}>
 
-        {proposal.state === 'Active' &&
+        {proposal.state !== 'Active' &&
             <div
                 onClick={() => {
-                    setDropDownBox(!dropDownBox);
-                    setDropDownBoxInit(false);
+                    setDropDownBox(!dropDownBox)
+                    setDropDownBoxInit(false)
                 }}
             >
                 <div className={styles.proposalHeader}>
@@ -78,36 +78,26 @@ function Proposal({
                         <p className={styles.muted}>Title: {proposal.description}</p>
                         <p className={styles.muted}>Status: {proposal.state}</p>
                         <p className={styles.muted}>Start L1 Block: {proposal.startBlock} &nbsp; &nbsp; End L1 Block: {proposal.endBlock}</p>
+                        {proposal.state === 'Active' &&
+                            <div style={{
+                                background: 'blue', 
+                                borderRadius: '8px',
+                                width: '100px',
+                                height: '25px',
+                                fontSize: '0.9em',
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'center'
+                            }}>VOTE</div>
+                        }
                     </div>
-                    <ExpandMoreIcon /> VOTE
-                </div>
-                <div className={styles.proposalContent}>
-                    <div className={styles.vote}>For: {proposal.forVotes}</div>
-                    <div className={styles.vote}>Against: {proposal.againstVotes}</div>
-                    <div className={styles.vote}>Abstain: {proposal.abstainVotes}</div>
-                    <div className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </div>
-                    <div className={styles.vote}>Total Votes: {proposal.totalVotes}</div>
-                </div>
-            </div>
-        }
-
-        {proposal.state !== 'Active' &&
-            <div
-            >
-                <div className={styles.proposalHeader}>
-                    <div className={styles.title}>
-                        <p>Proposal #{proposal.id}</p>
-                        <p className={styles.muted}>Title: {proposal.description}</p>
-                        <p className={styles.muted}>Status: {proposal.state}</p>
-                        <p className={styles.muted}>Start L1 Block: {proposal.startBlock} End L1 Block: {proposal.endBlock}</p>
+                    <div>
+                        <div className={styles.vote}>For: {proposal.forVotes}</div>
+                        <div className={styles.vote}>Against: {proposal.againstVotes}</div>
+                        <div className={styles.vote}>Abstain: {proposal.abstainVotes}</div>
+                        <div className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </div>
+                        <div className={styles.vote}>Total Votes: {proposal.totalVotes}</div>
                     </div>
-                </div>
-                <div className={styles.proposalContent}>
-                    <div className={styles.vote}>For: {proposal.forVotes}</div>
-                    <div className={styles.vote}>Against: {proposal.againstVotes}</div>
-                    <div className={styles.vote}>Abstain: {proposal.abstainVotes}</div>
-                    <div className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </div>
-                    <div className={styles.vote}>Total Votes: {proposal.totalVotes}</div>
                 </div>
             </div>
         }
@@ -130,7 +120,7 @@ function Proposal({
                 > Cast Vote For</Button>
                 <Button
                     type="primary"
-                    variant="contained"
+                    variant="outlined"
                     style={{
                         maxWidth: '180px',
                         padding: '15px 10px',
