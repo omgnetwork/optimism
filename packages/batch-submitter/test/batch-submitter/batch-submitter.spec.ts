@@ -378,7 +378,7 @@ describe('BatchSubmitter', () => {
         l2Provider.setL2BlockData({
           queueOrigin: QueueOrigin.L1ToL2,
         } as any)
-        const highGasPriceWei = BigNumber.from(200).mul(1_000_000_000)
+        const highGasPriceWei = BigNumber.from(600).mul(1_000_000_000)
         let getGasPriceCalled = false
         const l1ProviderMocked = {
           _isProvider: true,
