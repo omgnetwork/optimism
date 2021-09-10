@@ -34,56 +34,62 @@ import {
 
 import { checkVersion } from 'actions/serviceAction';
 
+import { closeAlert, closeError } from 'actions/uiAction';
+import { selectAlert, selectError } from 'selectors/uiSelector';
+
 import DepositModal from 'containers/modals/deposit/DepositModal';
 import TransferModal from 'containers/modals/transfer/TransferModal';
 import ExitModal from 'containers/modals/exit/ExitModal';
 
 import LedgerConnect from 'containers/modals/ledger/LedgerConnect';
 import AddTokenModal from 'containers/modals/addtoken/AddTokenModal';
+
+//Farm
 import FarmDepositModal from 'containers/modals/farm/FarmDepositModal';
 import FarmWithdrawModal from 'containers/modals/farm/FarmWithdrawModal';
+
+//DAO
+import DAO from 'containers/dao/Dao';
 import TransferDaoModal from 'containers/modals/dao/TransferDaoModal';
 import DelegateDaoModal from 'containers/modals/dao/DelegateDaoModal';
 import NewProposalModal from 'containers/modals/dao/NewProposalModal';
 
+import { fetchDaoBalance, fetchDaoVotes, fetchDaoProposals, getProposalThreshold } from 'actions/daoAction';
 
 //Wallet Functions
-import Status from 'containers/status/Status';
 import Account from 'containers/account/Account';
 import Transactions from 'containers/transactions/History';
 
 //NFT Example Page
 import NFT from 'containers/nft/Nft';
-import MobileHeader from 'components/mobileheader/MobileHeader';
-import MobileMenu from 'components/mobilemenu/MobileMenu';
 
-// Farm
-import Farm from 'containers/farm/Farm';
+import { useTheme } from '@material-ui/core/styles'
+import { Box, Container, useMediaQuery } from '@material-ui/core'
+import MainMenu from 'components/mainMenu/MainMenu'
+import FarmWrapper from 'containers/farm/FarmWrapper'
 
-// DAO
-import DAO from 'containers/dao/Dao';
+import Alert from 'components/alert/Alert';
 
-
-// import logo from 'images/omgx.png';
-import logo from 'images/logo-boba.svg';
-
-import * as styles from './Home.module.scss';
-import { fetchDaoBalance, fetchDaoVotes } from 'actions/daoAction';
-
-const POLL_INTERVAL = 5000; //milliseconds
+const POLL_INTERVAL = 5000 //milliseconds
 
 function Home () {
 
   const dispatch = useDispatch();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const errorMessage = useSelector(selectError);
+  const alertMessage = useSelector(selectAlert);
+
+  
 
   const [ mobileMenuOpen, setMobileMenuOpen ] = useState(false)
-  
-  const [ pageDisplay, setPageDisplay ] = useState("AccountNow");
-  
+
+  const pageDisplay = useSelector(selectModalState('page'))
   const depositModalState = useSelector(selectModalState('depositModal'))
   const transferModalState = useSelector(selectModalState('transferModal'))
   const exitModalState = useSelector(selectModalState('exitModal'))
-  
+
   const fast = useSelector(selectModalState('fast'))
   const token = useSelector(selectModalState('token'))
 
@@ -100,7 +106,10 @@ function Home () {
 
   const walletMethod = useSelector(selectWalletMethod())
   //const transactions = useSelector(selectlayer2Transactions, isEqual);
-  
+
+  const handleErrorClose=()=>dispatch(closeError());
+  const handleAlertClose=()=>dispatch(closeAlert());
+
   useEffect(() => {
     const body = document.getElementsByTagName('body')[0];
     mobileMenuOpen
@@ -112,7 +121,6 @@ function Home () {
   useEffect(() => {
     window.scrollTo(0, 0);
     dispatch(fetchDeposits());
-    setPageDisplay("AccountNow");
   }, [ dispatch ]);
 
   useInterval(() => {
@@ -130,38 +138,54 @@ function Home () {
 
   //get all account balances
   useInterval(() => {
-    dispatch(fetchBalances());
-    dispatch(addTokenList());
-    dispatch(fetchNFTs());
+    dispatch(fetchBalances())
+    dispatch(addTokenList())
+    dispatch(fetchNFTs())
 
     // get Dao balance / Votes
-    dispatch(fetchDaoBalance());
-    dispatch(fetchDaoVotes());
+    dispatch(fetchDaoBalance())
+    dispatch(fetchDaoVotes())
+    dispatch(fetchDaoProposals())
+    dispatch(getProposalThreshold())
   }, POLL_INTERVAL);
 
   useEffect(() => {
     checkVersion();
   }, [])
-  
-  const handleSetPage = async (page) => {
-    setPageDisplay(page)
-  }
 
   return (
-
     <>
-      
       <DepositModal  open={depositModalState}  token={token} fast={fast} />
       <TransferModal open={transferModalState} token={token} fast={fast} />
       <ExitModal     open={exitModalState}     token={token} fast={fast} />
-      
-      <AddTokenModal open={addTokenModalState} />
-      <FarmDepositModal open={farmDepositModalState} />
+
+      <AddTokenModal     open={addTokenModalState} />
+      <FarmDepositModal  open={farmDepositModalState} />
       <FarmWithdrawModal open={farmWithdrawModalState} />
 
       <TransferDaoModal open={tranferBobaDaoModalState} />
       <DelegateDaoModal open={delegateBobaDaoModalState} />
       <NewProposalModal open={proposalBobaDaoModalState} />
+
+      <Alert
+        type='error'
+        duration={0}
+        open={!!errorMessage}
+        onClose={handleErrorClose}
+        position={50}
+      >
+        {errorMessage}
+      </Alert>
+
+      <Alert
+        type='success'
+        duration={0}
+        open={!!alertMessage}
+        onClose={handleAlertClose}
+        position={0}
+      >
+        {alertMessage}
+      </Alert>
 
       <LedgerConnect
         open={walletMethod === 'browser'
@@ -170,61 +194,18 @@ function Home () {
         }
       />
 
-      <div className={styles.Home}>
-        <div className={styles.sidebar}>
-          <img className={styles.logo} src={logo} alt='omgx' />
-          <Status />
-        </div>
-        <div className={styles.main}>
-          <MobileHeader
-            mobileMenuOpen={mobileMenuOpen}
-            onHamburgerClick={()=>setMobileMenuOpen(open=>!open)}
-          />
-          <MobileMenu 
-            mobileMenuOpen={mobileMenuOpen}
-          />
-
+      <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
+          <MainMenu />
           {/* The Top SubMenu Bar, non-mobile */}
 
-          <div className={styles.secondtab}>
-            <h2
-              className={pageDisplay === "AccountNow" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("AccountNow")}}
-            >  
-              Wallet
-            </h2>
-            <h2
-              className={pageDisplay === "History" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("History")}}
-            >  
-              History
-            </h2>
-            <h2
-              className={pageDisplay === "Farm" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("Farm")}}
-            >  
-              Earn
-            </h2>
-            <h2
-              className={pageDisplay === "NFT" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("NFT")}}
-            >  
-              NFT
-            </h2>
-            <h2
-              className={pageDisplay === "DAO" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("DAO")}}
-            >  
-              DAO
-            </h2>
-          </div>
+        <Container maxWidth="lg">
           {pageDisplay === "AccountNow" &&
-          <>  
+          <>
             <Account/>
           </>
           }
           {pageDisplay === "History" &&
-          <>  
+          <>
             <Transactions/>
           </>
           }
@@ -232,13 +213,13 @@ function Home () {
             <NFT/>
           }
           {pageDisplay === "Farm" &&
-            <Farm/>
+            <FarmWrapper/>
           }
           {pageDisplay === "DAO" &&
             <DAO/>
           }
-        </div>
-      </div>
+        </Container>
+      </Box>
     </>
   );
 }
