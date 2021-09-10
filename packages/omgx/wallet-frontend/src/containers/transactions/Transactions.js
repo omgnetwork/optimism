@@ -19,7 +19,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Grid, Box } from '@material-ui/core';
 
 import moment from 'moment';
-import truncate from 'truncate-middle';
 
 import { selectLoading } from 'selectors/loadingSelector'
 
@@ -102,7 +101,7 @@ function Transactions({ searchHistory, transactions }) {
                 <Transaction
                   key={index}
                   title={`${chain} Hash: ${i.hash}`}
-                  time={moment.unix(i.timeStamp).format('lll')}
+                  time={time}
                   blockNumber={`Block ${i.blockNumber}`}
                   chain={`${chain} Chain`}
                   typeTX={`TX Type: ${metaData}`}

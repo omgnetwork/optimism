@@ -13,6 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 import React, { useState } from 'react'
+import {Typography} from '@material-ui/core'
+
 import { useDispatch } from 'react-redux'
 
 import { closeModal, openAlert, openError } from 'actions/uiAction'
@@ -22,6 +24,8 @@ import * as styles from './daoModal.module.scss'
 import Modal from 'components/modal/Modal'
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
+
+import { WrapperActionsModal } from 'components/modal/Modal.styles'
 import { createDaoProposal } from 'actions/daoAction'
 
 function NewProposalModal({ open }) {
@@ -45,7 +49,7 @@ function NewProposalModal({ open }) {
 
     const submit = async () => {
         let res = await dispatch(createDaoProposal({ votingThreshold, text: proposeText }));
-    
+
         if (res) {
             dispatch(openAlert(`Proposal has been submitted!`))
             handleClose()
@@ -64,28 +68,28 @@ function NewProposalModal({ open }) {
     };
 
     return (
-        <Modal open={open}
+        <Modal
+            open={open}
             onClose={handleClose}
-            width="400px"
+            maxWidth="md"
         >
-            <h2>New Proposal</h2>
+            <Typography variant="h2">New Proposal</Typography>
             <div className={styles.modalContent}>
                 <div className={styles.proposalAction}>
-
                     <select
                         className={styles.actionPicker}
                         onChange={onActionChange}
                     >
                         <option>Select Proposal Type...</option>
                         <option value="change-threshold">Change Voting Threshold</option>
-                        <option value="text-proposal">Propose text</option>
+                        <option value="text-proposal">Freeform Text Proposal</option>
                     </select>
                     {action === 'change-threshold' && <Input
                         label="Enter voting threshold"
                         placeholder="0000"
                         value={votingThreshold}
                         type="number"
-                        onChange={(i) => setVotingThreshold(i.target.value)}
+                        onChange={(i)=>setVotingThreshold(i.target.value)}
                         variant="standard"
                         newStyle
                     />
@@ -93,7 +97,7 @@ function NewProposalModal({ open }) {
                     {action === 'text-proposal' && <Input
                         label="Enter proposal text"
                         value={proposeText}
-                        onChange={(i) => setProposeText(i.target.value)}
+                        onChange={(i)=>setProposeText(i.target.value)}
                         variant="standard"
                         newStyle
                     />
@@ -101,25 +105,26 @@ function NewProposalModal({ open }) {
                 </div>
             </div>
 
-            <div className={styles.buttons}>
+            <WrapperActionsModal>
                 <Button
                     onClick={handleClose}
-                    type='secondary'
-                    className={styles.button}
+                    color='neutral'
+                    size="large"
                 >
                     CANCEL
                 </Button>
 
                 <Button
-                    className={styles.button}
                     onClick={() => { submit({ useLedgerSign: false }) }}
-                    type='primary'
+                    color='primary'
+                    size="large"
+                    variant="contained"
                     // loading={loading} // TODO: Implement loading base on the action trigger
                     disabled={disabledProposal()}
                 >
                     PROPOSE
                 </Button>
-            </div>
+            </WrapperActionsModal>
         </Modal >
     )
 }

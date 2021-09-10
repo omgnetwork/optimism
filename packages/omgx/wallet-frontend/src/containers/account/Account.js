@@ -26,7 +26,6 @@ import { selectTransactions } from 'selectors/transactionSelector'
 
 import ListAccount from 'components/listAccount/listAccount'
 
-import { logAmount } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
 import * as S from './Account.styles'
@@ -41,7 +40,6 @@ import TabPanel from 'components/tabs/TabPanel'
 import Drink from '../../images/backgrounds/drink.png'
 import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon'
 
-import { openError } from 'actions/uiAction'
 import PendingTransaction from './PendingTransaction'
 import useInterval from 'util/useInterval'
 

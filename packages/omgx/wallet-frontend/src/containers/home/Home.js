@@ -34,6 +34,9 @@ import {
 
 import { checkVersion } from 'actions/serviceAction';
 
+import { closeAlert, closeError } from 'actions/uiAction';
+import { selectAlert, selectError } from 'selectors/uiSelector';
+
 import DepositModal from 'containers/modals/deposit/DepositModal';
 import TransferModal from 'containers/modals/transfer/TransferModal';
 import ExitModal from 'containers/modals/exit/ExitModal';
@@ -51,7 +54,7 @@ import TransferDaoModal from 'containers/modals/dao/TransferDaoModal';
 import DelegateDaoModal from 'containers/modals/dao/DelegateDaoModal';
 import NewProposalModal from 'containers/modals/dao/NewProposalModal';
 
-import { fetchDaoBalance, fetchDaoVotes, fetchDaoProposals } from 'actions/daoAction';
+import { fetchDaoBalance, fetchDaoVotes, fetchDaoProposals, getProposalThreshold } from 'actions/daoAction';
 
 //Wallet Functions
 import Account from 'containers/account/Account';
@@ -65,18 +68,24 @@ import { Box, Container, useMediaQuery } from '@material-ui/core'
 import MainMenu from 'components/mainMenu/MainMenu'
 import FarmWrapper from 'containers/farm/FarmWrapper'
 
+import Alert from 'components/alert/Alert';
+
 const POLL_INTERVAL = 5000 //milliseconds
 
-function Home ({ light, setLight }) {
+function Home () {
 
   const dispatch = useDispatch();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  const errorMessage = useSelector(selectError);
+  const alertMessage = useSelector(selectAlert);
+
+  
+
   const [ mobileMenuOpen, setMobileMenuOpen ] = useState(false)
 
-  const [ pageDisplay, setPageDisplay ] = useState("AccountNow");
-
+  const pageDisplay = useSelector(selectModalState('page'))
   const depositModalState = useSelector(selectModalState('depositModal'))
   const transferModalState = useSelector(selectModalState('transferModal'))
   const exitModalState = useSelector(selectModalState('exitModal'))
@@ -98,6 +107,9 @@ function Home ({ light, setLight }) {
   const walletMethod = useSelector(selectWalletMethod())
   //const transactions = useSelector(selectlayer2Transactions, isEqual);
 
+  const handleErrorClose=()=>dispatch(closeError());
+  const handleAlertClose=()=>dispatch(closeAlert());
+
   useEffect(() => {
     const body = document.getElementsByTagName('body')[0];
     mobileMenuOpen
@@ -109,7 +121,6 @@ function Home ({ light, setLight }) {
   useEffect(() => {
     window.scrollTo(0, 0);
     dispatch(fetchDeposits());
-    setPageDisplay("AccountNow");
   }, [ dispatch ]);
 
   useInterval(() => {
@@ -135,15 +146,12 @@ function Home ({ light, setLight }) {
     dispatch(fetchDaoBalance())
     dispatch(fetchDaoVotes())
     dispatch(fetchDaoProposals())
+    dispatch(getProposalThreshold())
   }, POLL_INTERVAL);
 
   useEffect(() => {
     checkVersion();
   }, [])
-
-  const handleSetPage = async (page) => {
-    setPageDisplay(page)
-  }
 
   return (
     <>
@@ -159,6 +167,26 @@ function Home ({ light, setLight }) {
       <DelegateDaoModal open={delegateBobaDaoModalState} />
       <NewProposalModal open={proposalBobaDaoModalState} />
 
+      <Alert
+        type='error'
+        duration={0}
+        open={!!errorMessage}
+        onClose={handleErrorClose}
+        position={50}
+      >
+        {errorMessage}
+      </Alert>
+
+      <Alert
+        type='success'
+        duration={0}
+        open={!!alertMessage}
+        onClose={handleAlertClose}
+        position={0}
+      >
+        {alertMessage}
+      </Alert>
+
       <LedgerConnect
         open={walletMethod === 'browser'
           ? ledgerConnectModalState
@@ -167,7 +195,7 @@ function Home ({ light, setLight }) {
       />
 
       <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
-          <MainMenu pageDisplay={pageDisplay} handleSetPage={handleSetPage} light={light} setLight={setLight} />
+          <MainMenu />
           {/* The Top SubMenu Bar, non-mobile */}
 
         <Container maxWidth="lg">

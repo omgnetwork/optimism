@@ -26,7 +26,7 @@ import Modal from 'components/modal/Modal'
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
 
-function TransferDaoModal({ open }) {
+function TransferDaoModal({ open = false }) {
 
     const [recipient, setRecipient] = useState('')
     const [amount, setAmount] = useState('')
@@ -53,7 +53,7 @@ function TransferDaoModal({ open }) {
     const disabledTransfer = amount <= 0 || !recipient;
 
     return (
-        <Modal open={open}>
+        <Modal open={open} onClose={handleClose}>
             <Typography variant="h2">Transfer Boba</Typography>
             <Input
                 label='To Address'
