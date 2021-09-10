@@ -17,7 +17,6 @@ export VAULT_ADDR="https://127.0.0.1:8900"
 export VAULT_CACERT="$CA_CERT"
 
 function create_config {
-
 	cat > "$CONFIG" << EOF
 
 [req]
@@ -61,7 +60,6 @@ EOF
 }
 
 function gencerts {
-
     create_config
 	openssl req \
 	-new \
@@ -162,7 +160,7 @@ else
     vault secrets list
 fi
 
-if [ -n "$TEST" ]; then
+if [ "$TEST" == "true" ]; then
     echo "Dying."
 else
     echo "Don't exit until vault dies."

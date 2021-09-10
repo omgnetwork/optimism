@@ -164,7 +164,7 @@ export const run = async () => {
     // it takes precedence over a sequencer private key
     // this means all eth transactions go through the vault
     if (SEQUENCER_ADDRESS) {
-      console.log('VAULT IN BATCH SUBMITTER ENABLED for sequencer')
+      logger.info('Sequencer in Vault')
       return { signer: undefined, address: SEQUENCER_ADDRESS }
     } else if (SEQUENCER_PRIVATE_KEY) {
       console.log('SEQUENCER_PRIVATE_KEY')
@@ -206,7 +206,7 @@ export const run = async () => {
     // it takes precedence over a sequencer private key
     // this means all eth transactions go through the vault
     if (PROPOSER_ADDRESS) {
-      console.log('VAULT IN BATCH SUBMITTER ENABLED')
+      logger.info('Proposer in Vault')
       return { address: PROPOSER_ADDRESS, signer: undefined }
     } else if (PROPOSER_PRIVATE_KEY) {
       return {

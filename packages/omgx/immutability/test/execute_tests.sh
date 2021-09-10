@@ -2,7 +2,17 @@
 
 trap 'catch' EXIT
 catch() {
-  echo "Done with tests."
+  if [ "$RUN_TEST" == "true" ]; then
+    echo "Done with tests."
+	else
+			echo "Not exiting, waiting for Vault pid to exit."
+      ps $(pidof vault) -o pid | grep -w $(pidof vault) >/dev/null 2>&1
+      while [ "$?" == "0" ]
+      do
+        sleep 10
+        ps $(pidof vault) -o pid | grep -w $(pidof vault) >/dev/null 2>&1
+      done
+	fi
 }
 
 function test_banner {
@@ -10,7 +20,7 @@ function test_banner {
 }
 
 function test_plugin {
-	if [ -n "$RUN_TEST" ]; then
+	if [ "$RUN_TEST" == "true" ]; then
     test_banner
 		test_banner
 		echo "SMOKE TEST BASIC WALLET FUNCTIONALITY"
@@ -25,7 +35,6 @@ function test_plugin {
 		/vault/test/smoke.encode_asb.sh
 	else
 			echo "Skipping tests."
-			wait $VAULT_PID
 	fi
 }
 

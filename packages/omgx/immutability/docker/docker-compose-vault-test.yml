@@ -61,6 +61,12 @@ services:
        ./batches.sh
 
   vault:
+    image: omgx/vault
+    ports:
+      - "127.0.0.1:8200:8200"
+    build:
+      context: ..
+      dockerfile: ./ops/docker/Dockerfile.omgx_vault
     user: root
     deploy:
        replicas: 1
@@ -69,25 +75,28 @@ services:
       VAULT_CACERT: /vault/config/ca.crt
       RUN_TEST: "true"
       TEST: "true"
+      # RUN_TEST: "false"
+      # TEST: "false"
       URL: http://deployer:8081/addresses.json
     volumes:
-      # - "./docker/immutability/ca/certs/:/etc/ssl/certs/"
+      - "/tmp/vault_auth:/vault/config:rw"
       - "./../packages/omgx/immutability/test:/vault/test"
       - "./vault/data/immutability/config:/vault/config:rw"
     entrypoint:
       - "/bin/sh"
       - -ec
       - |
-        apk add --update --no-cache make gcc g++
-        apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
+        apk add --quiet --no-progress --update --no-cache make gcc g++
+        apk add --quiet --no-progress --update --no-cache python3 && ln -sf python3 /usr/bin/python
         python3 -m ensurepip
         pip3 install --no-cache --upgrade pip setuptools
-        apk add --update nodejs npm
+        apk add --quiet --no-progress --update nodejs npm
         cd /vault/test && npm install
+        cat /vault/vault.sh
         nohup /vault/vault.sh > /tmp/vault.out &
         while [ $$(cat /tmp/vault.out | grep -c "Success! Enabled the immutability-eth-plugin secrets engine at: immutability-eth-plugin/") -ne 1 ];
         do
-            sleep 1
+            sleep 10
             echo "Waiting for Vault..."
         done
         export VAULT_TOKEN=$$(cat /vault/config/unseal.json | jq -r .root_token)
@@ -106,4 +115,4 @@ services:
          # cleanup
         rm /vault/test/tokens_and_accounts.sh
         echo "Executing tests"
-        . /vault/test/execute_tests.sh
+        /vault/test/execute_tests.sh

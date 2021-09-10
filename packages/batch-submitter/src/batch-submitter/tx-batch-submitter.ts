@@ -158,6 +158,8 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     this.logger.info(
       'Getting batch start and end for transaction batch submitter...'
     )
+    console.log('_getBatchStartAndEnd')
+    console.log(this)
     const startBlock =
       (await this.chainContract.getTotalElements()).toNumber() +
       this.blockOffset

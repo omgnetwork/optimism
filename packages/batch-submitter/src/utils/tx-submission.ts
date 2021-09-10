@@ -57,6 +57,8 @@ export const submitTransactionWithYNATM = async (
   const sendTxAndWaitForReceipt = async (
     gasPrice
   ): Promise<TransactionReceipt> => {
+    console.log('sendTxAndWaitForReceipt')
+    console.log(call)
     let tx
     //if (batchSigner.address === undefined) {
     if (call.type === 'AppendQueueBatch') {
