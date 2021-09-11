@@ -26,9 +26,9 @@ import {
   addTokenList,
   fetchNFTs,
   fetchExits,
-  fetchDeposits,
-  fetchEthStats,
-  checkPendingDepositStatus,
+  //fetchDeposits,
+  //fetchEthStats,
+  //checkPendingDepositStatus,
   checkPendingExitStatus
 } from 'actions/networkAction';
 
@@ -118,15 +118,15 @@ function Home () {
   // calls only on boot
   useEffect(() => {
     window.scrollTo(0, 0)
-    dispatch(fetchDeposits())
+    //dispatch(fetchDeposits())
   }, [ dispatch ]);
 
   useInterval(() => {
     batch(() => {
       // infura call
-      dispatch(fetchEthStats());
-      dispatch(checkPendingDepositStatus());
-      dispatch(checkPendingExitStatus());
+      //dispatch(fetchEthStats()); not defined in networkservices?
+      //dispatch(checkPendingDepositStatus()); not defined in networkservices?
+      //dispatch(checkPendingExitStatus());
 
       // watcher only calls
       dispatch(checkWatcherStatus());

@@ -23,9 +23,9 @@ export function checkWatcherStatus() {
   return createAction('STATUS/GET', () => networkService.checkStatus())
 }
 
-export function fetchEthStats() {
-  return createAction('ETHSTATS/GET', () => networkService.getEthStats())
-}
+// export function fetchEthStats() {
+//   return createAction('ETHSTATS/GET', () => networkService.getEthStats())
+// }
 
 export function fetchBalances() {
   return createAction('BALANCE/GET', () => networkService.getBalances())
@@ -47,21 +47,21 @@ export function fetchTransactions() {
   )
 }
 
-export function fetchDeposits() {
-  return createAction('DEPOSIT/GETALL', () => networkService.getDeposits())
-}
+// export function fetchDeposits() {
+//   return createAction('DEPOSIT/GETALL', () => networkService.getDeposits())
+// }
 
-export function checkPendingDepositStatus() {
-  return createAction('DEPOSIT/CHECKALL', () =>
-    networkService.checkPendingDepositStatus()
-  )
-}
+// export function checkPendingDepositStatus() {
+//   return createAction('DEPOSIT/CHECKALL', () =>
+//     networkService.checkPendingDepositStatus()
+//   )
+// }
 
-export function checkPendingExitStatus() {
-  return createAction('EXIT/CHECKALL', () =>
-    networkService.checkPendingExitStatus()
-  )
-}
+// export function checkPendingExitStatus() {
+//   return createAction('EXIT/CHECKALL', () =>
+//     networkService.checkPendingExitStatus()
+//   )
+// }
 
 export function fetchExits() {
   return createAction('EXIT/GETALL', () => networkService.getExits())

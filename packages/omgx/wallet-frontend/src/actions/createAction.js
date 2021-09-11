@@ -23,32 +23,18 @@ export function createAction (key, asyncAction) {
     
     try {
       const response = await asyncAction()
-      console.log("response",response)
-      if(response.hasOwnProperty('message') && response.hasOwnProperty('code')) { 
-        //an error has occurred
-        //for example response['code'] === 4001
-        //= user denied transaction signature in MetaMask
+      //deal with metamask errors
+      if(response && response.hasOwnProperty('message') && response.hasOwnProperty('code')) { 
         dispatch({ type: `UI/ERROR/UPDATE`, payload: response.message })
         return false
       }
       dispatch({ type: `${key}/SUCCESS`, payload: response })
       return true
     } catch (error) {
-      // cancel request loading state
+      console.log("createAction error:",error)
+      //dispatch({ type: `UI/ERROR/UPDATE`, payload: error.message })
       dispatch({ type: `${key}/ERROR` })
-
-      const _error = error instanceof WebWalletError
-        ? error
-        : new WebWalletError({
-          originalError: error,
-          customErrorMessage: 'Something went wrong and none of the preconfigured error messages are relevant',
-          reportToSentry: true,
-          reportToUi: true
-        });
-
-      // perform necessary reports
-      _error.report(dispatch)
-      return false;
+      return false
     }
-  };
+  }
 }
