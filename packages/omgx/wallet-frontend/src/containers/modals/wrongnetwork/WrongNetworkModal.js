@@ -56,11 +56,11 @@ function WrongNetworkModal ({ open, onClose }) {
       maxWidth="sm"
     >
       <Typography variant="h2" gutterBottom>
-        Wrong Network
+        Please Change Network
       </Typography>
 
       <Typography variant="body1">
-        MetaMask is set to the wrong network. Please switch MetaMask to "{textLabel}" to continue.
+        To use "{textLabel}", please switch MetaMask to that network.
       </Typography>
 
       <Box display="flex" sx={{ flexDirection: 'column', alignItems: 'center', mt: 3 }}>

@@ -16,18 +16,20 @@ limitations under the License. */
 import { WebWalletError } from 'services/errorService';
 
 export function createAction (key, asyncAction) {
+  
   return async function (dispatch) {
+    
     dispatch({ type: `${key}/REQUEST` })
+    
     try {
       const response = await asyncAction()
-      //console.log("Async action:",response)
-
-      if(response.hasOwnProperty('code')) {
-        if(response['code'] === 4001) {
-          //user canceled TX
-          dispatch({ type: `${key}/REJECTED`, payload: response })
-          return false
-        }
+      console.log("response",response)
+      if(response.hasOwnProperty('message') && response.hasOwnProperty('code')) { 
+        //an error has occurred
+        //for example response['code'] === 4001
+        //= user denied transaction signature in MetaMask
+        dispatch({ type: `UI/ERROR/UPDATE`, payload: response.message })
+        return false
       }
       dispatch({ type: `${key}/SUCCESS`, payload: response })
       return true

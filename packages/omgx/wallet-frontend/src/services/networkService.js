@@ -40,7 +40,7 @@ import {
   updateSignatureStatus_depositTRAD
 } from 'actions/signAction'
 
-import { WebWalletError } from 'services/errorService'
+//import { WebWalletError } from 'services/errorService'
 
 //Base contracts
 import L1StandardBridgeJson from '../deployment/artifacts/optimistic-ethereum/OVM/bridge/tokens/OVM_L1StandardBridge.sol/OVM_L1StandardBridge.json'
@@ -592,13 +592,6 @@ class NetworkService {
         )
 
       }
-
-/*
-  this.comp = null
-  this.delegate = null
-  this.delegator = null
-  this.timelock = null
-*/
 
       this.bindProviderListeners()
 
@@ -1205,15 +1198,12 @@ class NetworkService {
         layer2: orderBy(layer2Balances, (i) => i.currency),
       }
     } catch (error) {
-      throw new WebWalletError({
-        originalError: error,
-        reportToSentry: false,
-        reportToUi: false,
-      })
+      return error
     }
   }
 
   //Move ETH from L1 to L2 using the standard deposit system
+  //should have ok error handling
   depositETHL2 = async (value = '1', gasPrice) => {
 
     updateSignatureStatus_depositTRAD(false)
@@ -1245,12 +1235,12 @@ class NetworkService {
 
       return l2Receipt
     } catch(error) {
-      console.log(error)
       return error
     }
   }
 
   //Transfer funds from one account to another, on the L2
+  //updated with better error handling
   async transfer(address, value, currency) {
     try {
       //any old ERC20 json will do....
@@ -1259,20 +1249,8 @@ class NetworkService {
         parseEther(value.toString())
       )
       await tx.wait()
-      //console.log("TX return:", tx)
       return tx
     } catch (error) {
-      console.log('User canceled, for example?')
-      //throw new Error(error.message)
-      // throw new WebWalletError({
-      //   originalError: error,
-      //   customErrorMessage: 'Could not reset allowance for ERC20.',
-      //   reportToSentry: false,
-      //   reportToUi: true,
-      // })
-      //console.log('User canceled, for example?')
-      //throw new Error(error.message)
-      console.log(error)
       return error
     }
   }
@@ -1302,12 +1280,7 @@ class NetworkService {
       )
       return allowance.toString()
     } catch (error) {
-      throw new WebWalletError({
-        originalError: error,
-        customErrorMessage: 'Could not check ERC20 allowance.',
-        reportToSentry: false,
-        reportToUi: true,
-      })
+      return error
     }
   }
 
@@ -1352,8 +1325,6 @@ class NetworkService {
   ) {
 
     try {
-
-      console.log("approveERC20_L1LP")
 
       const ERC20Contract = new ethers.Contract(
         currencyAddress,
@@ -1428,12 +1399,7 @@ class NetworkService {
       await approveStatus.wait()
       return true
     } catch (error) {
-      throw new WebWalletError({
-        originalError: error,
-        customErrorMessage: 'Could not reset allowance for ERC20.',
-        reportToSentry: false,
-        reportToUi: true,
-      })
+      return error
     }
   }
 
@@ -1480,13 +1446,7 @@ class NetworkService {
 
       return l2Receipt
     } catch (error) {
-      throw new WebWalletError({
-        originalError: error,
-        customErrorMessage:
-          'Could not deposit ERC20. Please check to make sure you have enough in your wallet to cover both the amount you want to deposit and the associated gas fees.',
-        reportToSentry: false,
-        reportToUi: true,
-      })
+      return error
     }
   }
 
@@ -1757,8 +1717,7 @@ class NetworkService {
       )
       await addLiquidityTX.wait()
       return true
-    } catch (err) {
-      console.log(err)
+    } catch (error) {
       return false
     }
   }
@@ -1776,7 +1735,7 @@ class NetworkService {
       )
       await withdrawRewardTX.wait()
       return true
-    } catch (err) {
+    } catch (error) {
       return false
     }
   }
@@ -1794,7 +1753,7 @@ class NetworkService {
       )
       await withdrawRewardTX.wait()
       return true
-    } catch (err) {
+    } catch (error) {
       return false
     }
   }
@@ -1817,7 +1776,7 @@ class NetworkService {
       )
       await withdrawLiquidityTX.wait()
       return true
-    } catch (err) {
+    } catch (error) {
       return false
     }
   }
@@ -1845,6 +1804,7 @@ class NetworkService {
       depositTX.hash
     )
     console.log(' got L1->L2 message hash', l1ToL2msgHash)
+    
     const l2Receipt = await this.watcher.getL2TransactionReceipt(l1ToL2msgHash)
     console.log(' completed swap-on ! L2 tx hash:', l2Receipt.transactionHash)
 
@@ -1990,9 +1950,9 @@ class NetworkService {
           slow: Math.max(medianEstimate / 2, 1000000000),
           normal: medianEstimate,
           fast: medianEstimate * 5
-        };
+        }
       } catch (error) {
-        //
+        return error
       }
     }
 
@@ -2016,7 +1976,7 @@ class NetworkService {
       return { balance: formatEther(balance) }
     } catch (error) {
       console.log('Error: DAO Balance', error)
-      throw new Error(error.message)
+      return error
     }
   }
 
@@ -2028,7 +1988,7 @@ class NetworkService {
       return { votes: formatEther(votes) }
     } catch (error) {
       console.log('Error: DAO Votes', error)
-      throw new Error(error.message);
+      return error
     }
   }
 
@@ -2040,7 +2000,7 @@ class NetworkService {
       return tx
     } catch (error) {
       console.log('Error: DAO Transfer', error)
-      throw new Error(error.message);
+      return error
     }
   }
 
@@ -2052,7 +2012,7 @@ class NetworkService {
       return tx
     } catch (error) {
       console.log('Error: DAO Delegate', error)
-      throw new Error(error.message)
+      return error
     }
   }
 
@@ -2070,8 +2030,8 @@ class NetworkService {
         return { threshold: 0 };
       }
     } catch (error) {
-      console.log(error);
-      throw new Error(error.message);
+      console.log('Error: DAO getProposalThreshold', error)
+      return error
     }
   }
 
@@ -2106,8 +2066,8 @@ class NetworkService {
       )
       return res;
     } catch (error) {
-      console.log(error);
-      throw new Error(error.message);
+      console.log('Error: createProposal',error)
+      return error
     }
   }
 
@@ -2181,8 +2141,8 @@ class NetworkService {
       }
       return { proposalList }
     } catch (error) {
-      console.log(error)
-      throw new Error(error.message)
+      console.log('Error: fetchProposals', error)
+      return error
     }
   }
 
@@ -2191,14 +2151,16 @@ class NetworkService {
     try {
       
       const delegateCheck = await this.delegate.attach(this.delegator.address);
+      
       let res = delegateCheck.castVote(id, userVote, {
         gasPrice: 15000000,
         gasLimit: 8000000
-      });
-      return res;
+      })
+      
+      return res
     } catch(error) {
-      console.log('Error: cast vote', error);
-      throw new Error(error.message);
+      console.log('Error: castProposalVote', error)
+      return error
     }
   }
 

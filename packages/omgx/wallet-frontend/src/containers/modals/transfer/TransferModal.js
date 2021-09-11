@@ -17,6 +17,7 @@ import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { transfer } from 'actions/networkAction'
+import networkService from 'services/networkService'
 
 import { closeModal, openAlert, openError } from 'actions/uiAction'
 import { selectLoading } from 'selectors/loadingSelector'
@@ -25,7 +26,6 @@ import Button from 'components/button/Button'
 import Modal from 'components/modal/Modal'
 
 import { amountToUsd, logAmount } from 'util/amountConvert'
-import networkService from 'services/networkService';
 
 import Input from 'components/input/Input'
 import { selectLookupPrice } from 'selectors/lookupSelector'
@@ -46,7 +46,7 @@ function TransferModal ({ open, token }) {
 
   const lookupPrice = useSelector(selectLookupPrice);
 
-  const theme = useTheme();
+  const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   async function submit () {
@@ -57,12 +57,11 @@ function TransferModal ({ open, token }) {
     ) {
       try {
         const transferResponse = await dispatch(transfer(recipient, value, token.address))
-        //console.log("transferResponse",transferResponse)
-        if (transferResponse /*true if no error*/) {
+        if (transferResponse) {
           dispatch(openAlert('Transaction submitted'))
           handleClose()
         } else {
-          dispatch(openError('User rejected signature or other error'))
+          //error handled elsewhere
           handleClose()
         }
       } catch (err) {
