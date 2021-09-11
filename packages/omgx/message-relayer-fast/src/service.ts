@@ -405,7 +405,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         selectedEvent.blockNumber
       )
       // alert if two SCC events are not the same
-      if (isEqual(selectedEvent, SCCEvent[0])) {
+      if (!isEqual(selectedEvent, SCCEvent[0])) {
         this.logger.warn('Found inconsistent SCC event', {
           prevSCCEvent: selectedEvent,
           newSCCEvent: SCCEvent
