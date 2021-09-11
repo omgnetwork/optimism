@@ -394,7 +394,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           txIndex < prevTotalElements + batchSize
         )
       })
-      // No event find
+      // No event found
       if (selectedEvent === undefined) {
         return undefined
       }
