@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import { WebWalletError } from 'services/errorService';
+//import { WebWalletError } from 'services/errorService';
 
 export function createAction (key, asyncAction) {
   return async function (dispatch) {
@@ -24,19 +24,20 @@ export function createAction (key, asyncAction) {
       return true;
     } catch (error) {
       // cancel request loading state
-      dispatch({ type: `${key}/ERROR` });
+      dispatch({ type: `${key}/ERROR` })
+      console.log("createAction error:", error)
 
-      const _error = error instanceof WebWalletError
-        ? error
-        : new WebWalletError({
-          originalError: error,
-          customErrorMessage: 'Something went wrong and none of the preconfigured error messages are relevant',
-          reportToSentry: true,
-          reportToUi: true
-        });
+      // const _error = error instanceof WebWalletError
+      //   ? error
+      //   : new WebWalletError({
+      //     originalError: error,
+      //     customErrorMessage: 'Something went wrong and none of the preconfigured error messages are relevant',
+      //     reportToSentry: true,
+      //     reportToUi: true
+      //   });
 
-      // perform necessary reports
-      _error.report(dispatch);
+      // // perform necessary reports
+      // _error.report(dispatch);
       return false;
     }
   };

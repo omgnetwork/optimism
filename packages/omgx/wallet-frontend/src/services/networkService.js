@@ -609,14 +609,14 @@ class NetworkService {
     }
   }
 
-  async checkStatus() {
-    return {
-      connection: true,
-      byzantine: false,
-      watcherSynced: true,
-      lastSeenBlock: 0,
-    }
-  }
+  // async checkStatus() {
+  //   return {
+  //     connection: true,
+  //     byzantine: false,
+  //     watcherSynced: true,
+  //     lastSeenBlock: 0,
+  //   }
+  // }
 
   async addL2Network() {
     
@@ -2047,6 +2047,9 @@ class NetworkService {
   // Proposal Create Threshold
 
   async getProposalThreshold() {
+
+    if(this.masterSystemConfig !== 'rinkeby' || this.L1orL2 !== 'L2') return
+      
     try {
       // get the threshold proposal only in case of L2
       if(this.L1orL2 === 'L2') { 
