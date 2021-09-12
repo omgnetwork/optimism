@@ -3,6 +3,7 @@ import { Contract, ethers, Wallet, BigNumber, providers } from 'ethers'
 import * as rlp from 'rlp'
 import { MerkleTree } from 'merkletreejs'
 import fetch from 'node-fetch';
+import { isEqual } from 'lodash';
 
 /* Imports: Internal */
 import { fromHexString, sleep } from '@eth-optimism/core-utils'
@@ -348,15 +349,15 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           )
 
           // Remove any events from the cache for batches that should've been processed by now.
-	  const oldSize = this.state.eventCache.length
-          this.state.eventCache = this.state.eventCache.filter((event) => {
-            return event.args._batchIndex > lastProcessedBatch.batch.batchIndex
+          const oldSize = this.state.eventCache.length
+            this.state.eventCache = this.state.eventCache.filter((event) => {
+              return event.args._batchIndex > lastProcessedBatch.batch.batchIndex
           })
-	  const newSize = this.state.eventCache.length
-	  this.logger.info("Trimmed eventCache", {
-	    oldSize,
-	    newSize,
-	  })
+          const newSize = this.state.eventCache.length
+          this.logger.info("Trimmed eventCache", {
+            oldSize,
+            newSize,
+          })
         }
 
         this.logger.info(
@@ -382,10 +383,10 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       }
     | undefined
   > {
-    const getStateBatchAppendedEventForIndex = (
+    const getStateBatchAppendedEventForIndex = async (
       txIndex: number
-    ): ethers.Event => {
-      return this.state.eventCache.find((cachedEvent) => {
+    ): Promise <ethers.Event> => {
+      const selectedEvent = this.state.eventCache.find((cachedEvent) => {
         const prevTotalElements = cachedEvent.args._prevTotalElements.toNumber()
         const batchSize = cachedEvent.args._batchSize.toNumber()
 
@@ -395,6 +396,24 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           txIndex < prevTotalElements + batchSize
         )
       })
+      // No event found
+      if (selectedEvent === undefined) {
+        return undefined
+      }
+      // query the new SCC event. event.args._extraData in eventCache might be wrong
+      const SCCEvent: ethers.Event[] = await this.state.OVM_StateCommitmentChain.queryFilter(
+        this.state.OVM_StateCommitmentChain.filters.StateBatchAppended(),
+        selectedEvent.blockNumber,
+        selectedEvent.blockNumber
+      )
+      // alert if two SCC events are not the same
+      if (!isEqual(selectedEvent, SCCEvent[0])) {
+        this.logger.warn('Found inconsistent SCC event', {
+          prevSCCEvent: selectedEvent,
+          newSCCEvent: SCCEvent
+        })
+      }
+      return SCCEvent[0]
     }
 
     let startingBlock = this.state.lastQueriedL1Block
@@ -426,12 +445,12 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
 
       // We need to stop syncing early once we find the event we're looking for to avoid putting
       // *all* events into memory at the same time. Otherwise we'll get OOM killed.
-      if (getStateBatchAppendedEventForIndex(height) !== undefined) {
+      if (await getStateBatchAppendedEventForIndex(height) !== undefined) {
         break
       }
     }
 
-    const event = getStateBatchAppendedEventForIndex(height)
+    const event = await getStateBatchAppendedEventForIndex(height)
     if (event === undefined) {
       return undefined
     }
