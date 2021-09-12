@@ -46,6 +46,8 @@ function ProposalList({balance}) {
     let totalNumberOfPages = Math.ceil(orderedProposals.length / PER_PAGE);
     if (totalNumberOfPages === 0) totalNumberOfPages = 1
 
+    console.log(paginatedProposals);
+
     return <>
         <div className={styles.containerAction}>
             <p className={styles.listTitle}>Proposal List</p>

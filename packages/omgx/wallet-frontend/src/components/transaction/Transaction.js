@@ -52,12 +52,12 @@ function Transaction({
   const chainLink = () => {
     let network = nw[currentNetwork]
     if (!!network && !!network[oriChain]) {
-      if(oriChain === 'L1') {
+      if (oriChain === 'L1') {
         //go to etherscan
         return `${network[oriChain].transaction}${oriHash}`;
       } else {
         //the boba blockexplorer
-        return `${network[oriChain].transaction}${oriHash}?network=${currentNetwork[0].toUpperCase()+currentNetwork.slice(1)}`;
+        return `${network[oriChain].transaction}${oriHash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
       }
     }
     return '';
@@ -70,7 +70,7 @@ function Transaction({
     }
 
     let prefix = 'L2'
-    if( oriChain === 'L2') prefix = 'L1'
+    if (oriChain === 'L2') prefix = 'L1'
 
     return (
 
@@ -88,24 +88,24 @@ function Transaction({
               styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
           >
             <Grid className={styles.dropDownContent} container spacing={1}>
-              <div className={styles.mutedMI}>
+              <Typography variant="body3" className={styles.muted}>
                 {prefix} Hash:&nbsp;
-                  <a className={styles.href} href={detail.txLink} target="_blank" rel="noopener noreferrer">
-                    {detail.hash}
-                  </a>
-              </div>
+                <a className={styles.href} href={detail.txLink} target="_blank" rel="noopener noreferrer">
+                  {detail.hash}
+                </a>
+              </Typography>
             </Grid>
             <Grid className={styles.dropDownContent} container spacing={1}>
-              <div className={styles.mutedMI}>{prefix} Block:&nbsp;{detail.blockNumber}</div>
+              <Typography variant="body3" className={styles.muted}>{prefix} Block:&nbsp;{detail.blockNumber}</Typography>
             </Grid>
             <Grid className={styles.dropDownContent} container spacing={1}>
-              <div className={styles.mutedMI}>{prefix} Block Hash:&nbsp;{detail.blockHash}</div>
+              <Typography variant="body3" className={styles.muted}>{prefix} Block Hash:&nbsp;{detail.blockHash}</Typography>
             </Grid>
             <Grid className={styles.dropDownContent} container spacing={1}>
-              <div className={styles.mutedMI}>{prefix} From:&nbsp;{detail.from}</div>
+              <Typography variant="body3" className={styles.muted}>{prefix} From:&nbsp;{detail.from}</Typography>
             </Grid>
             <Grid className={styles.dropDownContent} container spacing={1}>
-              <div className={styles.mutedMI}>{prefix} To:&nbsp;{detail.to}</div>
+              <Typography variant="body3" className={styles.muted}>{prefix} To:&nbsp;{detail.to}</Typography>
             </Grid>
           </div>
         </S.TableCell>
@@ -124,22 +124,30 @@ function Transaction({
 
         <S.TableCell
           sx={{ gap: '5px' }}
-          style={{ width: '50%' }}
+          style={{ width: '60%' }}
         >
           <Typography variant="h3">{chain}</Typography>
-          <div className={styles.muted}>{time}</div>
-          <div className={styles.muted}>{oriChain}&nbsp;Hash:&nbsp;
-          <a
+
+          <Typography variant="body3" className={styles.muted}>
+            {time}
+          </Typography>
+
+          <Typography variant="body3" className={styles.muted}>
+            {oriChain}&nbsp;Hash:&nbsp;
+            <a
               href={chainLink()}
               target={'_blank'}
               rel='noopener noreferrer'
               style={{ color: theme.palette.mode === 'light' ? 'black' : 'white' }}
             >
               {oriHash}
-          </a>
-          </div>
-          <div className={styles.muted}>{typeTX}</div>
-          
+            </a>
+          </Typography>
+
+          <Typography variant="body3" className={styles.muted}>
+            {typeTX}
+          </Typography>
+
           {!!detail &&
             <Typography
               variant="body2"
@@ -160,7 +168,11 @@ function Transaction({
           sx={{ gap: '5px' }}
           style={{ width: '20%' }}
         >
-          <div className={styles.muted}>{blockNumber}</div>
+          <div className={styles.muted}>
+            <Typography variant="body3">
+              {blockNumber}
+            </Typography>
+          </div>
         </S.TableCell>
 
         <S.TableCell sx={{ gap: "5px" }}>
