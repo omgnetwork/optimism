@@ -102,21 +102,34 @@ export function approveERC20_L2LP(
   )
 }
 
-export function resetApprove(
+export function approveERC20_L1LP(
   value,
   currency,
-  approveContractAddress,
-  contractABI
 ) {
-  return createAction('APPROVE/RESET', () =>
-    networkService.resetApprove(
+  return createAction('APPROVE/CREATE', () =>
+    networkService.approveERC20_L1LP(
       value,
       currency,
-      approveContractAddress,
-      contractABI
     )
   )
 }
+
+// Never used?
+// export function resetApprove(
+//   value,
+//   currency,
+//   approveContractAddress,
+//   contractABI
+// ) {
+//   return createAction('APPROVE/RESET', () =>
+//     networkService.resetApprove(
+//       value,
+//       currency,
+//       approveContractAddress,
+//       contractABI
+//     )
+//   )
+// }
 
 export function processExits(maxExits, currency, gasPrice) {
   return createAction('QUEUE/PROCESS', () =>
