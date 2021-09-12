@@ -43,21 +43,20 @@ function Transaction({
 }) {
 
   const [dropDownBox, setDropDownBox] = useState(false)
-  const [dropDownBoxInit, setDropDownBoxInit] = useState(false)
   const theme = useTheme()
 
   const currentNetwork = useSelector(selectNetwork())
   const nw = getAllNetworks()
 
-  const chainLink = () => {
+  const chainLink = ({chain,hash}) => {
     let network = nw[currentNetwork]
-    if (!!network && !!network[oriChain]) {
-      if (oriChain === 'L1') {
+    if (!!network && !!network[chain]) {
+      if (chain === 'L1') {
         //go to etherscan
-        return `${network[oriChain].transaction}${oriHash}`;
+        return `${network[chain].transaction}${hash}`;
       } else {
         //the boba blockexplorer
-        return `${network[oriChain].transaction}${oriHash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
+        return `${network[chain].transaction}${hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
       }
     }
     return '';
@@ -88,7 +87,7 @@ function Transaction({
               <Grid className={styles.dropDownContent} container spacing={1}>
                 <Typography variant="body3" className={styles.muted}>
                   {prefix} Hash:&nbsp;
-                  <a className={styles.href} href={detail.txLink} target="_blank" rel="noopener noreferrer">
+                  <a className={styles.href} href={chainLink({ chain: prefix, hash:detail.hash})} target="_blank" rel="noopener noreferrer">
                     {detail.hash}
                   </a>
                 </Typography>
@@ -134,7 +133,7 @@ function Transaction({
           <Typography variant="body3" className={styles.muted}>
             {oriChain}&nbsp;Hash:&nbsp;
             <a
-              href={chainLink()}
+              href={chainLink({hash:oriHash, chain: oriChain})}
               target={'_blank'}
               rel='noopener noreferrer'
               style={{ color: theme.palette.mode === 'light' ? 'black' : 'white' }}
@@ -155,7 +154,6 @@ function Transaction({
               }}
               onClick={() => {
                 setDropDownBox(!dropDownBox)
-                setDropDownBoxInit(false)
               }}
             >
               More Information
