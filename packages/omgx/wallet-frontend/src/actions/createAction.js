@@ -20,24 +20,17 @@ export function createAction (key, asyncAction) {
     dispatch({ type: `${key}/REQUEST` });
     try {
       const response = await asyncAction();
+      //deal with metamask errors
+      if(response && response.hasOwnProperty('message') && response.hasOwnProperty('code')) { 
+        dispatch({ type: `UI/ERROR/UPDATE`, payload: response.message })
+        return false
+      }
       dispatch({ type: `${key}/SUCCESS`, payload: response });
       return true;
     } catch (error) {
       // cancel request loading state
       dispatch({ type: `${key}/ERROR` })
       console.log("createAction error:", error)
-
-      // const _error = error instanceof WebWalletError
-      //   ? error
-      //   : new WebWalletError({
-      //     originalError: error,
-      //     customErrorMessage: 'Something went wrong and none of the preconfigured error messages are relevant',
-      //     reportToSentry: true,
-      //     reportToUi: true
-      //   });
-
-      // // perform necessary reports
-      // _error.report(dispatch);
       return false;
     }
   };

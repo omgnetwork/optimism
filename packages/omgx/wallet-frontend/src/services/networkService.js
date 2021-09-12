@@ -1261,7 +1261,8 @@ class NetworkService {
       await tx.wait()
       return tx
     } catch (error) {
-      console.log(error)
+      console.log("NS: transfer error:", error)
+      return error
     }
   }
 
@@ -1290,6 +1291,7 @@ class NetworkService {
       )
       return allowance.toString()
     } catch (error) {
+      console.log("NS: checkAllowance error:", error)
       throw new WebWalletError({
         originalError: error,
         customErrorMessage: 'Could not check ERC20 allowance.',
@@ -1330,6 +1332,7 @@ class NetworkService {
 
       return true
     } catch (error) {
+      console.log("NS: approveERC20_L2LP error:", error)
       return false
     }
   }
@@ -1357,6 +1360,7 @@ class NetworkService {
 
       return true
     } catch (error) {
+      console.log("NS: approveERC20_L1LP error:", error)
       return false
     }
   }
@@ -1370,8 +1374,6 @@ class NetworkService {
 
     try {
 
-      console.log("approveERC20")
-
       const ERC20Contract = new ethers.Contract(
         currency,
         contractABI,
@@ -1382,48 +1384,53 @@ class NetworkService {
         approveContractAddress,
         value
       )
+
       await approveStatus.wait()
 
       return true
     } catch (error) {
+      console.log("NS: approveERC20 error:", error)
       return false
     }
   }
 
-  async resetApprove(
-    value,
-    currency,
-    approveContractAddress = this.L1StandardBridgeAddress,
-    contractABI = L1ERC20Json.abi
-  ) {
-    try {
-      const ERC20Contract = new ethers.Contract(
-        currency,
-        contractABI,
-        this.provider.getSigner()
-      )
+  //Never used?
 
-      const resetApproveStatus = await ERC20Contract.approve(
-        approveContractAddress,
-        0
-      )
-      await resetApproveStatus.wait()
+  // async resetApprove(
+  //   value,
+  //   currency,
+  //   approveContractAddress = this.L1StandardBridgeAddress,
+  //   contractABI = L1ERC20Json.abi
+  // ) {
+  //   try {
+  //     const ERC20Contract = new ethers.Contract(
+  //       currency,
+  //       contractABI,
+  //       this.provider.getSigner()
+  //     )
 
-      const approveStatus = await ERC20Contract.approve(
-        approveContractAddress,
-        value
-      )
-      await approveStatus.wait()
-      return true
-    } catch (error) {
-      throw new WebWalletError({
-        originalError: error,
-        customErrorMessage: 'Could not reset allowance for ERC20.',
-        reportToSentry: false,
-        reportToUi: true,
-      })
-    }
-  }
+  //     const resetApproveStatus = await ERC20Contract.approve(
+  //       approveContractAddress,
+  //       0
+  //     )
+  //     await resetApproveStatus.wait()
+
+  //     const approveStatus = await ERC20Contract.approve(
+  //       approveContractAddress,
+  //       value
+  //     )
+  //     await approveStatus.wait()
+  //     return true
+  //   } catch (error) {
+  //     console.log("NS: resetApprove error:", error)
+  //     throw new WebWalletError({
+  //       originalError: error,
+  //       customErrorMessage: 'Could not reset allowance for ERC20.',
+  //       reportToSentry: false,
+  //       reportToUi: true,
+  //     })
+  //   }
+  // }
 
   //Used to move ERC20 Tokens from L1 to L2
   async depositErc20(value, currency, gasPrice, currencyL2) {

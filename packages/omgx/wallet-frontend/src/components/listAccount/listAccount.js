@@ -127,7 +127,7 @@ class ListAccount extends React.Component {
                        }}
                      >
                        <Typography variant="body2" component="p" >
-                         MetaMask is set to L2. To transact on L1, - SWITCH LAYER to L1
+                         MetaMask is set to L2. To transact on L1, SWITCH LAYER to L1
                        </Typography>
                      </Box>
                      <Box sx={{ textAlign: 'center'}}>
@@ -144,7 +144,7 @@ class ListAccount extends React.Component {
                        }}
                      >
                        <Typography variant="body2" component="p" >
-                         MetaMask is set to L1. To transact on L2, - SWITCH LAYER to L2
+                         MetaMask is set to L1. To transact on L2, SWITCH LAYER to L2
                        </Typography>
                      </Box>
                      <Box sx={{ textAlign: 'center'}}>
@@ -216,11 +216,5 @@ class ListAccount extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({
-  //login: state.login,
-  //sell: state.sell,
-  //sellTask: state.sellTask,
-  //buy: state.buy,
-});
-
-export default connect(mapStateToProps)(ListAccount);
+const mapStateToProps = state => ({ })
+export default connect(mapStateToProps)(ListAccount)
