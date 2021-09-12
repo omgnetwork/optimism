@@ -184,7 +184,7 @@ function Home () {
         <MainMenu />
         {/* The Top SubMenu Bar, non-mobile */}
 
-        <Container maxWidth="lg">
+        <Container maxWidth="lg" sx={{marginLeft: 'unset' , marginRight: 'unset'}}>
           {pageDisplay === "AccountNow" &&
           <>
             <Account/>
