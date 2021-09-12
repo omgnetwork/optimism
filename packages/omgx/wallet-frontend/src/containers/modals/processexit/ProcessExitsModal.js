@@ -13,58 +13,64 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import numbro from 'numbro';
+import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import numbro from 'numbro'
 
-import { selectByzantine } from 'selectors/statusSelector';
-import { processExits, fetchExits } from 'actions/networkAction';
+import { processExits, fetchExits } from 'actions/networkAction'
 
-import GasPicker from 'components/gaspicker/GasPicker';
-import Button from 'components/button/Button';
-import Modal from 'components/modal/Modal';
+import GasPicker from 'components/gaspicker/GasPicker'
+import Button from 'components/button/Button'
+import Modal from 'components/modal/Modal'
 
-import * as styles from './ProcessExitsModal.module.scss';
+import * as styles from './ProcessExitsModal.module.scss'
 
 function ProcessExitsModal ({ exitData, open, toggle }) {
-  const dispatch = useDispatch();
 
-  const byzantineChain = useSelector(selectByzantine);
-  const [ loading, setLoading ] = useState(false);
-  const [ gasPrice, setGasPrice ] = useState();
-  const [ selectedSpeed, setSelectedSpeed ] = useState('normal');
+  const dispatch = useDispatch()
+
+  const [ loading, setLoading ] = useState(false)
+
+  const [ gasPrice, setGasPrice ] = useState()
+  const [ selectedSpeed, setSelectedSpeed ] = useState('normal')
 
   async function submit () {
-    setLoading(true);
-    const res = await dispatch(processExits(exitData.queuePosition, exitData.currency, gasPrice));
+    setLoading(true)
+    const res = await dispatch(processExits(exitData.queuePosition, exitData.currency, gasPrice))
     if (res) {
-      await dispatch(fetchExits());
-      setLoading(false);
-      return handleClose();
+      await dispatch(fetchExits())
+      setLoading(false)
+      return handleClose()
     }
-    return setLoading(false);
+    return setLoading(false)
   }
 
+  const renderGasPicker = (
+    <GasPicker
+      selectedSpeed={selectedSpeed}
+      setSelectedSpeed={setSelectedSpeed}
+      setGasPrice={setGasPrice}
+    />
+  )
+
   function handleClose () {
-    setSelectedSpeed('normal');
-    toggle();
+    setSelectedSpeed('normal')
+    toggle()
   }
 
   return (
     <Modal open={open} onClose={handleClose} maxWidth="md">
       <h2>Process Exit</h2>
 
+      {/*
       <div className={styles.note}>
         <span>This exit is currently</span>
         <span className={styles.position}>{exitData ? numbro(exitData.queuePosition).format({ output: 'ordinal' }) : ''}</span>
         <span>{`in the queue for this token. You will need to process ${exitData.queuePosition} ${exitData.queuePosition === 1 ? 'exit' : 'exits'} to release your funds.`}</span>
       </div>
+      */}
 
-      <GasPicker
-        selectedSpeed={selectedSpeed}
-        setSelectedSpeed={setSelectedSpeed}
-        setGasPrice={setGasPrice}
-      />
+      {renderGasPicker}
 
       <div className={styles.buttons}>
         <Button
@@ -79,11 +85,8 @@ function ProcessExitsModal ({ exitData, open, toggle }) {
           type='primary'
           style={{ flex: 0 }}
           loading={loading}
-          tooltip='Your process exit transaction is still pending. Please wait for confirmation.'
-          disabled={
-            exitData.queueLength < 1 ||
-            byzantineChain
-          }
+          tooltip='Your process exit TX is still pending. Please wait for confirmation.'
+          disabled={false}
           triggerTime={new Date()}
         >
           PROCESS
