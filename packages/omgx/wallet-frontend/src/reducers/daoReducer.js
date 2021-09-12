@@ -23,20 +23,16 @@ const initialState = {
 function daoReducer(state = initialState, action) {
   switch (action.type) {
     case 'BALANCE/DAO/GET/SUCCESS':
-      //const { balance } = action.payload
-      return { ...state, balance: action.payload }
+      return { ...state, ...action.payload }
 
     case 'VOTES/DAO/GET/SUCCESS':
-      //const { votes } = action.payload
-      return { ...state, votes: action.payload }
+      return { ...state, ...action.payload }
 
     case 'PROPOSALS/GET/SUCCESS':
-      //const { proposalList } = action.payload
-      return { ...state, proposalList: action.payload }
+      return { ...state, ...action.payload }
 
     case 'PROPOSAL/THRESHOLD/GET/SUCCESS':
-      //const { threshold } = action.payload
-      return { ...state, proposalThreshold: action.payload }
+      return { ...state, ...action.payload }
 
     default:
       return state

@@ -20,7 +20,6 @@ $boxDropDownHeight: 50px;
               margin: 0px;
             }
             .muted {
-              font-size: 0.7em;
               color: $white700;
             }
         }
@@ -28,12 +27,10 @@ $boxDropDownHeight: 50px;
     .proposalContent {
       display: flex;
       justify-content: flex-start;
-      font-size: 0.7em;
       color: $white700;
       font-weight: 700;
     }
     .vote {
-      font-size: 0.7em;
       min-width: 120px;
       color: $white700;
       font-weight: 700;
