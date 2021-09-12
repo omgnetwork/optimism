@@ -8,7 +8,6 @@ $boxDropDownHeight: 50px;
   justify-content: center;
   margin: 10px auto;
   flex-direction: row;
-  width: 90%;
   .listTitle {
     flex: 1;
     display: flex;
@@ -47,7 +46,6 @@ $boxDropDownHeight: 50px;
 .listContainer {
     overflow-y: auto;
     margin: 10px auto;
-    width: 90%;
     border-radius: 8px;
     padding: 20px 10px;
     background: $background400;
