@@ -137,14 +137,15 @@ function PendingTransaction() {
 
     const chainLink = (item) => {
         let network = nw[currentNetwork]
-        if (!!network && !!network[item.chain]) {
+        let chain = item.chain === 'L1pending' ? 'L1' : item.chain;
+        if (!!network && !!network[chain]) {
             // network object should have L1 & L2
-            if (item.chain === 'L1') {
-                return `${network[item.chain].transaction}${item.hash}`;
+            if (chain === 'L1') {
+                return `${network[chain].transaction}${item.hash}`;
                 //our custom watcher
             } else {
                 //etherscan
-                return `${network[item.chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
+                return `${network[chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
             }
         }
         return '';
