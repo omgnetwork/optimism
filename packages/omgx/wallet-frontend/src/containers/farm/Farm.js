@@ -69,7 +69,7 @@ class Farm extends React.Component {
       layer2,
       lpChoice: initialLayer,
       poolTab: initialViewLayer,
-      showAll: false
+      showAll: true
     }
 
   }
