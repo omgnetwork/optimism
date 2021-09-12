@@ -69,7 +69,7 @@ function Exits({ searchHistory, transactions, chainLink }) {
       isExitable = moment().isAfter(moment.unix(i.crossDomainMessage.crossDomainMessageEstimateFinalizedTime))
 
       if (isExitable) {
-        timeLabel = 'Ready to exit - initiated:' + moment.unix(i.timeStamp).format('lll')
+        timeLabel = 'Ready to exit - initiated: ' + moment.unix(i.timeStamp).format('lll')
       } else {
         const secondsToGo = i.crossDomainMessage.crossDomainMessageEstimateFinalizedTime - Math.round(Date.now() / 1000)
         const daysToGo = Math.floor(secondsToGo / (3600 * 24))

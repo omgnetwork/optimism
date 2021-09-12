@@ -32,7 +32,6 @@ import { selectLookupPrice } from 'selectors/lookupSelector';
 import { Box, Typography, useMediaQuery } from '@material-ui/core';
 import * as S from './TransferModal.style';
 import { useTheme } from '@emotion/react';
-import truncate from 'truncate-middle';
 
 function TransferModal ({ open, token }) {
   const dispatch = useDispatch()
@@ -41,7 +40,7 @@ function TransferModal ({ open, token }) {
   const [ recipient, setRecipient ] = useState('')
 
   const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]));
-  const wAddress = networkService.account ? truncate(networkService.account, 6, 14, '.') : '';
+  const wAddress = networkService.account ? networkService.account : ''
 
   const lookupPrice = useSelector(selectLookupPrice);
 
@@ -55,10 +54,13 @@ function TransferModal ({ open, token }) {
       recipient
     ) {
       try {
-        const transferResponse = await dispatch(transfer(recipient, value, token.address));
-        if (transferResponse) {
+        const transferResponseGood = await dispatch(transfer(recipient, value, token.address));
+        if (transferResponseGood) {
           dispatch(openAlert('Transaction submitted'));
           handleClose();
+        } else {
+          //error handled elsewhere
+          handleClose()
         }
       } catch (err) {
         //guess not really?
@@ -85,16 +87,16 @@ function TransferModal ({ open, token }) {
       </Typography>
 
       <Typography variant="body1" sx={{mb: 1}}>
-        From Adress: {wAddress}
+        From Address: {wAddress}
       </Typography>
 
       <Typography variant="body1" sx={{mb: 1}}>
-        To Adress
+        To Address
       </Typography>
 
       <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
         <Input
-          placeholder='Enter adress to send to...'
+          placeholder='Recipient address (0x...)'
           value={recipient}
           onChange={i => setRecipient(i.target.value)}
           fullWidth
@@ -103,7 +105,7 @@ function TransferModal ({ open, token }) {
         />
 
         <Input
-          label="Enter Amount to Deposit"
+          label="Amount to Transfer"
           placeholder="0.00"
           value={value}
           type="number"
@@ -117,7 +119,7 @@ function TransferModal ({ open, token }) {
 
       {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
         <Typography variant="body2" component="p" sx={{opacity: 0.5, mt: 3}}>
-          {`($${amountToUsd(value, lookupPrice, token).toFixed(2)})`}
+          {`Transfer value in USD: $${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
         </Typography>
       )}
 
@@ -136,7 +138,7 @@ function TransferModal ({ open, token }) {
             color='primary'
             variant="contained"
             loading={loading}
-            tooltip='Your exit is still pending. Please wait for confirmation.'
+            tooltip='Your transfer is still pending. Please wait for confirmation.'
             disabled={disabledTransfer}
             triggerTime={new Date()}
             fullWidth={isMobile}

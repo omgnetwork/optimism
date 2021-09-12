@@ -30,6 +30,7 @@ class ListFarm extends React.Component {
       userInfo,
       L1orL2Pool,
       balance,
+      showAll
     } = this.props;
 
     this.state = {
@@ -38,6 +39,7 @@ class ListFarm extends React.Component {
       // data
       poolInfo,
       userInfo,
+      showAll,
       //drop down box
       dropDownBox: false,
       dropDownBoxInit: true,
@@ -48,7 +50,7 @@ class ListFarm extends React.Component {
 
   componentDidUpdate(prevState) {
 
-    const { poolInfo, userInfo, balance } = this.props;
+    const { poolInfo, userInfo, balance, showAll } = this.props;
 
     if (!isEqual(prevState.poolInfo, poolInfo)) {
       this.setState({ poolInfo });
@@ -60,6 +62,10 @@ class ListFarm extends React.Component {
 
     if (!isEqual(prevState.balance, balance)) {
       this.setState({ balance });
+    }
+
+    if (!isEqual(prevState.showAll, showAll)) {
+      this.setState({ showAll });
     }
 
   }
@@ -140,7 +146,7 @@ class ListFarm extends React.Component {
 
     const {
       poolInfo, userInfo,
-      dropDownBox,
+      dropDownBox, showAll,
       loading, L1orL2Pool
     } = this.state;
 
@@ -167,6 +173,12 @@ class ListFarm extends React.Component {
     const logo = getCoinImage(symbol)
 
     //console.log('poolinfo',poolInfo)
+    
+    if(!showAll) {
+      if(!Number(logAmount(poolInfo.tokenBalance, decimals, 2))) {
+        return null;
+      }
+    }
 
     return (
       <S.Wrapper dropDownBox={dropDownBox}>

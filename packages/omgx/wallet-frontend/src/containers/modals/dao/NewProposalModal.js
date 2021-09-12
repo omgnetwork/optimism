@@ -52,7 +52,7 @@ function NewProposalModal({ open }) {
     const submit = async () => {
         let res = await dispatch(createDaoProposal({ 
             votingThreshold, 
-            text: `${proposeText}@@${proposalUri}`
+            text: !!proposeText ? `${proposeText}@@${proposalUri}` : null
         }));
 
         if (res) {

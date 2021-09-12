@@ -14,17 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React, { useState, useEffect } from 'react';
+import {Typography} from '@material-ui/core';
 
 import { useDispatch } from 'react-redux';
 
 import { openAlert, openError } from 'actions/uiAction';
+import { castProposalVote } from 'actions/daoAction';
 
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Button from 'components/button/Button';
 
 import * as styles from './Proposal.module.scss';
-
-import { castProposalVote } from 'actions/daoAction';
 
 function Proposal({
     proposal,
@@ -83,9 +82,9 @@ function Proposal({
                 <div className={styles.proposalHeader}>
                     <div className={styles.title}>
                         <p>Proposal #{proposal.id}</p>
-                        <p className={styles.muted}>Title: <FormatDescription description={proposal.description} /></p>
-                        <p className={styles.muted}>Status: {proposal.state}</p>
-                        <p className={styles.muted}>Start L1 Block: {proposal.startBlock} &nbsp; &nbsp; End L1 Block: {proposal.endBlock}</p>
+                        <Typography variant="body3" component="p" className={styles.muted}>Title: <FormatDescription description={proposal.description} /></Typography>
+                        <Typography variant="body3" component="p" className={styles.muted}>Status: {proposal.state}</Typography>
+                        <Typography variant="body3" component="p" className={styles.muted}>Start L1 Block: {proposal.startBlock} &nbsp; &nbsp; End L1 Block: {proposal.endBlock}</Typography>
                         {proposal.state === 'Active' &&
                             <div style={{
                                 background: 'blue', 
@@ -100,11 +99,11 @@ function Proposal({
                         }
                     </div>
                     <div>
-                        <div className={styles.vote}>For: {proposal.forVotes}</div>
-                        <div className={styles.vote}>Against: {proposal.againstVotes}</div>
-                        <div className={styles.vote}>Abstain: {proposal.abstainVotes}</div>
-                        <div className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </div>
-                        <div className={styles.vote}>Total Votes: {proposal.totalVotes}</div>
+                        <Typography variant="body3" component="p" className={styles.vote}>For: {proposal.forVotes}</Typography>
+                        <Typography variant="body3" component="p" className={styles.vote}>Against: {proposal.againstVotes}</Typography>
+                        <Typography variant="body3" component="p" className={styles.vote}>Abstain: {proposal.abstainVotes}</Typography>
+                        <Typography variant="body3" component="p" className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </Typography>
+                        <Typography variant="body3" component="p" className={styles.vote}>Total Votes: {proposal.totalVotes}</Typography>
                     </div>
                 </div>
             </div>

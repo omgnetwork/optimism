@@ -21,16 +21,11 @@ import { selectModalState } from 'selectors/uiSelector';
 import useInterval from 'util/useInterval';
 
 import {
-  checkWatcherStatus,
   fetchBalances,
   addTokenList,
   fetchNFTs,
   fetchExits,
-  fetchDeposits,
-  fetchEthStats,
-  checkPendingDepositStatus,
-  checkPendingExitStatus
-} from 'actions/networkAction';
+} from 'actions/networkAction'
 
 import { checkVersion } from 'actions/serviceAction';
 
@@ -118,21 +113,14 @@ function Home () {
   // calls only on boot
   useEffect(() => {
     window.scrollTo(0, 0)
-    dispatch(fetchDeposits())
-  }, [ dispatch ]);
+    //dispatch(fetchDeposits())
+  }, [ dispatch ])
 
   useInterval(() => {
     batch(() => {
-      // infura call
-      dispatch(fetchEthStats());
-      dispatch(checkPendingDepositStatus());
-      dispatch(checkPendingExitStatus());
-
-      // watcher only calls
-      dispatch(checkWatcherStatus());
-      dispatch(fetchExits());
+      dispatch(fetchExits())
     })
-  }, POLL_INTERVAL * 2);
+  }, POLL_INTERVAL * 2)
 
   //get all account balances
   useInterval(() => {
@@ -148,7 +136,7 @@ function Home () {
   }, POLL_INTERVAL);
 
   useEffect(() => {
-    checkVersion();
+    checkVersion()
   }, [])
 
   return (

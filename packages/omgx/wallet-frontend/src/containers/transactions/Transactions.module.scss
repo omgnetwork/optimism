@@ -9,22 +9,14 @@
 }
 
 .header {
-  h2 {
-    // flex: 1;
-    margin-bottom: 0;
-    padding-left: 10px;
-    color: $white; //$gray2;
-  }
   display: flex;
   flex-direction: row;
-  justify-content: flex-end; //space-between;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  // background-color: $bunnyRed;
-  @include mobile {
-    padding-top: 10px;
-    flex-direction: column;
-    align-items: flex-start;
+
+  .searchInput {
+    width: 250px!important;
   }
 }
 

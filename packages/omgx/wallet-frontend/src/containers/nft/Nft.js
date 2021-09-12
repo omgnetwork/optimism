@@ -39,7 +39,7 @@ class Nft extends React.Component {
       newNFTname: '',
       newNFTsymbol: '',
       deployModalOpen: false,
-      minModalOpen: false,
+      mintModalOpen: false,
     }
 
     this.closeMintModal = this.closeMintModal.bind(this)
@@ -176,7 +176,7 @@ class Nft extends React.Component {
               <span>You have {numberOfContracts} minting contracts. To mint an NFT, select "Mint NFT".</span>
             }
             {numberOfContracts < 1 &&
-              <span>You do not have any NFT contracts. To mint NFTs, first create your own miniting contract by selecting "Deploy NFT contract".</span>
+              <span>You do not have any NFT contracts. To mint NFTs, first create your own minting contract by selecting "Deploy NFT contract".</span>
             }
           </Typography>
 

@@ -28,7 +28,7 @@ import AlertIcon from 'components/icons/AlertIcon'
 import networkService from 'services/networkService'
 
 import * as S from './Farm.styles'
-import { Box, Typography } from '@material-ui/core';
+import { Box, FormControlLabel, Checkbox } from '@material-ui/core';
 import PageHeader from 'components/pageHeader/PageHeader';
 import { tableHeadList } from './tableHeadList';
 import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher';
@@ -68,7 +68,8 @@ class Farm extends React.Component {
       layer1,
       layer2,
       lpChoice: initialLayer,
-      poolTab: initialViewLayer
+      poolTab: initialViewLayer,
+      showAll: true
     }
 
   }
@@ -167,6 +168,12 @@ class Farm extends React.Component {
       })
   }
 
+  handleCheckBox = (e) =>{
+    this.setState({
+      showAll: e.target.checked
+    })
+  }
+
   render() {
     const {
       // Pool
@@ -174,23 +181,37 @@ class Farm extends React.Component {
       // user
       userInfo,
       lpChoice,
-      poolTab
+      poolTab,
+      showAll
     } = this.state;
 
     const { isMobile } = this.props
 
     const networkLayer = networkService.L1orL2
+    
     return (
       <>
         <PageHeader title="Earn" />
 
         <Box sx={{ my: 3, width: '100%' }}>
-          <Box sx={{ mb: 2 }}>
+          <Box sx={{ mb: 2, display: 'flex' }}>
             <Tabs
               activeTab={poolTab}
               onClick={(t)=>this.handleChange(null, t)}
               aria-label="Liquidity Pool Tab"
               tabs={["L1 Liquidity Pool", "L2 Liquidity Pool"]}
+            />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showAll}
+                  onChange={this.handleCheckBox}
+                  name="show all"
+                  color="primary"
+                />
+              }
+              label="Show All"
             />
           </Box>
 
@@ -249,6 +270,7 @@ class Farm extends React.Component {
                     balance={ret[0]}
                     decimals={ret[1]}
                     isMobile={isMobile}
+                    showAll={showAll}
                   />
                 )
               })}
@@ -267,6 +289,7 @@ class Farm extends React.Component {
                     balance={ret[0]}
                     decimals={ret[1]}
                     isMobile={isMobile}
+                    showAll={showAll}
                   />
                 )
               })}

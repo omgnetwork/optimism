@@ -19,8 +19,6 @@ import { useSelector, useDispatch, batch } from 'react-redux'
 import { isEqual, orderBy } from 'lodash'
 
 //Selectors
-import { selectLoading } from 'selectors/loadingSelector'
-import { selectIsSynced } from 'selectors/statusSelector'
 import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector'
 import { selectTransactions } from 'selectors/transactionSelector'
 
@@ -54,8 +52,6 @@ function Account () {
   const childBalance = useSelector(selectlayer2Balance, isEqual)
   const rootBalance = useSelector(selectlayer1Balance, isEqual)
 
-  const isSynced = useSelector(selectIsSynced)
-  const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]))
   const tokenList = useSelector(selectTokens)
 
   const network = useSelector(selectNetwork())
@@ -108,9 +104,6 @@ function Account () {
     ...pendingL2
   ]
 
-  //console.log("Pending:", pending.length)
-  //console.log("Pending:", pending)
-
   const getGasPrice = useCallback(() => {
     dispatch(fetchGas({
       network: network || 'local',
@@ -129,21 +122,7 @@ function Account () {
     })
   }, POLL_INTERVAL * 2)
 
-  const disabled = false //criticalTransactionLoading || !isSynced
-
-  // let balances = {
-  //   oETH : {have: false, amount: 0, amountShort: '0'}
-  // }
-
-  // childBalance.reduce((acc, cur) => {
-  //   if (cur.symbol === 'oETH' && cur.balance > 0 ) {
-  //     acc['oETH']['have'] = true;
-  //     acc['oETH']['amount'] = cur.balance;
-  //     acc['oETH']['amountShort'] = logAmount(cur.balance, cur.decimals, 2);
-  //   }
-  //   return acc;
-  // }, balances)
-
+  const disabled = false
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
