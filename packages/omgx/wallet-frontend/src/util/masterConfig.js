@@ -35,7 +35,7 @@ NETWORKS = {
       name: "BOBA Rinkeby L2",
       chainId: 28,
       rpcUrl: `https://rinkeby.boba.network`,
-      blockExplorer: `https://blockexplorer.rinkeby.boba.network/?network=Rinkeby`,
+      blockExplorer: `https://blockexplorer.rinkeby.boba.network/`,
       transaction: `https://blockexplorer.rinkeby.boba.network/tx/`,
     }
   },
@@ -55,8 +55,8 @@ NETWORKS = {
       name: "BOBA L2",
       chainId: 288,
       rpcUrl: `https://mainnet.boba.network`,
-      blockExplorer: `https://blockexplorer.rinkeby.boba.network/?network=Mainnet`,
-      transaction: `https://blockexplorer.rinkeby.boba.network/tx/`,
+      blockExplorer: `https://blockexplorer.boba.network/`,
+      transaction: `https://blockexplorer.boba.network/tx/`,
     }
   }
 }

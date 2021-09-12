@@ -780,9 +780,9 @@ class NetworkService {
 
     console.log("Getting transactions...")
     
-    let txL1
-    let txL1pending
-    let txL2
+    let txL1 = []
+    let txL1pending = []
+    let txL2 = []
 
     //console.log("trying")
 
