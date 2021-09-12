@@ -19,23 +19,23 @@ Parameters:
   EcsMinSize:
     Description: Minimum number of instances in the ECS cluster
     Type: Number
-    Default: 1
-    MinValue: 1
-    MaxValue: 1 # This is set to prevent accidental huge costs
+    Default: 2
+    MinValue: 2
+    MaxValue: 2 # This is set to prevent accidental huge costs
 
   EcsMaxSize:
     Description: Maximum number of instances in the ECS cluster
     Type: Number
-    Default: 1
-    MinValue: 1
-    MaxValue: 1 # This is set to prevent accidental huge costs
+    Default: 2
+    MinValue: 2
+    MaxValue: 2 # This is set to prevent accidental huge costs
 
   EcsDesiredCapacity:
     Description: Default number of instances in the ECS cluster
     Type: Number
-    Default: 1
-    MinValue: 1
-    MaxValue: 1 # This is set to prevent accidental huge costs
+    Default: 2
+    MinValue: 2
+    MaxValue: 2 # This is set to prevent accidental huge costs
 
   DomainName:
     Description: The domain for the Common Name of the wildcard certificate on the Load Balancer listener

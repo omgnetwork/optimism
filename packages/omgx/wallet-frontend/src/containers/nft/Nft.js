@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { isEqual } from 'lodash'
+import Modal from 'components/modal/Modal';
 
 import ListNFT from 'components/listNFT/listNFT'
 import ListNFTfactory from 'components/listNFTfactory/listNFTfactory'
@@ -9,11 +10,13 @@ import { openAlert, openError } from 'actions/uiAction'
 
 import * as styles from './Nft.module.scss'
 
-import cellIcon from 'images/hela.jpg'
-import factoryIcon from 'images/factory.png'
-import koiIcon from 'images/koi.png'
+import { Box, Grid, Typography } from '@material-ui/core'
+import PageHeader from 'components/pageHeader/PageHeader'
 
 import networkService from 'services/networkService'
+
+import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher'
+import AlertIcon from 'components/icons/AlertIcon';
 
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
@@ -24,18 +27,23 @@ class Nft extends React.Component {
 
     super(props);
 
-    const { list, factories } = this.props.nft;
+    const { list, contracts } = this.props.nft;
 
     this.state = {
       list,
-      factories,
+      contracts,
       loading: false,
       ownerName: '',
       tokenURI: '',
       newAddress: '',
       newNFTname: '',
       newNFTsymbol: '',
+      deployModalOpen: false,
+      mintModalOpen: false,
     }
+
+    this.closeMintModal = this.closeMintModal.bind(this)
+
   }
 
   componentDidMount() {
@@ -44,16 +52,16 @@ class Nft extends React.Component {
 
   componentDidUpdate(prevState) {
 
-    const { list, factories } = this.props.nft;
-    
+    const { list, contracts } = this.props.nft;
+
     if (!isEqual(prevState.nft.list, list)) {
      this.setState({ list })
     }
 
-    if (!isEqual(prevState.nft.factories, factories)) {
-     this.setState({ factories })
+    if (!isEqual(prevState.nft.contracts, contracts)) {
+     this.setState({ contracts })
     }
- 
+
   }
 
   async handleDeployContract() {
@@ -61,7 +69,7 @@ class Nft extends React.Component {
     const { newNFTsymbol, newNFTname } = this.state;
 
     const networkStatus = await this.props.dispatch(networkService.confirmLayer('L2'))
-    
+
     if (!networkStatus) {
       this.props.dispatch(openError('Please use L2 network'))
       return;
@@ -72,215 +80,213 @@ class Nft extends React.Component {
     let originName = ''
 
     if(networkService.chainID === 28) {
-      originName = 'OMGX_Rinkeby_28'
+      originName = 'BOBA_Rinkeby_28'
     } else if (networkService.chainID === 288) {
-      originName = 'OMGX_Mainnet_288'
+      originName = 'BOBA_Mainnet_288'
     } else {
-      originName = 'OMGX_Other'
+      originName = 'BOBA_Other'
     }
 
-    const deployTX = await networkService.deployNewNFTContract(
+    const deployTX = await networkService.deployNFTContract(
       newNFTsymbol,
       newNFTname,
-      '0x0000000000000000000000000000000000000042',
-      'simple',
+      '0x0000000000000000000000000000000000000042', //Legacy - can be anything
+      'simple', //Legacy - can be anything
       originName
     )
-    
+
     if (deployTX) {
       this.props.dispatch(openAlert(`You have deployed a new NFT contract`))
     } else {
       this.props.dispatch(openError('NFT contract deployment error'))
     }
 
-    this.setState({ loading: false })
+    this.setState({ loading: false, deployModalOpen: false })
+  }
+
+  closeMintModal() {
+    this.setState({ minModalOpen: false})
   }
 
   render() {
 
-    const { 
+    const {
       list,
-      factories,
+      contracts,
       newNFTsymbol,
       newNFTname,
-      loading
+      loading,
     } = this.state;
 
     const numberOfNFTs = Object.keys(list).length
-    //const numberOfFactories = Object.keys(factories).length
+    const numberOfContracts = Object.keys(contracts).length
+    const layer = networkService.L1orL2
 
-    let rights = Object.keys(factories).map((v, i) => {
-      return factories[v].haveRights
-    }).filter(Boolean).length
+    if(layer === 'L1') {
+        return <div className={styles.container}>
+            <div className={styles.header}>
+                <h2 className={styles.title}>
+                    BOBA DAO
+                </h2>
+            </div>
+            <div className={styles.content}>
+                <Box
+                    sx={{
+                        //background: theme.palette.background.secondary,
+                        borderRadius: '12px',
+                        margin: '20px 5px',
+                        padding: '10px 20px',
+                        display: 'flex',
+                        justifyContent: 'space-between'
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <AlertIcon />
+                        <Typography
+                            sx={{ wordBreak: 'break-all', marginLeft: '10px' }}
+                            variant="body1"
+                            component="p"
+                        >
+                            To use Boba NFTs, you must be on L2 - SWITCH LAYER to L2
+                        </Typography>
+                    </div>
+                    <LayerSwitcher isButton={true} />
+                </Box>
+            </div>
+        </div>
+    }
 
     return (
+      <>
+        <PageHeader title="NFT" />
 
-      <div className={styles.container}>
-        
-        <div 
-          className={styles.nftContainer}
+        <Grid item xs={12}>
+          <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>Your NFT contracts</Typography>
+
+          <Typography variant="body2" component="p" sx={{mt: 1, mb: 2}}>
+            {numberOfContracts === 1 &&
+              <span>You have one NFT minting contract. To mint an NFT, select "Mint NFT".</span>
+            }
+            {numberOfContracts > 1 &&
+              <span>You have {numberOfContracts} minting contracts. To mint an NFT, select "Mint NFT".</span>
+            }
+            {numberOfContracts < 1 &&
+              <span>You do not have any NFT contracts. To mint NFTs, first create your own minting contract by selecting "Deploy NFT contract".</span>
+            }
+          </Typography>
+
+        <Grid 
+          container
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+          sx={{mt: 1, mb: 5}}
         >
-          
-          <h2>Your NFTs</h2>
+          <Button size="medium" variant="contained" sx={{marginRight: 3}} onClick={()=> {this.setState({deployModalOpen: true})}}>Deploy NFT contract</Button>
+          <Button size="medium" variant="contained" onClick={()=> {this.setState({mintModalOpen: true})}}>Mint NFT</Button>
+        </Grid>
 
-          {numberOfNFTs === 1 && 
-            <div className={styles.note}>You have one NFT and it should be shown below.</div> 
+        </Grid>
+
+        <Grid item xs={12}>
+
+          <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>Your NFTs</Typography>
+
+          {numberOfNFTs === 1 &&
+            <Typography variant="body2" component="p" sx={{mt: 1, mb: 2}}>You have one NFT and it should be shown below.</Typography>
           }
-          {numberOfNFTs > 1 && 
-            <div className={styles.note}>You have {numberOfNFTs} NFTs and they should be shown below.</div> 
+          {numberOfNFTs > 1 &&
+            <Typography variant="body2" component="p" sx={{mt: 1, mb: 2}}>You have {numberOfNFTs} NFTs and they should be shown below.</Typography>
           }
           {numberOfNFTs < 1 &&
-            <div className={styles.note}>Scanning the blockchain for your NFTs...</div> 
+            <Typography variant="body2" component="p" sx={{mt: 1, mb: 2}}>Scanning the blockchain for your NFTs...</Typography>
           }
-          <div className={styles.nftTiles} >
-          {Object.keys(list).map((v, i) => {
-            const key_UUID = `nft_` + i
-            return (
-              <ListNFT 
-                key={key_UUID}
-                name={list[v].name}
-                symbol={list[v].symbol}
-                owner={list[v].owner}
-                address={list[v].address}
-                layer={list[v].layer}
-                icon={list[v].originID === 'simple' ? koiIcon : cellIcon}
-                UUID={list[v].UUID}
-                URL={list[v].url}
-                time={list[v].mintedTime}
-                oriChain={list[v].originChain}
-                oriAddress={list[v].originAddress}
-                oriID={list[v].originID}
-                oriFeeRecipient={list[v].originFeeRecipient}
-                type={list[v].type}
-              />
-            )
-          })
-          }
-          </div>
 
-        </div>
+          <Grid
+            container
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="flex-start"
+            xs={12}
+            item
+          >
+            {Object.keys(list).map((v, i) => {
+              const key_UUID = `nft_` + i
+              return (
+                <ListNFT
+                  key={key_UUID}
+                  name={list[v].name}
+                  symbol={list[v].symbol}
+                  address={list[v].address}
+                  UUID={list[v].UUID}
+                  URL={list[v].url}
+                  time={list[v].mintedTime}
+                  attributes={list[v].attributes}
+                />)
+              })
+            }
+          </Grid>
+        </Grid>
 
-        <div className={styles.boxContainer}>
-
-          <h2>Mint your own NFTs</h2>
- 
-          <div className={styles.note}>
-            To mint your own NFTs, you first need to deploy your NFT contract. Specify the NFT's name and symbol, and then click 
-            "Deploy NFT contract".
-          </div> 
-
-          <Input
-            small={true}
-            placeholder="NFT Symbol (e.g. TWST)"
-            onChange={i=>{this.setState({newNFTsymbol: i.target.value})}}
-            value={newNFTsymbol}
-          />
-          <Input
-            small={true}
-            placeholder="NFT Name (e.g. Twist)"
-            onChange={i=>{this.setState({newNFTname: i.target.value})}}
-            value={newNFTname}
-          />
+        <Modal maxWidth="md" open={this.state.deployModalOpen} onClose={()=> this.setState({deployModalOpen: false})}>
+        <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>
+            Deploy new NFT Contract
+          </Typography>
+          <Typography variant="body2" component="p" sx={{mt: 1, mb: 4}}>
+            Specify the NFT's symbol and name, and then click "Deploy NFT contract".
+          </Typography>
+          <Box sx={{display: "flex", flexDirection: "column", gap: "10px", mb: 2}}>
+            <Input
+              placeholder="NFT Symbol (e.g. TWST)"
+              onChange={i=>{this.setState({newNFTsymbol: i.target.value})}}
+              value={newNFTsymbol}
+              fullWidth
+            />
+            <Input
+              placeholder="NFT Name (e.g. Twist)"
+              onChange={i=>{this.setState({newNFTname: i.target.value})}}
+              value={newNFTname}
+              fullWidth
+            />
+          </Box>
           <Button
-            type='primary'
-            size='small'
+            variant="contained"
+            fullWidth
             disabled={!newNFTname || !newNFTsymbol}
             onClick={()=>{this.handleDeployContract()}}
             loading={loading}
           >
             Deploy NFT contract
-          </Button> 
+          </Button>
 
-          <div className={styles.TableContainer}>
-            {Object.keys(factories).map((v, i) => {
-              if(factories[v].haveRights && factories[v].originID === 'simple') {
-                const key_UUID = `fac_` + i
-                console.log(key_UUID)
-                return (
-                  <ListNFTfactory 
-                    key={key_UUID}
-                    name={factories[v].name}
-                    symbol={factories[v].symbol}
-                    owner={factories[v].owner}
-                    address={factories[v].address}
-                    layer={factories[v].layer}
-                    icon={factoryIcon}
-                    oriChain={factories[v].originChain}
-                    oriAddress={factories[v].originAddress}
-                    oriID={factories[v].originID}
-                    oriFeeRecipient={factories[v].originFeeRecipient}
-                    haveRights={factories[v].haveRights}
-                  />
-                )
-              } else {
-                return (<></>)
-              }
-            })}
-          </div>
-        </div>
+        </Modal>
 
-        <div className={styles.boxContainer}>
+        <Modal maxWidth="md" 
+          open={this.state.mintModalOpen} 
+          onClose={()=> this.setState({mintModalOpen: false})}
+        >
+          <Typography variant="h2" component="h2" sx={{fontWeight: "700"}}>
+            Mint an NFT
+          </Typography>
 
-          <h2>Derive an NFT Factory from another NFT (experimental)</h2>
-
-          {rights > 0 && 
-            <div className={styles.note}>
-              In this tab, you can take an NFT you got from someone and derive a new family of NFTs from it.
-              Think of this as creating a "child" NFT from a preceeding "parent" NFT. This is useful, for example, if you generate 
-              creative content, and would like to license that content to others, and allow them to build on it, whilst still 
-              receiving micropayments for your original contribution and work.
-              Status: You have owner permissions for one or more NFT factories. Select the desired NFT factory 
-              and click "Actions" to mint NFTs.
-            </div> 
-          }
-
-          {rights === 0 &&
-            <div className={styles.note}>
-              In this tab, you can take an NFT you obtained from someone else and derive a new family of NFTs from it.
-              Think of this as creating a "child" NFT from a preceeding "parent" NFT. This is useful, for example, if you generate 
-              creative content, and would like to license that content to others and allow them to build on it, whilst still 
-              receiving micropayments for your original contribution and work.
-              Status: You do not have owner permissions. To create your own NFT factory, obtain an NFT first.
-            </div> 
-          }
-
-          <div className={styles.TableContainer}>
-            {Object.keys(factories).map((v, i) => {
-              if(factories[v].haveRights && factories[v].originID !== 'simple') {
-                const key_UUID = `fac_d_` + i
-                return (
-                  <ListNFTfactory 
-                    key={key_UUID}
-                    name={factories[v].name}
-                    symbol={factories[v].symbol}
-                    owner={factories[v].owner}
-                    address={factories[v].address}
-                    layer={factories[v].layer}
-                    icon={factoryIcon}
-                    oriChain={factories[v].originChain}
-                    oriAddress={factories[v].originAddress}
-                    oriID={factories[v].originID}
-                    oriFeeRecipient={factories[v].originFeeRecipient}
-                    haveRights={factories[v].haveRights}
-                  />
-                )
-              } else {
-                return (<></>)
-              }
-            })}
-          </div>
-        </div>
-
-        
-
-      </div>
+          <ListNFTfactory
+            contracts={contracts}
+            closeMintModal={this.closeMintModal}
+          />
+        </Modal>
+      </>
     )
   }
 }
 
-const mapStateToProps = state => ({ 
+const mapStateToProps = state => ({
   nft: state.nft,
   setup: state.setup
-});
+})
 
-export default connect(mapStateToProps)(Nft);
+export default connect(mapStateToProps)(Nft)

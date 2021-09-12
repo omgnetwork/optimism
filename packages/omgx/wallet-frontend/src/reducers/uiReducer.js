@@ -13,7 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+//localStorage.removeItem("activePage")
+
+let activePage = localStorage.getItem("activePage")
+
+if (activePage) {
+  activePage = JSON.parse(activePage)
+}
+
 const initialState = {
+  theme: 'dark',
+  page: activePage ? activePage : 'AccountNow',
   depositModal: false,
   transferModal: false,
   exitModal: false,
@@ -24,17 +34,29 @@ const initialState = {
   addNewTokenModal: false,
   farmDepositModal: false,
   farmWithdrawModal: false,
+  transferDaoModal: false,
+  delegateDaoModal: false,
+  newProposalModal: false,
   ledger: false,
   alert: null,
   error: null,
-  activeHistoryTab1: 'Transactions',
+  activeHistoryTab1: 'All',
   activeHistoryTab2: 'Exits',
 };
 
 function uiReducer (state = initialState, action) {
   switch (action.type) {
+    case 'UI/THEME/UPDATE':
+      return { ...state, theme: action.payload }
+    case 'UI/PAGE/UPDATE':
+      //save currently active page
+      localStorage.setItem("activePage", JSON.stringify(action.payload))
+      return { 
+        ...state, 
+        page: action.payload
+      }
     case 'UI/MODAL/OPEN':
-      return { ...state, 
+      return { ...state,
         [action.payload]: true,
         fast: action.fast,
         token: action.token
@@ -56,8 +78,8 @@ function uiReducer (state = initialState, action) {
       if(action.payload.modal === 'confirmationModal') {
         dataType = 'cMD';
       }
-      return { ...state, 
-        [dataType]: action.payload.data, 
+      return { ...state,
+        [dataType]: action.payload.data,
       }
     default:
       return state;

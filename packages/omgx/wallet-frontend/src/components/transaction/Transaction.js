@@ -13,160 +13,186 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, {useState} from 'react';
+import React, { useState } from 'react'
 
-import Tooltip from 'components/tooltip/Tooltip';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import LinkIcon from 'components/Icons/LinkIcon';
-import * as styles from './Transaction.module.scss';
+import { Grid, Typography,Fade } from '@material-ui/core'
+import * as styles from './Transaction.module.scss'
+import * as S from './Transaction.styles'
+import { useTheme } from '@emotion/react'
+import { selectNetwork } from 'selectors/setupSelector'
+import { useSelector } from 'react-redux'
+import { getAllNetworks } from 'util/masterConfig'
+import Button from 'components/button/Button'
 
-function Transaction ({
+function Transaction({
   link,
   status,
   statusPercentage,
   subStatus,
   button,
   title,
-  midTitle,
+  time,
   subTitle,
   chain,
   typeTX,
   blockNumber,
   tooltip = '',
-  detail
+  detail,
+  oriChain,
+  oriHash,
 }) {
 
-  const [dropDownBox, setDropDownBox] = useState(false);
-  const [dropDownBoxInit, setDropDownBoxInit] = useState(true);
+  const [dropDownBox, setDropDownBox] = useState(false)
+  const theme = useTheme()
 
-  function renderValue () {
-    
-    if (button) {
-      return (
-        <div className={styles.statusContainer}>
-          <div
-            onClick={button.onClick}
-            className={styles.button}
-          >
-            {button.text}
-          </div>
-          <div>{subStatus}</div>
-        </div>
-      )
+  const currentNetwork = useSelector(selectNetwork())
+  const nw = getAllNetworks()
+
+  const chainLink = ({chain,hash}) => {
+    let network = nw[currentNetwork]
+    if (!!network && !!network[chain]) {
+      if (chain === 'L1') {
+        //go to etherscan
+        return `${network[chain].transaction}${hash}`;
+      } else {
+        //the boba blockexplorer
+        return `${network[chain].transaction}${hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
+      }
     }
-    
-    return (
-      <div className={styles.statusContainer}>
-        <div className={styles.status}>
-          <div
-            className={[
-              styles.indicator,
-              status === 'Pending' ? styles.pending : '',
-              status === 'Exited' ? styles.exited : '',
-              status === 'Failed' ? styles.failed : ''
-            ].join(' ')}
-          />
-          <span>{status}</span>
-          {status === 'Pending' && !!statusPercentage && (
-            <Tooltip title={tooltip}>
-              <span className={styles.percentage}>
-                {`(${Math.max(statusPercentage, 0)}%)`}
-              </span>
-            </Tooltip>
-          )}
-        </div>
-        <div>{subStatus}</div>
-      </div>
-    )
+    return '';
   }
 
-  function renderDetail() {
+  function renderDetailRedesign() {
+
     if (!detail) {
-      return null;
+      return null
     }
-    return <> 
-      <div className={`${styles.subTitle} ${styles.viewMore}`} style={{ cursor: 'pointer' }}
-        onClick={() => {
-          setDropDownBox(!dropDownBox)
-          setDropDownBoxInit(false)
-        }}
+
+    let prefix = 'L2'
+    if (oriChain === 'L2') prefix = 'L1'
+
+    return (
+
+      <S.TableBody
+        style={{ justifyContent: 'center' }}
       >
-        <div>View More</div>
-        <ExpandMoreIcon />
-      </div>
-      <div
-        className={dropDownBox ?
-          styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
-      >
-        <div className={styles.title}>
-        <a className={styles.href} href={detail.l1TxLink} target="_blank" rel="noopener noreferrer">
-          {detail.l1Hash}
-        </a>
-        </div>
-        <div className={styles.content}>
-          <div>L1 Block : {detail.l1BlockNumber}</div>
-        </div>
-        <div className={styles.content}>
-          <div>Block Hash : {detail.l1BlockHash}</div>
-        </div>
-        <div className={styles.content}>
-          <div>L1 From : {detail.l1From}</div>
-        </div>
-        <div className={styles.content}>
-          <div>L1 To : {detail.l1To}</div>
-        </div>
-      </div>
-    </>
+        <S.TableCell sx={{
+          gap: '5px',
+          width: '98% !important',
+          padding: '10px',
+          alignItems: 'flex-start !important',
+        }}>
+          {!!dropDownBox ? <Fade in={dropDownBox}>
+            <div>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>
+                  {prefix} Hash:&nbsp;
+                  <a className={styles.href} href={chainLink({ chain: prefix, hash:detail.hash})} target="_blank" rel="noopener noreferrer">
+                    {detail.hash}
+                  </a>
+                </Typography>
+              </Grid>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>{prefix} Block:&nbsp;{detail.blockNumber}</Typography>
+              </Grid>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>{prefix} Block Hash:&nbsp;{detail.blockHash}</Typography>
+              </Grid>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>{prefix} From:&nbsp;{detail.from}</Typography>
+              </Grid>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>{prefix} To:&nbsp;{detail.to}</Typography>
+              </Grid>
+            </div>
+          </Fade> : null}
+        </S.TableCell>
+      </S.TableBody>)
   }
 
   return (
-    <div className={styles.Transaction}
-      style={{
-        background: `${!!dropDownBox ? 'rgba(255, 255, 255, 0.03)' : ''}`
+    <
+      div style={{
+        padding: '10px',
+        borderRadius: '8px',
+        background: theme.palette.background.secondary,
       }}
     >
-      <div className={styles.transactionItem}>
-        <div className={styles.title}>
-          <div>{chain}</div>
-          <div>{title}</div>
-        </div>
-        {(midTitle || status) && 
-          <div className={styles.subTitle}>
-            <div>{midTitle}</div>
-            <div>{blockNumber}</div>
-          </div>
-        }
-        {subTitle && 
-          <div className={styles.subTitle}>
-            {subTitle}
-          </div>
-        }
-        <div className={styles.content}>
-          <div>{typeTX}</div>
-          {link && 
-            <a 
-              href={link}
+      <S.TableBody>
+
+        <S.TableCell
+          sx={{ gap: '5px' }}
+          style={{ width: '60%' }}
+        >
+          <Typography variant="h3">{chain}</Typography>
+
+          <Typography variant="body3" className={styles.muted}>
+            {time}
+          </Typography>
+
+          <Typography variant="body3" className={styles.muted}>
+            {oriChain}&nbsp;Hash:&nbsp;
+            <a
+              href={chainLink({hash:oriHash, chain: oriChain})}
               target={'_blank'}
               rel='noopener noreferrer'
-              className={styles.button}
-            > 
-            <LinkIcon />
-             Advanced Details</a>  
-          }
-        </div>
-        {renderDetail()}
-        {(button || status) &&
-          <div className={styles.content}>
-            <div className={styles.right}>
-              {renderValue()}
-            </div>
-          </div>
-        }
-      </div>
-      <div className={styles.divider}></div>
+              style={{ color: theme.palette.mode === 'light' ? 'black' : 'white' }}
+            >
+              {oriHash}
+            </a>
+          </Typography>
 
-    </div>
-  )
+          <Typography variant="body3" className={styles.muted}>
+            {typeTX}
+          </Typography>
+
+          {!!detail &&
+            <Typography
+              variant="body2"
+              sx={{
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                setDropDownBox(!dropDownBox)
+              }}
+            >
+              More Information
+            </Typography>
+          }
+        </S.TableCell>
+
+        <S.TableCell
+          sx={{ gap: '5px' }}
+          style={{ width: '20%' }}
+        >
+          <div className={styles.muted}>
+            <Typography variant="body3">
+              {blockNumber}
+            </Typography>
+          </div>
+        </S.TableCell>
+
+        <S.TableCell sx={{ gap: "5px" }}>
+          {button &&
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                boder: '1.4px solid #506DFA',
+                borderRadius: '8px',
+                width: '180px'
+              }}
+              onClick={button.onClick}
+            >
+              {button.text}
+            </Button>
+          }
+
+        </S.TableCell>
+      </S.TableBody>
+      {renderDetailRedesign()}
+    </div>)
+
 }
 
-export default React.memo(Transaction);
+export default Transaction

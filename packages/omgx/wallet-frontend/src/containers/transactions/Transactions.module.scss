@@ -5,26 +5,18 @@
   flex-direction: column;
   padding: 10px;
   padding-top: 0px;
-  background: $background;//white;
+  background: $background; //white;
 }
 
 .header {
-  h2 {
-    // flex: 1;
-    margin-bottom: 0;
-    padding-left: 10px;
-    color: $white;//$gray2;
-  }
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  // background-color: $bunnyRed;
-  @include mobile {
-    padding-top: 10px;
-    flex-direction: column;
-    align-items: flex-start;
+
+  .searchInput {
+    width: 250px!important;
   }
 }
 
@@ -64,9 +56,6 @@
   & > div {
     border: none !important;
   }
-  input {
-    
-  }
 }
 
 .transactions {
@@ -104,9 +93,8 @@
 }
 
 .actions {
-  // flex:1;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
 
   .datePicker {
@@ -117,31 +105,35 @@
 }
 
 .datePickerInput {
-  background: rgba(9, 22, 43, 0.5); 
-  box-shadow: -13px 15px 19px rgba(0, 0, 0, 0.15), inset 53px 36px 120px rgba(255, 255, 255, 0.06);
+  background: rgba(9, 22, 43, 0.5);
+  box-shadow: -13px 15px 19px rgba(0, 0, 0, 0.15),
+    inset 53px 36px 120px rgba(255, 255, 255, 0.06);
   border-radius: 8px;
   width: 130px;
   margin: 0px 15px;
   position: relative;
 
-  &::after{
-    content: "^";
-    color: rgba(255, 255, 255, 0.7);;
+  &::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 7px solid $white700;
     position: absolute;
     right: 10px;
     font-size: 25px;
-    bottom: 10px;
-    transform: rotate(180deg);
+    bottom: 15px;
   }
 
-  input { 
+  input {
     background-color: transparent;
     height: 40px;
     width: 130px;
     padding: 0px 15px;
     line-height: 40px;
-    border: 0;   
-    color: #F0A000;
+    border: 0;
+    color: #f0a000;
     font-size: 16px;
     text-align: left;
   }
