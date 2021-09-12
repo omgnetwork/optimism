@@ -1,5 +1,34 @@
 # data transport layer
 
+## 0.4.7
+
+### Patch Changes
+
+- 21b17edd: Added coverage for packages
+- Updated dependencies [888dafca]
+- Updated dependencies [eb0854e7]
+- Updated dependencies [21b17edd]
+- Updated dependencies [dfe3598f]
+  - @eth-optimism/contracts@0.4.11
+  - @eth-optimism/core-utils@0.5.5
+
+## 0.4.6
+
+### Patch Changes
+
+- 918c08ca: Bump ethers dependency to 5.4.x to support eip1559
+- Updated dependencies [918c08ca]
+  - @eth-optimism/contracts@0.4.10
+  - @eth-optimism/core-utils@0.5.2
+
+## 0.4.5
+
+### Patch Changes
+
+- b5b9fd89: Migrate to using `ethers.StaticJsonRpcProvider`
+- Updated dependencies [ecc2f8c1]
+  - @eth-optimism/contracts@0.4.9
+
 ## 0.4.4
 
 ### Patch Changes

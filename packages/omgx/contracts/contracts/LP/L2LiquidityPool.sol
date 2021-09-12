@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >0.5.0;
+pragma solidity 0.7.6;
 
 import "./interfaces/iL1LiquidityPool.sol";
 
@@ -9,12 +9,14 @@ import "@eth-optimism/contracts/contracts/optimistic-ethereum/libraries/bridge/O
 /* External Imports */
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 /**
  * @dev An L2 LiquidityPool implementation
  */
 
-contract L2LiquidityPool is OVM_CrossDomainEnabled {
+contract L2LiquidityPool is OVM_CrossDomainEnabled, ReentrancyGuardUpgradeable, PausableUpgradeable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -197,12 +199,17 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
         public
         onlyOwner()
         onlyNotInitialized()
+        initializer()
     {
         messenger = _l2CrossDomainMessenger;
         L1LiquidityPoolAddress = _L1LiquidityPoolAddress;
         owner = msg.sender;
         configureFee(35, 15);
         configureGas(100000);
+
+        __Context_init_unchained();
+        __Pausable_init_unchained();
+        __ReentrancyGuard_init_unchained();
     }
 
     /**
@@ -253,6 +260,7 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
         public
         onlyOwner()
     {
+        require(_l1TokenAddress != _l2TokenAddress, "l1 and l2 token addresses cannot be same");
         // use with caution, can register only once
         PoolInfo storage pool = poolInfo[_l2TokenAddress];
         // l2 token address equal to zero, then pair is not registered.
@@ -317,6 +325,8 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
         address _tokenAddress
     )
         external
+        nonReentrant
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
         UserInfo storage user = userInfo[_tokenAddress][msg.sender];
@@ -361,6 +371,7 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
         address _tokenAddress
     )
         external
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
 
@@ -403,6 +414,7 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
         address payable _to
     )
         external
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
         UserInfo storage user = userInfo[_tokenAddress][msg.sender];
@@ -477,6 +489,7 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
         address _to
     )
         external
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
         UserInfo storage user = userInfo[_tokenAddress][msg.sender];
@@ -502,6 +515,20 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
         );
     }
 
+    /**
+     * Pause contract
+     */
+    function pause() external onlyOwner() {
+        _pause();
+    }
+
+    /**
+     * UnPause contract
+     */
+    function unpause() external onlyOwner() {
+        _unpause();
+    }
+
     /*************************
      * Cross-chain Functions *
      *************************/
@@ -520,6 +547,7 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
         external
         onlyInitialized()
         onlyFromCrossDomainAccount(address(L1LiquidityPoolAddress))
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
 
@@ -574,6 +602,7 @@ contract L2LiquidityPool is OVM_CrossDomainEnabled {
         external
         onlyInitialized()
         onlyFromCrossDomainAccount(address(L1LiquidityPoolAddress))
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
 

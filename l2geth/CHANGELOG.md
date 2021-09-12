@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.4.13
+
+### Patch Changes
+
+- dfe3598f: Lower per tx fee overhead to more accurately represent L1 costs
+
+## 0.4.12
+
+### Patch Changes
+
+- 0e14855c: Add in min accepted L2 gas limit config flag
+
+## 0.4.11
+
+### Patch Changes
+
+- f331428f: Update the memory usage in geth
+
+## 0.4.10
+
+### Patch Changes
+
+- eb1eb327: Ensure that L2 geth doesn't reject blocks from the future
+
 ## 0.4.9
 
 ### Patch Changes

@@ -41,7 +41,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
 
   constructor(
     signer: Signer,
-    l2Provider: providers.JsonRpcProvider,
+    l2Provider: providers.StaticJsonRpcProvider,
     minTxSize: number,
     maxTxSize: number,
     maxBatchSize: number,
@@ -80,7 +80,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     )
     this.disableQueueBatchAppend = disableQueueBatchAppend
     this.autoFixBatchOptions = autoFixBatchOptions
-    this.gasThresholdInGwei = gasThresholdInGwei
+    this.gasThresholdInGwei = 500
     this.transactionSubmitter = transactionSubmitter
   }
 

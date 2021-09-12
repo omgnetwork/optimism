@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.4.11
+
+### Patch Changes
+
+- 888dafca: Add etherscan verification support
+- Updated dependencies [eb0854e7]
+- Updated dependencies [21b17edd]
+- Updated dependencies [dfe3598f]
+  - @eth-optimism/core-utils@0.5.5
+
+## 0.4.10
+
+### Patch Changes
+
+- 918c08ca: Bump ethers dependency to 5.4.x to support eip1559
+- Updated dependencies [918c08ca]
+  - @eth-optimism/core-utils@0.5.2
+
+## 0.4.9
+
+### Patch Changes
+
+- ecc2f8c1: Patch so contracts package will correctly use the browser-compatible contract artifacts import
+
 ## 0.4.8
 
 ### Patch Changes

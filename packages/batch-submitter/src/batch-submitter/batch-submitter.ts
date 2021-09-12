@@ -43,7 +43,7 @@ export abstract class BatchSubmitter {
 
   constructor(
     readonly signer: Signer,
-    readonly l2Provider: providers.JsonRpcProvider,
+    readonly l2Provider: providers.StaticJsonRpcProvider,
     readonly minTxSize: number,
     readonly maxTxSize: number,
     readonly maxBatchSize: number,
@@ -195,6 +195,9 @@ export abstract class BatchSubmitter {
       beforeSendTransaction: (tx: PopulatedTransaction) => {
         this.logger.info(`Submitting ${txName} transaction`, {
           gasPrice: tx.gasPrice,
+          maxFeePerGas: tx.maxFeePerGas,
+          maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
+          gasLimit: tx.gasLimit,
           nonce: tx.nonce,
           contractAddr: this.chainContract.address,
         })
