@@ -16,7 +16,7 @@ limitations under the License. */
 import React from 'react'
 import BN from 'bignumber.js'
 import * as S from './Input.styles'
-import Button from 'components/button/Button'
+
 import { Box, Typography } from '@material-ui/core'
 import { useTheme } from '@emotion/react'
 import { getCoinImage } from 'util/coinImage'

@@ -19,8 +19,6 @@ import { useSelector, useDispatch, batch } from 'react-redux'
 import { isEqual, orderBy } from 'lodash'
 
 //Selectors
-import { selectLoading } from 'selectors/loadingSelector'
-import { selectIsSynced } from 'selectors/statusSelector'
 import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector'
 import { selectTransactions } from 'selectors/transactionSelector'
 

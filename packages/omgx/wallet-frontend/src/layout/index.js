@@ -91,6 +91,9 @@ function App () {
         fontSize: 16,
         fontWeight: 400,
       },
+      body3: {
+        fontSize: '0.7em'
+      },
     },
     components: {
       MuiPaper: {
