@@ -46,6 +46,12 @@ export function exitBOBA(token, value) {
   )
 }
 
+export function processExits(maxExits, currency, gasPrice) {
+  return createAction('QUEUE/PROCESS', () =>
+    networkService.processExits(maxExits, currency, gasPrice)
+  )
+}
+
 //SWAP RELATED
 export function depositL1LP(currency, value, decimals) {
   return createAction('DEPOSIT/CREATE', () =>
@@ -130,12 +136,6 @@ export function approveERC20_L1LP(
 //     )
 //   )
 // }
-
-export function processExits(maxExits, currency, gasPrice) {
-  return createAction('QUEUE/PROCESS', () =>
-    networkService.processExits(maxExits, currency, gasPrice)
-  )
-}
 
 export function transfer(recipient, value, currency) {
   return createAction('TRANSFER/CREATE', () =>
