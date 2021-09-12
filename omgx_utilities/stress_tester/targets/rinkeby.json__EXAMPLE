@@ -4,6 +4,7 @@
   "endpoints":[ "https://rinkeby.infura.io/v3/fd76d0a0b9e940058d6d42d5e261f517", "https://rinkeby.boba.network" ],
   "L1_geth_PoA":true,
   "confirmations": [ 1, 0 ],
+  "op_pct": [ [ 5, 50, 50 ] , [ 5, 20, 0 ] ],
   "gas_price_gwei": [ 1.0 , 0.015 ],
   "gas_mult": [ 1.1 , 1.0 ],
   "whale_acct":[ "0x_ACCT_", "_KEY_"],

@@ -12,8 +12,8 @@
 #
 # Child processes will only be performing one action at a time, chosen randomly
 # and with probabilities intended to keep most of the activity on the L2 chain.
-# However some will stay on L1 to ensure that there is some background activity
-# which is not part of the rollup framework.
+# However some L1 operations are included to ensure that there is some background
+# activity which is not part of the rollup framework.
 
 import os,sys
 from web3 import Web3
@@ -27,19 +27,19 @@ from web3.gas_strategies.time_based import fast_gas_price_strategy
 from web3.middleware import geth_poa_middleware
 from web3.logs import STRICT, IGNORE, DISCARD, WARN
 
-num_children = 4
-num_workers = 4
+num_children = 20
+num_workers = 2
 min_active_per = 5  # For every <min_active_per> children, require 1 to stay on L2 (disallows exit operations)
+max_fail = 0 # Ignore this many op failures. Next one will start a shutdown
 
 min_balance = Web3.toWei(0.01, 'ether')
 refund_balance = Web3.toWei(0.009, 'ether') # FIXME - try all refunds, and fail gracefully w. insufficient balance for gas cost
 min_lp_balance = Web3.toWei(1.0, 'ether')
-max_fail = 0 # Ignore this many op failures. Next one will start a shutdown
 
 # Emit warning messages if any child has been waiting "slow_secs" or more. Shut down at "stuck_secs". 
 slow_secs = 360
 stuck_secs = 900
-giveup_secs = 3600
+giveup_secs = 1800
 fund_batch = 10
 
 if len(sys.argv) < 2:
@@ -55,6 +55,7 @@ except:
   print("Unable to load target definition",env_path)
   exit(1)
 
+  
 assert(num_children <= 1000) # Not a hard limit, but does affect log formatting
 
 # Fail if the parameters would exceed the allowed funding limit
@@ -64,7 +65,9 @@ class shutdown:
   level = 0
   num_done = 0
   num_fails = 0
-
+  total_ops = 0  # FIXME - saving time by sticking this here. Move to its own stats object or other thread-safe place.
+  batchGas = 0
+  
 class Account:
   def __init__(self, address, key):
     self.address = address
@@ -101,9 +104,14 @@ class Context:
       
 class Child:
   def __init__(self, num, acct, parent):
+     
     self.num = num
     self.acct = acct
-    self.on_chain = 2 - (self.num % 2)
+    # Optional parameter to force all children to start on one chain
+    if 'start_chain' in env and env['start_chain'] > 0:
+      self.on_chain = env['start_chain']
+    else:
+      self.on_chain = 2 - (self.num % 2)
     self.approved = [False]*3
     self.staked = [False]*3
     self.parent = parent
@@ -111,7 +119,10 @@ class Child:
     self.op = None
     self.need_tx = False
     self.exiting = False
-
+    self.gasEstimate = 0
+    self.gasLimit = 0
+    self.gasUsed = 0
+    
     addr_names[acct.address] = "Child_" + str(num)
     # Could cache L1, L2 balances
 
@@ -133,7 +144,7 @@ def nuke(sec):
   os._exit(1)
   
 def myAssert(cond):
-  if not cond and shutdown.level < 2:
+  if not (cond) and shutdown.level < 2:
     shutdown.level = 2
     threading.Thread(target=nuke, args=(10,)).start()
   assert(cond)
@@ -150,7 +161,6 @@ def ctrlC(sig, frame):
   print("+---------------------+")
   print("Shutdown level: ", shutdown.level)
   print("listLock:", listLock.locked())
-#  print("qLock:", qLock.locked())
   print("txWatch items:", len(txWatch))
   if shutdown.level > 1:
     for i in txWatch.keys():
@@ -162,7 +172,6 @@ def ctrlC(sig, frame):
       print("  ",i)
   print("readyQueue size:", readyQueue.qsize())
   print("idleQueue size:", idleQueue.qsize())
-  print("fundQueue size:", fundQueue.qsize())
   print("numDone:", shutdown.num_done,"of",num_children)
   if shutdown.level > 1:
     for c in children:
@@ -179,7 +188,6 @@ evWatch = dict()
 txWatch = dict()
 evMissed = []
 
-#qLock = threading.Lock()
 readyQueue = queue.Queue()
 idleQueue = queue.Queue()
 
@@ -199,6 +207,7 @@ if 'address_server_2' in env: # Legacy
   boba_addrs = requests.get(env['address_server_2'] + "/addresses.json")
 else:
   boba_addrs = requests.get(env['address_server'] + "/omgx-addr.json")
+
 a2 = json.loads(boba_addrs.text)
 
 
@@ -302,17 +311,254 @@ def loadL2Contracts(rpc):
   contracts['OVM_L2CrossDomainMessenger'] = loadContract(rpc,omgx_addrs['OVM_L2CrossDomainMessenger'],'./contracts/OVM_L2CrossDomainMessenger.json')
   
   return contracts
+
+def wPrint(log, ch, msg, screenEcho = True):
+  if screenEcho:
+    print("--",ch,"-- ", msg)
+  log.write(msg + "\n")
+  
+def lPrint(log, msg, screenEcho = True):
+  if screenEcho:
+    print(msg)
+  log.write(msg + "\n")
+
   
 gCtx = Context("./logs/mainloop.log")
-print ("Versions: L1 =", gCtx.rpc[1].clientVersion, ", L2 =", gCtx.rpc[2].clientVersion)
-print ("Detected chain IDs: L1 =", gCtx.chainIds[1], ", L2 =", gCtx.chainIds[2])
+lPrint (gCtx.log, "Versions: L1=" + gCtx.rpc[1].clientVersion + ", L2=" + gCtx.rpc[2].clientVersion)
+lPrint (gCtx.log, "Detected chain IDs: L1=" + str(gCtx.chainIds[1]) + ", L2=" + str(gCtx.chainIds[2]))
 
 whale.setNonces(gCtx.rpc)
+
+def Fund(ctx, fr, to, chain, amount, n=None):
+
+  amount -= randint(0,65535)
+  
+  if n is None:
+    n = ctx.rpc[chain].eth.get_transaction_count(fr.address)
+  
+  tx = {
+      'nonce': n,
+ #     'gasPrice':gasPrice[chain],
+      'from':fr.address,
+      'to':to,
+      'value':1,
+#      'gas':800000,
+      'chainId': ctx.chainIds[chain],
+  }
+
+#  print("DBG FundTx before estimateGas", tx)
+  
+  eg = ctx.rpc[chain].eth.estimate_gas(tx)
+#  print("DBG FundTx estimate_gas:", eg, "GasPrice", ctx.rpc[chain].eth.gasPrice)
+  
+  eg = int(eg * env['gas_mult'][chain-1])
+  
+  tx['gas'] = Web3.toWei(eg , 'wei')
+  tx['gasPrice'] = gasPrice[chain]
+#  print("EG", eg)
+  
+  myAssert(eg*gasPrice[chain] < amount)
+  tx['value'] = Web3.toWei(amount - eg*gasPrice[chain], 'wei')
+#  print("DBG Modified FundTx", tx)
+  
+  signed_txn = ctx.rpc[chain].eth.account.sign_transaction(tx, fr.key)
+  
+  ret = ctx.rpc[chain].eth.send_raw_transaction(signed_txn.rawTransaction)
+  
+  return ret
+
+def xFund(ctx, c, to, amount, n=None):
+
+  amount -= randint(0,65535)
+  
+  if n is None:
+    n = ctx.rpc[c.on_chain].eth.get_transaction_count(c.acct.address)
+  
+  tx = {
+      'nonce': n,
+#      'gasPrice':gasPrice[c.on_chain],
+      'from':c.acct.address,
+      'to':to,
+      'value':1,
+      'gas':800000,
+      'chainId': ctx.chainIds[c.on_chain],
+  }
+
+#  print("DBG FundTx before estimateGas", tx)
+  
+  c.gasEstimate = ctx.rpc[c.on_chain].eth.estimate_gas(tx)
+  
+#  print("DBG FundTx estimate_gas:", eg, "GasPrice", ctx.rpc[c.on_chain].eth.gasPrice)
+  
+  c.gasLimit = int(c.gasEstimate * env['gas_mult'][c.on_chain-1])
+  
+  tx['gas'] = Web3.toWei(c.gasLimit , 'wei')
+  tx['gasPrice'] = gasPrice[c.on_chain]
+  
+#  print("EG", eg)
+  
+  myAssert(c.gasLimit*gasPrice[c.on_chain] < amount)
+  tx['value'] = Web3.toWei(amount - c.gasLimit*gasPrice[c.on_chain], 'wei')
+#  print("DBG Modified FundTx", tx)
+  
+  signed_txn = ctx.rpc[c.on_chain].eth.account.sign_transaction(tx, c.acct.key)
+  
+  ret = ctx.rpc[c.on_chain].eth.send_raw_transaction(signed_txn.rawTransaction)
+  
+  return ret
+
+if len(sys.argv) >= 3 and sys.argv[2] == "recover":
+  print("Recovering account balances on ", env['name'])
+  n = 0
+  err = 0
+  
+  with open("./logs/accounts-" + env['name'] + ".log", "r") as f:
+    for l in f.readlines():
+      n += 1
+      jj = json.loads(l)
+      
+      addr = jj['addr']
+      print("Line ",n,":", addr)
+      
+      a = [0]  # gCtx.contracts['LP_1'].functions.userInfo('0x0000000000000000000000000000000000000000', addr).call()
+      if a[0] != 0:
+
+        addr = jj['addr']
+        key = jj['key']
+
+        print("addr", addr, "has liquidity", a)
+
+        b = gCtx.contracts['LP_1'].functions.withdrawLiquidity(Web3.toWei(a[0] / 10, 'wei'), '0x0000000000000000000000000000000000000000', addr).buildTransaction({
+          'nonce':gCtx.rpc[1].eth.get_transaction_count(addr),
+          'gasPrice':gasPrice[1],
+          'gas': 2000000,
+          'from':addr,
+          'value':1,
+          'chainId':gCtx.chainIds[1],
+        })
+
+        eg = 0
+        try:
+          eg = gCtx.rpc[1].eth.estimate_gas(b)
+          b['gas'] = Web3.toWei(eg, 'wei')
+
+          st = gCtx.rpc[1].eth.account.sign_transaction(b,key)
+          r = gCtx.rpc[1].eth.send_raw_transaction(st.rawTransaction)
+          rcpt = gCtx.rpc[1].eth.wait_for_transaction_receipt(r)
+          print("RCPT", rcpt)
+        except Exception as e:
+          print ("EXCEPTION", e)
+          time.sleep(2)
+
+      bal = gCtx.rpc[1].eth.get_balance(addr)
+      print("L1 bal", Web3.fromWei(bal,'ether'))
+      
+      if bal > refund_balance:
+        class tmpFrom:
+          def __init__(self, address, key):
+            self.address = address
+            self.key = key
+        print("Will refund L1 from addr", addr)
+        tFr = tmpFrom(addr, jj['key'])
+
+        try:
+          ret = Fund(gCtx, tFr, whale.address, 1, bal)
+          rcpt = gCtx.rpc[1].eth.wait_for_transaction_receipt(ret)
+          print("RCPT status", rcpt.status)
+          if rcpt.status != 1:
+            err += 1
+        except Exception as e:
+          print("Refund failed:" , e)
+          err += 1
+          
+      bal = gCtx.rpc[2].eth.get_balance(addr)
+      print("L2 bal", Web3.fromWei(bal,'ether'))
+      
+      if bal > refund_balance:
+        class tmpFrom:
+          def __init__(self, address, key):
+            self.address = address
+            self.key = key
+        print("Will refund L2 from addr", addr)
+        tFr = tmpFrom(addr, jj['key'])
+
+        try:
+          ret = Fund(gCtx, tFr, whale.address, 2, bal)
+          rcpt = gCtx.rpc[2].eth.wait_for_transaction_receipt(ret)
+          print("RCPT status", rcpt.status)
+          if rcpt.status != 1:
+            err += 1
+        except Exception as e:
+         print("Refund failed:" , e)
+         err += 1
+      
+      if err >= 5:
+        exit(1)
+            
+      time.sleep(0.5)
+     
+  exit(0)
+elif len(sys.argv) >= 3 and sys.argv[2] == "testpay":
+
+  #fr = whale
+  
+  fr = Account(Web3.toChecksumAddress("0x1cbd3b2770909d4e10f157cabc84c7264073c9ec"), "0x47c99abed3324a2707c28affff1267e45918ec8c3f20b8aa892e8b065d2942dd")
+  
+  chain = 2
+  ctx = gCtx
+  
+  amount = Web3.toWei(0.01,'ether')
+  to = "0x6cF9BAf45458cF510F6AC807B52596C62Bf242B1"   # "key": "0x74db41959addb60d029f1a81536ab9de13f094c66dd747d6f4b66de646120fd8" (random test acct)
+
+  n = ctx.rpc[chain].eth.get_transaction_count(fr.address)
+  
+  tx = {
+      'nonce': n,
+      'gasPrice':gasPrice[chain],
+      'from':fr.address,
+      'to':to,
+      'value':1,
+#      'gas':1,
+      'chainId': ctx.chainIds[chain],
+  }
+
+  print("DBG FundTx before estimateGas", tx)
+  
+  egRaw = ctx.rpc[chain].eth.estimate_gas(tx)
+  print("DBG FundTx estimate_gas:", egRaw, "GasPrice", ctx.rpc[chain].eth.gasPrice)
+  
+  if len(sys.argv) >= 4:
+    eg = int(sys.argv[3])
+    print("Using supplied gas limit", eg)
+  else:
+    print("Auto-adjusting gas limit")
+    eg = int(egRaw * env['gas_mult'][chain-1])
+  
+  tx['gas'] = Web3.toWei(eg , 'wei')
+  print("Estimated Gas: raw=", egRaw, "adjusted=", eg, "price=", ctx.rpc[chain].eth.gasPrice)
+  
+  myAssert(eg*gasPrice[chain] < amount)
+  tx['value'] = Web3.toWei(amount - eg*gasPrice[chain], 'wei')
+#  print("DBG Modified FundTx", tx)
+  
+  signed_txn = ctx.rpc[chain].eth.account.sign_transaction(tx, fr.key)
+  
+  ret = ctx.rpc[chain].eth.send_raw_transaction(signed_txn.rawTransaction)
+
+  rcpt = gCtx.rpc[chain].eth.wait_for_transaction_receipt(ret)
+  print("RCPT", rcpt)
+
+
+  exit(0)
+
 
 def Start(ctx, c, op):
   myAssert(c.op is None)
   myAssert(not c.ts) # Ensure it's empty
   c.op = op
+  c.gasEstimate = 0
+  c.gasLimit = 0
+  c.gasUsed = 0
   
   c.ts.append(time.time())
   s = "OP_START," + "{:03d}".format(c.num) + "," + op + "," + str(c.on_chain) + "," + "{:.8f}".format(c.ts[0])
@@ -348,7 +594,7 @@ def Watch(ctx, c, op, tx=None):
   
 # Wrapper to watch for an event as well as a tx receipt
 def WatchEv(ctx, c, op, tx=None):
-  myAssert(tx)
+  myAssert(tx is not None)
 
   listLock.acquire()
   evWatch[c.acct.address] = c
@@ -360,7 +606,11 @@ def Finish(c,success=1):
   tNow = time.time()
   c.ts.append(tNow)
 
-  op_str = "OP_DONE_," + "{:03d}".format(c.num) + "," + c.op + "," + str(c.on_chain) + "," + str(success) 
+  op_str = "OP_DONE_," + "{:03d}".format(c.num) + "," + c.op + "," + str(c.on_chain) + "," + str(success)
+  op_str += "," + str(c.gasEstimate) + "/" + str(c.gasLimit) + "/" + str(c.gasUsed)
+  c.gasEstimate = 0
+  c.gasLimit = 0
+  c.gasUsed = 0
   
   start_at = c.ts.pop(0)
   for t in c.ts:
@@ -368,9 +618,13 @@ def Finish(c,success=1):
   op_str += "\n"
   
   logLock.acquire()
+  
+  shutdown.total_ops += 1
+  
   op_log.write(op_str)
   op_log.flush() 
   logLock.release()
+  old_op = c.op
   
   c.ts = []
   c.op = None
@@ -380,18 +634,14 @@ def Finish(c,success=1):
     shutdown.num_done += 1
     # FIXME - advance shutdown if it was the last one
   elif success:
-#    qLock.acquire()
     readyQueue.put(c)
-#    qLock.release()
   else:
-    print("Putting child",c.num,"into idleQueue after failed operation")
-#    qLock.acquire()
+    print("Putting child",c.num,"into idleQueue after failed operation:", old_op)
     shutdown.num_fails += 1
     if shutdown.num_fails > max_fail and shutdown.level == 0: 
       print("*** Maximum failure count reached, starting shutdown")
       shutdown.level = 1
     idleQueue.put(c)
-#    qLock.release()
     
 # Periodically take a child out of the idleQueue and see if it has gained enough funds to be put back
 # into the readyQueue.
@@ -449,7 +699,7 @@ def AddLiquidity(ctx, c,amount):
   Start(ctx, c, "AL")
   if c.staked[c.on_chain]:
     # FIXME - do a withdrawal in this case
-    print("Child",c.num,"alredy staked on",c.on_chain,"in AddLiquidity")
+    lPrint(ctx.log, "Child " + str(c.num) + " alredy staked on chain " + str(c.on_chain) + " in AddLiquidity")
   r2 = AddLiquidity_2(ctx, c.on_chain, c.acct, amount)
   c.staked[c.on_chain] = True
   Watch(ctx, c, "AL", r2)
@@ -471,36 +721,44 @@ def AddLiquidity_2(ctx, chain, acct,amount):
     token,
   ).buildTransaction({
     'nonce':ctx.rpc[chain].eth.get_transaction_count(acct.address),
-    'gas':800000, # too low fails e.g. "fee too low: 11700000000000, use at least tx.gasLimit = 790000 and tx.gasPrice = 15000000"
-    'gasPrice':gasPrice[chain],
+#    'gasPrice':gasPrice[chain],
     'from':acct.address,
-    'value':amount,
+#    'value':amount,
     'chainId':ctx.chainIds[chain],
   })
-      
+  
+  if(chain==1):
+    t2['value'] = amount
+  eg = ctx.rpc[chain].eth.estimate_gas(t2)
+  t2['gas'] = eg # FIXME
+  t2['gasPrice'] = gasPrice[chain]
   st = ctx.rpc[chain].eth.account.sign_transaction(t2, acct.key)
   r2 = ctx.rpc[chain].eth.send_raw_transaction(st.rawTransaction)
   return r2
 
-
-def Onramp_2(ctx,acct, amount):
+# FIXME - this is used by the Whale to transfer L1->L2 if needed on startup. Can't quite unify it with 
+# the Onramp_trad code path used by the workers.
+def Onramp_2(ctx, acct, amount):
   
   sb = ctx.contracts['SB_1'].functions.depositETH(
-    1300000,  # FIXME / ref: 100000 == MIN_ROLLUP_TX_GAS from OVM_CanonicalTransactionChain.sol
+    8000000,  # FIXME / ref: 100000 == MIN_ROLLUP_TX_GAS from OVM_CanonicalTransactionChain.sol
               # Values like 8*MIN can fail silently, successful Tx on L1 but no event ever on L2
               # 8000000 works sometimes(?)
     '0x',
   )
   r2 = sb.buildTransaction({
     'nonce':ctx.rpc[1].eth.get_transaction_count(acct.address),
-    'gasPrice':gasPrice[1],
+#    'gas':1,
+#    'gasPrice':gasPrice[1],
     'from':acct.address,
     'value':1,
     'chainId':ctx.chainIds[1],
   })
-  eg = int(ctx.rpc[1].eth.estimate_gas(r2) * env['gas_mult'][0])
   
+  eg =  int(ctx.rpc[1].eth.estimate_gas(r2) * env['gas_mult'][0])
+
   r2['gas'] = eg
+  r2['gasPrice'] = gasPrice[1]
   r2['value'] = Web3.toWei(amount - (eg*gasPrice[1]),'wei')
   
   r2 = ctx.rpc[1].eth.account.sign_transaction(r2, acct.key)
@@ -516,26 +774,41 @@ def Onramp_trad(ctx,c):
   try:
     Start(ctx,c,"SO")
     bb = ctx.rpc[1].eth.getBalance(acct.address)
-    #print("BAL trad", bb)
 
     bb = Web3.toWei(bb, 'wei')
 
-    ret = Onramp_2(ctx,c.acct, bb)
-    
+    sb = ctx.contracts['SB_1'].functions.depositETH(
+      8000000,  # FIXME / ref: 100000 == MIN_ROLLUP_TX_GAS from OVM_CanonicalTransactionChain.sol
+                # Values like 8*MIN can fail silently, successful Tx on L1 but no event ever on L2
+                # 8000000 works sometimes(?)
+      '0x',
+    )
+    r2 = sb.buildTransaction({
+      'nonce':ctx.rpc[1].eth.get_transaction_count(acct.address),
+#      'gas':1,
+#      'gasPrice':gasPrice[1],
+      'from':acct.address,
+      'value':1,
+      'chainId':ctx.chainIds[1],
+    })
+
+    c.gasEstimate = ctx.rpc[1].eth.estimate_gas(r2) 
+    c.gasLimit = int(c.gasEstimate * env['gas_mult'][0])
+
+    r2['gas'] = c.gasLimit
+    r2['gasPrice'] = gasPrice[1]
+    r2['value'] = Web3.toWei(bb - (c.gasLimit*gasPrice[1]),'wei')
+     
+#    print("SlowOnramp modified Tx:", r2)
+    r2 = ctx.rpc[1].eth.account.sign_transaction(r2, acct.key)
+    ret = ctx.rpc[1].eth.send_raw_transaction(r2.rawTransaction)
     c.on_chain = 2
     
-    if False:
-      print("&&&&& Waiting for SO")
-      rcpt = ctx.rpc[1].eth.wait_for_transaction_receipt(ret,timeout=300)    
-      print("&&&&& Got rcpt",rcpt)
-
-      Watch(ctx,c,"SO")
-    else:
-      WatchEv(ctx,c,"SO",ret)
+    WatchEv(ctx,c,"SO",ret)
     
   except Exception as e:
     print("ERROR onramp_trad failed for child",c.num, e)
-    exit(1)
+    myAssert(False) # FIXME
     
 def Onramp_fast(ctx,c):
   acct = c.acct
@@ -546,69 +819,82 @@ def Onramp_fast(ctx,c):
   bb = ctx.rpc[1].eth.getBalance(acct.address)
     
   if bb > (t[2] / 2.0):
-    print("Falling back to traditional onramp")
+    lPrint(ctx.log, "***** WARNING Child " + str(c.num) + " falling back to traditional onramp")
     Onramp_trad(acct)
   else:
-    #print("Continuing Fast Onramp for child",c.num,"addr", acct.address, "TS", time.time())
-    
-    try:
+    if True:
       Start(ctx,c,"FO")
       dep = ctx.contracts['LP_1'].functions.clientDepositL1(
-        1,
+        0,
         '0x0000000000000000000000000000000000000000'
       ).buildTransaction({
         'nonce':ctx.rpc[1].eth.get_transaction_count(acct.address),
-        'gasPrice':gasPrice[chain],
+#        'gasPrice':gasPrice[chain],
+#        'gas':1,
         'from':acct.address,
         'value':1,
         'chainId':ctx.chainIds[1],
       })
-      eg = int(ctx.rpc[1].eth.estimate_gas(dep) * env['gas_mult'][0])
-      amount = Web3.toWei(bb - eg*gasPrice[chain],'wei')
+      #eg = int(ctx.rpc[1].eth.estimate_gas(dep) * env['gas_mult'][0])
+      c.gasEstimate = ctx.rpc[1].eth.estimate_gas(dep)
+      c.gasLimit = int(c.gasEstimate * env['gas_mult'][0])
       
-      #print("EG_FO",eg)
-      dep = ctx.contracts['LP_1'].functions.clientDepositL1(
-        amount,
-        '0x0000000000000000000000000000000000000000'
-      ).buildTransaction({
-        'nonce':ctx.rpc[1].eth.get_transaction_count(acct.address),
-        'gasPrice':gasPrice[chain],
-        'gas':eg,
-        'from':acct.address,
-        'value':amount,
-        'chainId':ctx.chainIds[1],
-      })
-      #print("Child",c.num,"New dep", dep)
+      myAssert(bb > c.gasLimit*gasPrice[chain])
+      amount = Web3.toWei(bb - c.gasLimit * gasPrice[chain],'wei')
+      dep['gas'] = c.gasLimit
+      dep['gasPrice'] = gasPrice[chain]
+      dep['value'] = amount
+      
+#      print("FastOnramp modified Tx:", dep)
+      
       st = ctx.rpc[1].eth.account.sign_transaction(dep, acct.key)
       r = ctx.rpc[1].eth.send_raw_transaction(st.rawTransaction)
 
       c.on_chain = 2
+
       WatchEv(ctx,c,"FO",r)
-    except Exception as e:
-      print("ERROR - FastOnramp failed for child", c.num, e, "TS", time.time())
-      exit(1) # FIXME - trigger shutdown
+#    except Exception as e:
+#      print("ERROR - FastOnramp failed for child", c.num, repr(e), "TS", time.time())
+#      myAssert(False) 
 
 def SlowExit(ctx,c):
   Start(ctx,c,"SX")
   acct = c.acct
   chain = 2
    
-  bb = (0.8*ctx.rpc[2].eth.getBalance(acct.address)) - (8000000 * 15000000)
-  myAssert(bb > 0)
+  amount = ctx.rpc[2].eth.getBalance(acct.address)
+  
     
+  t1 = ctx.contracts['SB_2'].functions.withdraw(
+    '0x4200000000000000000000000000000000000006',
+    Web3.toWei(amount,'wei'),
+    1,  # L1-gas, unused
+    '0x41424344',
+  ).buildTransaction({
+    'nonce':ctx.rpc[2].eth.get_transaction_count(acct.address),
+    'from':acct.address,
+    'chainId':ctx.chainIds[2],
+  })
+  
+  c.gasEstimate = ctx.rpc[2].eth.estimate_gas(t1)
+  c.gasLimit = int(c.gasEstimate * env['gas_mult'][1])
+  
+  myAssert(amount > c.gasLimit*gasPrice[chain])
+  amount = amount - c.gasLimit*gasPrice[chain]
+  
   t = ctx.contracts['SB_2'].functions.withdraw(
     '0x4200000000000000000000000000000000000006',
-    Web3.toWei(bb,'wei'),
+    Web3.toWei(amount,'wei'),
     1,  # L1-gas, unused
     '0x41424344',
   ).buildTransaction({
     'nonce':ctx.rpc[2].eth.get_transaction_count(acct.address),
     'gasPrice':gasPrice[chain],
-    'gas':2000000, # FIXME
+    'gas':c.gasLimit, # FIXME
     'from':acct.address,
-#    'value':Web3.toWei(bb,'wei'),
     'chainId':ctx.chainIds[2],
   })
+  
   st = ctx.rpc[2].eth.account.sign_transaction(t,acct.key)
 
   r = ctx.rpc[2].eth.send_raw_transaction(st.rawTransaction)
@@ -620,33 +906,43 @@ def FastExit(ctx, c):
   t = ctx.contracts['LP_1'].functions.poolInfo('0x0000000000000000000000000000000000000000').call()
   chain = 2
   
-  bb = ctx.rpc[2].eth.getBalance(acct.address) * 0.95 # FIXME - gas calc
+  bb = ctx.rpc[2].eth.getBalance(acct.address)
   
-  #print("FE Want to exit", Web3.fromWei(Web3.toWei(bb, 'wei'),'ether'),
-  #   "With L1 pool balance", Web3.fromWei(t[2],'ether'))
   if bb > (t[2] / 2.0):
     print("Falling back to traditional exit")
     SlowExit(ctx,c)
   else:
-    Start(ctx,c,"FX")
-    #print("Continuing Fast Exit for", acct.address)
-    #l2PayQueue.put({'addr':acct.address, 'e1':e1, 'e2':e2})
-    #e1.wait()
-    
+    Start(ctx,c,"FX")    
     amount = Web3.toWei(bb,'wei')
+    
+    am2 = Web3.toWei(amount * 0.8, 'wei') # FIXME - amount of 1 gives too-low result; full amount out-of-gas in estimateGas.
+    dep_1 = ctx.contracts['LP_2'].functions.clientDepositL2(
+      amount,
+      '0x4200000000000000000000000000000000000006'
+    ).buildTransaction({
+      'nonce':ctx.rpc[2].eth.get_transaction_count(acct.address),
+      'gas': 1,
+#      'gasPrice':gasPrice[chain],
+      'from':acct.address,
+      'chainId':ctx.chainIds[2],
+    })
+    c.gasEstimate = ctx.rpc[2].eth.estimate_gas(dep_1)
+    
+    c.gasLimit = int(c.gasEstimate * env['gas_mult'][1])
+    
+    myAssert(amount > c.gasLimit*gasPrice[chain])
+    amount = amount - c.gasLimit*gasPrice[chain]
     
     dep = ctx.contracts['LP_2'].functions.clientDepositL2(
       amount,
       '0x4200000000000000000000000000000000000006'
     ).buildTransaction({
       'nonce':ctx.rpc[2].eth.get_transaction_count(acct.address),
+      'gas': c.gasLimit,
       'gasPrice':gasPrice[chain],
       'from':acct.address,
       'chainId':ctx.chainIds[2],
     })
-    eg = ctx.rpc[2].eth.estimate_gas(dep)
-    #print("EG_FX",eg)
-    dep['gas'] = eg
     
     st = ctx.rpc[2].eth.account.sign_transaction(dep, acct.key)
     r = ctx.rpc[2].eth.send_raw_transaction(st.rawTransaction)
@@ -659,13 +955,11 @@ def SendFunds(ctx, c):
   
   idx = randint(0,len(addrs)-1)
   if (addrs[idx] == c.acct.address):
-    print("Child", c.num, "NOP on chain", c.on_chain)
-#    qLock.acquire()
+    lPrint(ctx.log, "Child " + str(c.num) + " NOP on chain " + str(c.on_chain))
     readyQueue.put(c)
-#    qLock.release()
   else:
     Start(ctx,c,"PY")
-    tt = Fund(ctx, c.acct, addrs[idx],c.on_chain, bal / 10.0)
+    tt = xFund(ctx, c, addrs[idx], bal / 10.0)
     myAssert(tt not in txWatch)
     Watch(ctx,c,"PY",tt)
 
@@ -675,19 +969,19 @@ def StopChild(ctx, c):
     if c.staked[ch]:
       pass
     b = ctx.rpc[ch].eth.getBalance(c.acct.address)
-    print("StopChild",c.num,"chain",ch,"balance",b, (b > refund_balance))
+    lPrint(ctx.log, "StopChild " + str(c.num) + " chain " + str(ch) + " balance " + str(b))
     if b > refund_balance:
       try:
         Start(ctx,c,"RF")
         r = Fund(ctx, c.acct, c.parent, ch, Web3.toWei(b, 'wei'))
-        print("Child",c.num,"refunding", Web3.fromWei(b,'ether'), "to", c.parent,"on chain", ch, "tx", Web3.toHex(r))
+        lPrint(ctx.log, "Child " + str(c.num) + " refunding " + str(Web3.fromWei(b,'ether')) + " to " + c.parent + " on chain " + str(ch) + " tx " + Web3.toHex(r))
         Watch(ctx,c,"RF",r)
       except Exception as e:
-        print("ERROR Refund attempt failed for child",c.num,"on chain",ch,"error",e)
+        lPrint(ctx.log, "ERROR Refund attempt failed for child " + str(c.num) + " on chain " + str(ch) + " error " + str(e))
         continue
       return
     else:
-      print("Child",c.num,"below minimum refund balance on chain", ch)
+      lPrint(ctx.log, "Child " + str(c.num) + " is below minimum refund balance on chain " + str(ch))
   Start(ctx, c,"DN")
   Watch(ctx, c,"DN")
   c.exiting = True
@@ -706,33 +1000,31 @@ def RollDice(prob):
   else:
     return False
 
-def dispatch(ctx, num, c):
+def dispatch(ctx, prefix, c):
     if c.on_chain == 1:
       # ERC20 approval not presently needed on L1
       
-      if not c.staked[1] and RollDice(5):
+      if not c.staked[1] and RollDice(env['op_pct'][0][0]):
         bal = ctx.rpc[c.on_chain].eth.getBalance(c.acct.address)
-        print("W", num, "Child",c.num,"will add/remove liquidity on chain", c.on_chain)
+        lPrint(ctx.log, prefix + "will add/remove liquidity")
         AddLiquidity(ctx, c, Web3.toWei(bal / 4.0,'wei'))
-      elif RollDice(50):
-        print("W", num, "Child",c.num,"will fast-onramp on chain", c.on_chain)
+      elif RollDice(env['op_pct'][0][1]):
+        lPrint(ctx.log, prefix +  "will fast-onramp")
         Onramp_fast(ctx, c)
-      elif RollDice(50):
-        print("W", num, "Child",c.num,"will traditonal-onramp on chain", c.on_chain)
+      elif RollDice(env['op_pct'][0][2]):
+        lPrint(ctx.log, prefix + "will traditonal-onramp")
         Onramp_trad(ctx, c)    
       else:
-       print("W", num, "Child", c.num, "Will send funds on chain", c.on_chain)
+       lPrint(ctx.log, prefix + "Will send funds")
        SendFunds(ctx, c)
     else:
       if not c.approved[2]:
-        print("W",num,"ch",c.on_chain,"Child", c.num, "Approving contracts")
+        lPrint(ctx.log, prefix + "Approving contracts")
         # Currently synchronous, could do multi-step waits for completion 
         Approve(ctx, omgx_addrs['Proxy__L2LiquidityPool'], c.acct)
         Approve(ctx, '0x4200000000000000000000000000000000000010', c.acct)
         c.approved[2] = True
-#        qLock.acquire()
         readyQueue.put(c)
-#        qLock.release()
         return
       
       mayExit = True
@@ -742,18 +1034,18 @@ def dispatch(ctx, num, c):
       
 #      print("DBG dispatch mayExit", mayExit, "minActive", minActive, "evWatch", len(evWatch), "idle", idleQueue.qsize())
       
-      if not c.staked[2] and RollDice(5):
+      if not c.staked[2] and RollDice(env['op_pct'][1][0]):
         bal = ctx.rpc[c.on_chain].eth.getBalance(c.acct.address)
-        print("W", num, "Child",c.num,"will add/remove liquidity on chain", c.on_chain)
+        lPrint(ctx.log, prefix + "will add/remove liquidity")
         AddLiquidity(ctx, c, Web3.toWei(bal / 4.0,'wei'))
-      elif mayExit and RollDice(20):
-        print("W", num, "Child",c.num,"will fast-exit on chain", c.on_chain)
+      elif mayExit and RollDice(env['op_pct'][1][1]):
+        lPrint(ctx.log, prefix + "will fast-exit")
         r = FastExit(ctx, c)
-      elif mayExit and RollDice(0):
-        print("W", num, "Child",c.num,"will slow-exit on chain", c.on_chain)
+      elif mayExit and RollDice(env['op_pct'][1][2]):
+        lPrint(ctx.log, prefix + "will slow-exit")
         SlowExit(ctx, c)
       else:
-        print("W", num, "Child", c.num, "Will send funds on chain", c.on_chain)
+        lPrint(ctx.log, prefix + "Will send funds")
         SendFunds(ctx, c) 
   
 
@@ -764,15 +1056,13 @@ def worker_thread(num, cx, ch):
   while shutdown.num_done < num_children and shutdown.level < 2:
     c = None
     
-#    qLock.acquire()
     try:
       c = readyQueue.get(False)
       wasBusy = True
     except:
       if wasBusy:
-        print("Worker",num,"readyQueue is empty")
+        lPrint(ctx.log, "Worker " + str(num) + " readyQueue is empty")
         wasBusy = False
-#    qLock.release()
     
     if not c:  
       time.sleep(2)
@@ -787,82 +1077,47 @@ def worker_thread(num, cx, ch):
     if shutdown.level > 0:
       StopChild(ctx, c)  # A child might get here several times before it's done
       continue
-
-    print("W",num,"ch",c.on_chain,"dispatching child",c.num, "b1", Web3.fromWei(b1,'ether'), "b2", 
-      Web3.fromWei(b2,'ether'), "L2_Share", int(100*b2/(b1+b2)),"%")
+      
+    prefix = "W " + str(num) + " ch " + str(c.on_chain) + " Child " + str(c.num) + " "
+    
+    s = prefix + "dispatching at " + str(time.time()) + " b1 " + str(Web3.fromWei(b1,'ether'))
+    s +=  " b2 " + str(Web3.fromWei(b2,'ether')) + " L2_Share " + str(int(100*b2/(b1+b2))) + "%"
+    lPrint(ctx.log, s)
+    
     if (bal >= min_balance):
       pass
     elif c.on_chain == 1 and b2 >= min_balance:
-      print("W",num,"ch",c.on_chain,"Child",c.num,"balance low, switching to chain 2")
+      lPrint(ctx.log, prefix + "balance low, switching to chain 2")
       c.on_chain = 2
     elif c.on_chain == 2 and b1 >= min_balance:
-      print("W",num,"ch",c.on_chain,"Child",c.num,"balance low, switching to chain 1")
+      lPrint(ctx.log, prefix + "balance low, switching to chain 1")
       c.on_chain = 1
     else:  
-      print("W",num,"ch",c.on_chain,"Child", c.num, "has insufficient funding on either chain")
+      lPrint(ctx.log, prefix + "has insufficient funding on either chain")
       idleQueue.put(c)
       continue
 
-    dispatch(ctx, num, c)
+    dispatch(ctx, prefix, c)
 
     ctx.log.flush() 
-    time.sleep(0.5)
+    time.sleep(env['op_delay'])
     
   ctx.log.write("# Finished at " + time.asctime(time.gmtime()) + "\n")
   ctx.log.flush()
-  print("Thread", num, "done")
+  lPrint(ctx.log, "Thread " + str(num) + " done")
 
-print("Whale L2 balance", Web3.fromWei(gCtx.rpc[2].eth.getBalance(whale.address),'ether'),
-   "nonce", gCtx.rpc[2].eth.get_transaction_count(whale.address))
+lPrint(gCtx.log, "Whale L2 balance " + str(Web3.fromWei(gCtx.rpc[2].eth.getBalance(whale.address),'ether')) + " nonce " + str( gCtx.rpc[2].eth.get_transaction_count(whale.address)))
    
 threads = []
-fundQueue = queue.Queue()
 l1PayQueue = queue.Queue()
 l2PayQueue = queue.Queue()
-
-def Fund(ctx, fr, to, chain, amount, n=None):
-
-  amount -= randint(0,65535)
-  
-  if n is None:
-    n = ctx.rpc[chain].eth.get_transaction_count(fr.address)
-  
-  tx = {
-      'nonce': n,
-      'gasPrice':gasPrice[chain],
-      'from':fr.address,
-      'to':to,
-      'value':1,
-      'gas':800000,
-      'chainId': ctx.chainIds[chain],
-  }
-
-#  print("DBG FundTx before estimateGas", tx)
-  
-  eg = ctx.rpc[chain].eth.estimate_gas(tx)
-#  print("DBG FundTx estimate_gas:", eg, "GasPrice", ctx.rpc[chain].eth.gasPrice)
-  
-  eg = eg * env['gas_mult'][chain-1]
-  
-  tx['gas'] = Web3.toWei(eg , 'wei')
-#  print("EG", eg)
-  
-  myAssert(eg*gasPrice[chain] < amount)
-  tx['value'] = Web3.toWei(amount - eg*gasPrice[chain], 'wei')
-  print("DBG Modified FundTx", tx)
-  
-  signed_txn = ctx.rpc[chain].eth.account.sign_transaction(tx, fr.key)
-  
-  ret = ctx.rpc[chain].eth.send_raw_transaction(signed_txn.rawTransaction)
-  
-  return ret
 
 def Approve(ctx, contract, acct):
   
   allowance = ctx.contracts['oETH'].functions.allowance(acct.address,contract).call()
   
   if Web3.fromWei(allowance,'ether') > 1000:
-    print("Approval not needed, allowance =", allowance)
+    lPrint(ctx.log, "Approval not needed, allowance=" + str(allowance))
     return
   
   a = ctx.contracts['oETH'].functions.approve(
@@ -870,28 +1125,21 @@ def Approve(ctx, contract, acct):
     Web3.toWei(99999,'ether')
   ).buildTransaction({
     'nonce':ctx.rpc[2].eth.get_transaction_count(acct.address),
-    'gasPrice':gasPrice[2],
-    'gas':1, # FIXME - see gasUsed of 1315706, 797198,
     'from':acct.address,
     'chainId':ctx.chainIds[2],
   })
   
-  bal = ctx.rpc[2].eth.getBalance(acct.address)
   eg = ctx.rpc[2].eth.estimate_gas(a)
+#  bal = ctx.rpc[2].eth.getBalance(acct.address)
 #  print("EG",eg,"BAL",bal)
   a['gas'] = Web3.toWei(eg, 'wei')
-#  print("APPROVE2", a)
+  a['gasPrice'] = gasPrice[2]
   
   st = ctx.rpc[2].eth.account.sign_transaction(a, acct.key)
   ret = ctx.rpc[2].eth.send_raw_transaction(st.rawTransaction)
   rcpt = ctx.rpc[2].eth.wait_for_transaction_receipt(ret)
-  print("APPROVED addr", acct.address,"FOR",contract, "STATUS", rcpt.status)
+  lPrint(ctx.log, "APPROVED addr " + acct.address + " FOR " + contract + " STATUS " + str(rcpt.status))
   myAssert(rcpt.status == 1)
-
-def wPrint(log, ch, msg, screenEcho = True):
-  if screenEcho:
-    print("--",ch,"-- ", msg)
-  log.write(msg + "\n")
 
 def addrName(addr):
   if addr in addr_names:
@@ -913,6 +1161,11 @@ def block_watcher(env, ch):
     w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
   next = w3.eth.block_number
+  
+  ctcCount = 0
+  ctcGasUsed = 0
+  sccCount = 0
+  sccGasUsed = 0
   
   if ch == 1:
     contracts = loadL1Contracts(w3)
@@ -980,21 +1233,15 @@ def block_watcher(env, ch):
         cc = txWatch.pop(t)
         cc.need_tx = False
         wPrint(log, ch, "got TX " + Web3.toHex(t) + " child " + str(cc.num) + " addr " + cc.acct.address + " S " + str(tr.status))
+        #print("gas", tx.gas, "gasUsed", tr.gasUsed)
+        cc.gasUsed = tr.gasUsed
+        
         if tr.status != 1:
           success = 0
           wPrint(log, ch, "ERROR Failed TX " + Web3.toHex(t) + " child " + str(cc.num) + " addr " + cc.acct.address)
-          #print("@@@@@@",tx)
+          print("FAILED_TX",tx)
+          print("FAILED_TX_RCPT",tr)
           
-          try:
-            rt = {}
-            for kk in [ 'from', 'gas', 'gasPrice', 'input', 'nonce', 'r', 's', 'v', 'to', 'value' ]:
-              rt[kk] = tr[kk]
-            print("@@@@@ eth_call result =", w3.eth.call(rt))
-
-          except Exception as e:
-            print("@@@@@@@@", e)
-            wPrint(log, ch, "ERROR exception code =", str(e))
-         
           if cc.acct.address in evWatch:
             wPrint(log, ch, "Removing " + cc.acct.address + "from evWatch after failed TX")
             evWatch.pop(cc.acct.address)
@@ -1024,6 +1271,14 @@ def block_watcher(env, ch):
             wPrint(log, ch, "*** GAS MISMATCH, gasUsed " + str(pr['gasUsed']) + " > gas " + str(pr['gas']))
             
         wPrint(log, ch, "sys TX " + Web3.toHex(t) + " " + str(pr))
+        
+        if pr['to'] == 'OVM_CanonicalTransactionChain':
+          ctcCount += 1
+          ctcGasUsed += pr['gasUsed']
+        elif pr['to'] == 'OVM_StateCommitmentChain':
+          sccCount += 1
+          sccGasUsed += pr['gasUsed']
+         
       else:
         ign_count += 1
         wPrint(log, ch, "ign TX " + Web3.toHex(t), False)
@@ -1062,7 +1317,7 @@ def block_watcher(env, ch):
           c = evWatch.pop(match)
           wPrint(log,ch, "        --> Matched evWatch child " + str(c.num) + " addr " + match)
           if c.need_tx:
-            wPrint(log,ch, "     *****  WARNING got event before tx for addr" + match)
+            wPrint(log,ch, "            NOTE got event before tx for addr" + match) # This is no longer a warning; should be handled OK, and happens if Confirmations is set higher than the DTL value
           else:
             Finish(c,success)
         elif match in addrs:  
@@ -1096,6 +1351,23 @@ def block_watcher(env, ch):
       pass  
     
     next += 1
+    
+    if (next % 10) == 0 and ch == 1 and ctcCount > 0 and sccCount > 0:
+      ctcAvg = int(ctcGasUsed / ctcCount)
+      sccAvg = int(sccGasUsed / sccCount)
+      s =  "+++ GAS_STATS +++ CTC has used " + str(ctcGasUsed) + " gas in " + str(ctcCount) + " tx (avg " + str(ctcAvg) + ")"
+      s += "; SCC has used " + str(sccGasUsed) + " gas in " + str(sccCount) + " tx (avg " + str(sccAvg) + ")"
+      wPrint(log, ch, s)
+
+  # Print final stats on thread exit.
+  if ch == 1 and ctcCount > 0 and sccCount > 0:  
+    ctcAvg = int(ctcGasUsed / ctcCount)
+    sccAvg = int(sccGasUsed / sccCount)
+    s =  "+++ GAS_STATS_FINAL +++ CTC used total " + str(ctcGasUsed) + " gas in " + str(ctcCount) + " tx (avg " + str(ctcAvg) + ")"
+    s += "; SCC used total " + str(sccGasUsed) + " gas in " + str(sccCount) + " tx (avg " + str(sccAvg) + ")"
+    wPrint(log, ch, s)
+    shutdown.batchGas = ctcGasUsed + sccGasUsed
+    
   wPrint(log, ch, "Watcher thread done")
   
 l1_watcher = threading.Thread(target=block_watcher, args=(env,1,))
@@ -1109,13 +1381,14 @@ idle_mgr.start()
 balStart = [None]*3
 balStart[1] = gCtx.rpc[1].eth.getBalance(whale.address)
 balStart[2] = gCtx.rpc[2].eth.getBalance(whale.address)
+fvStart = gCtx.rpc[2].eth.getBalance('0x4200000000000000000000000000000000000011')
 
-print("Whale staring balances: L1=", Web3.fromWei(balStart[1],'ether'), "L2=", Web3.fromWei(balStart[2],'ether'))
-print("Ratio:", balStart[2] / (balStart[1] + balStart[2]))
+lPrint(gCtx.log, "Whale staring balances: L1=" + str(Web3.fromWei(balStart[1],'ether')) + " L2=" + str(Web3.fromWei(balStart[2],'ether')))
+lPrint(gCtx.log, "Ratio: " + str(balStart[2] / (balStart[1] + balStart[2])))
 
 if (balStart[2] / (balStart[1] + balStart[2])) < 0.4:
   diff = (balStart[1] + balStart[2])/2.0 - balStart[2]
-  print("Whale will move", Web3.fromWei(diff,'ether'), "from L1 to L2")
+  lPrint(gCtx.log, "Whale will move " + str(Web3.fromWei(diff,'ether')) + " from L1 to L2")
   
   diff = Web3.toWei(diff,'wei')
   
@@ -1123,19 +1396,19 @@ if (balStart[2] / (balStart[1] + balStart[2])) < 0.4:
   rcpt = gCtx.rpc[1].eth.wait_for_transaction_receipt(tx)
   #print("DBG rcpt", rcpt)
   myAssert(rcpt.status == 1)
-  print("Whale L1->L2 transfer completed on L1.")
+  lPrint(gCtx.log, "Whale L1->L2 transfer completed on L1.")
 
   tries = 0
   while gCtx.rpc[2].eth.getBalance(whale.address) <= balStart[2]:
-    print("Waiting for transfer to arrive on L2")
+    lPrint(gCtx.log, "Waiting for transfer to arrive on L2")
     time.sleep(10)
     tries += 1
     myAssert(tries < 60)  
-  print("Whale L1->L2 transfer completed on L2. Recalculating start values.")
+  lPrint(gCtx.log, "Whale L1->L2 transfer completed on L2. Recalculating start values.")
 
   balStart[1] = gCtx.rpc[1].eth.getBalance(whale.address)
   balStart[2] = gCtx.rpc[2].eth.getBalance(whale.address)
-  print("Updated staring balances: L1=", Web3.fromWei(balStart[1],'ether'), "L2=", Web3.fromWei(balStart[2],'ether'))
+  lPrint(gCtx.log, "Updated staring balances: L1=" + str(Web3.fromWei(balStart[1],'ether')) + " L2=" + str(Web3.fromWei(balStart[2],'ether')))
   whale.setNonces(gCtx.rpc)
 
 time.sleep(2)
@@ -1148,32 +1421,32 @@ t = gCtx.contracts['LP_1'].functions.poolInfo('0x0000000000000000000000000000000
 if t[2] < min_lp_balance:
   r = AddLiquidity_2(gCtx, 1, whale, min_lp_balance)
   rcpt = gCtx.rpc[1].eth.wait_for_transaction_receipt(r)
-  print("Added liquidity to LP[1], status",rcpt.status)
+  lPrint(gCtx.log, "Added liquidity to LP[1], status " + str(rcpt.status))
   myAssert(rcpt.status == 1)
 else:
-  print("LP[1] has sufficient liquidity:", Web3.fromWei(t[2],'ether'))
+  lPrint(gCtx.log, "LP[1] has sufficient liquidity: " + str(Web3.fromWei(t[2],'ether')))
 
 t = gCtx.contracts['LP_2'].functions.poolInfo('0x4200000000000000000000000000000000000006').call()
 if t[2] < min_lp_balance:
   r = AddLiquidity_2(gCtx, 2, whale, min_lp_balance)
   rcpt = gCtx.rpc[2].eth.wait_for_transaction_receipt(r)
-  print("Added liquidity to LP[2], status",rcpt.status)
+  lPrint(gCtx.log, "Added liquidity to LP[2], status " + str(rcpt.status))
   myAssert(rcpt.status == 1)
 else:
-  print("LP[2] has sufficient liquidity:", Web3.fromWei(t[2],'ether'))
+  lPrint(gCtx.log, "LP[2] has sufficient liquidity: " + str(Web3.fromWei(t[2],'ether')))
 
 whale.setNonces(gCtx.rpc)
 
 # Process initial funding ops in batches to avoid overloading the L1 (Rinkeby)
 def InitialFunding(env):
-  print("InitialFunding thread starting, num_children =", len(children))
+  lPrint(gCtx.log, "InitialFunding thread starting, num_children = " + str(len(children)))
   batchTx = []
   
   for c in children:
-    print("InitialFunding child", c.num, "addr", c.acct.address, "on chain", c.on_chain)
+    lPrint(gCtx.log, "InitialFunding child " + str(c.num) + " addr " +  c.acct.address + " on chain " + str(c.on_chain))
     
     if shutdown.level > 0:
-      print("InitialFunding thread in shutdown, skipping child",c.num)
+      lPrint(gCtx.log, "InitialFunding thread in shutdown, skipping child " + str(c.num))
       readyQueue.put(c)
       continue
 
@@ -1186,23 +1459,23 @@ def InitialFunding(env):
     batchTx.append(ret)
     
     if (len(batchTx) >= fund_batch):
-      print("InitialFunding thread pausing for batch completion")
+      lPrint(gCtx.log, "InitialFunding thread pausing for batch completion")
       tStart = time.time()
       while len(batchTx) > 0 and shutdown.level == 0:
         time.sleep(10)
         listLock.acquire()
         for t in batchTx:
           if t not in txWatch:
-            print("InitialFunding done for tx", Web3.toHex(t))
+            lPrint(gCtx.log, "InitialFunding done for tx " + Web3.toHex(t))
             batchTx.remove(t)
         listLock.release()
         tWait = time.time() - tStart
-        print("InitialFunding thread still waiting for",len(batchTx),"transactions after",int(tWait),"secs")
+        lPrint(gCtx.log, "InitialFunding thread still waiting for " + str(len(batchTx)) + " transactions after " + str(int(tWait)) + " secs")
         if tWait > stuck_secs and shutdown.level == 0:
-          print("InitialFunding thread triggering STUCK_OPERATION shutdown")
+          lPrint(gCtx.log, "InitialFunding thread triggering STUCK_OPERATION shutdown")
           shutdown.level = 1
 
-  print("InitialFunding thread done.")
+  lPrint(gCtx.log, "InitialFunding thread done.")
   
 for i in range(0,num_workers):  
   t = threading.Thread(target=worker_thread, args=(i,None,0,))
@@ -1214,7 +1487,7 @@ myAssert(num_children * (min_balance * 10) < balStart[2])
 fundCount = 0
 
 for i in range(0,num_children):
-  print("Creating child account", i)
+  lPrint(gCtx.log, "Creating child account " + str(i))
   
   acct = gCtx.rpc[1].eth.account.create()
   addrs.append(acct.address)
@@ -1239,18 +1512,28 @@ ifThread.start()
 account_log.flush()
 
 
+start_time = time.time()
+
 while shutdown.level < 2:  
   c = None
   while c is None and shutdown.level < 2: # FIXME
     listLock.acquire()
    # print("Whale balances", Web3.fromWei(gCtx.rpc[1].eth.getBalance(whale.address),'ether'),
    #   Web3.fromWei(gCtx.rpc[2].eth.getBalance(whale.address),'ether'))
-    print("Pool balances", 
-      "LP1",Web3.fromWei(gCtx.contracts['LP_1'].functions.poolInfo('0x0000000000000000000000000000000000000000').call()[2],'ether'),
-      "LP2",Web3.fromWei(gCtx.contracts['LP_2'].functions.poolInfo('0x4200000000000000000000000000000000000006').call()[2],'ether'),
-      "SB1",Web3.fromWei(gCtx.rpc[1].eth.getBalance(omgx_addrs['Proxy__OVM_L1StandardBridge']),'ether'),
-      "SB2","N/A",
-      "oETH",Web3.fromWei(gCtx.contracts['oETH'].functions.totalSupply().call(),'ether'))
+    
+    runtime = time.time() - start_time
+    
+    s = "Completed " + str(shutdown.total_ops) + " ops in " + str(runtime) + " seconds (" + str(int(3600 * shutdown.total_ops / runtime)) + "/hour)"
+    lPrint(gCtx.log, s)
+    
+    ps = "Pool balances, TS " + str(time.time())
+    ps += " LP1 " + str(Web3.fromWei(gCtx.contracts['LP_1'].functions.poolInfo('0x0000000000000000000000000000000000000000').call()[2],'ether'))
+    ps += " LP2 " + str(Web3.fromWei(gCtx.contracts['LP_2'].functions.poolInfo('0x4200000000000000000000000000000000000006').call()[2],'ether'))
+    ps += " SB1 " + str(Web3.fromWei(gCtx.rpc[1].eth.getBalance(omgx_addrs['Proxy__OVM_L1StandardBridge']),'ether'))
+    ps += " oETH " + str(Web3.fromWei(gCtx.contracts['oETH'].functions.totalSupply().call(),'ether'))
+    ps += " FV+ " + str(Web3.fromWei(gCtx.rpc[2].eth.getBalance('0x4200000000000000000000000000000000000011') - fvStart,'ether'))
+
+    lPrint(gCtx.log, ps)
     
     s = ""  
     now = time.time()
@@ -1260,6 +1543,8 @@ while shutdown.level < 2:
     
     for i in txWatch:
       c = txWatch[i]
+      if len(c.ts) == 0:
+        continue # FIXME - shouldn't happen
       t = now - c.ts[0]
       tMax = max(t,tMax)
       if t > slow_secs:
@@ -1270,6 +1555,8 @@ while shutdown.level < 2:
         
     for i in evWatch:
       c = evWatch[i]
+      if len(c.ts) == 0:
+        continue # FIXME - shouldn't happen
       t = now - c.ts[0]
       tMax = max(t,tMax)
       if t > slow_secs and c.num not in slowTx:
@@ -1277,45 +1564,48 @@ while shutdown.level < 2:
         if slowCount <= 5:
           s += "(child " + str(c.num) + " op " + c.op +" ev " + str(int(t)) + "s) "
     
-    print("Other stats",
-      "L1GP", Web3.fromWei(gCtx.rpc[1].eth.gasPrice,'gwei'),
-      "L2GP", Web3.fromWei(gCtx.rpc[2].eth.gasPrice,'gwei'),
-      "txWatch", len(txWatch), "evWatch", len(evWatch), "readyQueue", readyQueue.qsize(), "fundQueue", fundQueue.qsize(),
-      "idleQueue", idleQueue.qsize(),
-      "maxWait", int(tMax),
-      "SL",shutdown.level,"(",shutdown.num_done,"/",num_children,")")
+    os = "Other stats"
+    os += " L1GP " + str(Web3.fromWei(gCtx.rpc[1].eth.gasPrice,'gwei'))
+    os += " L2GP " + str(Web3.fromWei(gCtx.rpc[2].eth.gasPrice,'gwei'))
+    os += " txWatch " + str(len(txWatch)) + " evWatch " + str(len(evWatch)) + " readyQueue " + str(readyQueue.qsize())
+    os += " idleQueue " + str(idleQueue.qsize())
+    os += " maxWait " + str(int(tMax)) + " SL " + str(shutdown.level)
+    os += " (" + str(shutdown.num_done) + "/" + str(num_children) + ")"
+    lPrint(gCtx.log, os)
+    
     if slowCount > 5:
       s += "...and " + str(slowCount - 5) + " more"
       
     if s != "":
-      print("SLOW OPERATION WARNINGS: " + s)
+      lPrint(gCtx.log, "SLOW OPERATION WARNINGS: " + s)
     
     if tMax > stuck_secs and shutdown.level == 0:
-      print("Shutting down on STUCK_OPERATION timeout")
+      lPrint(gCtx.log, "Shutting down on STUCK_OPERATION timeout")
       shutdown.level = 1
     elif tMax > giveup_secs and shutdown.level == 1:
-      print("Forcing level 2 shutdown after", giveup_secs, "secs")
+      lPrint(gCtx.log, "Forcing level 2 shutdown after " + str(giveup_secs) + " secs")
       shutdown.level = 2
     
       
     listLock.release()
     try:
       sys.stdout.flush()
+      gCtx.log.flush()
     except:
       pass
       
     if shutdown.level == 1 and shutdown.num_done >= num_children:
-      print("Continuing shutdown")
+      lPrint(gCtx.log, "Continuing shutdown")
       shutdown.level = 2
       break
       
     time.sleep(5)
     
-print("Main joining worker threads")
+lPrint(gCtx.log,"Main joining worker threads")
 for t in threads:
   t.join()
 
-print("Main joining watcher threads")
+lPrint(gCtx.log, "Main joining watcher threads")
 l1_watcher.join()
 l2_watcher.join()
 idle_mgr.join()
@@ -1328,15 +1618,24 @@ balEnd[2] = gCtx.rpc[2].eth.getBalance(whale.address)
 l1_net = Web3.fromWei(balEnd[1],'ether') - Web3.fromWei(balStart[1],'ether')
 l2_net = Web3.fromWei(balEnd[2],'ether') - Web3.fromWei(balStart[2],'ether')
 
-print("Final balances: L1 = " + str(Web3.fromWei(balEnd[1],'ether')) + " (" + str(l1_net) + ") L2 = " + str(Web3.fromWei(balEnd[2],'ether')) + " (" + str(l2_net) + ")")
+lPrint(gCtx.log, "Final balances: L1 = " + str(Web3.fromWei(balEnd[1],'ether')) + " (" + str(l1_net) + ") L2 = " + str(Web3.fromWei(balEnd[2],'ether')) + " (" + str(l2_net) + ")")
 diff = l1_net + l2_net
 if diff > 0:
   # Maybe possible in the future with pool rewards or delayed exits from other activities?
-  print("Somehow we gained " + str(diff) + " ETH during this run")
+  lPrint(gCtx.log, "Somehow we gained " + str(diff) + " ETH during this run")
 else:
-  print("Total cost of run: " + str(-diff) + " ETH")
+  lPrint(gCtx.log, "Total cost of run: " + str(-diff) + " ETH")
 
-print("Main cleaning up")
+fvEnd = gCtx.rpc[2].eth.getBalance('0x4200000000000000000000000000000000000011')
+
+lPrint(gCtx.log,"L2 Fee Vault collected " + str(Web3.fromWei(fvEnd-fvStart,'ether')) + " ETH during run")
+
+lPrint(gCtx.log,"Batch submitter consumed " + str(shutdown.batchGas) + " L1 gas, costing " + str(Web3.fromWei(shutdown.batchGas * gasPrice[1], 'ether')) + " ETH")
+
+s = "+++ OPS_TOTAL +++ Completed " + str(shutdown.total_ops) + " ops in " + str(runtime) + " seconds (" + str(int(3600 * shutdown.total_ops / runtime)) + "/hour)"
+lPrint(gCtx.log, s)
+
+lPrint(gCtx.log, "Main cleaning up")
 if len(evWatch) == 0 and len(txWatch) == 0 and shutdown.num_done == num_children:
   op_log.write("# Clean exit at " + time.asctime(time.gmtime()) +"\n")
 else:  
@@ -1345,5 +1644,3 @@ else:
 op_log.close()
 account_log.close()
 
-#fundQueue.join()  # This would require task_done() calls
-#readyQueue.join()
