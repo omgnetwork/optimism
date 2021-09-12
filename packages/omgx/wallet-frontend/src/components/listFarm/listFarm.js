@@ -167,6 +167,13 @@ class ListFarm extends React.Component {
     const logo = getCoinImage(symbol)
 
     //console.log('poolinfo',poolInfo)
+    
+    // TODO: @Jan please help me with correct logic to show and hide base on share.
+    if(!this.props.showAll) {
+      if(!Number(logAmount(poolInfo.tokenBalance, decimals, 2))) {
+        return null;
+      }
+    }
 
     return (
       <S.Wrapper dropDownBox={dropDownBox}>
