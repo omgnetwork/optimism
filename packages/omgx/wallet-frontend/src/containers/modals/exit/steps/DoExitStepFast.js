@@ -99,6 +99,12 @@ function DoExitStepFast({ handleClose, token }) {
         setFeeRate(feeRate)
       })
     }
+    // to clean up state and fix the 
+    // error in console for max state update.
+    return ()=>{
+      setLPBalance(0);
+      setFeeRate(0);
+    }
   }, [ token ])
 
   useEffect(() => {
