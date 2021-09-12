@@ -28,7 +28,7 @@ import AlertIcon from 'components/icons/AlertIcon'
 import networkService from 'services/networkService'
 
 import * as S from './Farm.styles'
-import { Box, Typography } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import PageHeader from 'components/pageHeader/PageHeader';
 import { tableHeadList } from './tableHeadList';
 import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher';

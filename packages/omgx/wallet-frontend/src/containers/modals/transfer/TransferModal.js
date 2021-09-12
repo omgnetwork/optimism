@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { transfer } from 'actions/networkAction';
 
-import { closeModal, openAlert, openError } from 'actions/uiAction';
+import { closeModal, openAlert } from 'actions/uiAction';
 import { selectLoading } from 'selectors/loadingSelector';
 
 import Button from 'components/button/Button';
@@ -32,7 +32,6 @@ import { selectLookupPrice } from 'selectors/lookupSelector';
 import { Box, Typography, useMediaQuery } from '@material-ui/core';
 import * as S from './TransferModal.style';
 import { useTheme } from '@emotion/react';
-import truncate from 'truncate-middle';
 
 function TransferModal ({ open, token }) {
   const dispatch = useDispatch()
