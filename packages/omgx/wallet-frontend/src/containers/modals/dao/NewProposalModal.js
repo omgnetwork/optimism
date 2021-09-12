@@ -56,7 +56,7 @@ function NewProposalModal({ open }) {
         }));
 
         if (res) {
-            dispatch(openAlert(`Proposal has been submitted!`))
+            dispatch(openAlert(`Proposal has been submitted. It will be listed soon`))
             handleClose()
         } else {
             dispatch(openError(`Failed to create proposal`));

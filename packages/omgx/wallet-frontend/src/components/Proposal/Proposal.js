@@ -58,8 +58,14 @@ function Proposal({
 
     const FormatDescription = ({description}) =>{
         if(!!description.includes('@@')) {
-            let descList = description.split('@@');
-            return  <> {descList[0]} <a className={styles.href} target="_blank" rel="noopener noreferrer" href={descList[1]}>more details</a>  </>
+            let descList = description.split('@@')
+            //console.log("descList",descList)
+            if(descList[1] !== '') {
+                //should validate http link
+                return  <>{descList[0]}&nbsp;&nbsp;<a className={styles.href} target="_blank" rel="noopener noreferrer" href={descList[1]}>MORE DETAILS</a>  </>
+            } else {
+                return  <>{descList[0]}</>
+            }
         } 
         return <>{description}</>;
     }
@@ -72,45 +78,44 @@ function Proposal({
             borderRadius: '12px'
         }}>
 
-        {proposal.state !== 'Active' &&
-            <div
-                onClick={() => {
-                    setDropDownBox(!dropDownBox)
-                    setDropDownBoxInit(false)
-                }}
-            >
-                <div className={styles.proposalHeader}>
-                    <div className={styles.title}>
-                        <p>Proposal #{proposal.id}</p>
-                        <Typography variant="body3" component="p" className={styles.muted}>Title: <FormatDescription description={proposal.description} /></Typography>
-                        <Typography variant="body3" component="p" className={styles.muted}>Status: {proposal.state}</Typography>
-                        <Typography variant="body3" component="p" className={styles.muted}>Start L1 Block: {proposal.startBlock} &nbsp; &nbsp; End L1 Block: {proposal.endBlock}</Typography>
-                        {proposal.state === 'Active' &&
-                            <div style={{
-                                background: 'blue', 
-                                borderRadius: '8px',
-                                width: '100px',
-                                height: '25px',
-                                fontSize: '0.9em',
-                                display: 'flex',
-                                flexDirection: 'row',
-                                justifyContent: 'center'
-                            }}>VOTE</div>
-                        }
-                    </div>
-                    <div>
-                        <Typography variant="body3" component="p" className={styles.vote}>For: {proposal.forVotes}</Typography>
-                        <Typography variant="body3" component="p" className={styles.vote}>Against: {proposal.againstVotes}</Typography>
-                        <Typography variant="body3" component="p" className={styles.vote}>Abstain: {proposal.abstainVotes}</Typography>
-                        <Typography variant="body3" component="p" className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </Typography>
-                        <Typography variant="body3" component="p" className={styles.vote}>Total Votes: {proposal.totalVotes}</Typography>
-                    </div>
+        <div
+            onClick={() => {
+                setDropDownBox(!dropDownBox)
+                setDropDownBoxInit(false)
+            }}
+        >
+            <div className={styles.proposalHeader}>
+                <div className={styles.title}>
+                    <p>Proposal #{proposal.id}</p>
+                    <Typography variant="body3" component="p" className={styles.muted}>Title: <FormatDescription description={proposal.description} /></Typography>
+                    <Typography variant="body3" component="p" className={styles.muted}>Status: {proposal.state}</Typography>
+                    <Typography variant="body3" component="p" className={styles.muted}>Start L1 Block: {proposal.startBlock} &nbsp; &nbsp; End L1 Block: {proposal.endBlock}</Typography>
+                    {proposal.state === 'Active' &&
+                        <div style={{
+                            background: 'blue', 
+                            borderRadius: '8px',
+                            width: '100px',
+                            height: '25px',
+                            fontSize: '0.9em',
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'center'
+                        }}>VOTE</div>
+                    }
+                </div>
+                <div>
+                    <Typography variant="body3" component="p" className={styles.vote}>For: {proposal.forVotes}</Typography>
+                    <Typography variant="body3" component="p" className={styles.vote}>Against: {proposal.againstVotes}</Typography>
+                    <Typography variant="body3" component="p" className={styles.vote}>Abstain: {proposal.abstainVotes}</Typography>
+                    <Typography variant="body3" component="p" className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </Typography>
+                    <Typography variant="body3" component="p" className={styles.vote}>Total Votes: {proposal.totalVotes}</Typography>
                 </div>
             </div>
-        }
+        </div>
 
         <div className={dropDownBox ? styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}>
             <div className={styles.proposalDetail}>
+            <Typography variant="body2">Note: only your first vote counts.</Typography>
                 <Button
                     type="primary"
                     variant="outlined"
