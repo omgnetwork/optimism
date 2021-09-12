@@ -15,7 +15,7 @@ limitations under the License. */
 
 import React, { useState } from 'react'
 
-import { Grid, Typography } from '@material-ui/core'
+import { Grid, Typography,Fade } from '@material-ui/core'
 import * as styles from './Transaction.module.scss'
 import * as S from './Transaction.styles'
 import { useTheme } from '@emotion/react'
@@ -83,31 +83,30 @@ function Transaction({
           padding: '10px',
           alignItems: 'flex-start !important',
         }}>
-          <div
-            className={dropDownBox ?
-              styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
-          >
-            <Grid className={styles.dropDownContent} container spacing={1}>
-              <Typography variant="body3" className={styles.muted}>
-                {prefix} Hash:&nbsp;
-                <a className={styles.href} href={detail.txLink} target="_blank" rel="noopener noreferrer">
-                  {detail.hash}
-                </a>
-              </Typography>
-            </Grid>
-            <Grid className={styles.dropDownContent} container spacing={1}>
-              <Typography variant="body3" className={styles.muted}>{prefix} Block:&nbsp;{detail.blockNumber}</Typography>
-            </Grid>
-            <Grid className={styles.dropDownContent} container spacing={1}>
-              <Typography variant="body3" className={styles.muted}>{prefix} Block Hash:&nbsp;{detail.blockHash}</Typography>
-            </Grid>
-            <Grid className={styles.dropDownContent} container spacing={1}>
-              <Typography variant="body3" className={styles.muted}>{prefix} From:&nbsp;{detail.from}</Typography>
-            </Grid>
-            <Grid className={styles.dropDownContent} container spacing={1}>
-              <Typography variant="body3" className={styles.muted}>{prefix} To:&nbsp;{detail.to}</Typography>
-            </Grid>
-          </div>
+          {!!dropDownBox ? <Fade in={dropDownBox}>
+            <div>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>
+                  {prefix} Hash:&nbsp;
+                  <a className={styles.href} href={detail.txLink} target="_blank" rel="noopener noreferrer">
+                    {detail.hash}
+                  </a>
+                </Typography>
+              </Grid>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>{prefix} Block:&nbsp;{detail.blockNumber}</Typography>
+              </Grid>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>{prefix} Block Hash:&nbsp;{detail.blockHash}</Typography>
+              </Grid>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>{prefix} From:&nbsp;{detail.from}</Typography>
+              </Grid>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>{prefix} To:&nbsp;{detail.to}</Typography>
+              </Grid>
+            </div>
+          </Fade> : null}
         </S.TableCell>
       </S.TableBody>)
   }
