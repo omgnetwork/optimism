@@ -20,7 +20,7 @@ import { openModal } from 'actions/uiAction';
 
 import * as styles from './Dao.module.scss';
 
-import { Box, Typography } from '@material-ui/core'
+import { Box, Typography,useMediaQuery } from '@material-ui/core'
 import { useTheme } from '@emotion/react'
 
 import Button from 'components/button/Button';
@@ -36,6 +36,7 @@ import PageHeader from 'components/pageHeader/PageHeader'
 function DAO() {
 
     const theme = useTheme()
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const dispatch = useDispatch()
     const balance = useSelector(selectDaoBalance)
     const votes = useSelector(selectDaoVotes)
@@ -94,7 +95,7 @@ function DAO() {
             <div className={styles.container}>
 
                 <div className={styles.content}>
-                    <div className={styles.action}>
+                    <div className={`${styles.action} ${isMobile ? styles.isMobile : ''}`}>
                         <div className={styles.transferContainer}>
                             <div className={styles.info}>
                                 <Typography variant="h3">{balance} Comp</Typography>

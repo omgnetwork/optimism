@@ -7,10 +7,6 @@
   padding: 10px;
   padding-top: 0px;
 
-    .proposal {
-        //background: red;
-    }
-
   .header {
     h2 {
         margin-bottom: 0;
@@ -29,13 +25,17 @@
     margin: 10px auto;
     display: flex;
     flex-direction: column;
-    width: 90%;
+    width: 100%;
 
       .action {
         display: flex;
-        flex-direction: row;
         justify-content: space-between;
-        align-items: center;
+        align-items: center;        
+        flex-direction: row;
+
+        &.isMobile {
+          flex-direction: column;
+        }
 
         .transferContainer, .delegateContainer {
             /*margin: auto;*/
@@ -46,7 +46,8 @@
             background: $background400;
             max-width: 48%;
             width: 48%;
-            min-width: 400px;
+            min-width: 350px;
+            margin: 5px;
             .info {
                 text-align: center;
                 .title {
