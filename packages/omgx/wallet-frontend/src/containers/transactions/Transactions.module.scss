@@ -113,6 +113,10 @@
   margin: 0px 15px;
   position: relative;
 
+  &:hover {
+    outline: #fff auto 1px;
+  }
+
   &::after {
     content: '';
     width: 0;

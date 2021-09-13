@@ -16,6 +16,8 @@ limitations under the License. */
 import React, { useState } from 'react'
 
 import { Grid, Typography,Fade } from '@material-ui/core'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+
 import * as styles from './Transaction.module.scss'
 import * as S from './Transaction.styles'
 import { useTheme } from '@emotion/react'
@@ -151,12 +153,14 @@ function Transaction({
               variant="body2"
               sx={{
                 cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center'
               }}
               onClick={() => {
                 setDropDownBox(!dropDownBox)
               }}
             >
-              More Information
+              More Information <ExpandMoreIcon />
             </Typography>
           }
         </S.TableCell>

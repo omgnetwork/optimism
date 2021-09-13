@@ -157,7 +157,6 @@ class ListAccount extends React.Component {
               <>
                 <Button
                   onClick={()=>{this.handleModalClick('depositModal', token, false)}}
-                  color='neutral'
                   variant="outlined"
                   disabled={disabled}
                   fullWidth

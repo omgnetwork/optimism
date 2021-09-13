@@ -17,10 +17,3 @@ export const Button = styled.button`
   transition: all .2s ease-in-out;
   z-index: 5;
 `;
-
-export const Shadow = styled(Box)`
-  position: absolute;
-  bottom: -40px;
-  left: -290px;
-  z-index: -1;
-`;
