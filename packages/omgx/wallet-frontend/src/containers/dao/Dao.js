@@ -74,7 +74,7 @@ function DAO() {
                             variant="body1"
                             component="p"
                         >
-                            To use the Boba DAO, you must be on L2 - SWITCH LAYER to L2
+                            You are on L1. To use the Boba DAO, SWITCH LAYER to L2
                         </Typography>
                     </div>
                     <LayerSwitcher isButton={true} />

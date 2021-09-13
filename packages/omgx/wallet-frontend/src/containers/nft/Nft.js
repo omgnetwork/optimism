@@ -135,7 +135,7 @@ class Nft extends React.Component {
                             variant="body1"
                             component="p"
                         >
-                            To use Boba NFTs, you must be on L2 - SWITCH LAYER to L2
+                            You are on L1. To use Boba NFTs, SWITCH LAYER to L2
                         </Typography>
                     </div>
                     <LayerSwitcher isButton={true} />

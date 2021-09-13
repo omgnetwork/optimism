@@ -223,7 +223,7 @@ class Farm extends React.Component {
                   variant="body1"
                   component="p"
                 >
-                  Note: MetaMask is set to L2. To interact with the L1 liquidity pool, please switch MetaMask to L1.
+                  You are on L2. To transact on L1, SWITCH LAYER to L1
                 </S.AlertText>
               </S.AlertInfo>
               <LayerSwitcher isButton={true} size={isMobile ? "small" : "medium"}/>
@@ -238,7 +238,7 @@ class Farm extends React.Component {
                   variant="body2"
                   component="p"
                 >
-                  Note: MetaMask is set to L1. To interact with the L2 liquidity pool, please switch MetaMask to L2.
+                  You are on L1. To transact on L2, SWITCH LAYER to L2
                 </S.AlertText>
               </S.AlertInfo>
               <LayerSwitcher isButton={true} />
