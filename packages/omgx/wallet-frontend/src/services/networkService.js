@@ -2115,7 +2115,7 @@ class NetworkService {
     if(this.masterSystemConfig !== 'rinkeby' || this.L1orL2 !== 'L2') return
       
     const delegateCheck = await this.delegate.attach(this.delegator.address)
-    
+
     try {
       let proposalList = [];
       const proposalCounts = await delegateCheck.proposalCount()
@@ -2160,6 +2160,8 @@ class NetworkService {
 
         let proposal = await delegateCheck.getActions(i+2)
         
+        const {hasVoted} = await delegateCheck.getReceipt(proposalID, delegateCheck.address);
+
         let description = descriptionList[i].args[8].toString()
         
         proposalList.push({
@@ -2172,8 +2174,8 @@ class NetworkService {
            abstainVotes,
            state: proposalStates[state],
            startBlock,
-           endBlock
-
+           endBlock,
+           hasVoted 
         })
 
       }
