@@ -193,6 +193,22 @@ class Farm extends React.Component {
       <>
         <PageHeader title="Earn" />
 
+        {
+            <S.LayerAlert style={{background: 'red'}}>
+              <S.AlertInfo>
+                <AlertIcon />
+                <S.AlertText
+                  variant="body2"
+                  component="p"
+                >
+                  In preparation for Mainnet on Sept. 20, the LP pool contracts will be redeployed. If you have funds in the LP pools,
+                  please withdraw those funds now. Your funds are safe, however - a separate page will be provided to withdraw funds from the 
+                  Mainnet Beta liquidity pools. 
+                </S.AlertText>
+              </S.AlertInfo>
+            </S.LayerAlert>
+          }
+
         <Box sx={{ my: 3, width: '100%' }}>
           <Box sx={{ mb: 2, display: 'flex' }}>
             <Tabs
