@@ -67,7 +67,7 @@ We open the following the ports:
 >
 > `omgx/l2geth`: it's the most important service, so we should give as much memory as we can.
 >
-> `omgx/message-relayer-fast` and `omgx/message-relayer` : both message relayers can stop due the OOM issue. Giving it **4GB** memory can reduce the number of times that it needs to restart. 
+> `omgx/message-relayer-fast` and `omgx/message-relayer` : both message relayers can stop due the OOM issue. Giving it **4GB** memory can reduce the number of times that it needs to restart.
 >
 > [**IMPORTANT**] When `omgx/message-relayer-fast` and `omgx/message-relayer` restart, they scans all L2 blocks and check if there is a cross domain message and if the message is relayed to L1. It takes about 5 mins to sync 4K L2 blocks.
 
@@ -144,22 +144,18 @@ type Genesis struct {
 }
 ```
 
-### Bypass `GasPriceOracleOwnerAddress`
+### Make regenesis
 
-Modify `l2GasPriceOracleAddress` in [rollup/sync_service.go](https://github.com/omgnetwork/optimism/blob/9e07036f61a02ffb23eff405c3274f5f24950ad5/l2geth/rollup/sync_service.go#L49).
+Download the l2geth data from the server first, then get the state dump via
 
-```go
-var (
-	// l2GasPriceSlot refers to the storage slot that the L2 gas price is stored
-	// in in the OVM_GasPriceOracle predeploy
-	l2GasPriceSlot = common.BigToHash(big.NewInt(1))
-	// l2GasPriceOracleOwnerSlot refers to the storage slot that the owner of
-	// the OVM_GasPriceOracle is stored in
-	l2GasPriceOracleOwnerSlot = common.BigToHash(big.NewInt(0))
-	// l2GasPriceOracleAddress is the address of the OVM_GasPriceOracle
-	// predeploy
-	// l2GasPriceOracleAddress = common.HexToAddress("0x420000000000000000000000000000000000000F")
-  l2GasPriceOracleAddress = common.HexToAddress("OVM_GasPriceOracleAddress")
-)
+```
+geth dump LATEST_BLOCK_NUMBER --datadir DIR > state-dump.genesis.json
+```
+
+Move `state-dump.genesis.json` to `packages/contracts/dist/dump` and run
+
+```
+yarn build:dump
+yarn build:regenesis
 ```
 
