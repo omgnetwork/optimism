@@ -29,7 +29,7 @@ class FarmDepositModal extends React.Component {
       stakeToken,
       stakeValue: null,
       stakeValueValid: false,
-      stakeValueBadEntry: false,
+      //stakeValueBadEntry: false,
       // allowance
       approvedAllowance: 0,
       // loading
@@ -84,13 +84,13 @@ class FarmDepositModal extends React.Component {
         this.setState({
           stakeValue: value,
           stakeValueValid: true,
-          stakeValueBadEntry: false,
+          //stakeValueBadEntry: false,
         })
     } else {
       this.setState({
         stakeValue: null,
         stakeValueValid: false,
-        stakeValueBadEntry: true,
+        //stakeValueBadEntry: true,
       })
     }
 
@@ -166,7 +166,7 @@ class FarmDepositModal extends React.Component {
       stakeToken,
       stakeValue,
       stakeValueValid,
-      stakeValueBadEntry,
+      //stakeValueBadEntry,
       approvedAllowance,
       loading,
     } = this.state
