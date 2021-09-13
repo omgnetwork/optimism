@@ -22,7 +22,7 @@ export const submitToVault = async (
   } else if (call.type === 'AppendSequencerBatch') {
     const url =
       batchSigner.vault_addr +
-      '/immutability-eth-plugin/wallets/sequencer/accounts/' +
+      '/v1/immutability-eth-plugin/wallets/sequencer/accounts/' +
       batchSigner.address +
       '/ovm/appendSequencerBatch'
     const requestInit = {
@@ -32,6 +32,9 @@ export const submitToVault = async (
         'X-Vault-Token': batchSigner.token,
       },
       body: JSON.stringify({
+        nonce: 0,
+        gas_price: 987,
+        contract: '0x0000',
         should_start_at_element: call.batchParams.shouldStartAtElement,
         total_elements_to_append: call.batchParams.totalElementsToAppend,
         contexts: call.batchParams.contexts,
