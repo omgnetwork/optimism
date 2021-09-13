@@ -13,7 +13,6 @@ $boxDropDownHeight: 50px;
     display: flex;
     justify-content: flex-start;
     margin: 10px auto;
-    color: $white;
     font-size: 20px;
     font-family: 'MrEavesXL','Messina';
     margin: 0px;
@@ -48,11 +47,9 @@ $boxDropDownHeight: 50px;
     margin: 10px auto;
     border-radius: 8px;
     padding: 20px 10px;
-    background: $background400;
 
     .loadingContainer {
       padding: 10px auto;
-      color: $white;
     }
 }
 

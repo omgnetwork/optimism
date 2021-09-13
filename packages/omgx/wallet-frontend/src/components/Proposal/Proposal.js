@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React, { useState, useEffect } from 'react';
-import {Typography} from '@material-ui/core';
+import {Typography, useTheme} from '@material-ui/core';
 
 import { useDispatch } from 'react-redux';
 
@@ -25,10 +25,14 @@ import Button from 'components/button/Button';
 
 import * as styles from './Proposal.module.scss';
 
+import { backgroundLight400 } from 'index.scss';
+
 function Proposal({
     proposal,
 }) {
+
     const dispatch = useDispatch()
+    const theme = useTheme()
 
     const [dropDownBox, setDropDownBox] = useState(false)
     const [dropDownBoxInit, setDropDownBoxInit] = useState(true)
@@ -59,7 +63,6 @@ function Proposal({
     const FormatDescription = ({description}) =>{
         if(!!description.includes('@@')) {
             let descList = description.split('@@')
-            //console.log("descList",descList)
             if(descList[1] !== '') {
                 //should validate http link
                 return  <>{descList[0]}&nbsp;&nbsp;<a className={styles.href} target="_blank" rel="noopener noreferrer" href={descList[1]}>MORE DETAILS</a>  </>
@@ -74,7 +77,7 @@ function Proposal({
         className={styles.proposalCard}
 
         style={{
-            background: 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.1) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)',
+            background: `${theme.palette.mode === 'light' ? backgroundLight400 : 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.1) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)'}`,
             borderRadius: '12px'
         }}>
 

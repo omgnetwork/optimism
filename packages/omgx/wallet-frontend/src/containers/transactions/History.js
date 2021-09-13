@@ -20,6 +20,7 @@ import { useSelector } from 'react-redux'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
 
+import {useTheme} from '@material-ui/core'
 import moment from 'moment';
 
 import { setActiveHistoryTab1 } from 'actions/uiAction'
@@ -43,6 +44,8 @@ import Transactions from './Transactions'
 const POLL_INTERVAL = 5000; //milliseconds
 
 function History() {
+
+  const theme = useTheme()
 
   const dispatch = useDispatch()
   const [startDate, setStartDate] = useState(null)
@@ -96,6 +99,7 @@ function History() {
             selectsStart
             startDate={startDate}
             endDate={endDate}
+            calendarClassName={theme.palette.mode}
           />
 
           <div style={{ margin: '0px 10px', opacity: 0.7 }}>to </div>
@@ -107,6 +111,7 @@ function History() {
             startDate={startDate}
             endDate={endDate}
             minDate={startDate}
+            calendarClassName={theme.palette.mode}
           />
         </div>
       </div>

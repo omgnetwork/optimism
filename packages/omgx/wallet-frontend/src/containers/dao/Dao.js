@@ -91,7 +91,12 @@ function DAO() {
 
                 <div className={styles.content}>
                     <div className={`${styles.action} ${isMobile ? styles.isMobile : ''}`}>
-                        <div className={styles.transferContainer}>
+                        <div className={styles.transferContainer}
+                        
+                            style={{
+                                background: theme.palette.background.secondary,
+                            }}
+                        >
                             <div className={styles.info}>
                                 <Typography variant="h3">{balance} Comp</Typography>
                                 <Typography variant="h4">Wallet Balance</Typography>
@@ -111,7 +116,11 @@ function DAO() {
                                 }}
                             >Transfer</Button>
                         </div>
-                        <div className={styles.delegateContainer}>
+                        <div className={styles.delegateContainer}
+                            style={{
+                                background: theme.palette.background.secondary,
+                            }}
+                        >
                             <div className={styles.info}>
                                 <Typography variant="h3">{votes} Votes</Typography>
                                 <Typography variant="h4">Voting Power</Typography>

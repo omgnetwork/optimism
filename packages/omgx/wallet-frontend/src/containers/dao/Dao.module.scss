@@ -43,7 +43,6 @@
             padding: 20px;
             display: flex;
             flex-direction: column; 
-            background: $background400;
             max-width: 48%;
             width: 48%;
             min-width: 350px;
@@ -62,7 +61,7 @@
                 .helpText {
                     font-size: 0.8em;
                     margin: 10px;
-                    color: $white700;
+                    opacity: 0.7;
                     margin: 10px;
                 }
             }

@@ -15,6 +15,7 @@ limitations under the License. */
 
 import React, {useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import {useTheme} from '@material-ui/core';
 
 import { openError, openModal } from 'actions/uiAction';
 
@@ -30,6 +31,7 @@ import { orderBy } from 'lodash';
 const PER_PAGE = 3;
 
 function ProposalList({balance}) {
+    const theme = useTheme();
 
     const [page, setPage] = useState(1);
     const dispatch = useDispatch()
@@ -68,7 +70,11 @@ function ProposalList({balance}) {
 
             > Create Proposal </Button>
         </div>
-        <div className={styles.listContainer}>
+        <div className={styles.listContainer}
+            style={{
+                background: theme.palette.background.secondary
+            }}
+        >
             <Pager
                 currentPage={page}
                 isLastPage={paginatedProposals.length < PER_PAGE}

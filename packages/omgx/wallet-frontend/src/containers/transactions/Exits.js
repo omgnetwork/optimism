@@ -34,7 +34,7 @@ const PER_PAGE = 8
 function Exits({ searchHistory, transactions, chainLink }) {
 
   const [page, setPage] = useState(1);
-  const [processExitModal, setProcessExitModal] = useState(false);
+  
 
   const loading = useSelector(selectLoading(['EXIT/GETALL']));
 
@@ -53,7 +53,7 @@ function Exits({ searchHistory, transactions, chainLink }) {
     const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
     const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
 
-    let tradExit = false
+    
     let isExitable = false
     let details = null
 
@@ -64,7 +64,7 @@ function Exits({ searchHistory, transactions, chainLink }) {
     //are we dealing with a traditional exit?
     if (to === networkService.L2StandardBridgeAddress.toLowerCase()) {
 
-      tradExit = true
+      
       isExitable = moment().isAfter(moment.unix(i.crossDomainMessage.crossDomainMessageEstimateFinalizedTime))
 
       if (isExitable) {
