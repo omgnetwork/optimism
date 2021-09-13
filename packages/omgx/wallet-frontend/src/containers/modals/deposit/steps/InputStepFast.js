@@ -155,7 +155,7 @@ function InputStepFast({ handleClose, token }) {
   } else if (approvalLoading) {
     buttonLabel_2 = "Approving..."
   }
-  
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -179,13 +179,13 @@ function InputStepFast({ handleClose, token }) {
         newStyle
       />
 
-      {token && token.symbol === 'ETH' && (
+      {value > 0 && token && token.symbol === 'ETH' && (
         <Typography variant="body2" sx={{mt: 2}}>
           {value && `You will receive ${receivableAmount(value)} oETH ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
         </Typography>
       )}
 
-      {token && token.symbol !== 'ETH' && (
+      {value > 0 && token && token.symbol !== 'ETH' && (
         <Typography variant="body2" sx={{mt: 2}}>
           {value && `You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
         </Typography>

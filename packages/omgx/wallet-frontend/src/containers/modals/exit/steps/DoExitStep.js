@@ -109,7 +109,7 @@ function DoExitStep({ handleClose, token }) {
         newStyle
       />
 
-      {token && token.symbol === 'oETH' && (
+      {value > 0 && token && token.symbol === 'oETH' && (
         <Typography variant="body2" sx={{mt: 2}}>
           {value &&
             `You will receive ${Number(value).toFixed(2)} ETH
@@ -119,7 +119,7 @@ function DoExitStep({ handleClose, token }) {
         </Typography>
       )}
 
-      {token && token.symbol !== 'oETH' && (
+      {value > 0 && token && token.symbol !== 'oETH' && (
         <Typography variant="body2" sx={{mt: 2}}>
           {value &&
             `You will receive ${Number(value).toFixed(2)} ${token.symbol}

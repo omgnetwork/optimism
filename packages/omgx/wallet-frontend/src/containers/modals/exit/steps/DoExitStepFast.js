@@ -99,7 +99,7 @@ function DoExitStepFast({ handleClose, token }) {
         setFeeRate(feeRate)
       })
     }
-    // to clean up state and fix the 
+    // to clean up state and fix the
     // error in console for max state update.
     return ()=>{
       setLPBalance(0);
@@ -143,7 +143,7 @@ function DoExitStepFast({ handleClose, token }) {
         variant="standard"
       />
 
-      {token && token.symbol === 'oETH' && (
+      {value > 0 && token && token.symbol === 'oETH' && (
         <Typography variant="body2" sx={{mt: 2}}>
           {value &&
             `You will receive
@@ -155,7 +155,7 @@ function DoExitStepFast({ handleClose, token }) {
         </Typography>
       )}
 
-      {token && token.symbol !== 'oETH' && (
+      {value > 0 && token && token.symbol !== 'oETH' && (
         <Typography variant="body2" sx={{mt: 2}}>
           {value &&
             `You will receive
