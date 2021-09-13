@@ -46,6 +46,8 @@ function DoExitStepFast({ handleClose, token }) {
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
   const lookupPrice = useSelector(selectLookupPrice)
   const signatureStatus = useSelector(selectSignatureStatus_exitLP)
+  const maxValue = logAmount(token.balance, token.decimals)
+  const valueIsValid = value > 0 && value <= maxValue
 
   function setAmount(value) {
     if (
@@ -138,12 +140,12 @@ function DoExitStepFast({ handleClose, token }) {
         type="number"
         onChange={(i)=>{setAmount(i.target.value)}}
         unit={token.symbol}
-        maxValue={logAmount(token.balance, token.decimals)}
+        maxValue={maxValue}
         newStyle
         variant="standard"
       />
 
-      {value > 0 && token && token.symbol === 'oETH' && (
+      {valueIsValid && token && token.symbol === 'oETH' && (
         <Typography variant="body2" sx={{mt: 2}}>
           {value &&
             `You will receive
@@ -155,7 +157,7 @@ function DoExitStepFast({ handleClose, token }) {
         </Typography>
       )}
 
-      {value > 0 && token && token.symbol !== 'oETH' && (
+      {valueIsValid && token && token.symbol !== 'oETH' && (
         <Typography variant="body2" sx={{mt: 2}}>
           {value &&
             `You will receive

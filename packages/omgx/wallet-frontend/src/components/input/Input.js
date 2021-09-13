@@ -120,6 +120,11 @@ function Input({
         </Typography>
         : null
       }
+      {value != '' && value > maxValue  ?
+        <Typography variant="body2" sx={{mt: 2}}>
+          The value must be smaller than {Number(maxValue).toFixed(3)}.
+        </Typography>
+        : null}
     </>
   )
 }
