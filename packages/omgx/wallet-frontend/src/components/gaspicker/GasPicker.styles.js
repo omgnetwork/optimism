@@ -3,7 +3,8 @@ import { Box, Card } from '@material-ui/core';
 
 export const CardTag = styled(Card)`
   border: ${(props) => props.selected ? '2px solid #F0A000' : '2px solid #3A3F51'};
-  opacity: ${(props) => props.selected ? 1.0 : 0.4}
+  opacity: ${(props) => props.selected ? 1.0 : 0.4};
+  background-color: ${(props) => props.theme.palette.background.secondary};
 `;
 
 export const WrapperItem = styled(Box)`

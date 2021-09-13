@@ -204,14 +204,6 @@ class FarmDepositModal extends React.Component {
           variant="standard"
         />
 
-        {stakeValueBadEntry ?
-          <Typography variant="body2" sx={{mt: 2}}>
-            Staking value limits: You can't add 0 to the pool (otherwise you would just burn gas
-            for no reason) and you can't stake more than your {stakeToken.symbol} balance.
-          </Typography>
-          : null
-        }
-
         {!allowanceGTstake &&
           <>
             {stakeValueValid &&
