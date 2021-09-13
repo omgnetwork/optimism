@@ -48,7 +48,6 @@ function DAO() {
         layer = networkService.L1orL2
     }
 
-
     if(layer === 'L1') {
         return <div className={styles.container}>
             <div className={styles.header}>
