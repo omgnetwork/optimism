@@ -218,7 +218,7 @@ class ListFarm extends React.Component {
 
             <S.GridItemTag item xs={4} md={1.7}>
               {isMobile ? (
-                <Typography variant="overline" sx={{opacity: 0.7}}>APR &#x25;</Typography>
+                <Typography variant="overline" sx={{opacity: 0.7}}>APR %</Typography>
               ) : (null)}
               <Typography variant="body1">
                 {userInfo.amount ?

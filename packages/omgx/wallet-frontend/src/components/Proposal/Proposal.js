@@ -130,56 +130,50 @@ function Proposal({
         </div>
 
         <div className={dropDownBox ? styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}>
-            {
-                proposal.hasVoted ?
-                    <div className={styles.proposalDetail}>
-                        <Typography variant="body2">Thank you for voting - your vote has been recorded</Typography>
-                    </div>
-                    : <div className={styles.proposalDetail}>
-                        <Typography variant="body2">Note: only your first vote counts.</Typography>
-                        <Button
-                            type="primary"
-                            variant="outlined"
-                            style={{
-                                maxWidth: '180px',
-                                padding: '15px 10px',
-                                borderRadius: '8px',
-                                alignSelf: 'center'
-                            }}
-                            onClick={(e) => {
-                                updateVote(proposal.id, 1, 'Cast Vote For')
-                            }}
+            <div className={styles.proposalDetail}>
+                <Typography variant="body2">Note: only your first vote counts.</Typography>
+                <Button
+                    type="primary"
+                    variant="outlined"
+                    style={{
+                        maxWidth: '180px',
+                        padding: '15px 10px',
+                        borderRadius: '8px',
+                        alignSelf: 'center'
+                    }}
+                    onClick={(e) => {
+                        updateVote(proposal.id, 1, 'Cast Vote For')
+                    }}
 
-                        > Cast Vote For</Button>
-                        <Button
-                            type="primary"
-                            variant="outlined"
-                            style={{
-                                maxWidth: '180px',
-                                padding: '15px 10px',
-                                borderRadius: '8px',
-                                alignSelf: 'center'
-                            }}
-                            onClick={(e) => {
-                                updateVote(proposal.id, 0, 'Cast Vote Against')
-                            }}
+                > Cast Vote For</Button>
+                <Button
+                    type="primary"
+                    variant="outlined"
+                    style={{
+                        maxWidth: '180px',
+                        padding: '15px 10px',
+                        borderRadius: '8px',
+                        alignSelf: 'center'
+                    }}
+                    onClick={(e) => {
+                        updateVote(proposal.id, 0, 'Cast Vote Against')
+                    }}
 
-                        > Cast Vote Against</Button>
-                        <Button
-                            type="outline"
-                            variant="outlined"
-                            style={{
-                                maxWidth: '180px',
-                                padding: '15px 10px',
-                                borderRadius: '8px',
-                                alignSelf: 'center'
-                            }}
-                            onClick={(e) => {
-                                updateVote(proposal.id, 2, 'Cast Vote Abstain')
-                            }}
-                        > Cast Vote Abstain</Button>
-                    </div>
-            }
+                > Cast Vote Against</Button>
+                <Button
+                    type="outline"
+                    variant="outlined"
+                    style={{
+                        maxWidth: '180px',
+                        padding: '15px 10px',
+                        borderRadius: '8px',
+                        alignSelf: 'center'
+                    }}
+                    onClick={(e) => {
+                        updateVote(proposal.id, 2, 'Cast Vote Abstain')
+                    }}
+                > Cast Vote Abstain</Button>
+            </div>
         </div>
     </div>)
 }
