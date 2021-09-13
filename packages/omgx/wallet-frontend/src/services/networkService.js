@@ -1394,44 +1394,6 @@ class NetworkService {
     }
   }
 
-  //Never used?
-
-  // async resetApprove(
-  //   value,
-  //   currency,
-  //   approveContractAddress = this.L1StandardBridgeAddress,
-  //   contractABI = L1ERC20Json.abi
-  // ) {
-  //   try {
-  //     const ERC20Contract = new ethers.Contract(
-  //       currency,
-  //       contractABI,
-  //       this.provider.getSigner()
-  //     )
-
-  //     const resetApproveStatus = await ERC20Contract.approve(
-  //       approveContractAddress,
-  //       0
-  //     )
-  //     await resetApproveStatus.wait()
-
-  //     const approveStatus = await ERC20Contract.approve(
-  //       approveContractAddress,
-  //       value
-  //     )
-  //     await approveStatus.wait()
-  //     return true
-  //   } catch (error) {
-  //     console.log("NS: resetApprove error:", error)
-  //     throw new WebWalletError({
-  //       originalError: error,
-  //       customErrorMessage: 'Could not reset allowance for ERC20.',
-  //       reportToSentry: false,
-  //       reportToUi: true,
-  //     })
-  //   }
-  // }
-
   //Used to move ERC20 Tokens from L1 to L2
   async depositErc20(value, currency, gasPrice, currencyL2) {
 
@@ -2004,6 +1966,7 @@ class NetworkService {
 
   // get DAO Balance
   async getDaoBalance() {
+    
     if(this.masterSystemConfig !== 'rinkeby' || this.L1orL2 !== 'L2') return
 
     try {
@@ -2060,16 +2023,16 @@ class NetworkService {
     try {
       // get the threshold proposal only in case of L2
       if(this.L1orL2 === 'L2') { 
-        const delegateCheck = await this.delegate.attach(this.delegator.address);
-        let rawThreshold = await delegateCheck.proposalThreshold();
-        return { threshold: formatEther(rawThreshold) };
+        const delegateCheck = await this.delegate.attach(this.delegator.address)
+        let rawThreshold = await delegateCheck.proposalThreshold()
+        return { threshold: formatEther(rawThreshold) }
       }
       else {
-        return { threshold: 0 };
+        return { threshold: 0 }
       }
     } catch (error) {
-      console.log(error);
-      throw new Error(error.message);
+      console.log(error)
+      throw new Error(error.message)
     }
   }
 
@@ -2089,18 +2052,18 @@ class NetworkService {
       )]
       let description = !text ? `# Changing Proposal Threshold to ${votingThreshold} Comp` : text;
       
-      let setGas = {
-        gasPrice: 15000000,
-        gasLimit: 8000000
-      };
+      //let setGas = {
+      //  gasPrice: 15000000,
+      //  gasLimit: 8000000
+      //};
 
       let res = await delegateCheck.propose(
         address,
         values,
         signatures,
         calldatas,
-        description,
-        setGas
+        description//,
+        //setGas
       )
       return res;
     } catch (error) {
@@ -2198,10 +2161,12 @@ class NetworkService {
     try {
       
       const delegateCheck = await this.delegate.attach(this.delegator.address);
-      let res = delegateCheck.castVote(id, userVote, {
-        gasPrice: 15000000,
-        gasLimit: 8000000
-      });
+      let res = delegateCheck.castVote(id, userVote //, 
+      //{
+      //  gasPrice: 15000000,
+      //  gasLimit: 8000000
+      //}
+      )
       return res;
     } catch(error) {
       console.log('Error: cast vote', error);
