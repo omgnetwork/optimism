@@ -9,30 +9,28 @@ $boxDropDownHeight: 50px;
     padding: 5px;
     padding-left: 10px;
     border-radius: 8px;
-    background: red;
     .proposalHeader {
         display: flex;
         justify-content: space-between;
         .title {
             font-size: 1.1em;
-            color: $white;
             p{
               margin: 0px;
             }
             .muted {
-              color: $white700;
+              opacity: 0.7;
             }
         }
     }
     .proposalContent {
       display: flex;
       justify-content: flex-start;
-      color: $white700;
+      opacity: 0.7;
       font-weight: 700;
     }
     .vote {
       min-width: 120px;
-      color: $white700;
+      opacity: 0.7;
       font-weight: 700;
     }
 }
@@ -103,5 +101,4 @@ $boxDropDownHeight: 50px;
 
   .href {
     text-decoration: underline;
-    color: white
   }
