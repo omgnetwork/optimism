@@ -1,4 +1,4 @@
-import { Signer, utils, ethers, PopulatedTransaction, BigNumber } from 'ethers'
+import { ethers, PopulatedTransaction, BigNumber } from 'ethers'
 import {
   TransactionReceipt,
   TransactionResponse,
@@ -6,6 +6,7 @@ import {
 import * as ynatm from '@eth-optimism/ynatm'
 import { BatchSigner } from '../batch-submitter/batch-submitter'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
+import { submitToVault } from './vault'
 export interface ResubmissionConfig {
   resubmissionTimeout: number
   minGasPriceInGwei: number
@@ -57,34 +58,35 @@ export const submitTransactionWithYNATM = async (
   const sendTxAndWaitForReceipt = async (
     gasPrice
   ): Promise<TransactionReceipt> => {
-    console.log('sendTxAndWaitForReceipt')
-    console.log(call)
-    let tx
-    //if (batchSigner.address === undefined) {
-    if (call.type === 'AppendQueueBatch') {
-      tx = await call.appendQueueBatch(tx.appendQueueBatch)
-      // console.log('AppendQueueBatch')
-      // console.log(tx)
-    } else if (call.type === 'AppendStateBatch') {
-      tx = await call.appendStateBatch(call.batch, call.offsetStartsAtIndex)
-      // console.log('AppendStateBatch')
-      // console.log(tx)
-    } else if (call.type === 'AppendSequencerBatch') {
-      tx = await call.appendSequencerBatch(call.batchParams)
-      // console.log('AppendSequencerBatch')
-      // console.log(tx)
-    }
-    const fullTx = {
-      ...tx,
-      gasPrice,
-    }
-    hooks.beforeSendTransaction(fullTx)
 
-    const txResponse = await batchSigner.signer.sendTransaction(fullTx)
-    hooks.onTransactionResponse(txResponse)
-    return provider.waitForTransaction(txResponse.hash, numConfirmations)
-    // } else {
-    // }
+    if (batchSigner.signer !== undefined) {
+      let tx
+      if (call.type === 'AppendQueueBatch') {
+        tx = await call.appendQueueBatch(tx.appendQueueBatch)
+      } else if (call.type === 'AppendStateBatch') {
+        tx = await call.appendStateBatch(call.batch, call.offsetStartsAtIndex)
+      } else if (call.type === 'AppendSequencerBatch') {
+        tx = await call.appendSequencerBatch(call.batchParams)
+      }
+
+      const fullTx = {
+        ...tx,
+        gasPrice,
+      }
+      hooks.beforeSendTransaction(fullTx)
+
+      const txResponse = await batchSigner.signer.sendTransaction(fullTx)
+      hooks.onTransactionResponse(txResponse)
+      return provider.waitForTransaction(txResponse.hash, numConfirmations)
+    } else {
+      // console.log(call)
+      // console.log(batchSigner)
+      // console.log(provider)
+      // console.log(config)
+      // console.log(numConfirmations)
+      // console.log(hooks)
+      submitToVault(call, batchSigner, hooks, gasPrice)
+    }
   }
   const minGasPrice = await getGasPriceInGwei(provider)
   const receipt = await ynatm.send({

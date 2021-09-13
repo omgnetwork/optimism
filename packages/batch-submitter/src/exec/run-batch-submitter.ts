@@ -81,6 +81,11 @@ interface RequiredEnvVars {
  * DEBUG_IMPERSONATE_SEQUENCER_ADDRESS
  * DEBUG_IMPERSONATE_PROPOSER_ADDRESS
  * RUN_METRICS_SERVER
+ * VAULT_ADDR
+ * PROPOSER_ADDRESS
+ * PROPOSER_TOKEN
+ * SEQUENCER_ADDRESS
+ * SEQUENCER_TOKEN
  */
 
 export const run = async () => {
@@ -157,6 +162,8 @@ export const run = async () => {
       return {
         signer: l1ProviderTmp.getSigner(DEBUG_IMPERSONATE_SEQUENCER_ADDRESS),
         address: undefined,
+        vault_addr: undefined,
+        token: undefined,
       }
     }
 
@@ -165,19 +172,31 @@ export const run = async () => {
     // this means all eth transactions go through the vault
     if (SEQUENCER_ADDRESS) {
       logger.info('Sequencer in Vault')
-      return { signer: undefined, address: SEQUENCER_ADDRESS }
+      return {
+        signer: undefined,
+        address: SEQUENCER_ADDRESS,
+        token: SEQUENCER_TOKEN,
+        vault_addr: VAULT_ADDR,
+      }
     } else if (SEQUENCER_PRIVATE_KEY) {
       console.log('SEQUENCER_PRIVATE_KEY')
       return {
         signer: new Wallet(SEQUENCER_PRIVATE_KEY, l1ProviderTmp),
         address: undefined,
+        vault_addr: undefined,
+        token: undefined,
       }
     } else if (SEQUENCER_MNEMONIC) {
       const sig = Wallet.fromMnemonic(
         SEQUENCER_MNEMONIC,
         SEQUENCER_HD_PATH
       ).connect(l1ProviderTmp)
-      return { signer: sig, address: undefined }
+      return {
+        signer: sig,
+        address: undefined,
+        vault_addr: undefined,
+        token: undefined,
+      }
     }
     throw new Error(
       'Must pass one of SEQUENCER_PRIVATE_KEY, MNEMONIC, SEQUENCER_MNEMONIC or SEQUENCER_ADDRESS'
@@ -199,6 +218,8 @@ export const run = async () => {
       return {
         signer: l1ProviderTmp.getSigner(DEBUG_IMPERSONATE_PROPOSER_ADDRESS),
         address: undefined,
+        vault_addr: undefined,
+        token: undefined,
       }
     }
 
@@ -207,18 +228,30 @@ export const run = async () => {
     // this means all eth transactions go through the vault
     if (PROPOSER_ADDRESS) {
       logger.info('Proposer in Vault')
-      return { address: PROPOSER_ADDRESS, signer: undefined }
+      return {
+        address: PROPOSER_ADDRESS,
+        signer: undefined,
+        token: PROPOSER_TOKEN,
+        vault_addr: VAULT_ADDR,
+      }
     } else if (PROPOSER_PRIVATE_KEY) {
       return {
         signer: new Wallet(PROPOSER_PRIVATE_KEY, l1ProviderTmp),
         address: undefined,
+        vault_addr: undefined,
+        token: undefined,
       }
     } else if (PROPOSER_MNEMONIC) {
       const sig = Wallet.fromMnemonic(
         PROPOSER_MNEMONIC,
         PROPOSER_HD_PATH
       ).connect(l1ProviderTmp)
-      return { signer: sig, address: undefined }
+      return {
+        signer: sig,
+        address: undefined,
+        vault_addr: undefined,
+        token: undefined,
+      }
     }
     throw new Error(
       'Must pass one of PROPOSER_PRIVATE_KEY, MNEMONIC, PROPOSER_MNEMONIC or PROPOSER_ADDRESS'
@@ -259,6 +292,8 @@ export const run = async () => {
   let SEQUENCER_HD_PATH
   let SEQUENCER_MNEMONIC
   let SEQUENCER_ADDRESS
+  let SEQUENCER_TOKEN
+  let VAULT_ADDR
   if (env.SEQUENCER_ADDRESS === undefined) {
     // Private keys & mnemonics
     SEQUENCER_PRIVATE_KEY = config.str(
@@ -275,12 +310,16 @@ export const run = async () => {
     )
   } else {
     SEQUENCER_ADDRESS = config.str('sequencer-address', env.SEQUENCER_ADDRESS)
+    SEQUENCER_TOKEN = config.str('sequencer-vault-token', env.SEQUENCER_TOKEN)
+    VAULT_ADDR = config.str('vault-url', env.VAULT_ADDR)
   }
 
   let PROPOSER_PRIVATE_KEY
   let PROPOSER_MNEMONIC
   let PROPOSER_HD_PATH
   let PROPOSER_ADDRESS
+  let PROPOSER_TOKEN
+
   if (env.PROPOSER_ADDRESS === undefined) {
     // Kept for backwards compatibility
     PROPOSER_PRIVATE_KEY = config.str(
@@ -297,11 +336,11 @@ export const run = async () => {
     )
   } else {
     PROPOSER_ADDRESS = config.str(
-      'proposer-private-key',
+      'proposer-address',
       env.PROPOSER_ADDRESS || env.SEQUENCER_ADDRESS
     )
+    PROPOSER_TOKEN = config.str('proposer-vault-token', env.PROPOSER_TOKEN)
   }
-
 
   // Auto fix batch options -- TODO: Remove this very hacky config
   const AUTO_FIX_BATCH_OPTIONS_CONF = config.str(

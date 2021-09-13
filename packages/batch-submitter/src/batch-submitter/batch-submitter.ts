@@ -19,6 +19,8 @@ import { getBalance, getBatchSignerAddress } from './provider-helper'
 export interface BatchSigner {
   // one or the other, not both!
   address: string
+  vault_addr: string
+  token: string
   signer: Signer
 }
 /* Internal Imports */

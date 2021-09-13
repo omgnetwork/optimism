@@ -18,8 +18,13 @@ services:
   ### via SEQUENCER_PRIVATE_KEY - SEQUENCER_ADDRESS, PROPOSER_PRIVATE_KEY - PROPOSER_ADDRESS
   ### not very clean atm, because the modes exist side by side.
 
-  ### we inject a short script that was prepared in Vault that
-  ### exposes Vault tokens, sequencer address and proposer address
+  ### we inject a short script that was prepared in Vault.
+  ### It exposes Vault tokens, sequencer address and proposer address
+  ### as env vars.
+  ### PROPOSER_TOKEN, SEQUENCER_TOKEN, SEQUENCER_ADDRESS, PROPOSER_ADDRESS
+
+  ### The deployer takes these addresses and populates the contracts guard with them.
+  ### Batch submitter will go into Vault mode if these env vars are present.
   deployer:
     volumes:
       - "./../packages/omgx/immutability/test:/vault/test"
@@ -30,7 +35,7 @@ services:
        SCRIPT=$$(cat <<-END
        while [ ! -f /vault/test/tokens_and_accounts.sh ]
        do
-         sleep 1
+         sleep 5
          echo "Waiting for the Vault accounts in tokens_and_accounts.sh"
        done
        source /vault/test/tokens_and_accounts.sh
@@ -43,6 +48,8 @@ services:
   batch_submitter:
     volumes:
       - "./../packages/omgx/immutability/test:/vault/test"
+    environment:
+      VAULT_ADDR: http://vault:8900
     entrypoint:
       - "/bin/bash"
       - -ec
@@ -50,7 +57,7 @@ services:
        SCRIPT=$$(cat <<-END
        while [ ! -f /vault/test/tokens_and_accounts.sh ]
        do
-         sleep 1
+         sleep 5
          echo "Waiting for the Vault accounts in tokens_and_accounts.sh"
        done
        source /vault/test/tokens_and_accounts.sh
@@ -71,7 +78,7 @@ services:
     deploy:
        replicas: 1
     environment:
-      VAULT_ADDR: https://127.0.0.1:8900
+      VAULT_ADDR: http://127.0.0.1:8900
       VAULT_CACERT: /vault/config/ca.crt
       RUN_TEST: "true"
       TEST: "true"
@@ -86,18 +93,18 @@ services:
       - "/bin/sh"
       - -ec
       - |
+        rm /vault/test/tokens_and_accounts.sh || true
         apk add --quiet --no-progress --update --no-cache make gcc g++
         apk add --quiet --no-progress --update --no-cache python3 && ln -sf python3 /usr/bin/python
         python3 -m ensurepip
         pip3 install --no-cache --upgrade pip setuptools
         apk add --quiet --no-progress --update nodejs npm
         cd /vault/test && npm install
-        cat /vault/vault.sh
         nohup /vault/vault.sh > /tmp/vault.out &
         while [ $$(cat /tmp/vault.out | grep -c "Success! Enabled the immutability-eth-plugin secrets engine at: immutability-eth-plugin/") -ne 1 ];
         do
             sleep 10
-            echo "Waiting for Vault..."
+            echo "Waiting for Vault setup to finish..."
         done
         export VAULT_TOKEN=$$(cat /vault/config/unseal.json | jq -r .root_token)
         echo "Config and provisioning, create tokens_and_accounts.sh"

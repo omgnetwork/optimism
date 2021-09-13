@@ -14,7 +14,7 @@ export FUNDING_AMOUNT=100000000000000000
 export TEST_AMOUNT=10000000000000000
 export PASSPHRASE="passion bauble hypnotic hanky kiwi effective overcast roman staleness"
 export EMPTY=""
-export VAULT_ADDR="https://127.0.0.1:8900"
+export VAULT_ADDR="$VAULT_ADDR"
 function check_result(){
   EXIT_STATUS=$1
   EXPECTED=$2

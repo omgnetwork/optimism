@@ -10,7 +10,6 @@ import {
   remove0x,
 } from '@eth-optimism/core-utils'
 import { Logger, Metrics } from '@eth-optimism/common-ts'
-import { getBatchSignerAddress, getTransactionCount } from './provider-helper'
 /* Internal Imports */
 import { BlockRange, BatchSubmitter, BatchSigner } from '.'
 import { TransactionSubmitter, AppendStateBatch } from '../utils'
