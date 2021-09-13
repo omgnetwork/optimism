@@ -16,7 +16,7 @@ import PageHeader from 'components/pageHeader/PageHeader'
 import networkService from 'services/networkService'
 
 import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher'
-import AlertIcon from 'components/icons/AlertIcon';
+import AlertIcon from 'components/icons/AlertIcon'
 
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
@@ -111,11 +111,7 @@ class Nft extends React.Component {
 
     if(layer === 'L1') {
         return <div className={styles.container}>
-            <div className={styles.header}>
-                <h2 className={styles.title}>
-                    BOBA NFT
-                </h2>
-            </div>
+            <PageHeader title="NFT" />
             <div className={styles.content}>
                 <Box
                     sx={{
