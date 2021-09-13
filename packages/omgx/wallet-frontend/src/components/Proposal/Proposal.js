@@ -83,6 +83,9 @@ function Proposal({
                 if(proposal.state !== 'Active') {
                     return;
                 }
+                if(proposal.hasVoted) {
+                    return;
+                }
                 setDropDownBox(!dropDownBox)
                 setDropDownBoxInit(false)
             }}
@@ -93,6 +96,28 @@ function Proposal({
                     <Typography variant="body3" component="p" className={styles.muted}>Title: <FormatDescription description={proposal.description} /></Typography>
                     <Typography variant="body3" component="p" className={styles.muted}>Status: {proposal.state}</Typography>
                     <Typography variant="body3" component="p" className={styles.muted}>Start L1 Block: {proposal.startBlock} &nbsp; &nbsp; End L1 Block: {proposal.endBlock}</Typography>
+                    {proposal.state === 'Active' && !proposal.hasVoted &&
+                         <div style={{
+                            background: 'blue', 
+                            borderRadius: '8px',
+                            height: '25px',
+                            fontSize: '0.9em',
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'center'
+                        }}>Proposal active: please VOTE</div>
+                    }
+                    {proposal.state === 'Active' && proposal.hasVoted &&
+                         <div style={{
+                            background: 'green', 
+                            borderRadius: '8px',
+                            height: '25px',
+                            fontSize: '0.9em',
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'center'
+                        }}>Vote recorded: thank you</div>
+                    }
                 </div>
                 <div>
                     <Typography variant="body3" component="p" className={styles.vote}>For: {proposal.forVotes}</Typography>

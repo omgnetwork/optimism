@@ -2133,12 +2133,15 @@ class NetworkService {
         null
       )
       
-      const descriptionList = await delegateCheck.queryFilter(filter);
+      const descriptionList = await delegateCheck.queryFilter(filter)
+
       for (let i = 0; i < totalProposals; i++) {
         
         let proposalID = descriptionList[i].args[0]
+        
         //this is a number such as 2
         let proposalData = await delegateCheck.proposals(proposalID)
+
         const proposalStates = [
           'Pending',
           'Active',
@@ -2151,6 +2154,8 @@ class NetworkService {
         ]
 
         let state = await delegateCheck.state(proposalID)
+        //console.log("State:", proposalStates[state])
+        
         let againstVotes = parseInt(formatEther(proposalData.againstVotes))
         let forVotes = parseInt(formatEther(proposalData.forVotes))
         let abstainVotes = parseInt(formatEther(proposalData.abstainVotes))
@@ -2160,7 +2165,9 @@ class NetworkService {
 
         let proposal = await delegateCheck.getActions(i+2)
         
-        const {hasVoted} = await delegateCheck.getReceipt(proposalID, delegateCheck.address);
+        const { hasVoted } = await delegateCheck.getReceipt(proposalID, this.account)//delegateCheck.address)
+
+        //console.log("Has voted:", hasVoted)
 
         let description = descriptionList[i].args[8].toString()
         

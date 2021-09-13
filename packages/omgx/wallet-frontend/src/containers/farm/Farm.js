@@ -69,7 +69,7 @@ class Farm extends React.Component {
       layer2,
       lpChoice: initialLayer,
       poolTab: initialViewLayer,
-      showAll: true
+      showMDO: false //MDO = my desposits only
     }
 
   }
@@ -170,7 +170,7 @@ class Farm extends React.Component {
 
   handleCheckBox = (e) =>{
     this.setState({
-      showAll: e.target.checked
+      showMDO: e.target.checked
     })
   }
 
@@ -182,7 +182,7 @@ class Farm extends React.Component {
       userInfo,
       lpChoice,
       poolTab,
-      showAll
+      showMDO
     } = this.state;
 
     const { isMobile } = this.props
@@ -205,13 +205,13 @@ class Farm extends React.Component {
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={showAll}
+                  checked={showMDO}
                   onChange={this.handleCheckBox}
-                  name="show all"
+                  name="my deposits only"
                   color="primary"
                 />
               }
-              label="Show All"
+              label="My Deposits Only"
             />
           </Box>
 
@@ -270,7 +270,7 @@ class Farm extends React.Component {
                     balance={ret[0]}
                     decimals={ret[1]}
                     isMobile={isMobile}
-                    showAll={showAll}
+                    showAll={!showMDO}
                   />
                 )
               })}
@@ -289,7 +289,7 @@ class Farm extends React.Component {
                     balance={ret[0]}
                     decimals={ret[1]}
                     isMobile={isMobile}
-                    showAll={showAll}
+                    showAll={!showMDO}
                   />
                 )
               })}
