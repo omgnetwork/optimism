@@ -61,59 +61,71 @@ function Input({
   const theme = useTheme()
 
   return (
-
-    <S.Wrapper newstyle={newStyle ? 1 : 0}>
-      {unit && (
-        <S.UnitContent>
-          <div>
-            <Typography variant="body2" component="div">{unit}</Typography>
-            <img src={getCoinImage(unit)} alt="logo" width={50} height={50} />
-          </div>
-        </S.UnitContent>
-      )}
-
-      <S.InputWrapper>
-        {label && (
-          <Typography variant="body2" component="div" sx={{opacity: 0.7, mb: 1  , ml: '15px'}}>
-            {label}
-          </Typography>
+    <>
+      <S.Wrapper newstyle={newStyle ? 1 : 0}>
+        {unit && (
+          <S.UnitContent>
+            <div>
+              <Typography variant="body2" component="div">{unit}</Typography>
+              <img src={getCoinImage(unit)} alt="logo" width={50} height={50} />
+            </div>
+          </S.UnitContent>
         )}
-        <S.TextFieldTag
-          placeholder={placeholder}
-          type={type}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-          fullWidth={fullWidth}
-          size={size}
-          variant={variant}
-          error={overMax}
-          sx={sx}
-          newstyle={newStyle ? 1 : 0}
-        />
-      </S.InputWrapper>
 
-      {unit && (
-        <S.ActionsWrapper>
-          <Typography variant="body2" component="p" sx={{opacity: 0.7, textAlign: "end", mb: 2}}>
-            Max Available: {Number(maxValue).toFixed(3)}
-          </Typography>
+        <S.InputWrapper>
+          {label && (
+            <Typography variant="body2" component="div" sx={{opacity: 0.7, mb: 1  , ml: '15px'}}>
+              {label}
+            </Typography>
+          )}
+          <S.TextFieldTag
+            placeholder={placeholder}
+            type={type}
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+            fullWidth={fullWidth}
+            size={size}
+            variant={variant}
+            error={overMax}
+            sx={sx}
+            newstyle={newStyle ? 1 : 0}
+          />
+        </S.InputWrapper>
 
-          {/* maxValue && value !== maxValue && (
-            <Box>
-              <Button onClick={handleMaxClick} variant="small" >
-                Use All
-              </Button>
-            </Box>
-          )*/}
-        </S.ActionsWrapper>
-      )}
-      {paste && (
-        <Box onClick={handlePaste} sx={{color: theme.palette.secondary.main, opacity: 0.9, cursor: 'pointer', position: 'absolute', right: '70px', fontSize: '14px'}}>
-          PASTE
-        </Box>
-      )}
-    </S.Wrapper>
+        {unit && (
+          <S.ActionsWrapper>
+            <Typography variant="body2" component="p" sx={{opacity: 0.7, textAlign: "end", mb: 2}}>
+              Max Available: {Number(maxValue).toFixed(3)}
+            </Typography>
+
+            {/* maxValue && value !== maxValue && (
+              <Box>
+                <Button onClick={handleMaxClick} variant="small" >
+                  Use All
+                </Button>
+              </Box>
+            )*/}
+          </S.ActionsWrapper>
+        )}
+        {paste && (
+          <Box onClick={handlePaste} sx={{color: theme.palette.secondary.main, opacity: 0.9, cursor: 'pointer', position: 'absolute', right: '70px', fontSize: '14px'}}>
+            PASTE
+          </Box>
+        )}
+      </S.Wrapper>
+      {value <= 0 && value != '' ?
+        <Typography variant="body2" sx={{mt: 2}}>
+          The value must be greater than 0.
+        </Typography>
+        : null
+      }
+      {value != '' && value > maxValue  ?
+        <Typography variant="body2" sx={{mt: 2}}>
+          The value must be smaller than {Number(maxValue).toFixed(3)}.
+        </Typography>
+        : null}
+    </>
   )
 }
 
