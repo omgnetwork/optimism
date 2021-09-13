@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import { Box } from '@material-ui/core';
 
 export const ThemeSwitcherTag = styled.div`
   margin-left: -15px;
