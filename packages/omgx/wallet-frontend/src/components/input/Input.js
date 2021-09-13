@@ -52,9 +52,9 @@ function Input({
     }
   }
 
-  function handleMaxClick() {
-    onChange({ target: { value: maxValue } })
-  }
+  // function handleMaxClick() {
+  //   onChange({ target: { value: maxValue } })
+  // }
 
   const overMax = new BN(value).gt(new BN(maxValue))
 
@@ -114,13 +114,13 @@ function Input({
           </Box>
         )}
       </S.Wrapper>
-      {value <= 0 && value != '' ?
+      {value <= 0 && value !== '' ?
         <Typography variant="body2" sx={{mt: 2}}>
           The value must be greater than 0.
         </Typography>
         : null
       }
-      {value != '' && value > maxValue  ?
+      {value !== '' && value > maxValue  ?
         <Typography variant="body2" sx={{mt: 2}}>
           The value must be smaller than {Number(maxValue).toFixed(3)}.
         </Typography>
