@@ -127,7 +127,7 @@ class ListAccount extends React.Component {
                        }}
                      >
                        <Typography variant="body2" component="p" >
-                         MetaMask is set to L2. To transact on L1, SWITCH LAYER to L1
+                         You are on L2. To transact on L1, SWITCH LAYER to L1
                        </Typography>
                      </Box>
                      <Box sx={{ textAlign: 'center'}}>
@@ -144,7 +144,7 @@ class ListAccount extends React.Component {
                        }}
                      >
                        <Typography variant="body2" component="p" >
-                         MetaMask is set to L1. To transact on L2, SWITCH LAYER to L2
+                         You are on L1. To transact on L2, SWITCH LAYER to L2
                        </Typography>
                      </Box>
                      <Box sx={{ textAlign: 'center'}}>

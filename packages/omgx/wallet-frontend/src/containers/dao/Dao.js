@@ -14,19 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React from 'react';
-import { useDispatch,useSelector } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux'
 
-import { openModal } from 'actions/uiAction';
+import { openModal } from 'actions/uiAction'
 
-import * as styles from './Dao.module.scss';
+import * as styles from './Dao.module.scss'
 
 import { Box, Typography,useMediaQuery } from '@material-ui/core'
 import { useTheme } from '@emotion/react'
 
-import Button from 'components/button/Button';
-import ProposalList from './proposal/ProposalList';
-import { selectDaoBalance, selectDaoVotes } from 'selectors/daoSelector';
-import { selectLayer } from 'selectors/setupSelector';
+import Button from 'components/button/Button'
+import ProposalList from './proposal/ProposalList'
+import { selectDaoBalance, selectDaoVotes } from 'selectors/daoSelector'
+import { selectLayer } from 'selectors/setupSelector'
 import AlertIcon from 'components/icons/AlertIcon'
 import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher'
 import networkService from 'services/networkService'
@@ -48,14 +48,9 @@ function DAO() {
         layer = networkService.L1orL2
     }
 
-
     if(layer === 'L1') {
         return <div className={styles.container}>
-            <div className={styles.header}>
-                <h2 className={styles.title}>
-                    BOBA DAO
-                </h2>
-            </div>
+            <PageHeader title="DAO" />
             <div className={styles.content}>
                 <Box
                     sx={{
@@ -79,7 +74,7 @@ function DAO() {
                             variant="body1"
                             component="p"
                         >
-                            To use the Boba DAO, you must be on L2 - SWITCH LAYER to L2
+                            You are on L1. To use the Boba DAO, SWITCH LAYER to L2
                         </Typography>
                     </div>
                     <LayerSwitcher isButton={true} />
@@ -90,7 +85,7 @@ function DAO() {
 
     return (
         <>
-            <PageHeader title="BOBO DAO" />
+            <PageHeader title="DAO" />
 
             <div className={styles.container}>
 

@@ -12,7 +12,7 @@ export const tableHeadList = [
       isSort: false,
   },
   {
-      label: 'APR',
+      label: 'APR %',
       isSort: false,
   },
   {
