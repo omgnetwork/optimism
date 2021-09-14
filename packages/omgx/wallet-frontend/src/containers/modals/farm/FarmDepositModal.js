@@ -29,7 +29,7 @@ class FarmDepositModal extends React.Component {
       stakeToken,
       stakeValue: null,
       stakeValueValid: false,
-      stakeValueBadEntry: false,
+      //stakeValueBadEntry: false,
       // allowance
       approvedAllowance: 0,
       // loading
@@ -84,13 +84,13 @@ class FarmDepositModal extends React.Component {
         this.setState({
           stakeValue: value,
           stakeValueValid: true,
-          stakeValueBadEntry: false,
+          //stakeValueBadEntry: false,
         })
     } else {
       this.setState({
         stakeValue: null,
         stakeValueValid: false,
-        stakeValueBadEntry: true,
+        //stakeValueBadEntry: true,
       })
     }
 
@@ -166,7 +166,7 @@ class FarmDepositModal extends React.Component {
       stakeToken,
       stakeValue,
       stakeValueValid,
-      stakeValueBadEntry,
+      //stakeValueBadEntry,
       approvedAllowance,
       loading,
     } = this.state
@@ -203,14 +203,6 @@ class FarmDepositModal extends React.Component {
           newStyle
           variant="standard"
         />
-
-        {stakeValueBadEntry ?
-          <Typography variant="body2" sx={{mt: 2}}>
-            Staking value limits: You can't add 0 to the pool (otherwise you would just burn gas
-            for no reason) and you can't stake more than your {stakeToken.symbol} balance.
-          </Typography>
-          : null
-        }
 
         {!allowanceGTstake &&
           <>

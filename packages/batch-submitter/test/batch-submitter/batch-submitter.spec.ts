@@ -536,5 +536,7 @@ const createBatchSigner = (signer: Signer): BatchSigner => {
   return {
     signer,
     address: undefined,
+    token: undefined,
+    vault_addr: undefined,
   }
 }

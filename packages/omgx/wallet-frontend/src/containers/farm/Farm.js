@@ -28,7 +28,7 @@ import AlertIcon from 'components/icons/AlertIcon'
 import networkService from 'services/networkService'
 
 import * as S from './Farm.styles'
-import { Box, Typography } from '@material-ui/core';
+import { Box, FormControlLabel, Checkbox } from '@material-ui/core';
 import PageHeader from 'components/pageHeader/PageHeader';
 import { tableHeadList } from './tableHeadList';
 import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher';
@@ -68,7 +68,8 @@ class Farm extends React.Component {
       layer1,
       layer2,
       lpChoice: initialLayer,
-      poolTab: initialViewLayer
+      poolTab: initialViewLayer,
+      showMDO: false //MDO = my desposits only
     }
 
   }
@@ -156,9 +157,21 @@ class Farm extends React.Component {
 
   handleChange = (event, t) => {
     if( t === 'L1 Liquidity Pool' )
-      this.setState({ lpChoice: 'L1LP' })
+      this.setState({ 
+        lpChoice: 'L1LP',
+        poolTab: t  
+      })
     else if(t === 'L2 Liquidity Pool')
-      this.setState({ lpChoice: 'L2LP' })
+      this.setState({ 
+        lpChoice: 'L2LP',
+        poolTab: t 
+      })
+  }
+
+  handleCheckBox = (e) =>{
+    this.setState({
+      showMDO: e.target.checked
+    })
   }
 
   render() {
@@ -168,23 +181,53 @@ class Farm extends React.Component {
       // user
       userInfo,
       lpChoice,
-      poolTab
+      poolTab,
+      showMDO
     } = this.state;
 
     const { isMobile } = this.props
 
     const networkLayer = networkService.L1orL2
+    
     return (
       <>
         <PageHeader title="Earn" />
 
+        {
+            <S.LayerAlert style={{background: 'red'}}>
+              <S.AlertInfo>
+                <AlertIcon />
+                <S.AlertText
+                  variant="body2"
+                  component="p"
+                >
+                  In preparation for Mainnet on Sept. 20, the LP pool contracts will be redeployed. If you have funds in the LP pools,
+                  please withdraw those funds now. Your funds are safe, however - a separate page will be provided to withdraw funds from the 
+                  Mainnet Beta liquidity pools. 
+                </S.AlertText>
+              </S.AlertInfo>
+            </S.LayerAlert>
+          }
+
         <Box sx={{ my: 3, width: '100%' }}>
-          <Box sx={{ mb: 2 }}>
+          <Box sx={{ mb: 2, display: 'flex' }}>
             <Tabs
               activeTab={poolTab}
               onClick={(t)=>this.handleChange(null, t)}
               aria-label="Liquidity Pool Tab"
               tabs={["L1 Liquidity Pool", "L2 Liquidity Pool"]}
+            />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showMDO}
+                  onChange={this.handleCheckBox}
+                  name="my deposits only"
+                  color="primary"
+                />
+              }
+              label="My Deposits Only"
             />
           </Box>
 
@@ -196,7 +239,7 @@ class Farm extends React.Component {
                   variant="body1"
                   component="p"
                 >
-                  Note: MetaMask is set to L2. To interact with the L1 liquidity pool, please switch MetaMask to L1.
+                  You are on L2. To transact on L1, SWITCH LAYER to L1
                 </S.AlertText>
               </S.AlertInfo>
               <LayerSwitcher isButton={true} size={isMobile ? "small" : "medium"}/>
@@ -211,7 +254,7 @@ class Farm extends React.Component {
                   variant="body2"
                   component="p"
                 >
-                  Note: MetaMask is set to L1. To interact with the L2 liquidity pool, please switch MetaMask to L2.
+                  You are on L1. To transact on L2, SWITCH LAYER to L2
                 </S.AlertText>
               </S.AlertInfo>
               <LayerSwitcher isButton={true} />
@@ -243,6 +286,7 @@ class Farm extends React.Component {
                     balance={ret[0]}
                     decimals={ret[1]}
                     isMobile={isMobile}
+                    showAll={!showMDO}
                   />
                 )
               })}
@@ -261,6 +305,7 @@ class Farm extends React.Component {
                     balance={ret[0]}
                     decimals={ret[1]}
                     isMobile={isMobile}
+                    showAll={!showMDO}
                   />
                 )
               })}

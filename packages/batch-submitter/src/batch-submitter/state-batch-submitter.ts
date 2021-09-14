@@ -13,6 +13,7 @@ import { Logger, Metrics } from '@eth-optimism/common-ts'
 /* Internal Imports */
 import { BlockRange, BatchSubmitter, BatchSigner } from '.'
 import { TransactionSubmitter, AppendStateBatch } from '../utils'
+import { getBatchSignerAddress, getTransactionCount } from './provider-helper'
 
 export class StateBatchSubmitter extends BatchSubmitter {
   // TODO: Change this so that we calculate start = scc.totalElements() and end = ctc.totalElements()!
@@ -177,6 +178,10 @@ export class StateBatchSubmitter extends BatchSubmitter {
 
     this.logger.debug('Submitting batch.', { calldata })
     const offsetStartsAtIndex = startBlock - this.blockOffset
+    const nonce = await getTransactionCount(
+      this.l1Provider,
+      await getBatchSignerAddress(this.batchSigner)
+    )
     const submitTransaction = (): Promise<TransactionReceipt> => {
       const appendStateBatch = (
         appendStateBatchArg: Function,
@@ -187,6 +192,7 @@ export class StateBatchSubmitter extends BatchSubmitter {
           appendStateBatch: appendStateBatchArg,
           batch: batchArg,
           offsetStartsAtIndex: offsetStartsAtIndexArg,
+          nonce,
           type: 'AppendStateBatch',
         }
       }

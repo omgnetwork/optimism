@@ -24,6 +24,7 @@ export interface AppendStateBatch {
   appendStateBatch: Function
   batch: any[]
   offsetStartsAtIndex: number
+  nonce: number
   type: 'AppendStateBatch'
 }
 
@@ -64,7 +65,9 @@ export const submitTransactionWithYNATM = async (
       if (call.type === 'AppendQueueBatch') {
         tx = await call.appendQueueBatch(tx.appendQueueBatch)
       } else if (call.type === 'AppendStateBatch') {
-        tx = await call.appendStateBatch(call.batch, call.offsetStartsAtIndex)
+        tx = await call.appendStateBatch(call.batch, call.offsetStartsAtIndex, {
+          nonce: call.nonce,
+        })
       } else if (call.type === 'AppendSequencerBatch') {
         tx = await call.appendSequencerBatch(call.batchParams)
       }

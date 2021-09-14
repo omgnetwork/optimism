@@ -259,11 +259,7 @@ export abstract class BatchSubmitter {
     }
 
     this.logger.info('Received transaction receipt', { receipt })
-    this.logger.info(successMessage, {
-      block: receipt.blockNumber,
-      status: receipt.status,
-      txHash: receipt.transactionHash,
-    })
+    this.logger.info(successMessage)
     this.metrics.batchesSubmitted.inc()
     this.metrics.submissionGasUsed.observe(
       receipt ? receipt.gasUsed.toNumber() : 0

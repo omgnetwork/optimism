@@ -52,11 +52,11 @@ function NewProposalModal({ open }) {
     const submit = async () => {
         let res = await dispatch(createDaoProposal({ 
             votingThreshold, 
-            text: `${proposeText}@@${proposalUri}`
+            text: !!proposeText ? `${proposeText}@@${proposalUri}` : null
         }));
 
         if (res) {
-            dispatch(openAlert(`Proposal has been submitted!`))
+            dispatch(openAlert(`Proposal has been submitted. It will be listed soon`))
             handleClose()
         } else {
             dispatch(openError(`Failed to create proposal`));

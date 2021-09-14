@@ -19,8 +19,6 @@ import { useSelector, useDispatch, batch } from 'react-redux'
 import { isEqual, orderBy } from 'lodash'
 
 //Selectors
-import { selectLoading } from 'selectors/loadingSelector'
-import { selectIsSynced } from 'selectors/statusSelector'
 import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector'
 import { selectTransactions } from 'selectors/transactionSelector'
 
@@ -54,8 +52,6 @@ function Account () {
   const childBalance = useSelector(selectlayer2Balance, isEqual)
   const rootBalance = useSelector(selectlayer1Balance, isEqual)
 
-  const isSynced = useSelector(selectIsSynced)
-  const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]))
   const tokenList = useSelector(selectTokens)
 
   const network = useSelector(selectNetwork())
@@ -108,9 +104,6 @@ function Account () {
     ...pendingL2
   ]
 
-  //console.log("Pending:", pending.length)
-  //console.log("Pending:", pending)
-
   const getGasPrice = useCallback(() => {
     dispatch(fetchGas({
       network: network || 'local',
@@ -129,21 +122,7 @@ function Account () {
     })
   }, POLL_INTERVAL * 2)
 
-  const disabled = false //criticalTransactionLoading || !isSynced
-
-  // let balances = {
-  //   oETH : {have: false, amount: 0, amountShort: '0'}
-  // }
-
-  // childBalance.reduce((acc, cur) => {
-  //   if (cur.symbol === 'oETH' && cur.balance > 0 ) {
-  //     acc['oETH']['have'] = true;
-  //     acc['oETH']['amount'] = cur.balance;
-  //     acc['oETH']['amountShort'] = logAmount(cur.balance, cur.decimals, 2);
-  //   }
-  //   return acc;
-  // }, balances)
-
+  const disabled = false
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -157,15 +136,21 @@ function Account () {
     </Box>
   )
 
-  const mobileL1 = network + ' L1'
-  const mobileL2 = 'BOBA L2 ' + network
+  // const mobileL1 = network + ' L1'
+  // const mobileL2 = 'BOBA L2 ' + network
+
+  let label_L1 = 'Ethereum L1'
+  if(network === 'rinkeby') label_L1 = 'Rinkeby L1'
+
+  let label_L2 = 'Boba L2'
+  if(network === 'rinkeby') label_L2 = 'Boba Rinkeby L2'
 
   const L1Column = () => (
     <S.AccountWrapper >
 
       {!isMobile ? (
         <S.WrapperHeading>
-          <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>L1 ({network})</Typography>
+          <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>{label_L1}</Typography>
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
           {networkLayer === 'L1' ? <ActiveItem active={true} /> : null}
         </S.WrapperHeading>
@@ -202,7 +187,7 @@ function Account () {
     <S.AccountWrapper>
       {!isMobile ? (
         <S.WrapperHeading>
-          <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>BOBA L2 ({network})</Typography>
+          <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>{label_L2}</Typography>
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
           {networkLayer === 'L2' ? <ActiveItem active={true} /> : null}
         </S.WrapperHeading>
@@ -269,8 +254,8 @@ function Account () {
       {isMobile ? (
         <>
           <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, my: 2}}>
-            <Tab label={mobileL1} />
-            <Tab label={mobileL2} />
+            <Tab label={label_L1} />
+            <Tab label={label_L2} />
           </Tabs>
           <TabPanel value={activeTab} index={0}>
             <L1Column />

@@ -130,6 +130,7 @@ class listNFTfactory extends React.Component {
                 <MenuItem value="">Select</MenuItem>
                 {Object.values(this.props.contracts).map((item) =>
                   <MenuItem
+                    disableRipple
                     key={item.address}
                     value={item.address}>
                       {item.symbol}

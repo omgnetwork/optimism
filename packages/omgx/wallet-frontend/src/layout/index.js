@@ -91,6 +91,9 @@ function App () {
         fontSize: 16,
         fontWeight: 400,
       },
+      body3: {
+        fontSize: '0.7em'
+      },
     },
     components: {
       MuiPaper: {
@@ -98,10 +101,7 @@ function App () {
           elevation: 0,
         },
         styleOverrides: {
-          root: {
-            background: light ? 'rgba(0,0,0,0.06)' : "rgba(255,255,255,0.06)",
-            // borderRadius: 10,
-          },
+          root: {},
         },
       },
       MuiButton: {
