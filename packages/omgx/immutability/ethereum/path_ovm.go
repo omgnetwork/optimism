@@ -10,6 +10,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/big"
 	"strconv"
 	"strings"
@@ -418,6 +419,8 @@ func encodeTransactionData(data *framework.FieldData) (string, error) {
 
 func encodeContexts(data *framework.FieldData) (string, error) {
 	inputContexts, ok := data.GetOk("contexts")
+	log.Println("inputContexts")
+	log.Println(inputContexts)
 	if !ok {
 		return "", fmt.Errorf("invalid contexts")
 	}
