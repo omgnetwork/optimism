@@ -47,9 +47,11 @@ function Button ({
   const [now, setTime] = React.useState(new Date());
 
   React.useEffect(() => {
-    const timer = setInterval(()=>{setTime(new Date())}, 1000);
-    return () => {clearInterval(timer)}
-  }, []);
+    if (loading) {
+      const timer = setInterval(()=>{setTime(new Date())}, 1000);
+      return () => {clearInterval(timer)}
+    }
+  }, [loading]);
 
   let waitTime = (now-triggerTime) / 1000;
   if(waitTime < 0) waitTime = 0;
@@ -69,8 +71,7 @@ function Button ({
     <ButtonMUI {...muiProps}>
       {children}
       {(disabled || loading) && timeDefined && (waitTime > 3) &&
-        <div style={{marginLeft: '10px'}}
-        >
+        <div style={{marginLeft: '10px'}}>
           {waitTime}s ago
         </div>
       }

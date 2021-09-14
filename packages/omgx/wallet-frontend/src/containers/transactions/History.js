@@ -20,7 +20,7 @@ import { useSelector } from 'react-redux'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
 
-import {useTheme} from '@material-ui/core'
+import {useMediaQuery, useTheme} from '@material-ui/core'
 import moment from 'moment';
 
 import { setActiveHistoryTab1 } from 'actions/uiAction'
@@ -36,6 +36,7 @@ import Exits from './Exits'
 import Deposits from './Deposits'
 
 import * as styles from './Transactions.module.scss'
+import * as S from './History.styles'
 
 import useInterval from 'util/useInterval'
 import PageHeader from 'components/pageHeader/PageHeader'
@@ -46,6 +47,7 @@ const POLL_INTERVAL = 5000; //milliseconds
 function History() {
 
   const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const dispatch = useDispatch()
   const [startDate, setStartDate] = useState(null)
@@ -78,7 +80,7 @@ function History() {
     <>
       <PageHeader title="Transaction History" />
 
-      <div className={styles.header}>
+      <S.Header>
         <div className={styles.searchInput}>
           <Input
             size='small'
@@ -91,7 +93,9 @@ function History() {
           />
         </div>
         <div className={styles.actions}>
-          <div style={{ margin: '0px 10px', opacity: 0.7 }}>Show period from </div>
+          {!isMobile ? (
+            <div style={{ margin: '0px 10px', opacity: 0.7 }}>Show period from</div>
+          ) : null}
           <DatePicker
             wrapperClassName={styles.datePickerInput}
             selected={startDate}
@@ -100,9 +104,12 @@ function History() {
             startDate={startDate}
             endDate={endDate}
             calendarClassName={theme.palette.mode}
+            placeholderText={isMobile ? "From" : ""}
+            popperClassName={styles.popperStyle}
           />
-
-          <div style={{ margin: '0px 10px', opacity: 0.7 }}>to </div>
+          {!isMobile ? (
+            <div style={{ margin: '0px 10px', opacity: 0.7 }}>to </div>
+          ) : null}
           <DatePicker
             wrapperClassName={styles.datePickerInput}
             selected={endDate}
@@ -112,15 +119,15 @@ function History() {
             endDate={endDate}
             minDate={startDate}
             calendarClassName={theme.palette.mode}
+            placeholderText={isMobile ? "To" : ""}
+            popperClassName={styles.popperStyle}
           />
         </div>
-      </div>
+      </S.Header>
       <div className={styles.data}>
         <div className={styles.section}>
           <Tabs
-            onClick={tab => {
-              dispatch(setActiveHistoryTab1(tab));
-            }}
+            onClick={tab => {dispatch(setActiveHistoryTab1(tab))}}
             activeTab={activeTab1}
             tabs={['All', 'Deposits', 'Exits']}
           />
