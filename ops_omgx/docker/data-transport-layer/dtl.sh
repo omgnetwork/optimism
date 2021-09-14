@@ -17,6 +17,7 @@ export DATA_TRANSPORT_LAYER__SYNC_FROM_L1=`/opt/secret2env -name $SECRETNAME|gre
 export DATA_TRANSPORT_LAYER__SYNC_FROM_L2=`/opt/secret2env -name $SECRETNAME|grep -w DATA_TRANSPORT_LAYER__SYNC_FROM_L2|sed 's/DATA_TRANSPORT_LAYER__SYNC_FROM_L2=//g'`
 export DATA_TRANSPORT_LAYER__TRANSACTIONS_PER_POLLING_INTERVAL=`/opt/secret2env -name $SECRETNAME|grep -w DATA_TRANSPORT_LAYER__TRANSACTIONS_PER_POLLING_INTERVAL|sed 's/DATA_TRANSPORT_LAYER__TRANSACTIONS_PER_POLLING_INTERVAL=//g'`
 export L1_NODE_WEB3_URL=`/opt/secret2env -name $SECRETNAME|grep -w L1_NODE_WEB3_URL|sed 's/L1_NODE_WEB3_URL=//g'`
+export DATA_TRANSPORT_LAYER__ETH1_CTC_DEPLOYMENT_HEIGHT=`/opt/secret2env -name $SECRETNAME|grep -w DATA_TRANSPORT_LAYER__ETH1_CTC_DEPLOYMENT_HEIGHT|sed 's/DATA_TRANSPORT_LAYER__ETH1_CTC_DEPLOYMENT_HEIGHT=//g'`
 
 rm -rf /db/LOCK
 #!/bin/bash
@@ -24,13 +25,6 @@ rm -rf /db/LOCK
 set -e
 
 RETRIES=${RETRIES:-60}
-
-if [[ ! -z "$URL" ]]; then
-    # get the addrs from the URL provided
-    ADDRESSES=$(curl --fail --show-error --silent --retry-connrefused --retry $RETRIES --retry-delay 5 $URL)
-    # set the env
-    export DATA_TRANSPORT_LAYER__ADDRESS_MANAGER=$(echo $ADDRESSES | jq -r '.AddressManager')
-fi
 
 # go
 exec node dist/src/services/run.js

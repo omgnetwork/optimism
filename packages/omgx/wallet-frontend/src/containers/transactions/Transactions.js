@@ -13,158 +13,110 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { isEqual, orderBy } from 'lodash';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import "react-datepicker/dist/react-datepicker.css";
+import { Grid, Box } from '@material-ui/core';
 
 import moment from 'moment';
-import truncate from 'truncate-middle';
 
-import { setActiveHistoryTab1 } from 'actions/uiAction'
-import { setActiveHistoryTab2 } from 'actions/uiAction'
-
-import { selectActiveHistoryTab1 } from 'selectors/uiSelector'
-import { selectActiveHistoryTab2 } from 'selectors/uiSelector'
-
-import { selectChildchainTransactions } from 'selectors/transactionSelector';
 import { selectLoading } from 'selectors/loadingSelector'
 
-import Tabs from 'components/tabs/Tabs'
-import Input from 'components/input/Input'
 import Transaction from 'components/transaction/Transaction'
 import Pager from 'components/pager/Pager'
 
-import Exits from './Exits';
-import Deposits from './Deposits';
+import * as styles from './Transactions.module.scss'
+import * as S from './history.styles'
 
-import networkService from 'services/networkService';
+const PER_PAGE = 8;
 
-import * as styles from './Transactions.module.scss';
-
-const PER_PAGE = 5;
-
-function Transactions () {
-
-  const dispatch = useDispatch();
-
-  const [ page1, setPage1 ] = useState(1);
-  // eslint-disable-next-line
-  const [ page2, setPage2 ] = useState(1);
+function Transactions({ searchHistory, transactions }) {
   
-  const [ searchHistory, setSearchHistory ] = useState('');
-
-  const loading = useSelector(selectLoading([ 'TRANSACTION/GETALL' ]));
-
-  const activeTab1 = useSelector(selectActiveHistoryTab1, isEqual);
-  const activeTab2 = useSelector(selectActiveHistoryTab2, isEqual);
-
-  const unorderedTransactions = useSelector(selectChildchainTransactions, isEqual);
-  const transactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
+  const [page, setPage] = useState(1)
+  
+  const loading = useSelector(selectLoading(['EXIT/GETALL']))
+  
+  useEffect(() => {
+    setPage(1);
+  }, [searchHistory])
 
   const _transactions = transactions.filter(i => {
-    return i.hash.includes(searchHistory);
-  });
+    return i.hash.includes(searchHistory)
+  })
 
-  const startingIndex = page1 === 1 ? 0 : ((page1 - 1) * PER_PAGE);
-  const endingIndex = page1 * PER_PAGE;
-  const paginatedTransactions = _transactions.slice(startingIndex, endingIndex);
+  const startingIndex = page === 1 ? 0 : ((page - 1) * PER_PAGE)
+  const endingIndex = page * PER_PAGE
+  const paginatedTransactions = _transactions.slice(startingIndex, endingIndex)
 
-  let totalNumberOfPages = Math.ceil(_transactions.length / PER_PAGE);
+  let totalNumberOfPages = Math.ceil(_transactions.length / PER_PAGE)
 
   //if totalNumberOfPages === 0, set to one so we don't get the strange "page 1 of 0" display
-  if (totalNumberOfPages === 0) totalNumberOfPages = 1;
+  if (totalNumberOfPages === 0) totalNumberOfPages = 1
 
   return (
-    <div className={styles.container}>
+    <S.HistoryContainer>
+      <Pager
+        currentPage={page}
+        isLastPage={paginatedTransactions.length < PER_PAGE}
+        totalPages={totalNumberOfPages}
+        onClickNext={() => setPage(page + 1)}
+        onClickBack={() => setPage(page - 1)}
+      />
+      <Grid item xs={12}>
+        <Box>
+          <S.Content>
+            {!paginatedTransactions.length && !loading && (
+              <div className={styles.disclaimer}>Scanning for transactions...</div>
+            )}
+            {!paginatedTransactions.length && loading && (
+              <div className={styles.disclaimer}>Loading...</div>
+            )}
+            {paginatedTransactions.map((i, index) => {
+              const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
+              const time = moment.unix(i.timeStamp).format('lll')
+              let details = null
+              const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
 
-      <div className={styles.header}>
-        <h2>Search</h2>
-        <Input
-          icon
-          placeholder='Search history'
-          value={searchHistory}
-          onChange={i => {
-            setPage1(1);
-            setSearchHistory(i.target.value);
-          }}
-          className={styles.searchBar}
-        />
-      </div>
+              if( i.crossDomainMessage && i.crossDomainMessage.l1BlockHash ) {
+                details = {
+                  blockHash: i.crossDomainMessage.l1BlockHash,
+                  blockNumber: i.crossDomainMessage.l1BlockNumber,
+                  from: i.crossDomainMessage.l1From,
+                  hash: i.crossDomainMessage.l1Hash,
+                  to: i.crossDomainMessage.l1To,
+                }
+              }
 
-      <div className={styles.data}>
+              if( i.crossDomainMessage && i.crossDomainMessage.l2BlockHash ) {
+                details = {
+                  blockHash: i.crossDomainMessage.l2BlockHash,
+                  blockNumber: i.crossDomainMessage.l2BlockNumber,
+                  from: i.crossDomainMessage.l2From,
+                  hash: i.crossDomainMessage.l2Hash,
+                  to: i.crossDomainMessage.l2To,
+                }
+              }
 
-        <div className={styles.section}>
-        
-          <Tabs
-            onClick={tab => {
-              setPage1(1);
-              dispatch(setActiveHistoryTab1(tab));
-            }}
-            activeTab={activeTab1}
-            tabs={[ 'Transactions', 'Deposits' ]}
-          />
+              return (
+                <Transaction
+                  key={index}
+                  title={`${chain} Hash: ${i.hash}`}
+                  time={time}
+                  blockNumber={`Block ${i.blockNumber}`}
+                  chain={`${chain} Chain`}
+                  typeTX={`TX Type: ${metaData}`}
+                  detail={details}
+                  oriChain={chain}
+                  oriHash={i.hash}
+                />
+              )
+            })}
+          </S.Content>
+        </Box>
+      </Grid>
 
-          {activeTab1 === 'Transactions' && (
-            <div className={styles.transactions}>
-              <Pager
-                currentPage={page1}
-                isLastPage={paginatedTransactions.length < PER_PAGE}
-                totalPages={totalNumberOfPages}
-                onClickNext={()=>setPage1(page1 + 1)}
-                onClickBack={()=>setPage1(page1 - 1)}
-              />
-              {!paginatedTransactions.length && !loading && (
-                <div className={styles.disclaimer}>No transaction history.</div>
-              )}
-              {!paginatedTransactions.length && loading && (
-                <div className={styles.disclaimer}>Loading...</div>
-              )}
-              {paginatedTransactions.map((i, index) => {
-                return (
-                  <Transaction
-                    key={index}
-                    link={ 
-                      networkService.chainID === 4 ? 
-                      `https://rinkeby.etherscan.io/tx/${i.hash}`:
-                      networkService.chainID === 28 ? 
-                      `https://blockexplorer.rinkeby.omgx.network/tx/${i.hash}`:
-                      undefined
-                    }
-                    title={`${truncate(i.hash, 6, 4, '...')}`}
-                    midTitle={moment.unix(i.timeStamp).format('lll')}
-                    status={`Block ${i.blockNumber}`}
-                  />
-                );
-              })}
-            </div>
-          )}
-
-          {activeTab1=== 'Deposits' && <
-            Deposits searchHistory={searchHistory} transactions={transactions} />
-          }
-
-        </div>
-
-        <div className={styles.section}>
-          <Tabs
-            onClick={tab => {
-              setPage2(1);
-              dispatch(setActiveHistoryTab2(tab));
-            }}
-            activeTab={activeTab2}
-            tabs={[ 'Exits', 'TBD' ]}
-          />
-
-          {activeTab2 === 'Exits' && 
-            <Exits searchHistory={searchHistory} />
-          }
-
-        </div>
-
-      </div>
-    </div>
-  );
+    </S.HistoryContainer>
+  )
 }
 
-export default React.memo(Transactions);
+export default React.memo(Transactions)

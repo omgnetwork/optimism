@@ -13,150 +13,140 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { isEqual } from 'lodash';
-import BN from 'bignumber.js';
 
 import { transfer } from 'actions/networkAction';
 
-import { selectChildchainBalance } from 'selectors/balanceSelector';
-import { selectLoading } from 'selectors/loadingSelector';
 import { closeModal, openAlert } from 'actions/uiAction';
+import { selectLoading } from 'selectors/loadingSelector';
 
 import Button from 'components/button/Button';
 import Modal from 'components/modal/Modal';
-import Input from 'components/input/Input';
-import InputSelect from 'components/inputselect/InputSelect';
 
+import { amountToUsd, logAmount } from 'util/amountConvert'
 import networkService from 'services/networkService';
-import { logAmount } from 'util/amountConvert';
 
-import * as styles from './TransferModal.module.scss';
+import Input from 'components/input/Input';
+import { selectLookupPrice } from 'selectors/lookupSelector';
+import { Box, Typography, useMediaQuery } from '@material-ui/core';
+import * as S from './TransferModal.style';
+import { useTheme } from '@emotion/react';
 
-function TransferModal ({ open }) {
-  const dispatch = useDispatch();
+function TransferModal ({ open, token }) {
+  const dispatch = useDispatch()
 
-  const [ currency, setCurrency ] = useState('');
-  const [ value, setValue ] = useState('');
-  const [ recipient, setRecipient ] = useState('');
-
-  const balances = useSelector(selectChildchainBalance, isEqual);
+  const [ value, setValue ] = useState('')
+  const [ recipient, setRecipient ] = useState('')
 
   const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]));
+  const wAddress = networkService.account ? networkService.account : ''
 
-  useEffect(() => {
-    if (balances.length && !currency) {
-      setCurrency(balances[0].currency);
-    }
-  }, [ balances, currency, open ]);
+  const lookupPrice = useSelector(selectLookupPrice);
 
-  const selectOptions = balances.map(i => ({
-    title: i.symbol,
-    value: i.currency,
-    subTitle: `Balance: ${logAmount(i.amount, i.decimals)}`
-  }));
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   async function submit () {
     if (
       value > 0 &&
-      currency &&
+      token.address &&
       recipient
     ) {
       try {
-        const transferResponse = await dispatch(transfer(recipient, value, currency));
-        if (transferResponse) {
-          dispatch(openAlert('Transaction was submitted'));
+        const transferResponseGood = await dispatch(transfer(recipient, value, token.address));
+        if (transferResponseGood) {
+          dispatch(openAlert('Transaction submitted'));
           handleClose();
+        } else {
+          //error handled elsewhere
+          handleClose()
         }
       } catch (err) {
-        //
+        //guess not really?
       }
     }
   }
 
   function handleClose () {
-    setCurrency('');
-    setValue('');
-    setRecipient('');
-    dispatch(closeModal('transferModal'));
+    setValue('')
+    setRecipient('')
+    dispatch(closeModal('transferModal'))
   }
 
   const disabledTransfer = value <= 0 ||
-    !currency ||
-    !recipient ||
-    new BN(value).gt(new BN(getMaxTransferValue()));
+    !token.address ||
+    !recipient
 
-  function getMaxTransferValue () {
-
-    const transferingBalanceObject = balances.find(i => i.currency === currency);
-    if (!transferingBalanceObject) {
-      return;
-    }
-    return logAmount(transferingBalanceObject.amount, transferingBalanceObject.decimals);
-  }
-
-  function renderTransferScreen () {
-    return (
-      <>
-        <h2>Transfer</h2>
-        
-        <div className={styles.address}>
-          {`From address : ${networkService.account}`}
-        </div>
-
-        <Input
-          label='To Address'
-          placeholder='Hash or ENS name'
-          paste
-          value={recipient}
-          onChange={i => setRecipient(i.target.value)}
-        />
-
-        <InputSelect
-          label='Amount to transfer'
-          placeholder={0}
-          value={value}
-          onChange={i => {
-            setValue(i.target.value);
-          }}
-          selectOptions={selectOptions}
-          onSelect={i => {
-            setCurrency(i.target.value);
-          }}
-          selectValue={currency}
-          maxValue={getMaxTransferValue()}
-        />
-
-        <div className={styles.buttons}>
-          <Button
-            onClick={handleClose}
-            type='secondary'
-            className={styles.button}
-          >
-            CANCEL
-          </Button>
-
-          <Button
-            className={styles.button}
-            onClick={() => {
-              submit({ useLedgerSign: false });
-            }}
-            type='primary'
-            loading={loading}
-            tooltip='Your transfer transaction is still pending. Please wait for confirmation.'
-            disabled={disabledTransfer}
-          >
-            TRANSFER
-          </Button>
-        </div>
-      </>
-    );
-  }
+  if(typeof(token) === 'undefined') return
 
   return (
-    <Modal open={open}>
-      {renderTransferScreen()}
+    <Modal open={open} onClose={handleClose} maxWidth="md">
+      <Typography variant="h2" sx={{fontWeight: 700, mb: 2}}>
+        Transfer
+      </Typography>
+
+      <Typography variant="body1" sx={{mb: 1}}>
+        From Address: {wAddress}
+      </Typography>
+
+      <Typography variant="body1" sx={{mb: 1}}>
+        To Address
+      </Typography>
+
+      <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
+        <Input
+          placeholder='Recipient address (0x...)'
+          value={recipient}
+          onChange={i => setRecipient(i.target.value)}
+          fullWidth
+          paste
+          sx={{fontSize: '50px'}}
+        />
+
+        <Input
+          label="Amount to Transfer"
+          placeholder="0.00"
+          value={value}
+          type="number"
+          onChange={(i) => {setValue(i.target.value)}}
+          unit={token.symbol}
+          maxValue={logAmount(token.balance, token.decimals)}
+          variant="standard"
+          newStyle
+        />
+      </Box>
+
+      {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+        <Typography variant="body2" component="p" sx={{opacity: 0.5, mt: 3}}>
+          {`Transfer value in USD: $${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
+        </Typography>
+      )}
+
+      <S.WrapperActions>
+        {!isMobile ? (
+          <Button
+            onClick={handleClose}
+            color="neutral"
+            size="large"
+          >
+            Cancel
+          </Button>
+        ) : null}
+          <Button
+            onClick={() => {submit({useLedgerSign: false})}}
+            color='primary'
+            variant="contained"
+            loading={loading}
+            tooltip='Your transfer is still pending. Please wait for confirmation.'
+            disabled={disabledTransfer}
+            triggerTime={new Date()}
+            fullWidth={isMobile}
+            size="large"
+          >
+            Transfer
+          </Button>
+      </S.WrapperActions>
     </Modal>
   );
 }

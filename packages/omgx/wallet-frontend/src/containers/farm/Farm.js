@@ -1,5 +1,5 @@
 /*
-  Utility Functions for OMG Plasma 
+  Utility Functions for OMG Plasma
   Copyright (C) 2021 Enya Inc. Palo Alto, CA
 
   This program is free software: you can redistribute it and/or modify
@@ -20,123 +20,306 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { isEqual } from 'lodash';
 
-import { getFarmInfo, getFee } from 'actions/farmAction';
+import { getFarmInfo, getFee } from 'actions/farmAction'
 
-import FarmList from 'components/farmList/FarmList';
+import ListFarm from 'components/listFarm/listFarm'
+import Tabs from 'components/tabs/Tabs'
+import AlertIcon from 'components/icons/AlertIcon'
+import networkService from 'services/networkService'
 
-import networkService from 'services/networkService';
-
-import ethLogo from 'images/ethereum.svg';
-import JLKNLogo from 'images/JLKN.svg';
-
-import * as styles from './Farm.module.scss';
+import * as S from './Farm.styles'
+import { Box, FormControlLabel, Checkbox } from '@material-ui/core';
+import PageHeader from 'components/pageHeader/PageHeader';
+import { tableHeadList } from './tableHeadList';
+import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher';
 
 class Farm extends React.Component {
-  constructor(props) {
-    super(props);
 
-    const { 
-      totalFeeRate, userRewardFeeRate,
-      poolInfo, userInfo,
-    } = this.props.farm;
+  constructor(props) {
+
+    super(props)
+
+    const {
+      totalFeeRate,
+      userRewardFeeRate,
+      poolInfo,
+      userInfo,
+    } = this.props.farm
+
+    const {
+      layer1,
+      layer2
+    } = this.props.balance
+
+
+    let initialViewLayer = 'L1 Liquidity Pool'
+    let initialLayer = 'L1LP'
+
+    if(networkService.L1orL2 === 'L2') {
+      initialViewLayer = 'L2 Liquidity Pool'
+      initialLayer = 'L2LP'
+    }
 
     this.state = {
-      totalFeeRate, userRewardFeeRate,
-      poolInfo, userInfo,
+      totalFeeRate,
+      userRewardFeeRate,
+      poolInfo,
+      userInfo,
+      layer1,
+      layer2,
+      lpChoice: initialLayer,
+      poolTab: initialViewLayer,
+      showMDO: false //MDO = my desposits only
     }
+
   }
 
   componentDidMount() {
-    const { totalFeeRate, userRewardFeeRate } = this.props.farm;
+
+    const { totalFeeRate, userRewardFeeRate } = this.props.farm
+
     if (!totalFeeRate || !userRewardFeeRate) {
-      this.props.dispatch(getFee());
+      this.props.dispatch(getFee())
     }
-    this.props.dispatch(getFarmInfo());
+
+    this.props.dispatch(getFarmInfo())
+
   }
 
   componentDidUpdate(prevState) {
-    const { 
-      totalFeeRate, userRewardFeeRate,
-      poolInfo, userInfo,
-    } = this.props.farm;
+
+    const {
+      totalFeeRate,
+      userRewardFeeRate,
+      poolInfo,
+      userInfo,
+    } = this.props.farm
+
+    const {
+      layer1,
+      layer2
+    } = this.props.balance
 
     if (prevState.farm.totalFeeRate !== totalFeeRate) {
-      this.setState({ totalFeeRate });
+      this.setState({ totalFeeRate })
     }
 
     if (prevState.farm.userRewardFeeRate !== userRewardFeeRate) {
-      this.setState({ userRewardFeeRate });
+      this.setState({ userRewardFeeRate })
     }
 
     if (!isEqual(prevState.farm.poolInfo, poolInfo)) {
-      this.setState({ poolInfo });
+      this.setState({ poolInfo })
     }
 
     if (!isEqual(prevState.farm.userInfo, userInfo)) {
-      this.setState({ userInfo });
+      this.setState({ userInfo })
     }
+
+    if (!isEqual(prevState.balance.layer1, layer1)) {
+      this.setState({ layer1 })
+    }
+
+    if (!isEqual(prevState.balance.layer2, layer2)) {
+      this.setState({ layer2 })
+    }
+
   }
 
-  isETH(address) {
-    return [networkService.L2ETHAddress, networkService.L1ETHAddress].includes(address);
+
+  getBalance(address, chain) {
+
+    const { layer1, layer2 } = this.state;
+
+    if (typeof (layer1) === 'undefined') return [0, 0]
+    if (typeof (layer2) === 'undefined') return [0, 0]
+
+    if (chain === 'L1') {
+      let tokens = Object.entries(layer1)
+      for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i][1].address.toLowerCase() === address.toLowerCase()) {
+          return [tokens[i][1].balance, tokens[i][1].decimals]
+        }
+      }
+    }
+    else if (chain === 'L2') {
+      let tokens = Object.entries(layer2)
+      for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i][1].address.toLowerCase() === address.toLowerCase()) {
+          return [tokens[i][1].balance, tokens[i][1].decimals]
+        }
+      }
+    }
+
+    return [0, 0]
+
+  }
+
+  handleChange = (event, t) => {
+    if( t === 'L1 Liquidity Pool' )
+      this.setState({ 
+        lpChoice: 'L1LP',
+        poolTab: t  
+      })
+    else if(t === 'L2 Liquidity Pool')
+      this.setState({ 
+        lpChoice: 'L2LP',
+        poolTab: t 
+      })
+  }
+
+  handleCheckBox = (e) =>{
+    this.setState({
+      showMDO: e.target.checked
+    })
   }
 
   render() {
-    const { 
+    const {
       // Pool
       poolInfo,
       // user
       userInfo,
+      lpChoice,
+      poolTab,
+      showMDO
     } = this.state;
 
+    const { isMobile } = this.props
+
+    const networkLayer = networkService.L1orL2
+    
     return (
-      <div className={styles.Farm}>
-        <h2>Stake tokens to the liquidity pool to earn</h2>
-        <div className={styles.Note}>
-          Your tokens will be deposited into the liquidity pool. 
-          Meanwhile, you are rewarded with a portion of the fees collected from the swap users.
-        </div>
-        <h3>L1 Liquidity Pool</h3>
-        <div className={styles.TableContainer}>
-          {Object.keys(poolInfo.L1LP).map((v, i) => {
-            const isETH = this.isETH(v);
-            return (
-              <FarmList 
-                key={i}
-                logo={isETH ? ethLogo : JLKNLogo}
-                name={isETH ? "Ethereum" : "JLKN"}
-                shortName={isETH ? "ETH" : "JLKN"}
-                poolInfo={poolInfo.L1LP[v]}
-                userInfo={userInfo.L1LP[v]}
-                L1orL2Pool="L1LP"
-              />
-            )
-          })}
-        </div>
-        <h3>L2 Liquidity Pool</h3>
-        <div className={styles.TableContainer}>
-          {Object.keys(poolInfo.L2LP).map((v, i) => {
-            const isETH = this.isETH(v);
-            return (
-              <FarmList 
-                key={i}
-                logo={isETH ? ethLogo : JLKNLogo}
-                name={isETH ? "Ethereum" : "JLKN"}
-                shortName={isETH ? "ETH" : "JLKN"}
-                poolInfo={poolInfo.L2LP[v]}
-                userInfo={userInfo.L2LP[v]}
-                L1orL2Pool="L2LP"
-              />
-            )
-          })}
-        </div>
-      </div>
+      <>
+        <PageHeader title="Earn" />
+
+        {
+            <S.LayerAlert style={{background: 'red'}}>
+              <S.AlertInfo>
+                <AlertIcon />
+                <S.AlertText
+                  variant="body2"
+                  component="p"
+                >
+                  In preparation for Mainnet on Sept. 20, the LP pool contracts will be redeployed. If you have funds in the LP pools,
+                  please withdraw those funds now. Your funds are safe, however - a separate page will be provided to withdraw funds from the 
+                  Mainnet Beta liquidity pools. 
+                </S.AlertText>
+              </S.AlertInfo>
+            </S.LayerAlert>
+          }
+
+        <Box sx={{ my: 3, width: '100%' }}>
+          <Box sx={{ mb: 2, display: 'flex' }}>
+            <Tabs
+              activeTab={poolTab}
+              onClick={(t)=>this.handleChange(null, t)}
+              aria-label="Liquidity Pool Tab"
+              tabs={["L1 Liquidity Pool", "L2 Liquidity Pool"]}
+            />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showMDO}
+                  onChange={this.handleCheckBox}
+                  name="my deposits only"
+                  color="primary"
+                />
+              }
+              label="My Deposits Only"
+            />
+          </Box>
+
+          {networkLayer === 'L2' && lpChoice === 'L1LP' &&
+            <S.LayerAlert>
+              <S.AlertInfo>
+                <AlertIcon sx={{flex: 1}} />
+                <S.AlertText
+                  variant="body1"
+                  component="p"
+                >
+                  You are on L2. To transact on L1, SWITCH LAYER to L1
+                </S.AlertText>
+              </S.AlertInfo>
+              <LayerSwitcher isButton={true} size={isMobile ? "small" : "medium"}/>
+            </S.LayerAlert>
+          }
+
+          {networkLayer === 'L1' && lpChoice === 'L2LP' &&
+            <S.LayerAlert>
+              <S.AlertInfo>
+                <AlertIcon />
+                <S.AlertText
+                  variant="body2"
+                  component="p"
+                >
+                  You are on L1. To transact on L2, SWITCH LAYER to L2
+                </S.AlertText>
+              </S.AlertInfo>
+              <LayerSwitcher isButton={true} />
+            </S.LayerAlert>
+          }
+
+          {!isMobile ? (
+            <S.TableHeading>
+              {tableHeadList.map((item) => {
+                return (
+                  <S.TableHeadingItem key={item.label} variant="body2" component="div">
+                    {item.label}
+                  </S.TableHeadingItem>
+                )
+              })}
+            </S.TableHeading>
+          ) : (null)}
+
+          {lpChoice === 'L1LP' &&
+            <Box>
+              {Object.keys(poolInfo.L1LP).map((v, i) => {
+                const ret = this.getBalance(v, 'L1')
+                return (
+                  <ListFarm
+                    key={i}
+                    poolInfo={poolInfo.L1LP[v]}
+                    userInfo={userInfo.L1LP[v]}
+                    L1orL2Pool={lpChoice}
+                    balance={ret[0]}
+                    decimals={ret[1]}
+                    isMobile={isMobile}
+                    showAll={!showMDO}
+                  />
+                )
+              })}
+            </Box>}
+
+          {lpChoice === 'L2LP' &&
+            <Box>
+              {Object.keys(poolInfo.L2LP).map((v, i) => {
+                const ret = this.getBalance(v, 'L2')
+                return (
+                  <ListFarm
+                    key={i}
+                    poolInfo={poolInfo.L2LP[v]}
+                    userInfo={userInfo.L2LP[v]}
+                    L1orL2Pool={lpChoice}
+                    balance={ret[0]}
+                    decimals={ret[1]}
+                    isMobile={isMobile}
+                    showAll={!showMDO}
+                  />
+                )
+              })}
+            </Box>
+          }
+        </Box>
+      </>
     )
   }
 }
 
-const mapStateToProps = state => ({ 
-  farm: state.farm
-});
+const mapStateToProps = state => ({
+  farm: state.farm,
+  balance: state.balance
+})
 
-export default connect(mapStateToProps)(Farm);
+export default connect(mapStateToProps)(Farm)

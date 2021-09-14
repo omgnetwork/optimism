@@ -3,13 +3,14 @@ import { Contract, ethers, Wallet, BigNumber, providers } from 'ethers'
 import * as rlp from 'rlp'
 import { MerkleTree } from 'merkletreejs'
 import fetch from 'node-fetch';
+import { isEqual } from 'lodash';
 
 /* Imports: Internal */
 import { fromHexString, sleep } from '@eth-optimism/core-utils'
 import { Logger, BaseService, Metrics } from '@eth-optimism/common-ts'
 
 import { loadContract, loadContractFromManager } from '@eth-optimism/contracts'
-import { StateRootBatchHeader, SentMessage, SentMessageProof } from './types'
+import { StateRootBatchHeader, SentMessage, SentMessageProof, BatchMessage } from './types'
 
 interface MessageRelayerOptions {
   // Providers for interacting with L1 and L2.
@@ -25,6 +26,10 @@ interface MessageRelayerOptions {
 
   // Max gas to relay messages with.
   relayGasLimit: number
+
+  //batch system
+  minBatchSize: number
+  maxWaitTimeS: number
 
   // Height of the L2 transaction to start searching for L2->L1 messages.
   fromL2TransactionIndex?: number
@@ -56,12 +61,15 @@ interface MessageRelayerOptions {
 
 const optionSettings = {
   relayGasLimit: { default: 4_000_000 },
+  //batch system
+  minBatchSize: { default: 2 },
+  maxWaitTimeS: { default: 60 },
   fromL2TransactionIndex: { default: 0 },
   pollingInterval: { default: 5000 },
   l2BlockOffset: { default: 1 },
   l1StartOffset: { default: 0 },
   getLogsInterval: { default: 2000 },
-  filterPollingInterval: { default: 60000 }
+  filterPollingInterval: { default: 60000 },
 }
 
 export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
@@ -77,10 +85,15 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     Lib_AddressManager: Contract
     OVM_StateCommitmentChain: Contract
     OVM_L1CrossDomainMessenger: Contract
+    OVM_L1MultiMessageRelayer: Contract
     OVM_L2CrossDomainMessenger: Contract
     OVM_L2ToL1MessagePasser: Contract
     filter: Array<any>
     lastFilterPollingTimestamp: number
+    //batch system
+    timeSinceLastRelayS: number
+    timeOfLastRelayS: number
+    messageBuffer: Array<BatchMessage>
   }
 
   protected async _init(): Promise<void> {
@@ -91,6 +104,8 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       l2BlockOffset: this.options.l2BlockOffset,
       getLogsInterval: this.options.getLogsInterval,
       filterPollingInterval: this.options.filterPollingInterval,
+      minBatchSize: this.options.minBatchSize,
+      maxWaitTimeS: this.options.maxWaitTimeS,
     })
     // Need to improve this, sorry.
     this.state = {} as any
@@ -125,6 +140,16 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       address: this.state.OVM_L1CrossDomainMessenger.address,
     })
 
+    this.logger.info('Connecting to OVM_L1MultiMessageRelayer...')
+    this.state.OVM_L1MultiMessageRelayer = await loadContractFromManager({
+      name: 'OVM_L1MultiMessageRelayer',
+      Lib_AddressManager: this.state.Lib_AddressManager,
+      provider: this.options.l1RpcProvider,
+    })
+    this.logger.info('Connected to OVM_L1MultiMessageRelayer', {
+      address: this.state.OVM_L1MultiMessageRelayer.address,
+    })
+
     this.logger.info('Connecting to OVM_L2CrossDomainMessenger...')
     this.state.OVM_L2CrossDomainMessenger = await loadContractFromManager({
       name: 'OVM_L2CrossDomainMessenger',
@@ -154,6 +179,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     this.state.nextUnfinalizedTxHeight =
       this.options.fromL2TransactionIndex || 0
     this.state.lastFilterPollingTimestamp = 0
+
+    //batch system
+    this.state.timeOfLastRelayS = Date.now()
+    this.state.timeSinceLastRelayS = 0
+    this.state.messageBuffer = []
   }
 
   protected async _start(): Promise<void> {
@@ -174,6 +204,51 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
               `OVM_L2MessageRelayer (${relayer}) is not set to message-passer EOA ${address}`
             )
           }
+        }
+
+        //Batch flushing logic
+        const secondsElapsed = Math.floor(
+          (Date.now() - this.state.timeOfLastRelayS) / 1000
+        )
+        console.log('\n***********************************')
+        console.log('Seconds elapsed since last batch push:', secondsElapsed)
+        const timeOut =
+          secondsElapsed > this.options.maxWaitTimeS ? true : false
+
+        //console.log('Current buffer size:', this.state.messageBuffer.length)
+        const bufferFull =
+          this.state.messageBuffer.length >= this.options.minBatchSize
+            ? true : false
+
+        if (this.state.messageBuffer.length !== 0 && (bufferFull || timeOut)) {
+          if (bufferFull) {
+            console.log('Buffer full: flushing')
+          }
+          if (timeOut) {
+            console.log('Buffer timeout: flushing')
+          }
+
+          const receipt = await this._relayMultiMessageToL1(
+            this.state.messageBuffer
+          )
+
+          console.log('Receipt:', receipt)
+
+          /* parse this to make sure that the mesaage was actually relayed */
+          if (/*everything went well*/ true) {
+            //clear out the buffer so we do not double relay, which will just
+            //led to reversion at the SCC level
+            this.state.messageBuffer = []
+          }
+
+          this.state.timeOfLastRelayS = Date.now()
+        } else {
+          console.log(
+            'Buffer still too small - current buffer length:',
+            this.state.messageBuffer.length
+          )
+          console.log('Buffer flush size set to:', this.options.minBatchSize)
+          console.log('***********************************\n')
         }
 
         this.logger.info('Checking for newly finalized transactions...')
@@ -247,7 +322,15 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
             'Successfully generated a proof. Attempting to relay to Layer 1...'
           )
 
-          await this._relayMessageToL1(message, proof)
+          // await this._relayMessageToL1(message, proof)
+          const messageToSend = {
+            target: message.target,
+            message: message.message,
+            sender: message.sender,
+            messageNonce: message.messageNonce,
+            proof,
+          }
+          this.state.messageBuffer.push(messageToSend)
         }
 
         if (messages.length === 0) {
@@ -266,8 +349,14 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           )
 
           // Remove any events from the cache for batches that should've been processed by now.
-          this.state.eventCache = this.state.eventCache.filter((event) => {
-            return event.args._batchIndex > lastProcessedBatch.batch.batchIndex
+          const oldSize = this.state.eventCache.length
+            this.state.eventCache = this.state.eventCache.filter((event) => {
+              return event.args._batchIndex > lastProcessedBatch.batch.batchIndex
+          })
+          const newSize = this.state.eventCache.length
+          this.logger.info("Trimmed eventCache", {
+            oldSize,
+            newSize,
           })
         }
 
@@ -294,10 +383,10 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       }
     | undefined
   > {
-    const getStateBatchAppendedEventForIndex = (
+    const getStateBatchAppendedEventForIndex = async (
       txIndex: number
-    ): ethers.Event => {
-      return this.state.eventCache.find((cachedEvent) => {
+    ): Promise <ethers.Event> => {
+      const selectedEvent = this.state.eventCache.find((cachedEvent) => {
         const prevTotalElements = cachedEvent.args._prevTotalElements.toNumber()
         const batchSize = cachedEvent.args._batchSize.toNumber()
 
@@ -307,16 +396,35 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           txIndex < prevTotalElements + batchSize
         )
       })
+      // No event found
+      if (selectedEvent === undefined) {
+        return undefined
+      }
+      // query the new SCC event. event.args._extraData in eventCache might be wrong
+      const SCCEvent: ethers.Event[] = await this.state.OVM_StateCommitmentChain.queryFilter(
+        this.state.OVM_StateCommitmentChain.filters.StateBatchAppended(),
+        selectedEvent.blockNumber,
+        selectedEvent.blockNumber
+      )
+      // alert if two SCC events are not the same
+      if (!isEqual(selectedEvent, SCCEvent[0])) {
+        this.logger.warn('Found inconsistent SCC event', {
+          prevSCCEvent: selectedEvent,
+          newSCCEvent: SCCEvent
+        })
+      }
+      return SCCEvent[0]
     }
 
     let startingBlock = this.state.lastQueriedL1Block
+    const maxBlock = await this.options.l1RpcProvider.getBlockNumber()
     while (
-      startingBlock < (await this.options.l1RpcProvider.getBlockNumber())
+      startingBlock < maxBlock
     ) {
-      this.state.lastQueriedL1Block = startingBlock
       this.logger.info('Querying events', {
         startingBlock,
         endBlock: startingBlock + this.options.getLogsInterval,
+        maxBlock,
       })
 
       const events: ethers.Event[] =
@@ -325,18 +433,24 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           startingBlock,
           startingBlock + this.options.getLogsInterval
         )
+      this.state.lastQueriedL1Block = Math.min(startingBlock + this.options.getLogsInterval, maxBlock)
 
       this.state.eventCache = this.state.eventCache.concat(events)
+      this.logger.info("Added events to eventCache", {
+        added:events.length,
+        newSize:this.state.eventCache.length,
+      })
+
       startingBlock += this.options.getLogsInterval
 
       // We need to stop syncing early once we find the event we're looking for to avoid putting
       // *all* events into memory at the same time. Otherwise we'll get OOM killed.
-      if (getStateBatchAppendedEventForIndex(height) !== undefined) {
+      if (await getStateBatchAppendedEventForIndex(height) !== undefined) {
         break
       }
     }
 
-    const event = getStateBatchAppendedEventForIndex(height)
+    const event = await getStateBatchAppendedEventForIndex(height)
     if (event === undefined) {
       return undefined
     }
@@ -567,6 +681,44 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     this.logger.info('Message successfully relayed to Layer 1!')
   }
 
+  private async _relayMultiMessageToL1(
+    messages: Array<BatchMessage>
+  ): Promise<any> {
+
+    const result = await this.state.OVM_L1MultiMessageRelayer.connect(
+      this.options.l1Wallet
+    ).batchRelayMessages(messages, {
+      gasLimit: this.options.relayGasLimit,
+    })
+
+    this.logger.info('Relay message transaction sent', {
+      transactionHash: result,
+    })
+
+    let receipt
+
+    try {
+      receipt = await result.wait()
+
+      this.logger.info('Relay messages included in block', {
+        transactionHash: receipt.transactionHash,
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed.toString(),
+        confirmations: receipt.confirmations,
+        status: receipt.status,
+      })
+    } catch (err) {
+      this.logger.error('Relay attempt failed, skipping.', {
+        message: err.toString(),
+        stack: err.stack,
+        code: err.code,
+      })
+      return
+    }
+    this.logger.info('Message Batch successfully relayed to Layer 1!')
+    return receipt
+  }
+
   private async _getFilter(): Promise<void> {
     try {
       if (this.options.filterEndpoint) {
@@ -579,7 +731,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           // export L1LIQPOOL=$(echo $ADDRESSES | jq -r '.L1LiquidityPool')
           // export L1M=$(echo $ADDRESSES | jq -r '.L1Message')
           // echo '["'$L1LIQPOOL'", "'$L1M'"]' > dist/dumps/whitelist.json
-          const filterSelect = [ filter.L1LiquidityPool, filter.L1Message ]
+          const filterSelect = [ filter.Proxy__L1LiquidityPool, filter.L1Message ]
 
           this.state.lastFilterPollingTimestamp = new Date().getTime()
           this.state.filter = filterSelect

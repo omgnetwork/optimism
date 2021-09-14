@@ -13,13 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React from 'react';
-import { Search } from '@material-ui/icons';
-import BN from 'bignumber.js';
+import React from 'react'
+import BN from 'bignumber.js'
+import * as S from './Input.styles'
 
-import * as styles from './Input.module.scss';
+import { Box, Typography } from '@material-ui/core'
+import { useTheme } from '@emotion/react'
+import { getCoinImage } from 'util/coinImage'
 
-function Input ({
+function Input({
   placeholder,
   label,
   type = 'text',
@@ -28,67 +30,103 @@ function Input ({
   unit,
   value,
   onChange,
+  sx,
   paste,
-  className,
-  maxValue
+  // className,
+  maxValue,
+  // small,
+  fullWidth,
+  size,
+  variant,
+  newStyle = false,
 }) {
-  
-  async function handlePaste () {
+
+  async function handlePaste() {
     try {
-      const text = await navigator.clipboard.readText();
+      const text = await navigator.clipboard.readText()
       if (text) {
-        onChange({ target: { value: text } });
+        onChange({ target: { value: text } })
       }
     } catch (err) {
       // navigator clipboard api not supported in client browser
     }
   }
 
-  function handleMaxClick () {
-    onChange({ target: { value: maxValue } });
-  }
+  // function handleMaxClick() {
+  //   onChange({ target: { value: maxValue } })
+  // }
 
-  const overMax = new BN(value).gt(new BN(maxValue));
+  const overMax = new BN(value).gt(new BN(maxValue))
+
+  const theme = useTheme()
 
   return (
-    <div className={[ styles.Input, className ].join(' ')}>
-      {label && <div className={styles.label}>{label}</div>}
-      <div
-        className={[
-          styles.field,
-          overMax ? styles.error : ''
-        ].join(' ')}
-      >
-        {icon && <Search className={styles.icon} />}
-        <input
-          className={styles.input}
-          placeholder={placeholder}
-          type={type}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-        />
+    <>
+      <S.Wrapper newstyle={newStyle ? 1 : 0}>
         {unit && (
-          <div className={styles.unit}>
-            {maxValue && (value !== maxValue) && (
-              <div
-                onClick={handleMaxClick}
-                className={styles.maxValue}
-              >
-                MAX
-              </div>
-            )}
-            {unit}
-          </div>
+          <S.UnitContent>
+            <div>
+              <Typography variant="body2" component="div">{unit}</Typography>
+              <img src={getCoinImage(unit)} alt="logo" width={50} height={50} />
+            </div>
+          </S.UnitContent>
+        )}
+
+        <S.InputWrapper>
+          {label && (
+            <Typography variant="body2" component="div" sx={{opacity: 0.7, mb: 1  , ml: '15px'}}>
+              {label}
+            </Typography>
+          )}
+          <S.TextFieldTag
+            placeholder={placeholder}
+            type={type}
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+            fullWidth={fullWidth}
+            size={size}
+            variant={variant}
+            error={overMax}
+            sx={sx}
+            newstyle={newStyle ? 1 : 0}
+          />
+        </S.InputWrapper>
+
+        {unit && (
+          <S.ActionsWrapper>
+            <Typography variant="body2" component="p" sx={{opacity: 0.7, textAlign: "end", mb: 2}}>
+              Max Available: {Number(maxValue).toFixed(3)}
+            </Typography>
+
+            {/* maxValue && value !== maxValue && (
+              <Box>
+                <Button onClick={handleMaxClick} variant="small" >
+                  Use All
+                </Button>
+              </Box>
+            )*/}
+          </S.ActionsWrapper>
         )}
         {paste && (
-          <div onClick={handlePaste} className={styles.paste}>
-            Paste
-          </div>
+          <Box onClick={handlePaste} sx={{color: theme.palette.secondary.main, opacity: 0.9, cursor: 'pointer', position: 'absolute', right: '70px', fontSize: '14px'}}>
+            PASTE
+          </Box>
         )}
-      </div>
-    </div>
-  );
+      </S.Wrapper>
+      {value <= 0 && value !== '' ?
+        <Typography variant="body2" sx={{mt: 2}}>
+          The value must be greater than 0.
+        </Typography>
+        : null
+      }
+      {value !== '' && value > maxValue  ?
+        <Typography variant="body2" sx={{mt: 2}}>
+          The value must be smaller than {Number(maxValue).toFixed(3)}.
+        </Typography>
+        : null}
+    </>
+  )
 }
 
-export default React.memo(Input);
+export default React.memo(Input)

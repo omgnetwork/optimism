@@ -4,8 +4,8 @@ import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
 import { Contract, ContractFactory, BigNumber, utils, ethers } from 'ethers'
 import { Direction } from './shared/watcher-utils'
+import { expectLogs } from './shared/utils'
 import { getContractFactory } from '@eth-optimism/contracts';
-
 
 import L1ERC20Json from '../contracts/L1ERC20.json'
 import L1LiquidityPoolJson from '../contracts/L1LiquidityPool.json'
@@ -30,11 +30,10 @@ describe('Liquidity Pool Test', async () => {
 
   let env: OptimismEnv
 
-  const initialSupply = utils.parseEther("10000000000")
+  const initialSupply = utils.parseEther('10000000000')
   const tokenName = 'JLKN'
   const tokenSymbol = 'JLKN'
 
-  /************* BOB owns all the pools, and ALICE mints a new token ***********/
   before(async () => {
 
     env = await OptimismEnv.new()
@@ -45,39 +44,7 @@ describe('Liquidity Pool Test', async () => {
       env.bobl1Wallet
     )
 
-    Factory__L2ERC20 = getContractFactory(
-      "L2StandardERC20",
-      env.bobl2Wallet,
-      true
-    )
-
-    /****************************
-    //  * THIS NEEDS TO BE CHANGED/UPDATED TO TEST THE DEPLOYED CONTRACTS
-    //  * The addresses are at
-
-    //  export const getOMGXDeployerAddresses = async () => {
-    //    var options = {
-    //        uri: OMGX_URL,
-    //    }
-    //    const result = await request.get(options)
-    //    return JSON.parse(result)
-    // }
-    *****************************/
-
-    console.log(env.addressesOMGX)
     const L1StandardBridgeAddress = await env.addressManager.getAddress('Proxy__OVM_L1StandardBridge')
-
-    L1LiquidityPool = new Contract(
-      env.addressesOMGX.L1LiquidityPool,
-      L1LiquidityPoolJson.abi,
-      env.bobl1Wallet
-    )
-
-    L2LiquidityPool = new Contract(
-      env.addressesOMGX.L2LiquidityPool,
-      L2LiquidityPoolJson.abi,
-      env.bobl2Wallet
-    )
 
     L1StandardBridge = getContractFactory(
       "OVM_L1StandardBridge",
@@ -86,8 +53,7 @@ describe('Liquidity Pool Test', async () => {
 
     const L2StandardBridgeAddress = await L1StandardBridge.l2TokenBridge()
 
-
-    // we want to deploy new ERC20 for each test run
+    //we deploy a new erc20, so tests won't fail on a rerun on the same contracts
     L1ERC20 = await Factory__L1ERC20.deploy(
       initialSupply,
       tokenName,
@@ -95,23 +61,42 @@ describe('Liquidity Pool Test', async () => {
     )
     await L1ERC20.deployTransaction.wait()
 
+    Factory__L2ERC20 = getContractFactory(
+      "L2StandardERC20",
+      env.bobl2Wallet,
+      true
+    )
+
     L2ERC20 = await Factory__L2ERC20.deploy(
       L2StandardBridgeAddress,
       L1ERC20.address,
       tokenName,
       tokenSymbol,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 85390000}
     )
     await L2ERC20.deployTransaction.wait()
+
+    L1LiquidityPool = new Contract(
+      env.addressesOMGX.Proxy__L1LiquidityPool,
+      L1LiquidityPoolJson.abi,
+      env.bobl1Wallet
+    )
+
+    L2LiquidityPool = new Contract(
+      env.addressesOMGX.Proxy__L2LiquidityPool,
+      L2LiquidityPoolJson.abi,
+      env.bobl2Wallet
+    )
 
     L2TokenPool = new Contract(
       env.addressesOMGX.L2TokenPool,
       L2TokenPoolJson.abi,
       env.bobl2Wallet
     )
+
   })
 
-  it('should deposit ERC20 token to L2', async () => {
+  it('should deposit 10000 TEST ERC20 token from L1 to L2', async () => {
 
     const depositL2ERC20Amount = utils.parseEther("10000");
 
@@ -147,7 +132,7 @@ describe('Liquidity Pool Test', async () => {
     )
   })
 
-  it('should transfer ERC20 token to Alice and Kate', async () => {
+  it('should transfer L2 ERC20 TEST token from Bob to Alice and Kate', async () => {
 
     const transferL2ERC20Amount = utils.parseEther("150")
 
@@ -158,14 +143,14 @@ describe('Liquidity Pool Test', async () => {
     const tranferToAliceTX = await L2ERC20.transfer(
       env.alicel2Wallet.address,
       transferL2ERC20Amount,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await tranferToAliceTX.wait()
 
     const transferToKateTX = await L2ERC20.transfer(
       env.katel2Wallet.address,
       transferL2ERC20Amount,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await transferToKateTX.wait()
 
@@ -186,21 +171,21 @@ describe('Liquidity Pool Test', async () => {
     )
   })
 
-  it('should add ERC20 token to token pool', async () => {
+  it('should add 1000 ERC20 TEST tokens to the L2 token pool', async () => {
 
     const addL2TPAmount = utils.parseEther("1000")
 
     const approveL2TPTX = await L2ERC20.approve(
       L2TokenPool.address,
       addL2TPAmount,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await approveL2TPTX.wait()
 
     const transferL2TPTX = await L2ERC20.transfer(
       L2TokenPool.address,
       addL2TPAmount,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     );
     await transferL2TPTX.wait()
 
@@ -232,8 +217,7 @@ describe('Liquidity Pool Test', async () => {
 
     const registerPoolERC20TX = await L2LiquidityPool.registerPool(
       L1ERC20.address,
-      L2ERC20.address,
-      {gasLimit: 800000, gasPrice: 0}
+      L2ERC20.address
     )
     await registerPoolERC20TX.wait()
 
@@ -252,7 +236,7 @@ describe('Liquidity Pool Test', async () => {
     const registerPoolTX = await L2LiquidityPool.registerPool(
       L1ERC20.address,
       L2ERC20.address,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await expect(registerPoolTX.wait()).to.be.eventually.rejected;
   })
@@ -297,28 +281,28 @@ describe('Liquidity Pool Test', async () => {
     const approveBobL2TX = await L2ERC20.approve(
       L2LiquidityPool.address,
       addLiquidityAmount,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await approveBobL2TX.wait()
 
     const BobAddLiquidity = await L2LiquidityPool.addLiquidity(
       addLiquidityAmount,
       L2ERC20.address,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await BobAddLiquidity.wait()
 
     const approveAliceL2TX = await L2ERC20.connect(env.alicel2Wallet).approve(
       L2LiquidityPool.address,
       addLiquidityAmount,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await approveAliceL2TX.wait()
 
     const AliceAddLiquidity = await L2LiquidityPool.connect(env.alicel2Wallet).addLiquidity(
       addLiquidityAmount,
       L2ERC20.address,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await AliceAddLiquidity.wait()
 
@@ -355,15 +339,15 @@ describe('Liquidity Pool Test', async () => {
     const approveKateL2TX = await L2ERC20.connect(env.katel2Wallet).approve(
       L2LiquidityPool.address,
       fastExitAmount,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await approveKateL2TX.wait()
 
-    await env.waitForXDomainTransactionFast(
+    const depositTx = await env.waitForXDomainTransactionFast(
       L2LiquidityPool.connect(env.katel2Wallet).clientDepositL2(
         fastExitAmount,
         L2ERC20.address,
-        {gasLimit: 800000, gasPrice: 0}
+        {gasLimit: 7000000}
       ),
       Direction.L2ToL1
     )
@@ -398,6 +382,20 @@ describe('Liquidity Pool Test', async () => {
     expect(updatedPoolInfo.accUserRewardPerShare).to.deep.eq(
       (fastExitAmount.mul(35).div(1000)).mul(BigNumber.from(10).pow(12)).div(poolInfo.userDepositAmount)
     )
+
+    // check event ClientDepositL2 is emitted
+    await expectLogs(depositTx.receipt,L2LiquidityPoolJson.abi,L2LiquidityPool.address, 'ClientDepositL2', {
+      sender: env.katel2Wallet.address,
+      receivedAmount: fastExitAmount,
+      tokenAddress: L2ERC20.address,
+    })
+
+    // check event ClientPayL1 is emitted
+    await expectLogs(depositTx.remoteReceipt,L1LiquidityPoolJson.abi,L1LiquidityPool.address, 'ClientPayL1', {
+      sender: env.katel2Wallet.address,
+      amount: fastExitAmount.mul(95).div(100),
+      tokenAddress: L1ERC20.address
+    })
   })
 
   it("should withdraw liquidity", async () => {
@@ -411,7 +409,7 @@ describe('Liquidity Pool Test', async () => {
       withdrawAmount,
       L2ERC20.address,
       env.bobl2Wallet.address,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await withdrawTX.wait()
 
@@ -440,12 +438,13 @@ describe('Liquidity Pool Test', async () => {
       withdrawAmount,
       L2ERC20.address,
       env.bobl2Wallet.address,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await expect(withdrawTX.wait()).to.be.eventually.rejected;
   })
 
-  it("should withdraw reward", async () => {
+  it("should withdraw reward from L2 pool", async () => {
+
     const preL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
     const preBobUserInfo = await L2LiquidityPool.userInfo(L2ERC20.address, env.bobl2Wallet.address)
     const pendingReward = BigNumber.from(preBobUserInfo.pendingReward).div(2)
@@ -454,14 +453,14 @@ describe('Liquidity Pool Test', async () => {
       pendingReward,
       L2ERC20.address,
       env.bobl2Wallet.address,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await withdrawRewardTX.wait()
 
     const postBobUserInfo = await L2LiquidityPool.userInfo(
       L2ERC20.address,
       env.bobl2Wallet.address,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     const postL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
 
@@ -469,14 +468,45 @@ describe('Liquidity Pool Test', async () => {
     expect(preL2ERC20Balance).to.deep.eq(postL2ERC20Balance.sub(pendingReward))
   })
 
-  it("shouldn't withdraw reward", async () => {
+  it("should withdraw reward from L1 pool", async () => {
+
+    const preL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
+    const preBobUserInfo = await L1LiquidityPool.userInfo(L1ERC20.address, env.bobl1Wallet.address)
+    const prePoolInfo = await L1LiquidityPool.poolInfo(L1ERC20.address)
+    const pendingReward = BigNumber.from(preBobUserInfo.pendingReward).add(
+      BigNumber.from(preBobUserInfo.amount)
+      .mul(BigNumber.from(prePoolInfo.accUserRewardPerShare))
+      .div(BigNumber.from(10).pow(BigNumber.from(12)))
+      .sub(BigNumber.from(preBobUserInfo.rewardDebt))
+    )
+
+    const withdrawRewardTX = await L1LiquidityPool.withdrawReward(
+      pendingReward,
+      L1ERC20.address,
+      env.bobl1Wallet.address//,
+      //{gasLimit: 800000}
+    )
+    await withdrawRewardTX.wait()
+
+    const postBobUserInfo = await L1LiquidityPool.userInfo(
+      L1ERC20.address,
+      env.bobl1Wallet.address//,
+      //{gasLimit: 800000}
+    )
+    const postL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
+
+    expect(postBobUserInfo.pendingReward).to.deep.eq(BigNumber.from(0))
+    expect(preL1ERC20Balance).to.deep.eq(postL1ERC20Balance.sub(pendingReward))
+  })
+
+  it("shouldn't withdraw reward from L2 pool", async () => {
     const withdrawRewardAmount = utils.parseEther("100")
 
     const withdrawRewardTX = await L2LiquidityPool.withdrawReward(
       withdrawRewardAmount,
       L2ERC20.address,
       env.bobl2Wallet.address,
-      {gasLimit: 800000, gasPrice: 0}
+      {gasLimit: 7000000}
     )
     await expect(withdrawRewardTX.wait()).to.be.eventually.rejected;
   })
@@ -491,13 +521,15 @@ describe('Liquidity Pool Test', async () => {
     const approveL1LPTX = await L1ERC20.approve(
       L1LiquidityPool.address,
       depositAmount,
+      {gasLimit: 9000000}
     )
     await approveL1LPTX.wait()
 
-    await env.waitForXDomainTransaction(
+    const depositTx = await env.waitForXDomainTransaction(
       L1LiquidityPool.clientDepositL1(
         depositAmount,
-        L1ERC20.address
+        L1ERC20.address,
+        {gasLimit: 9000000}
       ),
       Direction.L1ToL2
     )
@@ -517,19 +549,33 @@ describe('Liquidity Pool Test', async () => {
     expect(prePoolInfo.accOwnerReward).to.deep.eq(
       postPoolInfo.accOwnerReward.sub(depositAmount.mul(15).div(1000))
     )
+
+    // check event ClientDepositL1 is emitted
+    await expectLogs(depositTx.receipt,L1LiquidityPoolJson.abi,L1LiquidityPool.address, 'ClientDepositL1', {
+      sender: env.bobl1Wallet.address,
+      receivedAmount: depositAmount,
+      tokenAddress: L1ERC20.address,
+    })
+
+    // check event ClientPayL2 is emitted
+    await expectLogs(depositTx.remoteReceipt,L2LiquidityPoolJson.abi,L2LiquidityPool.address, 'ClientPayL2', {
+      sender: env.bobl1Wallet.address,
+      amount: depositAmount.mul(95).div(100),
+      tokenAddress: L2ERC20.address
+    })
   })
 
-  it("should revert unfulfillable swaps", async () => {
+  it("should revert unfulfillable swap-offs", async () => {
 
      const preBobL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
      const preBobL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
-     const requestedLiquidity = (await L1ERC20.balanceOf(L1LiquidityPool.address)).add(1)
-     const fastExitAmount = requestedLiquidity.mul(1000).div(950)
+     const requestedLiquidity = (await L1ERC20.balanceOf(L1LiquidityPool.address)).add(10)
+     const fastExitAmount = requestedLiquidity.mul(100).div(95)
 
      const approveBobL2TX = await L2ERC20.connect(env.bobl2Wallet).approve(
        L2LiquidityPool.address,
        fastExitAmount,
-       {gasLimit: 800000, gasPrice: 0}
+       {gasLimit: 7000000}
      )
      await approveBobL2TX.wait()
 
@@ -537,7 +583,7 @@ describe('Liquidity Pool Test', async () => {
        L2LiquidityPool.connect(env.bobl2Wallet).clientDepositL2(
          fastExitAmount,
          L2ERC20.address,
-         {gasLimit: 800000, gasPrice: 0}
+         {gasLimit: 7000000}
        ),
        Direction.L2ToL1
      )
@@ -547,7 +593,128 @@ describe('Liquidity Pool Test', async () => {
 
      expect(preBobL1ERC20Balance).to.deep.eq(postBobL1ERC20Balance)
 
-     const exitFees = fastExitAmount.mul(50).div(1000)
+     const exitFees = fastExitAmount.mul(5).div(100)
      expect(postBobL2ERC20Balance).to.deep.eq(preBobL2ERC20Balance.sub(exitFees))
    })
+
+   it("should revert unfulfillable swap-ons", async () => {
+
+      const preL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
+      const preL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
+
+      const requestedLiquidity = (await L2ERC20.balanceOf(L2LiquidityPool.address)).add(10)
+      const swapOnAmount = requestedLiquidity.mul(100).div(95)
+
+      const approveBobL1TX = await L1ERC20.connect(env.bobl1Wallet).approve(
+        L1LiquidityPool.address,
+        swapOnAmount
+      )
+      await approveBobL1TX.wait()
+
+      await env.waitForRevertXDomainTransaction(
+        L1LiquidityPool.clientDepositL1(
+          swapOnAmount,
+          L1ERC20.address
+        ),
+        Direction.L1ToL2
+      )
+
+      const postBobL1ERC20Balance = await L1ERC20.balanceOf(env.bobl1Wallet.address)
+      const postBobL2ERC20Balance = await L2ERC20.balanceOf(env.bobl2Wallet.address)
+
+      const swapOnFees = swapOnAmount.mul(5).div(100)
+
+      expect(preL2ERC20Balance).to.deep.eq(postBobL2ERC20Balance)
+      expect(postBobL1ERC20Balance).to.deep.eq(preL1ERC20Balance.sub(swapOnFees))
+   })
+
+   it("should be able to pause L1LiquidityPool contract", async function () {
+
+     const poolOwner = await L1LiquidityPool.owner()
+
+     // since tests are with deployed contracts
+     if(env.bobl1Wallet.address == poolOwner) {
+
+        const pauseStatusTogglePrior = await L1LiquidityPool.paused()
+
+        expect(pauseStatusTogglePrior).to.eq(false)
+
+        await expect(L1LiquidityPool.connect(env.alicel1Wallet).pause()).to.be.revertedWith('caller is not the owner')
+
+        // only owner can pause
+        await L1LiquidityPool.connect(env.bobl1Wallet).pause();
+
+        // expect pause variable is updated
+        const pauseStatus = await L1LiquidityPool.paused()
+
+        expect(pauseStatus).to.eq(true)
+
+        // check addLiquidity is paused
+        const addLiquidityAmount = utils.parseEther("100")
+
+        const approveBobL1TX = await L1ERC20.approve(
+          L1LiquidityPool.address,
+          addLiquidityAmount,
+        )
+        await approveBobL1TX.wait()
+
+        await expect(L1LiquidityPool.connect(env.bobl1Wallet).addLiquidity(
+            addLiquidityAmount,
+            L1ERC20.address
+        )).to.be.revertedWith('Pausable: paused')
+
+        // unpause contracts for next tests
+        await L1LiquidityPool.connect(env.bobl1Wallet).unpause();
+        const pauseStatusToggleAfter = await L1LiquidityPool.paused()
+
+        expect(pauseStatusToggleAfter).to.eq(false)
+     } else {
+        this.skip()
+     }
+   })
+
+   it("should be able to pause L2LiquidityPool contract", async function () {
+
+    const poolOwner = await L2LiquidityPool.owner()
+
+    // since tests are with deployed contracts
+    if(env.bobl2Wallet.address == poolOwner) {
+
+       const pauseStatusTogglePrior = await L2LiquidityPool.paused()
+
+       expect(pauseStatusTogglePrior).to.eq(false)
+
+       await expect(L2LiquidityPool.connect(env.alicel2Wallet).pause()).to.be.revertedWith('caller is not the owner')
+
+       // only owner can pause
+       await L2LiquidityPool.connect(env.bobl2Wallet).pause();
+
+       // expect pause variable is updated
+       const pauseStatus = await L2LiquidityPool.paused()
+
+       expect(pauseStatus).to.eq(true)
+
+       // check addLiquidity is paused
+       const addLiquidityAmount = utils.parseEther("100")
+
+       const approveBobL2TX = await L2ERC20.approve(
+         L2LiquidityPool.address,
+         addLiquidityAmount,
+       )
+       await approveBobL2TX.wait()
+
+       await expect(L2LiquidityPool.connect(env.bobl2Wallet).addLiquidity(
+           addLiquidityAmount,
+           L2ERC20.address
+       )).to.be.revertedWith('Pausable: paused')
+
+       // unpause contracts for next tests
+       await L2LiquidityPool.connect(env.bobl2Wallet).unpause();
+       const pauseStatusToggleAfter = await L2LiquidityPool.paused()
+
+       expect(pauseStatusToggleAfter).to.eq(false)
+    } else {
+       this.skip()
+    }
+  })
 })

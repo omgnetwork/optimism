@@ -13,286 +13,269 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Send, ArrowBack, ArrowForward } from '@material-ui/icons';
-import { isEqual } from 'lodash';
-import truncate from 'truncate-middle';
+import React,{useState,useEffect,useCallback} from 'react'
+import { useSelector, useDispatch, batch } from 'react-redux'
 
-import { selectLoading } from 'selectors/loadingSelector';
-import { selectIsSynced } from 'selectors/statusSelector';
-import { selectChildchainBalance, selectRootchainBalance } from 'selectors/balanceSelector';
+import { isEqual, orderBy } from 'lodash'
 
-import { openModal, openAlert, openError } from 'actions/uiAction';
+//Selectors
+import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector'
+import { selectTransactions } from 'selectors/transactionSelector'
 
-import Copy from 'components/copy/Copy';
-import Button from 'components/button/Button';
-import { logAmount } from 'util/amountConvert';
+import ListAccount from 'components/listAccount/listAccount'
 
-import networkService from 'services/networkService';
+import networkService from 'services/networkService'
 
-import bunny_happy from 'images/bunny_happy.svg';
-import bunny_sad from 'images/bunny_sad.svg';
+import * as S from './Account.styles'
+import { selectTokens } from 'selectors/tokenSelector'
+import PageHeader from 'components/pageHeader/PageHeader'
+import { Box, Grid, Tab, Tabs, Typography, useMediaQuery } from '@material-ui/core'
+import { fetchGas, fetchLookUpPrice, fetchTransactions } from 'actions/networkAction'
+import { selectNetwork } from 'selectors/setupSelector'
+import { useTheme } from '@emotion/react'
+import { tableHeadList } from './tableHeadList'
+import TabPanel from 'components/tabs/TabPanel'
+import Drink from '../../images/backgrounds/drink.png'
+import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon'
 
-import * as styles from './Account.module.scss';
+import PendingTransaction from './PendingTransaction'
+import useInterval from 'util/useInterval'
+
+const POLL_INTERVAL = 2000; //milliseconds
 
 function Account () {
 
-  const dispatch = useDispatch();
-  const isSynced = useSelector(selectIsSynced);
-  const childBalance = useSelector(selectChildchainBalance, isEqual);
-  const rootBalance = useSelector(selectRootchainBalance, isEqual);
-  const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]));
+  const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2'
+  const dispatch = useDispatch()
+  const [activeTab, setActiveTab] = useState(networkLayer === 'L1' ? 0 : 1)
 
-  const disabled = !childBalance.length || !isSynced ;
+  const childBalance = useSelector(selectlayer2Balance, isEqual)
+  const rootBalance = useSelector(selectlayer1Balance, isEqual)
 
-  const handleModalClick = useCallback(
-    async (name, fast = false, beginner = false) => {
-      if (name === 'transferModal' || name === 'exitModal') {
-        const correctLayer = await dispatch(networkService.confirmLayer('L2'));
-        if (!correctLayer) return 
+  const tokenList = useSelector(selectTokens)
+
+  const network = useSelector(selectNetwork())
+
+  const getLookupPrice = useCallback(()=>{
+    const symbolList = Object.values(tokenList).map((i)=> {
+      if(i.symbolL1 === 'ETH') {
+        return 'ethereum'
+      } else if(i.symbolL1 === 'OMG') {
+        return 'omg'
+      } else {
+        return i.symbolL1.toLowerCase()
       }
-      if (name === 'depositModal') {
-        const correctLayer = await dispatch(networkService.confirmLayer('L1'));
-        if (!correctLayer) return 
-      }
-      dispatch(openModal(name, beginner, fast))
-    }, [ dispatch ]
-  );
+    })
+    dispatch(fetchLookUpPrice(symbolList))
+  },[tokenList,dispatch])
 
-  let balances = {
-    /*____ : {have: false, amount: 0, amountShort: '0'},*/
-    oETH : {have: false, amount: 0, amountShort: '0'}
+  const unorderedTransactions = useSelector(selectTransactions, isEqual)
+  //console.log("Transactions:",unorderedTransactions)
+
+  const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
+  //console.log("orderedTransactions:",orderedTransactions)
+
+  const pendingL1 = orderedTransactions.filter((i) => {
+      if (i.chain === 'L1pending' && //use the custom API watcher for fast data on pending L1->L2 TXs
+          i.crossDomainMessage &&
+          i.crossDomainMessage.crossDomainMessage === 1 &&
+          i.crossDomainMessage.crossDomainMessageFinalize === 0 &&
+          i.action.status === "pending"
+      ) {
+          return true
+      }
+      return false
+  })
+
+  const pendingL2 = orderedTransactions.filter((i) => {
+      if (i.chain === 'L2' &&
+          i.crossDomainMessage &&
+          i.crossDomainMessage.crossDomainMessage === 1 &&
+          i.crossDomainMessage.crossDomainMessageFinalize === 0 &&
+          i.action.status === "pending"
+      ) {
+          return true
+      }
+      return false
+  })
+
+  const pending = [
+    ...pendingL1,
+    ...pendingL2
+  ]
+
+  const getGasPrice = useCallback(() => {
+    dispatch(fetchGas({
+      network: network || 'local',
+      networkLayer
+    }))
+  }, [dispatch, network, networkLayer])
+
+  useEffect(()=>{
+    getLookupPrice()
+    getGasPrice()
+  },[childBalance, rootBalance, getLookupPrice, getGasPrice])
+
+  useInterval(() => {
+    batch(() => {
+      dispatch(fetchTransactions())
+    })
+  }, POLL_INTERVAL * 2)
+
+  const disabled = false
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
+  const handleChange = (event, newValue) => {
+    setActiveTab(newValue)
   }
 
-  childBalance.reduce((acc, cur) => {
-    if (cur.symbol === 'oETH' && cur.amount > 0 ) {
-      acc['oETH']['have'] = true;
-      acc['oETH']['amount'] = cur.amount;
-      acc['oETH']['amountShort'] = logAmount(cur.amount, cur.decimals, 2);
-    }
-    return acc;
-  }, balances)
+  const ActiveItem = ({active}) => (
+    <Box display="flex" sx={{ justifyContent: 'center', gap: 1 }}>
+      <NetworkSwitcherIcon active={active} /> <Typography variant="overline">Active</Typography>
+    </Box>
+  )
 
-  const wAddress = networkService.account ? truncate(networkService.account, 6, 4, '...') : '';
-  const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2';
-  const masterConfig = networkService.masterConfig;
+  // const mobileL1 = network + ' L1'
+  // const mobileL2 = 'BOBA L2 ' + network
 
-  const handleDepositETHL1 = useCallback(
-    () => dispatch(networkService.depositETHL1()),
-    [dispatch]
+  let label_L1 = 'Ethereum L1'
+  if(network === 'rinkeby') label_L1 = 'Rinkeby L1'
+
+  let label_L2 = 'Boba L2'
+  if(network === 'rinkeby') label_L2 = 'Boba Rinkeby L2'
+
+  const L1Column = () => (
+    <S.AccountWrapper >
+
+      {!isMobile ? (
+        <S.WrapperHeading>
+          <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>{label_L1}</Typography>
+          {/* <SearchIcon color={theme.palette.secondary.main}/> */}
+          {networkLayer === 'L1' ? <ActiveItem active={true} /> : null}
+        </S.WrapperHeading>
+        ) : (null)
+      }
+
+      <S.TableHeading>
+        {tableHeadList.map((item) => {
+          return (
+            <S.TableHeadingItem key={item.label} variant="body2" component="div" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2"}}>
+              {item.label}
+            </S.TableHeadingItem>
+          )
+        })}
+      </S.TableHeading>
+
+      <Box>
+        {rootBalance.map((i, index) => {
+          return (
+            <ListAccount
+              key={i.currency}
+              token={i}
+              chain={'L1'}
+              networkLayer={networkLayer}
+              disabled={disabled}
+            />
+          )
+        })}
+      </Box>
+    </S.AccountWrapper>
+  )
+
+  const L2Column = () => (
+    <S.AccountWrapper>
+      {!isMobile ? (
+        <S.WrapperHeading>
+          <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>{label_L2}</Typography>
+          {/* <SearchIcon color={theme.palette.secondary.main}/> */}
+          {networkLayer === 'L2' ? <ActiveItem active={true} /> : null}
+        </S.WrapperHeading>
+        ) : (null)
+      }
+
+      <S.TableHeading sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4"}}>
+        {tableHeadList.map((item) => {
+          return (
+            <S.TableHeadingItem key={item.label} variant="body2" component="div">{item.label}</S.TableHeadingItem>
+          )
+        })}
+      </S.TableHeading>
+
+      <Box>
+        {childBalance.map((i, index) => {
+          return (
+            <ListAccount
+              key={i.currency}
+              token={i}
+              chain={'L2'}
+              networkLayer={networkLayer}
+              disabled={disabled}
+            />
+          )
+        })}
+      </Box>
+    </S.AccountWrapper>
   );
-
-  const handleGetToken = async () => {
-    const res = await networkService.getTestToken();
-    if (res) {
-      dispatch(openAlert('10 test tokens were sent to your wallet'));
-    } else {
-      dispatch(openError('Your reached the limit'));
-    }
-  }
 
   return (
-    <div className={styles.Account}>
+    <>
+      <PageHeader title="Wallet"/>
 
-      <div className={styles.wallet}>
-        <span className={styles.address}>{`Wallet Address : ${wAddress}`}</span>
-        <Copy value={networkService.account} />
-      </div>
+      <S.CardTag>
+        <S.CardContentTag>
+          <S.CardInfo>Boba Balances</S.CardInfo>
+          {(network === 'mainnet') &&
+          <Typography variant="body2">
+             You are using Mainnet Beta.<br/>
+             WARNING: the mainnet smart contracts are not fully audited and funds may be at risk.<br/>
+             Please exercise caution when using Mainnet Beta.
+          </Typography>
+          }
+          {/*
+            <S.BalanceValue component ="div">{balances['oETH'].amountShort}</S.BalanceValue>
+            <Typography>oETH</Typography>
+          */}
+        </S.CardContentTag>
+        <Box sx={{flex: 3}}>
+          <S.ContentGlass>
+            <img src={Drink} href="#" width={135} alt="Boba Drink"/>
+          </S.ContentGlass>
+        </Box>
 
-{/*
-      {balances['oETH']['have'] &&
-        <h3 style={{marginBottom: '30px'}}>Status: Ready to use OMGX</h3> 
+      </S.CardTag>
+      {pending.length > 0 &&
+        <Grid sx={{margin: '10px 0px'}}>
+          <Grid item xs={12}>
+            <PendingTransaction />
+          </Grid>
+        </Grid>
       }
-      {!balances['oETH']['have'] &&
-        <h3 style={{marginBottom: '30px'}}>Status: Bunny Cry. You do not have any oETH on OMGX</h3> 
-      }
-*/}
-      {balances['oETH']['have'] &&
-        <div className={styles.RabbitBox}>
-          <img className={styles.bunny} src={bunny_happy} alt='Happy Bunny' />
-          <div className={styles.RabbitRight}>
-            <div className={styles.RabbitRightTop}>
-              OMGX Balance
-            </div>
-            <div className={styles.RabbitRightMiddle}>
-              <div className={styles.happy}>{balances['oETH']['amountShort']}</div>
-            </div>
-            <div className={styles.RabbitRightBottom}>
-              oETH
-            </div>
-            <div className={styles.RabbitRightBottomNote}>
-            {networkLayer === 'L1' && 
-              <span>You are on Mainnet (L1). Here, you can send tokens to OMGX. To do things on OMGX (L2), please switch to L2 in your wallet.</span>
-            }
-            {networkLayer === 'L2' && 
-              <span>You are on OMGX (L2). Here, you can trade, send tokens to others on OMGX, and send tokens to L1. To use L1, please switch to L1 in your wallet.</span>
-            }
-            </div>
-          </div>
-        </div>
-      }
+      {isMobile ? (
+        <>
+          <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, my: 2}}>
+            <Tab label={label_L1} />
+            <Tab label={label_L2} />
+          </Tabs>
+          <TabPanel value={activeTab} index={0}>
+            <L1Column />
+          </TabPanel>
+          <TabPanel value={activeTab} index={1}>
+            <L2Column />
+          </TabPanel>
+        </>
+      ) : (
+        <Grid container spacing={2} >
+          <Grid item xs={12} md={6} >
+            <L1Column />
+          </Grid>
 
-      {!balances['oETH']['have'] &&
-        <div className={styles.RabbitBox}>
-          <img className={styles.bunny} src={bunny_sad} alt='Sad Bunny' />
-          <div className={styles.RabbitRight}>
-            <div
-              className={styles.RabbitRightTop}
-            >
-              OMGX Balance
-            </div>
-            <div className={styles.RabbitRightMiddle}>
-                0
-            </div>
-            <div className={styles.RabbitRightBottom}>
-            </div>
-          </div>
-        </div>
-      }
-
-      <div className={styles.balances} style={{marginTop: 30}}>
-
-      <div className={styles.boxWrapper}>
-
-        <div className={styles.location}>
-          <div>L1</div>
-            {networkLayer === 'L1' && <span className={styles.under}>You are here</span>}
-            {networkLayer === 'L2' && <span>&nbsp;</span>}
-          <div>L1</div>
-        </div>
-
-        <div className={[styles.box, networkLayer === 'L2' ? styles.dim : styles.active].join(' ')}>
-
-          <div className={styles.header}>
-            <div className={styles.title}>
-              <span>Balance on Rootchain</span>
-              <span>Ethereum Network</span>
-            </div>
-            {masterConfig === 'local' &&
-              <div
-                onClick={()=>handleDepositETHL1()}
-                className={[styles.transfer, !isSynced ? styles.disabled : ''].join(' ')}
-              >
-                <Send />
-                <span>ETH Test Fountain</span>
-              </div>
-            }
-          </div>
-
-          {rootBalance.map((i, index) => {
-            return (
-              <div key={index} className={styles.row}>
-                <div className={styles.token}>
-                  <span className={styles.symbol}>{i.symbol}</span>
-                </div>
-                <span>{logAmount(i.amount, i.decimals, 4)}</span>
-              </div>
-            );
-          })}
-
-        </div>
-      </div>
-
-      <div className={styles.boxWrapper}>
-        <div className={styles.location}>
-          &nbsp;
-        </div>
-        <div className={styles.boxActions}>
-        {networkLayer === 'L1' &&
-          <div className={styles.buttons}>
-            <Button
-              onClick={() => handleModalClick('depositModal', true)}
-              type='primary'
-              disabled={!isSynced || criticalTransactionLoading}
-              style={{maxWidth: '150px', padding: '8px'}}
-            >
-              FAST ONRAMP<ArrowForward/>
-            </Button>
-          </div>
-        }
-        {networkLayer === 'L2' &&
-          <div className={styles.buttons}>
-            <Button
-              onClick={() => handleModalClick('exitModal', true)}
-              type='primary'
-              disabled={!isSynced || criticalTransactionLoading}
-              style={{maxWidth: '150px', padding: '8px'}}
-            > 
-            <ArrowBack/>FAST EXIT
-            </Button>
-          </div>
-        }
-        {networkLayer === 'L1' &&
-          <div className={styles.buttons}>
-            <Button
-              onClick={() => handleModalClick('depositModal')}
-              type='primary'
-              disabled={!isSynced || criticalTransactionLoading}
-              style={{maxWidth: '150px', padding: '8px'}}
-            >
-              SLOW ONRAMP<ArrowForward/>
-            </Button>
-          </div>
-        }
-        {networkLayer === 'L2' &&
-          <div className={styles.buttons}>
-            <Button
-              onClick={() => handleModalClick('exitModal')}
-              type='primary'
-              disabled={disabled || criticalTransactionLoading}
-              style={{maxWidth: '150px', padding: '8px'}}
-            >
-              <ArrowBack/>SLOW EXIT
-            </Button>
-          </div>
-        }
-        </div>
-      </div>
-      
-      <div className={styles.boxWrapper}>
-        <div className={styles.location}>
-          <div>L2</div>
-            {networkLayer === 'L1' && <span>&nbsp;</span>}
-            {networkLayer === 'L2' && <span className={styles.under}>You are here</span>}
-          <div>L2</div>
-        </div>
-        <div className={[styles.box, networkLayer === 'L1' ? styles.dim : styles.active].join(' ')}>
-          <div className={styles.header}>
-            <div className={styles.title}>
-              <span>Balance on Childchain</span>
-              <span>OMGX</span>
-            </div>
-              <div
-                onClick={()=>handleGetToken()}
-                className={[styles.transfer, networkLayer === 'L1' ? styles.disabled : ''].join(' ')}
-              >
-                <Send />
-                <span>GET JLKN</span>
-              </div>
-              <div
-                onClick={()=>handleModalClick('transferModal')}
-                className={[styles.transfer, networkLayer === 'L1' ? styles.disabled : ''].join(' ')}
-              >
-                <Send />
-                <span>TRANSFER</span>
-              </div>
-          </div>
-          {childBalance.map((i, index) => {
-            return (
-              <div key={index} className={styles.row}>
-                <div className={styles.token}>
-                  <span className={styles.symbol}>{i.symbol}</span>
-                </div>
-                <span>{logAmount(i.amount, i.decimals, 4)}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-
-  </div>
+          <Grid item xs={12} md={6}>
+            <L2Column />
+          </Grid>
+        </Grid>
+      )}
+    </>
   );
 
 }

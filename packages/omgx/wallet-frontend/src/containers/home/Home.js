@@ -17,85 +17,92 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector, batch } from 'react-redux';
 import { selectWalletMethod } from 'selectors/setupSelector';
 import { selectModalState } from 'selectors/uiSelector';
-// import { selectChildchainTransactions } from 'selectors/transactionSelector';
-import { selectLogin } from 'selectors/loginSelector';
 
 import useInterval from 'util/useInterval';
-// import { isEqual } from 'lodash';
 
 import {
-  checkWatcherStatus,
   fetchBalances,
-  fetchTransactions,
+  addTokenList,
+  fetchNFTs,
   fetchExits,
-  fetchDeposits,
-  fetchEthStats,
-  checkPendingDepositStatus,
-  checkPendingExitStatus
-} from 'actions/networkAction';
+} from 'actions/networkAction'
 
 import { checkVersion } from 'actions/serviceAction';
 
-import { openError } from 'actions/uiAction';
+import { closeAlert, closeError } from 'actions/uiAction';
+import { selectAlert, selectError } from 'selectors/uiSelector';
 
 import DepositModal from 'containers/modals/deposit/DepositModal';
 import TransferModal from 'containers/modals/transfer/TransferModal';
 import ExitModal from 'containers/modals/exit/ExitModal';
+
 import LedgerConnect from 'containers/modals/ledger/LedgerConnect';
 import AddTokenModal from 'containers/modals/addtoken/AddTokenModal';
-import ConfirmationModal from 'containers/modals/confirmation/ConfirmationModal';
+
+//Farm
 import FarmDepositModal from 'containers/modals/farm/FarmDepositModal';
 import FarmWithdrawModal from 'containers/modals/farm/FarmWithdrawModal';
 
+//DAO
+import DAO from 'containers/dao/Dao';
+import TransferDaoModal from 'containers/modals/dao/TransferDaoModal'
+import DelegateDaoModal from 'containers/modals/dao/DelegateDaoModal'
+import NewProposalModal from 'containers/modals/dao/NewProposalModal'
+
+import { fetchDaoBalance, fetchDaoVotes, fetchDaoProposals, getProposalThreshold } from 'actions/daoAction'
+
 //Wallet Functions
-import Status from 'containers/status/Status';
-import Account from 'containers/account/Account';
-import Transactions from 'containers/transactions/Transactions';
+import Account from 'containers/account/Account'
+import Transactions from 'containers/transactions/History'
 
 //NFT Example Page
-import NFT from 'containers/nft/Nft';
-import MobileHeader from 'components/mobileheader/MobileHeader';
-import MobileMenu from 'components/mobilemenu/MobileMenu';
+import NFT from 'containers/nft/Nft'
 
-//Varna
-import Login from 'containers/login/Login';
-import Seller from 'containers/seller/Seller';
-import Buyer from 'containers/buyer/Buyer';
+import { useTheme } from '@material-ui/core/styles'
+import { Box, Container, useMediaQuery } from '@material-ui/core'
+import MainMenu from 'components/mainMenu/MainMenu'
+import FarmWrapper from 'containers/farm/FarmWrapper'
 
-// Farm
-import Farm from 'containers/farm/Farm';
+import Alert from 'components/alert/Alert'
 
-import networkService from 'services/networkService';
-
-import logo from 'images/omgx.png';
-
-import * as styles from './Home.module.scss';
-
-const POLL_INTERVAL = 10000; //in milliseconds?
+const POLL_INTERVAL = 5000 //milliseconds
 
 function Home () {
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
+  const errorMessage = useSelector(selectError)
+  const alertMessage = useSelector(selectAlert)
 
   const [ mobileMenuOpen, setMobileMenuOpen ] = useState(false)
-  
-  const [ pageDisplay, setPageDisplay ] = useState("AccountNow");
-  
+
+  const pageDisplay = useSelector(selectModalState('page'))
   const depositModalState = useSelector(selectModalState('depositModal'))
-  const beginner = useSelector(selectModalState('beginner'))
-  const fast = useSelector(selectModalState('fast'))
   const transferModalState = useSelector(selectModalState('transferModal'))
   const exitModalState = useSelector(selectModalState('exitModal'))
+
+  const fast = useSelector(selectModalState('fast'))
+  const token = useSelector(selectModalState('token'))
+
   const addTokenModalState = useSelector(selectModalState('addNewTokenModal'))
   const ledgerConnectModalState = useSelector(selectModalState('ledgerConnectModal'))
-  const confirmationModalState = useSelector(selectModalState('confirmationModal'))
+
   const farmDepositModalState = useSelector(selectModalState('farmDepositModal'))
   const farmWithdrawModalState = useSelector(selectModalState('farmWithdrawModal'))
 
+  // DAO modal
+  const tranferBobaDaoModalState = useSelector(selectModalState('transferDaoModal'))
+  const delegateBobaDaoModalState = useSelector(selectModalState('delegateDaoModal'))
+  const proposalBobaDaoModalState = useSelector(selectModalState('newProposalModal'))
+
   const walletMethod = useSelector(selectWalletMethod())
-  const loggedIn = useSelector(selectLogin());
-  // const transactions = useSelector(selectChildchainTransactions, isEqual);
-  
+  //const transactions = useSelector(selectlayer2Transactions, isEqual);
+
+  const handleErrorClose=()=>dispatch(closeError())
+  const handleAlertClose=()=>dispatch(closeAlert())
+
   useEffect(() => {
     const body = document.getElementsByTagName('body')[0];
     mobileMenuOpen
@@ -105,61 +112,66 @@ function Home () {
 
   // calls only on boot
   useEffect(() => {
-    window.scrollTo(0, 0);
-    dispatch(fetchDeposits());
-    setPageDisplay("AccountNow");
-  }, [ dispatch ]);
+    window.scrollTo(0, 0)
+    //dispatch(fetchDeposits())
+  }, [ dispatch ])
 
   useInterval(() => {
     batch(() => {
-      // infura call
-      dispatch(fetchEthStats());
-      dispatch(checkPendingDepositStatus());
-      dispatch(checkPendingExitStatus());
+      dispatch(fetchExits())
+    })
+  }, POLL_INTERVAL * 2)
 
-      // watcher only calls
-      dispatch(checkWatcherStatus());
-      dispatch(fetchExits());
-      dispatch(fetchTransactions());
-    });
-  }, POLL_INTERVAL * 2);
-
+  //get all account balances
   useInterval(() => {
-    dispatch(fetchBalances());
+    dispatch(fetchBalances())
+    dispatch(addTokenList())
+    dispatch(fetchNFTs())
+
+    // get Dao balance / Votes
+    dispatch(fetchDaoBalance())
+    dispatch(fetchDaoVotes())
+    dispatch(fetchDaoProposals())
+    dispatch(getProposalThreshold())
   }, POLL_INTERVAL);
 
   useEffect(() => {
     checkVersion()
   }, [])
 
-  useEffect(() => {
-    if (!loggedIn) {
-      setPageDisplay("AccountNow");
-    } else {
-      setPageDisplay("VarnaSell");
-    }
-  },[loggedIn]);
-  
-  const handleSetPage = async (page) => {
-    if (page === 'VarnaLogin') {
-      if (!(networkService.L1orL2 === 'L2')) {
-        dispatch(openError('Wrong network! Please switch to L2 network to use Varna.'));
-        return
-      }
-    }
-    setPageDisplay(page);
-  }
-
   return (
-
     <>
-      <DepositModal open={depositModalState} omgOnly={beginner} fast={fast}/>
-      <TransferModal open={transferModalState} />
-      <ExitModal open={exitModalState} fast={fast}/>
-      <AddTokenModal open={addTokenModalState} />
-      <ConfirmationModal open={confirmationModalState} />
-      <FarmDepositModal open={farmDepositModalState} />
+      <DepositModal  open={depositModalState}  token={token} fast={fast} />
+      <TransferModal open={transferModalState} token={token} fast={fast} />
+      <ExitModal     open={exitModalState}     token={token} fast={fast} />
+
+      <AddTokenModal     open={addTokenModalState} />
+      <FarmDepositModal  open={farmDepositModalState} />
       <FarmWithdrawModal open={farmWithdrawModalState} />
+
+      <TransferDaoModal open={tranferBobaDaoModalState} />
+      <DelegateDaoModal open={delegateBobaDaoModalState} />
+      <NewProposalModal open={proposalBobaDaoModalState} />
+
+      <Alert
+        type='error'
+        duration={0}
+        open={!!errorMessage}
+        onClose={handleErrorClose}
+        position={50}
+      >
+        {errorMessage}
+      </Alert>
+
+      <Alert
+        type='success'
+        duration={0}
+        open={!!alertMessage}
+        onClose={handleAlertClose}
+        position={0}
+      >
+        {alertMessage}
+      </Alert>
 
       <LedgerConnect
         open={walletMethod === 'browser'
@@ -168,90 +180,34 @@ function Home () {
         }
       />
 
-      <div className={styles.Home}>
-        <div className={styles.sidebar}>
-          <img className={styles.logo} src={logo} alt='omgx' />
-          <Status />
-        </div>
-        <div className={styles.main}>
-          <MobileHeader
-            mobileMenuOpen={mobileMenuOpen}
-            onHamburgerClick={()=>setMobileMenuOpen(open=>!open)}
-          />
-          <MobileMenu 
-            mobileMenuOpen={mobileMenuOpen}
-          />
+      <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
+        <MainMenu />
+        {/* The Top SubMenu Bar, non-mobile */}
 
-          {/* The Top SubMenu Bar, non-mobile */}
-
-          <div className={styles.secondtab}>
-            <h2
-              className={pageDisplay === "AccountNow" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("AccountNow")}}
-            >  
-              Wallet
-            </h2>
-            <h2
-              className={pageDisplay === "Farm" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("Farm")}}
-            >  
-              Farm
-            </h2>
-            <h2
-              className={pageDisplay === "NFT" ? styles.subtitletextActive : styles.subtitletext}
-              onClick={()=>{handleSetPage("NFT")}}
-            >  
-              NFT
-            </h2>
-            {!loggedIn ?
-              <h2
-                className={pageDisplay === "VarnaLogin" ? styles.subtitletextActive : styles.subtitletext}
-                onClick={()=>{handleSetPage("VarnaLogin")}}
-              >  
-                Login
-              </h2>:
-              <>
-                <h2 
-                  className={pageDisplay === "VarnaBuy" ? styles.subtitletextActive : styles.subtitletext}
-                  onClick={()=>{handleSetPage("VarnaBuy")}}
-                  style={{position: 'relative'}}
-                >  
-                  Buy
-                </h2>
-                <h2
-                  className={pageDisplay === "VarnaSell" ? styles.subtitletextActive : styles.subtitletext}
-                  onClick={()=>{handleSetPage("VarnaSell")}}
-                >  
-                  Sell
-                </h2>
-              </>
-            }
-          </div>
+        <Container maxWidth="lg" sx={{marginLeft: 'unset' , marginRight: 'unset'}}>
           {pageDisplay === "AccountNow" &&
-          <>  
+          <>
             <Account/>
+          </>
+          }
+          {pageDisplay === "History" &&
+          <>
             <Transactions/>
           </>
           }
           {pageDisplay === "NFT" &&
             <NFT/>
           }
-          {pageDisplay === "VarnaLogin" &&
-            <Login/>
-          }
-          {pageDisplay === "VarnaSell" &&
-            <Seller/>
-          }
-          {pageDisplay === "VarnaBuy" &&
-            <Buyer/>
-          }
           {pageDisplay === "Farm" &&
-            <Farm/>
+            <FarmWrapper/>
           }
-        </div>
-      </div>
+          {pageDisplay === "DAO" &&
+            <DAO/>
+          }
+        </Container>
+      </Box>
     </>
   );
 }
 
-export default React.memo(Home);
+export default React.memo(Home)

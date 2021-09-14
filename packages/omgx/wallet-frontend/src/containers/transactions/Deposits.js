@@ -13,45 +13,42 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import moment from 'moment';
-import truncate from 'truncate-middle';
+import React, { useState, useEffect } from 'react'
+import { Grid, Box } from '@material-ui/core'
+import { useSelector } from 'react-redux'
+import moment from 'moment'
 
-import { selectLoading } from 'selectors/loadingSelector';
+import { selectLoading } from 'selectors/loadingSelector'
 
-import Pager from 'components/pager/Pager';
-import Transaction from 'components/transaction/Transaction';
+import Pager from 'components/pager/Pager'
+import Transaction from 'components/transaction/Transaction'
 
-import networkService from 'services/networkService';
+import networkService from 'services/networkService'
 
-import * as styles from './Transactions.module.scss';
+import * as styles from './Transactions.module.scss'
+import * as S from './history.styles';
 
 const PER_PAGE = 10;
 
-function Deposits ({ searchHistory, transactions }) {
+function Deposits({ searchHistory, transactions }) {
 
-  const [ page, setPage ] = useState(1);
+  const [page, setPage] = useState(1);
 
-  // const ethDeposits = useSelector(selectEthDeposits, isEqual);
-  // const erc20Deposits = useSelector(selectErc20Deposits, isEqual);
-  const loading = useSelector(selectLoading([ 'TRANSACTION/GETALL' ]));
+  const loading = useSelector(selectLoading(['TRANSACTION/GETALL']));
 
   useEffect(() => {
     setPage(1);
-  }, [ searchHistory ]);
-
-  // const deposits = orderBy(
-  //   [ ...ethDeposits, ...erc20Deposits ],
-  //   i => i.blockNumber, 'desc'
-  // );
+  }, [searchHistory]);
 
   const _deposits = transactions.filter(i => {
     return i.hash.includes(searchHistory) && (
       i.to !== null && (
-      i.to.toLowerCase() === networkService.L1LPAddress.toLowerCase() ||
-      i.to.toLowerCase() === networkService.L1ETHAddress.toLowerCase()));
-  });
+        i.to.toLowerCase() === networkService.L1LPAddress.toLowerCase() ||
+        i.to.toLowerCase() === networkService.L1_ETH_Address.toLowerCase() ||
+        i.to.toLowerCase() === networkService.L1StandardBridgeAddress.toLowerCase()
+      )
+    )
+  })
 
   const startingIndex = page === 1 ? 0 : ((page - 1) * PER_PAGE);
   const endingIndex = page * PER_PAGE;
@@ -60,11 +57,11 @@ function Deposits ({ searchHistory, transactions }) {
   let totalNumberOfPages = Math.ceil(_deposits.length / PER_PAGE);
 
   //if totalNumberOfPages === 0, set to one so we don't get the strange "page 1 of 0" display
-  if (totalNumberOfPages === 0) totalNumberOfPages = 1;
+  if (totalNumberOfPages === 0) totalNumberOfPages = 1
 
   return (
     <div className={styles.transactionSection}>
-      <div className={styles.transactions}>
+      <S.HistoryContainer>
         <Pager
           currentPage={page}
           isLastPage={paginatedDeposits.length < PER_PAGE}
@@ -72,31 +69,50 @@ function Deposits ({ searchHistory, transactions }) {
           onClickNext={()=>setPage(page + 1)}
           onClickBack={()=>setPage(page - 1)}
         />
-        {!paginatedDeposits.length && !loading && (
-          <div className={styles.disclaimer}>No deposit history.</div>
-        )}
-        {!paginatedDeposits.length && loading && (
-          <div className={styles.disclaimer}>Loading...</div>
-        )}
-        {paginatedDeposits.map((i, index) => {
-          return (
-            <Transaction
-              key={index}
-              link={
-                networkService.chainID === 4 ?
-                  `https://rinkeby.etherscan.io/tx/${i.hash}`:
-                  networkService.chainID === 28 ?
-                  `https://blockexplorer.rinkeby.omgx.network/tx/${i.hash}`:
-                  undefined
-              }
-              title={truncate(i.hash, 6, 4, '...')}
-              midTitle='Deposit'
-              subTitle={moment.unix(i.timeStamp).format('lll')}
-              subStatus={`Block ${i.blockNumber}`}
-            />
-          );
-        })}
-      </div>
+
+        <Grid item xs={12}>
+          <Box>
+            <S.Content>
+              {!paginatedDeposits.length && !loading && (
+                <div className={styles.disclaimer}>Scanning for deposits...</div>
+              )}
+              {!paginatedDeposits.length && loading && (
+                <div className={styles.disclaimer}>Loading deposits...</div>
+              )}
+              {paginatedDeposits.map((i, index) => {
+                const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
+                const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
+
+                let details = null
+
+                if( i.crossDomainMessage && i.crossDomainMessage.l2BlockHash ) {
+                  details = {
+                    blockHash: i.crossDomainMessage.l2BlockHash,
+                    blockNumber: i.crossDomainMessage.l2BlockNumber,
+                    from: i.crossDomainMessage.l2From,
+                    hash: i.crossDomainMessage.l2Hash,
+                    to: i.crossDomainMessage.l2To,
+                  }
+                }
+
+                return (
+                  <Transaction
+                    key={index}
+                    title={`Hash: ${i.hash}`}
+                    time={moment.unix(i.timeStamp).format('lll')}
+                    blockNumber={`Block ${i.blockNumber}`}
+                    chain={`L1->L2 Deposit`}
+                    typeTX={`TX Type: ${metaData}`}
+                    detail={details}
+                    oriChain={chain}
+                    oriHash={i.hash} 
+                  />
+                )
+              })}
+            </S.Content>
+          </Box>
+        </Grid>
+      </S.HistoryContainer>
     </div>
   );
 }

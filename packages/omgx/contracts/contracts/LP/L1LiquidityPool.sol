@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // @unsupported: ovm
-pragma solidity >0.5.0;
+pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "./interfaces/iL2LiquidityPool.sol";
@@ -9,12 +9,13 @@ import "../libraries/OVM_CrossDomainEnabledFast.sol";
 /* External Imports */
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 /**
  * @dev An L1 LiquidityPool implementation
  */
-contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
+contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuardUpgradeable, PausableUpgradeable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -77,13 +78,15 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
     // Info of each user that stakes tokens.
     mapping(address => mapping(address => UserInfo)) public userInfo;
 
-    address L2LiquidityPoolAddress;
-    uint256 public totalFeeRate;
+    address public owner;
+    address public L2LiquidityPoolAddress;
     uint256 public userRewardFeeRate;
     uint256 public ownerRewardFeeRate;
     // Default gas value which can be overridden if more complex logic runs on L2.
-    uint32 public DEFAULT_FINALIZE_DEPOSIT_L2_GAS = 1200000;
-    uint256 constant internal SAFE_GAS_STIPEND = 2300;
+    uint32 public SETTLEMENT_L2_GAS;
+    uint256 public SAFE_GAS_STIPEND;
+    // cdm address
+    address public l1CrossDomainMessenger;
 
     /********************
      *       Events     *
@@ -117,6 +120,15 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
         address tokenAddress
     );
 
+    event ClientPayL1Settlement(
+        address sender,
+        uint256 amount,
+        uint256 userRewardFee,
+        uint256 ownerRewardFee,
+        uint256 totalFee,
+        address tokenAddress
+    );
+
     event WithdrawLiquidity(
         address sender,
         address receiver,
@@ -134,55 +146,115 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
     /********************
      *    Constructor   *
      ********************/
-    /**
-     * @param _l1CrossDomainMessenger L1 Messenger address being used for sending the cross-chain message.
-     * @param _l1CrossDomainMessengerFast L1 Messenger address being used for relaying cross-chain messages quickly.
-     */
-    constructor (
-        address _l1CrossDomainMessenger,
-        address _l1CrossDomainMessengerFast
-    )
-        OVM_CrossDomainEnabledFast(
-            _l1CrossDomainMessenger,
-            _l1CrossDomainMessengerFast
-        )
+
+    constructor()
+        OVM_CrossDomainEnabledFast(address(0), address(0))
     {}
 
     /**********************
      * Function Modifiers *
      **********************/
 
+    modifier onlyOwner() {
+        require(msg.sender == owner || owner == address(0), 'caller is not the owner');
+        _;
+    }
+
+    modifier onlyNotInitialized() {
+        require(address(L2LiquidityPoolAddress) == address(0), "Contract has been initialized");
+        _;
+    }
+
     modifier onlyInitialized() {
         require(address(L2LiquidityPoolAddress) != address(0), "Contract has not yet been initialized");
         _;
     }
 
+
     /********************
      * Public Functions *
      ********************/
 
-
     /**
-     * @dev Initialize this contract.
+     * @dev transfer ownership
      *
-     * @param _userRewardFeeRate fee rate that users get
-     * @param _ownerRewardFeeRate fee rate that contract owner gets
-     * @param _L2LiquidityPoolAddress Address of the corresponding L2 LP deployed to the L2 chain
+     * @param _newOwner new owner of this contract
      */
-    function init(
-        uint256 _userRewardFeeRate,
-        uint256 _ownerRewardFeeRate,
-        address _L2LiquidityPoolAddress
+    function transferOwnership(
+        address _newOwner
     )
         public
         onlyOwner()
     {
-        totalFeeRate = _userRewardFeeRate + _ownerRewardFeeRate;
-        userRewardFeeRate = _userRewardFeeRate;
-        ownerRewardFeeRate = _ownerRewardFeeRate;
-        L2LiquidityPoolAddress = _L2LiquidityPoolAddress;
+        owner = _newOwner;
     }
 
+    /**
+     * @dev Initialize this contract.
+     *
+     * @param _l1CrossDomainMessenger L1 Messenger address being used for sending the cross-chain message.
+     * @param _l1CrossDomainMessengerFast L1 Messenger address being used for relaying cross-chain messages quickly.
+     * @param _L2LiquidityPoolAddress Address of the corresponding L2 LP deployed to the L2 chain
+     */
+    function initialize(
+        address _l1CrossDomainMessenger,
+        address _l1CrossDomainMessengerFast,
+        address _L2LiquidityPoolAddress
+    )
+        public
+        onlyOwner()
+        onlyNotInitialized()
+        initializer()
+    {
+        require(_l1CrossDomainMessenger != address(0) && _l1CrossDomainMessengerFast != address(0) && _L2LiquidityPoolAddress != address(0), "zero address not allowed");
+        senderMessenger = _l1CrossDomainMessenger;
+        relayerMessenger = _l1CrossDomainMessengerFast;
+        L2LiquidityPoolAddress = _L2LiquidityPoolAddress;
+        owner = msg.sender;
+        configureFee(35, 15);
+        configureGas(1400000, 2300);
+
+        __Context_init_unchained();
+        __Pausable_init_unchained();
+        __ReentrancyGuard_init_unchained();
+
+    }
+
+    /**
+     * @dev Configure fee of this contract.
+     *
+     * @param _userRewardFeeRate fee rate that users get
+     * @param _ownerRewardFeeRate fee rate that contract owner gets
+     */
+    function configureFee(
+        uint256 _userRewardFeeRate,
+        uint256 _ownerRewardFeeRate
+    )
+        public
+        onlyOwner()
+        onlyInitialized()
+    {
+        userRewardFeeRate = _userRewardFeeRate;
+        ownerRewardFeeRate = _ownerRewardFeeRate;
+    }
+
+    /**
+     * @dev Configure gas.
+     *
+     * @param _l2GasFee default finalized deposit L2 Gas
+     * @param _safeGas safe gas stipened
+     */
+    function configureGas(
+        uint32 _l2GasFee,
+        uint256 _safeGas
+    )
+        public
+        onlyOwner()
+        onlyInitialized()
+    {
+        SETTLEMENT_L2_GAS = _l2GasFee;
+        SAFE_GAS_STIPEND = _safeGas;
+    }
 
     /***
      * @dev Add the new token pair to the pool
@@ -192,13 +264,14 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
      * @param _l2TokenAddress
      *
      */
-    function registerPool (
+    function registerPool(
         address _l1TokenAddress,
         address _l2TokenAddress
     )
         public
         onlyOwner()
     {
+        require(_l1TokenAddress != _l2TokenAddress, "l1 and l2 token addresses cannot be same");
         // use with caution, can register only once
         PoolInfo storage pool = poolInfo[_l1TokenAddress];
         // l2 token address equal to zero, then pair is not registered.
@@ -214,21 +287,6 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
                 accOwnerReward: 0,
                 startTime: block.timestamp
             });
-    }
-
-    /**
-     * @dev Overridable getter for the L2 gas limit, in the case it may be
-     * dynamic, and the above public constant does not suffice.
-     *
-     */
-    function getFinalizeDepositL2Gas()
-        internal
-        view
-        returns(
-            uint32
-        )
-    {
-        return DEFAULT_FINALIZE_DEPOSIT_L2_GAS;
     }
 
     /**
@@ -263,6 +321,8 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
     )
         external
         payable
+        nonReentrant
+        whenNotPaused
     {
         // check whether user sends ETH or ERC20
         if (msg.value != 0) {
@@ -317,6 +377,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
     )
         external
         payable
+        whenNotPaused
     {
         // check whether user sends ETH or ERC20
         if (msg.value != 0) {
@@ -345,7 +406,8 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
         // Send calldata into L1
         sendCrossDomainMessage(
             address(L2LiquidityPoolAddress),
-            getFinalizeDepositL2Gas(),
+            // extra gas for complex l2 logic
+            SETTLEMENT_L2_GAS,
             data
         );
 
@@ -368,6 +430,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
         address payable _to
     )
         external
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
         UserInfo storage user = userInfo[_tokenAddress][msg.sender];
@@ -423,14 +486,14 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
         require(pool.l2TokenAddress != address(0), "Token Address Not Register");
         require(pool.accOwnerReward >= _amount, "Owner Reward Withdraw Error");
 
+        pool.accOwnerReward = pool.accOwnerReward.sub(_amount);
+
         if (_tokenAddress != address(0)) {
             IERC20(_tokenAddress).safeTransfer(_to, _amount);
         } else {
             (bool sent,) = _to.call{gas: SAFE_GAS_STIPEND, value: _amount}("");
             require(sent, "Failed to send Ether");
         }
-
-        pool.accOwnerReward = pool.accOwnerReward.sub(_amount);
 
         emit OwnerRecoverFee(
             msg.sender,
@@ -452,7 +515,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
         address _to
     )
         external
-        onlyOwner()
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
         UserInfo storage user = userInfo[_tokenAddress][msg.sender];
@@ -483,12 +546,27 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
         );
     }
 
+    /**
+     * Pause contract
+     */
+    function pause() external onlyOwner() {
+        _pause();
+    }
+
+    /**
+     * UnPause contract
+     */
+    function unpause() external onlyOwner() {
+        _unpause();
+    }
+
     /*************************
      * Cross-chain Functions *
      *************************/
 
     /**
      * Move funds from L2 to L1, and pay out from the right liquidity pool
+     * part of the contract pause, if only this method needs pausing use pause on CDM_Fast
      * @param _to receiver to get the funds
      * @param _amount amount to to be transferred.
      * @param _tokenAddress L1 token address
@@ -500,6 +578,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
     )
         external
         onlyFromCrossDomainAccount(address(L2LiquidityPoolAddress))
+        whenNotPaused
     {
         bool replyNeeded = false;
 
@@ -540,15 +619,15 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
          if (replyNeeded) {
              // send cross domain message
              bytes memory data = abi.encodeWithSelector(
-             iL2LiquidityPool.clientPayL2.selector,
+             iL2LiquidityPool.clientPayL2Settlement.selector,
              _to,
              _amount,
-             poolInfo[_tokenAddress].l2TokenAddress
+             pool.l2TokenAddress
              );
 
              sendCrossDomainMessage(
                  address(L2LiquidityPoolAddress),
-                 getFinalizeDepositL2Gas(),
+                 SETTLEMENT_L2_GAS,
                  data
              );
          } else {
@@ -561,5 +640,50 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, Ownable {
              _tokenAddress
              );
          }
+    }
+
+    /**
+     * Settlement pay when there's not enough funds on the other side
+     * part of the contract pause, if only this method needs pausing use pause on CDM_Fast
+     * @param _to receiver to get the funds
+     * @param _amount amount to to be transferred.
+     * @param _tokenAddress L1 token address
+     */
+    function clientPayL1Settlement(
+        address payable _to,
+        uint256 _amount,
+        address _tokenAddress
+    )
+        external
+        onlyFromCrossDomainAccount(address(L2LiquidityPoolAddress))
+        whenNotPaused
+    {
+        PoolInfo storage pool = poolInfo[_tokenAddress];
+        uint256 userRewardFee = (_amount.mul(userRewardFeeRate)).div(1000);
+        uint256 ownerRewardFee = (_amount.mul(ownerRewardFeeRate)).div(1000);
+        uint256 totalFee = userRewardFee.add(ownerRewardFee);
+        uint256 receivedAmount = _amount.sub(totalFee);
+
+        pool.accUserReward = pool.accUserReward.add(userRewardFee);
+        pool.accOwnerReward = pool.accOwnerReward.add(ownerRewardFee);
+
+        if (_tokenAddress != address(0)) {
+            IERC20(_tokenAddress).safeTransfer(_to, receivedAmount);
+        } else {
+            //this is ETH
+            // balances[address(0)] = balances[address(0)].sub(_amount);
+            //_to.transfer(_amount); UNSAFE
+            (bool sent,) = _to.call{gas: SAFE_GAS_STIPEND, value: receivedAmount}("");
+            require(sent, "Failed to send Ether");
+        }
+
+        emit ClientPayL1Settlement(
+        _to,
+        receivedAmount,
+        userRewardFee,
+        ownerRewardFee,
+        totalFee,
+        _tokenAddress
+        );
     }
 }
