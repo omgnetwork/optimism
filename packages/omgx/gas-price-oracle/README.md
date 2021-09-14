@@ -51,7 +51,7 @@ The `L2GasPrice` changes gradually to reflect our service cost, primarirly, the 
 The service fetches the L1 ETH balances of the `sequencer`, `proposer`, `relayer` and `fast relayer` in each polling interval. Based on the ETH balances, we calculate the costs of maintaining the Layer 2.
 
 * `L1ETHBalance`: The ETH balances of all accounts
-* `L1ETHCostFee`: The ETHwe pay to maintain the Layer 2, starting from the (most recent) start time of the gas oracle service
+* `L1ETHCostFee`: The ETH we pay to maintain the Layer 2, starting from the (most recent) start time of the gas oracle service
 
 The service also fetches the L2 gas fees collected by us based on `gasUsage * gasPrice` and the L2 block numbers in each polling interval. We also calculate the average gas usage per block. Together, this allows us to estimate the gas price.
 
