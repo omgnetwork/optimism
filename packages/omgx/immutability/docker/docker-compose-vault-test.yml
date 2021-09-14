@@ -80,10 +80,8 @@ services:
     environment:
       VAULT_ADDR: http://127.0.0.1:8900
       VAULT_CACERT: /vault/config/ca.crt
-      RUN_TEST: "true"
-      TEST: "true"
-      # RUN_TEST: "false"
-      # TEST: "false"
+      RUN_TEST: "${RUN_TEST:-false}"
+      TEST: "${TEST:-false}"
       URL: http://deployer:8081/addresses.json
     volumes:
       - "/tmp/vault_auth:/vault/config:rw"

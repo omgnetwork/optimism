@@ -24,7 +24,7 @@ ACCOUNT1=$(vault write -f -field=address immutability-eth-plugin/wallets/$WALLET
 
 tee append-sequencer-batch.hcl <<EOF
 path "immutability-eth-plugin/wallets/$WALLET_NAME/accounts/$ACCOUNT0/ovm/appendSequencerBatch" {
-    capabilities = ["create"]
+    capabilities = ["create", "update"]
 }
 EOF
 
@@ -32,12 +32,12 @@ vault policy write append-sequencer-batch append-sequencer-batch.hcl
 
 tee append-state-batch-proposer.hcl <<EOF
 path "immutability-eth-plugin/wallets/$WALLET_NAME_2/accounts/$ACCOUNT1/ovm/appendStateBatch" {
-    capabilities = ["create"]
+    capabilities = ["create", "update"]
 }
 EOF
 
 vault policy write append-state-batch-proposer append-state-batch-proposer.hcl
-
+vault policy list
 node index.js $ACCOUNT0
 node index.js $ACCOUNT1
 echo "Creating tokens helper file"
@@ -50,3 +50,5 @@ echo "export SEQUENCER_TOKEN=$SEQUENCER_TOKEN" >> $DIR/tokens_and_accounts.sh
 echo "export SEQUENCER_ADDRESS=$ACCOUNT0" >> $DIR/tokens_and_accounts.sh
 echo "export PROPOSER_ADDRESS=$ACCOUNT1" >> $DIR/tokens_and_accounts.sh
 cat $DIR/tokens_and_accounts.sh
+
+

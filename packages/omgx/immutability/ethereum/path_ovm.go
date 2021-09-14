@@ -345,7 +345,7 @@ func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *lo
 		return nil, err
 	}
 
-	json := `[{
+	json_abi := `[{
       "inputs": [],
       "name": "appendSequencerBatch",
       "outputs": [],
@@ -353,7 +353,7 @@ func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *lo
       "type": "function"
     }]`
 
-	abi, _ := abi.JSON(strings.NewReader(json))
+	abi, _ := abi.JSON(strings.NewReader(json_abi))
 	packed, _ := abi.Pack("appendSequencerBatch")
 
 	tx, err := ctcSession.RawAppendSequencerBatch(append(packed, common.FromHex(encodedData)...))
@@ -363,7 +363,6 @@ func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *lo
 
 	var signedTxBuff bytes.Buffer
 	tx.EncodeRLP(&signedTxBuff)
-
 	return &logical.Response{
 		Data: map[string]interface{}{
 			"contract":           contractAddress.Hex(),

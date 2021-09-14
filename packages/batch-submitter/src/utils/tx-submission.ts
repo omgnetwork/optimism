@@ -6,7 +6,7 @@ import {
 import * as ynatm from '@eth-optimism/ynatm'
 import { BatchSigner } from '../batch-submitter/batch-submitter'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
-import { submitToVault } from './vault'
+import { submitToVault, VaultTransactionResponse, VaultPopulatedTransaction } from './vault'
 export interface ResubmissionConfig {
   resubmissionTimeout: number
   minGasPriceInGwei: number
@@ -26,17 +26,24 @@ export interface AppendStateBatch {
   offsetStartsAtIndex: number
   nonce: number
   type: 'AppendStateBatch'
+  address: string
 }
 
 export interface AppendSequencerBatch {
   appendSequencerBatch: Function
   batchParams: any
   type: 'AppendSequencerBatch'
+  address: string
+  nonce: number
 }
 
 export interface TxSubmissionHooks {
-  beforeSendTransaction: (tx: PopulatedTransaction) => void
-  onTransactionResponse: (txResponse: TransactionResponse) => void
+  beforeSendTransaction: (
+    tx: PopulatedTransaction | VaultPopulatedTransaction
+  ) => void
+  onTransactionResponse: (
+    txResponse: TransactionResponse | VaultTransactionResponse
+  ) => void
 }
 
 const getGasPriceInGwei = async (
@@ -69,7 +76,7 @@ export const submitTransactionWithYNATM = async (
           nonce: call.nonce,
         })
       } else if (call.type === 'AppendSequencerBatch') {
-        tx = await call.appendSequencerBatch(call.batchParams)
+        tx = await call.appendSequencerBatch(call.batchParams, call.nonce)
       }
 
       const fullTx = {
@@ -82,13 +89,7 @@ export const submitTransactionWithYNATM = async (
       hooks.onTransactionResponse(txResponse)
       return provider.waitForTransaction(txResponse.hash, numConfirmations)
     } else {
-      // console.log(call)
-      // console.log(batchSigner)
-      // console.log(provider)
-      // console.log(config)
-      // console.log(numConfirmations)
-      // console.log(hooks)
-      submitToVault(call, batchSigner, hooks, gasPrice)
+      return submitToVault(call, batchSigner, hooks, gasPrice, provider)
     }
   }
   const minGasPrice = await getGasPriceInGwei(provider)

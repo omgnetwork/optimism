@@ -61,7 +61,7 @@ jobs:
       run: |
         mkdir -p $DATA_DIR
         sudo chown -R 100:1000 $DATA_DIR && sudo chmod -R 777 $DATA_DIR
-        docker-compose -f docker-compose.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml up -d --build builder l1_chain deployer vault
+        RUN_TEST=true TEST=true docker-compose -f docker-compose.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml up -d --build builder l1_chain deployer vault
 
     - name: Building logs
       working-directory: ./ops
@@ -79,6 +79,28 @@ jobs:
         done
         echo "Vault has executed tests"
         docker-compose -f docker-compose.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml logs
+
     - name: Test validation
       working-directory: ./ops
       run: exit $(docker-compose -f docker-compose.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml logs | grep -c "DID NOT PASS THE REQUIRED TEST")
+
+    - name: Bring the stack up
+      working-directory: ./ops
+      run: |
+        docker-compose -f docker-compose.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml down
+        rm -rf vault/
+        docker-compose -f docker-compose.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml up -d
+
+    - name: Wait for the Sequencer node
+      working-directory: ./ops
+      run: ./scripts/wait-for-sequencer.sh
+
+    - name: Start background logging
+      working-directory: ./ops
+      run: docker-compose -f docker-compose.yml logs --follow &
+
+    - name: Run the integration tests
+      working-directory: ./ops
+      run: docker-compose run integration_tests
+
+

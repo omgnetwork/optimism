@@ -193,6 +193,7 @@ export class StateBatchSubmitter extends BatchSubmitter {
           batch: batchArg,
           offsetStartsAtIndex: offsetStartsAtIndexArg,
           nonce,
+          address: this.chainContract.address,
           type: 'AppendStateBatch',
         }
       }

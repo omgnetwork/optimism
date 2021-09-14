@@ -26,6 +26,7 @@ import {
   AppendQueueBatch,
   AppendSequencerBatch,
 } from '../utils'
+import { getTransactionCount, getBatchSignerAddress } from './provider-helper'
 
 export interface AutoFixBatchOptions {
   fixDoublePlayedDeposits: boolean
@@ -243,8 +244,11 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       calldata: batchParams,
       l1tipHeight,
     })
-
-    return this.submitAppendSequencerBatch(batchParams)
+    const nonce = await getTransactionCount(
+      this.l1Provider,
+      await getBatchSignerAddress(this.batchSigner)
+    )
+    return this.submitAppendSequencerBatch(batchParams, nonce)
   }
 
   /*********************
@@ -276,7 +280,8 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
   }
 
   private async submitAppendSequencerBatch(
-    batchParams: AppendSequencerBatchParams
+    batchParams: AppendSequencerBatchParams,
+    nonce: number
   ): Promise<TransactionReceipt> {
     const appendSequencerBatch = (
       appendSequencerBatchArg: Function,
@@ -286,6 +291,8 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
         appendSequencerBatch: appendSequencerBatchArg,
         batchParams: batchParamsArg,
         type: 'AppendSequencerBatch',
+        address: this.chainContract.address,
+        nonce,
       }
     }
 

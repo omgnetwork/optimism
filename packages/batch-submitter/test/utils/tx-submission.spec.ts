@@ -78,7 +78,7 @@ describe('submitTransactionWithYNATM', async () => {
       gasRetryIncrement: 1,
     }
     await submitTransactionWithYNATM(
-      appendSequencerBatch(mockAppendSequncerBatchFun, data),
+      appendSequencerBatch(mockAppendSequncerBatchFun, data, 0),
       createBatchSigner(signer),
       provider,
       config,
@@ -96,7 +96,6 @@ describe('submitTransactionWithYNATM', async () => {
     // than our resubmission timeout
     const resubmissionTimeout = 100
     const txReceiptDelay = resubmissionTimeout * 3
-    const numConfirmations = 3
     const data = 'hello world!'
     let lastGasPrice = BigNumber.from(0)
     // Create a transaction which has a gas price that we will watch increment
@@ -136,7 +135,7 @@ describe('submitTransactionWithYNATM', async () => {
       gasRetryIncrement: 1,
     }
     await submitTransactionWithYNATM(
-      appendSequencerBatch(mockAppendSequncerBatchFun, data),
+      appendSequencerBatch(mockAppendSequncerBatchFun, data, 0),
       createBatchSigner(signer),
       l1Provider,
       config,
@@ -164,11 +163,14 @@ const mockAppendSequncerBatchFun = async (
 
 const appendSequencerBatch = (
   appendSequencerBatchArg: Function,
-  batchParamsArg: any
+  batchParamsArg: any,
+  nonce: number
 ): AppendSequencerBatch => {
   return {
     appendSequencerBatch: appendSequencerBatchArg,
     batchParams: batchParamsArg,
     type: 'AppendSequencerBatch',
+    nonce,
+    address: undefined,
   }
 }
