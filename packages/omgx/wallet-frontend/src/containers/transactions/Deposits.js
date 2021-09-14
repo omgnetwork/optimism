@@ -26,7 +26,7 @@ import Transaction from 'components/transaction/Transaction'
 import networkService from 'services/networkService'
 
 import * as styles from './Transactions.module.scss'
-import * as S from './history.styles';
+import * as S from './History.styles';
 
 const PER_PAGE = 10;
 
@@ -105,7 +105,7 @@ function Deposits({ searchHistory, transactions }) {
                     typeTX={`TX Type: ${metaData}`}
                     detail={details}
                     oriChain={chain}
-                    oriHash={i.hash} 
+                    oriHash={i.hash}
                   />
                 )
               })}
