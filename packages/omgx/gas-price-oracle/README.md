@@ -34,30 +34,32 @@ The gas fee of L2 is
 gasFee = gasPrice * gasLimit
 ```
 
-The gas price is **0.015 GWei**. **DON'T UPDATE IT!**
+**GAS PRICE** The gas price is fixed and is equal to **0.015 GWei**. **DON'T CHANGE IT!** Notably, the way fees are calculated on L2 differ from what you might be used to on L1, where the gas price can be adjusted e.g. to ensure faster mining. Since there is no mining on L2, the gas price is fixed. 
 
-Users can use the maximum gas limit, but it costs more than you actually have to pay. The estimated gas limit is based on `rollup_gasPrices`, `rollup_gasPrices` has `l1GasPrice` and `l2GasPrce`. 
+**GAS LIMIT** On L2, we vary the gas limit to accomodate the ever-changing costs of running the L2. This can be confusing, since on L1, the gas limits are constants that depend only on the _type_ of transaction - e.g. on L1, a standard ETH transfer requires a gas limit of 21,000 units of gas. 
+
+**GAS LIMIT SETTINGS** You _could_ use the maximum gas limit, but that would incur wasteful spending. We provide an oracle to help you pick a smaller, more cost effective setting. The estimated gas limit is based on `rollup_gasPrices`, which is composed of `L1GasPrice` and `L2GasPrice` based on the following expression: 
 
 ```
-estimatedGasLimit = calculateL1GasLimit(data) * L1GasPrice + L2GasPrice * L2EstimateExecutionGasLimit
+estimatedGasLimit = calculateL1GasLimit(data) * L1GasPrice + L2GasPrice * L2EstimatedExecutionGasLimit
 ```
 
-We update `l2GasPrice` based on our service cost.
+The `L2GasPrice` changes gradually to reflect our service cost, primarirly, the cost of writing state roots into L1, and the significant cost of relaying messages from L1 to L2 (e.g. deposits) and back from L2 to L1 (e.g. exits). _Unlike other L2's, we include the cost of relaying messages in our gas limits_, so you do not have to pay two different fees or have to worry about relaying your messages. 
 
 ## Algorithm
 
-The service fetches the L1 ETH balances of `sequencer`, `proposer`, `relayer` and `fast relayer` in each polling interval. Based on the ETH balances, we can calculate the costs of maintaining the Layer 2.
+The service fetches the L1 ETH balances of the `sequencer`, `proposer`, `relayer` and `fast relayer` in each polling interval. Based on the ETH balances, we calculate the costs of maintaining the Layer 2.
 
 * `L1ETHBalance`: The ETH balances of all accounts
-* `L1ETHCostFee`: The ETH fees that we pay to maintain the Layer 2 since the gas oracle service starts
+* `L1ETHCostFee`: The ETHwe pay to maintain the Layer 2, starting from the (most recent) start time of the gas oracle service
 
-The service also fetches the L2 gas fees collected by us based on the `gasUsage * gasPrice` and increased L2 block numbers in each polling interval. We also calculate the average gas usage per block, so we can estimate the gas price.
+The service also fetches the L2 gas fees collected by us based on `gasUsage * gasPrice` and the L2 block numbers in each polling interval. We also calculate the average gas usage per block. Together, this allows us to estimate the gas price.
 
-* `L2ETHCollectFee`: The ETH fees that we collect from the Layer 2 transactions.
+* `L2ETHCollectFee`: The ETH fees that we collected from the Layer 2 transactions.
 * `avgL2GasLimitPerBlock` : The average gas limit per block in each polling interval
 * `numberOfBlocksInterval`: The increased number of blocks in each pooling interval
 
-The estimated gas usages in the next interval are
+The estimated gas usages in the next interval are therefore
 
 ```
 estimatedGasUsage = avgL2GasLimitPerBlock * numberOfBlocksInterval
@@ -69,14 +71,16 @@ The estimated L2 gas price that we should charge in the next interval is
 estimatedL2GasPrice = (L1ETHCostFee - L2ETHCollectFee) / estimatedGasUsage
 ```
 
+## Special Cases
+
 When the estimated L2 gas price is lower than the `GAS_PRICE_ORACLE_FLOOR_PRICE`, we set the gas price as the `GAS_PRICE_ORACLE_FLOOR_PRICE`.
 
-When the estimated L2 gas price is larger than the `GAS_PRICE_ORACLE_ROOF_PRICE`, we set the gas price as the `GAS_PRICE_ORACLE_ROOF_PRICE`.
+When the estimated L2 gas price is larger than the `GAS_PRICE_ORACLE_ROOF_PRICE`, we set the gas price as the `GAS_PRICE_ORACLE_ROOF_PRICE`. We do this to cap your cost.
 
-When the new estimated L2 gas price is not in the range of `(1 + GAS_PRICE_ORACLE_MIN_PERCENT_CHANGE) * latestGasPriceInContract` and `(1 - GAS_PRICE_ORACLE_MIN_PERCENT_CHANGE) * latestGasPriceInContract`, we update the gas price.
+If the newly estimated L2 gas price falls out of a tolerance band of `(1 + GAS_PRICE_ORACLE_MIN_PERCENT_CHANGE) * latestGasPriceInContract` and `(1 - GAS_PRICE_ORACLE_MIN_PERCENT_CHANGE) * latestGasPriceInContract`, we update the gas price.
 
-## Problem
+## Considerations
 
-1. `numberOfBlocksInterval` can affect the gas price significantly. The possible solution is to increase the `POLLING_INTERVAL` to 30 mins.
-2. When the service starts, the gas price will be restored to the `GAS_PRICE_ORACLE_FLOOR_PRICE`.
-3. The `GAS_PRICE_ORACLE_FLOOR_PRICE` and `GAS_PRICE_ORACLE_ROOF_PRICE` are not easy to be determined in the test environment.
+1. The choice of `numberOfBlocksInterval` can affect the gas price significantly. We have tired to find a balance between rapidly changing gas prices - which would lead to many failed transactions - and a fixed gas price, which would be hard to sustain in the face of ETH spikes.
+2. When the service starts, the gas price always starts at the `GAS_PRICE_ORACLE_FLOOR_PRICE`.
+3. The `GAS_PRICE_ORACLE_FLOOR_PRICE` and `GAS_PRICE_ORACLE_ROOF_PRICE` are not easily determined in test environments.
