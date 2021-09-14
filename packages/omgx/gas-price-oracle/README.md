@@ -39,7 +39,7 @@ The gas price is **0.015 GWei**. **DON'T UPDATE IT!**
 Users can use the maximum gas limit, but it costs more than you actually have to pay. The estimated gas limit is based on `rollup_gasPrices`, `rollup_gasPrices` has `l1GasPrice` and `l2GasPrce`. 
 
 ```
-estimatedGasLimit = calculateL1GasLimit(data) * L1GasFee + L2GasPrice * L2estimateExecutionGas
+estimatedGasLimit = calculateL1GasLimit(data) * L1GasPrice + L2GasPrice * L2EstimateExecutionGasLimit
 ```
 
 We update `l2GasPrice` based on our service cost.
