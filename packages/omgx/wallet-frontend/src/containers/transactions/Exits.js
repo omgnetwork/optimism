@@ -20,7 +20,6 @@ import { useSelector } from 'react-redux'
 
 import { selectLoading } from 'selectors/loadingSelector'
 
-import ProcessExitsModal from 'containers/modals/processexit/ProcessExitsModal'
 import Transaction from 'components/transaction/Transaction'
 import Pager from 'components/pager/Pager'
 
@@ -28,14 +27,14 @@ import networkService from 'services/networkService'
 
 import * as styles from './Transactions.module.scss'
 
-import * as S from './history.styles';
+import * as S from './History.styles';
 
 const PER_PAGE = 8
 
 function Exits({ searchHistory, transactions, chainLink }) {
 
   const [page, setPage] = useState(1);
-  const [processExitModal, setProcessExitModal] = useState(false);
+
 
   const loading = useSelector(selectLoading(['EXIT/GETALL']));
 
@@ -54,7 +53,7 @@ function Exits({ searchHistory, transactions, chainLink }) {
     const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
     const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
 
-    let tradExit = false
+
     let isExitable = false
     let details = null
 
@@ -64,12 +63,12 @@ function Exits({ searchHistory, transactions, chainLink }) {
 
     //are we dealing with a traditional exit?
     if (to === networkService.L2StandardBridgeAddress.toLowerCase()) {
-      tradExit = true
+
 
       isExitable = moment().isAfter(moment.unix(i.crossDomainMessage.crossDomainMessageEstimateFinalizedTime))
 
       if (isExitable) {
-        timeLabel = 'Ready to exit - initiated:' + moment.unix(i.timeStamp).format('lll')
+        timeLabel = 'Funds were exited to L1 after ' + moment.unix(i.crossDomainMessage.crossDomainMessageEstimateFinalizedTime).format('lll')
       } else {
         const secondsToGo = i.crossDomainMessage.crossDomainMessageEstimateFinalizedTime - Math.round(Date.now() / 1000)
         const daysToGo = Math.floor(secondsToGo / (3600 * 24))
@@ -97,7 +96,7 @@ function Exits({ searchHistory, transactions, chainLink }) {
         title={`${chain} Hash: ${i.hash}`}
         blockNumber={`Block ${i.blockNumber}`}
         time={timeLabel}
-        button={isExitable && tradExit ? { onClick: () => setProcessExitModal(i), text: 'Process Exit' } : undefined}
+        button={undefined}
         typeTX={`TX Type: ${metaData}`}
         detail={details}
         oriChain={chain}
@@ -117,11 +116,6 @@ function Exits({ searchHistory, transactions, chainLink }) {
 
   return (
     <>
-      <ProcessExitsModal
-        exitData={processExitModal}
-        open={!!processExitModal}
-        toggle={() => setProcessExitModal(false)}
-      />
       <div className={styles.section}>
         <div className={styles.transactionSection}>
           <S.HistoryContainer>
@@ -153,4 +147,4 @@ function Exits({ searchHistory, transactions, chainLink }) {
   );
 }
 
-export default React.memo(Exits);
+export default React.memo(Exits)

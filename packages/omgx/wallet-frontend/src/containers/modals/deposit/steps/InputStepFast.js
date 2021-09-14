@@ -44,6 +44,8 @@ function InputStepFast({ handleClose, token }) {
   const approvalLoading = useSelector(selectLoading(['APPROVE/CREATE']))
   const lookupPrice = useSelector(selectLookupPrice)
   const signatureStatus = useSelector(selectSignatureStatus_depositLP)
+  const maxValue = logAmount(token.balance, token.decimals)
+  const valueIsValid = value > 0 && value <= maxValue
 
   function setAmount(value) {
     if (
@@ -155,7 +157,7 @@ function InputStepFast({ handleClose, token }) {
   } else if (approvalLoading) {
     buttonLabel_2 = "Approving..."
   }
-  
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -174,18 +176,18 @@ function InputStepFast({ handleClose, token }) {
         type="number"
         onChange={(i)=>{setAmount(i.target.value)}}
         unit={token.symbol}
-        maxValue={logAmount(token.balance, token.decimals)}
+        maxValue={maxValue}
         variant="standard"
         newStyle
       />
 
-      {token && token.symbol === 'ETH' && (
+      {valueIsValid && token && token.symbol === 'ETH' && (
         <Typography variant="body2" sx={{mt: 2}}>
           {value && `You will receive ${receivableAmount(value)} oETH ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
         </Typography>
       )}
 
-      {token && token.symbol !== 'ETH' && (
+      {valueIsValid && token && token.symbol !== 'ETH' && (
         <Typography variant="body2" sx={{mt: 2}}>
           {value && `You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
         </Typography>

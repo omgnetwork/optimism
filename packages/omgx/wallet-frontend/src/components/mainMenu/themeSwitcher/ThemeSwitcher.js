@@ -2,7 +2,6 @@ import React from 'react';
 import * as S from './ThemeSwitcher.styles.js'
 import DarkIcon from 'components/icons/DarkIcon.js';
 import LightIcon from 'components/icons/LightIcon.js';
-import { ReactComponent as ShadowMenu } from './../../../images/backgrounds/shadow-menu.svg';
 import { setTheme } from 'actions/uiAction.js';
 import { useSelector } from 'react-redux';
 import { selectModalState } from 'selectors/uiSelector.js';
@@ -25,9 +24,6 @@ function ThemeSwitcher () {
       }} selected={theme === 'light'}>
         <LightIcon />
       </S.Button>
-      <S.Shadow>
-        <ShadowMenu height={250}/>
-      </S.Shadow>
     </S.ThemeSwitcherTag>
   );
 }

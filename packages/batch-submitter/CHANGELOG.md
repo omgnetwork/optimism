@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.3.13
+
+### Patch Changes
+
+- 7482d09c: Fixes a bug in the batch submitted that would cause it to submit transactions with increasing nonces
+
+## 0.3.12
+
+### Patch Changes
+
+- 21b17edd: Added coverage for packages
+- 78ca518b: Add loglines for eip1559 related fields before sending a transaction
+- Updated dependencies [888dafca]
+- Updated dependencies [eb0854e7]
+- Updated dependencies [21b17edd]
+- Updated dependencies [dfe3598f]
+  - @eth-optimism/contracts@0.4.11
+  - @eth-optimism/core-utils@0.5.5
+
 ## 0.3.11
 
 ### Patch Changes

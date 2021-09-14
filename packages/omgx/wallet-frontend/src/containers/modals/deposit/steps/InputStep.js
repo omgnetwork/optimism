@@ -74,8 +74,9 @@ function InputStep({ handleClose, token }) {
       setGasPrice={setGasPrice}
     />
   )
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   useEffect(() => {
     if (signatureStatus && depositLoading) {

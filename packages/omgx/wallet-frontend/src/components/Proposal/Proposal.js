@@ -14,22 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React, { useState, useEffect } from 'react';
+import {Typography, useTheme} from '@material-ui/core';
 
 import { useDispatch } from 'react-redux';
 
 import { openAlert, openError } from 'actions/uiAction';
+import { castProposalVote } from 'actions/daoAction';
 
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Button from 'components/button/Button';
 
 import * as styles from './Proposal.module.scss';
 
-import { castProposalVote } from 'actions/daoAction';
+import { backgroundLight400 } from 'index.scss';
 
 function Proposal({
     proposal,
 }) {
+
     const dispatch = useDispatch()
+    const theme = useTheme()
 
     const [dropDownBox, setDropDownBox] = useState(false)
     const [dropDownBoxInit, setDropDownBoxInit] = useState(true)
@@ -57,63 +60,81 @@ function Proposal({
         }
     }
 
+    const FormatDescription = ({description}) =>{
+        if(!!description.includes('@@')) {
+            let descList = description.split('@@')
+            if(descList[1] !== '') {
+                //should validate http link
+                return  <>{descList[0]}&nbsp;&nbsp;<a className={styles.href} target="_blank" rel="noopener noreferrer" href={descList[1]}>MORE DETAILS</a>  </>
+            } else {
+                return  <>{descList[0]}</>
+            }
+        } 
+        return <>{description}</>;
+    }
+
     return (<div
         className={styles.proposalCard}
 
         style={{
-            background: 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.1) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)',
+            background: `${theme.palette.mode === 'light' ? backgroundLight400 : 'linear-gradient(132.17deg, rgba(255, 255, 255, 0.1) 0.24%, rgba(255, 255, 255, 0.03) 94.26%)'}`,
             borderRadius: '12px'
         }}>
 
-        {proposal.state === 'Active' &&
-            <div
-                onClick={() => {
-                    setDropDownBox(!dropDownBox);
-                    setDropDownBoxInit(false);
-                }}
-            >
-                <div className={styles.proposalHeader}>
-                    <div className={styles.title}>
-                        <p>Proposal #{proposal.id}</p>
-                        <p className={styles.muted}>Title: {proposal.description}</p>
-                        <p className={styles.muted}>Status: {proposal.state}</p>
-                        <p className={styles.muted}>Start L1 Block: {proposal.startBlock} &nbsp; &nbsp; End L1 Block: {proposal.endBlock}</p>
-                    </div>
-                    <ExpandMoreIcon /> VOTE
+        <div
+            onClick={() => {
+                if(proposal.state !== 'Active') {
+                    return;
+                }
+                if(proposal.hasVoted) {
+                    return;
+                }
+                setDropDownBox(!dropDownBox)
+                setDropDownBoxInit(false)
+            }}
+        >
+            <div className={styles.proposalHeader}>
+                <div className={styles.title}>
+                    <p>Proposal #{proposal.id}</p>
+                    <Typography variant="body3" component="p" className={styles.muted}>Title: <FormatDescription description={proposal.description} /></Typography>
+                    <Typography variant="body3" component="p" className={styles.muted}>Status: {proposal.state}</Typography>
+                    <Typography variant="body3" component="p" className={styles.muted}>Start L1 Block: {proposal.startBlock} &nbsp; &nbsp; End L1 Block: {proposal.endBlock}</Typography>
+                    {proposal.state === 'Active' && !proposal.hasVoted &&
+                         <div style={{
+                            background: 'blue', 
+                            borderRadius: '8px',
+                            height: '25px',
+                            fontSize: '0.9em',
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'center'
+                        }}>Proposal active: please VOTE</div>
+                    }
+                    {proposal.state === 'Active' && proposal.hasVoted &&
+                         <div style={{
+                            background: 'green', 
+                            borderRadius: '8px',
+                            height: '25px',
+                            fontSize: '0.9em',
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'center'
+                        }}>Vote recorded: thank you</div>
+                    }
                 </div>
-                <div className={styles.proposalContent}>
-                    <div className={styles.vote}>For: {proposal.forVotes}</div>
-                    <div className={styles.vote}>Against: {proposal.againstVotes}</div>
-                    <div className={styles.vote}>Abstain: {proposal.abstainVotes}</div>
-                    <div className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </div>
-                    <div className={styles.vote}>Total Votes: {proposal.totalVotes}</div>
+                <div>
+                    <Typography variant="body3" component="p" className={styles.vote}>For: {proposal.forVotes}</Typography>
+                    <Typography variant="body3" component="p" className={styles.vote}>Against: {proposal.againstVotes}</Typography>
+                    <Typography variant="body3" component="p" className={styles.vote}>Abstain: {proposal.abstainVotes}</Typography>
+                    <Typography variant="body3" component="p" className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </Typography>
+                    <Typography variant="body3" component="p" className={styles.vote}>Total Votes: {proposal.totalVotes}</Typography>
                 </div>
             </div>
-        }
-
-        {proposal.state !== 'Active' &&
-            <div
-            >
-                <div className={styles.proposalHeader}>
-                    <div className={styles.title}>
-                        <p>Proposal #{proposal.id}</p>
-                        <p className={styles.muted}>Title: {proposal.description}</p>
-                        <p className={styles.muted}>Status: {proposal.state}</p>
-                        <p className={styles.muted}>Start L1 Block: {proposal.startBlock} End L1 Block: {proposal.endBlock}</p>
-                    </div>
-                </div>
-                <div className={styles.proposalContent}>
-                    <div className={styles.vote}>For: {proposal.forVotes}</div>
-                    <div className={styles.vote}>Against: {proposal.againstVotes}</div>
-                    <div className={styles.vote}>Abstain: {proposal.abstainVotes}</div>
-                    <div className={styles.vote} style={{minWidth: '150px'}}>Percentage For: {votePercent}% </div>
-                    <div className={styles.vote}>Total Votes: {proposal.totalVotes}</div>
-                </div>
-            </div>
-        }
+        </div>
 
         <div className={dropDownBox ? styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}>
             <div className={styles.proposalDetail}>
+                <Typography variant="body2">Note: only your first vote counts.</Typography>
                 <Button
                     type="primary"
                     variant="outlined"
@@ -130,7 +151,7 @@ function Proposal({
                 > Cast Vote For</Button>
                 <Button
                     type="primary"
-                    variant="contained"
+                    variant="outlined"
                     style={{
                         maxWidth: '180px',
                         padding: '15px 10px',
@@ -161,4 +182,4 @@ function Proposal({
 }
 
 
-export default React.memo(Proposal);
+export default React.memo(Proposal)
