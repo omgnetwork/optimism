@@ -324,6 +324,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuardUpgradeab
         nonReentrant
         whenNotPaused
     {
+        require(msg.value != 0 || _tokenAddress != address(0), "Amount Incorrect");
         // check whether user sends ETH or ERC20
         if (msg.value != 0) {
             // override the _amount and token address
@@ -379,6 +380,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuardUpgradeab
         payable
         whenNotPaused
     {
+        require(msg.value != 0 || _tokenAddress != address(0), "Amount Incorrect");
         // check whether user sends ETH or ERC20
         if (msg.value != 0) {
             // override the _amount and token address

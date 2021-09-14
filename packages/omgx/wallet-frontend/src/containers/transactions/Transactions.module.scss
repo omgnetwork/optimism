@@ -8,15 +8,10 @@
   background: $background; //white;
 }
 
-.header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-
-  .searchInput {
-    width: 250px!important;
+.searchInput {
+  width: 250px !important;
+  @include mobile {
+    width: 100% !important;
   }
 }
 
@@ -96,11 +91,19 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-
   .datePicker {
     flex: 1;
     margin-bottom: 0;
     min-width: 250px;
+  }
+  @include mobile {
+    width: 100%;
+    > div:first-child {
+      margin-right: 5px;
+    }
+    > div:last-child {
+      margin-left: 5px;
+    }
   }
 }
 
@@ -112,6 +115,10 @@
   width: 130px;
   margin: 0px 15px;
   position: relative;
+  @include mobile {
+    width: 100%;
+    margin: 0px;
+  }
 
   &:hover {
     outline: #fff auto 1px;
@@ -140,5 +147,12 @@
     color: #f0a000;
     font-size: 16px;
     text-align: left;
+    @include mobile {
+      width: 100%;
+    }
   }
+}
+
+.popperStyle {
+  z-index: 3;
 }
