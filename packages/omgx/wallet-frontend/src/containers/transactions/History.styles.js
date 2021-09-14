@@ -31,3 +31,17 @@ export const Content = styled(Box)`
   padding: 10px 20px;
   border-radius: 6px;
 `;
+
+
+export const Header = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: '20px',
+  [theme.breakpoints.down('md')]: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '20px',
+  },
+}));

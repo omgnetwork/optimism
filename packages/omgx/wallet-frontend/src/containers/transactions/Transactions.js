@@ -26,16 +26,16 @@ import Transaction from 'components/transaction/Transaction'
 import Pager from 'components/pager/Pager'
 
 import * as styles from './Transactions.module.scss'
-import * as S from './history.styles'
+import * as S from './History.styles'
 
 const PER_PAGE = 8;
 
 function Transactions({ searchHistory, transactions }) {
-  
+
   const [page, setPage] = useState(1)
-  
+
   const loading = useSelector(selectLoading(['EXIT/GETALL']))
-  
+
   useEffect(() => {
     setPage(1);
   }, [searchHistory])
