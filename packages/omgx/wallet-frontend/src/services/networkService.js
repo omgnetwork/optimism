@@ -1496,7 +1496,10 @@ class NetworkService {
 
   /***********************************************/
   /*****                  Fee                *****/
-  /***********************************************/
+  /***** Fees are reported as integers, 
+   * where every int 
+   * represent 0.1%
+  *********/
 
   // Total exit fee
   async getTotalFeeRate() {
@@ -1509,8 +1512,11 @@ class NetworkService {
       L2LPContract.userRewardFeeRate(),
       L2LPContract.ownerRewardFeeRate()
     ])
-    const feeRate = Number(userRewardFeeRate) + Number(ownerRewardFeeRate);
-    return ((feeRate / 1000) * 100).toFixed(0)
+    //console.log("Fee URFR:",userRewardFeeRate.toString())
+    //console.log("Fee ORFR:",ownerRewardFeeRate.toString())
+    const feeRate = Number(userRewardFeeRate) + Number(ownerRewardFeeRate)
+    //console.log("FeeRate:",feeRate)
+    return (feeRate / 10).toFixed(1)
   }
 
   async getUserRewardFeeRate() {
@@ -1520,7 +1526,7 @@ class NetworkService {
       this.L2Provider
     )
     const feeRate = await L2LPContract.userRewardFeeRate()
-    return ((feeRate / 1000) * 100).toFixed(1)
+    return (feeRate / 10).toFixed(1)
   }
 
   /*****************************************************/
