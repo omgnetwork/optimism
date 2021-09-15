@@ -22,7 +22,7 @@ import { closeModal } from 'actions/uiAction'
 import DoExitStep from './steps/DoExitStep'
 import DoExitStepFast from './steps/DoExitStepFast'
 
-function ExitModal({ open, token, fast }) {
+function ExitModal({ open, token, fast, minHeight }) {
 
   const dispatch = useDispatch()
 
@@ -31,11 +31,11 @@ function ExitModal({ open, token, fast }) {
   }
 
   return (
-    <Modal open={open} maxWidth="md" onClose={handleClose}>
+    <Modal open={open} maxWidth="md" onClose={handleClose} minHeight={!!fast ? "" : "350px"}>
       {!!fast ? (
         <DoExitStepFast handleClose={handleClose} token={token} />
       ) : (
-        <DoExitStep handleClose={handleClose} token={token} />
+        <DoExitStep handleClose={handleClose} token={token}/>
       )}
     </Modal>
   )
