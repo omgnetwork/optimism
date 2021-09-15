@@ -1,14 +1,6 @@
 import { Box } from '@material-ui/core';
 import { styled } from '@material-ui/system';
 
-export const WrapperActions = styled(Box)`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 50px;
-`;
-
 // export const StyleCreateTransactions = styled(Box)`
 //   display: flex;
 //   flex-direction: column;
