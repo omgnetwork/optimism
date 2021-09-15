@@ -460,8 +460,8 @@ func (s *SyncService) sequence() error {
 }
 
 func (s *SyncService) syncQueueToTip() error {
-	indexWrapper := func(inf *EnqueueInfo)(indexGetter) {
-		return func()(*uint64, error) {
+	indexWrapper := func(inf *EnqueueInfo) indexGetter {
+		return func() (*uint64, error) {
 			return inf.QueueIndex, nil
 		}
 	}
@@ -481,7 +481,7 @@ func (s *SyncService) syncQueueToTip() error {
 		return fmt.Errorf("Cannot sync queue to tip: %w", err)
 	}
 
-	if  s.GetNextEnqueueIndex() == *inf.QueueIndex+1 && *inf.BaseBlock > s.GetLatestL1BlockNumber() {
+	if s.GetNextEnqueueIndex() == *inf.QueueIndex+1 && *inf.BaseBlock > s.GetLatestL1BlockNumber() {
 		// moved from the updateContext() function
 		current := time.Unix(int64(s.GetLatestL1Timestamp()), 0)
 		next := time.Unix(int64(*inf.BaseTime), 0)
@@ -523,6 +523,12 @@ func (s *SyncService) updateL1GasPrice() error {
 	if err != nil {
 		return fmt.Errorf("cannot fetch L1 gas price: %w", err)
 	}
+	previousL1GasPrice, err := s.RollupGpo.SuggestL1GasPrice(context.Background())
+	if err == nil {
+		s.RollupGpo.SetPreviousL1GasPrice(previousL1GasPrice)
+	} else {
+		s.RollupGpo.SetPreviousL1GasPrice(l1GasPrice)
+	}
 	s.RollupGpo.SetL1GasPrice(l1GasPrice)
 	return nil
 }
@@ -539,6 +545,12 @@ func (s *SyncService) updateL2GasPrice(statedb *state.StateDB) error {
 		}
 	}
 	result := statedb.GetState(l2GasPriceOracleAddress, l2GasPriceSlot)
+	previousL2GasPrice, err := s.RollupGpo.SuggestL2GasPrice(context.Background())
+	if err == nil {
+		s.RollupGpo.SetPreviousL2GasPrice(previousL2GasPrice)
+	} else {
+		s.RollupGpo.SetPreviousL2GasPrice(result.Big())
+	}
 	s.RollupGpo.SetL2GasPrice(result.Big())
 	return nil
 }
@@ -805,8 +817,8 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 		bn := s.GetLatestL1BlockNumber()
 		tx.SetL1Timestamp(ts)
 		tx.SetL1BlockNumber(bn)
-	// In a testing environment with an "automine" L1, we may receive two blocks with the same L1Timestamp.
-	// Checking for L1BLockNumber() as well as Timestamp() will ensure that the context is updated in this situation.
+		// In a testing environment with an "automine" L1, we may receive two blocks with the same L1Timestamp.
+		// Checking for L1BLockNumber() as well as Timestamp() will ensure that the context is updated in this situation.
 	} else if tx.L1Timestamp() > s.GetLatestL1Timestamp() || tx.L1BlockNumber().Uint64() > s.GetLatestL1BlockNumber() {
 		if tx.L1Timestamp() == s.GetLatestL1Timestamp() {
 			log.Warn("Duplicate L1Timestamp() detected in applyTransactionToTip", "ts", tx.L1Timestamp(), "l1block", tx.L1BlockNumber().Uint64())
@@ -903,6 +915,14 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	if err != nil {
 		return err
 	}
+	previousL1GasPrice, err := s.RollupGpo.SuggestPreviousL1GasPrice(context.Background())
+	if err != nil {
+		return err
+	}
+	previousL2GasPrice, err := s.RollupGpo.SuggestPreviousL2GasPrice(context.Background())
+	if err != nil {
+		return err
+	}
 	// Calculate the fee based on decoded L2 gas limit
 	gas := new(big.Int).SetUint64(tx.Gas())
 	l2GasLimit := fees.DecodeL2GasLimit(gas)
@@ -916,19 +936,22 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	// Only count the calldata here as the overhead of the fully encoded
 	// RLP transaction is handled inside of EncodeL2GasLimit
 	expectedTxGasLimit := fees.EncodeTxGasLimit(tx.Data(), l1GasPrice, l2GasLimit, l2GasPrice)
+	expectedPreviousTxGasLimit := fees.EncodeTxGasLimit(tx.Data(), previousL1GasPrice, l2GasLimit, previousL2GasPrice)
 
 	// This should only happen if the unscaled transaction fee is greater than 18.44 ETH
-	if !expectedTxGasLimit.IsUint64() {
+	if !expectedTxGasLimit.IsUint64() || !expectedPreviousTxGasLimit.IsUint64() {
 		return fmt.Errorf("fee overflow: %s", expectedTxGasLimit.String())
 	}
 
 	userFee := new(big.Int).Mul(new(big.Int).SetUint64(tx.Gas()), tx.GasPrice())
 	expectedFee := new(big.Int).Mul(expectedTxGasLimit, fees.BigTxGasPrice)
+	expectedPreviousFee := new(big.Int).Mul(expectedPreviousTxGasLimit, fees.BigTxGasPrice)
 	opts := fees.PaysEnoughOpts{
-		UserFee:       userFee,
-		ExpectedFee:   expectedFee,
-		ThresholdUp:   s.feeThresholdUp,
-		ThresholdDown: s.feeThresholdDown,
+		UserFee:             userFee,
+		ExpectedFee:         expectedFee,
+		ExpectedPreviousFee: expectedPreviousFee,
+		ThresholdUp:         s.feeThresholdUp,
+		ThresholdDown:       s.feeThresholdDown,
 	}
 	// Check the error type and return the correct error message to the user
 	if err := fees.PaysEnough(&opts); err != nil {

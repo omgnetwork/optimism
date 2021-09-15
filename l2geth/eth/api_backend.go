@@ -385,6 +385,14 @@ func (b *EthAPIBackend) SetL2GasPrice(ctx context.Context, gasPrice *big.Int) er
 	return b.rollupGpo.SetL2GasPrice(gasPrice)
 }
 
+func (b *EthAPIBackend) SetPreviousL1GasPrice(ctx context.Context, gasPrice *big.Int) error {
+	return b.rollupGpo.SetPreviousL1GasPrice(gasPrice)
+}
+
+func (b *EthAPIBackend) SetPreviousL2GasPrice(ctx context.Context, gasPrice *big.Int) error {
+	return b.rollupGpo.SetPreviousL2GasPrice(gasPrice)
+}
+
 func (b *EthAPIBackend) ChainDb() ethdb.Database {
 	return b.eth.ChainDb()
 }

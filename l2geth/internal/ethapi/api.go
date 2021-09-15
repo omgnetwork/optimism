@@ -1959,6 +1959,17 @@ func (api *PrivateRollupAPI) SetL2GasPrice(ctx context.Context, gasPrice hexutil
 	return api.b.SetL2GasPrice(ctx, (*big.Int)(&gasPrice))
 }
 
+// SetPreviousL1GasPrice sets the gas price to be used when quoting calldata publishing costs
+// to users
+func (api *PrivateRollupAPI) SetPreviousL1GasPrice(ctx context.Context, gasPrice hexutil.Big) error {
+	return api.b.SetPreviousL1GasPrice(ctx, (*big.Int)(&gasPrice))
+}
+
+// SetPreviousL2GasPrice sets the gas price to be used when executing transactions on
+func (api *PrivateRollupAPI) SetPreviousL2GasPrice(ctx context.Context, gasPrice hexutil.Big) error {
+	return api.b.SetPreviousL2GasPrice(ctx, (*big.Int)(&gasPrice))
+}
+
 // PublicDebugAPI is the collection of Ethereum APIs exposed over the public
 // debugging endpoint.
 type PublicDebugAPI struct {

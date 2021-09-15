@@ -105,8 +105,8 @@ func DecodeL2GasLimitU64(gasLimit uint64) uint64 {
 
 // PaysEnoughOpts represent the options to PaysEnough
 type PaysEnoughOpts struct {
-	UserFee, ExpectedFee       *big.Int
-	ThresholdUp, ThresholdDown *big.Float
+	UserFee, ExpectedFee, ExpectedPreviousFee *big.Int
+	ThresholdUp, ThresholdDown                *big.Float
 }
 
 // PaysEnough returns an error if the fee is not large enough
@@ -120,13 +120,14 @@ func PaysEnough(opts *PaysEnoughOpts) error {
 	}
 
 	fee := new(big.Int).Set(opts.ExpectedFee)
+	previousFee := new(big.Int).Set(opts.ExpectedPreviousFee)
 	// Allow for a downward buffer to protect against L1 gas price volatility
 	if opts.ThresholdDown != nil {
 		fee = mulByFloat(fee, opts.ThresholdDown)
 	}
 	// Protect the sequencer from being underpaid
 	// if user fee < expected fee, return error
-	if opts.UserFee.Cmp(fee) == -1 {
+	if opts.UserFee.Cmp(fee) == -1 && opts.UserFee.Cmp(previousFee) == -1 {
 		return ErrFeeTooLow
 	}
 	// Protect users from overpaying by too much
@@ -135,7 +136,7 @@ func PaysEnough(opts *PaysEnoughOpts) error {
 		overpaying := new(big.Int).Sub(opts.UserFee, opts.ExpectedFee)
 		threshold := mulByFloat(opts.ExpectedFee, opts.ThresholdUp)
 		// if overpaying > threshold, return error
-		if overpaying.Cmp(threshold) == 1 {
+		if overpaying.Cmp(threshold) == 1 && opts.UserFee.Cmp(previousFee) == 1 {
 			return ErrFeeTooHigh
 		}
 	}

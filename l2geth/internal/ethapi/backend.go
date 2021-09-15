@@ -95,6 +95,10 @@ type Backend interface {
 	SetL1GasPrice(context.Context, *big.Int) error
 	SuggestL2GasPrice(context.Context) (*big.Int, error)
 	SetL2GasPrice(context.Context, *big.Int) error
+	SuggestPreviousL1GasPrice(ctx context.Context) (*big.Int, error)
+	SetPreviousL1GasPrice(context.Context, *big.Int) error
+	SuggestPreviousL2GasPrice(context.Context) (*big.Int, error)
+	SetPreviousL2GasPrice(context.Context, *big.Int) error
 	IngestTransactions([]*types.Transaction) error
 }
 
