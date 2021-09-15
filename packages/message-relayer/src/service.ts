@@ -354,7 +354,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
               return event.args._batchIndex > lastProcessedBatch.batch.batchIndex
           })
           const newSize = this.state.eventCache.length
-          this.logger.info("Trimmed eventCache", {
+          this.logger.info('Trimmed eventCache', {
             oldSize,
             newSize,
           })

@@ -10,7 +10,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/big"
 	"strconv"
 	"strings"
@@ -25,7 +24,6 @@ import (
 	"github.com/omgnetwork/immutability-eth-plugin/contracts/ovm_ctc"
 	"github.com/omgnetwork/immutability-eth-plugin/contracts/ovm_scc"
 	"github.com/omgnetwork/immutability-eth-plugin/util"
-	"golang.org/x/crypto/sha3"
 )
 
 const ovm string = "ovm"
@@ -195,18 +193,12 @@ func (b *PluginBackend) pathOvmAppendStateBatch(ctx context.Context, req *logica
 	var batch = make([][32]byte, len(inputBatchArr))
 
 	for i, s := range inputBatchArr {
-		var buf []byte
-		hash := sha3.NewLegacyKeccak256()
-		hash.Write([]byte(s))
-		buf = hash.Sum(buf)
-		if len(buf) != 32 {
+		var b = common.FromHex(s)
+		if len(b) != 32 {
 			return nil, fmt.Errorf("invalid batch element - not the right size")
 		}
-		batchByteElement := [32]byte{}
-		copy(batchByteElement[:], buf[0:32])
-		batch[i] = batchByteElement
+		copy(batch[i][:], b[0:32])
 	}
-	// get the AppendStateBatch function arguments from JSON DONE
 
 	instance, err := ovm_scc.NewOvmScc(contractAddress, client)
 	if err != nil {
@@ -418,8 +410,6 @@ func encodeTransactionData(data *framework.FieldData) (string, error) {
 
 func encodeContexts(data *framework.FieldData) (string, error) {
 	inputContexts, ok := data.GetOk("contexts")
-	log.Println("inputContexts")
-	log.Println(inputContexts)
 	if !ok {
 		return "", fmt.Errorf("invalid contexts")
 	}
