@@ -43,8 +43,8 @@ node index.js $ACCOUNT1
 echo "Creating tokens helper file"
 rm $DIR/tokens_and_accounts.sh || true
 touch $DIR/tokens_and_accounts.sh
-PROPOSER_TOKEN=$(vault token create -field=token -period=10m -policy=append-state-batch-proposer)
-SEQUENCER_TOKEN=$(vault token create -field=token -period=10m -policy=append-sequencer-batch)
+PROPOSER_TOKEN=$(vault token create -field=token -period=30m -policy=append-state-batch-proposer)
+SEQUENCER_TOKEN=$(vault token create -field=token -period=30m -policy=append-sequencer-batch)
 echo "export PROPOSER_TOKEN=$PROPOSER_TOKEN" >> $DIR/tokens_and_accounts.sh
 echo "export SEQUENCER_TOKEN=$SEQUENCER_TOKEN" >> $DIR/tokens_and_accounts.sh
 echo "export SEQUENCER_ADDRESS=$ACCOUNT0" >> $DIR/tokens_and_accounts.sh
