@@ -95,7 +95,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "transaction-monitor", "service": "transaction-monitor"}]'
           Essential: true
-          Memory: "64"
+          Memory: "128"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
       Family: "transaction-monitor"

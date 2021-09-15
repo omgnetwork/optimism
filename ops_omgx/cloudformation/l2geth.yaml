@@ -155,6 +155,10 @@ Resources:
             - ContainerPort: 8546
               HostPort: 0
           Environment:
+            - Name: RPC_API
+              Value: eth,net,rollup,web3
+            - Name: WS_API
+              Value: eth,net,rollup,web3
             - Name: SECRETNAME
               Value: !Ref SecretName
             - Name: RETRIES
@@ -191,7 +195,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "geth_l2", "service": "geth_l2"}]'
           Essential: true
-          Memory: "2048"
+          Memory: "6000"
         - Image: 942431445534.dkr.ecr.us-east-1.amazonaws.com/omgx/nginx-eth-proxy:rpc_proxy
           Ulimits:
             - Name: nofile
@@ -214,7 +218,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "l2_proxy", "service": "l2_proxy"}]'
           Essential: true
-          Memory: "64"
+          Memory: "128"
           Links:
             - geth_l2
       NetworkMode: bridge

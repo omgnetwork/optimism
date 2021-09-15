@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - develop
-      - message-relayer-filter-endpoint
+      - aws-blockscout
 
 jobs:
   push2aws:
