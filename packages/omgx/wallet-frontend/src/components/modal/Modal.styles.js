@@ -1,5 +1,4 @@
 import { Box, IconButton } from '@material-ui/core';
-import { dark } from '@material-ui/core/styles/createPalette';
 import { styled } from '@material-ui/system';
 import ModalUnstyled from '@material-ui/unstyled/ModalUnstyled';
 

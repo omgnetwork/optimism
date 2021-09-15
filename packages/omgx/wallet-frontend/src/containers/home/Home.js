@@ -76,7 +76,7 @@ function Home () {
   const errorMessage = useSelector(selectError)
   const alertMessage = useSelector(selectAlert)
 
-  const [ mobileMenuOpen, setMobileMenuOpen ] = useState(false)
+  const [ mobileMenuOpen/*, setMobileMenuOpen*/ ] = useState(false)
 
   const pageDisplay = useSelector(selectModalState('page'))
   const depositModalState = useSelector(selectModalState('depositModal'))

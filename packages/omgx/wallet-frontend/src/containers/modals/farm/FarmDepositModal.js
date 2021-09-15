@@ -13,7 +13,6 @@ import { logAmount, powAmount } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
 
-import * as S from './FarmModal.styles';
 import { Typography } from '@material-ui/core';
 import { WrapperActionsModal } from 'components/modal/Modal.styles';
 import { Box } from '@material-ui/system';
