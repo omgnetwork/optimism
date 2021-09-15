@@ -67,7 +67,7 @@ function MainMenu ({ pageDisplay, handleSetPage }) {
         </Container>
       ) : (
         <S.Menu>
-          <Link to="/" onClick={() => dispatch(setPage('AccountNow'))}>
+          <Link to="/" style={{maxWidth: '180px'}} onClick={() => dispatch(setPage('AccountNow'))}>
             <Logo />
           </Link>
           <NetworkSwitcher />
