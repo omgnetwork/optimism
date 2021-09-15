@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - develop
-      - wallet-integration
+      - message-relayer-filter-endpoint
 
 jobs:
   push2aws:
