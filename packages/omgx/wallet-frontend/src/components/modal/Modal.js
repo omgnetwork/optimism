@@ -34,7 +34,8 @@ function _Modal ({
   light,
   title,
   transparent,
-  maxWidth
+  maxWidth,
+  minHeight
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -60,7 +61,7 @@ function _Modal ({
             </Grid>
 
             <Grid item xs={12} md={title ? 10 : 9}>
-              <S.Style isMobile={isMobile} transparent={transparent || isMobile}>
+              <S.Style minHeight={minHeight || '430px'} isMobile={isMobile} transparent={transparent || isMobile}>
                 {children}
               </S.Style>
             </Grid>

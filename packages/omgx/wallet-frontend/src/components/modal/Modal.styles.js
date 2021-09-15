@@ -15,6 +15,7 @@ export const StyledModal = styled(ModalUnstyled)`
   align-items: center;
   justify-content: center;
   backdrop-filter: ${(props) => props.ismobile ? 'blur(20px)' : 'none'};
+
 `;
 
 export const Backdrop = styled('div')`
@@ -30,6 +31,9 @@ export const Backdrop = styled('div')`
 `;
 
 export const Style = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   background: ${(props) => props.transparent ? props.theme.palette.background.modalTransparent : props.theme.palette.background.modal};
   backdrop-filter: ${(props) => props.transparent ? 'none' :'blur(66px)'};
   padding: ${(props) => props.transparent ? '20px' : '40px'};
@@ -38,6 +42,7 @@ export const Style = styled(Box)`
   box-sizing: border-box;
   max-width: 100%;
   border-radius: 12px;
+  /* min-height: 450px; */
 `;
 
 export const IconButtonTag = styled(IconButton)(({ theme }) => ({
@@ -55,5 +60,5 @@ export const WrapperActionsModal = styled(Box)`
    align-items: center;
    gap: 10px;
    justify-content: flex-end;
-   margin-top: 50px;
+   /* margin-top: 50px; */
  `;

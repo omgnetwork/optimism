@@ -74,7 +74,7 @@ function Input({
 
         <S.InputWrapper>
           {label && (
-            <Typography variant="body2" component="div" sx={{opacity: 0.7, mb: 1  , ml: '15px'}}>
+            <Typography variant="body2" component="div" sx={{opacity: 0.7, mb: 1}}>
               {label}
             </Typography>
           )}
@@ -115,13 +115,13 @@ function Input({
         )}
       </S.Wrapper>
       {value <= 0 && value !== '' ?
-        <Typography variant="body2" sx={{mt: 2}}>
+        <Typography variant="body2" sx={{mt: 1}}>
           The value must be greater than 0.
         </Typography>
         : null
       }
       {value !== '' && value > maxValue  ?
-        <Typography variant="body2" sx={{mt: 2}}>
+        <Typography variant="body2" sx={{mt: 1}}>
           The value must be smaller than {Number(maxValue).toFixed(3)}.
         </Typography>
         : null}
