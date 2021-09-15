@@ -182,6 +182,10 @@ Resources:
           Environment:
             - Name: SECRETNAME
               Value: !Ref SecretName
+            - Name: DATA_TRANSPORT_LAYER__SYNC_FROM_L1
+              Value: true
+            - Name: DATA_TRANSPORT_LAYER__SYNC_FROM_L2
+              Value: true
             - Name: RETRIES
               Value: 3600
             - Name: DATA_TRANSPORT_LAYER__L2_RPC_ENDPOINT
@@ -213,7 +217,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "data_transport_layer", "service": "data_transport_layer"}]'
           Essential: true
-          Memory: "100"
+          Memory: "200"
         - Image: 942431445534.dkr.ecr.us-east-1.amazonaws.com/omgx/nginx-eth-proxy:data_tr_layer
           Name: nginx-dtl
           PortMappings:
@@ -235,7 +239,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "nginx", "service": "nginx"}]'
           Essential: true
-          Memory: "64"
+          Memory: "128"
           Links:
             - data_transport_layer
       NetworkMode: bridge
