@@ -118,9 +118,13 @@ func PaysEnough(opts *PaysEnoughOpts) error {
 	if opts.ExpectedFee == nil {
 		return fmt.Errorf("%w: no expected fee", errMissingInput)
 	}
+	if opts.ExpectedPreviousFee == nil {
+		return fmt.Errorf("%w: no expected previous fee", errMissingInput)
+	}
 
 	fee := new(big.Int).Set(opts.ExpectedFee)
 	previousFee := new(big.Int).Set(opts.ExpectedPreviousFee)
+
 	// Allow for a downward buffer to protect against L1 gas price volatility
 	if opts.ThresholdDown != nil {
 		fee = mulByFloat(fee, opts.ThresholdDown)
