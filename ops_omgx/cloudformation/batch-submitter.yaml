@@ -109,7 +109,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "batch_submitter", "service": "batch_submitter"}]'
           Essential: true
-          Memory: "256"
+          Memory: "300"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
       Family: !Sub "BatchSubmitter-${EnvironmentName}"

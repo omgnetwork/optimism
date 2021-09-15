@@ -53,13 +53,13 @@ function Transaction({
   const chainLink = ({chain,hash}) => {
     let network = nw[currentNetwork]
     if (!!network && !!network[chain]) {
-      if (chain === 'L1') {
-        //go to etherscan
-        return `${network[chain].transaction}${hash}`;
-      } else {
-        //the boba blockexplorer
-        return `${network[chain].transaction}${hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
-      }
+      // network object should have L1 & L2
+      // endpoint name is now network specific - `?network` no longer needed
+      //if (chain === 'L1') {
+          return `${network[chain].transaction}${hash}`;
+      //} else {  
+      //    return `${network[chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
+      //}
     }
     return '';
   }

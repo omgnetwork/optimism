@@ -31,7 +31,7 @@ function DepositModal({ open, token, fast }) {
   }
 
   return (
-    <Modal open={open} maxWidth="md" onClose={handleClose}>
+    <Modal open={open} maxWidth="md" onClose={handleClose} minHeight={!!fast ? "" : "500px"}>
       {!!fast ? (
           <InputStepFast handleClose={handleClose} token={token}/>
         ) : (

@@ -13,8 +13,9 @@ import { logAmount, powAmount } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
 
-import * as S from './FarmModal.styles';
 import { Typography } from '@material-ui/core';
+import { WrapperActionsModal } from 'components/modal/Modal.styles';
+import { Box } from '@material-ui/system';
 
 class FarmDepositModal extends React.Component {
 
@@ -93,7 +94,6 @@ class FarmDepositModal extends React.Component {
         //stakeValueBadEntry: true,
       })
     }
-
   }
 
   async handleApprove() {
@@ -182,27 +182,28 @@ class FarmDepositModal extends React.Component {
     }
 
     return (
-
       <Modal
         open={open}
         maxWidth="md"
         onClose={()=>{this.handleClose()}}
+        minHeight="380px"
       >
+        <Box>
+          <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
+            Stake {`${stakeToken.symbol}`}
+          </Typography>
 
-        <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
-          Stake {`${stakeToken.symbol}`}
-        </Typography>
-
-        <Input
-          placeholder={`Amount to stake`}
-          value={stakeValue}
-          type="number"
-          onChange={i=>{this.handleStakeValue(i.target.value)}}
-          unit={stakeToken.symbol}
-          maxValue={this.getMaxTransferValue()}
-          newStyle
-          variant="standard"
-        />
+          <Input
+            placeholder={`Amount to stake`}
+            value={stakeValue}
+            type="number"
+            onChange={i=>{this.handleStakeValue(i.target.value)}}
+            unit={stakeToken.symbol}
+            maxValue={this.getMaxTransferValue()}
+            newStyle
+            variant="standard"
+          />
+        </Box>
 
         {!allowanceGTstake &&
           <>
@@ -212,7 +213,7 @@ class FarmDepositModal extends React.Component {
                 you first need to approve this amount.
               </Typography>
             }
-            <S.WrapperActions>
+            <WrapperActionsModal>
               <Button
                 onClick={()=>{this.handleClose()}}
                 color="neutral"
@@ -231,16 +232,17 @@ class FarmDepositModal extends React.Component {
               >
                 APPROVE AMOUNT
               </Button>
-            </S.WrapperActions>
+            </WrapperActionsModal>
           </>
         }
+
 
         {(stakeValueValid && allowanceGTstake) &&
           <>
             <Typography variant="body2" sx={{mt: 2}}>
               Your allowance has been approved. You can now stake your funds into the pool.
             </Typography>
-            <S.WrapperActions>
+            <WrapperActionsModal>
               <Button
                 onClick={()=>{this.handleClose()}}
                 color="neutral"
@@ -259,7 +261,7 @@ class FarmDepositModal extends React.Component {
               >
                 STAKE!
               </Button>
-            </S.WrapperActions>
+            </WrapperActionsModal>
           </>
         }
 

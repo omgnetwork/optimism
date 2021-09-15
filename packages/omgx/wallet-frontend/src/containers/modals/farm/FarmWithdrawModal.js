@@ -12,8 +12,8 @@ import { logAmount } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
 
-import * as S from './FarmModal.styles';
 import { Typography } from '@material-ui/core';
+import { WrapperActionsModal } from 'components/modal/Modal.styles';
 
 class FarmWithdrawModal extends React.Component {
   constructor(props) {
@@ -161,7 +161,7 @@ class FarmWithdrawModal extends React.Component {
           </Typography>
         }
 
-        <S.WrapperActions>
+        <WrapperActionsModal>
           <Button
             onClick={()=>{this.handleClose()}}
             color="neutral"
@@ -184,9 +184,7 @@ class FarmWithdrawModal extends React.Component {
           >
             CONFIRM
           </Button>
-        </S.WrapperActions>
-
-
+        </WrapperActionsModal>
       </Modal>
     )
   }

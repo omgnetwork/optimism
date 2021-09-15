@@ -333,9 +333,9 @@ Resources:
               Value: ipfs:5001
             - Name: ethereum
               Value: !Sub
-                - "omgx:http://${EndpointAddress}/rpc"
+                - "omgx:http://${EndpointAddress}:8545/rpc"
                 - EndpointAddress:
-                    Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
+                    Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerReplica:DNSName"
             - Name: GRAPH_LOG
               Value: debug
           EntryPoint:
@@ -379,7 +379,7 @@ Resources:
     DependsOn: GraphLBListenerRule
     Properties:
       Cluster:
-        Fn::ImportValue: !Sub "${InfrastructureStackName}:EcsCluster"
+        Fn::ImportValue: !Sub "${InfrastructureStackName}:EcsClusterReplica"
       LoadBalancers:
         - ContainerName: nginx-graph
           ContainerPort: 80

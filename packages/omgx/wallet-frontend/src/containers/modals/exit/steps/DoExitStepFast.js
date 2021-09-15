@@ -32,7 +32,8 @@ import networkService from 'services/networkService'
 
 import { Typography, useMediaQuery } from '@material-ui/core'
 import { useTheme } from '@emotion/react'
-import * as S from './DoExitSteps.styles'
+import { WrapperActionsModal } from 'components/modal/Modal.styles'
+import { Box } from '@material-ui/system'
 
 function DoExitStepFast({ handleClose, token }) {
 
@@ -126,63 +127,64 @@ function DoExitStepFast({ handleClose, token }) {
 
   return (
     <>
-
-      <Typography variant="h2" sx={{fontWeight: 700, mb: 1}}>
-        Fast Exit
-      </Typography>
-
-      <Typography variant="body2" sx={{mb: 3}}>{label}</Typography>
-
-      <Input
-        label={`Enter amount to exit`}
-        placeholder="0.0000"
-        value={value}
-        type="number"
-        onChange={(i)=>{setAmount(i.target.value)}}
-        unit={token.symbol}
-        maxValue={maxValue}
-        newStyle
-        variant="standard"
-      />
-
-      {valueIsValid && token && token.symbol === 'oETH' && (
-        <Typography variant="body2" sx={{mt: 2}}>
-          {value &&
-            `You will receive
-            ${receivableAmount(value)}
-            ETH
-            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
-            on L1.`
-          }
+      <Box>
+        <Typography variant="h2" sx={{fontWeight: 700, mb: 1}}>
+          Fast Exit
         </Typography>
-      )}
 
-      {valueIsValid && token && token.symbol !== 'oETH' && (
-        <Typography variant="body2" sx={{mt: 2}}>
-          {value &&
-            `You will receive
-            ${receivableAmount(value)}
-            ${token.symbol}
-            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
-            on L1.`
-          }
-        </Typography>
-      )}
+        <Typography variant="body2" sx={{mb: 3}}>{label}</Typography>
 
-      {Number(LPBalance) < Number(value) && (
-        <Typography variant="body2" sx={{mt: 2, color: 'red'}}>
-          The liquidity pool balance (of {LPBalance}) is too low to cover your exit - please
-          use the traditional exit or reduce the amount to exit.
-        </Typography>
-      )}
+        <Input
+          label={`Enter amount to exit`}
+          placeholder="0.0000"
+          value={value}
+          type="number"
+          onChange={(i)=>{setAmount(i.target.value)}}
+          unit={token.symbol}
+          maxValue={maxValue}
+          newStyle
+          variant="standard"
+        />
 
-      {exitLoading && (
-        <Typography variant="body2" sx={{mt: 2, color: 'green'}}>
-          This window will automatically close when your transaction has been signed and submitted.
-        </Typography>
-      )}
+        {valueIsValid && token && token.symbol === 'oETH' && (
+          <Typography variant="body2" sx={{mt: 2}}>
+            {value &&
+              `You will receive
+              ${receivableAmount(value)}
+              ETH
+              ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
+              on L1.`
+            }
+          </Typography>
+        )}
 
-      <S.WrapperActions>
+        {valueIsValid && token && token.symbol !== 'oETH' && (
+          <Typography variant="body2" sx={{mt: 2}}>
+            {value &&
+              `You will receive
+              ${receivableAmount(value)}
+              ${token.symbol}
+              ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
+              on L1.`
+            }
+          </Typography>
+        )}
+
+        {Number(LPBalance) < Number(value) && (
+          <Typography variant="body2" sx={{mt: 2, color: 'red'}}>
+            The liquidity pool balance (of {LPBalance}) is too low to cover your exit - please
+            use the traditional exit or reduce the amount to exit.
+          </Typography>
+        )}
+
+        {exitLoading && (
+          <Typography variant="body2" sx={{mt: 2, color: 'green'}}>
+            This window will automatically close when your transaction has been signed and submitted.
+          </Typography>
+        )}
+      </Box>
+
+      <WrapperActionsModal>
           <Button
             onClick={handleClose}
             color='neutral'
@@ -203,7 +205,7 @@ function DoExitStepFast({ handleClose, token }) {
           >
             Exit L2
           </Button>
-      </S.WrapperActions>
+      </WrapperActionsModal>
     </>
   )
 }
