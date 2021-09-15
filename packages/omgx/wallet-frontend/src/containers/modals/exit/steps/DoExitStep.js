@@ -43,6 +43,8 @@ function DoExitStep({ handleClose, token }) {
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
   const signatureStatus = useSelector(selectSignatureStatus_exitTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
+  const maxValue = logAmount(token.balance, token.decimals)
+  const valueIsValid = value > 0 && value <= maxValue
 
   async function doExit() {
 
@@ -104,12 +106,12 @@ function DoExitStep({ handleClose, token }) {
         type="number"
         onChange={(i)=>{setExitAmount(i.target.value)}}
         unit={token.symbol}
-        maxValue={logAmount(token.balance, token.decimals)}
+        maxValue={maxValue}
         variant="standard"
         newStyle
       />
 
-      {token && token.symbol === 'oETH' && (
+      {valueIsValid && token && token.symbol === 'oETH' && (
         <Typography variant="body2" sx={{mt: 2}}>
           {value &&
             `You will receive ${Number(value).toFixed(2)} ETH
@@ -119,7 +121,7 @@ function DoExitStep({ handleClose, token }) {
         </Typography>
       )}
 
-      {token && token.symbol !== 'oETH' && (
+      {valueIsValid && token && token.symbol !== 'oETH' && (
         <Typography variant="body2" sx={{mt: 2}}>
           {value &&
             `You will receive ${Number(value).toFixed(2)} ${token.symbol}

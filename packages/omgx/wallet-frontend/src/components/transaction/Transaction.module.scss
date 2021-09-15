@@ -245,15 +245,7 @@ $boxDropDownHeight: 50px;
 }
 
 .muted {
-  font-size: 0.7em;
-  color: $white700;
-  margin: 0;
-  padding: 0;
-}
-
-.mutedMI {
-  font-size: 0.7em;
-  color: $white700;
+  opacity: 0.7;
   margin: 0;
   padding: 0;
 }

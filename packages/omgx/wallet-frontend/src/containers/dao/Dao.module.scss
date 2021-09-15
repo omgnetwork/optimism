@@ -1,6 +1,7 @@
 @import 'index.scss';
 
 .container {
+
   display: flex;
   flex-direction: column;
   padding: 10px;
@@ -20,27 +21,32 @@
   }
 
   .content {
-      margin: 10px auto;
-      display: flex;
-      flex-direction: column;
-      width: 100%;
+    
+    margin: 10px auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 
       .action {
         display: flex;
+        justify-content: space-between;
+        align-items: center;        
         flex-direction: row;
-        justify-content: space-around;
-        align-items: center;
+
+        &.isMobile {
+          flex-direction: column;
+        }
 
         .transferContainer, .delegateContainer {
-            margin: auto;
+            /*margin: auto;*/
             border-radius: 12px;
             padding: 20px;
             display: flex;
             flex-direction: column; 
-            background: $background400;
-            max-width: 40%;
-            width: 40%;
-            min-width: 400px;
+            max-width: 48%;
+            width: 48%;
+            min-width: 350px;
+            margin: 5px;
             .info {
                 text-align: center;
                 .title {
@@ -55,7 +61,7 @@
                 .helpText {
                     font-size: 0.8em;
                     margin: 10px;
-                    color: $white700;
+                    opacity: 0.7;
                     margin: 10px;
                 }
             }

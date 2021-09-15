@@ -8,11 +8,11 @@ export const tableHeadList = [
       isSort: false,
   },
   {
-      label: 'Share',
+      label: 'Your Stake',
       isSort: false,
   },
   {
-      label: 'APR',
+      label: 'APR %',
       isSort: false,
   },
   {

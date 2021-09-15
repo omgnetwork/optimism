@@ -503,6 +503,24 @@ class DatabaseService extends OptimismEnv{
     con.end();
     return blockNumber;
   }
+
+  async getPendingMessageFromReceiptTable() {
+    const con = mysql.createConnection({
+      host: this.MySQLHostURL,
+      port: this.MySQLPort,
+      user: this.MySQLUsername,
+      password: this.MySQLPassword,
+    });
+    const query = util.promisify(con.query).bind(con);
+    await query(`USE ${this.MySQLDatabaseName}`);
+    const pendingMessages = await query(`SELECT receipt.hash, receipt.blockNumber, receipt.from, receipt.to,
+      crossDomainMessage, crossDomainMessageFinalize, crossDomainMessageSendTime, receipt.fastRelay
+      FROM receipt, exitL2
+      WHERE receipt.hash = exitL2.hash AND crossDomainMessage=${true} AND crossDomainMessageFinalize=${false}
+    `);
+    con.end();
+    return pendingMessages;
+  }
 }
 
 module.exports = DatabaseService;

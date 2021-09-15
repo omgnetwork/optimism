@@ -609,14 +609,14 @@ class NetworkService {
     }
   }
 
-  async checkStatus() {
-    return {
-      connection: true,
-      byzantine: false,
-      watcherSynced: true,
-      lastSeenBlock: 0,
-    }
-  }
+  // async checkStatus() {
+  //   return {
+  //     connection: true,
+  //     byzantine: false,
+  //     watcherSynced: true,
+  //     lastSeenBlock: 0,
+  //   }
+  // }
 
   async addL2Network() {
     
@@ -780,9 +780,9 @@ class NetworkService {
 
     console.log("Getting transactions...")
     
-    let txL1
-    let txL1pending
-    let txL2
+    let txL1 = []
+    let txL1pending = []
+    let txL2 = []
 
     //console.log("trying")
 
@@ -1261,7 +1261,8 @@ class NetworkService {
       await tx.wait()
       return tx
     } catch (error) {
-      console.log(error)
+      console.log("NS: transfer error:", error)
+      return error
     }
   }
 
@@ -1290,6 +1291,7 @@ class NetworkService {
       )
       return allowance.toString()
     } catch (error) {
+      console.log("NS: checkAllowance error:", error)
       throw new WebWalletError({
         originalError: error,
         customErrorMessage: 'Could not check ERC20 allowance.',
@@ -1330,6 +1332,7 @@ class NetworkService {
 
       return true
     } catch (error) {
+      console.log("NS: approveERC20_L2LP error:", error)
       return false
     }
   }
@@ -1357,6 +1360,7 @@ class NetworkService {
 
       return true
     } catch (error) {
+      console.log("NS: approveERC20_L1LP error:", error)
       return false
     }
   }
@@ -1370,8 +1374,6 @@ class NetworkService {
 
     try {
 
-      console.log("approveERC20")
-
       const ERC20Contract = new ethers.Contract(
         currency,
         contractABI,
@@ -1382,46 +1384,13 @@ class NetworkService {
         approveContractAddress,
         value
       )
+
       await approveStatus.wait()
 
       return true
     } catch (error) {
+      console.log("NS: approveERC20 error:", error)
       return false
-    }
-  }
-
-  async resetApprove(
-    value,
-    currency,
-    approveContractAddress = this.L1StandardBridgeAddress,
-    contractABI = L1ERC20Json.abi
-  ) {
-    try {
-      const ERC20Contract = new ethers.Contract(
-        currency,
-        contractABI,
-        this.provider.getSigner()
-      )
-
-      const resetApproveStatus = await ERC20Contract.approve(
-        approveContractAddress,
-        0
-      )
-      await resetApproveStatus.wait()
-
-      const approveStatus = await ERC20Contract.approve(
-        approveContractAddress,
-        value
-      )
-      await approveStatus.wait()
-      return true
-    } catch (error) {
-      throw new WebWalletError({
-        originalError: error,
-        customErrorMessage: 'Could not reset allowance for ERC20.',
-        reportToSentry: false,
-        reportToUi: true,
-      })
     }
   }
 
@@ -1997,6 +1966,7 @@ class NetworkService {
 
   // get DAO Balance
   async getDaoBalance() {
+    
     if(this.masterSystemConfig !== 'rinkeby' || this.L1orL2 !== 'L2') return
 
     try {
@@ -2047,19 +2017,22 @@ class NetworkService {
   // Proposal Create Threshold
 
   async getProposalThreshold() {
+
+    if(this.masterSystemConfig !== 'rinkeby' || this.L1orL2 !== 'L2') return
+      
     try {
       // get the threshold proposal only in case of L2
       if(this.L1orL2 === 'L2') { 
-        const delegateCheck = await this.delegate.attach(this.delegator.address);
-        let rawThreshold = await delegateCheck.proposalThreshold();
-        return { threshold: formatEther(rawThreshold) };
+        const delegateCheck = await this.delegate.attach(this.delegator.address)
+        let rawThreshold = await delegateCheck.proposalThreshold()
+        return { threshold: formatEther(rawThreshold) }
       }
       else {
-        return { threshold: 0 };
+        return { threshold: 0 }
       }
     } catch (error) {
-      console.log(error);
-      throw new Error(error.message);
+      console.log(error)
+      throw new Error(error.message)
     }
   }
 
@@ -2079,18 +2052,18 @@ class NetworkService {
       )]
       let description = !text ? `# Changing Proposal Threshold to ${votingThreshold} Comp` : text;
       
-      let setGas = {
-        gasPrice: 15000000,
-        gasLimit: 8000000
-      };
+      //let setGas = {
+      //  gasPrice: 15000000,
+      //  gasLimit: 8000000
+      //};
 
       let res = await delegateCheck.propose(
         address,
         values,
         signatures,
         calldatas,
-        description,
-        setGas
+        description//,
+        //setGas
       )
       return res;
     } catch (error) {
@@ -2105,7 +2078,7 @@ class NetworkService {
     if(this.masterSystemConfig !== 'rinkeby' || this.L1orL2 !== 'L2') return
       
     const delegateCheck = await this.delegate.attach(this.delegator.address)
-    
+
     try {
       let proposalList = [];
       const proposalCounts = await delegateCheck.proposalCount()
@@ -2123,12 +2096,15 @@ class NetworkService {
         null
       )
       
-      const descriptionList = await delegateCheck.queryFilter(filter);
+      const descriptionList = await delegateCheck.queryFilter(filter)
+
       for (let i = 0; i < totalProposals; i++) {
         
         let proposalID = descriptionList[i].args[0]
+        
         //this is a number such as 2
         let proposalData = await delegateCheck.proposals(proposalID)
+
         const proposalStates = [
           'Pending',
           'Active',
@@ -2141,6 +2117,8 @@ class NetworkService {
         ]
 
         let state = await delegateCheck.state(proposalID)
+        //console.log("State:", proposalStates[state])
+        
         let againstVotes = parseInt(formatEther(proposalData.againstVotes))
         let forVotes = parseInt(formatEther(proposalData.forVotes))
         let abstainVotes = parseInt(formatEther(proposalData.abstainVotes))
@@ -2150,6 +2128,10 @@ class NetworkService {
 
         let proposal = await delegateCheck.getActions(i+2)
         
+        const { hasVoted } = await delegateCheck.getReceipt(proposalID, this.account)//delegateCheck.address)
+
+        //console.log("Has voted:", hasVoted)
+
         let description = descriptionList[i].args[8].toString()
         
         proposalList.push({
@@ -2162,8 +2144,8 @@ class NetworkService {
            abstainVotes,
            state: proposalStates[state],
            startBlock,
-           endBlock
-
+           endBlock,
+           hasVoted 
         })
 
       }
@@ -2179,10 +2161,12 @@ class NetworkService {
     try {
       
       const delegateCheck = await this.delegate.attach(this.delegator.address);
-      let res = delegateCheck.castVote(id, userVote, {
-        gasPrice: 15000000,
-        gasLimit: 8000000
-      });
+      let res = delegateCheck.castVote(id, userVote //, 
+      //{
+      //  gasPrice: 15000000,
+      //  gasLimit: 8000000
+      //}
+      )
       return res;
     } catch(error) {
       console.log('Error: cast vote', error);

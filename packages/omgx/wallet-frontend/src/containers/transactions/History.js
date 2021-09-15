@@ -20,6 +20,7 @@ import { useSelector } from 'react-redux'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
 
+import {useMediaQuery, useTheme} from '@material-ui/core'
 import moment from 'moment';
 
 import { setActiveHistoryTab1 } from 'actions/uiAction'
@@ -29,11 +30,13 @@ import { selectActiveHistoryTab1 } from 'selectors/uiSelector'
 import { selectTransactions } from 'selectors/transactionSelector'
 
 import Tabs from 'components/tabs/Tabs'
+import Input from 'components/input/Input'
 
 import Exits from './Exits'
 import Deposits from './Deposits'
 
 import * as styles from './Transactions.module.scss'
+import * as S from './History.styles'
 
 import useInterval from 'util/useInterval'
 import PageHeader from 'components/pageHeader/PageHeader'
@@ -41,13 +44,16 @@ import Transactions from './Transactions'
 
 const POLL_INTERVAL = 5000; //milliseconds
 
-function History () {
+function History() {
+
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const dispatch = useDispatch()
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
 
-  const [ searchHistory, setSearchHistory ] = useState('')
+  const [searchHistory, setSearchHistory] = useState('')
 
   const activeTab1 = useSelector(selectActiveHistoryTab1, isEqual)
 
@@ -57,8 +63,8 @@ function History () {
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
   //'desc' or 'asc'
 
-  const transactions = orderedTransactions.filter((i)=>{
-    if(startDate && endDate) {
+  const transactions = orderedTransactions.filter((i) => {
+    if (startDate && endDate) {
       return (moment.unix(i.timeStamp).isSameOrAfter(startDate) && moment.unix(i.timeStamp).isSameOrBefore(endDate));
     }
     return true;
@@ -74,10 +80,10 @@ function History () {
     <>
       <PageHeader title="Transaction History" />
 
-    {
-    /*TODO: fix the search history
-    <Input
-            icon
+      <S.Header>
+        <div className={styles.searchInput}>
+          <Input
+            size='small'
             placeholder='Search by hash'
             value={searchHistory}
             onChange={i => {
@@ -85,12 +91,11 @@ function History () {
             }}
             className={styles.searchBar}
           />
-
-    */}
-
-      <div className={styles.header}>
+        </div>
         <div className={styles.actions}>
-          <div style={{margin: '0px 10px', opacity: 0.7}}>Show period from </div>
+          {!isMobile ? (
+            <div style={{ margin: '0px 10px', opacity: 0.7 }}>Show period from</div>
+          ) : null}
           <DatePicker
             wrapperClassName={styles.datePickerInput}
             selected={startDate}
@@ -98,9 +103,13 @@ function History () {
             selectsStart
             startDate={startDate}
             endDate={endDate}
+            calendarClassName={theme.palette.mode}
+            placeholderText={isMobile ? "From" : ""}
+            popperClassName={styles.popperStyle}
           />
-
-          <div style={{margin: '0px 10px', opacity: 0.7}}>to </div>
+          {!isMobile ? (
+            <div style={{ margin: '0px 10px', opacity: 0.7 }}>to </div>
+          ) : null}
           <DatePicker
             wrapperClassName={styles.datePickerInput}
             selected={endDate}
@@ -109,15 +118,16 @@ function History () {
             startDate={startDate}
             endDate={endDate}
             minDate={startDate}
+            calendarClassName={theme.palette.mode}
+            placeholderText={isMobile ? "To" : ""}
+            popperClassName={styles.popperStyle}
           />
         </div>
-      </div>
+      </S.Header>
       <div className={styles.data}>
         <div className={styles.section}>
           <Tabs
-            onClick={tab => {
-              dispatch(setActiveHistoryTab1(tab));
-            }}
+            onClick={tab => {dispatch(setActiveHistoryTab1(tab))}}
             activeTab={activeTab1}
             tabs={['All', 'Deposits', 'Exits']}
           />
