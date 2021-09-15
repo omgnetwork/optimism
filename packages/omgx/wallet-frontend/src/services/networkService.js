@@ -400,7 +400,8 @@ class NetworkService {
 
       // defines the set of possible networks
       const nw = getAllNetworks()
-
+      
+      //cannot use static here because the network can (and will) change
       this.L1Provider = new ethers.providers.JsonRpcProvider(
         nw[masterSystemConfig]['L1']['rpcUrl']
       )

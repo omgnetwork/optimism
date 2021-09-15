@@ -57,8 +57,8 @@ export const readConfig = (): HealthcheckServerOptions => {
 }
 
 export const binarySearchForMismatch = async (
-  sequencerProvider: providers.JsonRpcProvider,
-  replicaProvider: providers.JsonRpcProvider,
+  sequencerProvider: providers.StaticJsonRpcProvider,
+  replicaProvider: providers.StaticJsonRpcProvider,
   latest: number,
   logger: Logger
 ): Promise<number> => {
