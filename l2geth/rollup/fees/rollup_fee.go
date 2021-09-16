@@ -148,7 +148,7 @@ func PaysEnough(opts *PaysEnoughOpts) error {
 		// if overpaying > threshold && 
 		// overpayingPrevious > thresholdPrevious, return error
 		if (overpaying.Cmp(threshold) == 1 && 
-		    overpayingPrevious.cmp(thresholdPrevious) == 1) {
+		    overpayingPrevious.Cmp(thresholdPrevious) == 1) {
 			return ErrFeeTooHigh
 		}
 	}
