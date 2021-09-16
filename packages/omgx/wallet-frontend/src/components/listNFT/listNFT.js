@@ -110,8 +110,8 @@ class listNFT extends React.Component {
 
         <div className={styles.topContainer}>
           <div className={styles.Table2}>
-            <Typography variant="h4">{name}
-              ({symbol})
+            <Typography variant="h4">
+              {name} ({symbol})
             </Typography>
             {(attributes || []).map((attr, index) => {
               return (<Typography variant="body2" key={index}>{attr.trait_type}: 
