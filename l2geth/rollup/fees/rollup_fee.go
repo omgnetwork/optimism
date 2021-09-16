@@ -128,6 +128,7 @@ func PaysEnough(opts *PaysEnoughOpts) error {
 	// Allow for a downward buffer to protect against L1 gas price volatility
 	if opts.ThresholdDown != nil {
 		fee = mulByFloat(fee, opts.ThresholdDown)
+		previousFee = mulByFloat(previousFee, opts.ThresholdDown)
 	}
 	// Protect the sequencer from being underpaid
 	// if user fee < expected fee, return error
@@ -139,8 +140,15 @@ func PaysEnough(opts *PaysEnoughOpts) error {
 		// overpaying = user fee - expected fee
 		overpaying := new(big.Int).Sub(opts.UserFee, opts.ExpectedFee)
 		threshold := mulByFloat(opts.ExpectedFee, opts.ThresholdUp)
-		// if overpaying > threshold, return error
-		if overpaying.Cmp(threshold) == 1 && opts.UserFee.Cmp(previousFee) == 1 {
+		
+		// also allow previous value
+		overpayingPrevious := new(big.Int).Sub(opts.UserFee, opts.ExpectedPreviousFee)
+		thresholdPrevious := mulByFloat(opts.ExpectedPreviousFee, opts.ThresholdUp)
+
+		// if overpaying > threshold && 
+		// overpayingPrevious > thresholdPrevious, return error
+		if (overpaying.Cmp(threshold) == 1 && 
+		    overpayingPrevious.cmp(thresholdPrevious) == 1) {
 			return ErrFeeTooHigh
 		}
 	}
