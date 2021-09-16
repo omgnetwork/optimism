@@ -140,13 +140,12 @@ function PendingTransaction() {
         let chain = item.chain === 'L1pending' ? 'L1' : item.chain;
         if (!!network && !!network[chain]) {
             // network object should have L1 & L2
-            if (chain === 'L1') {
+            // endpoint name is now network specific - `?network` no longer needed
+            //if (chain === 'L1') {
                 return `${network[chain].transaction}${item.hash}`;
-                //our custom watcher
-            } else {
-                //etherscan
-                return `${network[chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
-            }
+            //} else {  
+            //    return `${network[chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
+            //}
         }
         return '';
     }

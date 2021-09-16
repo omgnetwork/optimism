@@ -23,8 +23,8 @@ import Modal from 'components/modal/Modal';
 import Input from 'components/input/Input';
 
 import * as styles from './AddTokenModal.module.scss';
-import * as S from './AddTokenModal.styles';
 import { Typography } from '@material-ui/core';
+import { WrapperActionsModal } from 'components/modal/Modal.styles';
 
 function AddTokenModal ({ open }) {
 
@@ -89,7 +89,7 @@ function AddTokenModal ({ open }) {
         }
 
         {buttonDisplay === "Waiting" &&
-          <S.WrapperActions>
+          <WrapperActionsModal>
             <Button
               onClick={handleClose}
               color="neutral"
@@ -106,11 +106,11 @@ function AddTokenModal ({ open }) {
             >
               LOOKUP
             </Button>
-          </S.WrapperActions>
+          </WrapperActionsModal>
         }
 
         {buttonDisplay === "Success" &&
-          <S.WrapperActions>
+          <WrapperActionsModal>
             <Button
               onClick={handleClose}
               color="neutral"
@@ -126,7 +126,7 @@ function AddTokenModal ({ open }) {
             >
               OK
             </Button>
-          </S.WrapperActions>
+          </WrapperActionsModal>
         }
       </div>
 

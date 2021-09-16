@@ -28,29 +28,16 @@ We have six main containers and five secondary containers that provide the monit
 
 * [omgx/message-relayer](https://hub.docker.com/layers/156091959/omgx/message-relayer/production-v1/images/sha256-52ae4dbe41895c331ee3dc05955ad8c50c1319f91aaf3b4747d3ded2305382b4?context=repo) and [omgx/message-relayer-fast](https://hub.docker.com/layers/156091184/omgx/message-relayer-fast/production-v1/images/sha256-4e973130ca9cd5704ae3ce83f8c01682851b73835753268203bba91df7213167?context=repo)
 
-  Both message relayers need at least **1GB** of memory. It will restart when they approach the memory usage around **3.5GB**. It's better to give them at least **4GB** memory, so they won't restart frequently.
+  Both message relayers need at least **1GB** of memory.
 
 ### Secondary containers
 
 Our main services won't be affected by these secondary services, so it's safe for them to reboot when they have any problems.
 
 * Graph-node, postgres, ipfs
-* omgx/monitoring
-* omgx/dummy-transaction
-
-## Port
-
-We open the following the ports:
-
-| **Port** |                **Purpose**                |                  **Routes**                   |                             URL                              | **Permission** |
-| :------: | :---------------------------------------: | :-------------------------------------------: | :----------------------------------------------------------: | :------------: |
-|   8545   |                  L2Geth                   |                       /                       |                 https://rinkeby.omgx.network                 |     Public     |
-|   8081   |                 Deployer                  | /addresses.json<br />/state-dumps.latest.json |              https://rinkeby.omgx.network:8081               |     Public     |
-|   8000   |            GraphQL HTTP server            |            /subgraphs/name/.../...            | https://graph.rinkeby.omgx.network <br />https://graph.rinkeby.omgx.network:8000 |     Public     |
-|   8001   |                GraphQL WS                 |            /subgraphs/name/.../...            |           https://graph.rinkeby.omgx.network:8001            |     Public     |
-|   8020   | JSON-RPC<br /> (for managing deployments) |                       /                       |           https://graph.rinkeby.omgx.network:8020            |    Private     |
-|   8030   |       Subgraph indexing status API        |                   /graphql                    |           https://graph.rinkeby.omgx.network:8030            |     Public     |
-|   8040   |            Prometheus metrics             |                   /metrics                    |           https://graph.rinkeby.omgx.network:8040            |     Public     |
+* omgx/gas-oracle
+* omgx/transaction-monitor
+* enyalabs/omgx-monitor
 
 ## Memory usage and recommendation
 
@@ -60,16 +47,12 @@ We open the following the ports:
 |        omgx/l2geth        |        500MB         |            **2GB**            |
 | omgx/data-transport-layer |        100MB         |             512MB             |
 |   omgx/batch-submitter    |         1GB          |            **2GB**            |
-|   omgx/message-relayer    |         1GB          |            **4GB**            |
-| omgx/message-relayer-fast |         1GB          |            **4GB**            |
+|   omgx/message-relayer    |         1GB          |            **2GB**            |
+| omgx/message-relayer-fast |         1GB          |            **2GB**            |
 
 > NOTE:
 >
 > `omgx/l2geth`: it's the most important service, so we should give as much memory as we can.
->
-> `omgx/message-relayer-fast` and `omgx/message-relayer` : both message relayers can stop due the OOM issue. Giving it **4GB** memory can reduce the number of times that it needs to restart. 
->
-> [**IMPORTANT**] When `omgx/message-relayer-fast` and `omgx/message-relayer` restart, they scans all L2 blocks and check if there is a cross domain message and if the message is relayed to L1. It takes about 5 mins to sync 4K L2 blocks.
 
 ## Possible errors
 
@@ -95,21 +78,6 @@ We open the following the ports:
   >
   > Once the local batch submitter pushes the correct queued elements to CTC, the production one will start to work.
 
-* [omgx/message-relayer-fast](https://hub.docker.com/layers/156091184/omgx/message-relayer-fast/production-v1/images/sha256-4e973130ca9cd5704ae3ce83f8c01682851b73835753268203bba91df7213167?context=repo)
-
-  It might has `MessageRelayerService._getStateBatchHeader` error when we ran the loading test. It can be fixed via restarting the service, but we don't know the root problem.
-
-* [omgx/l2geth](https://hub.docker.com/layers/156092279/omgx/l2geth/production-v1/images/sha256-d5f099b01629da9ca93af25705d326d90bb7d100695e0a66cc920871705ff890?context=repo) [**IMPORTANT!!**]
-
-  `omgx/l2geth` may have the incompatible genesis when we update the deployer.
-
-  ```
-   Fatal: Error starting protocol stack: database contains incompatible genesis
-  ```
-
-  We solve it by removing the old data. However, it's not a good way to solve it. It's related to #regensis topic.
-
-## Regenesis
 
 L2 geth genesis structure:
 
@@ -144,22 +112,57 @@ type Genesis struct {
 }
 ```
 
-### Bypass `GasPriceOracleOwnerAddress`
+## How to restart Mainnet Service
 
-Modify `l2GasPriceOracleAddress` in [rollup/sync_service.go](https://github.com/omgnetwork/optimism/blob/9e07036f61a02ffb23eff405c3274f5f24950ad5/l2geth/rollup/sync_service.go#L49).
+### Connect to EC2 Instance
 
-```go
-var (
-	// l2GasPriceSlot refers to the storage slot that the L2 gas price is stored
-	// in in the OVM_GasPriceOracle predeploy
-	l2GasPriceSlot = common.BigToHash(big.NewInt(1))
-	// l2GasPriceOracleOwnerSlot refers to the storage slot that the owner of
-	// the OVM_GasPriceOracle is stored in
-	l2GasPriceOracleOwnerSlot = common.BigToHash(big.NewInt(0))
-	// l2GasPriceOracleAddress is the address of the OVM_GasPriceOracle
-	// predeploy
-	// l2GasPriceOracleAddress = common.HexToAddress("0x420000000000000000000000000000000000000F")
-  l2GasPriceOracleAddress = common.HexToAddress("OVM_GasPriceOracleAddress")
-)
 ```
+ssh -i "KEY.pem" ubuntu@IP.compute-1.amazonaws.com
+```
+
+### Update Parameters
+
+All docker configuration files are in `omgx-mainnet/production-v1`. There are four files:
+
+*  `docker-compose-gas-oracle.yml` - Gas Oracle Service
+
+* `docker-compose-mainnet.yml` - Main Service
+
+  It has `deployer`, `omgx-deployer`, `data-transport-layer` and `l2geth` services
+
+* `docker-compose-mainnet-relative.yml` - Secondary service
+
+  It has `batch-submitter`, `message-relayer` and `message-relayer-fast` service
+
+* `docker-compose-transaction-monitor.yml` - Main Monitor service
+
+* `docker-compose-monitor.yml` - Datadog Monitor Service
+
+If you don't update or add the `FROM_L2_TRANSACTION_INDEX` in  `docker-compose-mainnet-relative.yml`  before restarting the service, the `message relayer` and `message relayer fast` will scan from the L2 0 block or L2 block number that is set up last time. It takes a really long time to sync up the l2 block. 
+
+[**RECOMMENDATION**]
+
+The `FROM_L2_TRANSACTION_INDEX` should be set to the correct L2 block which doesn‘t have any pending messages before that block. Thus, the `FROM_L2_TRANSACTION_INDEX` variables for the `message relayer` and `message relayer fast` are different.
+
+### Restart Services
+
+```bash
+cd omgx-mainnet/production-v1
+docker-compose -f [docker-compose.yml] down
+```
+
+If you want to delete volume of dtl, please run
+
+```bash
+cd /mnt/efs
+sudo rm -rf ./dtl
+```
+
+Restart services via:
+
+```bash
+docker-compose -f [docker-compose.yml] up -d
+```
+
+> NEVER DELETE `geth` FOLDER IN `/mnt/efs` !
 

@@ -5,7 +5,7 @@ import promBundle from 'express-prom-bundle'
 import { Gauge } from 'prom-client'
 import cors from 'cors'
 import { BigNumber } from 'ethers'
-import { JsonRpcProvider } from '@ethersproject/providers'
+import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { LevelUp } from 'levelup'
 import * as Sentry from '@sentry/node'
 import * as Tracing from '@sentry/tracing'
@@ -80,8 +80,8 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     app: express.Express
     server: any
     db: TransportDB
-    l1RpcProvider: JsonRpcProvider
-    l2RpcProvider: JsonRpcProvider
+    l1RpcProvider: StaticJsonRpcProvider
+    l2RpcProvider: StaticJsonRpcProvider
     baseBlock: number
     baseTime: number
   } = {} as any
@@ -94,12 +94,12 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
     this.state.db = new TransportDB(this.options.db)
     this.state.l1RpcProvider =
       typeof this.options.l1RpcProvider === 'string'
-        ? new JsonRpcProvider(this.options.l1RpcProvider)
+        ? new StaticJsonRpcProvider(this.options.l1RpcProvider)
         : this.options.l1RpcProvider
 
     this.state.l2RpcProvider =
       typeof this.options.l2RpcProvider === 'string'
-        ? new JsonRpcProvider(this.options.l2RpcProvider)
+        ? new StaticJsonRpcProvider(this.options.l2RpcProvider)
         : this.options.l2RpcProvider
 
     this.state.baseBlock = 0
