@@ -105,7 +105,7 @@ Resources:
             com.datadoghq.ad.init_configs: '[{}]'
             com.datadoghq.ad.logs: '[{"source": "omgx_gas-price-oracle", "service": "omgx_gas-price-oracle"}]'
           Essential: true
-          Memory: "64"
+          Memory: "128"
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
       Family: "omgx_gas-price-oracle"

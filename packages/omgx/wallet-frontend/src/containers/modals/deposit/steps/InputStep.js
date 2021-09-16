@@ -13,10 +13,11 @@ import { selectLoading } from 'selectors/loadingSelector'
 import { selectSignatureStatus_depositTRAD } from 'selectors/signatureSelector'
 import { amountToUsd, logAmount, powAmount } from 'util/amountConvert'
 
-import * as S from './InputSteps.styles'
 import { selectLookupPrice } from 'selectors/lookupSelector'
 import { Typography, useMediaQuery } from '@material-ui/core'
 import { useTheme } from '@emotion/react'
+import { WrapperActionsModal } from 'components/modal/Modal.styles'
+import { Box } from '@material-ui/system'
 
 function InputStep({ handleClose, token }) {
 
@@ -93,31 +94,32 @@ function InputStep({ handleClose, token }) {
 
   return (
     <>
-      <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
-        {`Deposit ${token && token.symbol ? token.symbol : ''}`}
-      </Typography>
+      <Box>
+        <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
+          {`Deposit ${token && token.symbol ? token.symbol : ''}`}
+        </Typography>
 
-      <Input
-        label="Enter amount to deposit"
-        placeholder="0.0000"
-        value={value}
-        type="number"
-        onChange={(i)=>setAmount(i.target.value)}
-        unit={token.symbol}
-        maxValue={logAmount(token.balance, token.decimals)}
-        variant="standard"
-        newStyle
-      />
+        <Input
+          label="Enter amount to deposit"
+          placeholder="0.0000"
+          value={value}
+          type="number"
+          onChange={(i)=>setAmount(i.target.value)}
+          unit={token.symbol}
+          maxValue={logAmount(token.balance, token.decimals)}
+          variant="standard"
+          newStyle
+        />
 
-      {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
-        <h3>
-          {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
-        </h3>
-      )}
+        {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+          <Typography variant="body1" sx={{mt: 2, fontWeight: 700}}>
+            {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
+          </Typography>
+        )}
 
-      {renderGasPicker}
-
-      <S.WrapperActions>
+        {renderGasPicker}
+      </Box>
+      <WrapperActionsModal>
         <Button
           onClick={handleClose}
           color="neutral"
@@ -138,7 +140,7 @@ function InputStep({ handleClose, token }) {
         >
           Deposit
         </Button>
-      </S.WrapperActions>
+      </WrapperActionsModal>
     </>
   )
 }

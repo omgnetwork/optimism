@@ -28,7 +28,7 @@ const main = async () => {
     throw new Error(`must provide l2 transaction hash`)
   }
 
-  const l1RpcProvider = new ethers.providers.JsonRpcProvider(l1RpcProviderUrl)
+  const l1RpcProvider = new ethers.providers.StaticJsonRpcProvider(l1RpcProviderUrl)
   const l1Wallet = new ethers.Wallet(l1PrivateKey, l1RpcProvider)
   const l1WalletBalance = await l1Wallet.getBalance()
   console.log(`relayer address: ${l1Wallet.address}`)

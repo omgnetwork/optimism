@@ -93,7 +93,7 @@ function HistoryPage() {
           optionList={tabList}
           isSearch={true}
         />
-        <Box display="flex" 
+        <Box display="flex"
           alignItems="center"
           justifyContent="space-around"
           >

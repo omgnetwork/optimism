@@ -395,16 +395,13 @@ class NetworkService {
         return 'wrongnetwork'
       }
 
-      //dispatch(setLayer(this.L1orL2))
-      //const dispatch = useDispatch();
-
       // defines the set of possible networks
       const nw = getAllNetworks()
-
-      this.L1Provider = new ethers.providers.JsonRpcProvider(
+      
+      this.L1Provider = new ethers.providers.StaticJsonRpcProvider(
         nw[masterSystemConfig]['L1']['rpcUrl']
       )
-      this.L2Provider = new ethers.providers.JsonRpcProvider(
+      this.L2Provider = new ethers.providers.StaticJsonRpcProvider(
         nw[masterSystemConfig]['L2']['rpcUrl']
       )
 
@@ -1227,11 +1224,12 @@ class NetworkService {
           gasPrice: ethers.utils.parseUnits(`${gasPrice}`, 'wei'),
         }
       )
-      //closes the Deposit modal
-      updateSignatureStatus_depositTRAD(true)
       
       //at this point the tx has been submitted, and we are waiting...
       await depositTxStatus.wait()
+
+      //closes the Deposit modal
+      updateSignatureStatus_depositTRAD(true)
 
       const [l1ToL2msgHash] = await this.watcher.getMessageHashesFromL1Tx(
         depositTxStatus.hash
@@ -1416,12 +1414,12 @@ class NetworkService {
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString())
       )
-      
-      //closes the Deposit modal
-      updateSignatureStatus_depositTRAD(true)
-      
+            
       //at this point the tx has been submitted, and we are waiting...
       await depositTxStatus.wait()
+
+      //closes the Deposit modal
+      updateSignatureStatus_depositTRAD(true)
 
       const [l1ToL2msgHash] = await this.watcher.getMessageHashesFromL1Tx(
         depositTxStatus.hash
@@ -1480,9 +1478,12 @@ class NetworkService {
       this.L1GasLimit,
       utils.formatBytes32String(new Date().getTime().toString())
     )
+
+    //everything submitted... waiting
+    await tx.wait()
+
     //can close window now
     updateSignatureStatus_exitTRAD(true)    
-    await tx.wait()
 
     const [L2ToL1msgHash] = await this.watcher.getMessageHashesFromL2Tx(tx.hash)
     console.log(' got L2->L1 message hash', L2ToL1msgHash)
@@ -1492,7 +1493,10 @@ class NetworkService {
 
   /***********************************************/
   /*****                  Fee                *****/
-  /***********************************************/
+  /***** Fees are reported as integers, 
+   * where every int 
+   * represent 0.1%
+  *********/
 
   // Total exit fee
   async getTotalFeeRate() {
@@ -1505,8 +1509,11 @@ class NetworkService {
       L2LPContract.userRewardFeeRate(),
       L2LPContract.ownerRewardFeeRate()
     ])
-    const feeRate = Number(userRewardFeeRate) + Number(ownerRewardFeeRate);
-    return ((feeRate / 1000) * 100).toFixed(0)
+    //console.log("Fee URFR:",userRewardFeeRate.toString())
+    //console.log("Fee ORFR:",ownerRewardFeeRate.toString())
+    const feeRate = Number(userRewardFeeRate) + Number(ownerRewardFeeRate)
+    //console.log("FeeRate:",feeRate)
+    return (feeRate / 10).toFixed(1)
   }
 
   async getUserRewardFeeRate() {
@@ -1516,7 +1523,7 @@ class NetworkService {
       this.L2Provider
     )
     const feeRate = await L2LPContract.userRewardFeeRate()
-    return ((feeRate / 1000) * 100).toFixed(1)
+    return (feeRate / 10).toFixed(1)
   }
 
   /*****************************************************/
@@ -1793,9 +1800,10 @@ class NetworkService {
       currency === this.L1_ETH_Address ? { value: depositAmount } : {}
     )
 
-    updateSignatureStatus_depositLP(true)
     //at this point the tx has been submitted, and we are waiting...
     await depositTX.wait()
+
+    updateSignatureStatus_depositLP(true)
 
     // Waiting the response from L2
     const [l1ToL2msgHash] = await this.watcher.getMessageHashesFromL1Tx(
@@ -1895,9 +1903,11 @@ class NetworkService {
       currencyAddress
     )
 
-    updateSignatureStatus_exitLP(true)
     //at this point the tx has been submitted, and we are waiting...
     await depositTX.wait()
+
+    //closes the modal
+    updateSignatureStatus_exitLP(true)
 
     // Waiting for the response from L1
     const [L2ToL1msgHash] = await this.fastWatcher.getMessageHashesFromL2Tx(
