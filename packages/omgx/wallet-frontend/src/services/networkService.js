@@ -395,16 +395,13 @@ class NetworkService {
         return 'wrongnetwork'
       }
 
-      //dispatch(setLayer(this.L1orL2))
-      //const dispatch = useDispatch();
-
       // defines the set of possible networks
       const nw = getAllNetworks()
-
-      this.L1Provider = new ethers.providers.JsonRpcProvider(
+      
+      this.L1Provider = new ethers.providers.StaticJsonRpcProvider(
         nw[masterSystemConfig]['L1']['rpcUrl']
       )
-      this.L2Provider = new ethers.providers.JsonRpcProvider(
+      this.L2Provider = new ethers.providers.StaticJsonRpcProvider(
         nw[masterSystemConfig]['L2']['rpcUrl']
       )
 
