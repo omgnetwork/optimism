@@ -44,8 +44,6 @@ export const submitToVault = async (
   provider: StaticJsonRpcProvider
 ): Promise<TransactionReceipt> => {
   if (call.type === 'AppendQueueBatch') {
-    // const response = await fetch(batchSigner.vault_addr, {method: 'POST', body: 'a=1'});
-    // const data = await response.json();
     // appendQueueBatch is currently disabled.
   } else if (call.type === 'AppendStateBatch') {
     const url =

@@ -110,10 +110,7 @@ export abstract class BatchSubmitter {
 
   protected async _hasEnoughETHToCoverGasCosts(): Promise<boolean> {
     const address = await getBatchSignerAddress(this.batchSigner)
-    const balance = await getBalance(
-      this.l1Provider,
-      await getBatchSignerAddress(this.batchSigner)
-    )
+    const balance = await getBalance(this.l1Provider, address)
     const ether = utils.formatEther(balance)
     const num = parseFloat(ether)
 

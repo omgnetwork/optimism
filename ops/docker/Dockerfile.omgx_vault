@@ -45,5 +45,5 @@ COPY --from=build /app/bin/SHA256SUMS /vault/plugins/SHA256SUMS
 COPY --from=build /app/vault.sh /vault/vault.sh
 COPY --from=build /app/vault.hcl /vault/config/
 COPY --from=build /app/vault.hcl /vault/vault.hcl
-
+COPY ./ops/scripts/provision_vault.sh .
 HEALTHCHECK CMD nc -zv 127.0.0.1 8900 || exit 1
