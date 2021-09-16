@@ -44,7 +44,7 @@ jobs:
       - name: Rename and retag the Optimism images
         working-directory: ./ops
         run: |
-          for i in $(docker images --format "{{.Repository}}:{{.Tag}}" | grep ethereumoptimism); do
+          for i in $(docker images --format "{{.Repository}}:{{.Tag}}" | grep omgx); do
             docker image tag "$i" omgx/$(echo $i | awk -F'/' '{print $2}' | awk -F':' '{print $1}'):${{ steps.tag.outputs.VERSION }}
           done
           docker images
