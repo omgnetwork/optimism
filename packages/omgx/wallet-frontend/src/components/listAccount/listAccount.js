@@ -82,7 +82,7 @@ class ListAccount extends React.Component {
 
               <S.TableCell>
                 <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div" sx={{fontWeight:"700"}}>
-                  {`${logAmount(token.balance, 18, 2)}`}
+                  {`${logAmount(token.balance, token.decimals, 2)}`}
                 </S.TextTableCell>
               </S.TableCell>
 
