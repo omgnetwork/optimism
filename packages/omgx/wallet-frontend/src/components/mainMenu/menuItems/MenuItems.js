@@ -8,9 +8,11 @@ import WalletIcon from 'components/icons/WalletIcon'
 import HistoryIcon from 'components/icons/HistoryIcon'
 import NFTIcon from 'components/icons/NFTIcon'
 import DAOIcon from 'components/icons/DAOIcon'
-import { useDispatch, useSelector } from 'react-redux';
-import { selectModalState } from 'selectors/uiSelector';
-import { setPage } from 'actions/uiAction';
+import HelpIcon from 'components/icons/LearnIcon'
+
+import { useDispatch, useSelector } from 'react-redux'
+import { selectModalState } from 'selectors/uiSelector'
+import { setPage } from 'actions/uiAction'
 
 function MenuItems ({setOpen }) {
 
@@ -19,14 +21,15 @@ function MenuItems ({setOpen }) {
   const isLight = theme.palette.mode === 'light'
   const colorIcon = theme.palette.common[isLight ? 'black' : 'white']
   const pageDisplay = useSelector(selectModalState('page'))
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
 
   const iconObj = {
     WalletIcon,
     EarnIcon,
     HistoryIcon,
     NFTIcon,
-    DAOIcon
+    DAOIcon,
+    HelpIcon
   }
 
   return (

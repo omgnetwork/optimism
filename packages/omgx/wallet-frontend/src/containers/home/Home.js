@@ -49,11 +49,19 @@ import TransferDaoModal from 'containers/modals/dao/TransferDaoModal'
 import DelegateDaoModal from 'containers/modals/dao/DelegateDaoModal'
 import NewProposalModal from 'containers/modals/dao/NewProposalModal'
 
-import { fetchDaoBalance, fetchDaoVotes, fetchDaoProposals, getProposalThreshold } from 'actions/daoAction'
+import { 
+  fetchDaoBalance, 
+  fetchDaoVotes, 
+  fetchDaoProposals, 
+  getProposalThreshold 
+} from 'actions/daoAction'
 
 //Wallet Functions
 import Account from 'containers/account/Account'
 import Transactions from 'containers/transactions/History'
+
+//Help page
+import Help from 'containers/help/Help'
 
 //NFT Example Page
 import NFT from 'containers/nft/Nft'
@@ -203,6 +211,9 @@ function Home () {
           }
           {pageDisplay === "DAO" &&
             <DAO/>
+          }
+          {pageDisplay === "Help" &&
+            <Help/>
           }
         </Container>
       </Box>
