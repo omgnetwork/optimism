@@ -28,9 +28,8 @@ class FarmDepositModal extends React.Component {
     this.state = {
       open,
       stakeToken,
-      stakeValue: null,
+      stakeValue: '',
       stakeValueValid: false,
-      //stakeValueBadEntry: false,
       // allowance
       approvedAllowance: 0,
       // loading
@@ -64,11 +63,6 @@ class FarmDepositModal extends React.Component {
 
   getMaxTransferValue () {
     const { stakeToken } = this.state
-    // const transferingBalanceObject = (stakeToken.L1orL2Pool === 'L1LP' ? layer1Balance : layer2Balance)
-    //   .find(i => i.currency === stakeToken.currency);
-    // if (!transferingBalanceObject) {
-    //   return;
-    // }
     return logAmount(stakeToken.balance, stakeToken.decimals)
   }
 
@@ -85,13 +79,11 @@ class FarmDepositModal extends React.Component {
         this.setState({
           stakeValue: value,
           stakeValueValid: true,
-          //stakeValueBadEntry: false,
         })
     } else {
       this.setState({
-        stakeValue: null,
+        stakeValue: value,
         stakeValueValid: false,
-        //stakeValueBadEntry: true,
       })
     }
   }

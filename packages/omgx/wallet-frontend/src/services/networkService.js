@@ -524,22 +524,6 @@ class NetworkService {
         this.provider.getSigner()
       )
 
-      //this one is always there...
-      //await addNFTContract(this.ERC721Contract.address)
-
-      //yes, this looks weird, but think before you change it...
-      //there may be some in the cache, and this makes sure we get them all, and if not,
-      //we at least have the basic one
-      //const NFTcontracts = Object.values(await getNFTContracts())
-
-      //Add factories based on cached contract addresses
-      //this information is also used for the balance lookup
-      //for(var i = 0; i < NFTcontracts.length; i++) {
-      // const address = NFTcontracts[i]
-      //  console.log("Adding NFT contract:",address)
-      //  this.addNFTFactoryNS( address )
-      //}
-
       this.watcher = new Watcher({
         l1: {
           provider: this.L1Provider,
@@ -590,13 +574,6 @@ class NetworkService {
 
       }
 
-/*
-  this.comp = null
-  this.delegate = null
-  this.delegator = null
-  this.timelock = null
-*/
-
       this.bindProviderListeners()
 
       return 'enabled'
@@ -606,48 +583,21 @@ class NetworkService {
     }
   }
 
-  // async checkStatus() {
-  //   return {
-  //     connection: true,
-  //     byzantine: false,
-  //     watcherSynced: true,
-  //     lastSeenBlock: 0,
-  //   }
-  // }
-
   async addL2Network() {
     
+    console.log("MetaMask: Adding network to MetaMask")
+
     const nw = getAllNetworks()
-    const masterConfig = store.getState().setup.masterConfig;
-    let chainParam = {}
+    const masterConfig = store.getState().setup.masterConfig
     
-    if (masterConfig === 'mainnet') {
-      chainParam = {
-        chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
-        chainName: nw.mainnet.L2.name,
-        rpcUrls: [nw.mainnet.L2.rpcUrl],
-      }
-    } else if (masterConfig === 'rinkeby') {
-      chainParam = {
-        chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
-        chainName: nw.rinkeby.L2.name,
-        rpcUrls: [nw.rinkeby.L2.rpcUrl],
-      }
-    } else if (masterConfig === 'rinkeby_integration') {
-      chainParam = {
-        chainId: '0x' + nw.rinkeby_integration.L2.chainId.toString(16),
-        chainName: nw.rinkeby_integration.L2.name,
-        rpcUrls: [nw.rinkeby_integration.L2.rpcUrl],
-      }
-    } else if (masterConfig === 'local') {
-      chainParam = {
-        chainId: '0x' + nw.local.L2.chainId.toString(16),
-        chainName: nw.local.L2.name,
-        rpcUrls: [nw.local.L2.rpcUrl],
-      }
+    const chainParam = {
+      chainId: '0x' + nw[masterConfig].L2.chainId.toString(16),
+      chainName: nw[masterConfig].L2.name,
+      rpcUrls: [nw[masterConfig].L2.rpcUrl],
+      blockExplorerUrls: [nw[masterConfig].L2.blockExplorer.slice(0, -1)],
     }
-    
-    console.log("MetaMask: Trying to add ", chainParam)
+
+    console.log("MetaMask: Adding ", chainParam)
     
     // connect to the wallet
     this.provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -675,6 +625,7 @@ class NetworkService {
       chainId: '0x' + nw[masterConfig].L2.chainId.toString(16),
       chainName: nw[masterConfig].L2.name,
       rpcUrls: [nw[masterConfig].L2.rpcUrl],
+      blockExplorerUrls: [nw[masterConfig].L2.blockExplorer.slice(0, -1)],
     }
 
     // connect to the wallet
