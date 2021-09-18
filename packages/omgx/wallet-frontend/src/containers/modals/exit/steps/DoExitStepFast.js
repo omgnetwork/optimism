@@ -118,7 +118,7 @@ function DoExitStepFast({ handleClose, token }) {
     }
   }, [ signatureStatus, exitLoading, handleClose ])
 
-  const label = 'There is a ' + feeRate + '% fee.'
+  const feeLabel = 'There is a ' + feeRate + '% fee.'
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -132,7 +132,7 @@ function DoExitStepFast({ handleClose, token }) {
           Fast Exit
         </Typography>
 
-        <Typography variant="body2" sx={{mb: 3}}>{label}</Typography>
+        <Typography variant="body2" sx={{mb: 3}}>{feeLabel}</Typography>
 
         <Input
           label={`Enter amount to exit`}

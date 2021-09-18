@@ -7,7 +7,7 @@ import { getFarmInfo } from 'actions/farmAction';
 
 import Button from 'components/button/Button';
 import Modal from 'components/modal/Modal';
-import InputSelect from 'components/inputselect/InputSelect';
+import Input from 'components/input/Input';
 import { logAmount } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
@@ -37,11 +37,12 @@ class FarmWithdrawModal extends React.Component {
   }
 
   async componentDidUpdate(prevState) {
-    const { open, balance } = this.props;
-    const { withdrawToken, userInfo } = this.props.farm;
+
+    const { open, balance } = this.props
+    const { withdrawToken, userInfo } = this.props.farm
 
     if (prevState.open !== open) {
-      this.setState({ open });
+      this.setState({ open })
     }
 
     if (!isEqual(prevState.farm.withdrawToken, withdrawToken)) {
@@ -102,45 +103,34 @@ class FarmWithdrawModal extends React.Component {
   }
 
   render() {
+
     const {
       open,
-      withdrawToken, withdrawValue,
+      withdrawToken, 
+      withdrawValue,
       userInfo,
-      layer1Balance, layer2Balance,
+      layer1Balance, 
+      layer2Balance,
       LPBalance,
       loading,
-    } = this.state;
-
-
-    const selectOptions = (withdrawToken.L1orL2Pool === 'L1LP' ? layer1Balance : layer2Balance)
-      .reduce((acc, cur) => {
-      if (cur.currency.toLowerCase() === withdrawToken.currency.toLowerCase()) {
-        acc.push({
-          title: cur.symbol,
-          value: cur.currency,
-          subTitle: `Balance: ${logAmount(userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency].amount, cur.decimals)}`
-        })
-      }
-      return acc;
-    }, []);
+    } = this.state
 
     return (
-      <Modal open={open} maxWidth="md" onClose={()=>{this.handleClose()}}>
+      
+      <Modal 
+        open={open} 
+        onClose={()=>{this.handleClose()}}
+      >
+        
         <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
           Withdraw {`${withdrawToken.symbol}`}
         </Typography>
 
-        <InputSelect
-          label='Amount to withdraw'
-          placeholder={0}
+        <Input
+          placeholder={`Amount to withdraw`}
           value={withdrawValue}
           type="number"
-          onChange={i => {
-            this.setState({withdrawValue: i.target.value});
-          }}
-          onSelect={i => {}}
-          selectOptions={selectOptions}
-          selectValue={withdrawToken.currency}
+          onChange={i=>{this.setState({withdrawValue: i.target.value})}}
           unit={withdrawToken.symbol}
           maxValue={this.getMaxTransferValue()}
           disabledSelect={true}

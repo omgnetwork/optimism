@@ -14,7 +14,8 @@ import uniLogo from 'images/uni.png';
 import omgLogo from 'images/omg.png';
 
 export const getCoinImage = (symbol) => {
-  let logo = null;
+  
+  let logo = null
 
   switch (symbol) {
     case "TEST":
