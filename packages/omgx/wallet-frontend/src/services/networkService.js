@@ -585,40 +585,18 @@ class NetworkService {
 
   async addL2Network() {
     
+    console.log("MetaMask: Adding network to MetaMask")
+
     const nw = getAllNetworks()
     const masterConfig = store.getState().setup.masterConfig
-    let chainParam = {}
     
-    if (masterConfig === 'mainnet') {
-      chainParam = {
-        chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
-        chainName: nw.mainnet.L2.name,
-        rpcUrls: [nw.mainnet.L2.rpcUrl],
-        blockExplorerUrls: [nw.mainnet.L2.blockExplorer],
-      }
-    } else if (masterConfig === 'rinkeby') {
-      chainParam = {
-        chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
-        chainName: nw.rinkeby.L2.name,
-        rpcUrls: [nw.rinkeby.L2.rpcUrl],
-        blockExplorerUrls: [nw.rinkeby.L2.blockExplorer],
-      }
-    } else if (masterConfig === 'rinkeby_integration') {
-      chainParam = {
-        chainId: '0x' + nw.rinkeby_integration.L2.chainId.toString(16),
-        chainName: nw.rinkeby_integration.L2.name,
-        rpcUrls: [nw.rinkeby_integration.L2.rpcUrl],
-        blockExplorerUrls: [nw.rinkeby_integration.L2.blockExplorer],
-      }
-    } else if (masterConfig === 'local') {
-      chainParam = {
-        chainId: '0x' + nw.local.L2.chainId.toString(16),
-        chainName: nw.local.L2.name,
-        rpcUrls: [nw.local.L2.rpcUrl],
-        blockExplorerUrls: [nw.local.L2.blockExplorer],
-      }
+    const chainParam = {
+      chainId: '0x' + nw[masterConfig].L2.chainId.toString(16),
+      chainName: nw[masterConfig].L2.name,
+      rpcUrls: [nw[masterConfig].L2.rpcUrl],
+      blockExplorerUrls: [nw[masterConfig].L2.blockExplorer.slice(0, -1)],
     }
-    
+
     console.log("MetaMask: Adding ", chainParam)
     
     // connect to the wallet
@@ -647,6 +625,7 @@ class NetworkService {
       chainId: '0x' + nw[masterConfig].L2.chainId.toString(16),
       chainName: nw[masterConfig].L2.name,
       rpcUrls: [nw[masterConfig].L2.rpcUrl],
+      blockExplorerUrls: [nw[masterConfig].L2.blockExplorer.slice(0, -1)],
     }
 
     // connect to the wallet

@@ -19,7 +19,7 @@ class FarmWithdrawModal extends React.Component {
   constructor(props) {
     super(props);
 
-    const { open, balance } = this.props;
+    const { open /*, balance*/ } = this.props;
     const { withdrawToken, userInfo } = this.props.farm;
 
     this.state = {
@@ -28,8 +28,8 @@ class FarmWithdrawModal extends React.Component {
       withdrawValue: '',
       // balance
       userInfo,
-      layer1Balance: balance.layer1,
-      layer2Balance: balance.layer2,
+      //layer1Balance: balance.layer1,
+      //layer2Balance: balance.layer2,
       LPBalance: 0,
       // loading
       loading: false,
@@ -38,7 +38,7 @@ class FarmWithdrawModal extends React.Component {
 
   async componentDidUpdate(prevState) {
 
-    const { open, balance } = this.props
+    const { open /*, balance*/ } = this.props
     const { withdrawToken, userInfo } = this.props.farm
 
     if (prevState.open !== open) {
@@ -59,16 +59,16 @@ class FarmWithdrawModal extends React.Component {
       this.setState({ userInfo });
     }
 
-    if (!isEqual(prevState.balance, balance)) {
-      this.setState({
-        layer1Balance: balance.layer1,
-        layer2Balance: balance.layer2
-      });
-    }
+    // if (!isEqual(prevState.balance, balance)) {
+    //   this.setState({
+    //     layer1Balance: balance.layer1,
+    //     layer2Balance: balance.layer2
+    //   });
+    // }
   }
 
   getMaxTransferValue () {
-    const { userInfo, withdrawToken } = this.state;
+    const { userInfo, withdrawToken } = this.state
     let transferingBalance = 0
     if (typeof userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency] !== 'undefined') {
       transferingBalance = userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency].amount
@@ -108,9 +108,6 @@ class FarmWithdrawModal extends React.Component {
       open,
       withdrawToken, 
       withdrawValue,
-      userInfo,
-      layer1Balance, 
-      layer2Balance,
       LPBalance,
       loading,
     } = this.state
