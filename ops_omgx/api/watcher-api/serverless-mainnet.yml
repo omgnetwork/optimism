@@ -82,18 +82,18 @@ functions:
           cors: true
     layers:
       - ${file(env-mainnet.yml):LAYERS}
-  watcher__getL1GasPrice:
-    handler: watcher__getL1GasPrice.watcher__getL1GasPrice
-    memorySize: 10240 # optional, in MB, default is 1024
-    timeout: 10 # optional, in seconds, default is 6
-    vpc:
-      subnetIds:
-        - ${file(env-mainnet.yml):SUBNET_ID_3}
-        - ${file(env-mainnet.yml):SUBNET_ID_4}
-    events:
-      - http:
-          path: get.l1.gasPrice
-          method: get
-          cors: true
-    layers:
-      - ${file(env-mainnet.yml):LAYERS}
+  # watcher__getL1GasPrice:
+  #   handler: watcher__getL1GasPrice.watcher__getL1GasPrice
+  #   memorySize: 10240 # optional, in MB, default is 1024
+  #   timeout: 10 # optional, in seconds, default is 6
+  #   vpc:
+  #     subnetIds:
+  #       - ${file(env-mainnet.yml):SUBNET_ID_3}
+  #       - ${file(env-mainnet.yml):SUBNET_ID_4}
+  #   events:
+  #     - http:
+  #         path: get.l1.gasPrice
+  #         method: get
+  #         cors: true
+  #   layers:
+  #     - ${file(env-mainnet.yml):LAYERS}
