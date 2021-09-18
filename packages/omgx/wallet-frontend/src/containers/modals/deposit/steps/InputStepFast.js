@@ -15,10 +15,12 @@ limitations under the License. */
 
 import { useTheme } from '@emotion/react'
 import { Typography, useMediaQuery } from '@material-ui/core'
+import { Box } from '@material-ui/system'
 import { depositL1LP, approveERC20 } from 'actions/networkAction'
 import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
+import { WrapperActionsModal } from 'components/modal/Modal.styles'
 
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -29,7 +31,6 @@ import { selectSignatureStatus_depositLP } from 'selectors/signatureSelector'
 
 import networkService from 'services/networkService'
 import { powAmount, logAmount, amountToUsd } from 'util/amountConvert'
-import * as S from './InputSteps.styles'
 
 function InputStepFast({ handleClose, token }) {
 
@@ -44,6 +45,8 @@ function InputStepFast({ handleClose, token }) {
   const approvalLoading = useSelector(selectLoading(['APPROVE/CREATE']))
   const lookupPrice = useSelector(selectLookupPrice)
   const signatureStatus = useSelector(selectSignatureStatus_depositLP)
+  const maxValue = logAmount(token.balance, token.decimals)
+  const valueIsValid = value > 0 && value <= maxValue
 
   function setAmount(value) {
     if (
@@ -155,56 +158,58 @@ function InputStepFast({ handleClose, token }) {
   } else if (approvalLoading) {
     buttonLabel_2 = "Approving..."
   }
-  
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <>
-      <Typography variant="h2" sx={{fontWeight: 700, mb: 1}}>
-        Fast Deposit
-      </Typography>
-
-      <Typography variant="body2" sx={{mb: 3}}>{label}</Typography>
-
-      <Input
-        label={`Enter amount to deposit`}
-        placeholder="0.0000"
-        value={value}
-        type="number"
-        onChange={(i)=>{setAmount(i.target.value)}}
-        unit={token.symbol}
-        maxValue={logAmount(token.balance, token.decimals)}
-        variant="standard"
-        newStyle
-      />
-
-      {token && token.symbol === 'ETH' && (
-        <Typography variant="body2" sx={{mt: 2}}>
-          {value && `You will receive ${receivableAmount(value)} oETH ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
+      <Box>
+        <Typography variant="h2" sx={{fontWeight: 700, mb: 1}}>
+          Fast Deposit
         </Typography>
-      )}
 
-      {token && token.symbol !== 'ETH' && (
-        <Typography variant="body2" sx={{mt: 2}}>
-          {value && `You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
-        </Typography>
-      )}
+        <Typography variant="body2" sx={{mb: 3}}>{label}</Typography>
 
-      {Number(LPBalance) < Number(value) && (
-        <Typography variant="body2" sx={{ color: 'red', my: 2}}>
-          The liquidity pool balance (of {LPBalance}) is too low to cover your fast deposit. Please
-          use the traditional deposit or reduce the amount.
-        </Typography>
-      )}
+        <Input
+          label={`Enter amount to deposit`}
+          placeholder="0.0000"
+          value={value}
+          type="number"
+          onChange={(i)=>{setAmount(i.target.value)}}
+          unit={token.symbol}
+          maxValue={maxValue}
+          variant="standard"
+          newStyle
+        />
 
-      {(depositLoading || approvalLoading) && (
-        <Typography variant="body2" sx={{mt: 2, color: 'green'}}>
-          This window will automatically close when your transaction has been signed and submitted.
-        </Typography>
-      )}
+        {valueIsValid && token && token.symbol === 'ETH' && (
+          <Typography variant="body2" sx={{mt: 2}}>
+            {value && `You will receive ${receivableAmount(value)} oETH ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
+          </Typography>
+        )}
 
-      <S.WrapperActions>
+        {valueIsValid && token && token.symbol !== 'ETH' && (
+          <Typography variant="body2" sx={{mt: 2}}>
+            {value && `You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
+          </Typography>
+        )}
+
+        {Number(LPBalance) < Number(value) && (
+          <Typography variant="body2" sx={{ color: 'red', my: 2}}>
+            The liquidity pool balance (of {LPBalance}) is too low to cover your fast deposit. Please
+            use the traditional deposit or reduce the amount.
+          </Typography>
+        )}
+
+        {(depositLoading || approvalLoading) && (
+          <Typography variant="body2" sx={{mt: 2, color: 'green'}}>
+            This window will automatically close when your transaction has been signed and submitted.
+          </Typography>
+        )}
+      </Box>
+
+      <WrapperActionsModal>
         <Button
           onClick={handleClose}
           color="neutral"
@@ -226,7 +231,7 @@ function InputStepFast({ handleClose, token }) {
         >
           {buttonLabel_2}
         </Button>
-      </S.WrapperActions>
+      </WrapperActionsModal>
     </>
   )
 }

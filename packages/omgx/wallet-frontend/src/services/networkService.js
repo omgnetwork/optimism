@@ -19,6 +19,7 @@ import { parseUnits, parseEther, formatEther } from '@ethersproject/units'
 import { Watcher } from '@eth-optimism/watcher'
 
 import { ethers, BigNumber, utils, ContractFactory } from 'ethers'
+
 import store from 'store'
 
 import { orderBy } from 'lodash'
@@ -77,7 +78,6 @@ import omgxWatcherAxiosInstance from 'api/omgxWatcherAxios'
 import addressAxiosInstance from 'api/addressAxios'
 import addressOMGXAxiosInstance from 'api/addressOMGXAxios'
 import coinGeckoAxiosInstance from 'api/coinGeckoAxios'
-import ethGasStationAxiosInstance from 'api/ethGasStationAxios'
 
 //All the current addresses for fallback purposes, or live network
 const localAddresses = require(`../deployment/local/addresses.json`)
@@ -395,16 +395,13 @@ class NetworkService {
         return 'wrongnetwork'
       }
 
-      //dispatch(setLayer(this.L1orL2))
-      //const dispatch = useDispatch();
-
       // defines the set of possible networks
       const nw = getAllNetworks()
-
-      this.L1Provider = new ethers.providers.JsonRpcProvider(
+      
+      this.L1Provider = new ethers.providers.StaticJsonRpcProvider(
         nw[masterSystemConfig]['L1']['rpcUrl']
       )
-      this.L2Provider = new ethers.providers.JsonRpcProvider(
+      this.L2Provider = new ethers.providers.StaticJsonRpcProvider(
         nw[masterSystemConfig]['L2']['rpcUrl']
       )
 
@@ -609,14 +606,14 @@ class NetworkService {
     }
   }
 
-  async checkStatus() {
-    return {
-      connection: true,
-      byzantine: false,
-      watcherSynced: true,
-      lastSeenBlock: 0,
-    }
-  }
+  // async checkStatus() {
+  //   return {
+  //     connection: true,
+  //     byzantine: false,
+  //     watcherSynced: true,
+  //     lastSeenBlock: 0,
+  //   }
+  // }
 
   async addL2Network() {
     
@@ -780,9 +777,9 @@ class NetworkService {
 
     console.log("Getting transactions...")
     
-    let txL1
-    let txL1pending
-    let txL2
+    let txL1 = []
+    let txL1pending = []
+    let txL2 = []
 
     //console.log("trying")
 
@@ -1104,10 +1101,10 @@ class NetworkService {
 
           const UUID = address.substring(1, 6) + '_' + tokenID.toString() + '_' + this.account.substring(1, 6)
 
-          const { url , attributes = []} = await getNftImageUrl(meta[1]);
+          const { url , attributes = []} = await getNftImageUrl(meta[1])
+          
           // Uncomment Just to test locally
           // const { url , attributes = []} = await getNftImageUrl('https://boredapeyachtclub.com/api/mutants/111');
-
           // const { url , attributes = []} = await getNftImageUrl('ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/6190');
           
           const NFT = {
@@ -1214,7 +1211,7 @@ class NetworkService {
   }
 
   //Move ETH from L1 to L2 using the standard deposit system
-  depositETHL2 = async (value = '1', gasPrice) => {
+  depositETHL2 = async (value = '1') => {
 
     updateSignatureStatus_depositTRAD(false)
 
@@ -1223,15 +1220,15 @@ class NetworkService {
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString()),
         {
-          value: parseEther(value),
-          gasPrice: ethers.utils.parseUnits(`${gasPrice}`, 'wei'),
+          value: parseEther(value)
         }
       )
-      //closes the Deposit modal
-      updateSignatureStatus_depositTRAD(true)
       
       //at this point the tx has been submitted, and we are waiting...
       await depositTxStatus.wait()
+
+      //closes the Deposit modal
+      updateSignatureStatus_depositTRAD(true)
 
       const [l1ToL2msgHash] = await this.watcher.getMessageHashesFromL1Tx(
         depositTxStatus.hash
@@ -1261,7 +1258,8 @@ class NetworkService {
       await tx.wait()
       return tx
     } catch (error) {
-      console.log(error)
+      console.log("NS: transfer error:", error)
+      return error
     }
   }
 
@@ -1290,6 +1288,7 @@ class NetworkService {
       )
       return allowance.toString()
     } catch (error) {
+      console.log("NS: checkAllowance error:", error)
       throw new WebWalletError({
         originalError: error,
         customErrorMessage: 'Could not check ERC20 allowance.',
@@ -1330,6 +1329,7 @@ class NetworkService {
 
       return true
     } catch (error) {
+      console.log("NS: approveERC20_L2LP error:", error)
       return false
     }
   }
@@ -1357,6 +1357,7 @@ class NetworkService {
 
       return true
     } catch (error) {
+      console.log("NS: approveERC20_L1LP error:", error)
       return false
     }
   }
@@ -1370,8 +1371,6 @@ class NetworkService {
 
     try {
 
-      console.log("approveERC20")
-
       const ERC20Contract = new ethers.Contract(
         currency,
         contractABI,
@@ -1382,51 +1381,18 @@ class NetworkService {
         approveContractAddress,
         value
       )
+
       await approveStatus.wait()
 
       return true
     } catch (error) {
+      console.log("NS: approveERC20 error:", error)
       return false
     }
   }
 
-  async resetApprove(
-    value,
-    currency,
-    approveContractAddress = this.L1StandardBridgeAddress,
-    contractABI = L1ERC20Json.abi
-  ) {
-    try {
-      const ERC20Contract = new ethers.Contract(
-        currency,
-        contractABI,
-        this.provider.getSigner()
-      )
-
-      const resetApproveStatus = await ERC20Contract.approve(
-        approveContractAddress,
-        0
-      )
-      await resetApproveStatus.wait()
-
-      const approveStatus = await ERC20Contract.approve(
-        approveContractAddress,
-        value
-      )
-      await approveStatus.wait()
-      return true
-    } catch (error) {
-      throw new WebWalletError({
-        originalError: error,
-        customErrorMessage: 'Could not reset allowance for ERC20.',
-        reportToSentry: false,
-        reportToUi: true,
-      })
-    }
-  }
-
   //Used to move ERC20 Tokens from L1 to L2
-  async depositErc20(value, currency, gasPrice, currencyL2) {
+  async depositErc20(value, currency, currencyL2) {
 
     updateSignatureStatus_depositTRAD(false)
 
@@ -1447,12 +1413,12 @@ class NetworkService {
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString())
       )
-      
-      //closes the Deposit modal
-      updateSignatureStatus_depositTRAD(true)
-      
+            
       //at this point the tx has been submitted, and we are waiting...
       await depositTxStatus.wait()
+
+      //closes the Deposit modal
+      updateSignatureStatus_depositTRAD(true)
 
       const [l1ToL2msgHash] = await this.watcher.getMessageHashesFromL1Tx(
         depositTxStatus.hash
@@ -1511,9 +1477,12 @@ class NetworkService {
       this.L1GasLimit,
       utils.formatBytes32String(new Date().getTime().toString())
     )
+
+    //everything submitted... waiting
+    await tx.wait()
+
     //can close window now
     updateSignatureStatus_exitTRAD(true)    
-    await tx.wait()
 
     const [L2ToL1msgHash] = await this.watcher.getMessageHashesFromL2Tx(tx.hash)
     console.log(' got L2->L1 message hash', L2ToL1msgHash)
@@ -1523,7 +1492,10 @@ class NetworkService {
 
   /***********************************************/
   /*****                  Fee                *****/
-  /***********************************************/
+  /***** Fees are reported as integers, 
+   * where every int 
+   * represent 0.1%
+  *********/
 
   // Total exit fee
   async getTotalFeeRate() {
@@ -1536,8 +1508,11 @@ class NetworkService {
       L2LPContract.userRewardFeeRate(),
       L2LPContract.ownerRewardFeeRate()
     ])
-    const feeRate = Number(userRewardFeeRate) + Number(ownerRewardFeeRate);
-    return ((feeRate / 1000) * 100).toFixed(0)
+    //console.log("Fee URFR:",userRewardFeeRate.toString())
+    //console.log("Fee ORFR:",ownerRewardFeeRate.toString())
+    const feeRate = Number(userRewardFeeRate) + Number(ownerRewardFeeRate)
+    //console.log("FeeRate:",feeRate)
+    return (feeRate / 10).toFixed(1)
   }
 
   async getUserRewardFeeRate() {
@@ -1547,7 +1522,7 @@ class NetworkService {
       this.L2Provider
     )
     const feeRate = await L2LPContract.userRewardFeeRate()
-    return ((feeRate / 1000) * 100).toFixed(1)
+    return (feeRate / 10).toFixed(1)
   }
 
   /*****************************************************/
@@ -1824,9 +1799,10 @@ class NetworkService {
       currency === this.L1_ETH_Address ? { value: depositAmount } : {}
     )
 
-    updateSignatureStatus_depositLP(true)
     //at this point the tx has been submitted, and we are waiting...
     await depositTX.wait()
+
+    updateSignatureStatus_depositLP(true)
 
     // Waiting the response from L2
     const [l1ToL2msgHash] = await this.watcher.getMessageHashesFromL1Tx(
@@ -1926,9 +1902,11 @@ class NetworkService {
       currencyAddress
     )
 
-    updateSignatureStatus_exitLP(true)
     //at this point the tx has been submitted, and we are waiting...
     await depositTX.wait()
+
+    //closes the modal
+    updateSignatureStatus_exitLP(true)
 
     // Waiting for the response from L1
     const [L2ToL1msgHash] = await this.fastWatcher.getMessageHashesFromL2Tx(
@@ -1956,47 +1934,13 @@ class NetworkService {
     }
   }
 
-  async getGasPrice({
-    network, networkLayer
-  }) {
-    if(network === 'mainnet' && networkLayer === 'L1') {
-      try {
-        const { data: { safeLow, average, fast } } = await ethGasStationAxiosInstance.get('json/ethgasAPI.json');
-        return {
-          slow: safeLow * 100000000,
-          normal: average * 100000000,
-          fast: fast * 100000000
-        };
-      } catch (error) {
-        //
-      }
-      // if not web3 oracle
-      try {
-        const _medianEstimate = await this.web3.eth.getGasPrice();
-        const medianEstimate = Number(_medianEstimate);
-        return {
-          slow: Math.max(medianEstimate / 2, 1000000000),
-          normal: medianEstimate,
-          fast: medianEstimate * 5
-        };
-      } catch (error) {
-        //
-      }
-    }
-
-    return {
-      slow: 1000000000,
-      normal: 2000000000,
-      fast: 10000000000
-    }
-  }
-
   /***********************************************/
   /*****         DAO Functions               *****/
   /***********************************************/
 
   // get DAO Balance
   async getDaoBalance() {
+    
     if(this.masterSystemConfig !== 'rinkeby' || this.L1orL2 !== 'L2') return
 
     try {
@@ -2047,19 +1991,22 @@ class NetworkService {
   // Proposal Create Threshold
 
   async getProposalThreshold() {
+
+    if(this.masterSystemConfig !== 'rinkeby' || this.L1orL2 !== 'L2') return
+      
     try {
       // get the threshold proposal only in case of L2
       if(this.L1orL2 === 'L2') { 
-        const delegateCheck = await this.delegate.attach(this.delegator.address);
-        let rawThreshold = await delegateCheck.proposalThreshold();
-        return { threshold: formatEther(rawThreshold) };
+        const delegateCheck = await this.delegate.attach(this.delegator.address)
+        let rawThreshold = await delegateCheck.proposalThreshold()
+        return { threshold: formatEther(rawThreshold) }
       }
       else {
-        return { threshold: 0 };
+        return { threshold: 0 }
       }
     } catch (error) {
-      console.log(error);
-      throw new Error(error.message);
+      console.log(error)
+      throw new Error(error.message)
     }
   }
 
@@ -2079,18 +2026,18 @@ class NetworkService {
       )]
       let description = !text ? `# Changing Proposal Threshold to ${votingThreshold} Comp` : text;
       
-      let setGas = {
-        gasPrice: 15000000,
-        gasLimit: 8000000
-      };
+      //let setGas = {
+      //  gasPrice: 15000000,
+      //  gasLimit: 8000000
+      //};
 
       let res = await delegateCheck.propose(
         address,
         values,
         signatures,
         calldatas,
-        description,
-        setGas
+        description//,
+        //setGas
       )
       return res;
     } catch (error) {
@@ -2105,7 +2052,7 @@ class NetworkService {
     if(this.masterSystemConfig !== 'rinkeby' || this.L1orL2 !== 'L2') return
       
     const delegateCheck = await this.delegate.attach(this.delegator.address)
-    
+
     try {
       let proposalList = [];
       const proposalCounts = await delegateCheck.proposalCount()
@@ -2123,12 +2070,15 @@ class NetworkService {
         null
       )
       
-      const descriptionList = await delegateCheck.queryFilter(filter);
+      const descriptionList = await delegateCheck.queryFilter(filter)
+
       for (let i = 0; i < totalProposals; i++) {
         
         let proposalID = descriptionList[i].args[0]
+        
         //this is a number such as 2
         let proposalData = await delegateCheck.proposals(proposalID)
+
         const proposalStates = [
           'Pending',
           'Active',
@@ -2141,6 +2091,8 @@ class NetworkService {
         ]
 
         let state = await delegateCheck.state(proposalID)
+        //console.log("State:", proposalStates[state])
+        
         let againstVotes = parseInt(formatEther(proposalData.againstVotes))
         let forVotes = parseInt(formatEther(proposalData.forVotes))
         let abstainVotes = parseInt(formatEther(proposalData.abstainVotes))
@@ -2150,6 +2102,10 @@ class NetworkService {
 
         let proposal = await delegateCheck.getActions(i+2)
         
+        const { hasVoted } = await delegateCheck.getReceipt(proposalID, this.account)//delegateCheck.address)
+
+        //console.log("Has voted:", hasVoted)
+
         let description = descriptionList[i].args[8].toString()
         
         proposalList.push({
@@ -2162,8 +2118,8 @@ class NetworkService {
            abstainVotes,
            state: proposalStates[state],
            startBlock,
-           endBlock
-
+           endBlock,
+           hasVoted 
         })
 
       }
@@ -2179,10 +2135,13 @@ class NetworkService {
     try {
       
       const delegateCheck = await this.delegate.attach(this.delegator.address);
-      let res = delegateCheck.castVote(id, userVote, {
-        gasPrice: 15000000,
-        gasLimit: 8000000
-      });
+      let res = delegateCheck.castVote(id, userVote 
+      //, 
+      //{
+      //  gasPrice: 15000000,
+      //  gasLimit: 8000000
+      //}
+      )
       return res;
     } catch(error) {
       console.log('Error: cast vote', error);

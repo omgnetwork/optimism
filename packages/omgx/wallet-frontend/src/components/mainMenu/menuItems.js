@@ -29,4 +29,10 @@ export const menuItems = [
     title: "DAO",
     url: "/dao"
   },
+  {
+    key: 'Help',
+    icon: "HelpIcon",
+    title: "Help/FAQ",
+    url: "/help"
+  },
 ]

@@ -66,7 +66,7 @@ interface StateTrieProof {
  * @returns Messages associated with the transaction.
  */
 export const getMessagesByTransactionHash = async (
-  l2RpcProvider: ethers.providers.JsonRpcProvider,
+  l2RpcProvider: ethers.providers.StaticJsonRpcProvider,
   l2CrossDomainMessengerAddress: string,
   l2TransactionHash: string
 ): Promise<CrossDomainMessage[]> => {
@@ -131,7 +131,7 @@ const encodeCrossDomainMessage = (message: CrossDomainMessage): string => {
  * @returns StateBatchAppended event for the given transaction or null if no such event exists.
  */
 export const getStateBatchAppendedEventByTransactionIndex = async (
-  l1RpcProvider: ethers.providers.JsonRpcProvider,
+  l1RpcProvider: ethers.providers.StaticJsonRpcProvider,
   l1StateCommitmentChainAddress: string,
   l2TransactionIndex: number
 ): Promise<ethers.Event | null> => {
@@ -213,7 +213,7 @@ export const getStateBatchAppendedEventByTransactionIndex = async (
  * batch exists.
  */
 export const getStateRootBatchByTransactionIndex = async (
-  l1RpcProvider: ethers.providers.JsonRpcProvider,
+  l1RpcProvider: ethers.providers.StaticJsonRpcProvider,
   l1StateCommitmentChainAddress: string,
   l2TransactionIndex: number
 ): Promise<StateRootBatch | null> => {
@@ -295,7 +295,7 @@ const getMerkleTreeProof = (leaves: string[], index: number): string[] => {
  * @returns Account proof and storage proof.
  */
 const getStateTrieProof = async (
-  l2RpcProvider: ethers.providers.JsonRpcProvider,
+  l2RpcProvider: ethers.providers.StaticJsonRpcProvider,
   blockNumber: number,
   address: string,
   slot: string
@@ -324,17 +324,17 @@ const getStateTrieProof = async (
  * @returns An array of messages sent in the transaction and a proof of inclusion for each.
  */
 export const getMessagesAndProofsForL2Transaction = async (
-  l1RpcProvider: ethers.providers.JsonRpcProvider | string,
-  l2RpcProvider: ethers.providers.JsonRpcProvider | string,
+  l1RpcProvider: ethers.providers.StaticJsonRpcProvider | string,
+  l2RpcProvider: ethers.providers.StaticJsonRpcProvider | string,
   l1StateCommitmentChainAddress: string,
   l2CrossDomainMessengerAddress: string,
   l2TransactionHash: string
 ): Promise<CrossDomainMessagePair[]> => {
   if (typeof l1RpcProvider === 'string') {
-    l1RpcProvider = new ethers.providers.JsonRpcProvider(l1RpcProvider)
+    l1RpcProvider = new ethers.providers.StaticJsonRpcProvider(l1RpcProvider)
   }
   if (typeof l2RpcProvider === 'string') {
-    l2RpcProvider = new ethers.providers.JsonRpcProvider(l2RpcProvider)
+    l2RpcProvider = new ethers.providers.StaticJsonRpcProvider(l2RpcProvider)
   }
 
   const l2Transaction = await l2RpcProvider.getTransaction(l2TransactionHash)

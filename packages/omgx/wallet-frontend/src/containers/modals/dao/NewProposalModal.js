@@ -34,10 +34,12 @@ function NewProposalModal({ open }) {
     const [action, setAction] = useState(null);
     const [votingThreshold, setVotingThreshold] = useState(0);
     const [proposeText, setProposeText] = useState();
+    const [proposalUri, setProposalUri] = useState();
 
     const onActionChange = (e) =>{
         setVotingThreshold('0');
         setProposeText('');
+        setProposalUri('');
         setAction(e.target.value);
     }
 
@@ -48,10 +50,13 @@ function NewProposalModal({ open }) {
     }
 
     const submit = async () => {
-        let res = await dispatch(createDaoProposal({ votingThreshold, text: proposeText }));
+        let res = await dispatch(createDaoProposal({ 
+            votingThreshold, 
+            text: !!proposeText ? `${proposeText}@@${proposalUri}` : null
+        }));
 
         if (res) {
-            dispatch(openAlert(`Proposal has been submitted!`))
+            dispatch(openAlert(`Proposal has been submitted. It will be listed soon`))
             handleClose()
         } else {
             dispatch(openError(`Failed to create proposal`));
@@ -94,13 +99,22 @@ function NewProposalModal({ open }) {
                         newStyle
                     />
                     }
-                    {action === 'text-proposal' && <Input
-                        label="Enter proposal text"
-                        value={proposeText}
-                        onChange={(i)=>setProposeText(i.target.value)}
-                        variant="standard"
-                        newStyle
-                    />
+                    {action === 'text-proposal' && <>
+                        <Input
+                            label="Enter proposal text"
+                            value={proposeText}
+                            onChange={(i) => setProposeText(i.target.value)}
+                            variant="standard"
+                            newStyle
+                        />
+                        <Input
+                            label="URI"
+                            value={proposalUri}
+                            onChange={(i) => setProposalUri(i.target.value)}
+                            variant="standard"
+                            newStyle
+                        />
+                    </>
                     }
                 </div>
             </div>

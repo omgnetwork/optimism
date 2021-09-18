@@ -13,21 +13,24 @@ import { logAmount, powAmount } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
 
-import * as S from './FarmModal.styles';
 import { Typography } from '@material-ui/core';
+import { WrapperActionsModal } from 'components/modal/Modal.styles';
+import { Box } from '@material-ui/system';
 
 class FarmDepositModal extends React.Component {
-  
+
   constructor(props) {
     super(props);
 
-    const { open } = this.props;
-    const { stakeToken } = this.props.farm;
+    const { open } = this.props
+    const { stakeToken } = this.props.farm
 
     this.state = {
       open,
       stakeToken,
-      stakeValue: '',
+      stakeValue: null,
+      stakeValueValid: false,
+      //stakeValueBadEntry: false,
       // allowance
       approvedAllowance: 0,
       // loading
@@ -45,9 +48,9 @@ class FarmDepositModal extends React.Component {
     }
 
     if (!isEqual(prevState.farm.stakeToken, stakeToken)) {
-      let approvedAllowance = powAmount(10, 50) 
+      let approvedAllowance = powAmount(10, 50)
       // Set to some very big number
-      // There is no need to check allowance for depositing ETH
+      // There is no need to query allowance for depositing ETH
       if (stakeToken.currency !== networkService.L1_ETH_Address) {
         approvedAllowance = await networkService.checkAllowance(
           stakeToken.currency,
@@ -60,17 +63,37 @@ class FarmDepositModal extends React.Component {
   }
 
   getMaxTransferValue () {
-    const { stakeToken } = this.state;
+    const { stakeToken } = this.state
     // const transferingBalanceObject = (stakeToken.L1orL2Pool === 'L1LP' ? layer1Balance : layer2Balance)
     //   .find(i => i.currency === stakeToken.currency);
     // if (!transferingBalanceObject) {
     //   return;
     // }
-    return logAmount(stakeToken.balance, stakeToken.decimals);
+    return logAmount(stakeToken.balance, stakeToken.decimals)
   }
 
   handleClose() {
     this.props.dispatch(closeModal("farmDepositModal"))
+  }
+
+  handleStakeValue(value) {
+
+    if( value &&
+        Number(value) > 0 &&
+        Number(value) < Number(this.getMaxTransferValue())
+    ) {
+        this.setState({
+          stakeValue: value,
+          stakeValueValid: true,
+          //stakeValueBadEntry: false,
+        })
+    } else {
+      this.setState({
+        stakeValue: null,
+        stakeValueValid: false,
+        //stakeValueBadEntry: true,
+      })
+    }
   }
 
   async handleApprove() {
@@ -86,19 +109,18 @@ class FarmDepositModal extends React.Component {
         powAmount(stakeValue, stakeToken.decimals),
         stakeToken.currency,
       )
-    } else if (stakeToken.L1orL2Pool === 'L1LP') {
+    }
+    else if (stakeToken.L1orL2Pool === 'L1LP') {
       approveTX = await networkService.approveERC20_L1LP(
         powAmount(stakeValue, stakeToken.decimals),
         stakeToken.currency,
       )
     }
 
-    
-
     if (approveTX) {
       this.props.dispatch(openAlert("Amount was approved"))
       let approvedAllowance = powAmount(10, 50)
-      // There is no need to check allowance for depositing ETH
+      // There is no need to query allowance for depositing ETH
       if (stakeToken.currency !== networkService.L1_ETH_Address) {
         approvedAllowance = await networkService.checkAllowance(
           stakeToken.currency,
@@ -138,75 +160,60 @@ class FarmDepositModal extends React.Component {
   }
 
   render() {
-    
+
     const {
       open,
       stakeToken,
       stakeValue,
+      stakeValueValid,
+      //stakeValueBadEntry,
       approvedAllowance,
       loading,
-    } = this.state;
+    } = this.state
+
+
+    let allowanceGTstake = false
+
+    if ( approvedAllowance > 0 &&
+        Number(stakeValue) > 0 &&
+        new BN(approvedAllowance).gte(powAmount(stakeValue, stakeToken.decimals))
+    ) {
+      allowanceGTstake = true
+    }
 
     return (
-
-      <Modal 
-        open={open} 
-        maxWidth="md" 
+      <Modal
+        open={open}
+        maxWidth="md"
         onClose={()=>{this.handleClose()}}
+        minHeight="380px"
       >
-
-        <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
-          Stake {`${stakeToken.symbol}`}
-        </Typography>
-
-        <Input
-          placeholder={`Amount to stake`}
-          value={stakeValue}
-          type="number"
-          onChange={i=>{this.setState({stakeValue: i.target.value})}}
-          unit={stakeToken.symbol}
-          maxValue={this.getMaxTransferValue()}
-          newStyle
-          variant="standard"
-        />
-
-        {Number(stakeValue) > Number(this.getMaxTransferValue()) &&
-          <Typography variant="body2" sx={{mt: 2}}>
-            You don't have enough {stakeToken.symbol} to stake.
+        <Box>
+          <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
+            Stake {`${stakeToken.symbol}`}
           </Typography>
-        }
 
-        {(new BN(approvedAllowance).gte(powAmount(stakeValue, 18)) || stakeValue === '') &&
-          <S.WrapperActions>
-            <Button
-              onClick={()=>{this.handleClose()}}
-              color="neutral"
-              size="large"
-            >
-              CANCEL
-            </Button>
-            <Button
-              onClick={()=>{this.handleConfirm()}}
-              disabled={Number(this.getMaxTransferValue()) < Number(stakeValue) || stakeValue === '' || !stakeValue}
-              loading={loading}
-              color='primary'
-              size="large"
-              variant="contained"
-              // fullWidth={isMobile}
-            >
-              STAKE!
-            </Button>
-          </S.WrapperActions>
-        }
+          <Input
+            placeholder={`Amount to stake`}
+            value={stakeValue}
+            type="number"
+            onChange={i=>{this.handleStakeValue(i.target.value)}}
+            unit={stakeToken.symbol}
+            maxValue={this.getMaxTransferValue()}
+            newStyle
+            variant="standard"
+          />
+        </Box>
 
-        {new BN(approvedAllowance).lt(new BN(powAmount(stakeValue, 18))) &&
+        {!allowanceGTstake &&
           <>
-            <Typography variant="body2" sx={{mt: 2}}>
-              To stake {stakeValue} {stakeToken.symbol},
-              you first need to approve this amount.
-            </Typography>
-
-            <S.WrapperActions>
+            {stakeValueValid &&
+              <Typography variant="body2" sx={{mt: 2}}>
+                To stake {stakeValue} {stakeToken.symbol},
+                you first need to approve this amount.
+              </Typography>
+            }
+            <WrapperActionsModal>
               <Button
                 onClick={()=>{this.handleClose()}}
                 color="neutral"
@@ -217,16 +224,47 @@ class FarmDepositModal extends React.Component {
               <Button
                 onClick={()=>{this.handleApprove()}}
                 loading={loading}
-                disabled={Number(this.getMaxTransferValue()) < Number(stakeValue)}
+                disabled={!stakeValueValid}
                 color='primary'
                 size="large"
                 variant="contained"
+                // fullWidth={isMobile}
               >
                 APPROVE AMOUNT
               </Button>
-            </S.WrapperActions>
+            </WrapperActionsModal>
           </>
         }
+
+
+        {(stakeValueValid && allowanceGTstake) &&
+          <>
+            <Typography variant="body2" sx={{mt: 2}}>
+              Your allowance has been approved. You can now stake your funds into the pool.
+            </Typography>
+            <WrapperActionsModal>
+              <Button
+                onClick={()=>{this.handleClose()}}
+                color="neutral"
+                size="large"
+              >
+                CANCEL
+              </Button>
+              <Button
+                onClick={()=>{this.handleConfirm()}}
+                loading={loading}
+                disabled={false}
+                color='primary'
+                size="large"
+                variant="contained"
+                // fullWidth={isMobile}
+              >
+                STAKE!
+              </Button>
+            </WrapperActionsModal>
+          </>
+        }
+
       </Modal>
     )
   }

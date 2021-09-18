@@ -33,11 +33,8 @@ function PendingTransaction() {
 
     const [page, setPage] = useState(1)
     const unorderedTransactions = useSelector(selectTransactions, isEqual)
-    const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
 
-    //console.log("orderedTransactions:",orderedTransactions)
-
-    const pending = orderedTransactions.filter((i) => {
+    const pending = unorderedTransactions.filter((i) => {
         if (i.crossDomainMessage &&
             i.crossDomainMessage.crossDomainMessage === 1 &&
             i.crossDomainMessage.crossDomainMessageFinalize === 0 &&
@@ -123,16 +120,16 @@ function PendingTransaction() {
         ...pendingDepositsFast
     ]
 
+    const orderedTransactions = orderBy(pendingTransactions, i => i.timeStamp, 'desc')
     const startingIndex = page === 1 ? 0 : ((page - 1) * PER_PAGE);
     const endingIndex = page * PER_PAGE;
-    const paginatedTransactions = pendingTransactions.slice(startingIndex, endingIndex);
+    const paginatedTransactions = orderedTransactions.slice(startingIndex, endingIndex);
 
-    let totalNumberOfPages = Math.ceil(pendingTransactions.length / PER_PAGE);
+    let totalNumberOfPages = Math.ceil(orderedTransactions.length / PER_PAGE);
 
     //if totalNumberOfPages === 0, set to one so we don't get the strange "page 1 of 0" display
     if (totalNumberOfPages === 0) totalNumberOfPages = 1
 
-    //console.log(['pendingTransactions', pendingTransactions])
 
     const currentNetwork = useSelector(selectNetwork());
     const nw = getAllNetworks();
@@ -140,15 +137,15 @@ function PendingTransaction() {
 
     const chainLink = (item) => {
         let network = nw[currentNetwork]
-        if (!!network && !!network[item.chain]) {
+        let chain = item.chain === 'L1pending' ? 'L1' : item.chain;
+        if (!!network && !!network[chain]) {
             // network object should have L1 & L2
-            if (item.chain === 'L1') {
-                return `${network[item.chain].transaction}${item.hash}`;
-                //our custom watcher
-            } else {
-                //etherscan
-                return `${network[item.chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
-            }
+            // endpoint name is now network specific - `?network` no longer needed
+            //if (chain === 'L1') {
+                return `${network[chain].transaction}${item.hash}`;
+            //} else {  
+            //    return `${network[chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
+            //}
         }
         return '';
     }

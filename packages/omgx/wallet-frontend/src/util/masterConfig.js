@@ -35,7 +35,7 @@ NETWORKS = {
       name: "BOBA Rinkeby L2",
       chainId: 28,
       rpcUrl: `https://rinkeby.boba.network`,
-      blockExplorer: `https://blockexplorer.rinkeby.boba.network/?network=Rinkeby`,
+      blockExplorer: `https://blockexplorer.rinkeby.boba.network/`,
       transaction: `https://blockexplorer.rinkeby.boba.network/tx/`,
     }
   },
@@ -55,8 +55,8 @@ NETWORKS = {
       name: "BOBA L2",
       chainId: 288,
       rpcUrl: `https://mainnet.boba.network`,
-      blockExplorer: `https://blockexplorer.rinkeby.boba.network/?network=Mainnet`,
-      transaction: `https://blockexplorer.rinkeby.boba.network/tx/`,
+      blockExplorer: `https://blockexplorer.boba.network/`,
+      transaction: `https://blockexplorer.boba.network/tx/`,
     }
   }
 }
@@ -87,7 +87,7 @@ if (env === 'dev') {
       OMGX_WATCHER_URL: `https://api-watcher.rinkeby-integration.boba.network/`,
       MM_Label:         `Rinkeby Int Test Network`,
       L1: {
-        name: "Rinkeby Int",
+        name: "Rinkeby",
         chainId: 4,
         rpcUrl: `https://rinkeby.infura.io/v3/${process.env.REACT_APP_INFURA_ID}`,
         blockExplorer: `https://api-rinkeby.etherscan.io/api?module=account&action=txlist&startblock=0&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_ETHERSCAN_API}`,
@@ -97,7 +97,7 @@ if (env === 'dev') {
         name: "BOBA Rinkeby Int L2",
         chainId: 29,
         rpcUrl: `https://rinkeby-integration.boba.network`,
-        blockExplorer: `https://blockexplorer.rinkeby.boba.network/?network=Rinkeby%20Test`,
+        blockExplorer: `https://blockexplorer.rinkeby.boba.network/`,
         transaction: `https://blockexplorer.rinkeby.boba.network/tx/`,
       }
     },

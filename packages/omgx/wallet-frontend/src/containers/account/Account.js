@@ -19,8 +19,6 @@ import { useSelector, useDispatch, batch } from 'react-redux'
 import { isEqual, orderBy } from 'lodash'
 
 //Selectors
-import { selectLoading } from 'selectors/loadingSelector'
-import { selectIsSynced } from 'selectors/statusSelector'
 import { selectlayer2Balance, selectlayer1Balance } from 'selectors/balanceSelector'
 import { selectTransactions } from 'selectors/transactionSelector'
 
@@ -32,7 +30,7 @@ import * as S from './Account.styles'
 import { selectTokens } from 'selectors/tokenSelector'
 import PageHeader from 'components/pageHeader/PageHeader'
 import { Box, Grid, Tab, Tabs, Typography, useMediaQuery } from '@material-ui/core'
-import { fetchGas, fetchLookUpPrice, fetchTransactions } from 'actions/networkAction'
+import { fetchLookUpPrice, fetchTransactions } from 'actions/networkAction'
 import { selectNetwork } from 'selectors/setupSelector'
 import { useTheme } from '@emotion/react'
 import { tableHeadList } from './tableHeadList'
@@ -54,8 +52,6 @@ function Account () {
   const childBalance = useSelector(selectlayer2Balance, isEqual)
   const rootBalance = useSelector(selectlayer1Balance, isEqual)
 
-  const isSynced = useSelector(selectIsSynced)
-  const criticalTransactionLoading = useSelector(selectLoading([ 'EXIT/CREATE' ]))
   const tokenList = useSelector(selectTokens)
 
   const network = useSelector(selectNetwork())
@@ -75,10 +71,10 @@ function Account () {
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual)
   //console.log("Transactions:",unorderedTransactions)
-  
+
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
   //console.log("orderedTransactions:",orderedTransactions)
-  
+
   const pendingL1 = orderedTransactions.filter((i) => {
       if (i.chain === 'L1pending' && //use the custom API watcher for fast data on pending L1->L2 TXs
           i.crossDomainMessage &&
@@ -108,20 +104,9 @@ function Account () {
     ...pendingL2
   ]
 
-  //console.log("Pending:", pending.length)
-  //console.log("Pending:", pending)
-
-  const getGasPrice = useCallback(() => {
-    dispatch(fetchGas({
-      network: network || 'local',
-      networkLayer
-    }))
-  }, [dispatch, network, networkLayer])
-
   useEffect(()=>{
     getLookupPrice()
-    getGasPrice()
-  },[childBalance, rootBalance, getLookupPrice, getGasPrice])
+  },[childBalance, rootBalance, getLookupPrice])
 
   useInterval(() => {
     batch(() => {
@@ -129,21 +114,7 @@ function Account () {
     })
   }, POLL_INTERVAL * 2)
 
-  const disabled = false //criticalTransactionLoading || !isSynced
-
-  // let balances = {
-  //   oETH : {have: false, amount: 0, amountShort: '0'}
-  // }
-
-  // childBalance.reduce((acc, cur) => {
-  //   if (cur.symbol === 'oETH' && cur.balance > 0 ) {
-  //     acc['oETH']['have'] = true;
-  //     acc['oETH']['amount'] = cur.balance;
-  //     acc['oETH']['amountShort'] = logAmount(cur.balance, cur.decimals, 2);
-  //   }
-  //   return acc;
-  // }, balances)
-
+  const disabled = false
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -157,15 +128,21 @@ function Account () {
     </Box>
   )
 
-  const mobileL1 = network + ' L1'
-  const mobileL2 = 'BOBA L2 ' + network
+  // const mobileL1 = network + ' L1'
+  // const mobileL2 = 'BOBA L2 ' + network
+
+  let label_L1 = 'Ethereum L1'
+  if(network === 'rinkeby') label_L1 = 'Rinkeby L1'
+
+  let label_L2 = 'Boba L2'
+  if(network === 'rinkeby') label_L2 = 'Boba Rinkeby L2'
 
   const L1Column = () => (
     <S.AccountWrapper >
-      
+
       {!isMobile ? (
         <S.WrapperHeading>
-          <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>L1 ({network})</Typography>
+          <Typography variant="h3" sx={{opacity: networkLayer === 'L1' ? "1.0" : "0.2", fontWeight: "700"}}>{label_L1}</Typography>
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
           {networkLayer === 'L1' ? <ActiveItem active={true} /> : null}
         </S.WrapperHeading>
@@ -202,7 +179,7 @@ function Account () {
     <S.AccountWrapper>
       {!isMobile ? (
         <S.WrapperHeading>
-          <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>BOBA L2 ({network})</Typography>
+          <Typography variant="h3" sx={{opacity: networkLayer === 'L2' ? "1.0" : "0.4", fontWeight: "700"}}>{label_L2}</Typography>
           {/* <SearchIcon color={theme.palette.secondary.main}/> */}
           {networkLayer === 'L2' ? <ActiveItem active={true} /> : null}
         </S.WrapperHeading>
@@ -238,13 +215,12 @@ function Account () {
       <PageHeader title="Wallet"/>
 
       <S.CardTag>
-        
         <S.CardContentTag>
           <S.CardInfo>Boba Balances</S.CardInfo>
-          {(network === 'mainnet') && 
-          <Typography>
-             You are using Mainnet Beta.<br/> 
-             WARNING: the mainnet smart contracts are not fully audited and funds may be at risk.<br/> 
+          {(network === 'mainnet') &&
+          <Typography variant="body2">
+             You are using Mainnet Beta.<br/>
+             WARNING: the mainnet smart contracts are not fully audited and funds may be at risk.<br/>
              Please exercise caution when using Mainnet Beta.
           </Typography>
           }
@@ -253,16 +229,15 @@ function Account () {
             <Typography>oETH</Typography>
           */}
         </S.CardContentTag>
-
-        <S.ContentGlass>
-          <img src={Drink} href="#" width={135} alt="Boba Drink"/>
-        </S.ContentGlass>
+        <Box sx={{flex: 3}}>
+          <S.ContentGlass>
+            <img src={Drink} href="#" width={135} alt="Boba Drink"/>
+          </S.ContentGlass>
+        </Box>
 
       </S.CardTag>
       {pending.length > 0 &&
-        <Grid 
-          sx={{margin: '10px 0px'}}
-        >
+        <Grid sx={{margin: '10px 0px'}}>
           <Grid item xs={12}>
             <PendingTransaction />
           </Grid>
@@ -271,8 +246,8 @@ function Account () {
       {isMobile ? (
         <>
           <Tabs value={activeTab} onChange={handleChange} sx={{color: '#fff', fontWeight: 700, my: 2}}>
-            <Tab label={mobileL1} />
-            <Tab label={mobileL2} />
+            <Tab label={label_L1} />
+            <Tab label={label_L2} />
           </Tabs>
           <TabPanel value={activeTab} index={0}>
             <L1Column />

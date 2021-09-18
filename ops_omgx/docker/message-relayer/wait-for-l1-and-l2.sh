@@ -9,6 +9,7 @@ export L1_BLOCK_OFFSET=`/opt/secret2env -name $SECRETNAME|grep -w L1_BLOCK_OFFSE
 export L1_NODE_WEB3_URL=`/opt/secret2env -name $SECRETNAME|grep -w L1_NODE_WEB3_URL|sed 's/L1_NODE_WEB3_URL=//g'`
 export RELAYER_PRIVATE_KEY=`/opt/secret2env -name $SECRETNAME|grep -w RELAY_L1_WALLET_PRIV_KEY|sed 's/RELAY_L1_WALLET_PRIV_KEY=//g'`
 export BLACKLIST_ENDPOINT=`/opt/secret2env -name $SECRETNAME|grep -w BLACKLIST_ENDPOINT|sed 's/BLACKLIST_ENDPOINT=//g'`
+export FILTER_ENDPOINT=`/opt/secret2env -name $SECRETNAME|grep -w FILTER_ENDPOINT|sed 's/FILTER_ENDPOINT=//g'`
 
 cmd="/opt/optimism/packages/message-relayer/exec/run-message-relayer.js"
 

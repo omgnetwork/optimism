@@ -32,7 +32,8 @@ import { selectLookupPrice } from 'selectors/lookupSelector'
 
 import { amountToUsd, logAmount } from 'util/amountConvert'
 
-import * as S from './DoExitSteps.styles'
+import { WrapperActionsModal } from 'components/modal/Modal.styles'
+import { Box } from '@material-ui/system'
 
 function DoExitStep({ handleClose, token }) {
 
@@ -43,6 +44,8 @@ function DoExitStep({ handleClose, token }) {
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
   const signatureStatus = useSelector(selectSignatureStatus_exitTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
+  const maxValue = logAmount(token.balance, token.decimals)
+  const valueIsValid = value > 0 && value <= maxValue
 
   async function doExit() {
 
@@ -93,49 +96,51 @@ function DoExitStep({ handleClose, token }) {
 
   return (
     <>
-      <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
-        Standard Exit ({`${token ? token.symbol : ''}`})
-      </Typography>
-
-      <Input
-        label={'Amount to exit'}
-        placeholder="0.0"
-        value={value}
-        type="number"
-        onChange={(i)=>{setExitAmount(i.target.value)}}
-        unit={token.symbol}
-        maxValue={logAmount(token.balance, token.decimals)}
-        variant="standard"
-        newStyle
-      />
-
-      {token && token.symbol === 'oETH' && (
-        <Typography variant="body2" sx={{mt: 2}}>
-          {value &&
-            `You will receive ${Number(value).toFixed(2)} ETH
-            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
-            on L1.
-            Your funds will be available on L1 in 7 days.`}
+      <Box>
+        <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
+          Standard Exit ({`${token ? token.symbol : ''}`})
         </Typography>
-      )}
 
-      {token && token.symbol !== 'oETH' && (
-        <Typography variant="body2" sx={{mt: 2}}>
-          {value &&
-            `You will receive ${Number(value).toFixed(2)} ${token.symbol}
-            ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
-            on L1.
-            Your funds will be available on L1 in 7 days.`}
-        </Typography>
-      )}
+        <Input
+          label={'Amount to exit'}
+          placeholder="0.0"
+          value={value}
+          type="number"
+          onChange={(i)=>{setExitAmount(i.target.value)}}
+          unit={token.symbol}
+          maxValue={maxValue}
+          variant="standard"
+          newStyle
+        />
 
-      {exitLoading && (
-        <Typography variant="body2" sx={{mt: 2, color: 'green'}}>
-          This window will automatically close when your transaction has been signed and submitted.
-        </Typography>
-      )}
+        {valueIsValid && token && token.symbol === 'oETH' && (
+          <Typography variant="body2" sx={{mt: 2}}>
+            {value &&
+              `You will receive ${Number(value).toFixed(2)} ETH
+              ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
+              on L1.
+              Your funds will be available on L1 in 7 days.`}
+          </Typography>
+        )}
 
-      <S.WrapperActions>
+        {valueIsValid && token && token.symbol !== 'oETH' && (
+          <Typography variant="body2" sx={{mt: 2}}>
+            {value &&
+              `You will receive ${Number(value).toFixed(2)} ${token.symbol}
+              ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
+              on L1.
+              Your funds will be available on L1 in 7 days.`}
+          </Typography>
+        )}
+
+        {exitLoading && (
+          <Typography variant="body2" sx={{mt: 2, color: 'green'}}>
+            This window will automatically close when your transaction has been signed and submitted.
+          </Typography>
+        )}
+      </Box>
+
+      <WrapperActionsModal>
           <Button
             onClick={handleClose}
             color="neutral"
@@ -158,7 +163,7 @@ function DoExitStep({ handleClose, token }) {
               Exit
             </Button>
           )}
-      </S.WrapperActions>
+      </WrapperActionsModal>
     </>
   )
 }

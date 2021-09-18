@@ -30,18 +30,17 @@ import networkService from 'services/networkService';
 import Input from 'components/input/Input';
 import { selectLookupPrice } from 'selectors/lookupSelector';
 import { Box, Typography, useMediaQuery } from '@material-ui/core';
-import * as S from './TransferModal.style';
 import { useTheme } from '@emotion/react';
-import truncate from 'truncate-middle';
+import { WrapperActionsModal } from 'components/modal/Modal.styles';
 
-function TransferModal ({ open, token }) {
+function TransferModal ({ open, token, minHeight }) {
   const dispatch = useDispatch()
 
   const [ value, setValue ] = useState('')
   const [ recipient, setRecipient ] = useState('')
 
   const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]));
-  const wAddress = networkService.account ? truncate(networkService.account, 6, 14, '.') : '';
+  const wAddress = networkService.account ? networkService.account : ''
 
   const lookupPrice = useSelector(selectLookupPrice);
 
@@ -55,10 +54,13 @@ function TransferModal ({ open, token }) {
       recipient
     ) {
       try {
-        const transferResponse = await dispatch(transfer(recipient, value, token.address));
-        if (transferResponse) {
+        const transferResponseGood = await dispatch(transfer(recipient, value, token.address));
+        if (transferResponseGood) {
           dispatch(openAlert('Transaction submitted'));
           handleClose();
+        } else {
+          //error handled elsewhere
+          handleClose()
         }
       } catch (err) {
         //guess not really?
@@ -79,49 +81,50 @@ function TransferModal ({ open, token }) {
   if(typeof(token) === 'undefined') return
 
   return (
-    <Modal open={open} onClose={handleClose} maxWidth="md">
-      <Typography variant="h2" sx={{fontWeight: 700, mb: 2}}>
-        Transfer
-      </Typography>
-
-      <Typography variant="body1" sx={{mb: 1}}>
-        From Adress: {wAddress}
-      </Typography>
-
-      <Typography variant="body1" sx={{mb: 1}}>
-        To Adress
-      </Typography>
-
-      <Box sx={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
-        <Input
-          placeholder='Enter adress to send to...'
-          value={recipient}
-          onChange={i => setRecipient(i.target.value)}
-          fullWidth
-          paste
-          sx={{fontSize: '50px'}}
-        />
-
-        <Input
-          label="Enter Amount to Deposit"
-          placeholder="0.00"
-          value={value}
-          type="number"
-          onChange={(i) => {setValue(i.target.value)}}
-          unit={token.symbol}
-          maxValue={logAmount(token.balance, token.decimals)}
-          variant="standard"
-          newStyle
-        />
-      </Box>
-
-      {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
-        <Typography variant="body2" component="p" sx={{opacity: 0.5, mt: 3}}>
-          {`($${amountToUsd(value, lookupPrice, token).toFixed(2)})`}
+    <Modal open={open} onClose={handleClose} maxWidth="md" minHeight="500px">
+      <Box>
+        <Typography variant="h2" sx={{fontWeight: 700, mb: 2}}>
+          Transfer
         </Typography>
-      )}
 
-      <S.WrapperActions>
+        <Typography variant="body1" sx={{mb: 1}}>
+          From Address: {wAddress}
+        </Typography>
+
+        <Typography variant="body1" sx={{mb: 1}}>
+          To Address
+        </Typography>
+
+        <Box sx={{display: 'flex', flexDirection: 'column'}}>
+          <Input
+            placeholder='Recipient address (0x...)'
+            value={recipient}
+            onChange={i => setRecipient(i.target.value)}
+            fullWidth
+            paste
+            sx={{fontSize: '50px', marginBottom: '20px'}}
+          />
+
+          <Input
+            label="Amount to Transfer"
+            placeholder="0.00"
+            value={value}
+            type="number"
+            onChange={(i) => {setValue(i.target.value)}}
+            unit={token.symbol}
+            maxValue={logAmount(token.balance, token.decimals)}
+            variant="standard"
+            newStyle
+          />
+        </Box>
+
+        {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+          <Typography variant="body2" component="p" sx={{opacity: 0.5, mt: 2}}>
+            {`Transfer value in USD: $${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
+          </Typography>
+        )}
+      </Box>
+      <WrapperActionsModal>
         {!isMobile ? (
           <Button
             onClick={handleClose}
@@ -136,7 +139,7 @@ function TransferModal ({ open, token }) {
             color='primary'
             variant="contained"
             loading={loading}
-            tooltip='Your exit is still pending. Please wait for confirmation.'
+            tooltip='Your transfer is still pending. Please wait for confirmation.'
             disabled={disabledTransfer}
             triggerTime={new Date()}
             fullWidth={isMobile}
@@ -144,7 +147,7 @@ function TransferModal ({ open, token }) {
           >
             Transfer
           </Button>
-      </S.WrapperActions>
+      </WrapperActionsModal>
     </Modal>
   );
 }

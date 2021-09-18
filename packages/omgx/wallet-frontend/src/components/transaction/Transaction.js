@@ -15,7 +15,9 @@ limitations under the License. */
 
 import React, { useState } from 'react'
 
-import { Grid, Typography } from '@material-ui/core'
+import { Grid, Typography,Fade } from '@material-ui/core'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+
 import * as styles from './Transaction.module.scss'
 import * as S from './Transaction.styles'
 import { useTheme } from '@emotion/react'
@@ -43,22 +45,21 @@ function Transaction({
 }) {
 
   const [dropDownBox, setDropDownBox] = useState(false)
-  const [dropDownBoxInit, setDropDownBoxInit] = useState(false)
   const theme = useTheme()
 
   const currentNetwork = useSelector(selectNetwork())
   const nw = getAllNetworks()
 
-  const chainLink = () => {
+  const chainLink = ({chain,hash}) => {
     let network = nw[currentNetwork]
-    if (!!network && !!network[oriChain]) {
-      if(oriChain === 'L1') {
-        //go to etherscan
-        return `${network[oriChain].transaction}${oriHash}`;
-      } else {
-        //the boba blockexplorer
-        return `${network[oriChain].transaction}${oriHash}?network=${currentNetwork[0].toUpperCase()+currentNetwork.slice(1)}`;
-      }
+    if (!!network && !!network[chain]) {
+      // network object should have L1 & L2
+      // endpoint name is now network specific - `?network` no longer needed
+      //if (chain === 'L1') {
+          return `${network[chain].transaction}${hash}`;
+      //} else {  
+      //    return `${network[chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
+      //}
     }
     return '';
   }
@@ -70,7 +71,7 @@ function Transaction({
     }
 
     let prefix = 'L2'
-    if( oriChain === 'L2') prefix = 'L1'
+    if (oriChain === 'L2') prefix = 'L1'
 
     return (
 
@@ -83,31 +84,30 @@ function Transaction({
           padding: '10px',
           alignItems: 'flex-start !important',
         }}>
-          <div
-            className={dropDownBox ?
-              styles.dropDownContainer : dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
-          >
-            <Grid className={styles.dropDownContent} container spacing={1}>
-              <div className={styles.mutedMI}>
-                {prefix} Hash:&nbsp;
-                  <a className={styles.href} href={detail.txLink} target="_blank" rel="noopener noreferrer">
+          {!!dropDownBox ? <Fade in={dropDownBox}>
+            <div>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>
+                  {prefix} Hash:&nbsp;
+                  <a className={styles.href} href={chainLink({ chain: prefix, hash:detail.hash})} target="_blank" rel="noopener noreferrer">
                     {detail.hash}
                   </a>
-              </div>
-            </Grid>
-            <Grid className={styles.dropDownContent} container spacing={1}>
-              <div className={styles.mutedMI}>{prefix} Block:&nbsp;{detail.blockNumber}</div>
-            </Grid>
-            <Grid className={styles.dropDownContent} container spacing={1}>
-              <div className={styles.mutedMI}>{prefix} Block Hash:&nbsp;{detail.blockHash}</div>
-            </Grid>
-            <Grid className={styles.dropDownContent} container spacing={1}>
-              <div className={styles.mutedMI}>{prefix} From:&nbsp;{detail.from}</div>
-            </Grid>
-            <Grid className={styles.dropDownContent} container spacing={1}>
-              <div className={styles.mutedMI}>{prefix} To:&nbsp;{detail.to}</div>
-            </Grid>
-          </div>
+                </Typography>
+              </Grid>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>{prefix} Block:&nbsp;{detail.blockNumber}</Typography>
+              </Grid>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>{prefix} Block Hash:&nbsp;{detail.blockHash}</Typography>
+              </Grid>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>{prefix} From:&nbsp;{detail.from}</Typography>
+              </Grid>
+              <Grid className={styles.dropDownContent} container spacing={1}>
+                <Typography variant="body3" className={styles.muted}>{prefix} To:&nbsp;{detail.to}</Typography>
+              </Grid>
+            </div>
+          </Fade> : null}
         </S.TableCell>
       </S.TableBody>)
   }
@@ -124,34 +124,43 @@ function Transaction({
 
         <S.TableCell
           sx={{ gap: '5px' }}
-          style={{ width: '50%' }}
+          style={{ width: '60%' }}
         >
           <Typography variant="h3">{chain}</Typography>
-          <div className={styles.muted}>{time}</div>
-          <div className={styles.muted}>{oriChain}&nbsp;Hash:&nbsp;
-          <a
-              href={chainLink()}
+
+          <Typography variant="body3" className={styles.muted}>
+            {time}
+          </Typography>
+
+          <Typography variant="body3" className={styles.muted}>
+            {oriChain}&nbsp;Hash:&nbsp;
+            <a
+              href={chainLink({hash:oriHash, chain: oriChain})}
               target={'_blank'}
               rel='noopener noreferrer'
               style={{ color: theme.palette.mode === 'light' ? 'black' : 'white' }}
             >
               {oriHash}
-          </a>
-          </div>
-          <div className={styles.muted}>{typeTX}</div>
-          
+            </a>
+          </Typography>
+
+          <Typography variant="body3" className={styles.muted}>
+            {typeTX}
+          </Typography>
+
           {!!detail &&
             <Typography
               variant="body2"
               sx={{
                 cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center'
               }}
               onClick={() => {
                 setDropDownBox(!dropDownBox)
-                setDropDownBoxInit(false)
               }}
             >
-              More Information
+              More Information <ExpandMoreIcon />
             </Typography>
           }
         </S.TableCell>
@@ -160,7 +169,11 @@ function Transaction({
           sx={{ gap: '5px' }}
           style={{ width: '20%' }}
         >
-          <div className={styles.muted}>{blockNumber}</div>
+          <div className={styles.muted}>
+            <Typography variant="body3">
+              {blockNumber}
+            </Typography>
+          </div>
         </S.TableCell>
 
         <S.TableCell sx={{ gap: "5px" }}>

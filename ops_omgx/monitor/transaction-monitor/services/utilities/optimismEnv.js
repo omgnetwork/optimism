@@ -32,6 +32,7 @@ const CROSS_DOMAIN_MESSAGE_MONITOR_INTERVAL = env.CROSS_DOMAIN_MESSAGE_MONITOR_I
 const STATE_ROOT_MONITOR_INTERVAL = env.STATE_ROOT_MONITOR_INTERVAL || 5 * 1000;
 const EXIT_MONITOR_INTERVAL = env.EXIT_MONITOR_INTERVAL || 3 * 1000;
 const L1_BRIDGE_MONITOR_INTERVAL = env.L1_BRIDGE_MONITOR_INTERVAL || 3 * 1000;
+const MESSAGE_MONITOR_INTERVAL = env.MESSAGE_MONITOR_INTERVAL || 10 * 60 * 1000;
 
 const SQL_DISCONNECTED = "disconnected";
 
@@ -87,6 +88,7 @@ class OptimismEnv {
     this.stateRootMonitorInterval = STATE_ROOT_MONITOR_INTERVAL;
     this.exitMonitorInterval = EXIT_MONITOR_INTERVAL;
     this.l1BridgeMonitorInterval = L1_BRIDGE_MONITOR_INTERVAL;
+    this.messageMonitorInterval = MESSAGE_MONITOR_INTERVAL;
 
     this.whitelistSleep = WHITELIST_SLEEP;
     this.nonWhitelistSleep = NON_WHITELIST_SLEEP;
