@@ -28,7 +28,7 @@ class FarmDepositModal extends React.Component {
     this.state = {
       open,
       stakeToken,
-      stakeValue: null,
+      stakeValue: '',
       stakeValueValid: false,
       //stakeValueBadEntry: false,
       // allowance
@@ -77,7 +77,6 @@ class FarmDepositModal extends React.Component {
   }
 
   handleStakeValue(value) {
-
     if( value &&
         Number(value) > 0 &&
         Number(value) < Number(this.getMaxTransferValue())
@@ -89,7 +88,7 @@ class FarmDepositModal extends React.Component {
         })
     } else {
       this.setState({
-        stakeValue: null,
+        stakeValue: value,
         stakeValueValid: false,
         //stakeValueBadEntry: true,
       })
