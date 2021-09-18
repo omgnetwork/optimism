@@ -30,7 +30,7 @@ import * as S from './Account.styles'
 import { selectTokens } from 'selectors/tokenSelector'
 import PageHeader from 'components/pageHeader/PageHeader'
 import { Box, Grid, Tab, Tabs, Typography, useMediaQuery } from '@material-ui/core'
-import { fetchGas, fetchLookUpPrice, fetchTransactions } from 'actions/networkAction'
+import { fetchLookUpPrice, fetchTransactions } from 'actions/networkAction'
 import { selectNetwork } from 'selectors/setupSelector'
 import { useTheme } from '@emotion/react'
 import { tableHeadList } from './tableHeadList'
@@ -104,17 +104,9 @@ function Account () {
     ...pendingL2
   ]
 
-  const getGasPrice = useCallback(() => {
-    dispatch(fetchGas({
-      network: network || 'local',
-      networkLayer
-    }))
-  }, [dispatch, network, networkLayer])
-
   useEffect(()=>{
     getLookupPrice()
-    getGasPrice()
-  },[childBalance, rootBalance, getLookupPrice, getGasPrice])
+  },[childBalance, rootBalance, getLookupPrice])
 
   useInterval(() => {
     batch(() => {
