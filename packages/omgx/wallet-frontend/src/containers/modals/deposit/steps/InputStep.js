@@ -7,7 +7,6 @@ import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
 
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
-import GasPicker from 'components/gaspicker/GasPicker'
 
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectSignatureStatus_depositTRAD } from 'selectors/signatureSelector'
@@ -24,8 +23,6 @@ function InputStep({ handleClose, token }) {
   const dispatch = useDispatch()
   const [value, setValue] = useState('')
   const [disabledSubmit, setDisabledSubmit] = useState(true)
-  const [gasPrice, setGasPrice] = useState()
-  const [selectedSpeed, setSelectedSpeed] = useState('normal')
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
   const signatureStatus = useSelector(selectSignatureStatus_depositTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
@@ -37,7 +34,7 @@ function InputStep({ handleClose, token }) {
     if(token.symbol === 'ETH') {
       console.log("Depositing ETH")
       if (value > 0) {
-        res = await dispatch(depositETHL2(value, gasPrice))
+        res = await dispatch(depositETHL2(value))
         if (res) {
           dispatch(setActiveHistoryTab1('Deposits'))
           dispatch(openAlert('ETH deposit submitted'))
@@ -47,7 +44,7 @@ function InputStep({ handleClose, token }) {
     } else {
       console.log("Depositing ERC20")
       res = await dispatch(
-        depositErc20(powAmount(value, token.decimals), token.address, gasPrice, token.addressL2)
+        depositErc20(powAmount(value, token.decimals), token.address, token.addressL2)
       )
       if (res) {
         dispatch(setActiveHistoryTab1('Deposits'))
@@ -67,14 +64,6 @@ function InputStep({ handleClose, token }) {
     }
     setValue(value)
   }
-
-  const renderGasPicker = (
-    <GasPicker
-      selectedSpeed={selectedSpeed}
-      setSelectedSpeed={setSelectedSpeed}
-      setGasPrice={setGasPrice}
-    />
-  )
 
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
@@ -117,7 +106,6 @@ function InputStep({ handleClose, token }) {
           </Typography>
         )}
 
-        {renderGasPicker}
       </Box>
       <WrapperActionsModal>
         <Button

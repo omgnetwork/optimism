@@ -19,6 +19,7 @@ import { parseUnits, parseEther, formatEther } from '@ethersproject/units'
 import { Watcher } from '@eth-optimism/watcher'
 
 import { ethers, BigNumber, utils, ContractFactory } from 'ethers'
+
 import store from 'store'
 
 import { orderBy } from 'lodash'
@@ -77,7 +78,6 @@ import omgxWatcherAxiosInstance from 'api/omgxWatcherAxios'
 import addressAxiosInstance from 'api/addressAxios'
 import addressOMGXAxiosInstance from 'api/addressOMGXAxios'
 import coinGeckoAxiosInstance from 'api/coinGeckoAxios'
-import ethGasStationAxiosInstance from 'api/ethGasStationAxios'
 
 //All the current addresses for fallback purposes, or live network
 const localAddresses = require(`../deployment/local/addresses.json`)
@@ -1211,7 +1211,7 @@ class NetworkService {
   }
 
   //Move ETH from L1 to L2 using the standard deposit system
-  depositETHL2 = async (value = '1', gasPrice) => {
+  depositETHL2 = async (value = '1') => {
 
     updateSignatureStatus_depositTRAD(false)
 
@@ -1220,8 +1220,7 @@ class NetworkService {
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString()),
         {
-          value: parseEther(value),
-          gasPrice: ethers.utils.parseUnits(`${gasPrice}`, 'wei'),
+          value: parseEther(value)
         }
       )
       
@@ -1393,7 +1392,7 @@ class NetworkService {
   }
 
   //Used to move ERC20 Tokens from L1 to L2
-  async depositErc20(value, currency, gasPrice, currencyL2) {
+  async depositErc20(value, currency, currencyL2) {
 
     updateSignatureStatus_depositTRAD(false)
 
@@ -1935,41 +1934,6 @@ class NetworkService {
     }
   }
 
-  async getGasPrice({
-    network, networkLayer
-  }) {
-    if(network === 'mainnet' && networkLayer === 'L1') {
-      try {
-        const { data: { safeLow, average, fast } } = await ethGasStationAxiosInstance.get('json/ethgasAPI.json');
-        return {
-          slow: safeLow * 100000000,
-          normal: average * 100000000,
-          fast: fast * 100000000
-        };
-      } catch (error) {
-        //
-      }
-      // if not web3 oracle
-      try {
-        const _medianEstimate = await this.web3.eth.getGasPrice();
-        const medianEstimate = Number(_medianEstimate);
-        return {
-          slow: Math.max(medianEstimate / 2, 1000000000),
-          normal: medianEstimate,
-          fast: medianEstimate * 5
-        };
-      } catch (error) {
-        //
-      }
-    }
-
-    return {
-      slow: 1000000000,
-      normal: 2000000000,
-      fast: 10000000000
-    }
-  }
-
   /***********************************************/
   /*****         DAO Functions               *****/
   /***********************************************/
@@ -2171,7 +2135,8 @@ class NetworkService {
     try {
       
       const delegateCheck = await this.delegate.attach(this.delegator.address);
-      let res = delegateCheck.castVote(id, userVote //, 
+      let res = delegateCheck.castVote(id, userVote 
+      //, 
       //{
       //  gasPrice: 15000000,
       //  gasLimit: 8000000
