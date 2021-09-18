@@ -16,11 +16,7 @@ export const tableHeadList = [
       isSort: false,
   },
   {
-      label: 'Liquidity',
-      isSort: false,
-  },
-  {
-      label: 'Balance',
+      label: 'Liquidity (Balance)',
       isSort: false,
   },
   {
