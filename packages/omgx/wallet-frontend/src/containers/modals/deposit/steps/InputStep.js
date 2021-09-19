@@ -32,32 +32,32 @@ function InputStep({ handleClose, token }) {
     let res
 
     if(token.symbol === 'ETH') {
-      console.log("Depositing ETH")
+      console.log("Bridging ETH to L2")
       if (value > 0) {
         res = await dispatch(depositETHL2(value))
         if (res) {
           dispatch(setActiveHistoryTab1('Deposits'))
-          dispatch(openAlert('ETH deposit submitted'))
+          dispatch(openAlert('ETH bridge submitted'))
           handleClose()
         }
       }
     } else {
-      console.log("Depositing ERC20")
+      console.log("Bridging ERC20 to L2")
       res = await dispatch(
         depositErc20(powAmount(value, token.decimals), token.address, token.addressL2)
       )
       if (res) {
         dispatch(setActiveHistoryTab1('Deposits'))
-        dispatch(openAlert(`${token.symbol} deposit submitted.`))
+        dispatch(openAlert(`${token.symbol} bridge submitted`))
         handleClose()
       } else {
-        dispatch(openError(`Failed to deposit ${token.symbol}`))
+        dispatch(openError(`Failed to bridge ${token.symbol}`))
       }
     }
   }
 
   function setAmount(value) {
-    if (Number(value) > 0 && Number(value) < Number(token.balance)) {
+    if (Number(value) > 0 && Number(value) < Number(logAmount(token.balance, token.decimals))) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
@@ -81,15 +81,26 @@ function InputStep({ handleClose, token }) {
   let buttonLabel_1 = 'CANCEL'
   if( depositLoading ) buttonLabel_1 = 'CLOSE WINDOW'
 
+  let convertToUSD = false
+  
+  if( Object.keys(lookupPrice) && 
+      !!value &&
+      value > 0 &&
+      value <= logAmount(token.balance, token.decimals) &&
+      !!amountToUsd(value, lookupPrice, token)
+  ) {
+    convertToUSD = true
+  }
+
   return (
     <>
       <Box>
         <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
-          {`Deposit ${token && token.symbol ? token.symbol : ''}`}
+          `Classic Bridge ${token && token.symbol ? token.symbol : ''} to L1`
         </Typography>
 
         <Input
-          label="Enter amount to deposit"
+          label="Amount to bridge to L1"
           placeholder="0.0000"
           value={value}
           type="number"
@@ -100,7 +111,7 @@ function InputStep({ handleClose, token }) {
           newStyle
         />
 
-        {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+        {!!convertToUSD && (
           <Typography variant="body1" sx={{mt: 2, fontWeight: 700}}>
             {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
           </Typography>
@@ -121,12 +132,12 @@ function InputStep({ handleClose, token }) {
           size="large"
           variant="contained"
           loading={depositLoading}
-          tooltip='Your swap is still pending. Please wait for confirmation.'
+          tooltip={depositLoading ? "Your bridge is still pending. Please wait for confirmation." : "Click here to bridge your funds to L2"}
           disabled={disabledSubmit}
           triggerTime={new Date()}
           fullWidth={isMobile}
         >
-          Deposit
+          Bridge
         </Button>
       </WrapperActionsModal>
     </>

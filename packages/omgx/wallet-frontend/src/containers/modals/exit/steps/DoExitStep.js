@@ -44,6 +44,7 @@ function DoExitStep({ handleClose, token }) {
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
   const signatureStatus = useSelector(selectSignatureStatus_exitTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
+  
   const maxValue = logAmount(token.balance, token.decimals)
   const valueIsValid = value > 0 && value <= maxValue
 
@@ -60,19 +61,22 @@ function DoExitStep({ handleClose, token }) {
     if (res) {
       dispatch(
         openAlert(
-          `${token.symbol} was exited to L1. You will receive
+          `${token.symbol} was bridged to L1. You will receive
           ${Number(value).toFixed(2)} ${currencyL1}
           on L1 in 7 days.`
         )
       )
       handleClose()
     } else {
-      dispatch(openError(`Failed to exit L2`))
+      dispatch(openError(`Failed to bridge to L1`))
     }
   }
 
   function setExitAmount(value) {
-    if (Number(value) > 0 && Number(value) < Number(token.balance)) {
+
+    const valid = value > 0 && value <= logAmount(token.balance, token.decimals)
+    
+    if (valid) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
@@ -98,11 +102,11 @@ function DoExitStep({ handleClose, token }) {
     <>
       <Box>
         <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
-          Standard Exit ({`${token ? token.symbol : ''}`})
+          Classic Bridge to L1 ({`${token ? token.symbol : ''}`})
         </Typography>
 
         <Input
-          label={'Amount to exit'}
+          label={'Amount to bridge to L1'}
           placeholder="0.0"
           value={value}
           type="number"
@@ -154,13 +158,13 @@ function DoExitStep({ handleClose, token }) {
               color="primary"
               variant="contained"
               loading={exitLoading}
-              tooltip="Your exit is still pending. Please wait for confirmation."
+              tooltip={exitLoading ? "Your bridge is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
               disabled={disabledSubmit}
               triggerTime={new Date()}
               fullWidth={isMobile}
               size="large"
             >
-              Exit
+              Bridge to L1
             </Button>
           )}
       </WrapperActionsModal>

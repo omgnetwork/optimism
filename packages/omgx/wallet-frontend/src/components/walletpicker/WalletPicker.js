@@ -152,7 +152,7 @@ function WalletPicker ({ onEnable, enabled }) {
                 Connect a Wallet to access BOBA
               </Typography>
               <S.Subtitle variant="body1" component="p" paragraph={true}>
-                  Select a wallet to connect to BOBA.
+                  Select a wallet to connect to BOBA
               </S.Subtitle>
             </Grid>
 

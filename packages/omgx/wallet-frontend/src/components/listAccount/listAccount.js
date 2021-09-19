@@ -62,7 +62,7 @@ class ListAccount extends React.Component {
       dropDownBox,
       networkLayer,
       disabled
-    } = this.state;
+    } = this.state
 
     const enabled = (networkLayer === chain) ? true : false
     const logo = getCoinImage(token.symbol)
@@ -97,12 +97,12 @@ class ListAccount extends React.Component {
               >
                 {chain === 'L1' &&
                   <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div">
-                    Deposit
+                    Bridge
                   </S.TextTableCell>
                 }
                 {chain === 'L2' &&
                   <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div">
-                    Transact
+                    Bridge and Transfer
                   </S.TextTableCell>
                 }
                 <Box sx={{display: "flex", opacity: !enabled ? "0.4" : "1.0", transform: dropDownBox ? "rotate(-180deg)" : ""}}>
@@ -160,9 +160,10 @@ class ListAccount extends React.Component {
                   color='neutral'
                   variant="outlined"
                   disabled={disabled}
+                  tooltip="Classic Bridge to Boba L2. This option is always available but is generally more expensive than the swap-based system ('Fast Bridge')."
                   fullWidth
                 >
-                  Deposit
+                  Bridge
                 </Button>
 
                 <Button
@@ -170,9 +171,10 @@ class ListAccount extends React.Component {
                   color='primary'
                   disabled={disabled}
                   variant="contained"
+                  tooltip="A swap-based bridge to Boba L2. This option is only available if there is enough liquidity in the pools."
                   fullWidth
                 >
-                  Fast Deposit
+                  Fast Bridge
                 </Button>
               </>
               }
@@ -183,24 +185,27 @@ class ListAccount extends React.Component {
                     onClick={()=>{this.handleModalClick('exitModal', token, false)}}
                     variant="outlined"
                     disabled={disabled}
+                    tooltip="Classic Bridge to L1. This option is always available but has a 7 day delay before receiving your funds."
                     fullWidth
                   >
-                    Standard Exit
+                    Bridge to L1
                   </Button>
 
                   <Button
                     onClick={()=>{this.handleModalClick('exitModal', token, true)}}
                     variant="contained"
                     disabled={disabled}
+                    tooltip="A swap-based bridge to L1 without a 7 day waiting period. There is a small fee, however, and this option is only available if there is enough liquidity in the pools."
                     fullWidth
                   >
-                    Fast Exit
+                    Fast Bridge to L1
                   </Button>
 
                   <Button
                     onClick={()=>{this.handleModalClick('transferModal', token, false)}}
                     variant="contained"
                     disabled={disabled}
+                    tooltip="Transfer funds from one L2 account to another L2 account."
                     fullWidth
                   >
                     Transfer
