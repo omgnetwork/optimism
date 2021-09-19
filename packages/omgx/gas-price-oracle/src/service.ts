@@ -53,6 +53,7 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
     OVM_oETH: Contract
     L1ETHBalance: BigNumber
     L1ETHCostFee: BigNumber
+    L2ETHVaultBalance: BigNumber
     L2ETHCollectFee: BigNumber
     lastQueriedL1Block: number
     lastQueriedL2Block: number
@@ -99,6 +100,7 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
     this.state.L1ETHBalance = BigNumber.from('0')
     this.state.L1ETHCostFee = BigNumber.from('0')
     this.state.L2ETHCollectFee = BigNumber.from('0')
+    this.state.L2ETHVaultBalance = BigNumber.from('0')
 
     this.state.lastQueriedL1Block = await this.options.l1RpcProvider.getBlockNumber()
     this.state.lastQueriedL2Block = await this.options.l2RpcProvider.getBlockNumber()
@@ -108,6 +110,7 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
 
     // Load history
     await this._loadL1ETHFee();
+    await this._loadL2ETHCost();
   }
 
   protected async _start(): Promise<void> {
@@ -120,7 +123,7 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
   }
 
   private async _loadL1ETHFee(): Promise<void> {
-    const dumpsPath = path.resolve(__dirname, '../data/history.json')
+    const dumpsPath = path.resolve(__dirname, '../data/l1History.json')
     if (fs.existsSync(dumpsPath)) {
       this.logger.warn('Loading L1 cost history...')
       const historyJsonRaw = await fsPromise.readFile(dumpsPath)
@@ -136,16 +139,57 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
     }
   }
 
+  private async _loadL2ETHCost(): Promise<void> {
+    const vaultBalance =
+      BigNumber.from((await this.state.OVM_oETH.balanceOf(this.options.OVM_SequencerFeeVault)).toString())
+    const dumpsPath = path.resolve(__dirname, '../data/l2History.json')
+    if (fs.existsSync(dumpsPath)) {
+      this.logger.warn('Loading L2 cost history...')
+      const historyJsonRaw = await fsPromise.readFile(dumpsPath)
+      const historyJSON = JSON.parse(historyJsonRaw.toString())
+      if (historyJSON.L2ETHCollectFee) {
+        this.state.L2ETHCollectFee = BigNumber.from(historyJSON.L2ETHCollectFee)
+      } else {
+        this.logger.warn('Invalid L2 cost history!')
+        this.state.L2ETHCollectFee = vaultBalance
+      }
+    } else {
+      this.logger.warn('No L2 cost history Found!')
+      this.state.L2ETHCollectFee = vaultBalance;
+    }
+    this.state.L2ETHVaultBalance = vaultBalance
+    this.logger.info('Loaded L2 Cost Data', {
+      L2ETHVaultBalance: this.state.L2ETHVaultBalance.toString(),
+      L2ETHCollectFee: this.state.L2ETHCollectFee.toString()
+    })
+  }
+
   private async _writeL1ETHFee(): Promise<void> {
     const dumpsPath = path.resolve(__dirname, '../data')
     if (!fs.existsSync(dumpsPath)) {
       fs.mkdirSync(dumpsPath)
     }
     try {
-      const addrsPath = path.resolve(dumpsPath, 'history.json')
+      const addrsPath = path.resolve(dumpsPath, 'l1History.json')
       await fsPromise.writeFile(addrsPath, JSON.stringify({
         L1ETHBalance: this.state.L1ETHBalance.toString(),
         L1ETHCostFee: this.state.L1ETHCostFee.toString()
+      }))
+    } catch (error) {
+      console.log(error)
+      this.logger.error("Failed to write L1 cost history!")
+    }
+  }
+
+  private async _writeL2ETHCost(): Promise<void> {
+    const dumpsPath = path.resolve(__dirname, '../data')
+    if (!fs.existsSync(dumpsPath)) {
+      fs.mkdirSync(dumpsPath)
+    }
+    try {
+      const addrsPath = path.resolve(dumpsPath, 'l2History.json')
+      await fsPromise.writeFile(addrsPath, JSON.stringify({
+        L2ETHCollectFee: this.state.L2ETHCollectFee.toString()
       }))
     } catch (error) {
       console.log(error)
@@ -188,6 +232,7 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
       data: {
         L1ETHBalance: this.state.L1ETHBalance.toString(),
         L1ETHCostFee: Number(utils.formatEther(this.state.L1ETHCostFee.toString()).slice(0, 8)),
+        L1ETHCostFee10X: Number(utils.formatEther(this.state.L1ETHCostFee.toString()).slice(0, 8)) * 10,
         latestQueriedL1Block: this.state.lastQueriedL1Block,
       }
     })
@@ -212,15 +257,28 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
     }, [BigNumber.from('0'), BigNumber.from('0')])
 
     // Get L2 ETH Fee from contract
-    this.state.L2ETHCollectFee = BigNumber.from((await this.state.OVM_oETH.balanceOf(this.options.OVM_SequencerFeeVault)).toString())
+    const L2ETHCollectFee =
+      BigNumber.from((await this.state.OVM_oETH.balanceOf(this.options.OVM_SequencerFeeVault)).toString())
+    // The oETH in OVM_SequencerFeeVault is zero after withdrawing it
+    let L2ETHCollectFeeIncreased = BigNumber.from('0')
+    if (L2ETHCollectFee.lt(this.state.L2ETHCollectFee)) {
+      this.state.L2ETHVaultBalance = L2ETHCollectFee
+    } else {
+      L2ETHCollectFeeIncreased = L2ETHCollectFee.sub(this.state.L2ETHVaultBalance)
+      this.state.L2ETHVaultBalance = L2ETHCollectFee
+    }
+    this.state.L2ETHCollectFee = this.state.L2ETHCollectFee.add(L2ETHCollectFeeIncreased);
     this.state.lastQueriedL2Block = latestQueriedL2Block
     this.state.avgL2GasLimitPerBlock = collectGasLimitAndFee[0].div(numberOfBlocksInterval)
     this.state.numberOfBlocksInterval = numberOfBlocksInterval
+
+    await this._writeL2ETHCost()
 
     this.logger.info("Got L2 Gas Cost", {
       network: "L2",
       data: {
         L2ETHCollectFee: Number(utils.formatEther(this.state.L2ETHCollectFee.toString()).slice(0, 8)),
+        L2ETHCollectFee10X: Number(utils.formatEther(this.state.L2ETHCollectFee.toString()).slice(0, 8)) * 10,
         lastQueriedL2Block: this.state.lastQueriedL2Block,
         avgL2GasUsagePerBlock: this.state.avgL2GasLimitPerBlock.toString(),
         numberOfBlocksInterval: this.state.numberOfBlocksInterval,
