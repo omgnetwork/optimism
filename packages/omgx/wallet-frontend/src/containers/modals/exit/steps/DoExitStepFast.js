@@ -87,7 +87,7 @@ function DoExitStepFast({ handleClose, token }) {
         You will receive ${receivableAmount(value)} ${currencyL1} on L1.`))
       handleClose()
     } else {
-      dispatch(openError(`Failed to fast exit funds from L2`));
+      dispatch(openError(`Failed to fast bridge funds to L1`))
     }
 
   }
@@ -128,13 +128,13 @@ function DoExitStepFast({ handleClose, token }) {
     <>
       <Box>
         <Typography variant="h2" sx={{fontWeight: 700, mb: 1}}>
-          Fast Exit
+          Fast Bridge to L1
         </Typography>
 
         <Typography variant="body2" sx={{mb: 3}}>{feeLabel}</Typography>
 
         <Input
-          label={`Enter amount to exit`}
+          label={`Amount to bridge to L1`}
           placeholder="0.0000"
           value={value}
           type="number"
@@ -171,8 +171,8 @@ function DoExitStepFast({ handleClose, token }) {
 
         {Number(LPBalance) < Number(value) && (
           <Typography variant="body2" sx={{mt: 2, color: 'red'}}>
-            The liquidity pool balance (of {LPBalance}) is too low to cover your exit - please
-            use the traditional exit or reduce the amount to exit.
+            The liquidity pool balance (of {LPBalance}) is too low to cover your bridge - please
+            use the classic bridge or reduce the amount.
           </Typography>
         )}
 
@@ -196,13 +196,13 @@ function DoExitStepFast({ handleClose, token }) {
             color='primary'
             variant='contained'
             loading={exitLoading}
-            tooltip='Your exit is still pending. Please wait for confirmation.'
+            tooltip={exitLoading ? "Your bridge is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
             disabled={disabledSubmit}
             triggerTime={new Date()}
             fullWidth={isMobile}
             size='large'
           >
-            Exit L2
+            Bridge to L2
           </Button>
       </WrapperActionsModal>
     </>

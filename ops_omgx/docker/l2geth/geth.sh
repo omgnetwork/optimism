@@ -63,5 +63,5 @@ curl \
     --retry $RETRIES \
     --retry-delay 1 \
     $ROLLUP_CLIENT_HTTP
-
+rm -rf /root/.ethereum/geth/LOCK
 exec geth --verbosity="$VERBOSITY" "$@"

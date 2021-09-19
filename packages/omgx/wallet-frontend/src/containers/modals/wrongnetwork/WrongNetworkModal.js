@@ -15,7 +15,10 @@ limitations under the License. */
 
 import React from 'react';
 import { useDispatch } from 'react-redux'
+
+import Button from 'components/button/Button'
 import Modal from 'components/modal/Modal'
+
 import { closeModal } from 'actions/uiAction'
 
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
@@ -26,7 +29,10 @@ import { ReactComponent as Fox } from './../../../images/icons/fox-icon.svg'
 import { ReactComponent as Account } from './../../../images/icons/mm-account.svg'
 
 import { getAllNetworks } from 'util/masterConfig'
+
 import store from 'store'
+
+import networkService from 'services/networkService'
 
 import * as styles from './WrongNetworkModal.module.scss'
 import { useTheme } from '@emotion/react'
@@ -37,6 +43,19 @@ function WrongNetworkModal ({ open, onClose }) {
 
   const nw = getAllNetworks()
   const masterConfig = store.getState().setup.masterConfig
+  const networkLayer = store.getState().setup.netLayer
+
+  /*
+    This is fired if the internal setting of the gateway does not match the 
+    MetaMask configuration. There are multiple networks (e.g. mainent and rinkeby), 
+    and multiple layers, e.g. L1 and L2 
+  */
+
+  console.log("WNM masterConfig",masterConfig)
+  console.log("WNM networkLayer",networkLayer)
+
+  //Next figure out the right labels and targets
+
   const textLabel = nw[masterConfig].MM_Label
   const iconLabel = nw[masterConfig].MM_Label
 
@@ -48,6 +67,11 @@ function WrongNetworkModal ({ open, onClose }) {
     dispatch(closeModal('wrongNetworkModal'))
   }
 
+  async function correctChain() {
+    console.log("Correcting the chain")
+    const res = await networkService.correctChain( networkLayer )
+  }
+
   return (
     <Modal
       open={open}
@@ -56,14 +80,30 @@ function WrongNetworkModal ({ open, onClose }) {
       maxWidth="sm"
     >
       <Typography variant="h2" gutterBottom>
-        Please Change Network
+        Incorrect Network
       </Typography>
 
-      <Typography variant="body1">
-        To use "{textLabel}", please switch MetaMask to that network.
+      <Typography variant="body1" style={{margin: 0, padding: 0, paddingTop: '40px'}}>
+        To use {textLabel}, please change network.
       </Typography>
 
-      <Box display="flex" sx={{ flexDirection: 'column', alignItems: 'center', mt: 3 }}>
+      <Button
+        onClick={correctChain}
+        color='primary'
+        size='large'
+        variant='contained'
+        fullWidth={isMobile}
+        newStyle
+      >
+        Change MetaMask Network
+      </Button>
+
+      <Typography variant="body2" style={{margin: 0, padding: 0, paddingTop: '60px'}}>
+        Or, you can change manually, by going to MetaMask and 
+        clicking in the top bar.
+      </Typography>
+
+      <Box display="flex" sx={{ flexDirection: 'column', alignItems: 'center', mt: 3}}>
         <div className={styles.metamask}>
           <Fox width={isMobile ? 30 : 30} />
           <div className={styles.button}>
@@ -74,8 +114,9 @@ function WrongNetworkModal ({ open, onClose }) {
         </div>
         <ArrowUpwardIcon fontSize={'large'} color={'primary'}/>
       </Box>
+
     </Modal>
   );
 }
 
-export default React.memo(WrongNetworkModal);
+export default React.memo(WrongNetworkModal)
