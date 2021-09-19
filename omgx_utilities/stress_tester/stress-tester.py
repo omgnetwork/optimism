@@ -27,8 +27,8 @@ from web3.gas_strategies.time_based import fast_gas_price_strategy
 from web3.middleware import geth_poa_middleware
 from web3.logs import STRICT, IGNORE, DISCARD, WARN
 
-num_children = 20
-num_workers = 2
+num_children = 5
+num_workers = 1
 min_active_per = 5  # For every <min_active_per> children, require 1 to stay on L2 (disallows exit operations)
 max_fail = 0 # Ignore this many op failures. Next one will start a shutdown
 
@@ -266,7 +266,7 @@ for k in omgx_addrs:
   
 gasPrice = [0]*3
 # Rinkeby seems to work at 0.5 gwei, ~75s
-gasPrice[1] = Web3.toWei(env['gas_price_gwei'][0],'gwei')  # FIXME - try to estimate it (fails on local network; needs active txns?)
+gasPrice[1] = Web3.toWei(env['gas_price_gwei'][0],'gwei')  # FIXME - try to estimate it (fails on local network)
 gasPrice[2] = Web3.toWei(env['gas_price_gwei'][1],'gwei') # This one is fixed
 
 whale = Account(Web3.toChecksumAddress(env['whale_acct'][0]),env['whale_acct'][1])
@@ -288,7 +288,6 @@ def loadContract(rpc, addr, abiPath):
       #print("ABI:",x['name'],abi_str)
       addSig(x['name'],abi_str)
       
-  #print("Loaded contract",abiPath,"with address", addr)
   return c
   
 def loadL1Contracts(rpc):
@@ -338,28 +337,21 @@ def Fund(ctx, fr, to, chain, amount, n=None):
   
   tx = {
       'nonce': n,
- #     'gasPrice':gasPrice[chain],
       'from':fr.address,
       'to':to,
       'value':1,
-#      'gas':800000,
       'chainId': ctx.chainIds[chain],
   }
 
-#  print("DBG FundTx before estimateGas", tx)
-  
   eg = ctx.rpc[chain].eth.estimate_gas(tx)
-#  print("DBG FundTx estimate_gas:", eg, "GasPrice", ctx.rpc[chain].eth.gasPrice)
   
   eg = int(eg * env['gas_mult'][chain-1])
   
   tx['gas'] = Web3.toWei(eg , 'wei')
   tx['gasPrice'] = gasPrice[chain]
-#  print("EG", eg)
   
   myAssert(eg*gasPrice[chain] < amount)
   tx['value'] = Web3.toWei(amount - eg*gasPrice[chain], 'wei')
-#  print("DBG Modified FundTx", tx)
   
   signed_txn = ctx.rpc[chain].eth.account.sign_transaction(tx, fr.key)
   
@@ -376,7 +368,6 @@ def xFund(ctx, c, to, amount, n=None):
   
   tx = {
       'nonce': n,
-#      'gasPrice':gasPrice[c.on_chain],
       'from':c.acct.address,
       'to':to,
       'value':1,
@@ -384,22 +375,16 @@ def xFund(ctx, c, to, amount, n=None):
       'chainId': ctx.chainIds[c.on_chain],
   }
 
-#  print("DBG FundTx before estimateGas", tx)
-  
+ 
   c.gasEstimate = ctx.rpc[c.on_chain].eth.estimate_gas(tx)
-  
-#  print("DBG FundTx estimate_gas:", eg, "GasPrice", ctx.rpc[c.on_chain].eth.gasPrice)
   
   c.gasLimit = int(c.gasEstimate * env['gas_mult'][c.on_chain-1])
   
   tx['gas'] = Web3.toWei(c.gasLimit , 'wei')
   tx['gasPrice'] = gasPrice[c.on_chain]
   
-#  print("EG", eg)
-  
   myAssert(c.gasLimit*gasPrice[c.on_chain] < amount)
   tx['value'] = Web3.toWei(amount - c.gasLimit*gasPrice[c.on_chain], 'wei')
-#  print("DBG Modified FundTx", tx)
   
   signed_txn = ctx.rpc[c.on_chain].eth.account.sign_transaction(tx, c.acct.key)
   
@@ -500,8 +485,6 @@ if len(sys.argv) >= 3 and sys.argv[2] == "recover":
   exit(0)
 elif len(sys.argv) >= 3 and sys.argv[2] == "testpay":
 
-  #fr = whale
-  
   fr = Account(Web3.toChecksumAddress("0x1cbd3b2770909d4e10f157cabc84c7264073c9ec"), "0x47c99abed3324a2707c28affff1267e45918ec8c3f20b8aa892e8b065d2942dd")
   
   chain = 2
@@ -518,7 +501,6 @@ elif len(sys.argv) >= 3 and sys.argv[2] == "testpay":
       'from':fr.address,
       'to':to,
       'value':1,
-#      'gas':1,
       'chainId': ctx.chainIds[chain],
   }
 
@@ -539,7 +521,6 @@ elif len(sys.argv) >= 3 and sys.argv[2] == "testpay":
   
   myAssert(eg*gasPrice[chain] < amount)
   tx['value'] = Web3.toWei(amount - eg*gasPrice[chain], 'wei')
-#  print("DBG Modified FundTx", tx)
   
   signed_txn = ctx.rpc[chain].eth.account.sign_transaction(tx, fr.key)
   
@@ -632,7 +613,6 @@ def Finish(c,success=1):
   if c.exiting:
     print("Child",c.num,"is done")
     shutdown.num_done += 1
-    # FIXME - advance shutdown if it was the last one
   elif success:
     readyQueue.put(c)
   else:
@@ -721,14 +701,11 @@ def AddLiquidity_2(ctx, chain, acct,amount):
     token,
   ).buildTransaction({
     'nonce':ctx.rpc[chain].eth.get_transaction_count(acct.address),
-#    'gasPrice':gasPrice[chain],
     'from':acct.address,
-#    'value':amount,
+    'value':amount,
     'chainId':ctx.chainIds[chain],
   })
   
-  if(chain==1):
-    t2['value'] = amount
   eg = ctx.rpc[chain].eth.estimate_gas(t2)
   t2['gas'] = eg # FIXME
   t2['gasPrice'] = gasPrice[chain]
@@ -748,8 +725,6 @@ def Onramp_2(ctx, acct, amount):
   )
   r2 = sb.buildTransaction({
     'nonce':ctx.rpc[1].eth.get_transaction_count(acct.address),
-#    'gas':1,
-#    'gasPrice':gasPrice[1],
     'from':acct.address,
     'value':1,
     'chainId':ctx.chainIds[1],
@@ -785,8 +760,6 @@ def Onramp_trad(ctx,c):
     )
     r2 = sb.buildTransaction({
       'nonce':ctx.rpc[1].eth.get_transaction_count(acct.address),
-#      'gas':1,
-#      'gasPrice':gasPrice[1],
       'from':acct.address,
       'value':1,
       'chainId':ctx.chainIds[1],
@@ -799,7 +772,6 @@ def Onramp_trad(ctx,c):
     r2['gasPrice'] = gasPrice[1]
     r2['value'] = Web3.toWei(bb - (c.gasLimit*gasPrice[1]),'wei')
      
-#    print("SlowOnramp modified Tx:", r2)
     r2 = ctx.rpc[1].eth.account.sign_transaction(r2, acct.key)
     ret = ctx.rpc[1].eth.send_raw_transaction(r2.rawTransaction)
     c.on_chain = 2
@@ -829,8 +801,6 @@ def Onramp_fast(ctx,c):
         '0x0000000000000000000000000000000000000000'
       ).buildTransaction({
         'nonce':ctx.rpc[1].eth.get_transaction_count(acct.address),
-#        'gasPrice':gasPrice[chain],
-#        'gas':1,
         'from':acct.address,
         'value':1,
         'chainId':ctx.chainIds[1],
@@ -844,8 +814,6 @@ def Onramp_fast(ctx,c):
       dep['gas'] = c.gasLimit
       dep['gasPrice'] = gasPrice[chain]
       dep['value'] = amount
-      
-#      print("FastOnramp modified Tx:", dep)
       
       st = ctx.rpc[1].eth.account.sign_transaction(dep, acct.key)
       r = ctx.rpc[1].eth.send_raw_transaction(st.rawTransaction)
@@ -922,7 +890,6 @@ def FastExit(ctx, c):
     ).buildTransaction({
       'nonce':ctx.rpc[2].eth.get_transaction_count(acct.address),
       'gas': 1,
-#      'gasPrice':gasPrice[chain],
       'from':acct.address,
       'chainId':ctx.chainIds[2],
     })
@@ -1032,8 +999,6 @@ def dispatch(ctx, prefix, c):
       if (len(evWatch) + idleQueue.qsize()) >= (num_children - minActive):
         mayExit = False
       
-#      print("DBG dispatch mayExit", mayExit, "minActive", minActive, "evWatch", len(evWatch), "idle", idleQueue.qsize())
-      
       if not c.staked[2] and RollDice(env['op_pct'][1][0]):
         bal = ctx.rpc[c.on_chain].eth.getBalance(c.acct.address)
         lPrint(ctx.log, prefix + "will add/remove liquidity")
@@ -1130,8 +1095,6 @@ def Approve(ctx, contract, acct):
   })
   
   eg = ctx.rpc[2].eth.estimate_gas(a)
-#  bal = ctx.rpc[2].eth.getBalance(acct.address)
-#  print("EG",eg,"BAL",bal)
   a['gas'] = Web3.toWei(eg, 'wei')
   a['gasPrice'] = gasPrice[2]
   
@@ -1233,7 +1196,6 @@ def block_watcher(env, ch):
         cc = txWatch.pop(t)
         cc.need_tx = False
         wPrint(log, ch, "got TX " + Web3.toHex(t) + " child " + str(cc.num) + " addr " + cc.acct.address + " S " + str(tr.status))
-        #print("gas", tx.gas, "gasUsed", tr.gasUsed)
         cc.gasUsed = tr.gasUsed
         
         if tr.status != 1:
@@ -1394,7 +1356,6 @@ if (balStart[2] / (balStart[1] + balStart[2])) < 0.4:
   
   tx = Onramp_2(gCtx,whale,diff)
   rcpt = gCtx.rpc[1].eth.wait_for_transaction_receipt(tx)
-  #print("DBG rcpt", rcpt)
   myAssert(rcpt.status == 1)
   lPrint(gCtx.log, "Whale L1->L2 transfer completed on L1.")
 
@@ -1518,8 +1479,6 @@ while shutdown.level < 2:
   c = None
   while c is None and shutdown.level < 2: # FIXME
     listLock.acquire()
-   # print("Whale balances", Web3.fromWei(gCtx.rpc[1].eth.getBalance(whale.address),'ether'),
-   #   Web3.fromWei(gCtx.rpc[2].eth.getBalance(whale.address),'ether'))
     
     runtime = time.time() - start_time
     
@@ -1585,8 +1544,7 @@ while shutdown.level < 2:
     elif tMax > giveup_secs and shutdown.level == 1:
       lPrint(gCtx.log, "Forcing level 2 shutdown after " + str(giveup_secs) + " secs")
       shutdown.level = 2
-    
-      
+     
     listLock.release()
     try:
       sys.stdout.flush()
@@ -1630,7 +1588,10 @@ fvEnd = gCtx.rpc[2].eth.getBalance('0x4200000000000000000000000000000000000011')
 
 lPrint(gCtx.log,"L2 Fee Vault collected " + str(Web3.fromWei(fvEnd-fvStart,'ether')) + " ETH during run")
 
-lPrint(gCtx.log,"Batch submitter consumed " + str(shutdown.batchGas) + " L1 gas, costing " + str(Web3.fromWei(shutdown.batchGas * gasPrice[1], 'ether')) + " ETH")
+s = "Batch submitter consumed " + str(shutdown.batchGas) + " L1 gas, costing " + str(Web3.fromWei(shutdown.batchGas * gasPrice[1], 'ether')) + " ETH"
+l1AltPrice = 50
+s += " (would be " + str(Web3.fromWei(shutdown.batchGas * Web3.toWei(l1AltPrice,'gwei'), 'ether')) + " @ L1 price of " + str(l1AltPrice) + " gwei)"
+lPrint(gCtx.log,s)
 
 s = "+++ OPS_TOTAL +++ Completed " + str(shutdown.total_ops) + " ops in " + str(runtime) + " seconds (" + str(int(3600 * shutdown.total_ops / runtime)) + "/hour)"
 lPrint(gCtx.log, s)
