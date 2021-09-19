@@ -62,7 +62,7 @@ class ListAccount extends React.Component {
       dropDownBox,
       networkLayer,
       disabled
-    } = this.state;
+    } = this.state
 
     const enabled = (networkLayer === chain) ? true : false
     const logo = getCoinImage(token.symbol)
@@ -97,7 +97,7 @@ class ListAccount extends React.Component {
               >
                 {chain === 'L1' &&
                   <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div">
-                    Deposit
+                    Bridge
                   </S.TextTableCell>
                 }
                 {chain === 'L2' &&
@@ -162,7 +162,7 @@ class ListAccount extends React.Component {
                   disabled={disabled}
                   fullWidth
                 >
-                  Deposit
+                  Bridge
                 </Button>
 
                 <Button
@@ -172,7 +172,7 @@ class ListAccount extends React.Component {
                   variant="contained"
                   fullWidth
                 >
-                  Fast Deposit
+                  Fast Bridge
                 </Button>
               </>
               }

@@ -23,7 +23,7 @@ NETWORKS = {
     addressUrl:       `https://rinkeby.boba.network:8080/addresses.json`,
     addressOMGXUrl:   `https://rinkeby.boba.network:8078/addresses.json`,
     OMGX_WATCHER_URL: `https://api-watcher.rinkeby.boba.network/`,
-    MM_Label:         `Rinkeby Test Network`,
+    MM_Label:         `Rinkeby`,
     L1: {
       name: "Rinkeby",
       chainId: 4,
@@ -43,7 +43,7 @@ NETWORKS = {
     addressUrl:       `https://mainnet.boba.network:8080/addresses.json`,
     addressOMGXUrl:   `https://mainnet.boba.network:8078/addresses.json`,
     OMGX_WATCHER_URL: `https://api-watcher.mainnet.boba.network/`,
-    MM_Label:         `Ethereum Mainnet`,
+    MM_Label:         `Mainnet`,
     L1: {
       name: "Mainnet",
       chainId: 1,
@@ -67,7 +67,7 @@ if (env === 'dev') {
       addressUrl:       `http://${window.location.hostname}:8080/addresses.json`,
       addressOMGXUrl:   `http://${window.location.hostname}:8078/addresses.json`,
       OMGX_WATCHER_URL: null, //Does not exist on local
-      MM_Label:         `Local Network`,
+      MM_Label:         `Local`,
       L1: {
         name: "Local L1",
         chainId: 31337,
@@ -85,7 +85,7 @@ if (env === 'dev') {
       addressUrl:       `https://rinkeby-integration.boba.network:8081/addresses.json`,
       addressOMGXUrl:   `https://rinkeby-integration.boba.network:8081/omgx-addr.json`,
       OMGX_WATCHER_URL: `https://api-watcher.rinkeby-integration.boba.network/`,
-      MM_Label:         `Rinkeby Int Test Network`,
+      MM_Label:         `Rinkeby Int Test`,
       L1: {
         name: "Rinkeby",
         chainId: 4,

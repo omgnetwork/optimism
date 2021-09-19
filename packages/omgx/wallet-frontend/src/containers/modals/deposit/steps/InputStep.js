@@ -32,12 +32,12 @@ function InputStep({ handleClose, token }) {
     let res
 
     if(token.symbol === 'ETH') {
-      console.log("Depositing ETH")
+      console.log("Bridging ETH")
       if (value > 0) {
         res = await dispatch(depositETHL2(value))
         if (res) {
           dispatch(setActiveHistoryTab1('Deposits'))
-          dispatch(openAlert('ETH deposit submitted'))
+          dispatch(openAlert('ETH bridge submitted'))
           handleClose()
         }
       }
@@ -48,10 +48,10 @@ function InputStep({ handleClose, token }) {
       )
       if (res) {
         dispatch(setActiveHistoryTab1('Deposits'))
-        dispatch(openAlert(`${token.symbol} deposit submitted`))
+        dispatch(openAlert(`${token.symbol} bridge submitted`))
         handleClose()
       } else {
-        dispatch(openError(`Failed to deposit ${token.symbol}`))
+        dispatch(openError(`Failed to bridge ${token.symbol}`))
       }
     }
   }
@@ -96,11 +96,11 @@ function InputStep({ handleClose, token }) {
     <>
       <Box>
         <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
-          {`Deposit ${token && token.symbol ? token.symbol : ''}`}
+          {`Bridge ${token && token.symbol ? token.symbol : ''}`}
         </Typography>
 
         <Input
-          label="Enter amount to deposit"
+          label="Amount to bridge"
           placeholder="0.0000"
           value={value}
           type="number"
@@ -137,7 +137,7 @@ function InputStep({ handleClose, token }) {
           triggerTime={new Date()}
           fullWidth={isMobile}
         >
-          Deposit
+          Bridge
         </Button>
       </WrapperActionsModal>
     </>

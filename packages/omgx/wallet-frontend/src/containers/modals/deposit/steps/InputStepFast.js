@@ -68,7 +68,7 @@ function InputStepFast({ handleClose, token }) {
 
     if(token.symbol === 'ETH') {
 
-      console.log("ETH Fast swap on")
+      console.log("ETH Fast Bridge")
 
       if (valueIsValid) {
         res = await dispatch(depositL1LP(token.address, value, token.decimals))
@@ -76,7 +76,7 @@ function InputStepFast({ handleClose, token }) {
           dispatch(setActiveHistoryTab1('Deposits'))
           dispatch(
             openAlert(
-              `ETH was deposited into the L1LP. You will receive
+              `ETH was bridged into the L1LP. You will receive
               ${((Number(value) * (100 - Number(feeRate)))/100).toFixed(2)}
               oETH on L2`
             )
@@ -84,14 +84,14 @@ function InputStepFast({ handleClose, token }) {
           handleClose()
           return
         } else {
-          dispatch(openError('Failed to deposit ETH'))
+          dispatch(openError('Failed to bridge ETH'))
           return
         }
       }
     }
 
     //at this point we know it's not ETH
-    console.log("ERC20 Fast swap on")
+    console.log("ERC20 Fast Bridge")
 
     res = await dispatch(
       approveERC20(
@@ -113,13 +113,13 @@ function InputStepFast({ handleClose, token }) {
       dispatch(setActiveHistoryTab1('Deposits'))
       dispatch(
         openAlert(
-          `${token.symbol} was deposited to the L1LP. You will receive
+          `${token.symbol} was bridged to the L1LP. You will receive
            ${receivableAmount(value)} ${token.symbol} on L2`
         )
       )
       handleClose()
     } else {
-      dispatch(openError('Failed to deposit ERC20'))
+      dispatch(openError('Failed to bridge ERC20'))
     }
 
   }
@@ -152,10 +152,10 @@ function InputStepFast({ handleClose, token }) {
   let buttonLabel_1 = 'CANCEL'
   if( depositLoading || approvalLoading ) buttonLabel_1 = 'CLOSE WINDOW'
 
-  let buttonLabel_2 = 'Deposit'
+  let buttonLabel_2 = 'Bridge'
 
   if(depositLoading) {
-    buttonLabel_2 = "Depositing..."
+    buttonLabel_2 = "Bridging..."
   } else if (approvalLoading) {
     buttonLabel_2 = "Approving..."
   }
@@ -167,13 +167,13 @@ function InputStepFast({ handleClose, token }) {
     <>
       <Box>
         <Typography variant="h2" sx={{fontWeight: 700, mb: 1}}>
-          Fast Deposit
+          Fast Bridge
         </Typography>
 
         <Typography variant="body2" sx={{mb: 3}}>{label}</Typography>
 
         <Input
-          label={`Enter amount to deposit`}
+          label={`Amount to bridge`}
           placeholder="0.0000"
           value={value}
           type="number"
@@ -198,8 +198,8 @@ function InputStepFast({ handleClose, token }) {
 
         {Number(LPBalance) < Number(value) && (
           <Typography variant="body2" sx={{ color: 'red', my: 2}}>
-            The liquidity pool balance (of {LPBalance}) is too low to cover your fast deposit. Please
-            use the traditional deposit or reduce the amount.
+            The liquidity pool balance (of {LPBalance}) is too low to cover your fast bridge. Please
+            use the traditional bridge or reduce the amount.
           </Typography>
         )}
 
@@ -223,7 +223,7 @@ function InputStepFast({ handleClose, token }) {
           color='primary'
           variant="contained"
           loading={depositLoading || approvalLoading}
-          tooltip="Your deposit is still pending. Please wait for confirmation."
+          tooltip="Your bridge is still pending. Please wait for confirmation."
           disabled={disabledSubmit}
           triggerTime={new Date()}
           size="large"
