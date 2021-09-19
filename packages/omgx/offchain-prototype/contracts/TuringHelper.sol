@@ -9,6 +9,8 @@ contract TuringHelper {
   TuringHelper Self;
   bytes[] methods;
 
+  event OffchainResponse(uint version, bytes responseData);
+
   constructor (string memory _url) public {
     console.log("Deploying a helper contract with data source:", _url);
     data_URL = bytes(_url);
@@ -173,6 +175,8 @@ contract TuringHelper {
      created. In the future some of this registration might be moved
      into l2geth, allowing for security measures such as TLS client
      certificates. A configurable timeout could also be added.
+
+     This is a "view" function and may be used from eth_call. See below.
   */
   function TuringCall(uint32 method_idx, bytes memory _payload)
     public view returns (bytes memory) {
@@ -184,6 +188,26 @@ contract TuringHelper {
          a place to intercept and re-write the call.
       */
       bytes memory response = Self.GetResponse(method_idx, 1, _payload);
+      return response;
+  }
+
+  /* Same as TuringCall() but logs the offchain response so that a future
+     verifier or fraud prover can replay the transaction and ensure that it
+     results in the same state root as during the initial execution. Note -
+     a future version might need to include a timestamp and/or more details
+     about the offchain interaction.
+  */
+  function TuringTx(uint32 method_idx, bytes memory _payload)
+    public returns (bytes memory) {
+      require (method_idx < methods.length, "Method not registered");
+      require (_payload.length > 0, "Payload length was 0");
+
+      /* Initiate the request. This can't be a local function call
+         because that would stay inside the EVM and not give l2geth
+         a place to intercept and re-write the call.
+      */
+      bytes memory response = Self.GetResponse(method_idx, 1, _payload);
+      emit OffchainResponse(0x01, response);
       return response;
   }
 }

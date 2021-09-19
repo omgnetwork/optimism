@@ -6,6 +6,7 @@ import "hardhat/console.sol";
 
 interface Helper {
   function TuringCall(uint32 method_idx, bytes memory) view external returns (bytes memory);
+  function TuringTx(uint32 method_idx, bytes memory) external returns (bytes memory);
 }
 
 contract HelloTuring {
@@ -47,7 +48,7 @@ contract HelloTuring {
        "Invalid Locale"); // Example uses "EN_US" etc
 
     locales[msg.sender] = locale;
-    bytes memory response =  myHelper.TuringCall(0, abi.encode(locale));
+    bytes memory response =  myHelper.TuringTx(0, abi.encode(locale));
     cachedGreetings[msg.sender] = abi.decode(response,(string));
   }
 
