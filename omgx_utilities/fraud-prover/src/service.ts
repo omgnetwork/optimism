@@ -530,7 +530,7 @@ FraudProverService._start (/opt/fraud-prover/src/service.ts:283:23)\n at FraudPr
           this.logger.info('Returning index of the mismatch', { index })
           return index
         } else {
-          this.logger.info('State root was not mismatched ✓')
+          this.logger.info('State root was not mismatched', { root:l2StateRoot } )
         }
       }
 

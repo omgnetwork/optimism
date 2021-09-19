@@ -389,7 +389,7 @@ export class L1ProviderWrapper {
       this.OVM_StateCommitmentChain.filters.StateBatchAppended()
     )
 
-    console.log('All events in the OVM_StateCommitmentChain:', events)
+    console.log('All events in the OVM_StateCommitmentChain: MMDBG', events.length)
 
     if (events.length === 0) {
       return

@@ -201,6 +201,7 @@ export const run = async () => {
     'fraud-submisison-address',
     env.FRAUD_SUBMISSION_ADDRESS || 'no fraud'
   )
+   
   const DISABLE_QUEUE_BATCH_APPEND = config.bool(
     'disable-queue-batch-append',
     !!env.DISABLE_QUEUE_BATCH_APPEND
