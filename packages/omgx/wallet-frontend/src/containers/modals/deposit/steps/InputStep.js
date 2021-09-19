@@ -32,7 +32,7 @@ function InputStep({ handleClose, token }) {
     let res
 
     if(token.symbol === 'ETH') {
-      console.log("Bridging ETH")
+      console.log("Bridging ETH to L2")
       if (value > 0) {
         res = await dispatch(depositETHL2(value))
         if (res) {
@@ -42,7 +42,7 @@ function InputStep({ handleClose, token }) {
         }
       }
     } else {
-      console.log("Depositing ERC20")
+      console.log("Bridging ERC20 to L2")
       res = await dispatch(
         depositErc20(powAmount(value, token.decimals), token.address, token.addressL2)
       )
@@ -96,11 +96,11 @@ function InputStep({ handleClose, token }) {
     <>
       <Box>
         <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
-          {`Bridge ${token && token.symbol ? token.symbol : ''}`}
+          `Classic Bridge ${token && token.symbol ? token.symbol : ''} to L1`
         </Typography>
 
         <Input
-          label="Amount to bridge"
+          label="Amount to bridge to L1"
           placeholder="0.0000"
           value={value}
           type="number"
@@ -132,7 +132,7 @@ function InputStep({ handleClose, token }) {
           size="large"
           variant="contained"
           loading={depositLoading}
-          tooltip='Your swap is still pending. Please wait for confirmation.'
+          tooltip={depositLoading ? "Your bridge is still pending. Please wait for confirmation." : "Click here to bridge your funds to L2"}
           disabled={disabledSubmit}
           triggerTime={new Date()}
           fullWidth={isMobile}

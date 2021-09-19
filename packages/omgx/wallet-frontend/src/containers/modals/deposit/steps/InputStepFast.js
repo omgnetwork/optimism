@@ -223,7 +223,7 @@ function InputStepFast({ handleClose, token }) {
           color='primary'
           variant="contained"
           loading={depositLoading || approvalLoading}
-          tooltip="Your bridge is still pending. Please wait for confirmation."
+          tooltip={depositLoading ? "Your bridge is still pending. Please wait for confirmation." : "Click here to bridge your funds to L2"}
           disabled={disabledSubmit}
           triggerTime={new Date()}
           size="large"
