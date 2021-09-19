@@ -142,6 +142,7 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
   private async _loadL2ETHCost(): Promise<void> {
     const vaultBalance =
       BigNumber.from((await this.state.OVM_oETH.balanceOf(this.options.OVM_SequencerFeeVault)).toString())
+    // load data
     const dumpsPath = path.resolve(__dirname, '../data/l2History.json')
     if (fs.existsSync(dumpsPath)) {
       this.logger.warn('Loading L2 cost history...')
@@ -155,7 +156,11 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
       }
     } else {
       this.logger.warn('No L2 cost history Found!')
-      this.state.L2ETHCollectFee = vaultBalance;
+      this.state.L2ETHCollectFee = vaultBalance
+    }
+    // adjust the L2ETHCollectFee if it is not correct
+    if (this.state.L2ETHCollectFee.lt(vaultBalance)) {
+      this.state.L2ETHCollectFee = vaultBalance
     }
     this.state.L2ETHVaultBalance = vaultBalance
     this.logger.info('Loaded L2 Cost Data', {
