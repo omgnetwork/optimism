@@ -29,7 +29,7 @@ if [ ! -d ${DATADIR}/geth ]; then
     "istanbulBlock": 0,
     "berlinBlock": 0,
     "muirGlacierBlock": 0,
-    "londonBlock": null,
+    "londonBlock": 0,
     "clique": {
       "period": ${BLOCK_INTERVAL},
       "epoch": 30000
@@ -107,4 +107,5 @@ exec geth \
   --http.api "admin,debug,web3,eth,txpool,personal,clique,miner,net"\
   --http.corsdomain "*"\
   --http.vhosts "*"\
+  --miner.gasprice ${GAS_PRICE}
   "$@"

@@ -1,8 +1,11 @@
 module.exports = {
   networks: {
     hardhat: {
-      gasPrice: 0,
-      initialBaseFeePerGas: 0
+      mining: {
+        auto: false,
+        interval: 10000,
+      },
+      hardfork: "london"
     },
   },
   analytics: { enabled: false },
