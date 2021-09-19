@@ -48,7 +48,7 @@ function InputStep({ handleClose, token }) {
       )
       if (res) {
         dispatch(setActiveHistoryTab1('Deposits'))
-        dispatch(openAlert(`${token.symbol} deposit submitted.`))
+        dispatch(openAlert(`${token.symbol} deposit submitted`))
         handleClose()
       } else {
         dispatch(openError(`Failed to deposit ${token.symbol}`))
@@ -57,7 +57,7 @@ function InputStep({ handleClose, token }) {
   }
 
   function setAmount(value) {
-    if (Number(value) > 0 && Number(value) < Number(token.balance)) {
+    if (Number(value) > 0 && Number(value) < Number(logAmount(token.balance, token.decimals))) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
@@ -81,6 +81,17 @@ function InputStep({ handleClose, token }) {
   let buttonLabel_1 = 'CANCEL'
   if( depositLoading ) buttonLabel_1 = 'CLOSE WINDOW'
 
+  let convertToUSD = false
+  
+  if( Object.keys(lookupPrice) && 
+      !!value &&
+      value > 0 &&
+      value <= logAmount(token.balance, token.decimals) &&
+      !!amountToUsd(value, lookupPrice, token)
+  ) {
+    convertToUSD = true
+  }
+
   return (
     <>
       <Box>
@@ -100,7 +111,7 @@ function InputStep({ handleClose, token }) {
           newStyle
         />
 
-        {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+        {!!convertToUSD && (
           <Typography variant="body1" sx={{mt: 2, fontWeight: 700}}>
             {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
           </Typography>

@@ -78,6 +78,17 @@ function TransferModal ({ open, token, minHeight }) {
     !token.address ||
     !recipient
 
+  let convertToUSD = false
+  
+  if( Object.keys(lookupPrice) && 
+      !!value &&
+      value > 0 &&
+      value <= logAmount(token.balance, token.decimals) &&
+      !!amountToUsd(value, lookupPrice, token)
+  ) {
+    convertToUSD = true
+  }
+
   if(typeof(token) === 'undefined') return
 
   return (
@@ -118,7 +129,7 @@ function TransferModal ({ open, token, minHeight }) {
           />
         </Box>
 
-        {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+        {convertToUSD && (
           <Typography variant="body2" component="p" sx={{opacity: 0.5, mt: 2}}>
             {`Transfer value in USD: $${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
           </Typography>
