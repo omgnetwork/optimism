@@ -45,19 +45,20 @@ function InputStepFast({ handleClose, token }) {
   const approvalLoading = useSelector(selectLoading(['APPROVE/CREATE']))
   const lookupPrice = useSelector(selectLookupPrice)
   const signatureStatus = useSelector(selectSignatureStatus_depositLP)
+  
   const maxValue = logAmount(token.balance, token.decimals)
   const valueIsValid = value > 0 && value <= maxValue
 
   function setAmount(value) {
-    if (
-      Number(value) > 0 &&
-      Number(value) < Number(LPBalance) &&
-      Number(value) < Number(token.balance)
-    ) {
+
+    const valid = value > 0 && value <= logAmount(token.balance, token.decimals)
+
+    if ( valid && Number(value) < Number(LPBalance) ) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
     }
+    
     setValue(value)
   }
 
@@ -69,7 +70,7 @@ function InputStepFast({ handleClose, token }) {
 
       console.log("ETH Fast swap on")
 
-      if (value > 0) {
+      if (valueIsValid) {
         res = await dispatch(depositL1LP(token.address, value, token.decimals))
         if (res) {
           dispatch(setActiveHistoryTab1('Deposits'))

@@ -56,8 +56,8 @@ function Input({
   //   onChange({ target: { value: maxValue } })
   // }
 
+  const underZero = new BN(value).lt(new BN(0)) 
   const overMax = new BN(value).gt(new BN(maxValue))
-
   const theme = useTheme()
 
   return (
@@ -87,7 +87,7 @@ function Input({
             fullWidth={fullWidth}
             size={size}
             variant={variant}
-            error={overMax}
+            error={underZero || overMax}
             sx={sx}
             newstyle={newStyle ? 1 : 0}
           />
@@ -114,15 +114,15 @@ function Input({
           </Box>
         )}
       </S.Wrapper>
-      {value <= 0 && value !== '' ?
+      {value !== '' && underZero ?
         <Typography variant="body2" sx={{mt: 1}}>
-          The value must be greater than 0.
+          The value must be greater than 0
         </Typography>
         : null
       }
-      {value !== '' && value > maxValue  ?
+      {value !== '' && overMax ?
         <Typography variant="body2" sx={{mt: 1}}>
-          The value must be smaller than {Number(maxValue).toFixed(3)}.
+          Wallet balance exceeded: the value must be smaller than {Number(maxValue).toFixed(3)}
         </Typography>
         : null}
     </>

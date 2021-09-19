@@ -44,6 +44,7 @@ function DoExitStep({ handleClose, token }) {
   const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
   const signatureStatus = useSelector(selectSignatureStatus_exitTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
+  
   const maxValue = logAmount(token.balance, token.decimals)
   const valueIsValid = value > 0 && value <= maxValue
 
@@ -72,7 +73,10 @@ function DoExitStep({ handleClose, token }) {
   }
 
   function setExitAmount(value) {
-    if (Number(value) > 0 && Number(value) < Number(token.balance)) {
+
+    const valid = value > 0 && value <= logAmount(token.balance, token.decimals)
+    
+    if (valid) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
