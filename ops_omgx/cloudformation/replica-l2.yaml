@@ -136,6 +136,7 @@ Resources:
       ContainerDefinitions:
         - Image: !Sub "${ECRRegistry}/${DockerPrefix}/${ReplicaL2Image}:${ImageTag}"
           Name: geth_l2
+          Hostname: geth-l2
           PortMappings:
             - ContainerPort: 8545
               HostPort: 0
@@ -175,7 +176,7 @@ Resources:
                 - EndpointAddress:
                     Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
             - Name: RPC_ADDR
-              Value: "0.0.0.0"
+              Value: "geth-l2"
             - Name: ROLLUP_ENABLE_L2_GAS_POLLING
               Value: true
             - Name: ROLLUP_ENFORCE_FEES
