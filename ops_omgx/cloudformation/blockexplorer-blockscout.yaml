@@ -150,7 +150,7 @@ Resources:
   BlockscoutLBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Port: 80
+      Port: 4000
       Protocol: HTTP
       VpcId:
         Fn::ImportValue: !Sub "${InfrastructureStackName}:VpcId"
@@ -158,7 +158,7 @@ Resources:
         - Key: deregistration_delay.timeout_seconds
           Value: 30
       HealthCheckIntervalSeconds: 20
-      HealthCheckPath: /health
+      HealthCheckPath: /
       HealthCheckProtocol: HTTP # TODO Implement proper healthcheck
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
@@ -213,6 +213,8 @@ Resources:
               Value: ETH
             - Name: NETWORK
               Value: Boba
+            - Name: PORT
+              Value: 4000
             - Name: SUBNETWORK
               Value: Rinkeby
             - Name: MIX_ENV
@@ -223,14 +225,14 @@ Resources:
               Value: /images/boba_logo.svg
             - Name: SUPPORTED_CHAINS
               Value: '[{"title":"Boba Mainnet","url":"https://blockexplorer.boba.network","hide_in_dropdown?": false},{"title":"Boba Rinkeby","url":"https://blockexplorer.rinkeby.boba.network","test_net?":true},{"title":"Boba Rinkeby Integration","url":"https://blockexplorer.rinkeby-integration.boba.network","test_net?":true,"hide_in_dropdown?": true}]'
-            - Name: ETHEREUM_JSONRPC_HTTP_URL
+            - Name: ETHEREUM_JSONRPC_TRACE_URL
               Value: !Sub
-                - "http://${EndpointAddress}:8545/rpc"
+                - "http://${EndpointAddress}:8545/"
                 - EndpointAddress:
                     Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerReplica:DNSName"
             - Name: ETHEREUM_JSONRPC_WS_URL
               Value: !Sub
-                - "ws://${EndpointAddress}:8545/ws"
+                - "ws://${EndpointAddress}:8545/ws/"
                 - EndpointAddress:
                     Fn::ImportValue: !Sub "${InfrastructureStackName}:LoadBalancerReplica:DNSName"
             - Name: BLOCKSCOUT_VERSION
@@ -243,23 +245,6 @@ Resources:
             com.datadoghq.ad.logs: '[{"source": "blockscout", "service": "blockscout"}]'
           Essential: true
           Memory: "512"
-        - Image: 942431445534.dkr.ecr.us-east-1.amazonaws.com/omgx/nginx-eth-proxy:blockscout
-          Name: nginx-blockscout
-          PortMappings:
-            - ContainerPort: 80
-              HostPort: 0
-          Command:
-            - "nginx-debug"
-            - "-g"
-            - "daemon off;"
-          DockerLabels:
-            com.datadoghq.ad.check_names: '["nginx-blockscout"]'
-            com.datadoghq.ad.init_configs: '[{}]'
-            com.datadoghq.ad.logs: '[{"source": "nginx-blockscout", "service": "nginx-blockscout"}]'
-          Essential: true
-          Memory: "128"
-          Links:
-            - blockscout
       NetworkMode: bridge
       TaskRoleArn: !GetAtt TaskRole.Arn
       Family: !Sub "blockscout-${EnvironmentName}"
@@ -270,8 +255,8 @@ Resources:
       Cluster:
         Fn::ImportValue: !Sub "${InfrastructureStackName}:EcsClusterReplica"
       LoadBalancers:
-        - ContainerName: nginx-blockscout
-          ContainerPort: 80
+        - ContainerName: blockscout
+          ContainerPort: 4000
           TargetGroupArn: !Ref BlockscoutLBTargetGroup
       DesiredCount: !Ref ServiceCount
       LaunchType: EC2

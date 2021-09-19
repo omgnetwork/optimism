@@ -21,11 +21,11 @@ import { transfer } from 'actions/networkAction';
 import { closeModal, openAlert } from 'actions/uiAction';
 import { selectLoading } from 'selectors/loadingSelector';
 
-import Button from 'components/button/Button';
-import Modal from 'components/modal/Modal';
+import Button from 'components/button/Button'
+import Modal from 'components/modal/Modal'
 
 import { amountToUsd, logAmount } from 'util/amountConvert'
-import networkService from 'services/networkService';
+import networkService from 'services/networkService'
 
 import Input from 'components/input/Input';
 import { selectLookupPrice } from 'selectors/lookupSelector';
