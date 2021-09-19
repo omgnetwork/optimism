@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { depositETHL2, depositErc20 } from 'actions/networkAction'
@@ -7,55 +7,57 @@ import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
 
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
-import GasPicker from 'components/gaspicker/GasPicker'
 
 import { selectLoading } from 'selectors/loadingSelector'
+import { selectSignatureStatus_depositTRAD } from 'selectors/signatureSelector'
 import { amountToUsd, logAmount, powAmount } from 'util/amountConvert'
 
-import * as styles from '../DepositModal.module.scss'
 import { selectLookupPrice } from 'selectors/lookupSelector'
+import { Typography, useMediaQuery } from '@material-ui/core'
+import { useTheme } from '@emotion/react'
+import { WrapperActionsModal } from 'components/modal/Modal.styles'
+import { Box } from '@material-ui/system'
 
 function InputStep({ handleClose, token }) {
 
   const dispatch = useDispatch()
   const [value, setValue] = useState('')
   const [disabledSubmit, setDisabledSubmit] = useState(true)
-  const [gasPrice, setGasPrice] = useState()
-  const [selectedSpeed, setSelectedSpeed] = useState('normal')
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
-  const lookupPrice = useSelector(selectLookupPrice);
+  const signatureStatus = useSelector(selectSignatureStatus_depositTRAD)
+  const lookupPrice = useSelector(selectLookupPrice)
 
   async function doDeposit() {
 
     let res
 
     if(token.symbol === 'ETH') {
-      console.log("Depositing ETH")
+      console.log("Bridging ETH to L2")
       if (value > 0) {
-        res = await dispatch(depositETHL2(value, gasPrice))
+        res = await dispatch(depositETHL2(value))
         if (res) {
           dispatch(setActiveHistoryTab1('Deposits'))
-          dispatch(openAlert('ETH deposit submitted'))
+          dispatch(openAlert('ETH bridge submitted'))
           handleClose()
         }
       }
     } else {
-      console.log("Depositing ERC20")
+      console.log("Bridging ERC20 to L2")
       res = await dispatch(
-        depositErc20(powAmount(value, token.decimals), token.address, gasPrice, token.addressL2)
+        depositErc20(powAmount(value, token.decimals), token.address, token.addressL2)
       )
       if (res) {
         dispatch(setActiveHistoryTab1('Deposits'))
-        dispatch(openAlert(`${token.symbol} deposit submitted.`))
+        dispatch(openAlert(`${token.symbol} bridge submitted`))
         handleClose()
       } else {
-        dispatch(openError(`Failed to deposit ${token.symbol}`))
+        dispatch(openError(`Failed to bridge ${token.symbol}`))
       }
     }
   }
 
   function setAmount(value) {
-    if (Number(value) > 0 && Number(value) < Number(token.balance)) {
+    if (Number(value) > 0 && Number(value) < Number(logAmount(token.balance, token.decimals))) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
@@ -63,59 +65,81 @@ function InputStep({ handleClose, token }) {
     setValue(value)
   }
 
-  const renderGasPicker = (
-    <GasPicker
-      selectedSpeed={selectedSpeed}
-      setSelectedSpeed={setSelectedSpeed}
-      setGasPrice={setGasPrice}
-    />
-  )
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
+  useEffect(() => {
+    if (signatureStatus && depositLoading) {
+      //we are all set - can close the window
+      //transaction has been sent and signed
+      handleClose()
+    }
+  }, [ signatureStatus, depositLoading, handleClose ])
 
   console.log("Loading:", depositLoading)
 
+  let buttonLabel_1 = 'CANCEL'
+  if( depositLoading ) buttonLabel_1 = 'CLOSE WINDOW'
+
+  let convertToUSD = false
+  
+  if( Object.keys(lookupPrice) && 
+      !!value &&
+      value > 0 &&
+      value <= logAmount(token.balance, token.decimals) &&
+      !!amountToUsd(value, lookupPrice, token)
+  ) {
+    convertToUSD = true
+  }
+
   return (
     <>
-      <h2>
-        {`Deposit ${token && token.symbol ? token.symbol : ''}`}
-      </h2>
+      <Box>
+        <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
+          `Classic Bridge ${token && token.symbol ? token.symbol : ''} to L1`
+        </Typography>
 
-      <Input
-        placeholder={'Amount to deposit'}
-        value={value}
-        type="number"
-        onChange={(i)=>setAmount(i.target.value)}
-        unit={token.symbol}
-        maxValue={logAmount(token.balance, token.decimals)}
-      />
+        <Input
+          label="Amount to bridge to L1"
+          placeholder="0.0000"
+          value={value}
+          type="number"
+          onChange={(i)=>setAmount(i.target.value)}
+          unit={token.symbol}
+          maxValue={logAmount(token.balance, token.decimals)}
+          variant="standard"
+          newStyle
+        />
 
-      {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
-        <h3>
-          {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
-        </h3>
-      )}
+        {!!convertToUSD && (
+          <Typography variant="body1" sx={{mt: 2, fontWeight: 700}}>
+            {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
+          </Typography>
+        )}
 
-      {renderGasPicker}
-
-      <div className={styles.buttons}>
-        <Button 
-          onClick={handleClose} 
-          type="outline" 
-          style={{ flex: 0 }}
+      </Box>
+      <WrapperActionsModal>
+        <Button
+          onClick={handleClose}
+          color="neutral"
+          size="large"
         >
-          CANCEL
+          {buttonLabel_1}
         </Button>
         <Button
           onClick={doDeposit}
-          type="primary"
-          style={{flex: 0, minWidth: 200}}
+          color='primary'
+          size="large"
+          variant="contained"
           loading={depositLoading}
-          tooltip="Your swap is still pending. Please wait for confirmation."
+          tooltip={depositLoading ? "Your bridge is still pending. Please wait for confirmation." : "Click here to bridge your funds to L2"}
           disabled={disabledSubmit}
           triggerTime={new Date()}
+          fullWidth={isMobile}
         >
-          DEPOSIT
+          Bridge
         </Button>
-      </div>
+      </WrapperActionsModal>
     </>
   )
 }

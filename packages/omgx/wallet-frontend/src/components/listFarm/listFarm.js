@@ -10,36 +10,36 @@ import { getFarmInfo, updateStakeToken, updateWithdrawToken } from 'actions/farm
 import Button from 'components/button/Button';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 
 import networkService from 'services/networkService';
 
 import { getCoinImage } from 'util/coinImage';
 
-import * as styles from './listFarm.module.scss';
+import { Box, Typography, Fade, Grid, CircularProgress } from '@material-ui/core';
+import * as S from "./ListFarm.styles"
 
 class ListFarm extends React.Component {
-  
+
   constructor(props) {
-    
-    super(props);
-    
-    const { 
-      poolInfo, 
-      userInfo, 
+
+    super(props)
+
+    const {
+      poolInfo,
+      userInfo,
       L1orL2Pool,
-      balance, 
-      decimals 
+      balance,
+      showAll
     } = this.props;
 
     this.state = {
       balance,
-      decimals,
       L1orL2Pool,
       // data
-      poolInfo, 
+      poolInfo,
       userInfo,
+      showAll,
       //drop down box
       dropDownBox: false,
       dropDownBoxInit: true,
@@ -47,10 +47,10 @@ class ListFarm extends React.Component {
       loading: false,
     }
   }
-  
+
   componentDidUpdate(prevState) {
 
-    const { poolInfo, userInfo, balance, decimals } = this.props;
+    const { poolInfo, userInfo, balance, showAll } = this.props;
 
     if (!isEqual(prevState.poolInfo, poolInfo)) {
       this.setState({ poolInfo });
@@ -64,46 +64,46 @@ class ListFarm extends React.Component {
       this.setState({ balance });
     }
 
-    if (!isEqual(prevState.decimals, decimals)) {
-      this.setState({ decimals });
+    if (!isEqual(prevState.showAll, showAll)) {
+      this.setState({ showAll });
     }
 
   }
 
   handleStakeToken() {
-    
-    const { poolInfo, L1orL2Pool, balance, decimals } = this.state
-    
+
+    const { poolInfo, L1orL2Pool, balance } = this.state
+
     this.props.dispatch(updateStakeToken({
       symbol: poolInfo.symbol,
       currency: L1orL2Pool === 'L1LP' ? poolInfo.l1TokenAddress : poolInfo.l2TokenAddress,
       LPAddress: L1orL2Pool === 'L1LP' ? networkService.L1LPAddress : networkService.L2LPAddress,
       L1orL2Pool,
       balance,
-      decimals
+      decimals: poolInfo.decimals
     }))
-    
+
     this.props.dispatch(openModal('farmDepositModal'))
   }
 
   handleWithdrawToken() {
-    
-    const { poolInfo, L1orL2Pool, balance, decimals } = this.state;
-    
+
+    const { poolInfo, L1orL2Pool, balance } = this.state;
+
     this.props.dispatch(updateWithdrawToken({
       symbol: poolInfo.symbol,
       currency: L1orL2Pool === 'L1LP' ? poolInfo.l1TokenAddress : poolInfo.l2TokenAddress,
       LPAddress: L1orL2Pool === 'L1LP' ? networkService.L1LPAddress : networkService.L2LPAddress,
       L1orL2Pool,
       balance,
-      decimals
+      decimals: poolInfo.decimals
     }))
-    
-    this.props.dispatch(openModal('farmWithdrawModal'));
+
+    this.props.dispatch(openModal('farmWithdrawModal'))
   }
 
   async handleHarvest() {
-    
+
     const { poolInfo, userInfo } = this.state;
 
     this.setState({ loading: true })
@@ -132,12 +132,12 @@ class ListFarm extends React.Component {
     }
 
     if (getRewardTX) {
-      this.props.dispatch(openAlert(`${logAmount(userReward, 18, 2)} ${poolInfo.symbol} was added to your account`));
-      this.props.dispatch(getFarmInfo());
-      this.setState({ loading: false });
+      this.props.dispatch(openAlert(`${logAmount(userReward, poolInfo.decimals, 2)} ${poolInfo.symbol} was added to your account`))
+      this.props.dispatch(getFarmInfo())
+      this.setState({ loading: false })
     } else {
-      this.props.dispatch(openError("Failed to get reward"));
-      this.setState({ loading: false });
+      this.props.dispatch(openError("Failed to get reward"))
+      this.setState({ loading: false })
     }
 
   }
@@ -146,9 +146,12 @@ class ListFarm extends React.Component {
 
     const {
       poolInfo, userInfo,
-      dropDownBox, dropDownBoxInit,
+      dropDownBox, showAll,
       loading, L1orL2Pool
     } = this.state;
+
+    const pageLoading = Object.keys(poolInfo).length === 0;
+    const { isMobile } = this.props
 
     let userReward = 0;
 
@@ -165,151 +168,160 @@ class ListFarm extends React.Component {
     // networkService.L1OrL2 L1: || L2
     const disabled = !L1orL2Pool.includes(networkService.L1orL2)
     const symbol = poolInfo.symbol
-    const name = poolInfo.name
-    const logo = getCoinImage(symbol);
+    let name = poolInfo.name
+    const decimals = poolInfo.decimals
+    let logo = getCoinImage(symbol)
+
+    //Deal with Token migration to REPv2
+    if( symbol === 'REPv2' ) {
+      name = 'AUGUR (REPv2)'
+      logo = getCoinImage('REP')
+    }
+
+    if(!showAll) {
+      if(!Number(logAmount(poolInfo.tokenBalance, decimals, 2))) {
+        return null;
+      }
+    }
 
     return (
-      <div className={styles.ListFarm}
-      style={{
-        background: `${!!dropDownBox ? 'rgba(255, 255, 255, 0.03)' : ''}`
-      }}
-      >
-        <div 
-          className={styles.topContainer} 
-          style={disabled ? {pointerEvents: 'none'} : {}}
-          onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
-        >
-          <div className={styles.Table1}>
-            <img className={styles.Image} src={logo} alt="logo"/>
-            <div className={styles.BasicText}>{name}</div>
-          </div>
-          <div className={styles.Table2}>
-            <div className={styles.BasicText}>Earned</div>
-            <div className={styles.BasicLightText}>
-              {userReward ? 
-                `${logAmount(userReward, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </div>
-          </div>
-          <div className={styles.Table3}>
-            <div className={styles.BasicText}>Share</div>
-            <div className={styles.BasicLightText}>
-              {userInfo.amount ? 
-                `${logAmount(userInfo.amount, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </div>
-          </div>
-          <div className={styles.Table4}>
-            <div className={styles.BasicText}>APR</div>
-            <div className={styles.BasicLightText}>
-              {`${poolInfo.APR ? poolInfo.APR.toFixed(2) : 0}%`}
-            </div>
-          </div>
-          <div className={styles.Table5}>
-            <div className={styles.BasicText}>Liquidity</div>
-            <div className={styles.BasicLightText}>
-              {poolInfo.userDepositAmount ? 
-                `${logAmount(poolInfo.userDepositAmount, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </div>
-          </div>
-          <div className={styles.Table5}>
-            <div className={styles.BasicText}>Balance</div>
-            <div className={styles.BasicLightText}>
-              {poolInfo.tokenBalance ?
-                `${logAmount(poolInfo.tokenBalance, 18, 2)} ${symbol}` : `0 ${symbol}`
-              }
-            </div>
-          </div>
-          {disabled &&
-            <div className={styles.Table6}>
-              <div className={styles.LinkTextOff}>Staking</div>
-              <ExpandMoreIcon className={styles.LinkButtonOff} />
-            </div>
-          }
-          {!disabled &&
-            <div className={styles.Table6}>
-              <div className={styles.LinkText}>Staking</div>
-              <ExpandMoreIcon className={styles.LinkButton} />
-            </div>
-          }
-        </div>
+      <S.Wrapper dropDownBox={dropDownBox}>
+        {pageLoading ? (
+          <Box sx={{textAlign: 'center'}}>
+            <CircularProgress color="secondary" />
+          </Box>
+        ) : (
+          <Grid container spacing={2} direction="row" justifyContent="center" alignItems="center" >
+
+            <S.GridItemTag item xs={4} md={2}>
+                <img src={logo} alt="logo" width={30} />
+                <Typography variant="overline">{name}</Typography>
+            </S.GridItemTag>
+
+            <S.GridItemTag item xs={4} md={2}>
+              {isMobile ? (
+                <Typography variant="overline" sx={{opacity: 0.7}}>Earned</Typography>
+              ) : (null)}
+              <Typography variant="body1">
+                {userReward ?
+                  `${logAmount(userReward, decimals, 2)}` : `0`
+                }
+              </Typography>
+            </S.GridItemTag>
+
+            <S.GridItemTag item xs={4} md={2}>
+              {isMobile ? (
+                <Typography variant="overline" sx={{opacity: 0.7}}>Your Stake</Typography>
+              ) : (null)}
+              <Typography variant="body1">
+                {userInfo.amount ?
+                  `${logAmount(userInfo.amount, decimals, 2)}` : `0`
+                }
+              </Typography>
+            </S.GridItemTag>
+
+            <S.GridItemTag item xs={4} md={2}>
+              {isMobile ? (
+                <Typography variant="overline" sx={{opacity: 0.7}}>APR %</Typography>
+              ) : (null)}
+              <Typography variant="body1">
+                {userInfo.amount ?
+                  `${logAmount(poolInfo.APR, 0, 2)}` : `0`
+                }
+              </Typography>
+            </S.GridItemTag>
+
+            <S.GridItemTag item xs={4} md={2}>
+              {isMobile ? (
+                <Typography variant="overline" sx={{opacity: 0.7}}>Liquidity (Balance)</Typography>
+              ) : (null)}
+              <Typography variant="body1">
+                {poolInfo.userDepositAmount ?
+                  `${logAmount(poolInfo.userDepositAmount, decimals, 2)}` : `0`
+                }{' ('}
+                {poolInfo.tokenBalance ?
+                  `${logAmount(poolInfo.tokenBalance, decimals, 2)}` : `0`
+                })
+              </Typography>
+            </S.GridItemTag>
+
+            <S.GridItemTag item xs={12} md={2}>
+              <Box
+                disabled={disabled}
+                onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
+                sx={{display: 'flex', cursor: 'pointer', color: "#0ebf9a", transform: dropDownBox ? "rotate(-180deg)" : ""}}
+              >
+                <ExpandMoreIcon />
+              </Box>
+            </S.GridItemTag>
+          </Grid>
+        )}
 
         {/*********************************************/
         /**************  Drop Down Box ****************/
         /**********************************************/
         }
-        <div 
-          className={dropDownBox ? 
-            styles.dropDownContainer: dropDownBoxInit ? styles.dropDownInit : styles.closeDropDown}
-        >
-          <div className={styles.boxContainer}>
-            <div className={styles.BasicText}>{`${name}`} Earned</div>
-            <div className={styles.boxRowContainer}>
-              <div className={styles.LargeBlueText}>{logAmount(userReward, 18, 2)}</div>
-              <Button
-                type='primary'
-                size='small'
-                className={styles.smallButton}
-                disabled={logAmount(userReward, 18) === '0' || disabled}
-                onClick={()=>{this.handleHarvest()}}
-                loading={loading}
-              >
-                Harvest
-              </Button>
-            </div>
-          </div>
-          
-          <div className={styles.boxContainer}>
-            {logAmount(userInfo.amount, 18) === '0' ? 
-              <>
-                <div className={styles.BasicText}>Stake {`${name}`}</div>
-                <div className={styles.boxRowContainer}>
-                  <Button
-                    type='primary'
-                    className={styles.largeButton}
-                    onClick={() => {this.handleStakeToken()}}
-                    disabled={disabled}
-                  >
-                    Stake
-                  </Button>
-                </div>
-              </>:
-              <>
-                <div className={styles.BasicText}>{`${name}`} Staked</div>
-                <div className={styles.boxRowContainer}>
-                  <div className={styles.LargeBlueText}>{logAmount(userInfo.amount, 18)}</div>
-                  <div className={styles.AdjustButtonsContainer}>
-                    <div 
-                      className={disabled ? styles.AdjustButtonContainerDisabled : styles.AdjustButtonContainer}
-                      onClick={() => {!disabled && this.handleStakeToken()}}
-                    >
-                      <AddIcon className={styles.AdjustButton} />
-                    </div>
-                    <div 
-                      className={disabled ? styles.AdjustButtonContainerDisabled : styles.AdjustButtonContainer}
-                      onClick={() => {!disabled && this.handleWithdrawToken()}}
-                    >
-                      <RemoveIcon className={styles.AdjustButton} />
-                    </div>
-                  </div>
-                </div>
-              </>
-            }
-          </div>
+        {dropDownBox ? (
+          <Fade in={dropDownBox}>
+            <S.DropdownContent>
+              <S.DropdownWrapper>
+                <Typography sx={{flex: 1}} variant="body2" component="div">{`${symbol}`} Earned</Typography>
+                <Typography sx={{flex: 1}} variant="body2" component="div" color="secondary">{logAmount(userReward, decimals, 2)}</Typography>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  disabled={logAmount(userReward, decimals) === '0' || disabled}
+                  onClick={()=>{this.handleHarvest()}}
+                  loading={loading}
+                  sx={{flex: 1}}
+                >
+                  Harvest
+                </Button>
+              </S.DropdownWrapper>
 
-        </div>
+              <S.DropdownWrapper>
+                {logAmount(userInfo.amount, decimals) === '0' ?
+                  <>
+                    <Typography sx={{flex: 1}} variant="body2" component="div">{`${symbol}`} Staked</Typography>
+                    <Typography sx={{flex: 1}} variant="body2" component="div" color="secondary">0.00</Typography>
+                    <Button
+                      variant="contained"
+                      onClick={() => {this.handleStakeToken()}}
+                      disabled={disabled}
+                      fullWidth
+                      sx={{flex: 1}}
+                    >
+                      Stake
+                    </Button>
+                  </> :
+                  <>
+                    <Typography variant="body2" component="div">{`${symbol}`} Staked</Typography>
+                    <Typography variant="body2" component="div" color="secondary">{logAmount(userInfo.amount, decimals)}</Typography>
+                    <Box sx={{display: "flex", alignItems: "center", gap: "5px"}}>
+                      <Button
+                        variant="outlined"
+                        color="neutral"
+                        onClick={() => {!disabled && this.handleWithdrawToken()}}
+                      >
+                        <RemoveIcon/>
+                      </Button>
+                      <Button variant="contained" onClick={() => {!disabled && this.handleStakeToken()}}>
+                        Stake More
+                      </Button>
+                    </Box>
+                  </>
+                }
+              </S.DropdownWrapper>
+            </S.DropdownContent>
+          </Fade>
+        ) : null }
 
-      </div>
+      </S.Wrapper>
     )
   }
 }
 
-const mapStateToProps = state => ({ 
-  login: state.login,
-  sell: state.sell,
-  sellTask: state.sellTask,
-  buy: state.buy,
-});
+const mapStateToProps = state => ({
+})
 
-export default connect(mapStateToProps)(ListFarm);
+export default connect(mapStateToProps)(ListFarm)

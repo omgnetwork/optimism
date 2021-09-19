@@ -19,7 +19,6 @@ export NETWORK_ID=`/opt/secret2env -name $SECRETNAME|grep -w NETWORK_ID|sed 's/N
 export NO_DISCOVER=`/opt/secret2env -name $SECRETNAME|grep -w NO_DISCOVER|sed 's/NO_DISCOVER=//g'`
 export NO_USB=`/opt/secret2env -name $SECRETNAME|grep -w NO_USB|sed 's/NO_USB=//g'`
 export ROLLUP_POLL_INTERVAL_FLAG=`/opt/secret2env -name $SECRETNAME|grep -w ROLLUP_POLL_INTERVAL_FLAG|sed 's/ROLLUP_POLL_INTERVAL_FLAG=//g'`
-export RPC_API=`/opt/secret2env -name $SECRETNAME|grep -w RPC_API|sed 's/RPC_API=//g'`
 export RPC_CORS_DOMAIN=`/opt/secret2env -name $SECRETNAME|grep -w RPC_CORS_DOMAIN|sed 's/RPC_CORS_DOMAIN=//g'`
 export RPC_ENABLE=`/opt/secret2env -name $SECRETNAME|grep -w RPC_ENABLE|sed 's/RPC_ENABLE=//g'`
 export RPC_PORT=`/opt/secret2env -name $SECRETNAME|grep -w RPC_PORT|sed 's/RPC_PORT=//g'`
@@ -28,7 +27,6 @@ export TARGET_GAS_LIMIT=`/opt/secret2env -name $SECRETNAME|grep -w TARGET_GAS_LI
 export USING_OVM=`/opt/secret2env -name $SECRETNAME|grep -w USING_OVM|sed 's/USING_OVM=//g'`
 export WS=`/opt/secret2env -name $SECRETNAME|grep -w WS|sed 's/WS=//g'`
 export WS_ADDR=`/opt/secret2env -name $SECRETNAME|grep -w WS_ADDR|sed 's/WS_ADDR=//g'`
-export WS_API=`/opt/secret2env -name $SECRETNAME|grep -w WS_API|sed 's/WS_API=//g'`
 export WS_ORIGINS=`/opt/secret2env -name $SECRETNAME|grep -w WS_ORIGINS|sed 's/WS_ORIGINS=//g'`
 
 RETRIES=${RETRIES:-40}
@@ -65,5 +63,5 @@ curl \
     --retry $RETRIES \
     --retry-delay 1 \
     $ROLLUP_CLIENT_HTTP
-
+rm -rf /root/.ethereum/geth/LOCK
 exec geth --verbosity="$VERBOSITY" "$@"

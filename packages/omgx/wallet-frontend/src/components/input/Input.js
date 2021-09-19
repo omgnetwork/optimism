@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React from 'react'
-import { Search } from '@material-ui/icons'
 import BN from 'bignumber.js'
+import * as S from './Input.styles'
 
-import * as styles from './Input.module.scss'
+import { Box, Typography } from '@material-ui/core'
+import { useTheme } from '@emotion/react'
+import { getCoinImage } from 'util/coinImage'
 
 function Input({
   placeholder,
@@ -28,11 +30,17 @@ function Input({
   unit,
   value,
   onChange,
+  sx,
   paste,
-  className,
+  // className,
   maxValue,
-  small,
+  // small,
+  fullWidth,
+  size,
+  variant,
+  newStyle = false,
 }) {
+
   async function handlePaste() {
     try {
       const text = await navigator.clipboard.readText()
@@ -44,62 +52,80 @@ function Input({
     }
   }
 
-  function handleMaxClick() {
-    onChange({ target: { value: maxValue } })
-  }
+  // function handleMaxClick() {
+  //   onChange({ target: { value: maxValue } })
+  // }
 
+  const underZero = new BN(value).lt(new BN(0)) 
   const overMax = new BN(value).gt(new BN(maxValue))
+  const theme = useTheme()
 
   return (
-    <div className={[styles.Input, className].join(' ')}>
-      {label && <div className={styles.label}>{label}</div>}
-      <div className={[styles.field, overMax ? styles.error : ''].join(' ')}>
-        {icon && <Search className={styles.icon} />}
-        {
-          type === 'textArea' ?
-            <textarea
-              className={[styles.input, small ? styles.small : ''].join(' ')}
-              placeholder={placeholder}
-              value={value}
-              onChange={onChange}
-              disabled={disabled}
-              rows="4"
-              style={{
-                height: 'auto'
-              }}
-            />
-            : <input
-              className={[styles.input, small ? styles.small : ''].join(' ')}
-              placeholder={placeholder}
-              type={type}
-              value={value}
-              onChange={onChange}
-              disabled={disabled}
-              style={{
-                paddingLeft: `${icon ? '40px' : '5px'}`
-              }}
-            />
-        }
+    <>
+      <S.Wrapper newstyle={newStyle ? 1 : 0}>
         {unit && (
-          <div className={`${styles.unit} ${!maxValue ? styles.isPaste : ''}`}>
-            {maxValue && value !== maxValue && (
-              <div onClick={handleMaxClick} className={styles.maxValue}>
-                MAX
-              </div>
-            )}
-            <div style={{display: 'flex', flexDirection: 'column'}}>
-              {unit}
-              <span style={{fontSize: '0.7em'}}>Balance: {Number(maxValue).toFixed(3)}</span>
+          <S.UnitContent>
+            <div>
+              <Typography variant="body2" component="div">{unit}</Typography>
+              <img src={getCoinImage(unit)} alt="logo" width={50} height={50} />
             </div>
-          </div>
+          </S.UnitContent>
+        )}
+
+        <S.InputWrapper>
+          {label && (
+            <Typography variant="body2" component="div" sx={{opacity: 0.7, mb: 1}}>
+              {label}
+            </Typography>
+          )}
+          <S.TextFieldTag
+            placeholder={placeholder}
+            type={type}
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+            fullWidth={fullWidth}
+            size={size}
+            variant={variant}
+            error={underZero || overMax}
+            sx={sx}
+            newstyle={newStyle ? 1 : 0}
+          />
+        </S.InputWrapper>
+
+        {unit && (
+          <S.ActionsWrapper>
+            <Typography variant="body2" component="p" sx={{opacity: 0.7, textAlign: "end", mb: 2}}>
+              Max Available: {Number(maxValue).toFixed(3)}
+            </Typography>
+
+            {/* maxValue && value !== maxValue && (
+              <Box>
+                <Button onClick={handleMaxClick} variant="small" >
+                  Use All
+                </Button>
+              </Box>
+            )*/}
+          </S.ActionsWrapper>
         )}
         {paste && (
-          <div onClick={handlePaste} className={styles.paste}>
-            Paste
-          </div>
+          <Box onClick={handlePaste} sx={{color: theme.palette.secondary.main, opacity: 0.9, cursor: 'pointer', position: 'absolute', right: '70px', fontSize: '14px'}}>
+            PASTE
+          </Box>
         )}
-      </div>
-    </div>
+      </S.Wrapper>
+      {value !== '' && underZero ?
+        <Typography variant="body2" sx={{mt: 1}}>
+          The value must be greater than 0
+        </Typography>
+        : null
+      }
+      {value !== '' && overMax ?
+        <Typography variant="body2" sx={{mt: 1}}>
+          Wallet balance exceeded: the value must be smaller than {Number(maxValue).toFixed(3)}
+        </Typography>
+        : null}
+    </>
   )
 }
 

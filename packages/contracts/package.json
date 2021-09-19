@@ -1,6 +1,6 @@
 {
   "name": "@eth-optimism/contracts",
-  "version": "0.4.10",
+  "version": "0.4.11",
   "main": "dist/index",
   "files": [
     "dist/**/*.js",
@@ -50,12 +50,11 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
-    "@eth-optimism/core-utils": "^0.5.2",
+    "@eth-optimism/core-utils": "^0.5.5",
     "@ethersproject/abstract-provider": "^5.4.1",
     "@ethersproject/abstract-signer": "^5.4.1",
     "@ethersproject/contracts": "^5.4.1",
     "@ethersproject/hardware-wallets": "^5.4.0",
-    "@nomiclabs/hardhat-etherscan": "^2.1.5",
     "glob": "^7.1.6"
   },
   "devDependencies": {
@@ -65,6 +64,7 @@
     "@ethersproject/transactions": "^5.4.0",
     "@nomiclabs/hardhat-ethers": "^2.0.1",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@nomiclabs/hardhat-etherscan": "^2.1.6",
     "@openzeppelin/contracts": "^3.3.0",
     "@openzeppelin/contracts-upgradeable": "^3.3.0",
     "@typechain/ethers-v5": "^7.0.1",

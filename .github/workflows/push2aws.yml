@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - develop
-      - wallet-integration
+      - aws-blockscout
 
 jobs:
   push2aws:

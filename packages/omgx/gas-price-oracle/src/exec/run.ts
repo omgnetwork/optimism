@@ -103,8 +103,8 @@ const main = async () => {
     throw new Error('Must pass FAST_RELAYER_ADDRESS or FAST_RELAYER_PRIVATE_KEY')
   }
 
-  const l1Provider = new providers.JsonRpcProvider(L1_NODE_WEB3_URL)
-  const l2Provider = new providers.JsonRpcProvider(L2_NODE_WEB3_URL)
+  const l1Provider = new providers.StaticJsonRpcProvider(L1_NODE_WEB3_URL)
+  const l2Provider = new providers.StaticJsonRpcProvider(L2_NODE_WEB3_URL)
 
   const gasPriceOracleOwnerWallet = new Wallet(GAS_PRICE_ORACLE_OWNER_PRIVATE_KEY, l2Provider)
 

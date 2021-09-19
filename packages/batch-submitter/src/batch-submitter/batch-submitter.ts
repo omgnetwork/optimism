@@ -195,6 +195,9 @@ export abstract class BatchSubmitter {
       beforeSendTransaction: (tx: PopulatedTransaction) => {
         this.logger.info(`Submitting ${txName} transaction`, {
           gasPrice: tx.gasPrice,
+          maxFeePerGas: tx.maxFeePerGas,
+          maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
+          gasLimit: tx.gasLimit,
           nonce: tx.nonce,
           contractAddr: this.chainContract.address,
         })
@@ -241,11 +244,12 @@ export abstract class BatchSubmitter {
     }
 
     this.logger.info('Received transaction receipt', { receipt })
-    this.logger.info(successMessage, {
-      block:receipt.blockNumber,
-      status:receipt.status,
-      txHash:receipt.transactionHash,
-    })
+    // this.logger.info(successMessage, {
+    //   block:receipt.blockNumber,
+    //   status:receipt.status,
+    //   txHash:receipt.transactionHash,
+    // })
+    this.logger.info(successMessage)
     this.metrics.batchesSubmitted.inc()
     this.metrics.submissionGasUsed.observe(
       receipt ? receipt.gasUsed.toNumber() : 0

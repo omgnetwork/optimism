@@ -13,124 +13,132 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 import React, { useState } from 'react'
+import {Typography} from '@material-ui/core'
+
 import { useDispatch } from 'react-redux'
 
-import { closeModal } from 'actions/uiAction'
+import { closeModal, openAlert, openError } from 'actions/uiAction'
 
 import * as styles from './daoModal.module.scss'
 
 import Modal from 'components/modal/Modal'
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
-import ProposalAction from './ProposalAction'
+
+import { WrapperActionsModal } from 'components/modal/Modal.styles'
+import { createDaoProposal } from 'actions/daoAction'
 
 function NewProposalModal({ open }) {
-
-    const [title, setTitle] = useState('')
-    const [description, setDescription] = useState('')
-
-    const [actionList, setActionList] = useState([])
-    const [contracts, setContracts] = useState(['select'])
-
-    const [calldata, setCalldata] = useState(undefined)
-
     const dispatch = useDispatch()
 
-    const renderActions = () => {
-        return actionList.map((action, index) => {
-            return <div key={index}>
-                <ProposalAction index={index}
-                    setActionList={setActionList}
-                    actionList={actionList}
-                    contracts={contracts}
-                    setContracts={setContracts}
-                    setCalldata={setCalldata}
-                />
-            </div>
-        })
-    }
+    const [action, setAction] = useState(null);
+    const [votingThreshold, setVotingThreshold] = useState(0);
+    const [proposeText, setProposeText] = useState();
+    const [proposalUri, setProposalUri] = useState();
 
-    const addAction = () => {
-        setActionList([...actionList, ''])
-        setContracts([...contracts, 'select'])
+    const onActionChange = (e) =>{
+        setVotingThreshold('0');
+        setProposeText('');
+        setProposalUri('');
+        setAction(e.target.value);
     }
-
 
     function handleClose() {
-        setTitle('');
+        setVotingThreshold(null);
+        setAction(null);
         dispatch(closeModal('newProposalModal'))
     }
 
     const submit = async () => {
-        console.log({
-            description,
-            title, 
-            actionList,
-            contracts,
-            calldata
-        })
+        let res = await dispatch(createDaoProposal({ 
+            votingThreshold, 
+            text: !!proposeText ? `${proposeText}@@${proposalUri}` : null
+        }));
+
+        if (res) {
+            dispatch(openAlert(`Proposal has been submitted. It will be listed soon`))
+            handleClose()
+        } else {
+            dispatch(openError(`Failed to create proposal`));
+            handleClose()
+        }
     }
 
-    const disabledProposal = !title;
+    const disabledProposal = () => {
+        if (action === 'change-threshold') {
+            return !votingThreshold
+        } else {
+            return !proposeText
+        }
+    };
 
     return (
-        <Modal open={open}
-            width="700px"
+        <Modal
+            open={open}
+            onClose={handleClose}
+            maxWidth="md"
         >
-            <h2>New Proposal</h2>
+            <Typography variant="h2">New Proposal</Typography>
             <div className={styles.modalContent}>
                 <div className={styles.proposalAction}>
-                    <div className={styles.actionTitle}>
-                        <h3>Actions</h3>
-                        <Button
-                            style={{
-                                borderRadius: '8px',
-                                width: '110px'
-                            }}
-                            size="small"
-                            type="outline"
-                            onClick={addAction}
-                        >
-                            + Add an action
-                        </Button>
-                    </div>
-                    {renderActions()}
-
-                </div>
-                <div className={styles.proposalDetail}>
-                    <Input
-                        label='Proposal Title'
-                        value={title}
-                        onChange={i => setTitle(i.target.value)}
+                    <select
+                        className={styles.actionPicker}
+                        onChange={onActionChange}
+                    >
+                        <option>Select Proposal Type...</option>
+                        <option value="change-threshold">Change Voting Threshold</option>
+                        <option value="text-proposal">Freeform Text Proposal</option>
+                    </select>
+                    {action === 'change-threshold' && <Input
+                        label="Enter voting threshold"
+                        placeholder="0000"
+                        value={votingThreshold}
+                        type="number"
+                        onChange={(i)=>setVotingThreshold(i.target.value)}
+                        variant="standard"
+                        newStyle
                     />
-                    <Input
-                        label='Proposal Description'
-                        value={description}
-                        type="textArea"
-                        onChange={i => setDescription(i.target.value)}
-                    />
+                    }
+                    {action === 'text-proposal' && <>
+                        <Input
+                            label="Enter proposal text"
+                            value={proposeText}
+                            onChange={(i) => setProposeText(i.target.value)}
+                            variant="standard"
+                            newStyle
+                        />
+                        <Input
+                            label="URI"
+                            value={proposalUri}
+                            onChange={(i) => setProposalUri(i.target.value)}
+                            variant="standard"
+                            newStyle
+                        />
+                    </>
+                    }
                 </div>
             </div>
 
-            <div className={styles.buttons}>
+            <WrapperActionsModal>
                 <Button
                     onClick={handleClose}
-                    type='secondary'
-                    className={styles.button}
+                    color='neutral'
+                    size="large"
                 >
                     CANCEL
                 </Button>
 
                 <Button
-                    className={styles.button}
                     onClick={() => { submit({ useLedgerSign: false }) }}
-                    type='primary'
+                    color='primary'
+                    size="large"
+                    variant="contained"
                     // loading={loading} // TODO: Implement loading base on the action trigger
-                    disabled={disabledProposal}
+                    disabled={disabledProposal()}
                 >
-                    SUBMIT PROPOSAL
+                    PROPOSE
                 </Button>
-            </div>
+            </WrapperActionsModal>
         </Modal >
     )
 }

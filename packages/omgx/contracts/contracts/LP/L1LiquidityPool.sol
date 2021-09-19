@@ -9,12 +9,13 @@ import "../libraries/OVM_CrossDomainEnabledFast.sol";
 /* External Imports */
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 /**
  * @dev An L1 LiquidityPool implementation
  */
-contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
+contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuardUpgradeable, PausableUpgradeable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -203,6 +204,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
         public
         onlyOwner()
         onlyNotInitialized()
+        initializer()
     {
         require(_l1CrossDomainMessenger != address(0) && _l1CrossDomainMessengerFast != address(0) && _L2LiquidityPoolAddress != address(0), "zero address not allowed");
         senderMessenger = _l1CrossDomainMessenger;
@@ -211,6 +213,11 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
         owner = msg.sender;
         configureFee(35, 15);
         configureGas(1400000, 2300);
+
+        __Context_init_unchained();
+        __Pausable_init_unchained();
+        __ReentrancyGuard_init_unchained();
+
     }
 
     /**
@@ -315,7 +322,9 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
         external
         payable
         nonReentrant
+        whenNotPaused
     {
+        require(msg.value != 0 || _tokenAddress != address(0), "Amount Incorrect");
         // check whether user sends ETH or ERC20
         if (msg.value != 0) {
             // override the _amount and token address
@@ -369,7 +378,9 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
     )
         external
         payable
+        whenNotPaused
     {
+        require(msg.value != 0 || _tokenAddress != address(0), "Amount Incorrect");
         // check whether user sends ETH or ERC20
         if (msg.value != 0) {
             // override the _amount and token address
@@ -421,6 +432,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
         address payable _to
     )
         external
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
         UserInfo storage user = userInfo[_tokenAddress][msg.sender];
@@ -505,6 +517,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
         address _to
     )
         external
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
         UserInfo storage user = userInfo[_tokenAddress][msg.sender];
@@ -535,12 +548,27 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
         );
     }
 
+    /**
+     * Pause contract
+     */
+    function pause() external onlyOwner() {
+        _pause();
+    }
+
+    /**
+     * UnPause contract
+     */
+    function unpause() external onlyOwner() {
+        _unpause();
+    }
+
     /*************************
      * Cross-chain Functions *
      *************************/
 
     /**
      * Move funds from L2 to L1, and pay out from the right liquidity pool
+     * part of the contract pause, if only this method needs pausing use pause on CDM_Fast
      * @param _to receiver to get the funds
      * @param _amount amount to to be transferred.
      * @param _tokenAddress L1 token address
@@ -552,6 +580,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
     )
         external
         onlyFromCrossDomainAccount(address(L2LiquidityPoolAddress))
+        whenNotPaused
     {
         bool replyNeeded = false;
 
@@ -617,6 +646,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
 
     /**
      * Settlement pay when there's not enough funds on the other side
+     * part of the contract pause, if only this method needs pausing use pause on CDM_Fast
      * @param _to receiver to get the funds
      * @param _amount amount to to be transferred.
      * @param _tokenAddress L1 token address
@@ -628,6 +658,7 @@ contract L1LiquidityPool is OVM_CrossDomainEnabledFast, ReentrancyGuard {
     )
         external
         onlyFromCrossDomainAccount(address(L2LiquidityPoolAddress))
+        whenNotPaused
     {
         PoolInfo storage pool = poolInfo[_tokenAddress];
         uint256 userRewardFee = (_amount.mul(userRewardFeeRate)).div(1000);

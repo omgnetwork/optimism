@@ -3,6 +3,7 @@ node_modules
 results
 temp
 .nyc_output
+coverage.json
 *.tsbuildinfo
 yarn.lock
 *yarn.lock
@@ -35,6 +36,8 @@ packages/omgx/wallet/wallet/build
 .env-docker
 env.js
 env.yml
+env-rinkeby.yml
+env-mainnet.yml
 *.log
 
 .serverless

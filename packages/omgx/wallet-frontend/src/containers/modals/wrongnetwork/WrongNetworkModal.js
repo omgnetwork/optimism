@@ -14,24 +14,62 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import Modal from 'components/modal/Modal';
-import { closeModal } from 'actions/uiAction';
-import close from 'images/close.png';
-import arrow from 'images/arrow.png';
+import { useDispatch } from 'react-redux'
 
-import * as styles from './WrongNetworkModal.module.scss';
+import Button from 'components/button/Button'
+import Modal from 'components/modal/Modal'
 
-import { selectNetwork } from 'selectors/setupSelector';
+import { closeModal } from 'actions/uiAction'
+
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+
+import { Box, Typography, useMediaQuery } from '@material-ui/core'
+import { ReactComponent as Fox } from './../../../images/icons/fox-icon.svg'
+import { ReactComponent as Account } from './../../../images/icons/mm-account.svg'
+
+import { getAllNetworks } from 'util/masterConfig'
+
+import store from 'store'
+
+import networkService from 'services/networkService'
+
+import * as styles from './WrongNetworkModal.module.scss'
+import { useTheme } from '@emotion/react'
 
 function WrongNetworkModal ({ open, onClose }) {
 
-  const masterConfig = useSelector(selectNetwork());
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
+
+  const nw = getAllNetworks()
+  const masterConfig = store.getState().setup.masterConfig
+  const networkLayer = store.getState().setup.netLayer
+
+  /*
+    This is fired if the internal setting of the gateway does not match the 
+    MetaMask configuration. There are multiple networks (e.g. mainent and rinkeby), 
+    and multiple layers, e.g. L1 and L2 
+  */
+
+  console.log("WNM masterConfig",masterConfig)
+  console.log("WNM networkLayer",networkLayer)
+
+  //Next figure out the right labels and targets
+
+  const textLabel = nw[masterConfig].MM_Label
+  const iconLabel = nw[masterConfig].MM_Label
+
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   function handleClose () {
-    onClose();
-    dispatch(closeModal('wrongNetworkModal'));
+    onClose()
+    dispatch(closeModal('wrongNetworkModal'))
+  }
+
+  async function correctChain() {
+    console.log("Correcting the chain")
+    const res = await networkService.correctChain( networkLayer )
   }
 
   return (
@@ -39,41 +77,46 @@ function WrongNetworkModal ({ open, onClose }) {
       open={open}
       onClose={handleClose}
       light
+      maxWidth="sm"
     >
-      <div className={styles.WrongNetworkModal}>
-        <img
-          className={styles.close}
-          onClick={handleClose}
-          src={close}
-          alt='close'
-        />
-        <h2>Wrong Network</h2>
+      <Typography variant="h2" gutterBottom>
+        Incorrect Network
+      </Typography>
 
-        <div className={styles.content}>
-          <div className={styles.description}>
-            Metamask is set to the wrong network. Please switch Metamask to {masterConfig} to continue.
+      <Typography variant="body1" style={{margin: 0, padding: 0, paddingTop: '40px'}}>
+        To use {textLabel}, please change network.
+      </Typography>
+
+      <Button
+        onClick={correctChain}
+        color='primary'
+        size='large'
+        variant='contained'
+        fullWidth={isMobile}
+        newStyle
+      >
+        Change MetaMask Network
+      </Button>
+
+      <Typography variant="body2" style={{margin: 0, padding: 0, paddingTop: '60px'}}>
+        Or, you can change manually, by going to MetaMask and 
+        clicking in the top bar.
+      </Typography>
+
+      <Box display="flex" sx={{ flexDirection: 'column', alignItems: 'center', mt: 3}}>
+        <div className={styles.metamask}>
+          <Fox width={isMobile ? 30 : 30} />
+          <div className={styles.button}>
+            {iconLabel}
+            <ExpandMoreIcon/>
           </div>
-
-          <div className={styles.currentNetwork}>
-            <div
-              className={[
-                styles.indicator,
-                styles.active
-              ].join(' ')}
-            />
-            <span>{masterConfig}</span>
-          </div>
-
-          <img
-            className={styles.arrow}
-            src={arrow}
-            alt='arrow'
-          />
-          
+          <Account width={isMobile ? 40 : 40} />
         </div>
-      </div>
+        <ArrowUpwardIcon fontSize={'large'} color={'primary'}/>
+      </Box>
+
     </Modal>
   );
 }
 
-export default React.memo(WrongNetworkModal);
+export default React.memo(WrongNetworkModal)
