@@ -8,6 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 var (
@@ -71,6 +72,8 @@ var BigTenThousand = new(big.Int).SetUint64(tenThousand)
 // encode transactions during calls to `eth_estimateGas`
 func EncodeTxGasLimit(data []byte, l1GasPrice, l2GasLimit, l2GasPrice *big.Int) *big.Int {
 	l1GasLimit := calculateL1GasLimit(data, overhead)
+        log.Debug("MMDBG EncodeTx", "l1GasLimit", l1GasLimit, "overhead", overhead)
+        
 	roundedL2GasLimit := Ceilmod(l2GasLimit, BigTenThousand)
 	l1Fee := new(big.Int).Mul(l1GasPrice, l1GasLimit)
 	l2Fee := new(big.Int).Mul(l2GasPrice, roundedL2GasLimit)
@@ -79,6 +82,7 @@ func EncodeTxGasLimit(data []byte, l1GasPrice, l2GasLimit, l2GasPrice *big.Int) 
 	rounded := Ceilmod(scaled, BigTenThousand)
 	roundedScaledL2GasLimit := new(big.Int).Div(roundedL2GasLimit, BigTenThousand)
 	result := new(big.Int).Add(rounded, roundedScaledL2GasLimit)
+        log.Debug("MMDBG EncodeTxGasLimit", "L1", l1Fee, "L2", l2Fee, "sum", sum, "scaled", scaled, "rounded", rounded, "RSL", roundedScaledL2GasLimit, "res", result)
 	return result
 }
 
@@ -124,9 +128,13 @@ func PaysEnough(opts *PaysEnoughOpts) error {
 	if opts.ThresholdDown != nil {
 		fee = mulByFloat(fee, opts.ThresholdDown)
 	}
+        
+        log.Debug("MMDBG fee check", "userFee", opts.UserFee, "opts.ExpectedFee", opts.ExpectedFee, "calc_fee", fee)
+        
 	// Protect the sequencer from being underpaid
 	// if user fee < expected fee, return error
 	if opts.UserFee.Cmp(fee) == -1 {
+        	log.Debug("MMDBG fee too low")
 		return ErrFeeTooLow
 	}
 	// Protect users from overpaying by too much
@@ -135,6 +143,7 @@ func PaysEnough(opts *PaysEnoughOpts) error {
 		overpaying := new(big.Int).Sub(opts.UserFee, opts.ExpectedFee)
 		threshold := mulByFloat(opts.ExpectedFee, opts.ThresholdUp)
 		// if overpaying > threshold, return error
+                log.Debug("MMDBG overpaying", "overpaying", overpaying, "threshold", threshold)
 		if overpaying.Cmp(threshold) == 1 {
 			return ErrFeeTooHigh
 		}

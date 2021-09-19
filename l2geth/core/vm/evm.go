@@ -458,7 +458,12 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 				}
 			}
 			if evm.Context.EthCallSender == nil {
-				log.Debug("Reached the end of an OVM execution", "Return Data", hexutil.Encode(ret), "Error", err)
+                        	if err != nil {
+					log.Debug("Reached the end of an OVM execution", "Return Data", hexutil.Encode(ret), "Error", err)
+                            	} else {
+                                	// Suppress the "Error=nil" so that it's easier to filter the debug logs
+					log.Debug("Reached the end of an OVM execution", "Return Data", hexutil.Encode(ret))
+                                }
 			}
 		}
 	}

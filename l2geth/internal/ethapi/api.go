@@ -988,8 +988,13 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrOrHash 
 	}
 	// 3. calculate the fee using just the calldata. The additional overhead of
 	// RLP encoding is covered inside of EncodeL2GasLimit
+        
+        log.Debug("MMDBG EG_1", "l1GasPrice", l1GasPrice, "l2GasPrice", l2GasPrice)
+        
 	l2GasLimit := new(big.Int).SetUint64(uint64(gasUsed))
 	fee := fees.EncodeTxGasLimit(data, l1GasPrice, l2GasLimit, l2GasPrice)
+        
+        log.Debug("MMDBG EG_2", "l2GasLimit (=gasUsed)", l2GasLimit, "fee", fee)
 	if !fee.IsUint64() {
 		return 0, fmt.Errorf("estimate gas overflow: %s", fee)
 	}
@@ -1019,6 +1024,8 @@ func legacyDoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrO
 	}
 	cap = hi
 
+        log.Debug("MMDBG legacy_EG", "lo", lo, "hi", hi) 
+        
 	// Set sender address or use a default if none specified
 	if args.From == nil {
 		if wallets := b.AccountManager().Wallets(); len(wallets) > 0 {
@@ -1067,6 +1074,7 @@ func legacyDoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNrO
 			return 0, fmt.Errorf("gas required exceeds allowance (%d)", cap)
 		}
 	}
+
 	return hexutil.Uint64(hi), nil
 }
 

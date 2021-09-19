@@ -903,9 +903,14 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	if err != nil {
 		return err
 	}
+        
+        log.Debug("MMDBG Gas_1", "l1GasPrice", l1GasPrice, "l2GasPrice", l2GasPrice)
+        
 	// Calculate the fee based on decoded L2 gas limit
 	gas := new(big.Int).SetUint64(tx.Gas())
 	l2GasLimit := fees.DecodeL2GasLimit(gas)
+        
+        log.Debug("MMDBG Gas_2", "gas", gas, "l2GasLimit", l2GasLimit, "minL2GasLimit", s.minL2GasLimit)
 
 	// When the L2 gas limit is smaller than the min L2 gas limit,
 	// reject the transaction
@@ -916,7 +921,15 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 	// Only count the calldata here as the overhead of the fully encoded
 	// RLP transaction is handled inside of EncodeL2GasLimit
 	expectedTxGasLimit := fees.EncodeTxGasLimit(tx.Data(), l1GasPrice, l2GasLimit, l2GasPrice)
-
+        
+        
+	log.Debug("MMDBG Gas_3", "expectedTxGasLimit", expectedTxGasLimit) 
+        
+ 	l1Base := fees.EncodeTxGasLimit(tx.Data(), l1GasPrice, new(big.Int).SetUint64(0), l2GasPrice)
+        l1Base_Fee := new(big.Int).Mul(l1Base, fees.BigTxGasPrice)
+        log.Debug("MMDBG Gas_3a", "l1Base", l1Base, "11Base_Fee", l1Base_Fee)
+        
+        
 	// This should only happen if the unscaled transaction fee is greater than 18.44 ETH
 	if !expectedTxGasLimit.IsUint64() {
 		return fmt.Errorf("fee overflow: %s", expectedTxGasLimit.String())
@@ -924,6 +937,12 @@ func (s *SyncService) verifyFee(tx *types.Transaction) error {
 
 	userFee := new(big.Int).Mul(new(big.Int).SetUint64(tx.Gas()), tx.GasPrice())
 	expectedFee := new(big.Int).Mul(expectedTxGasLimit, fees.BigTxGasPrice)
+	log.Debug("MMDBG Gas_4", "userFee", userFee, "expectedFee", expectedFee)
+        l2Offer :=  new(big.Int).Sub(userFee, l1Base_Fee)
+        if (l2GasPrice.Int64() > 0) {
+	        log.Debug("MMDBG Gas_4a", "L2_FeeOffer", l2Offer, "L2_GasAmount", new(big.Int).Div(l2Offer, l2GasPrice))
+        }
+        
 	opts := fees.PaysEnoughOpts{
 		UserFee:       userFee,
 		ExpectedFee:   expectedFee,
