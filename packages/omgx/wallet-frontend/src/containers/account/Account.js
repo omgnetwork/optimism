@@ -27,7 +27,10 @@ import ListAccount from 'components/listAccount/listAccount'
 import networkService from 'services/networkService'
 
 import * as S from './Account.styles'
+
 import { selectTokens } from 'selectors/tokenSelector'
+import { selectLoading } from 'selectors/loadingSelector'
+
 import PageHeader from 'components/pageHeader/PageHeader'
 import { Box, Grid, Tab, Tabs, Typography, useMediaQuery } from '@material-ui/core'
 import { fetchLookUpPrice, fetchTransactions } from 'actions/networkAction'
@@ -41,12 +44,16 @@ import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon'
 import PendingTransaction from './PendingTransaction'
 import useInterval from 'util/useInterval'
 
+import AlertIcon from 'components/icons/AlertIcon'
+
 const POLL_INTERVAL = 2000; //milliseconds
 
 function Account () {
 
   const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2'
+  
   const dispatch = useDispatch()
+  
   const [activeTab, setActiveTab] = useState(networkLayer === 'L1' ? 0 : 1)
 
   const childBalance = useSelector(selectlayer2Balance, isEqual)
@@ -55,6 +62,14 @@ function Account () {
   const tokenList = useSelector(selectTokens)
 
   const network = useSelector(selectNetwork())
+
+  const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
+  const exitLoading    = useSelector(selectLoading(['EXIT/CREATE']))
+
+  const disabled = depositLoading || exitLoading
+
+  //console.log("disabled:",disabled)
+  //console.log("loading:",loading)
 
   const getLookupPrice = useCallback(()=>{
     const symbolList = Object.values(tokenList).map((i)=> {
@@ -67,7 +82,7 @@ function Account () {
       }
     })
     dispatch(fetchLookUpPrice(symbolList))
-  },[tokenList,dispatch])
+  },[tokenList, dispatch])
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual)
   //console.log("Transactions:",unorderedTransactions)
@@ -114,7 +129,6 @@ function Account () {
     })
   }, POLL_INTERVAL * 2)
 
-  const disabled = false
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -230,8 +244,23 @@ function Account () {
             <img src={Drink} href="#" width={135} alt="Boba Drink"/>
           </S.ContentGlass>
         </Box>
-
       </S.CardTag>
+      
+      {disabled &&
+        <S.LayerAlert style={{background: 'yellow'}}>
+          <S.AlertInfo>
+            <AlertIcon style={{color: 'black'}} />
+            <S.AlertText
+              variant="body2"
+              component="p"
+              style={{color: 'black'}}
+            >
+              Balance altering transaction in progress - please be patient
+            </S.AlertText>
+          </S.AlertInfo>
+        </S.LayerAlert>
+      }
+
       {pending.length > 0 &&
         <Grid sx={{margin: '10px 0px'}}>
           <Grid item xs={12}>

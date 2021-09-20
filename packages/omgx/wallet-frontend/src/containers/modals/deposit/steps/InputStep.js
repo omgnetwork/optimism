@@ -37,7 +37,7 @@ function InputStep({ handleClose, token }) {
         res = await dispatch(depositETHL2(value))
         if (res) {
           dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
-          dispatch(openAlert('ETH bridge submitted'))
+          dispatch(openAlert('ETH bridge transaction submitted'))
           handleClose()
         }
       }
@@ -48,7 +48,7 @@ function InputStep({ handleClose, token }) {
       )
       if (res) {
         dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
-        dispatch(openAlert(`${token.symbol} bridge submitted`))
+        dispatch(openAlert(`${token.symbol} bridge transaction submitted`))
         handleClose()
       } else {
         dispatch(openError(`Failed to bridge ${token.symbol}`))
@@ -96,7 +96,7 @@ function InputStep({ handleClose, token }) {
     <>
       <Box>
         <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
-          `Classic Bridge ${token && token.symbol ? token.symbol : ''} to L1`
+          Classic Bridge {token && token.symbol ? token.symbol : ''} to L1
         </Typography>
 
         <Input
