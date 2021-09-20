@@ -96,11 +96,11 @@ function InputStep({ handleClose, token }) {
     <>
       <Box>
         <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
-          Classic Bridge {token && token.symbol ? token.symbol : ''} to L1
+          Classic Bridge {token && token.symbol ? token.symbol : ''} to L2
         </Typography>
 
         <Input
-          label="Amount to bridge to L1"
+          label="Amount to bridge to L2"
           placeholder="0.0"
           value={value}
           type="number"
