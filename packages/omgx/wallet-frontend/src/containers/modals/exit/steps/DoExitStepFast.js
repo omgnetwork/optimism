@@ -75,16 +75,8 @@ function DoExitStepFast({ handleClose, token }) {
       )
     )
 
-    let currencyL1 = token.symbol
-
-    //person will receive ETH on the L1, not oETH
-    if (currencyL1 === 'oETH') {
-      currencyL1 = 'ETH'
-    }
-
     if (res) {
-      dispatch(openAlert(`${token.symbol} was deposited into the L2 liquidity pool.
-        You will receive ${receivableAmount(value)} ${currencyL1} on L1.`))
+      dispatch(openAlert(`${token.symbol} was bridged. You will receive ${receivableAmount(value)} ${token.symbol} on L1.`))
       handleClose()
     } else {
       dispatch(openError(`Failed to fast bridge funds to L1`))
@@ -135,7 +127,7 @@ function DoExitStepFast({ handleClose, token }) {
 
         <Input
           label={`Amount to bridge to L1`}
-          placeholder="0.0000"
+          placeholder="0.0"
           value={value}
           type="number"
           onChange={(i)=>{setAmount(i.target.value)}}
@@ -145,19 +137,7 @@ function DoExitStepFast({ handleClose, token }) {
           variant="standard"
         />
 
-        {valueIsValid && token && token.symbol === 'oETH' && (
-          <Typography variant="body2" sx={{mt: 2}}>
-            {value &&
-              `You will receive
-              ${receivableAmount(value)}
-              ETH
-              ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
-              on L1.`
-            }
-          </Typography>
-        )}
-
-        {valueIsValid && token && token.symbol !== 'oETH' && (
+        {valueIsValid && token && (
           <Typography variant="body2" sx={{mt: 2}}>
             {value &&
               `You will receive
@@ -196,13 +176,13 @@ function DoExitStepFast({ handleClose, token }) {
             color='primary'
             variant='contained'
             loading={exitLoading}
-            tooltip={exitLoading ? "Your bridge is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
+            tooltip={exitLoading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
             disabled={disabledSubmit}
             triggerTime={new Date()}
             fullWidth={isMobile}
             size='large'
           >
-            Bridge to L2
+            Bridge to L1
           </Button>
       </WrapperActionsModal>
     </>

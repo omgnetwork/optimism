@@ -36,7 +36,7 @@ function InputStep({ handleClose, token }) {
       if (value > 0) {
         res = await dispatch(depositETHL2(value))
         if (res) {
-          dispatch(setActiveHistoryTab1('Deposits'))
+          dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
           dispatch(openAlert('ETH bridge submitted'))
           handleClose()
         }
@@ -47,7 +47,7 @@ function InputStep({ handleClose, token }) {
         depositErc20(powAmount(value, token.decimals), token.address, token.addressL2)
       )
       if (res) {
-        dispatch(setActiveHistoryTab1('Deposits'))
+        dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
         dispatch(openAlert(`${token.symbol} bridge submitted`))
         handleClose()
       } else {
@@ -101,7 +101,7 @@ function InputStep({ handleClose, token }) {
 
         <Input
           label="Amount to bridge to L1"
-          placeholder="0.0000"
+          placeholder="0.0"
           value={value}
           type="number"
           onChange={(i)=>setAmount(i.target.value)}
@@ -132,7 +132,7 @@ function InputStep({ handleClose, token }) {
           size="large"
           variant="contained"
           loading={depositLoading}
-          tooltip={depositLoading ? "Your bridge is still pending. Please wait for confirmation." : "Click here to bridge your funds to L2"}
+          tooltip={depositLoading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L2"}
           disabled={disabledSubmit}
           triggerTime={new Date()}
           fullWidth={isMobile}

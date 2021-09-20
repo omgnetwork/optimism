@@ -52,17 +52,11 @@ function DoExitStep({ handleClose, token }) {
 
     let res = await dispatch(exitBOBA(token.address, value))
 
-    //person will receive ETH on the L1, not oETH
-    let currencyL1 = token.symbol
-
-    if (currencyL1 === 'oETH')
-      currencyL1 = 'ETH'
-
     if (res) {
       dispatch(
         openAlert(
           `${token.symbol} was bridged to L1. You will receive
-          ${Number(value).toFixed(2)} ${currencyL1}
+          ${Number(value).toFixed(2)} ${token.symbol}
           on L1 in 7 days.`
         )
       )
@@ -81,6 +75,7 @@ function DoExitStep({ handleClose, token }) {
     } else {
       setDisabledSubmit(true)
     }
+    
     setValue(value)
   }
 
@@ -117,29 +112,18 @@ function DoExitStep({ handleClose, token }) {
           newStyle
         />
 
-        {valueIsValid && token && token.symbol === 'oETH' && (
-          <Typography variant="body2" sx={{mt: 2}}>
-            {value &&
-              `You will receive ${Number(value).toFixed(2)} ETH
-              ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
-              on L1.
-              Your funds will be available on L1 in 7 days.`}
-          </Typography>
-        )}
-
-        {valueIsValid && token && token.symbol !== 'oETH' && (
+        {valueIsValid && token && (
           <Typography variant="body2" sx={{mt: 2}}>
             {value &&
               `You will receive ${Number(value).toFixed(2)} ${token.symbol}
-              ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
-              on L1.
-              Your funds will be available on L1 in 7 days.`}
+              ${!!amountToUsd(value, lookupPrice, token) ? `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
+              on L1. Your funds will be available on L1 in 7 days.`}
           </Typography>
         )}
 
         {exitLoading && (
           <Typography variant="body2" sx={{mt: 2, color: 'green'}}>
-            This window will automatically close when your transaction has been signed and submitted.
+            This window will close when your transaction has been signed and submitted.
           </Typography>
         )}
       </Box>
@@ -158,7 +142,7 @@ function DoExitStep({ handleClose, token }) {
               color="primary"
               variant="contained"
               loading={exitLoading}
-              tooltip={exitLoading ? "Your bridge is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
+              tooltip={exitLoading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
               disabled={disabledSubmit}
               triggerTime={new Date()}
               fullWidth={isMobile}

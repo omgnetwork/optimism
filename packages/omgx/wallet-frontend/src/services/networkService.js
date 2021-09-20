@@ -1195,7 +1195,8 @@ class NetworkService {
 
   async getBalances() {
     try {
-      // Always check ETH and oETH
+
+      // Always check ETH
       const layer1Balance = await this.L1Provider.getBalance(this.account)
       const layer2Balance = await this.L2Provider.getBalance(this.account)
 
@@ -1215,7 +1216,7 @@ class NetworkService {
           address: this.L2_ETH_Address,
           addressL1: this.L1_ETH_Address,
           currency: this.L1_ETH_Address,
-          symbol: 'oETH',
+          symbol: 'ETH',
           decimals: 18,
           balance: new BN(layer2Balance.toString()),
         },
@@ -1695,6 +1696,7 @@ class NetworkService {
     const L2LPInfoPromise = [];
 
     const getL2LPInfoPromise = async(tokenAddress, tokenAddressL1 ) => {
+      
       let tokenBalance
       let tokenSymbol
       let tokenName
@@ -1702,9 +1704,9 @@ class NetworkService {
 
       if (tokenAddress === this.L2_ETH_Address) {
         tokenBalance = await this.L2Provider.getBalance(this.L2LPAddress)
-        tokenSymbol = 'oETH'
+        tokenSymbol = 'ETH'
         tokenName = 'Ethereum'
-        decimals = 18;
+        decimals = 18
       } else {
         tokenBalance = await this.L2_TEST_Contract.attach(tokenAddress).connect(this.L2Provider).balanceOf(this.L2LPAddress)
         tokenSymbol = await this.L2_TEST_Contract.attach(tokenAddress).connect(this.L2Provider).symbol()

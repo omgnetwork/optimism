@@ -224,10 +224,6 @@ function Account () {
              Please exercise caution when using Mainnet Beta.
           </Typography>
           }
-          {/*
-            <S.BalanceValue component ="div">{balances['oETH'].amountShort}</S.BalanceValue>
-            <Typography>oETH</Typography>
-          */}
         </S.CardContentTag>
         <Box sx={{flex: 3}}>
           <S.ContentGlass>

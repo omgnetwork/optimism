@@ -73,12 +73,12 @@ function InputStepFast({ handleClose, token }) {
       if (valueIsValid) {
         res = await dispatch(depositL1LP(token.address, value, token.decimals))
         if (res) {
-          dispatch(setActiveHistoryTab1('Deposits'))
+          dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
           dispatch(
             openAlert(
-              `ETH was bridged into the L1LP. You will receive
+              `ETH was bridged. You will receive
               ${((Number(value) * (100 - Number(feeRate)))/100).toFixed(2)}
-              oETH on L2`
+              ETH on L2`
             )
           )
           handleClose()
@@ -110,7 +110,7 @@ function InputStepFast({ handleClose, token }) {
     )
 
     if (res) {
-      dispatch(setActiveHistoryTab1('Deposits'))
+      dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
       dispatch(
         openAlert(
           `${token.symbol} was bridged to the L1LP. You will receive
@@ -174,7 +174,7 @@ function InputStepFast({ handleClose, token }) {
 
         <Input
           label={`Amount to bridge`}
-          placeholder="0.0000"
+          placeholder="0.0"
           value={value}
           type="number"
           onChange={(i)=>{setAmount(i.target.value)}}
@@ -184,13 +184,7 @@ function InputStepFast({ handleClose, token }) {
           newStyle
         />
 
-        {valueIsValid && token && token.symbol === 'ETH' && (
-          <Typography variant="body2" sx={{mt: 2}}>
-            {value && `You will receive ${receivableAmount(value)} oETH ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
-          </Typography>
-        )}
-
-        {valueIsValid && token && token.symbol !== 'ETH' && (
+        {valueIsValid && token && (
           <Typography variant="body2" sx={{mt: 2}}>
             {value && `You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
           </Typography>
@@ -223,7 +217,7 @@ function InputStepFast({ handleClose, token }) {
           color='primary'
           variant="contained"
           loading={depositLoading || approvalLoading}
-          tooltip={depositLoading ? "Your bridge is still pending. Please wait for confirmation." : "Click here to bridge your funds to L2"}
+          tooltip={depositLoading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L2"}
           disabled={disabledSubmit}
           triggerTime={new Date()}
           size="large"
