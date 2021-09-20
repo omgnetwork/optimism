@@ -24,7 +24,7 @@ import { selectLoading } from 'selectors/loadingSelector';
 import Button from 'components/button/Button'
 import Modal from 'components/modal/Modal'
 
-import { amountToUsd, logAmount } from 'util/amountConvert'
+import { amountToUsd, logAmount, toWei_BN } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
 import Input from 'components/input/Input';
@@ -54,7 +54,9 @@ function TransferModal ({ open, token, minHeight }) {
       recipient
     ) {
       try {
-        const transferResponseGood = await dispatch(transfer(recipient, value, token.address));
+        const transferResponseGood = await dispatch(
+          transfer(recipient, toWei_BN(value, token.decimals), token.address)
+        )
         if (transferResponseGood) {
           dispatch(openAlert('Transaction submitted'));
           handleClose();
