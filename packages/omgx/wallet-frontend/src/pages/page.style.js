@@ -14,9 +14,6 @@ export const PageTitle = styled.h1`
     margin: 0px
 `;
 
-
-// TODO:  Move me to the table specific folders.
-
 export const Th = styled.div`
     font-weight: normal;
     font-size: 18px;
@@ -31,7 +28,6 @@ export const Th = styled.div`
     }
 `
 
-// TODO: move to the common style file.
 export const Chevron = styled.img`
   transform: ${props => props.open ? 'rotate(-90deg)' : 'rotate(90deg)'};
   transition: all 200ms ease-in-out;

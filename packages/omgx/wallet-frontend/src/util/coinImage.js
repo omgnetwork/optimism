@@ -57,9 +57,6 @@ export const getCoinImage = (symbol) => {
     case "ETH":
       logo = ethLogo;
       break;
-    case "oETH":
-      logo = ethLogo;
-      break;
     case "JLKN":
       logo = TESTLogo;
       break;

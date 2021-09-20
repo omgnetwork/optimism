@@ -38,7 +38,7 @@ export function powAmount (amount, power) {
 }
 
 export function amountToUsd(amount, lookupPrice, token) {
-  if (['ETH', 'oETH'].includes(token.symbol) && !!lookupPrice['ethereum']) {
+  if (token.symbol === 'ETH' && !!lookupPrice['ethereum']) {
     return amount * lookupPrice['ethereum'].usd
   } else if (token.symbol === 'OMG' && !!lookupPrice['omisego']) {
     return amount * lookupPrice['omisego'].usd

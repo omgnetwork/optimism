@@ -69,7 +69,7 @@ class Farm extends React.Component {
       layer2,
       lpChoice: initialLayer,
       poolTab: initialViewLayer,
-      showMDO: false //MDO = my desposits only
+      showMDO: false //MDO = my deposits only
     }
 
   }
@@ -183,7 +183,7 @@ class Farm extends React.Component {
       lpChoice,
       poolTab,
       showMDO
-    } = this.state;
+    } = this.state
 
     const { isMobile } = this.props
 
@@ -193,7 +193,7 @@ class Farm extends React.Component {
       <>
         <PageHeader title="Earn" />
 
-        {
+          {/*
             <S.LayerAlert style={{background: 'red'}}>
               <S.AlertInfo>
                 <AlertIcon />
@@ -207,7 +207,7 @@ class Farm extends React.Component {
                 </S.AlertText>
               </S.AlertInfo>
             </S.LayerAlert>
-          }
+          */}
 
         <Box sx={{ my: 3, width: '100%' }}>
           <Box sx={{ mb: 2, display: 'flex' }}>

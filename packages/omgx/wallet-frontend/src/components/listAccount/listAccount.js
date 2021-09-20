@@ -17,35 +17,56 @@ import { getCoinImage } from 'util/coinImage'
 class ListAccount extends React.Component {
 
   constructor(props) {
+
     super(props)
-    const { token, chain, networkLayer, disabled } = this.props
+    
+    const { 
+      token, 
+      chain, 
+      networkLayer, 
+      disabled,
+      loading 
+    } = this.props
+    
     this.state = {
       token,
       chain,
       dropDownBox: false,
       networkLayer,
-      disabled
+      disabled,
+      loading
     }
+
   }
 
   componentDidUpdate(prevState) {
 
-    const { token, chain, networkLayer, disabled } = this.props;
+    const { 
+      token, 
+      chain, 
+      networkLayer, 
+      disabled,
+      loading 
+    } = this.props
 
     if (!isEqual(prevState.token, token)) {
-      this.setState({ token });
+      this.setState({ token })
     }
 
     if (!isEqual(prevState.chain, chain)) {
-      this.setState({ chain });
+      this.setState({ chain })
     }
 
     if (!isEqual(prevState.networkLayer, networkLayer)) {
-      this.setState({ networkLayer });
+      this.setState({ networkLayer })
     }
 
     if (!isEqual(prevState.disabled, disabled)) {
-      this.setState({ disabled });
+      this.setState({ disabled })
+    }
+
+    if (!isEqual(prevState.loading, loading)) {
+      this.setState({ loading })
     }
 
   }
@@ -61,11 +82,14 @@ class ListAccount extends React.Component {
       chain,
       dropDownBox,
       networkLayer,
-      disabled
+      disabled,
+      loading
     } = this.state
 
     const enabled = (networkLayer === chain) ? true : false
     const logo = getCoinImage(token.symbol)
+
+    //console.log("Acconut disabled:",disabled)
 
     return (
       <>
@@ -102,7 +126,7 @@ class ListAccount extends React.Component {
                 }
                 {chain === 'L2' &&
                   <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div">
-                    Bridge and Transfer
+                    Bridge/Transfer
                   </S.TextTableCell>
                 }
                 <Box sx={{display: "flex", opacity: !enabled ? "0.4" : "1.0", transform: dropDownBox ? "rotate(-180deg)" : ""}}>
@@ -127,7 +151,7 @@ class ListAccount extends React.Component {
                        }}
                      >
                        <Typography variant="body2" component="p" >
-                         You are on L2. To transact on L1, SWITCH LAYER to L1
+                         You are on L2. To use L1, click SWITCH LAYER
                        </Typography>
                      </Box>
                      <Box sx={{ textAlign: 'center'}}>
@@ -144,7 +168,7 @@ class ListAccount extends React.Component {
                        }}
                      >
                        <Typography variant="body2" component="p" >
-                         You are on L1. To transact on L2, SWITCH LAYER to L2
+                         You are on L1. To use L2, click SWITCH LAYER
                        </Typography>
                      </Box>
                      <Box sx={{ textAlign: 'center'}}>
@@ -163,7 +187,7 @@ class ListAccount extends React.Component {
                   tooltip="Classic Bridge to Boba L2. This option is always available but is generally more expensive than the swap-based system ('Fast Bridge')."
                   fullWidth
                 >
-                  Bridge
+                  Bridge to L2
                 </Button>
 
                 <Button
@@ -174,7 +198,7 @@ class ListAccount extends React.Component {
                   tooltip="A swap-based bridge to Boba L2. This option is only available if there is enough liquidity in the pools."
                   fullWidth
                 >
-                  Fast Bridge
+                  Fast Bridge to L2
                 </Button>
               </>
               }

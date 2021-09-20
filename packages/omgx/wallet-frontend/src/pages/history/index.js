@@ -15,34 +15,39 @@ limitations under the License. */
 
 import { Box, Grid } from '@material-ui/core';
 import { fetchTransactions } from 'actions/networkAction';
+
 import PageHeader from 'components/pageHeader/PageHeader';
 import StyledTabs from 'components/tabs';
 import Deposits from 'containers/history/deposits';
 import Exits from 'containers/history/exits';
 import Transactions from 'containers/history/transactions';
+
 import { isEqual, orderBy } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
+
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { selectNetwork } from 'selectors/setupSelector';
 import { selectTransactions } from 'selectors/transactionSelector';
 import { POLL_INTERVAL } from 'util/constant';
 import { getAllNetworks } from 'util/masterConfig';
 import useInterval from 'util/useInterval';
-import {
-  PageContent
-} from '../page.style';
+
+import { PageContent } from '../page.style';
 
 function HistoryPage() {
-  const dispatch = useDispatch();
-  const [selectedTab, setSelectedTab] = useState(0);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
 
-  const tabList = ['All', 'Deposits', 'Exits']
+  const dispatch = useDispatch();
+  
+  const [selectedTab, setSelectedTab] = useState(0)
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const tabList = ['All', 'L1->L2 Bridge', 'L2->L1 Bridge']
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual);
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
@@ -69,13 +74,13 @@ function HistoryPage() {
 
   useInterval(() => {
     batch(() => {
-      dispatch(fetchTransactions());
-    });
-  }, POLL_INTERVAL * 2);
+      dispatch(fetchTransactions())
+    })
+  }, POLL_INTERVAL * 2)
 
   console.log(['transactions', transactions]);
 
-  const onTabChagne = (event, newValue) => {
+  const onTabChange = (event, newValue) => {
     console.log([event, newValue]);
     setSelectedTab(newValue);
   }
@@ -89,7 +94,7 @@ function HistoryPage() {
       >
         <StyledTabs
           selectedTab={selectedTab}
-          onChange={onTabChagne}
+          onChange={onTabChange}
           optionList={tabList}
           isSearch={true}
         />
@@ -126,13 +131,13 @@ function HistoryPage() {
           chainLink={chainLink}
         /> : null
       }
-      {tabList[selectedTab] === 'Deposits' ?
+      {tabList[selectedTab] === 'L1->L2 Bridge' ?
         <Deposits
           transactions={transactions}
           chainLink={chainLink}
         /> : null
       }
-      {tabList[selectedTab] === 'Exits' ?
+      {tabList[selectedTab] === 'L2->L1 Bridge' ?
         <Exits
           transactions={transactions}
           chainLink={chainLink}
@@ -143,4 +148,4 @@ function HistoryPage() {
 
 }
 
-export default React.memo(HistoryPage);
+export default React.memo(HistoryPage)

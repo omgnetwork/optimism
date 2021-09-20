@@ -1195,7 +1195,8 @@ class NetworkService {
 
   async getBalances() {
     try {
-      // Always check ETH and oETH
+
+      // Always check ETH
       const layer1Balance = await this.L1Provider.getBalance(this.account)
       const layer2Balance = await this.L2Provider.getBalance(this.account)
 
@@ -1215,7 +1216,7 @@ class NetworkService {
           address: this.L2_ETH_Address,
           addressL1: this.L1_ETH_Address,
           currency: this.L1_ETH_Address,
-          symbol: 'oETH',
+          symbol: 'ETH',
           decimals: 18,
           balance: new BN(layer2Balance.toString()),
         },
@@ -1590,7 +1591,7 @@ class NetworkService {
   async getL1LPInfo() {
 
     const tokenAddressList = Object.keys(this.addresses.TOKENS).reduce((acc, cur) => {
-      acc.push(this["L1_" + cur + "_Address"]);
+      acc.push(this["L1_" + cur + "_Address"].toLowerCase());
       return acc;
     }, [this.L1_ETH_Address]);
 
@@ -1624,19 +1625,19 @@ class NetworkService {
       }
       const poolTokenInfo = await L1LPContract.poolInfo(tokenAddress)
       const userTokenInfo = await L1LPContract.userInfo(tokenAddress, this.account)
-      return { tokenAddress, tokenBalance, tokenSymbol, tokenName, poolTokenInfo, userTokenInfo,decimals }
+      return { tokenAddress, tokenBalance, tokenSymbol, tokenName, poolTokenInfo, userTokenInfo, decimals }
     }
 
     tokenAddressList.forEach((tokenAddress) => L1LPInfoPromise.push(getL1LPInfoPromise(tokenAddress)))
     const L1LPInfo = await Promise.all(L1LPInfoPromise);
     
     L1LPInfo.forEach((token) => {
-      poolInfo[token.tokenAddress] = {
+      poolInfo[token.tokenAddress.toLowerCase()] = {
         symbol: token.tokenSymbol,
         name: token.tokenName,
         decimals: token.decimals,
-        l1TokenAddress: token.poolTokenInfo.l1TokenAddress,
-        l2TokenAddress: token.poolTokenInfo.l2TokenAddress,
+        l1TokenAddress: token.poolTokenInfo.l1TokenAddress.toLowerCase(),
+        l2TokenAddress: token.poolTokenInfo.l2TokenAddress.toLowerCase(),
         accUserReward: token.poolTokenInfo.accUserReward.toString(),
         accUserRewardPerShare: token.poolTokenInfo.accUserRewardPerShare.toString(),
         userDepositAmount: token.poolTokenInfo.userDepositAmount.toString(),
@@ -1661,7 +1662,7 @@ class NetworkService {
         tokenBalance: token.tokenBalance.toString()
       }
       userInfo[token.tokenAddress] = {
-        l1TokenAddress: token.tokenAddress,
+        l1TokenAddress: token.tokenAddress.toLowerCase(),
         amount: token.userTokenInfo.amount.toString(),
         pendingReward: token.userTokenInfo.pendingReward.toString(),
         rewardDebt: token.userTokenInfo.rewardDebt.toString()
@@ -1674,8 +1675,8 @@ class NetworkService {
 
     const tokenAddressList = Object.keys(this.addresses.TOKENS).reduce((acc, cur) => {
       acc.push({
-        L1: this["L1_" + cur + "_Address"],
-        L2: this["L2_" + cur + "_Address"]
+        L1: this["L1_" + cur + "_Address"].toLowerCase(),
+        L2: this["L2_" + cur + "_Address"].toLowerCase()
       });
       return acc;
     }, [{
@@ -1695,6 +1696,7 @@ class NetworkService {
     const L2LPInfoPromise = [];
 
     const getL2LPInfoPromise = async(tokenAddress, tokenAddressL1 ) => {
+      
       let tokenBalance
       let tokenSymbol
       let tokenName
@@ -1702,9 +1704,9 @@ class NetworkService {
 
       if (tokenAddress === this.L2_ETH_Address) {
         tokenBalance = await this.L2Provider.getBalance(this.L2LPAddress)
-        tokenSymbol = 'oETH'
+        tokenSymbol = 'ETH'
         tokenName = 'Ethereum'
-        decimals = 18;
+        decimals = 18
       } else {
         tokenBalance = await this.L2_TEST_Contract.attach(tokenAddress).connect(this.L2Provider).balanceOf(this.L2LPAddress)
         tokenSymbol = await this.L2_TEST_Contract.attach(tokenAddress).connect(this.L2Provider).symbol()
@@ -1718,14 +1720,15 @@ class NetworkService {
 
     tokenAddressList.forEach(({L1, L2}) => L2LPInfoPromise.push(getL2LPInfoPromise(L2, L1)))
 
-    const L2LPInfo = await Promise.all(L2LPInfoPromise);
+    const L2LPInfo = await Promise.all(L2LPInfoPromise)
+    
     L2LPInfo.forEach((token) => {
-      poolInfo[token.tokenAddress] = {
+      poolInfo[token.tokenAddress.toLowerCase()] = {
         symbol: token.tokenSymbol,
         name: token.tokenName,
         decimals: token.decimals,
-        l1TokenAddress: token.poolTokenInfo.l1TokenAddress,
-        l2TokenAddress: token.poolTokenInfo.l2TokenAddress,
+        l1TokenAddress: token.poolTokenInfo.l1TokenAddress.toLowerCase(),
+        l2TokenAddress: token.poolTokenInfo.l2TokenAddress.toLowerCase(),
         accUserReward: token.poolTokenInfo.accUserReward.toString(),
         accUserRewardPerShare: token.poolTokenInfo.accUserRewardPerShare.toString(),
         userDepositAmount: token.poolTokenInfo.userDepositAmount.toString(),
@@ -1749,8 +1752,8 @@ class NetworkService {
               ), // ( accUserReward - userDepositAmount ) / timeDuration
         tokenBalance: token.tokenBalance.toString()
       }
-      userInfo[token.tokenAddress] = {
-        l2TokenAddress: token.tokenAddress,
+      userInfo[token.tokenAddress.toLowerCase()] = {
+        l2TokenAddress: token.tokenAddress.toLowerCase(),
         amount: token.userTokenInfo.amount.toString(),
         pendingReward: token.userTokenInfo.pendingReward.toString(),
         rewardDebt: token.userTokenInfo.rewardDebt.toString()
@@ -1878,8 +1881,10 @@ class NetworkService {
   /************ L1LP Pool size ***********/
   /***************************************/
   async L1LPBalance(tokenAddress, decimals) {
+    
     let balance
     let tokenAddressLC = tokenAddress.toLowerCase()
+    
     if (
       tokenAddressLC === this.L2_ETH_Address ||
       tokenAddressLC === this.L1_ETH_Address
@@ -1903,8 +1908,10 @@ class NetworkService {
   /************ L2LP Pool size ***********/
   /***************************************/
   async L2LPBalance(tokenAddress, decimals) {
+
     let balance
     let tokenAddressLC = tokenAddress.toLowerCase()
+    
     if (
       tokenAddressLC === this.L2_ETH_Address ||
       tokenAddressLC === this.L1_ETH_Address

@@ -17,6 +17,8 @@ import React from 'react'
 import BN from 'bignumber.js'
 import * as S from './Input.styles'
 
+import Button from 'components/button/Button'
+
 import { Box, Typography } from '@material-ui/core'
 import { useTheme } from '@emotion/react'
 import { getCoinImage } from 'util/coinImage'
@@ -32,9 +34,7 @@ function Input({
   onChange,
   sx,
   paste,
-  // className,
   maxValue,
-  // small,
   fullWidth,
   size,
   variant,
@@ -52,13 +52,17 @@ function Input({
     }
   }
 
-  // function handleMaxClick() {
-  //   onChange({ target: { value: maxValue } })
-  // }
+  function handleMaxClick() {
+    onChange({ target: { value: maxValue } })
+  }
 
   const underZero = new BN(value).lt(new BN(0)) 
   const overMax = new BN(value).gt(new BN(maxValue))
   const theme = useTheme()
+
+  //since ETH is the fee token, harder to use all b/c need to take 
+  //operation-specific fees into account 
+  const allowUseAll = (unit === 'ETH') ? false : true
 
   return (
     <>
@@ -96,10 +100,10 @@ function Input({
         {unit && (
           <S.ActionsWrapper>
             <Typography variant="body2" component="p" sx={{opacity: 0.7, textAlign: "end", mb: 2}}>
-              Max Available: {Number(maxValue).toFixed(3)}
+              Max Amount: {Number(maxValue).toFixed(3)}
             </Typography>
 
-            {/* maxValue && value !== maxValue && (
+            {/*allowUseAll && maxValue && value !== maxValue && (
               <Box>
                 <Button onClick={handleMaxClick} variant="small" >
                   Use All
@@ -116,13 +120,13 @@ function Input({
       </S.Wrapper>
       {value !== '' && underZero ?
         <Typography variant="body2" sx={{mt: 1}}>
-          The value must be greater than 0
+          Value too small: the value must be greater than 0
         </Typography>
         : null
       }
       {value !== '' && overMax ?
         <Typography variant="body2" sx={{mt: 1}}>
-          Wallet balance exceeded: the value must be smaller than {Number(maxValue).toFixed(3)}
+          Value too large: the value must be smaller than {Number(maxValue).toFixed(3)}
         </Typography>
         : null}
     </>

@@ -131,7 +131,7 @@ function TransferModal ({ open, token, minHeight }) {
 
         {convertToUSD && (
           <Typography variant="body2" component="p" sx={{opacity: 0.5, mt: 2}}>
-            {`Transfer value in USD: $${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
+            {`Value in USD: $${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
           </Typography>
         )}
       </Box>
@@ -150,7 +150,7 @@ function TransferModal ({ open, token, minHeight }) {
             color='primary'
             variant="contained"
             loading={loading}
-            tooltip='Your transfer is still pending. Please wait for confirmation.'
+            tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
             disabled={disabledTransfer}
             triggerTime={new Date()}
             fullWidth={isMobile}
