@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+import { BigNumber } from 'ethers'
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -24,7 +25,7 @@ import { selectLoading } from 'selectors/loadingSelector';
 import Button from 'components/button/Button'
 import Modal from 'components/modal/Modal'
 
-import { amountToUsd, logAmount, toWei_BN } from 'util/amountConvert'
+import { amountToUsd, logAmount, toWei_String } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
 import Input from 'components/input/Input';
@@ -37,6 +38,8 @@ function TransferModal ({ open, token, minHeight }) {
   const dispatch = useDispatch()
 
   const [ value, setValue ] = useState('')
+  const [ value_Wei_String, setValue_Wei_String ] = useState('0')  //support for Use Max
+
   const [ recipient, setRecipient ] = useState('')
 
   const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]));
@@ -54,8 +57,9 @@ function TransferModal ({ open, token, minHeight }) {
       recipient
     ) {
       try {
+        console.log("Amount to transfer:", value_Wei_String)
         const transferResponseGood = await dispatch(
-          transfer(recipient, toWei_BN(value, token.decimals), token.address)
+          transfer(recipient, value_Wei_String, token.address)
         )
         if (transferResponseGood) {
           dispatch(openAlert('Transaction submitted'));
@@ -72,6 +76,7 @@ function TransferModal ({ open, token, minHeight }) {
 
   function handleClose () {
     setValue('')
+    setValue_Wei_String('0')
     setRecipient('')
     dispatch(closeModal('transferModal'))
   }
@@ -123,7 +128,15 @@ function TransferModal ({ open, token, minHeight }) {
             placeholder="0.00"
             value={value}
             type="number"
-            onChange={(i) => {setValue(i.target.value)}}
+            onChange={(i)=>{
+              setValue(i.target.value)
+              setValue_Wei_String(toWei_String(i.target.value, token.decimals))
+            }}
+            onUseMax={(i)=>{//they want to use the maximum
+              setValue(logAmount(token.balance, token.decimals)); //so the input value updates for the user
+              setValue_Wei_String(token.balance.toString())
+            }}
+            allowUseAll={true}
             unit={token.symbol}
             maxValue={logAmount(token.balance, token.decimals)}
             variant="standard"

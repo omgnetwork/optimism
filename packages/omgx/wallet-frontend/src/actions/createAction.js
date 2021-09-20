@@ -23,6 +23,8 @@ export function createAction (key, asyncAction) {
       //deal with metamask errors
       if(response && response.hasOwnProperty('message') && response.hasOwnProperty('code')) { 
         dispatch({ type: `UI/ERROR/UPDATE`, payload: response.message })
+        // cancel request loading state
+        dispatch({ type: `${key}/ERROR` })
         return false
       }
       dispatch({ type: `${key}/SUCCESS`, payload: response });

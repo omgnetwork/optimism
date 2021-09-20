@@ -1308,16 +1308,17 @@ class NetworkService {
   }
 
   //Transfer funds from one account to another, on the L2
-  async transfer(address, value_BN, currency) {
+  async transfer(address, value_Wei_String, currency) {
     try {
       //any ERC20 json will do....
       const tx = await this.L2_TEST_Contract.attach(currency).transfer(
         address,
-        value_BN
+        value_Wei_String
       )
       await tx.wait()
       return tx
     } catch (error) {
+      //this is where we also want to stop the loading...
       console.log("NS: transfer error:", error)
       return error
     }

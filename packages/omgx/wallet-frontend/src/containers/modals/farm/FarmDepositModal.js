@@ -9,7 +9,7 @@ import { getFarmInfo } from 'actions/farmAction';
 import Button from 'components/button/Button';
 import Modal from 'components/modal/Modal';
 import Input from 'components/input/Input';
-import { logAmount, powAmount, toWei_BN } from 'util/amountConvert';
+import { logAmount, powAmount, toWei_String } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
 
@@ -135,7 +135,7 @@ class FarmDepositModal extends React.Component {
 
     const addLiquidityTX = await networkService.addLiquidity(
       stakeToken.currency,
-      toWei_BN( stakeValue, stakeToken.decimals ),
+      toWei_String( stakeValue, stakeToken.decimals ),
       stakeToken.L1orL2Pool,
     )
 
