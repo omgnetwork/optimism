@@ -1313,7 +1313,7 @@ class NetworkService {
       //any old ERC20 json will do....
       const tx = await this.L2_TEST_Contract.attach(currency).transfer(
         address,
-        parseEther(value.toString())
+        value
       )
       await tx.wait()
       return tx
