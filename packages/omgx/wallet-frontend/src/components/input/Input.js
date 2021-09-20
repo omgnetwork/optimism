@@ -102,14 +102,13 @@ function Input({
             <Typography variant="body2" component="p" sx={{opacity: 0.7, textAlign: "end", mb: 2}}>
               Max Amount: {Number(maxValue).toFixed(3)}
             </Typography>
-
-            {/*allowUseAll && maxValue && value !== maxValue && (
+            {allowUseAll && maxValue && value !== maxValue && (
               <Box>
                 <Button onClick={handleMaxClick} variant="small" >
                   Use All
                 </Button>
               </Box>
-            )*/}
+            )}
           </S.ActionsWrapper>
         )}
         {paste && (

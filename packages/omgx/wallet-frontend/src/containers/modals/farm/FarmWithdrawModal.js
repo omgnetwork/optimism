@@ -8,7 +8,7 @@ import { getFarmInfo } from 'actions/farmAction';
 import Button from 'components/button/Button';
 import Modal from 'components/modal/Modal';
 import Input from 'components/input/Input';
-import { logAmount } from 'util/amountConvert';
+import { logAmount, powAmount } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
 
@@ -87,7 +87,7 @@ class FarmWithdrawModal extends React.Component {
 
     const withdrawLiquidityTX = await networkService.withdrawLiquidity(
       withdrawToken.currency,
-      withdrawValue,
+      powAmount(withdrawValue, withdrawToken.decimals),
       withdrawToken.L1orL2Pool,
       withdrawToken.decimals,
     )

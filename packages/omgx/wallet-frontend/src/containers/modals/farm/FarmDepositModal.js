@@ -135,7 +135,7 @@ class FarmDepositModal extends React.Component {
 
     const addLiquidityTX = await networkService.addLiquidity(
       stakeToken.currency,
-      stakeValue,
+      powAmount(stakeValue, stakeToken.decimals),
       stakeToken.L1orL2Pool,
       stakeToken.decimals
     )
