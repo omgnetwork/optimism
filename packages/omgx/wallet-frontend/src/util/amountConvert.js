@@ -29,12 +29,31 @@ export function logAmount (amount, power, truncate = 0) {
   	return calculated.toFixed();
 }
 
-export function powAmount (amount, power) {
-  const x = new BigNumber(amount);
-  const exp = new BigNumber(10).pow(power);
+/*Takes a value such as 3.92 and converts it into
+a BigNumber in wei
 
-  const calculated = x.multipliedBy(exp);
-  return calculated.toFixed(0);
+Duplicates 
+
+ethers.utils.parseUnits( valueString , decimalsOrUnitName )   =>   BigNumber
+*/
+
+export function powAmount (amount, decimals) {
+
+  const x = new BigNumber(amount)
+  const exp = new BigNumber(10).pow(decimals)
+
+  const calculated = x.multipliedBy(exp)
+  return calculated.toFixed(0)
+}
+
+/* more clearly named version of this */
+export function toWei_BN(amount, decimals) {
+
+  const x = new BigNumber(amount)
+  const exp = new BigNumber(10).pow(decimals)
+
+  const calculated = x.multipliedBy(exp)
+  return calculated.toFixed(0)
 }
 
 export function amountToUsd(amount, lookupPrice, token) {

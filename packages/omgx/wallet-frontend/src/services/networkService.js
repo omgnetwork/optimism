@@ -1308,12 +1308,12 @@ class NetworkService {
   }
 
   //Transfer funds from one account to another, on the L2
-  async transfer(address, value, currency) {
+  async transfer(address, value_BN, currency) {
     try {
-      //any old ERC20 json will do....
+      //any ERC20 json will do....
       const tx = await this.L2_TEST_Contract.attach(currency).transfer(
         address,
-        parseEther(value.toString())
+        value_BN
       )
       await tx.wait()
       return tx
@@ -1766,9 +1766,9 @@ class NetworkService {
   /***********************************************/
   /*****            Add Liquidity            *****/
   /***********************************************/
-  async addLiquidity(currency, value, L1orL2Pool, decimals) {
+  async addLiquidity(currency, value_BN, L1orL2Pool) {
 
-    let depositAmount = powAmount(value, decimals)
+    //let depositAmount = powAmount(value, decimals)
 
     try {
       // Deposit
@@ -1776,9 +1776,9 @@ class NetworkService {
         ? this.L1LPContract
         : this.L2LPContract
       ).addLiquidity(
-        depositAmount,
+        value_BN,
         currency,
-        currency === this.L1_ETH_Address ? { value: depositAmount } : {}
+        currency === this.L1_ETH_Address ? { value: value_BN } : {}
       )
       await addLiquidityTX.wait()
       return true
@@ -1791,11 +1791,11 @@ class NetworkService {
   /***********************************************/
   /*****           Get Reward L1             *****/
   /***********************************************/
-  async getRewardL1(currencyL1Address, userReward_BN) {
+  async getRewardL1(currencyL1Address, value_BN) {
 
     try {
       const withdrawRewardTX = await this.L1LPContract.withdrawReward(
-        userReward_BN,
+        value_BN,
         currencyL1Address,
         this.account
       )
@@ -1809,11 +1809,11 @@ class NetworkService {
   /***********************************************/
   /*****           Get Reward L2             *****/
   /***********************************************/
-  async getRewardL2(currencyL2Address, userReward_BN) {
+  async getRewardL2(currencyL2Address, value_BN) {
 
     try {
       const withdrawRewardTX = await this.L2LPContract.withdrawReward(
-        userReward_BN,
+        value_BN,
         currencyL2Address,
         this.account
       )
@@ -1827,16 +1827,14 @@ class NetworkService {
   /***********************************************/
   /*****          Withdraw Liquidity         *****/
   /***********************************************/
-  async withdrawLiquidity(currency, value, L1orL2Pool, decimals) {
+  async withdrawLiquidity(currency, value_BN, L1orL2Pool) {
     
-    let withdrawAmount = powAmount(value, decimals)
     try {
-      // Deposit
       const withdrawLiquidityTX = await (L1orL2Pool === 'L1LP'
         ? this.L1LPContract
         : this.L2LPContract
       ).withdrawLiquidity(
-        withdrawAmount,
+        value_BN,
         currency,
         this.account
       )
