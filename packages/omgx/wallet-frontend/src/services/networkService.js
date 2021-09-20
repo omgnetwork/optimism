@@ -1318,7 +1318,6 @@ class NetworkService {
       await tx.wait()
       return tx
     } catch (error) {
-      //this is where we also want to stop the loading...
       console.log("NS: transfer error:", error)
       return error
     }
