@@ -27,6 +27,8 @@ function InputStep({ handleClose, token }) {
   const signatureStatus = useSelector(selectSignatureStatus_depositTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
 
+  const maxValue = logAmount(token.balance, token.decimals)
+
   async function doDeposit() {
 
     let res
@@ -81,16 +83,7 @@ function InputStep({ handleClose, token }) {
   let buttonLabel_1 = 'CANCEL'
   if( depositLoading ) buttonLabel_1 = 'CLOSE WINDOW'
 
-  let convertToUSD = false
-  
-  if( Object.keys(lookupPrice) && 
-      !!value &&
-      value > 0 &&
-      value <= logAmount(token.balance, token.decimals) &&
-      !!amountToUsd(value, lookupPrice, token)
-  ) {
-    convertToUSD = true
-  }
+  let valueIsValid = value > 0 && value < maxValue;
 
   return (
     <>
@@ -106,14 +99,14 @@ function InputStep({ handleClose, token }) {
           type="number"
           onChange={(i)=>setAmount(i.target.value)}
           unit={token.symbol}
-          maxValue={logAmount(token.balance, token.decimals)}
+          maxValue={maxValue}
           variant="standard"
           newStyle
         />
 
-        {!!convertToUSD && (
-          <Typography variant="body1" sx={{mt: 2, fontWeight: 700}}>
-            {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
+        {!!valueIsValid && (
+          <Typography variant="body2" sx={{mt: 2}}>
+            {value && `You will receive ${value} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
           </Typography>
         )}
 
