@@ -55,7 +55,9 @@ class FarmDepositModal extends React.Component {
           stakeToken.currency,
           stakeToken.LPAddress
         )
+        approvedAllowance = approvedAllowance.toString()
       }
+
       this.setState({ approvedAllowance, stakeToken })
     }
 
@@ -118,6 +120,7 @@ class FarmDepositModal extends React.Component {
           stakeToken.currency,
           stakeToken.LPAddress
         )
+        approvedAllowance = approvedAllowance.toString()
       }
 
       this.setState({ approvedAllowance, loading: false })

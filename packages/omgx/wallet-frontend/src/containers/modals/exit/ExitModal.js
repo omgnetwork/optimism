@@ -33,9 +33,9 @@ function ExitModal({ open, token, fast, minHeight }) {
   return (
     <Modal open={open} maxWidth="md" onClose={handleClose} minHeight={!!fast ? "" : "350px"}>
       {!!fast ? (
-        <DoExitStepFast handleClose={handleClose} token={token} />
+        <DoExitStepFast token={token} />
       ) : (
-        <DoExitStep handleClose={handleClose} token={token}/>
+        <DoExitStep token={token}/>
       )}
     </Modal>
   )

@@ -18,7 +18,7 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { depositL2LP } from 'actions/networkAction'
-import { openAlert, openError } from 'actions/uiAction'
+import { openAlert, openError, closeModal } from 'actions/uiAction'
 
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectSignatureStatus_exitLP } from 'selectors/signatureSelector'
@@ -27,7 +27,7 @@ import { selectLookupPrice } from 'selectors/lookupSelector'
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
 
-import { amountToUsd, logAmount, powAmount } from 'util/amountConvert'
+import { amountToUsd, logAmount, powAmount, toWei_String } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
 import { Typography, useMediaQuery } from '@material-ui/core'
@@ -39,12 +39,15 @@ function DoExitStepFast({ handleClose, token }) {
 
   const dispatch = useDispatch()
 
-  const [value, setValue] = useState('')
+  const [ value, setValue ] = useState('')
+  const [ value_Wei_String, setValue_Wei_String ] = useState('0')  //support for Use Max
+
   const [LPBalance, setLPBalance] = useState(0)
   const [feeRate, setFeeRate] = useState(0)
   const [disabledSubmit, setDisabledSubmit] = useState(true)
 
-  const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
+  const loading = useSelector(selectLoading(['EXIT/CREATE']))
+
   const lookupPrice = useSelector(selectLookupPrice)
   const signatureStatus = useSelector(selectSignatureStatus_exitLP)
   
@@ -52,7 +55,7 @@ function DoExitStepFast({ handleClose, token }) {
   const valueIsValid = value > 0 && value <= maxValue
 
   function setAmount(value) {
-    const valid = value > 0 && value <= logAmount(token.balance, token.decimals)
+    const valid = value > 0 && value <= maxValue
     if ( valid && Number(value) < Number(LPBalance) ) 
     {
       setDisabledSubmit(false)
@@ -68,15 +71,22 @@ function DoExitStepFast({ handleClose, token }) {
 
   async function doExit() {
 
+    console.log("Amount to exit:", value_Wei_String)
+
     let res = await dispatch(
       depositL2LP(
         token.address,
-        powAmount(value, token.decimals) //take a value, convert to 18 decimals, generate string
+        value_Wei_String
       )
     )
 
     if (res) {
-      dispatch(openAlert(`${token.symbol} was bridged. You will receive ${receivableAmount(value)} ${token.symbol} on L1.`))
+      dispatch(
+          openAlert(
+            `${token.symbol} was bridged. You will receive 
+            ${receivableAmount(value)} ${token.symbol} on L1.`
+          )
+        )
       handleClose()
     } else {
       dispatch(openError(`Failed to fast bridge funds to L1`))
@@ -102,19 +112,20 @@ function DoExitStepFast({ handleClose, token }) {
   }, [ token ])
 
   useEffect(() => {
-    if (signatureStatus && exitLoading) {
+    if (signatureStatus && loading) {
       //we are all set - can close the window
       //transaction has been sent and signed
       handleClose()
     }
-  }, [ signatureStatus, exitLoading, handleClose ])
+  }, [ signatureStatus, loading, handleClose ])
 
   const feeLabel = 'There is a ' + feeRate + '% fee.'
+
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   let buttonLabel = 'CANCEL'
-  if( exitLoading ) buttonLabel = 'CLOSE WINDOW'
+  if( loading ) buttonLabel = 'CLOSE WINDOW'
 
   return (
     <>
@@ -130,7 +141,15 @@ function DoExitStepFast({ handleClose, token }) {
           placeholder="0.0"
           value={value}
           type="number"
-          onChange={(i)=>{setAmount(i.target.value)}}
+          onChange={(i)=>{
+            setAmount(i.target.value)
+            setValue_Wei_String(toWei_String(i.target.value, token.decimals))
+          }}
+          onUseMax={(i)=>{//they want to use the maximum
+            setAmount(maxValue) //so the input value updates for the user
+            setValue_Wei_String(token.balance.toString())
+          }}
+          allowUseAll={true}
           unit={token.symbol}
           maxValue={maxValue}
           newStyle
@@ -156,7 +175,7 @@ function DoExitStepFast({ handleClose, token }) {
           </Typography>
         )}
 
-        {exitLoading && (
+        {loading && (
           <Typography variant="body2" sx={{mt: 2, color: 'green'}}>
             This window will automatically close when your transaction has been signed and submitted.
           </Typography>
@@ -175,8 +194,8 @@ function DoExitStepFast({ handleClose, token }) {
             onClick={doExit}
             color='primary'
             variant='contained'
-            loading={exitLoading}
-            tooltip={exitLoading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
+            loading={loading}
+            tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
             disabled={disabledSubmit}
             triggerTime={new Date()}
             fullWidth={isMobile}

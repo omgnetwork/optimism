@@ -1346,7 +1346,7 @@ class NetworkService {
         this.account,
         targetContract
       )
-      return allowance.toString()
+      return allowance //.toString()
     } catch (error) {
       console.log("NS: checkAllowance error:", error)
       throw new WebWalletError({
@@ -1505,26 +1505,21 @@ class NetworkService {
   }
 
   //Standard 7 day exit from BOBA
-  async exitBOBA(currencyAddress, value) {
+  async exitBOBA(currencyAddress, value_Wei_String) {
 
     updateSignatureStatus_exitTRAD(false)
+
+    //now coming in as a value_Wei_String
+    const value = BigNumber.from(value_Wei_String)
 
     const allowance = await this.checkAllowance(
       currencyAddress,
       this.L2StandardBridgeAddress
     )
-    const L2_ERC20_Contract = new ethers.Contract(
-      currencyAddress,
-      L2ERC20Json.abi,
-      this.provider.getSigner()
-    )
-    const decimals = await L2_ERC20_Contract.decimals()
-    // need the frontend updates
-    if (BigNumber.from(allowance).lt(parseUnits(value, decimals))) {
+    
+    if ( allowance.lt(value) ) {
       const res = await this.approveERC20(
-        // take caution while using parseEther() with erc20
-        // l2 erc20 can be customised to have non 18 decimals
-        parseUnits(value, decimals),
+        value_Wei_String,
         currencyAddress,
         this.L2StandardBridgeAddress
       )
@@ -1533,7 +1528,7 @@ class NetworkService {
 
     const tx = await this.L2StandardBridgeContract.withdraw(
       currencyAddress,
-      parseUnits(value, decimals),
+      value_Wei_String,
       this.L1GasLimit,
       utils.formatBytes32String(new Date().getTime().toString())
     )
@@ -1552,10 +1547,10 @@ class NetworkService {
 
   /***********************************************/
   /*****                  Fee                *****/
-  /***** Fees are reported as integers, 
-   * where every int 
-   * represent 0.1%
-  *********/
+  /***** Fees are reported as integers,      *****/
+  /***** where every int                     *****/
+  /***** represents 0.1%                     *****/
+  /***********************************************/
 
   // Total exit fee
   async getTotalFeeRate() {
@@ -1935,7 +1930,7 @@ class NetworkService {
   /**************************************************************/
   /***** SWAP OFF from BOBA by depositing funds to the L2LP *****/
   /**************************************************************/
-  async depositL2LP(currencyAddress, depositAmount_string) {
+  async depositL2LP(currencyAddress, value_Wei_String) {
 
     updateSignatureStatus_exitLP(false)
 
@@ -1950,19 +1945,19 @@ class NetworkService {
       this.L2LPAddress
     )
 
-    let depositAmount_BN = new BN(depositAmount_string)
+    let depositAmount_BN = new BN(value_Wei_String)
 
     if (depositAmount_BN.gt(allowance_BN)) {
       const approveStatus = await L2ERC20Contract.approve(
         this.L2LPAddress,
-        depositAmount_string
+        value_Wei_String
       )
       await approveStatus.wait()
       if (!approveStatus) return false
     }
 
     const depositTX = await this.L2LPContract.clientDepositL2(
-      depositAmount_string,
+      value_Wei_String,
       currencyAddress
     )
 

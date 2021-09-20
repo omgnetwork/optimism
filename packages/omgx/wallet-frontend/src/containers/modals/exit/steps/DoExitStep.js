@@ -21,7 +21,7 @@ import { useTheme } from '@emotion/react'
 import { Typography, useMediaQuery } from '@material-ui/core'
 
 import { exitBOBA } from 'actions/networkAction'
-import { openAlert, openError } from 'actions/uiAction'
+import { openAlert, openError, closeModal } from 'actions/uiAction'
 
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
@@ -30,27 +30,42 @@ import { selectLoading } from 'selectors/loadingSelector'
 import { selectSignatureStatus_exitTRAD } from 'selectors/signatureSelector'
 import { selectLookupPrice } from 'selectors/lookupSelector'
 
-import { amountToUsd, logAmount } from 'util/amountConvert'
+import { amountToUsd, logAmount, toWei_String } from 'util/amountConvert'
 
 import { WrapperActionsModal } from 'components/modal/Modal.styles'
 import { Box } from '@material-ui/system'
 
-function DoExitStep({ handleClose, token }) {
+function DoExitStep({ token }) {
 
   const dispatch = useDispatch()
 
-  const [value, setValue] = useState('')
+  const [ value, setValue ] = useState('')
+  const [ value_Wei_String, setValue_Wei_String ] = useState('0')  //support for Use Max
+
   const [disabledSubmit, setDisabledSubmit] = useState(true)
-  const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
+  const loading = useSelector(selectLoading(['EXIT/CREATE']))
+
   const signatureStatus = useSelector(selectSignatureStatus_exitTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
   
   const maxValue = logAmount(token.balance, token.decimals)
   const valueIsValid = value > 0 && value <= maxValue
 
+  function setAmount(value) {
+    const valid = value > 0 && value <= maxValue
+    if (valid) {
+      setDisabledSubmit(false)
+    } else {
+      setDisabledSubmit(true)
+    }
+    setValue(value)
+  }
+
   async function doExit() {
 
-    let res = await dispatch(exitBOBA(token.address, value))
+    console.log("Amount to exit:", value_Wei_String)
+
+    let res = await dispatch(exitBOBA(token.address, value_Wei_String))
 
     if (res) {
       dispatch(
@@ -66,32 +81,25 @@ function DoExitStep({ handleClose, token }) {
     }
   }
 
-  function setExitAmount(value) {
-
-    const valid = value > 0 && value <= logAmount(token.balance, token.decimals)
-    
-    if (valid) {
-      setDisabledSubmit(false)
-    } else {
-      setDisabledSubmit(true)
-    }
-    
-    setValue(value)
-  }
-
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   let buttonLabel = 'CANCEL'
-  if( exitLoading ) buttonLabel = 'CLOSE WINDOW'
+  if( loading ) buttonLabel = 'CLOSE WINDOW'
+
+  function handleClose () {
+    setValue('')
+    setValue_Wei_String('0')
+    dispatch(closeModal('exitModal'))
+  }
 
   useEffect(() => {
-    if (signatureStatus && exitLoading) {
+    if (signatureStatus && loading) {
       //we are all set - can close the window
       //transaction has been sent and signed
       handleClose()
     }
-  }, [ signatureStatus, exitLoading, handleClose ])
+  }, [ signatureStatus, loading, handleClose ])
 
   return (
     <>
@@ -105,7 +113,15 @@ function DoExitStep({ handleClose, token }) {
           placeholder="0.0"
           value={value}
           type="number"
-          onChange={(i)=>{setExitAmount(i.target.value)}}
+          onChange={(i)=>{
+            setAmount(i.target.value)
+            setValue_Wei_String(toWei_String(i.target.value, token.decimals))
+          }}
+          onUseMax={(i)=>{//they want to use the maximum
+            setAmount(maxValue) //so the input value updates for the user
+            setValue_Wei_String(token.balance.toString())
+          }}
+          allowUseAll={true}
           unit={token.symbol}
           maxValue={maxValue}
           variant="standard"
@@ -121,7 +137,7 @@ function DoExitStep({ handleClose, token }) {
           </Typography>
         )}
 
-        {exitLoading && (
+        {loading && (
           <Typography variant="body2" sx={{mt: 2, color: 'green'}}>
             This window will close when your transaction has been signed and submitted.
           </Typography>
@@ -141,8 +157,8 @@ function DoExitStep({ handleClose, token }) {
               onClick={doExit}
               color="primary"
               variant="contained"
-              loading={exitLoading}
-              tooltip={exitLoading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
+              loading={loading}
+              tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
               disabled={disabledSubmit}
               triggerTime={new Date()}
               fullWidth={isMobile}

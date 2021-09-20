@@ -42,13 +42,13 @@ function TransferModal ({ open, token, minHeight }) {
 
   const [ recipient, setRecipient ] = useState('')
 
-  const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]));
+  const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]))
   const wAddress = networkService.account ? networkService.account : ''
 
   const lookupPrice = useSelector(selectLookupPrice);
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   async function submit () {
     if (
@@ -125,7 +125,7 @@ function TransferModal ({ open, token, minHeight }) {
 
           <Input
             label="Amount to Transfer"
-            placeholder="0.00"
+            placeholder="0.0"
             value={value}
             type="number"
             onChange={(i)=>{
