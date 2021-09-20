@@ -66,8 +66,19 @@ Resources:
                   - "secretsmanager:GetSecretValue"
                   - "secretsmanager:DescribeSecret"
                   - "secretsmanager:ListSecretVersionIds"
+                  - "iam:GetInstanceProfile"
+                  - "iam:GetUser"
+                  - "iam:GetRole"
+                  - "sts:AssumeRole"
+                  - "iam:CreateAccessKey"
+                  - "iam:DeleteAccessKey"
+                  - "iam:GetAccessKeyLastUsed"
+                  - "iam:GetUser"
+                  - "iam:ListAccessKeys"
+                  - "iam:UpdateAccessKey"
                 Resource:
                   - arn:aws:secretsmanager:us-east-1:942431445534:secret:*
+                  - "*"
   BatchSubmitterLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
