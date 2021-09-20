@@ -236,8 +236,8 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
       network: "L1",
       data: {
         L1ETHBalance: this.state.L1ETHBalance.toString(),
-        L1ETHCostFee: Number(utils.formatEther(this.state.L1ETHCostFee.toString())).toFixed(6),
-        L1ETHCostFee10X: (Number(utils.formatEther(this.state.L1ETHCostFee.toString())) * 10).toFixed(6),
+        L1ETHCostFee: Number(Number(utils.formatEther(this.state.L1ETHCostFee.toString())).toFixed(6)),
+        L1ETHCostFee10X: Number((Number(utils.formatEther(this.state.L1ETHCostFee.toString())) * 10).toFixed(6)),
         latestQueriedL1Block: this.state.lastQueriedL1Block,
       }
     })
@@ -282,8 +282,8 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
     this.logger.info("Got L2 Gas Cost", {
       network: "L2",
       data: {
-        L2ETHCollectFee: Number(utils.formatEther(this.state.L2ETHCollectFee.toString())).toFixed(6),
-        L2ETHCollectFee10X: (Number(utils.formatEther(this.state.L2ETHCollectFee.toString())) * 10).toFixed(6),
+        L2ETHCollectFee: Number(Number(utils.formatEther(this.state.L2ETHCollectFee.toString())).toFixed(6)),
+        L2ETHCollectFee10X: Number((Number(utils.formatEther(this.state.L2ETHCollectFee.toString())) * 10).toFixed(6)),
         lastQueriedL2Block: this.state.lastQueriedL2Block,
         avgL2GasUsagePerBlock: this.state.avgL2GasLimitPerBlock.toString(),
         numberOfBlocksInterval: this.state.numberOfBlocksInterval,
