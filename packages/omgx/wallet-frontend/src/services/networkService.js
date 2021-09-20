@@ -1899,7 +1899,7 @@ class NetworkService {
     if(typeof(balance) === 'undefined') {
       return logAmount('0', decimals)
     } else {
-      return logAmount(balance, decimals)
+      return logAmount(balance.toString(), decimals)
     }
 
   }
@@ -1929,7 +1929,7 @@ class NetworkService {
     if(typeof(balance) === 'undefined') {
       return logAmount('0', decimals)
     } else {
-      return logAmount(balance, decimals)
+      return logAmount(balance.toString(), decimals)
     }
 
   }
