@@ -34,9 +34,7 @@ function Input({
   onChange,
   sx,
   paste,
-  // className,
   maxValue,
-  // small,
   fullWidth,
   size,
   variant,
@@ -102,16 +100,16 @@ function Input({
         {unit && (
           <S.ActionsWrapper>
             <Typography variant="body2" component="p" sx={{opacity: 0.7, textAlign: "end", mb: 2}}>
-              Account Balance: {Number(maxValue).toFixed(3)}
+              Max Amount: {Number(maxValue).toFixed(3)}
             </Typography>
 
-            {allowUseAll && maxValue && value !== maxValue && (
+            {/*allowUseAll && maxValue && value !== maxValue && (
               <Box>
                 <Button onClick={handleMaxClick} variant="small" >
                   Use All
                 </Button>
               </Box>
-            )}
+            )*/}
           </S.ActionsWrapper>
         )}
         {paste && (
@@ -122,13 +120,13 @@ function Input({
       </S.Wrapper>
       {value !== '' && underZero ?
         <Typography variant="body2" sx={{mt: 1}}>
-          The value must be greater than 0
+          Value too small: the value must be greater than 0
         </Typography>
         : null
       }
       {value !== '' && overMax ?
         <Typography variant="body2" sx={{mt: 1}}>
-          Wallet balance exceeded: the value must be smaller than {Number(maxValue).toFixed(3)}
+          Value too large: the value must be smaller than {Number(maxValue).toFixed(3)}
         </Typography>
         : null}
     </>

@@ -102,7 +102,7 @@ class ListAccount extends React.Component {
                 }
                 {chain === 'L2' &&
                   <S.TextTableCell enabled={`${enabled}`} variant="body2" component="div">
-                    Bridge and Transfer
+                    Bridge / Transfer
                   </S.TextTableCell>
                 }
                 <Box sx={{display: "flex", opacity: !enabled ? "0.4" : "1.0", transform: dropDownBox ? "rotate(-180deg)" : ""}}>
@@ -127,7 +127,7 @@ class ListAccount extends React.Component {
                        }}
                      >
                        <Typography variant="body2" component="p" >
-                         You are on L2. To transact on L1, SWITCH LAYER to L1
+                         You are on L2. To use L1, click SWITCH LAYER
                        </Typography>
                      </Box>
                      <Box sx={{ textAlign: 'center'}}>
@@ -144,7 +144,7 @@ class ListAccount extends React.Component {
                        }}
                      >
                        <Typography variant="body2" component="p" >
-                         You are on L1. To transact on L2, SWITCH LAYER to L2
+                         You are on L1. To use L2, click SWITCH LAYER
                        </Typography>
                      </Box>
                      <Box sx={{ textAlign: 'center'}}>
@@ -163,7 +163,7 @@ class ListAccount extends React.Component {
                   tooltip="Classic Bridge to Boba L2. This option is always available but is generally more expensive than the swap-based system ('Fast Bridge')."
                   fullWidth
                 >
-                  Bridge
+                  Bridge to L2
                 </Button>
 
                 <Button
@@ -174,7 +174,7 @@ class ListAccount extends React.Component {
                   tooltip="A swap-based bridge to Boba L2. This option is only available if there is enough liquidity in the pools."
                   fullWidth
                 >
-                  Fast Bridge
+                  Fast Bridge to L2
                 </Button>
               </>
               }

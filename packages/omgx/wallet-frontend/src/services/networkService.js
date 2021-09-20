@@ -1591,7 +1591,7 @@ class NetworkService {
   async getL1LPInfo() {
 
     const tokenAddressList = Object.keys(this.addresses.TOKENS).reduce((acc, cur) => {
-      acc.push(this["L1_" + cur + "_Address"]);
+      acc.push(this["L1_" + cur + "_Address"].toLowerCase());
       return acc;
     }, [this.L1_ETH_Address]);
 
@@ -1625,19 +1625,19 @@ class NetworkService {
       }
       const poolTokenInfo = await L1LPContract.poolInfo(tokenAddress)
       const userTokenInfo = await L1LPContract.userInfo(tokenAddress, this.account)
-      return { tokenAddress, tokenBalance, tokenSymbol, tokenName, poolTokenInfo, userTokenInfo,decimals }
+      return { tokenAddress, tokenBalance, tokenSymbol, tokenName, poolTokenInfo, userTokenInfo, decimals }
     }
 
     tokenAddressList.forEach((tokenAddress) => L1LPInfoPromise.push(getL1LPInfoPromise(tokenAddress)))
     const L1LPInfo = await Promise.all(L1LPInfoPromise);
     
     L1LPInfo.forEach((token) => {
-      poolInfo[token.tokenAddress] = {
+      poolInfo[token.tokenAddress.toLowerCase()] = {
         symbol: token.tokenSymbol,
         name: token.tokenName,
         decimals: token.decimals,
-        l1TokenAddress: token.poolTokenInfo.l1TokenAddress,
-        l2TokenAddress: token.poolTokenInfo.l2TokenAddress,
+        l1TokenAddress: token.poolTokenInfo.l1TokenAddress.toLowerCase(),
+        l2TokenAddress: token.poolTokenInfo.l2TokenAddress.toLowerCase(),
         accUserReward: token.poolTokenInfo.accUserReward.toString(),
         accUserRewardPerShare: token.poolTokenInfo.accUserRewardPerShare.toString(),
         userDepositAmount: token.poolTokenInfo.userDepositAmount.toString(),
@@ -1662,7 +1662,7 @@ class NetworkService {
         tokenBalance: token.tokenBalance.toString()
       }
       userInfo[token.tokenAddress] = {
-        l1TokenAddress: token.tokenAddress,
+        l1TokenAddress: token.tokenAddress.toLowerCase(),
         amount: token.userTokenInfo.amount.toString(),
         pendingReward: token.userTokenInfo.pendingReward.toString(),
         rewardDebt: token.userTokenInfo.rewardDebt.toString()
@@ -1675,8 +1675,8 @@ class NetworkService {
 
     const tokenAddressList = Object.keys(this.addresses.TOKENS).reduce((acc, cur) => {
       acc.push({
-        L1: this["L1_" + cur + "_Address"],
-        L2: this["L2_" + cur + "_Address"]
+        L1: this["L1_" + cur + "_Address"].toLowerCase(),
+        L2: this["L2_" + cur + "_Address"].toLowerCase()
       });
       return acc;
     }, [{
@@ -1720,14 +1720,15 @@ class NetworkService {
 
     tokenAddressList.forEach(({L1, L2}) => L2LPInfoPromise.push(getL2LPInfoPromise(L2, L1)))
 
-    const L2LPInfo = await Promise.all(L2LPInfoPromise);
+    const L2LPInfo = await Promise.all(L2LPInfoPromise)
+    
     L2LPInfo.forEach((token) => {
-      poolInfo[token.tokenAddress] = {
+      poolInfo[token.tokenAddress.toLowerCase()] = {
         symbol: token.tokenSymbol,
         name: token.tokenName,
         decimals: token.decimals,
-        l1TokenAddress: token.poolTokenInfo.l1TokenAddress,
-        l2TokenAddress: token.poolTokenInfo.l2TokenAddress,
+        l1TokenAddress: token.poolTokenInfo.l1TokenAddress.toLowerCase(),
+        l2TokenAddress: token.poolTokenInfo.l2TokenAddress.toLowerCase(),
         accUserReward: token.poolTokenInfo.accUserReward.toString(),
         accUserRewardPerShare: token.poolTokenInfo.accUserRewardPerShare.toString(),
         userDepositAmount: token.poolTokenInfo.userDepositAmount.toString(),
@@ -1751,8 +1752,8 @@ class NetworkService {
               ), // ( accUserReward - userDepositAmount ) / timeDuration
         tokenBalance: token.tokenBalance.toString()
       }
-      userInfo[token.tokenAddress] = {
-        l2TokenAddress: token.tokenAddress,
+      userInfo[token.tokenAddress.toLowerCase()] = {
+        l2TokenAddress: token.tokenAddress.toLowerCase(),
         amount: token.userTokenInfo.amount.toString(),
         pendingReward: token.userTokenInfo.pendingReward.toString(),
         rewardDebt: token.userTokenInfo.rewardDebt.toString()
@@ -1880,8 +1881,10 @@ class NetworkService {
   /************ L1LP Pool size ***********/
   /***************************************/
   async L1LPBalance(tokenAddress, decimals) {
+    
     let balance
     let tokenAddressLC = tokenAddress.toLowerCase()
+    
     if (
       tokenAddressLC === this.L2_ETH_Address ||
       tokenAddressLC === this.L1_ETH_Address
@@ -1896,7 +1899,7 @@ class NetworkService {
     if(typeof(balance) === 'undefined') {
       return logAmount('0', decimals)
     } else {
-      return logAmount(balance.toString(), decimals)
+      return logAmount(balance, decimals)
     }
 
   }
@@ -1905,8 +1908,10 @@ class NetworkService {
   /************ L2LP Pool size ***********/
   /***************************************/
   async L2LPBalance(tokenAddress, decimals) {
+
     let balance
     let tokenAddressLC = tokenAddress.toLowerCase()
+    
     if (
       tokenAddressLC === this.L2_ETH_Address ||
       tokenAddressLC === this.L1_ETH_Address
@@ -1924,7 +1929,7 @@ class NetworkService {
     if(typeof(balance) === 'undefined') {
       return logAmount('0', decimals)
     } else {
-      return logAmount(balance.toString(), decimals)
+      return logAmount(balance, decimals)
     }
 
   }

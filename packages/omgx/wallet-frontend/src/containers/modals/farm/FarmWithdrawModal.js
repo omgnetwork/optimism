@@ -17,28 +17,24 @@ import { WrapperActionsModal } from 'components/modal/Modal.styles';
 
 class FarmWithdrawModal extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
 
-    const { open /*, balance*/ } = this.props;
-    const { withdrawToken, userInfo } = this.props.farm;
+    const { open } = this.props
+    const { withdrawToken, userInfo } = this.props.farm
 
     this.state = {
       open,
       withdrawToken,
       withdrawValue: '',
-      // balance
       userInfo,
-      //layer1Balance: balance.layer1,
-      //layer2Balance: balance.layer2,
       LPBalance: 0,
-      // loading
       loading: false,
     }
   }
 
   async componentDidUpdate(prevState) {
 
-    const { open /*, balance*/ } = this.props
+    const { open } = this.props
     const { withdrawToken, userInfo } = this.props.farm
 
     if (prevState.open !== open) {
@@ -46,41 +42,45 @@ class FarmWithdrawModal extends React.Component {
     }
 
     if (!isEqual(prevState.farm.withdrawToken, withdrawToken)) {
-      let LPBalance = 0;
+      let LPBalance = 0
       if (withdrawToken.L1orL2Pool === 'L1LP') {
-        LPBalance = await networkService.L1LPBalance(withdrawToken.currency);
+        LPBalance = await networkService.L1LPBalance(withdrawToken.currency, withdrawToken.decimals)
       } else {
-        LPBalance = await networkService.L2LPBalance(withdrawToken.currency);
+        LPBalance = await networkService.L2LPBalance(withdrawToken.currency, withdrawToken.decimals)
       }
-      this.setState({ withdrawToken, LPBalance });
+      this.setState({ withdrawToken, LPBalance })
     }
 
     if (!isEqual(prevState.farm.userInfo, userInfo)) {
       this.setState({ userInfo });
     }
 
-    // if (!isEqual(prevState.balance, balance)) {
-    //   this.setState({
-    //     layer1Balance: balance.layer1,
-    //     layer2Balance: balance.layer2
-    //   });
-    // }
   }
 
   getMaxTransferValue () {
-    const { userInfo, withdrawToken } = this.state
+
+    const { userInfo, withdrawToken, LPBalance } = this.state
+
     let transferingBalance = 0
     if (typeof userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency] !== 'undefined') {
       transferingBalance = userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency].amount
+      transferingBalance = logAmount(transferingBalance, withdrawToken.decimals)
     }
-    return logAmount(transferingBalance, withdrawToken.decimals);
+
+    //BUT, if the current balance is lower than what you staked, can only withdraw the balance
+    //console.log("LPBalance:",LPBalance)
+    if (LPBalance < transferingBalance)
+      transferingBalance = LPBalance
+
+    return transferingBalance
   }
 
   handleClose() {
-    this.props.dispatch(closeModal("farmWithdrawModal"));
+    this.props.dispatch(closeModal("farmWithdrawModal"))
   }
 
   async handleConfirm() {
+
     const { withdrawToken, withdrawValue } = this.state;
 
     this.setState({ loading: true });
@@ -90,7 +90,7 @@ class FarmWithdrawModal extends React.Component {
       withdrawValue,
       withdrawToken.L1orL2Pool,
       withdrawToken.decimals,
-    );
+    )
     if (withdrawLiquidityTX) {
       this.props.dispatch(openAlert("Your liquidity was withdrawn."));
       this.props.dispatch(getFarmInfo());
