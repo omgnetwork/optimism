@@ -32,17 +32,17 @@ function InputStep({ handleClose, token }) {
     let res
 
     if(token.symbol === 'ETH') {
-      console.log("Bridging ETH to L2")
       if (value > 0) {
         res = await dispatch(depositETHL2(value))
         if (res) {
           dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
           dispatch(openAlert('ETH bridge transaction submitted'))
           handleClose()
+        } else {
+          dispatch(openError(`Failed to bridge ETH`))
         }
       }
     } else {
-      console.log("Bridging ERC20 to L2")
       res = await dispatch(
         depositErc20(powAmount(value, token.decimals), token.address, token.addressL2)
       )

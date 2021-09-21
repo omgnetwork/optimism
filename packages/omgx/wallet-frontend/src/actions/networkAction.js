@@ -68,8 +68,9 @@ export function depositL2LP(token, value) {
 
 //DEPOSIT ETH
 export function depositETHL2(value) {
-  return createAction('DEPOSIT/CREATE', () =>
-    networkService.depositETHL2(value)
+  return createAction('DEPOSIT/CREATE', () =>{ 
+     return networkService.depositETHL2(value)
+    }
   )
 }
 
