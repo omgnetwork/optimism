@@ -29,6 +29,8 @@ class FarmWithdrawModal extends React.Component {
       userInfo,
       LPBalance: 0,
       loading: false,
+      value_Wei_String: '0',
+      disableSubmit: true,
     }
   }
 
@@ -63,6 +65,8 @@ class FarmWithdrawModal extends React.Component {
 
     let transferingBalance = 0
     if (typeof userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency] !== 'undefined') {
+      console.log(['userInfo[withdrawToken.L1orL2Pool]',userInfo[withdrawToken.L1orL2Pool]]);
+      console.log(userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency])
       transferingBalance = userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency].amount
       transferingBalance = logAmount(transferingBalance, withdrawToken.decimals)
     }
@@ -79,26 +83,53 @@ class FarmWithdrawModal extends React.Component {
     this.props.dispatch(closeModal("farmWithdrawModal"))
   }
 
+  handleWithdrawValue(value) {
+    const {LPBalance,withdrawToken} = this.state;
+    let disableSubmit = false;
+    if (
+      Number(this.getMaxTransferValue()) < Number(value) ||
+      Number(value) > Number(LPBalance) || 
+      value === '' || 
+      !value) 
+    {
+      disableSubmit = true;
+    }
+
+    this.setState({
+      withdrawValue: value, 
+      value_Wei_String: toWei_String(value, withdrawToken.decimals),
+      disableSubmit
+    })
+  }
+
   async handleConfirm() {
 
-    const { withdrawToken, withdrawValue } = this.state;
+    const { withdrawToken,value_Wei_String } = this.state;
 
     this.setState({ loading: true });
 
     const withdrawLiquidityTX = await networkService.withdrawLiquidity(
       withdrawToken.currency,
-      toWei_String( withdrawValue, withdrawToken.decimals),
+      value_Wei_String,
       withdrawToken.L1orL2Pool,
     )
     
     if (withdrawLiquidityTX) {
       this.props.dispatch(openAlert("Your liquidity was withdrawn."));
       this.props.dispatch(getFarmInfo());
-      this.setState({ loading: false, withdrawValue: '' });
+      this.setState({
+        loading: false,
+        withdrawValue: '',
+        value_Wei_String: '0'
+      });
       this.props.dispatch(closeModal("farmWithdrawModal"));
     } else {
       this.props.dispatch(openError("Failed to withdraw liquidity."));
-      this.setState({ loading: false, withdrawValue: '' });
+      this.setState({
+        loading: false,
+        withdrawValue: '',
+        value_Wei_String: '0'
+      });
     }
   }
 
@@ -110,6 +141,7 @@ class FarmWithdrawModal extends React.Component {
       withdrawValue,
       LPBalance,
       loading,
+      disableSubmit
     } = this.state
 
     return (
@@ -127,9 +159,16 @@ class FarmWithdrawModal extends React.Component {
           placeholder={`Amount to withdraw`}
           value={withdrawValue}
           type="number"
-          onChange={i=>{this.setState({withdrawValue: i.target.value})}}
           unit={withdrawToken.symbol}
           maxValue={this.getMaxTransferValue()}
+          onChange={i=>{
+            this.handleWithdrawValue(i.target.value);
+          }}
+          allowUseAll={true}
+          onUseMax={(i)=>{
+            let maxValue = this.getMaxTransferValue();
+            this.handleWithdrawValue(maxValue);
+          }}
           disabledSelect={true}
           variant="standard"
           newStyle
@@ -161,12 +200,7 @@ class FarmWithdrawModal extends React.Component {
             color='primary'
             size="large"
             variant="contained"
-            disabled={
-              Number(this.getMaxTransferValue()) < Number(withdrawValue) ||
-              Number(withdrawValue) > Number(LPBalance) ||
-              withdrawValue === '' ||
-              !withdrawValue
-            }
+            disabled={!!disableSubmit}
             loading={loading}
           >
             CONFIRM

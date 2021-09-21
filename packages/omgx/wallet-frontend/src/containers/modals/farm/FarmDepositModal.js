@@ -29,6 +29,7 @@ class FarmDepositModal extends React.Component {
       open,
       stakeToken,
       stakeValue: '',
+      value_Wei_String: '0',
       stakeValueValid: false,
       // allowance
       approvedAllowance: 0,
@@ -74,25 +75,29 @@ class FarmDepositModal extends React.Component {
 
   handleStakeValue(value) {
 
+    const { stakeToken } = this.state
+    
     if( value &&
         Number(value) > 0 &&
-        Number(value) < Number(this.getMaxTransferValue())
+        Number(value) <= Number(this.getMaxTransferValue())
     ) {
         this.setState({
           stakeValue: value,
           stakeValueValid: true,
+          value_Wei_String: toWei_String(value, stakeToken.decimals)
         })
     } else {
       this.setState({
         stakeValue: value,
         stakeValueValid: false,
+        value_Wei_String: '0'
       })
     }
   }
 
   async handleApprove() {
 
-    const { stakeToken, stakeValue } = this.state
+    const { stakeToken, value_Wei_String } = this.state
 
     this.setState({ loading: true })
 
@@ -100,13 +105,13 @@ class FarmDepositModal extends React.Component {
 
     if (stakeToken.L1orL2Pool === 'L2LP') {
       approveTX = await networkService.approveERC20_L2LP(
-        powAmount(stakeValue, stakeToken.decimals),
+        value_Wei_String,
         stakeToken.currency,
       )
     }
     else if (stakeToken.L1orL2Pool === 'L1LP') {
       approveTX = await networkService.approveERC20_L1LP(
-        powAmount(stakeValue, stakeToken.decimals),
+        value_Wei_String,
         stakeToken.currency,
       )
     }
@@ -132,24 +137,24 @@ class FarmDepositModal extends React.Component {
 
   async handleConfirm() {
 
-    const { stakeToken, stakeValue } = this.state
+    const { stakeToken, value_Wei_String } = this.state
 
     this.setState({ loading: true })
 
     const addLiquidityTX = await networkService.addLiquidity(
       stakeToken.currency,
-      toWei_String( stakeValue, stakeToken.decimals ),
+      value_Wei_String,
       stakeToken.L1orL2Pool,
     )
 
     if (addLiquidityTX) {
       this.props.dispatch(openAlert("Your liquidity was added"))
       this.props.dispatch(getFarmInfo())
-      this.setState({ loading: false, stakeValue: '' })
+      this.setState({ loading: false, stakeValue: '',value_Wei_String:0 })
       this.props.dispatch(closeModal("farmDepositModal"))
     } else {
       this.props.dispatch(openError("Failed to add liquidity"))
-      this.setState({ loading: false, stakeValue: '' })
+      this.setState({ loading: false, stakeValue: '' ,value_Wei_String:0})
     }
   }
 
@@ -191,9 +196,11 @@ class FarmDepositModal extends React.Component {
             placeholder={`Amount to stake`}
             value={stakeValue}
             type="number"
-            onChange={i=>{this.handleStakeValue(i.target.value)}}
             unit={stakeToken.symbol}
             maxValue={this.getMaxTransferValue()}
+            onChange={i=>{this.handleStakeValue(i.target.value)}}
+            onUseMax={i=>{this.handleStakeValue(this.getMaxTransferValue())}}
+            allowUseAll={true}
             newStyle
             variant="standard"
           />

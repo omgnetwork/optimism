@@ -64,7 +64,7 @@ function Input({
 
   //since ETH is the fee token, harder to use all b/c need to take 
   //operation-specific fees into account 
-  allowUseAll = (unit === 'ETH') ? false : true
+  allowUseAll = (unit === 'ETH') ? false : allowUseAll
 
   return (
     <>
