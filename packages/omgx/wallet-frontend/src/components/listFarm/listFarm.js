@@ -151,6 +151,7 @@ class ListFarm extends React.Component {
     } = this.state;
 
     const pageLoading = Object.keys(poolInfo).length === 0;
+    
     const { isMobile } = this.props
 
     let userReward = 0;
@@ -185,7 +186,7 @@ class ListFarm extends React.Component {
     }
 
     let enableReward = false
-    if( Number(logAmount(userReward, decimals, 3)) > 0.001 ) {
+    if( Number(logAmount(userReward, decimals, 3)) >= 0.001 ) {
       enableReward = true
     }
 
