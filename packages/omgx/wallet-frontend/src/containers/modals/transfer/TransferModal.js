@@ -61,14 +61,19 @@ function TransferModal ({ open, token, minHeight }) {
   }
   
   function setAmount(value) {
+    
+    console.log("setAmount")
 
     const tooSmall = new BN(value).lte(new BN(0.0)) 
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
+    console.log("tooSmall",tooSmall)
+    console.log("tooBig",tooBig)
+
     if (tooSmall || tooBig) {
-      setDisabledSubmit(false)
-    } else {
       setDisabledSubmit(true)
+    } else {
+      setDisabledSubmit(false)
     }
 
     setValue(value)
@@ -146,11 +151,11 @@ function TransferModal ({ open, token, minHeight }) {
             value={value}
             type="number"
             onChange={(i)=>{
-              setValue(i.target.value)
+              setAmount(i.target.value)
               setValue_Wei_String(toWei_String(i.target.value, token.decimals))
             }}
             onUseMax={(i)=>{//they want to use the maximum
-              setValue(maxValue); //so the input value updates for the user
+              setAmount(maxValue) //so the input value updates for the user
               setValue_Wei_String(token.balance.toString())
             }}
             allowUseAll={true}

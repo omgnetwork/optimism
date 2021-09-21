@@ -56,14 +56,19 @@ function DoExitStepFast({ handleClose, token }) {
   const maxValue = logAmount(token.balance, token.decimals)
 
   function setAmount(value) {
+    
+    console.log("setAmount")
 
     const tooSmall = new BN(value).lte(new BN(0.0)) 
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
+    console.log("tooSmall",tooSmall)
+    console.log("tooBig",tooBig)
+
     if (tooSmall || tooBig) {
-      setDisabledSubmit(false)
-    } else {
       setDisabledSubmit(true)
+    } else {
+      setDisabledSubmit(false)
     }
 
     setValue(value)
