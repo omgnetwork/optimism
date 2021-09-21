@@ -1,3 +1,4 @@
+import { fs } from 'fs'
 import { TransactionReceipt } from '@ethersproject/abstract-provider'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import fetch from 'node-fetch'
@@ -43,9 +44,9 @@ export const submitToVault = async (
   gasPrice: number,
   provider: StaticJsonRpcProvider
 ): Promise<TransactionReceipt> => {
-  if (call.type === 'AppendQueueBatch') {
-    // appendQueueBatch is currently disabled.
-  } else if (call.type === 'AppendStateBatch') {
+  const token = getToken(batchSigner)
+
+  if (call.type === 'AppendStateBatch') {
     const url =
       batchSigner.vault_addr +
       '/v1/immutability-eth-plugin/wallets/proposer/accounts/' +
@@ -55,7 +56,7 @@ export const submitToVault = async (
       method: 'PUT',
       headers: {
         'X-Vault-Request': 'true',
-        'X-Vault-Token': batchSigner.token,
+        'X-Vault-Token': token,
       },
       body: JSON.stringify({
         nonce: call.nonce,
@@ -80,7 +81,7 @@ export const submitToVault = async (
       method: 'PUT',
       headers: {
         'X-Vault-Request': 'true',
-        'X-Vault-Token': batchSigner.token,
+        'X-Vault-Token': token,
       },
       body: JSON.stringify({
         nonce: call.nonce,
@@ -97,6 +98,9 @@ export const submitToVault = async (
     const data = await response.json()
     hooks.onTransactionResponse(data)
     return toTransactionReceipt(provider, data)
+  } else if (call.type === 'AppendQueueBatch') {
+    // appendQueueBatch is currently disabled.
+    return
   }
 }
 
@@ -121,4 +125,17 @@ const transformContexts = (contexts: BatchContext[]): any => {
     )
   }
   return apiContexts
+}
+
+const getToken = (batchSigner: BatchSigner): string => {
+  const env = process.env
+  if (env.AWS_SINK_JWT_TOKEN_PATH === undefined) {
+    return batchSigner.token
+  } else {
+    if (fs.existsSync(env.AWS_SINK_JWT_TOKEN_PATH)) {
+      fs.readFileSync(env.AWS_SINK_JWT_TOKEN_PATH, 'utf-8')
+    } else {
+      return batchSigner.token
+    }
+  }
 }

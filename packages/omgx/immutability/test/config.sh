@@ -38,17 +38,28 @@ EOF
 
 vault policy write append-state-batch-proposer append-state-batch-proposer.hcl
 vault policy list
+
 node index.js $ACCOUNT0
 node index.js $ACCOUNT1
 echo "Creating tokens helper file"
 rm $DIR/tokens_and_accounts.sh || true
 touch $DIR/tokens_and_accounts.sh
-PROPOSER_TOKEN=$(vault token create -field=token -period=30m -policy=append-state-batch-proposer)
-SEQUENCER_TOKEN=$(vault token create -field=token -period=30m -policy=append-sequencer-batch)
-echo "export PROPOSER_TOKEN=$PROPOSER_TOKEN" >> $DIR/tokens_and_accounts.sh
-echo "export SEQUENCER_TOKEN=$SEQUENCER_TOKEN" >> $DIR/tokens_and_accounts.sh
 echo "export SEQUENCER_ADDRESS=$ACCOUNT0" >> $DIR/tokens_and_accounts.sh
 echo "export PROPOSER_ADDRESS=$ACCOUNT1" >> $DIR/tokens_and_accounts.sh
+
+if [[ ! -z "$AWS_ROLE" && ! -z "$AWS_BOUND_IAM_PRINCIPAL_ARN" && ! -z "$AWS_ACCESS_KEY_ID" && ! -z "$AWS_SECRET_ACCESS_KEY" ]]; then
+  echo "Not writting tokens in helper - enabling AWS auth backend"
+  vault auth enable aws
+  vault write auth/aws/role/${AWS_ROLE} auth_type=iam \
+                bound_iam_principal_arn=${AWS_BOUND_IAM_PRINCIPAL_ARN} policies=append-state-batch-proposer,append-sequencer-batch max_ttl=500h
+  vault login -method=aws role=${AWS_ROLE}
+else
+  PROPOSER_TOKEN=$(vault token create -field=token -period=30m -policy=append-state-batch-proposer)
+  SEQUENCER_TOKEN=$(vault token create -field=token -period=30m -policy=append-sequencer-batch)
+  echo "export PROPOSER_TOKEN=$PROPOSER_TOKEN" >> $DIR/tokens_and_accounts.sh
+  echo "export SEQUENCER_TOKEN=$SEQUENCER_TOKEN" >> $DIR/tokens_and_accounts.sh
+fi
 cat $DIR/tokens_and_accounts.sh
+
 
 

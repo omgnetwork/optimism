@@ -23,8 +23,10 @@ services:
   ### as env vars.
   ### PROPOSER_TOKEN, SEQUENCER_TOKEN, SEQUENCER_ADDRESS, PROPOSER_ADDRESS
 
-  ### The deployer takes these addresses and populates the contracts guard with them.
+  ### The deployer takes these addresses and populates the contracts guard with these values.
   ### Batch submitter will go into Vault mode if these env vars are present.
+  ### SEQUENCER_TOKEN and PROPOSER_TOKEN are optional. Batch submitter will try to get the
+  ### JWT token for vault from the AWS_SINK_JWT_TOKEN_PATH if they're not set.
   deployer:
     volumes:
       - "./../packages/omgx/immutability/test:/vault/test"
@@ -48,8 +50,11 @@ services:
   batch_submitter:
     volumes:
       - "./../packages/omgx/immutability/test:/vault/test"
+      #AWS_SINK_JWT_TOKEN_PATH
+      - "/tmp/vault_agent:/tmp/vault_agent:rw"
     environment:
       VAULT_ADDR: http://vault:8900
+      AWS_SINK_JWT_TOKEN_PATH: "/tmp/vault_agent/vault_auth"
     entrypoint:
       - "/bin/bash"
       - -ec
@@ -70,7 +75,7 @@ services:
   vault:
     image: omgx/vault
     ports:
-      - "127.0.0.1:8200:8200"
+      - "127.0.0.1:8200:8900"
     build:
       context: ..
       dockerfile: ./ops/docker/Dockerfile.omgx_vault
@@ -83,6 +88,10 @@ services:
       RUN_TEST: "${RUN_TEST:-false}"
       TEST: "${TEST:-false}"
       URL: http://deployer:8081/addresses.json
+      AWS_ACCESS_KEY_ID: ""
+      AWS_SECRET_ACCESS_KEY: ""
+      AWS_BOUND_IAM_PRINCIPAL_ARN: ""
+      AWS_ROLE: ""
     volumes:
       - "/tmp/vault_auth:/vault/config:rw"
       - "./../packages/omgx/immutability/test:/vault/test"
@@ -92,3 +101,30 @@ services:
       - -ec
       - |
         ./provision_vault.sh
+
+  vault_agent:
+    depends_on:
+      - vault
+    image: hashicorp/vault-enterprise:latest
+    restart: always
+    ports:
+      - "18200:8200"
+    volumes:
+      - ./../packages/omgx/immutability/docker/:/vault-agent:rw
+      #AWS_SINK_JWT_TOKEN_PATH
+      - /tmp/vault_agent:/tmp/vault_agent:rw
+    environment:
+      VAULT_ADDR: "http://vault:8900"
+      AWS_SINK_JWT_TOKEN_PATH: "/tmp/vault_agent/vault_auth"
+      AWS_ACCESS_KEY_ID: ""
+      AWS_SECRET_ACCESS_KEY: ""
+      AWS_VAULT_ROLE: ""
+      restart: always
+    entrypoint:
+      - "/bin/sh"
+      - -ec
+      - |
+        apk add gettext
+        envsubst < /vault-agent/vault-agent.hcl > /tmp/vault-agent.hcl
+        vault agent -log-level debug -config=/tmp/vault-agent.hcl
+

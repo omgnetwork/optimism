@@ -6,7 +6,11 @@ import {
 import * as ynatm from '@eth-optimism/ynatm'
 import { BatchSigner } from '../batch-submitter/batch-submitter'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
-import { submitToVault, VaultTransactionResponse, VaultPopulatedTransaction } from './vault'
+import {
+  submitToVault,
+  VaultTransactionResponse,
+  VaultPopulatedTransaction,
+} from './vault'
 export interface ResubmissionConfig {
   resubmissionTimeout: number
   minGasPriceInGwei: number

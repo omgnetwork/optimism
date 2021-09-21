@@ -1,12 +1,12 @@
 default_lease_ttl = "168h"
 disable_mlock = "true"
 max_lease_ttl = "720h"
-
+ui = "true"
 backend "file" {
     path = "/vault/config/data"
 }
 
-ui = "false"
+#ui = "false"
 #api_addr = "https://localhost:8900" if tls_disable == "false"
 api_addr = "http://localhost:8900"
 plugin_directory = "/vault/plugins"
