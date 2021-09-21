@@ -64,8 +64,8 @@ def watcher_getL2Transactions(event, context):
             crossDomainMessageSendTime = transactionDataRaw[8]
           fastRelay = transactionDataRaw[11]
           if fastRelay == True:
-            # Estimate time is 5 minutes
-            crossDomainMessageEstimateFinalizedTime = int(crossDomainMessageSendTime) + 60 * 5
+            # Estimate time
+            crossDomainMessageEstimateFinalizedTime = int(crossDomainMessageSendTime) + int(config.get('ESTIMATE_FINIALIZED_TIME'))
           else:
             # Estimate time is 7 days
             crossDomainMessageEstimateFinalizedTime = int(crossDomainMessageSendTime) + 60 * 60 * 24 * 7
