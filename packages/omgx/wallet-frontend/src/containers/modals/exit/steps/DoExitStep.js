@@ -21,7 +21,7 @@ import { useTheme } from '@emotion/react'
 import { Typography, useMediaQuery } from '@material-ui/core'
 
 import { exitBOBA } from 'actions/networkAction'
-import { openAlert, openError, closeModal } from 'actions/uiAction'
+import { openAlert, openError } from 'actions/uiAction'
 
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
@@ -35,7 +35,7 @@ import { amountToUsd, logAmount, toWei_String } from 'util/amountConvert'
 import { WrapperActionsModal } from 'components/modal/Modal.styles'
 import { Box } from '@material-ui/system'
 
-function DoExitStep({ token }) {
+function DoExitStep({ handleClose, token }) {
 
   const dispatch = useDispatch()
 
@@ -85,12 +85,6 @@ function DoExitStep({ token }) {
 
   let buttonLabel = 'CANCEL'
   if( loading ) buttonLabel = 'CLOSE WINDOW'
-
-  function handleClose () {
-    setValue('')
-    setValue_Wei_String('0')
-    dispatch(closeModal('exitModal'))
-  }
 
   useEffect(() => {
     if (signatureStatus && loading) {

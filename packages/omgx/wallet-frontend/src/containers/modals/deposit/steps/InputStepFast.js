@@ -34,7 +34,7 @@ import { selectLookupPrice } from 'selectors/lookupSelector'
 import { selectSignatureStatus_depositLP } from 'selectors/signatureSelector'
 
 import networkService from 'services/networkService'
-import { powAmount, logAmount, amountToUsd, toWei_String } from 'util/amountConvert'
+import { logAmount, amountToUsd, toWei_String } from 'util/amountConvert'
 
 function InputStepFast({ handleClose, token }) {
 

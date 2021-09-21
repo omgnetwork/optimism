@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import { parseUnits, parseEther, formatEther } from '@ethersproject/units'
+import { parseEther, formatEther } from '@ethersproject/units'
 
 import { Watcher } from '@eth-optimism/watcher'
 
@@ -68,7 +68,7 @@ import GovernorBravoDelegate from "../deployment/rinkeby/json/GovernorBravoDeleg
 import GovernorBravoDelegator from "../deployment/rinkeby/json/GovernorBravoDelegator.json"
 import Timelock from "../deployment/rinkeby/json/Timelock.json"
 
-import { powAmount, logAmount } from 'util/amountConvert'
+import { logAmount } from 'util/amountConvert'
 import { accDiv, accMul } from 'util/calculation'
 import {getNftImageUrl} from 'util/nftImage'
 import { getAllNetworks } from 'util/masterConfig'

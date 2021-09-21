@@ -18,7 +18,7 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { depositL2LP } from 'actions/networkAction'
-import { openAlert, openError, closeModal } from 'actions/uiAction'
+import { openAlert, openError } from 'actions/uiAction'
 
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectSignatureStatus_exitLP } from 'selectors/signatureSelector'
@@ -27,7 +27,7 @@ import { selectLookupPrice } from 'selectors/lookupSelector'
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
 
-import { amountToUsd, logAmount, powAmount, toWei_String } from 'util/amountConvert'
+import { amountToUsd, logAmount, toWei_String } from 'util/amountConvert'
 import networkService from 'services/networkService'
 
 import { Typography, useMediaQuery } from '@material-ui/core'

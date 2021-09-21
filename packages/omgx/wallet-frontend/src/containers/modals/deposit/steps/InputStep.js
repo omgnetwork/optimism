@@ -10,7 +10,7 @@ import Input from 'components/input/Input'
 
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectSignatureStatus_depositTRAD } from 'selectors/signatureSelector'
-import { amountToUsd, logAmount, powAmount, toWei_String } from 'util/amountConvert'
+import { amountToUsd, logAmount, toWei_String } from 'util/amountConvert'
 
 import { selectLookupPrice } from 'selectors/lookupSelector'
 import { Typography, useMediaQuery } from '@material-ui/core'
@@ -32,7 +32,6 @@ function InputStep({ handleClose, token }) {
   const lookupPrice = useSelector(selectLookupPrice)
 
   const maxValue = logAmount(token.balance, token.decimals)
-  const valueIsValid = value > 0 && value <= maxValue
 
   function setAmount(value) {
     if (value > 0 && value <= maxValue) {
