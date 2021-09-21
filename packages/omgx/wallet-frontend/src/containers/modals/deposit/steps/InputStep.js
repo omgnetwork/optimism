@@ -18,6 +18,8 @@ import { useTheme } from '@emotion/react'
 import { WrapperActionsModal } from 'components/modal/Modal.styles'
 import { Box } from '@material-ui/system'
 
+import BN from 'bignumber.js'
+
 function InputStep({ handleClose, token }) {
 
   const dispatch = useDispatch()
@@ -34,11 +36,16 @@ function InputStep({ handleClose, token }) {
   const maxValue = logAmount(token.balance, token.decimals)
 
   function setAmount(value) {
-    if (value > 0 && value <= maxValue) {
+
+    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooBig   = new BN(value).gt(new BN(maxValue))
+
+    if (tooSmall || tooBig) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
     }
+
     setValue(value)
   }
 
@@ -50,13 +57,13 @@ function InputStep({ handleClose, token }) {
 
     if(token.symbol === 'ETH') {
       console.log("Bridging ETH to L2")
-      if (value > 0) {
-        res = await dispatch(depositETHL2(value_Wei_String))
-        if (res) {
-          dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
-          dispatch(openAlert('ETH bridge transaction submitted'))
-          handleClose()
-        }
+      res = await dispatch(
+        depositETHL2(value_Wei_String)
+      )
+      if (res) {
+        dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
+        dispatch(openAlert('ETH bridge transaction submitted'))
+        handleClose()
       }
     } else {
       console.log("Bridging ERC20 to L2")
@@ -93,8 +100,8 @@ function InputStep({ handleClose, token }) {
   
   if( Object.keys(lookupPrice) && 
       !!value &&
-      value > 0 &&
-      value <= maxValue &&
+      new BN(value).gt(new BN(0.0)) &&
+      new BN(value).lte(new BN(maxValue)) &&
       !!amountToUsd(value, lookupPrice, token)
   ) {
     convertToUSD = true
@@ -117,8 +124,8 @@ function InputStep({ handleClose, token }) {
             setValue_Wei_String(toWei_String(i.target.value, token.decimals))
           }}
           onUseMax={(i)=>{//they want to use the maximum
-            setAmount(maxValue) //so the input value updates for the user
-            setValue_Wei_String(token.balance.toString())
+            setAmount(maxValue) //so the input value updates for the user - just for display purposes
+            setValue_Wei_String(token.balance.toString()) //this is the one that matters
           }}
           allowUseAll={true}
           unit={token.symbol}

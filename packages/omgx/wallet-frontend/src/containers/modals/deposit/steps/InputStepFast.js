@@ -36,11 +36,13 @@ import { selectSignatureStatus_depositLP } from 'selectors/signatureSelector'
 import networkService from 'services/networkService'
 import { logAmount, amountToUsd, toWei_String } from 'util/amountConvert'
 
+import BN from 'bignumber.js'
+
 function InputStepFast({ handleClose, token }) {
 
   const dispatch = useDispatch()
 
-  const [value, setValue] = useState('')
+  const [ value, setValue ] = useState('')
   const [ value_Wei_String, setValue_Wei_String ] = useState('0')  //support for Use Max
 
   const [LPBalance, setLPBalance] = useState(0)
@@ -54,14 +56,18 @@ function InputStepFast({ handleClose, token }) {
   const signatureStatus = useSelector(selectSignatureStatus_depositLP)
   
   const maxValue = logAmount(token.balance, token.decimals)
-  const valueIsValid = value > 0 && value <= maxValue
 
   function setAmount(value) {
-    if ( value > 0 && value <= maxValue ) {
+
+    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooBig   = new BN(value).gt(new BN(maxValue))
+
+    if (tooSmall || tooBig) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
     }
+
     setValue(value)
   }
 
@@ -75,24 +81,24 @@ function InputStepFast({ handleClose, token }) {
 
       console.log("ETH Fast Bridge")
 
-      if (value > 0) {
-        res = await dispatch(depositL1LP(token.address, value_Wei_String))
-        if (res) {
-          dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
-          dispatch(
-            openAlert(
-              `ETH was bridged. You will receive
-              ${((Number(value) * (100 - Number(feeRate)))/100).toFixed(2)}
-              ETH on L2`
-            )
+      res = await dispatch(depositL1LP(token.address, value_Wei_String))
+      
+      if (res) {
+        dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
+        dispatch(
+          openAlert(
+            `ETH was bridged. You will receive
+            ${((Number(value) * (100 - Number(feeRate)))/100).toFixed(3)}
+            ETH on L2`
           )
-          handleClose()
-          return
-        } else {
-          dispatch(openError('Failed to bridge ETH'))
-          return
-        }
+        )
+        handleClose()
+        return
+      } else {
+        dispatch(openError('Failed to bridge ETH'))
+        return
       }
+
     }
 
     //at this point we know it's not ETH
@@ -130,13 +136,13 @@ function InputStepFast({ handleClose, token }) {
   }
 
   const receivableAmount = (value) => {
-    return (Number(value) * ((100 - Number(feeRate)) / 100)).toFixed(2)
+    return (Number(value) * ((100 - Number(feeRate)) / 100)).toFixed(3)
   }
 
   useEffect(() => {
     if (typeof(token) !== 'undefined') {
       networkService.L2LPBalance(token.addressL2,token.decimals).then((res) => {
-        setLPBalance(Number(res).toFixed(2))
+        setLPBalance(Number(res).toFixed(3))
       })
       networkService.getTotalFeeRate().then((feeRate) => {
         setFeeRate(feeRate)
@@ -167,6 +173,15 @@ function InputStepFast({ handleClose, token }) {
 
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
+  let valueIsValid = false
+
+  if( !!value &&
+      new BN(value).gt(new BN(0.0)) &&
+      new BN(value).lte(new BN(maxValue))
+  ) {
+    valueIsValid = true
+  }
 
   return (
     <>
@@ -199,11 +214,11 @@ function InputStepFast({ handleClose, token }) {
 
         {valueIsValid && token && (
           <Typography variant="body2" sx={{mt: 2}}>
-            {value && `You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
+            {`You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
           </Typography>
         )}
 
-        {Number(LPBalance) < Number(value) && (
+        {Number(value) > Number(LPBalance) && (
           <Typography variant="body2" sx={{ color: 'red', my: 2}}>
             The liquidity pool balance (of {LPBalance}) is too low to cover your fast bridge. Please
             use the traditional bridge or reduce the amount.

@@ -35,6 +35,8 @@ import { amountToUsd, logAmount, toWei_String } from 'util/amountConvert'
 import { WrapperActionsModal } from 'components/modal/Modal.styles'
 import { Box } from '@material-ui/system'
 
+import BN from 'bignumber.js'
+
 function DoExitStep({ handleClose, token }) {
 
   const dispatch = useDispatch()
@@ -49,14 +51,18 @@ function DoExitStep({ handleClose, token }) {
   const lookupPrice = useSelector(selectLookupPrice)
   
   const maxValue = logAmount(token.balance, token.decimals)
-  const valueIsValid = value > 0 && value <= maxValue
 
   function setAmount(value) {
-    if (value > 0 && value <= maxValue) {
+
+    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooBig   = new BN(value).gt(new BN(maxValue))
+
+    if (tooSmall || tooBig) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
     }
+
     setValue(value)
   }
 
@@ -70,7 +76,7 @@ function DoExitStep({ handleClose, token }) {
       dispatch(
         openAlert(
           `${token.symbol} was bridged to L1. You will receive
-          ${Number(value).toFixed(2)} ${token.symbol}
+          ${Number(value).toFixed(3)} ${token.symbol}
           on L1 in 7 days.`
         )
       )
@@ -93,6 +99,15 @@ function DoExitStep({ handleClose, token }) {
       handleClose()
     }
   }, [ signatureStatus, loading, handleClose ])
+
+  let valueIsValid = false
+
+  if( !!value &&
+      new BN(value).gt(new BN(0.0)) &&
+      new BN(value).lte(new BN(maxValue))
+  ) {
+    valueIsValid = true
+  }
 
   return (
     <>
@@ -124,7 +139,7 @@ function DoExitStep({ handleClose, token }) {
         {valueIsValid && token && (
           <Typography variant="body2" sx={{mt: 2}}>
             {value &&
-              `You will receive ${Number(value).toFixed(2)} ${token.symbol}
+              `You will receive ${Number(value).toFixed(3)} ${token.symbol}
               ${!!amountToUsd(value, lookupPrice, token) ? `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
               on L1. Your funds will be available on L1 in 7 days.`}
           </Typography>

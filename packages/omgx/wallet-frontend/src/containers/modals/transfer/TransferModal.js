@@ -33,7 +33,10 @@ import { Box, Typography, useMediaQuery } from '@material-ui/core';
 import { useTheme } from '@emotion/react';
 import { WrapperActionsModal } from 'components/modal/Modal.styles';
 
+import BN from 'bignumber.js'
+
 function TransferModal ({ open, token, minHeight }) {
+
   const dispatch = useDispatch()
 
   const [ value, setValue ] = useState('')
@@ -41,20 +44,39 @@ function TransferModal ({ open, token, minHeight }) {
 
   const [ recipient, setRecipient ] = useState('')
 
+  const [ disabledSubmit, setDisabledSubmit ] = useState(true)
+
   const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]))
   const wAddress = networkService.account ? networkService.account : ''
 
-  const lookupPrice = useSelector(selectLookupPrice);
+  const lookupPrice = useSelector(selectLookupPrice)
 
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
+  let maxValue = '0'
+
+  if(token) {
+    maxValue = logAmount(token.balance, token.decimals)
+  }
+  
+  function setAmount(value) {
+
+    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooBig   = new BN(value).gt(new BN(maxValue))
+
+    if (tooSmall || tooBig) {
+      setDisabledSubmit(false)
+    } else {
+      setDisabledSubmit(true)
+    }
+
+    setValue(value)
+  }
+
   async function submit () {
-    if (
-      value > 0 &&
-      token.address &&
-      recipient
-    ) {
+    if ( token.address && recipient ) 
+    {
       try {
         console.log("Amount to transfer:", value_Wei_String)
         const transferResponseGood = await dispatch(
@@ -80,16 +102,12 @@ function TransferModal ({ open, token, minHeight }) {
     dispatch(closeModal('transferModal'))
   }
 
-  const disabledTransfer = value <= 0 ||
-    !token.address ||
-    !recipient
-
+  //checked
   let convertToUSD = false
-  
   if( Object.keys(lookupPrice) && 
       !!value &&
-      value > 0 &&
-      value <= logAmount(token.balance, token.decimals) &&
+      new BN(value).gt(new BN(0.0)) &&
+      new BN(value).lte(new BN(maxValue)) &&
       !!amountToUsd(value, lookupPrice, token)
   ) {
     convertToUSD = true
@@ -132,12 +150,12 @@ function TransferModal ({ open, token, minHeight }) {
               setValue_Wei_String(toWei_String(i.target.value, token.decimals))
             }}
             onUseMax={(i)=>{//they want to use the maximum
-              setValue(logAmount(token.balance, token.decimals)); //so the input value updates for the user
+              setValue(maxValue); //so the input value updates for the user
               setValue_Wei_String(token.balance.toString())
             }}
             allowUseAll={true}
             unit={token.symbol}
-            maxValue={logAmount(token.balance, token.decimals)}
+            maxValue={maxValue}
             variant="standard"
             newStyle
           />
@@ -165,7 +183,7 @@ function TransferModal ({ open, token, minHeight }) {
             variant="contained"
             loading={loading}
             tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
-            disabled={disabledTransfer}
+            disabled={disabledSubmit}
             triggerTime={new Date()}
             fullWidth={isMobile}
             size="large"

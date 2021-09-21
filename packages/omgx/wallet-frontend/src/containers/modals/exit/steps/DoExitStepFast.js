@@ -35,6 +35,8 @@ import { useTheme } from '@emotion/react'
 import { WrapperActionsModal } from 'components/modal/Modal.styles'
 import { Box } from '@material-ui/system'
 
+import BN from 'bignumber.js'
+
 function DoExitStepFast({ handleClose, token }) {
 
   const dispatch = useDispatch()
@@ -52,21 +54,23 @@ function DoExitStepFast({ handleClose, token }) {
   const signatureStatus = useSelector(selectSignatureStatus_exitLP)
   
   const maxValue = logAmount(token.balance, token.decimals)
-  const valueIsValid = value > 0 && value <= maxValue
 
   function setAmount(value) {
-    const valid = value > 0 && value <= maxValue
-    if ( valid && Number(value) < Number(LPBalance) ) 
-    {
+
+    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooBig   = new BN(value).gt(new BN(maxValue))
+
+    if (tooSmall || tooBig) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
     }
+
     setValue(value)
   }
 
   const receivableAmount = (value) => {
-    return (Number(value) * ((100 - Number(feeRate)) / 100)).toFixed(2)
+    return (Number(value) * ((100 - Number(feeRate)) / 100)).toFixed(3)
   }
 
   async function doExit() {
@@ -124,6 +128,15 @@ function DoExitStepFast({ handleClose, token }) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
+  let valueIsValid = false
+
+  if( !!value &&
+      new BN(value).gt(new BN(0.0)) &&
+      new BN(value).lte(new BN(maxValue))
+  ) {
+    valueIsValid = true
+  }
+  
   let buttonLabel = 'CANCEL'
   if( loading ) buttonLabel = 'CLOSE WINDOW'
 
