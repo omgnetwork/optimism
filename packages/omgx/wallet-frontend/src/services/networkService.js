@@ -1873,8 +1873,8 @@ class NetworkService {
   /***************************************/
   /************ L1LP Pool size ***********/
   /***************************************/
-  async L1LPBalance(tokenAddress, decimals) {
-    
+  async L1LPBalance(tokenAddress) {
+
     let balance
     let tokenAddressLC = tokenAddress.toLowerCase()
     
@@ -1889,18 +1889,14 @@ class NetworkService {
       )
     }
 
-    if(typeof(balance) === 'undefined') {
-      return logAmount('0', decimals)
-    } else {
-      return logAmount(balance.toString(), decimals)
-    }
+    return balance.toString()
 
   }
 
   /***************************************/
   /************ L2LP Pool size ***********/
   /***************************************/
-  async L2LPBalance(tokenAddress, decimals) {
+  async L2LPBalance(tokenAddress) {
 
     let balance
     let tokenAddressLC = tokenAddress.toLowerCase()
@@ -1919,12 +1915,7 @@ class NetworkService {
       )
     }
 
-    if(typeof(balance) === 'undefined') {
-      return logAmount('0', decimals)
-    } else {
-      return logAmount(balance.toString(), decimals)
-    }
-
+    return balance.toString()
   }
 
   /**************************************************************/

@@ -88,7 +88,7 @@ class ListFarm extends React.Component {
 
   handleWithdrawToken() {
 
-    const { poolInfo, L1orL2Pool, balance } = this.state;
+    const { poolInfo, L1orL2Pool, balance } = this.state
 
     this.props.dispatch(updateWithdrawToken({
       symbol: poolInfo.symbol,

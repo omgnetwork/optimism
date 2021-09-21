@@ -105,8 +105,8 @@ function DoExitStepFast({ handleClose, token }) {
 
   useEffect(() => {
     if (typeof(token) !== 'undefined') {
-      networkService.L1LPBalance(token.addressL1, token.decimals).then((res) => {
-        setLPBalance(Number(res).toFixed(2))
+      networkService.L1LPBalance(token.addressL1).then((res) => {
+        setLPBalance(Number(logAmount(res, token.decimals)).toFixed(3))
       })
       networkService.getTotalFeeRate().then((feeRate) => {
         setFeeRate(feeRate)
@@ -115,8 +115,8 @@ function DoExitStepFast({ handleClose, token }) {
     // to clean up state and fix the
     // error in console for max state update.
     return ()=>{
-      setLPBalance(0);
-      setFeeRate(0);
+      setLPBalance(0)
+      setFeeRate(0)
     }
   }, [ token ])
 

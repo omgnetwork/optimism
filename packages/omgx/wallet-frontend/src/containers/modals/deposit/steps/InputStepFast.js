@@ -146,8 +146,8 @@ function InputStepFast({ handleClose, token }) {
 
   useEffect(() => {
     if (typeof(token) !== 'undefined') {
-      networkService.L2LPBalance(token.addressL2,token.decimals).then((res) => {
-        setLPBalance(Number(res).toFixed(3))
+      networkService.L2LPBalance(token.addressL2).then((res) => {
+        setLPBalance(Number(logAmount(res, token.decimals)).toFixed(3))
       })
       networkService.getTotalFeeRate().then((feeRate) => {
         setFeeRate(feeRate)
