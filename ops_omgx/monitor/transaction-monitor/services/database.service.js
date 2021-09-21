@@ -237,7 +237,7 @@ class DatabaseService extends OptimismEnv{
     const crossDomainMessage = await query(`SELECT * FROM receipt
       WHERE crossDomainMessage=${true}
       AND crossDomainMessageFinalize=${false}
-      AND UNIX_TIMESTAMP() > crossDomainMessageEstimateFinalizedTime
+      AND ((UNIX_TIMESTAMP() > crossDomainMessageEstimateFinalizedTime AND fastRelay is null) OR fastRelay=true)
     `);
     con.end();
     return crossDomainMessage;
@@ -257,7 +257,6 @@ class DatabaseService extends OptimismEnv{
       on depositL2.hash = l1Bridge.hash
       WHERE crossDomainMessage=${true}
       AND depositL2.status='pending'
-      AND UNIX_TIMESTAMP() > crossDomainMessageEstimateFinalizedTime
     `);
     con.end();
     return crossDomainMessage;
