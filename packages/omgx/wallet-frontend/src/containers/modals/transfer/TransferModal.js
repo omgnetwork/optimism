@@ -62,8 +62,8 @@ function TransferModal ({ open, token, minHeight }) {
           transfer(recipient, value_Wei_String, token.address)
         )
         if (transferResponseGood) {
-          dispatch(openAlert('Transaction submitted'));
-          handleClose();
+          dispatch(openAlert('Transaction submitted'))
+          handleClose()
         } else {
           //error handled elsewhere
           handleClose()

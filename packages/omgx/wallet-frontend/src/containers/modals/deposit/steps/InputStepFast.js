@@ -14,12 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import { useTheme } from '@emotion/react'
+
 import { Typography, useMediaQuery } from '@material-ui/core'
 import { Box } from '@material-ui/system'
 import { depositL1LP, approveERC20 } from 'actions/networkAction'
+
 import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
+
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
+
 import { WrapperActionsModal } from 'components/modal/Modal.styles'
 
 import React, { useEffect, useState } from 'react'
@@ -30,19 +34,22 @@ import { selectLookupPrice } from 'selectors/lookupSelector'
 import { selectSignatureStatus_depositLP } from 'selectors/signatureSelector'
 
 import networkService from 'services/networkService'
-import { powAmount, logAmount, amountToUsd } from 'util/amountConvert'
+import { powAmount, logAmount, amountToUsd, toWei_String } from 'util/amountConvert'
 
 function InputStepFast({ handleClose, token }) {
 
   const dispatch = useDispatch()
 
   const [value, setValue] = useState('')
+  const [ value_Wei_String, setValue_Wei_String ] = useState('0')  //support for Use Max
+
   const [LPBalance, setLPBalance] = useState(0)
   const [feeRate, setFeeRate] = useState(0)
   const [disabledSubmit, setDisabledSubmit] = useState(true)
 
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
   const approvalLoading = useSelector(selectLoading(['APPROVE/CREATE']))
+
   const lookupPrice = useSelector(selectLookupPrice)
   const signatureStatus = useSelector(selectSignatureStatus_depositLP)
   
@@ -50,15 +57,11 @@ function InputStepFast({ handleClose, token }) {
   const valueIsValid = value > 0 && value <= maxValue
 
   function setAmount(value) {
-
-    const valid = value > 0 && value <= logAmount(token.balance, token.decimals)
-
-    if ( valid && Number(value) < Number(LPBalance) ) {
+    if ( value > 0 && value <= maxValue ) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
     }
-    
     setValue(value)
   }
 
@@ -66,12 +69,14 @@ function InputStepFast({ handleClose, token }) {
 
     let res
 
+    console.log("Amount to bridge to L2:", value_Wei_String)
+
     if(token.symbol === 'ETH') {
 
       console.log("ETH Fast Bridge")
 
-      if (valueIsValid) {
-        res = await dispatch(depositL1LP(token.address, value, token.decimals))
+      if (value > 0) {
+        res = await dispatch(depositL1LP(token.address, value_Wei_String))
         if (res) {
           dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
           dispatch(
@@ -95,7 +100,7 @@ function InputStepFast({ handleClose, token }) {
 
     res = await dispatch(
       approveERC20(
-        powAmount(value, token.decimals),
+        value_Wei_String,
         token.address,
         networkService.L1LPAddress
       )
@@ -106,7 +111,7 @@ function InputStepFast({ handleClose, token }) {
     }
 
     res = await dispatch(
-      depositL1LP(token.address, value)
+      depositL1LP(token.address, value_Wei_String)
     )
 
     if (res) {
@@ -160,8 +165,8 @@ function InputStepFast({ handleClose, token }) {
     buttonLabel_2 = "Approving..."
   }
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   return (
     <>
@@ -177,7 +182,15 @@ function InputStepFast({ handleClose, token }) {
           placeholder="0.0"
           value={value}
           type="number"
-          onChange={(i)=>{setAmount(i.target.value)}}
+          onChange={(i)=>{
+            setAmount(i.target.value)
+            setValue_Wei_String(toWei_String(i.target.value, token.decimals))
+          }}
+          onUseMax={(i)=>{//they want to use the maximum
+            setAmount(maxValue) //so the input value updates for the user
+            setValue_Wei_String(token.balance.toString())
+          }}
+          allowUseAll={true}
           unit={token.symbol}
           maxValue={maxValue}
           variant="standard"

@@ -52,8 +52,7 @@ function DoExitStep({ token }) {
   const valueIsValid = value > 0 && value <= maxValue
 
   function setAmount(value) {
-    const valid = value > 0 && value <= maxValue
-    if (valid) {
+    if (value > 0 && value <= maxValue) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)

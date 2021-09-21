@@ -1360,7 +1360,7 @@ class NetworkService {
 
   /*Used when people want to fast exit - they have to deposit funds into the L2LP*/
   async approveERC20_L2LP(
-    depositAmount_string,
+    value_Wei_String,
     currencyAddress
   ) {
 
@@ -1377,12 +1377,12 @@ class NetworkService {
         this.L2LPAddress
       )
 
-      let depositAmount_BN = new BN(depositAmount_string)
+      let depositAmount_BN = new BN(value_Wei_String)
 
       if (depositAmount_BN.gt(allowance_BN)) {
         const approveStatus = await L2ERC20Contract.approve(
           this.L2LPAddress,
-          depositAmount_string
+          value_Wei_String
         )
         await approveStatus.wait()
       }
@@ -1395,7 +1395,7 @@ class NetworkService {
   }
 
   async approveERC20_L1LP(
-    depositAmount_string,
+    value_Wei_String,
     currencyAddress
   ) {
 
@@ -1411,7 +1411,7 @@ class NetworkService {
 
       const approveStatus = await ERC20Contract.approve(
         this.L1LPAddress,
-        depositAmount_string
+        value_Wei_String
       )
       await approveStatus.wait()
 
@@ -1423,7 +1423,7 @@ class NetworkService {
   }
 
   async approveERC20(
-    value,
+    value_Wei_String,
     currency,
     approveContractAddress = this.L1StandardBridgeAddress,
     contractABI = L1ERC20Json.abi
@@ -1439,7 +1439,7 @@ class NetworkService {
 
       const approveStatus = await ERC20Contract.approve(
         approveContractAddress,
-        value
+        value_Wei_String
       )
 
       await approveStatus.wait()
@@ -1452,7 +1452,7 @@ class NetworkService {
   }
 
   //Used to move ERC20 Tokens from L1 to L2
-  async depositErc20(value, currency, currencyL2) {
+  async depositErc20(value_Wei_String, currency, currencyL2) {
 
     updateSignatureStatus_depositTRAD(false)
 
@@ -1462,14 +1462,14 @@ class NetworkService {
 
       const approveStatus = await L1_TEST_Contract.approve(
         this.L1StandardBridgeAddress, //this is the spender
-        value
+        value_Wei_String
       )
       await approveStatus.wait()
 
       const depositTxStatus = await this.L1StandardBridgeContract.depositERC20(
         currency,
         currencyL2,
-        value,
+        value_Wei_String,
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString())
       )
@@ -1761,7 +1761,7 @@ class NetworkService {
   /***********************************************/
   /*****            Add Liquidity            *****/
   /***********************************************/
-  async addLiquidity(currency, value_BN, L1orL2Pool) {
+  async addLiquidity(currency, value_Wei_String, L1orL2Pool) {
 
     //let depositAmount = powAmount(value, decimals)
 
@@ -1771,9 +1771,9 @@ class NetworkService {
         ? this.L1LPContract
         : this.L2LPContract
       ).addLiquidity(
-        value_BN,
+        value_Wei_String,
         currency,
-        currency === this.L1_ETH_Address ? { value: value_BN } : {}
+        currency === this.L1_ETH_Address ? { value: value_Wei_String } : {}
       )
       await addLiquidityTX.wait()
       return true
@@ -1786,11 +1786,11 @@ class NetworkService {
   /***********************************************/
   /*****           Get Reward L1             *****/
   /***********************************************/
-  async getRewardL1(currencyL1Address, value_BN) {
+  async getRewardL1(currencyL1Address, value_Wei_String) {
 
     try {
       const withdrawRewardTX = await this.L1LPContract.withdrawReward(
-        value_BN,
+        value_Wei_String,
         currencyL1Address,
         this.account
       )
@@ -1804,11 +1804,11 @@ class NetworkService {
   /***********************************************/
   /*****           Get Reward L2             *****/
   /***********************************************/
-  async getRewardL2(currencyL2Address, value_BN) {
+  async getRewardL2(currencyL2Address, value_Wei_String) {
 
     try {
       const withdrawRewardTX = await this.L2LPContract.withdrawReward(
-        value_BN,
+        value_Wei_String,
         currencyL2Address,
         this.account
       )
@@ -1822,14 +1822,14 @@ class NetworkService {
   /***********************************************/
   /*****          Withdraw Liquidity         *****/
   /***********************************************/
-  async withdrawLiquidity(currency, value_BN, L1orL2Pool) {
+  async withdrawLiquidity(currency, value_Wei_String, L1orL2Pool) {
     
     try {
       const withdrawLiquidityTX = await (L1orL2Pool === 'L1LP'
         ? this.L1LPContract
         : this.L2LPContract
       ).withdrawLiquidity(
-        value_BN,
+        value_Wei_String,
         currency,
         this.account
       )
@@ -1843,15 +1843,14 @@ class NetworkService {
   /***********************************************************/
   /***** SWAP ON to BOBA by depositing funds to the L1LP *****/
   /***********************************************************/
-  async depositL1LP(currency, value, decimals) {
+  async depositL1LP(currency, value_Wei_String) {
 
     updateSignatureStatus_depositLP(false)
-    let depositAmount = powAmount(value, decimals)
 
     const depositTX = await this.L1LPContract.clientDepositL1(
-      depositAmount.toString(),
+      value_Wei_String,
       currency,
-      currency === this.L1_ETH_Address ? { value: depositAmount } : {}
+      currency === this.L1_ETH_Address ? { value: value_Wei_String } : {}
     )
 
     //at this point the tx has been submitted, and we are waiting...
@@ -1864,6 +1863,7 @@ class NetworkService {
       depositTX.hash
     )
     console.log(' got L1->L2 message hash', l1ToL2msgHash)
+    
     const l2Receipt = await this.watcher.getL2TransactionReceipt(l1ToL2msgHash)
     console.log(' completed swap-on ! L2 tx hash:', l2Receipt.transactionHash)
 

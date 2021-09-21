@@ -10,7 +10,7 @@ import Input from 'components/input/Input'
 
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectSignatureStatus_depositTRAD } from 'selectors/signatureSelector'
-import { amountToUsd, logAmount, powAmount } from 'util/amountConvert'
+import { amountToUsd, logAmount, powAmount, toWei_String } from 'util/amountConvert'
 
 import { selectLookupPrice } from 'selectors/lookupSelector'
 import { Typography, useMediaQuery } from '@material-ui/core'
@@ -21,20 +21,38 @@ import { Box } from '@material-ui/system'
 function InputStep({ handleClose, token }) {
 
   const dispatch = useDispatch()
-  const [value, setValue] = useState('')
+
+  const [ value, setValue ] = useState('')
+  const [ value_Wei_String, setValue_Wei_String ] = useState('0')  //support for Use Max
+  
   const [disabledSubmit, setDisabledSubmit] = useState(true)
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
+  
   const signatureStatus = useSelector(selectSignatureStatus_depositTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
+
+  const maxValue = logAmount(token.balance, token.decimals)
+  const valueIsValid = value > 0 && value <= maxValue
+
+  function setAmount(value) {
+    if (value > 0 && value <= maxValue) {
+      setDisabledSubmit(false)
+    } else {
+      setDisabledSubmit(true)
+    }
+    setValue(value)
+  }
 
   async function doDeposit() {
 
     let res
 
+    console.log("Amount to bridge to L2:", value_Wei_String)
+
     if(token.symbol === 'ETH') {
       console.log("Bridging ETH to L2")
       if (value > 0) {
-        res = await dispatch(depositETHL2(value))
+        res = await dispatch(depositETHL2(value_Wei_String))
         if (res) {
           dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
           dispatch(openAlert('ETH bridge transaction submitted'))
@@ -44,7 +62,7 @@ function InputStep({ handleClose, token }) {
     } else {
       console.log("Bridging ERC20 to L2")
       res = await dispatch(
-        depositErc20(powAmount(value, token.decimals), token.address, token.addressL2)
+        depositErc20(value_Wei_String, token.address, token.addressL2)
       )
       if (res) {
         dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
@@ -54,15 +72,6 @@ function InputStep({ handleClose, token }) {
         dispatch(openError(`Failed to bridge ${token.symbol}`))
       }
     }
-  }
-
-  function setAmount(value) {
-    if (Number(value) > 0 && Number(value) < Number(logAmount(token.balance, token.decimals))) {
-      setDisabledSubmit(false)
-    } else {
-      setDisabledSubmit(true)
-    }
-    setValue(value)
   }
 
   const theme = useTheme()
@@ -86,7 +95,7 @@ function InputStep({ handleClose, token }) {
   if( Object.keys(lookupPrice) && 
       !!value &&
       value > 0 &&
-      value <= logAmount(token.balance, token.decimals) &&
+      value <= maxValue &&
       !!amountToUsd(value, lookupPrice, token)
   ) {
     convertToUSD = true
@@ -104,9 +113,17 @@ function InputStep({ handleClose, token }) {
           placeholder="0.0"
           value={value}
           type="number"
-          onChange={(i)=>setAmount(i.target.value)}
+          onChange={(i)=>{
+            setAmount(i.target.value)
+            setValue_Wei_String(toWei_String(i.target.value, token.decimals))
+          }}
+          onUseMax={(i)=>{//they want to use the maximum
+            setAmount(maxValue) //so the input value updates for the user
+            setValue_Wei_String(token.balance.toString())
+          }}
+          allowUseAll={true}
           unit={token.symbol}
-          maxValue={logAmount(token.balance, token.decimals)}
+          maxValue={maxValue}
           variant="standard"
           newStyle
         />
