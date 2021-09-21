@@ -149,17 +149,17 @@ function Home () {
 
   return (
     <>
-      <DepositModal  open={depositModalState}  token={token} fast={fast} />
-      <TransferModal open={transferModalState} token={token} fast={fast} />
-      <ExitModal     open={exitModalState}     token={token} fast={fast} />
+      {!!depositModalState && <DepositModal  open={depositModalState}  token={token} fast={fast} />}
+      {!!transferModalState && <TransferModal open={transferModalState} token={token} fast={fast} />} 
+      {!!exitModalState && <ExitModal open={exitModalState}  token={token} fast={fast} />}
 
-      <AddTokenModal     open={addTokenModalState} />
-      <FarmDepositModal  open={farmDepositModalState} />
-      <FarmWithdrawModal open={farmWithdrawModalState} />
+      {!!addTokenModalState  && <AddTokenModal   open={addTokenModalState} />}
+      {!!farmDepositModalState && <FarmDepositModal  open={farmDepositModalState} />}
+      {!!farmWithdrawModalState && <FarmWithdrawModal open={farmWithdrawModalState} />}
 
-      <TransferDaoModal open={tranferBobaDaoModalState} />
-      <DelegateDaoModal open={delegateBobaDaoModalState} />
-      <NewProposalModal open={proposalBobaDaoModalState} />
+      {!!tranferBobaDaoModalState && <TransferDaoModal open={tranferBobaDaoModalState} />}
+      {!!delegateBobaDaoModalState && <DelegateDaoModal open={delegateBobaDaoModalState} />}
+      {!!proposalBobaDaoModalState && <NewProposalModal open={proposalBobaDaoModalState} />}
 
       <Alert
         type='error'
