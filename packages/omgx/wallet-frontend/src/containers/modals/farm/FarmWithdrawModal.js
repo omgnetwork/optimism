@@ -65,8 +65,6 @@ class FarmWithdrawModal extends React.Component {
 
     let transferingBalance = 0
     if (typeof userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency] !== 'undefined') {
-      console.log(['userInfo[withdrawToken.L1orL2Pool]',userInfo[withdrawToken.L1orL2Pool]]);
-      console.log(userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency])
       transferingBalance = userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency].amount
       transferingBalance = logAmount(transferingBalance, withdrawToken.decimals)
     }
