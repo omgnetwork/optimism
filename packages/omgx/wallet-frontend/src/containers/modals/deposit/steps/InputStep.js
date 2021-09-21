@@ -56,8 +56,10 @@ function InputStep({ handleClose, token }) {
     }
   }
 
-  function setAmount(value) {
-    if (Number(value) > 0 && Number(value) < Number(logAmount(token.balance, token.decimals))) {
+  function setAmount(valueStr) {
+    const value = parseFloat(valueStr);
+    const valid = value > 0 && value <= parseFloat(logAmount(token.balance, token.decimals))
+    if (valid) {
       setDisabledSubmit(false)
     } else {
       setDisabledSubmit(true)
@@ -82,8 +84,8 @@ function InputStep({ handleClose, token }) {
   if( depositLoading ) buttonLabel_1 = 'CLOSE WINDOW'
 
   let convertToUSD = false
-  
-  if( Object.keys(lookupPrice) && 
+
+  if( Object.keys(lookupPrice) &&
       !!value &&
       value > 0 &&
       value <= logAmount(token.balance, token.decimals) &&
