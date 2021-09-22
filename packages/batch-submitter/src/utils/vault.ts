@@ -133,7 +133,7 @@ const getToken = (batchSigner: BatchSigner): string => {
     return batchSigner.token
   } else {
     if (fs.existsSync(env.AWS_SINK_JWT_TOKEN_PATH)) {
-      fs.readFileSync(env.AWS_SINK_JWT_TOKEN_PATH, 'utf-8')
+      return fs.readFileSync(env.AWS_SINK_JWT_TOKEN_PATH, 'utf-8')
     } else {
       return batchSigner.token
     }
