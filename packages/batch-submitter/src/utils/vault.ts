@@ -1,5 +1,4 @@
 import * as fs from 'fs'
-import { TransactionReceipt } from '@ethersproject/abstract-provider'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import fetch from 'node-fetch'
 import {
@@ -41,8 +40,7 @@ export const submitToVault = async (
   call: AppendQueueBatch | AppendStateBatch | AppendSequencerBatch,
   batchSigner: BatchSigner,
   hooks: TxSubmissionHooks,
-  gasPrice: number,
-  provider: StaticJsonRpcProvider
+  gasPrice: number
 ): Promise<string> => {
   const token = getToken(batchSigner)
 

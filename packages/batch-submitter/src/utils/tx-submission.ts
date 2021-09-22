@@ -97,8 +97,7 @@ export const submitTransactionWithYNATM = async (
         call,
         batchSigner,
         hooks,
-        gasPrice,
-        provider
+        gasPrice
       )
       return provider.waitForTransaction(transactionHash, numConfirmations)
     }
