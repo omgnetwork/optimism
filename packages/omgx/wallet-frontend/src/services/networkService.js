@@ -14,11 +14,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import { parseUnits, parseEther, formatEther } from '@ethersproject/units'
+import { parseEther, formatEther } from '@ethersproject/units'
 
 import { Watcher } from '@eth-optimism/watcher'
 
 import { ethers, BigNumber, utils, ContractFactory } from 'ethers'
+
 import store from 'store'
 
 import { orderBy } from 'lodash'
@@ -54,6 +55,8 @@ import L2LPJson from '../deployment/artifacts-ovm/contracts/LP/L2LiquidityPool.s
 import L1ERC20Json from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.json'
 import L2ERC20Json from '../deployment/artifacts-ovm/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
 
+import OMGJson from '../deployment/contracts/OMG/OMG.json'
+
 //OMGX L2 Contracts
 import L2ERC721Json from '../deployment/artifacts-ovm/contracts/ERC721Genesis.sol/ERC721Genesis.json'
 import L2ERC721RegJson from '../deployment/artifacts-ovm/contracts/ERC721Registry.sol/ERC721Registry.json'
@@ -67,9 +70,9 @@ import GovernorBravoDelegate from "../deployment/rinkeby/json/GovernorBravoDeleg
 import GovernorBravoDelegator from "../deployment/rinkeby/json/GovernorBravoDelegator.json"
 import Timelock from "../deployment/rinkeby/json/Timelock.json"
 
-import { powAmount, logAmount } from 'util/amountConvert'
+import { logAmount } from 'util/amountConvert'
 import { accDiv, accMul } from 'util/calculation'
-import {getNftImageUrl} from 'util/nftImage'
+import { getNftImageUrl } from 'util/nftImage'
 import { getAllNetworks } from 'util/masterConfig'
 
 import etherScanInstance from 'api/etherScanAxios'
@@ -77,7 +80,6 @@ import omgxWatcherAxiosInstance from 'api/omgxWatcherAxios'
 import addressAxiosInstance from 'api/addressAxios'
 import addressOMGXAxiosInstance from 'api/addressOMGXAxios'
 import coinGeckoAxiosInstance from 'api/coinGeckoAxios'
-import ethGasStationAxiosInstance from 'api/ethGasStationAxios'
 
 //All the current addresses for fallback purposes, or live network
 const localAddresses = require(`../deployment/local/addresses.json`)
@@ -121,6 +123,8 @@ class NetworkService {
     this.L1_TEST_Contract = null
     this.L2_TEST_Contract = null
 
+    this.L1_OMG_Contract = null
+    
     this.L1LPAddress = null
     this.L2LPAddress = null
 
@@ -486,6 +490,14 @@ class NetworkService {
       )
       console.log('L1_TEST_Contract:', this.L1_TEST_Contract.address)
 
+      /*The test token*/
+      this.L1_OMG_Contract = new ethers.Contract(
+        addresses.TOKENS.OMG.L1,
+        OMGJson,
+        this.provider.getSigner()
+      )
+      console.log('L1_TEST_Contract:', this.L1_TEST_Contract.address)
+
       this.L2_TEST_Contract = new ethers.Contract(
         addresses.TOKENS.TEST.L2,
         L2ERC20Json.abi,
@@ -523,22 +535,6 @@ class NetworkService {
         AtomicSwapJson.abi,
         this.provider.getSigner()
       )
-
-      //this one is always there...
-      //await addNFTContract(this.ERC721Contract.address)
-
-      //yes, this looks weird, but think before you change it...
-      //there may be some in the cache, and this makes sure we get them all, and if not,
-      //we at least have the basic one
-      //const NFTcontracts = Object.values(await getNFTContracts())
-
-      //Add factories based on cached contract addresses
-      //this information is also used for the balance lookup
-      //for(var i = 0; i < NFTcontracts.length; i++) {
-      // const address = NFTcontracts[i]
-      //  console.log("Adding NFT contract:",address)
-      //  this.addNFTFactoryNS( address )
-      //}
 
       this.watcher = new Watcher({
         l1: {
@@ -590,13 +586,6 @@ class NetworkService {
 
       }
 
-/*
-  this.comp = null
-  this.delegate = null
-  this.delegator = null
-  this.timelock = null
-*/
-
       this.bindProviderListeners()
 
       return 'enabled'
@@ -606,48 +595,21 @@ class NetworkService {
     }
   }
 
-  // async checkStatus() {
-  //   return {
-  //     connection: true,
-  //     byzantine: false,
-  //     watcherSynced: true,
-  //     lastSeenBlock: 0,
-  //   }
-  // }
-
   async addL2Network() {
     
+    console.log("MetaMask: Adding network to MetaMask")
+
     const nw = getAllNetworks()
-    const masterConfig = store.getState().setup.masterConfig;
-    let chainParam = {}
+    const masterConfig = store.getState().setup.masterConfig
     
-    if (masterConfig === 'mainnet') {
-      chainParam = {
-        chainId: '0x' + nw.mainnet.L2.chainId.toString(16),
-        chainName: nw.mainnet.L2.name,
-        rpcUrls: [nw.mainnet.L2.rpcUrl],
-      }
-    } else if (masterConfig === 'rinkeby') {
-      chainParam = {
-        chainId: '0x' + nw.rinkeby.L2.chainId.toString(16),
-        chainName: nw.rinkeby.L2.name,
-        rpcUrls: [nw.rinkeby.L2.rpcUrl],
-      }
-    } else if (masterConfig === 'rinkeby_integration') {
-      chainParam = {
-        chainId: '0x' + nw.rinkeby_integration.L2.chainId.toString(16),
-        chainName: nw.rinkeby_integration.L2.name,
-        rpcUrls: [nw.rinkeby_integration.L2.rpcUrl],
-      }
-    } else if (masterConfig === 'local') {
-      chainParam = {
-        chainId: '0x' + nw.local.L2.chainId.toString(16),
-        chainName: nw.local.L2.name,
-        rpcUrls: [nw.local.L2.rpcUrl],
-      }
+    const chainParam = {
+      chainId: '0x' + nw[masterConfig].L2.chainId.toString(16),
+      chainName: nw[masterConfig].L2.name,
+      rpcUrls: [nw[masterConfig].L2.rpcUrl],
+      blockExplorerUrls: [nw[masterConfig].L2.blockExplorer.slice(0, -1)],
     }
-    
-    console.log("MetaMask: Trying to add ", chainParam)
+
+    console.log("MetaMask: Adding ", chainParam)
     
     // connect to the wallet
     this.provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -659,6 +621,114 @@ class NetworkService {
       console.log("MetaMask - Error adding new RPC: ", res)
     }
     
+  }
+
+  /* Yes, this almost complete dupicates async switchChain( layer )
+  but that's safest for now */
+  async correctChain( targetLayer ) {
+
+    const nw = getAllNetworks()
+    const masterConfig = store.getState().setup.masterConfig
+    
+    //the chainParams are only needed for the L2's
+    const chainParam = {
+      chainId: '0x' + nw[masterConfig].L2.chainId.toString(16),
+      chainName: nw[masterConfig].L2.name,
+      rpcUrls: [nw[masterConfig].L2.rpcUrl],
+      blockExplorerUrls: [nw[masterConfig].L2.blockExplorer.slice(0, -1)],
+    }
+
+    // connect to the wallet
+    this.provider = new ethers.providers.Web3Provider(window.ethereum)
+    
+    /********************* Switch to Mainnet L2 ****************/
+    if (masterConfig === 'mainnet' && targetLayer === 'L2') {
+      //ok, so then, we want to switch to 'mainnet' && 'L2'
+      try {
+        await this.provider.send('wallet_switchEthereumChain', [{ chainId: '0x120' }]) //ChainID 288
+      } catch (error) {
+        // This error code indicates that the chain has not been added to MetaMask.
+        if (error.code === 4902) {
+          try {
+            await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
+          } catch (addError) {
+            console.log("MetaMask - Error adding new RPC: ", addError)
+            // handle "add" error via alert message
+          }
+        } else { //some other error code
+          console.log("MetaMask - Switch Error: ", error.code)
+        }
+      }
+    } else if ( masterConfig === 'mainnet' && targetLayer === 'L1') {
+      //ok, so then, we want to switch to 'mainnet' && 'L1' - no need to add 
+      //if(fail) since mainnet L1 is always there unless the planet 
+      //has been vaporized by space aliens with a blaster ray
+      try {
+        await this.provider.send('wallet_switchEthereumChain',[{ chainId: '0x1' }]) //ChainID 1
+      } catch (switchError) {
+        console.log("MetaMask - could not switch to Ethereum Mainchain. Needless to say, this should never happen.")
+      }
+    } else if (masterConfig === 'rinkeby' && targetLayer === 'L2') {
+      //ok, so then, we want to switch to 'rinkeby' && 'L2'
+      try {
+        await this.provider.send('wallet_switchEthereumChain', [{ chainId: '0x1C' }]) //ChainID 28
+      } catch (error) {
+        if (error.code === 4902) {
+          try {
+            await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
+          } catch (addError) {
+            console.log("MetaMask - Error adding new RPC: ", addError)
+            // handle "add" error via alert message
+          }
+        } else { //some other error code
+          console.log("MetaMask - Switch Error: ", error.code)
+        }
+      }
+    } else if (masterConfig === 'rinkeby_integration' && targetLayer === 'L2') {
+      //ok, so then, we want to switch to 'rinkeby_integration' && 'L2'
+      try {
+        await this.provider.send('wallet_switchEthereumChain', [{ chainId: '0x1D' }]) //ChainID 29
+      } catch (error) {
+        if (error.code === 4902) {
+          try {
+            await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
+          } catch (addError) {
+            console.log("MetaMask - Error adding new RPC: ", addError)
+            // handle "add" error via alert message
+          }
+        } else { //some other error code
+          console.log("MetaMask - Switch Error: ", error.code)
+        }
+      }
+    } else if ((masterConfig === 'rinkeby' || masterConfig === 'rinkeby_integration') && targetLayer === 'L1') {
+      try {
+        await this.provider.send('wallet_switchEthereumChain',[{ chainId: '0x4' }]) //ChainID 4
+      } catch (switchError) {
+        console.log("MetaMask - could not switch to Rinkeby. Needless to say, this should never happen.")
+      }
+    } else if (masterConfig === 'local' && targetLayer === 'L2') {
+      //ok, so then, we want to switch to 'local' && 'L2'
+      try {
+        await this.provider.send('wallet_switchEthereumChain', [{ chainId: '0x7A6A' }]) //ChainID 31338
+      } catch (error) {
+        if (error.code === 4902) {
+          try {
+            await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
+          } catch (addError) {
+            console.log("MetaMask - Error adding new RPC: ", addError)
+            // handle "add" error via alert message
+          }
+        } else { //some other error code
+          console.log("MetaMask - Switch Error: ", error.code)
+        }
+      }
+    } else if (masterConfig === 'local' && targetLayer === 'L1') {
+      try {
+        await this.provider.send('wallet_switchEthereumChain',[{ chainId: '0x7A69' }]) //ChainID 31337
+      } catch (switchError) {
+        console.log("MetaMask - could not switch to Local L1")
+      }
+    } 
   }
 
   async switchChain( layer ) {
@@ -675,6 +745,7 @@ class NetworkService {
       chainId: '0x' + nw[masterConfig].L2.chainId.toString(16),
       chainName: nw[masterConfig].L2.name,
       rpcUrls: [nw[masterConfig].L2.rpcUrl],
+      blockExplorerUrls: [nw[masterConfig].L2.blockExplorer.slice(0, -1)],
     }
 
     // connect to the wallet
@@ -1101,10 +1172,10 @@ class NetworkService {
 
           const UUID = address.substring(1, 6) + '_' + tokenID.toString() + '_' + this.account.substring(1, 6)
 
-          const { url , attributes = []} = await getNftImageUrl(meta[1]);
+          const { url , attributes = []} = await getNftImageUrl(meta[1])
+          
           // Uncomment Just to test locally
           // const { url , attributes = []} = await getNftImageUrl('https://boredapeyachtclub.com/api/mutants/111');
-
           // const { url , attributes = []} = await getNftImageUrl('ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/6190');
           
           const NFT = {
@@ -1136,7 +1207,8 @@ class NetworkService {
 
   async getBalances() {
     try {
-      // Always check ETH and oETH
+
+      // Always check ETH
       const layer1Balance = await this.L1Provider.getBalance(this.account)
       const layer2Balance = await this.L2Provider.getBalance(this.account)
 
@@ -1156,7 +1228,7 @@ class NetworkService {
           address: this.L2_ETH_Address,
           addressL1: this.L1_ETH_Address,
           currency: this.L1_ETH_Address,
-          symbol: 'oETH',
+          symbol: 'ETH',
           decimals: 18,
           balance: new BN(layer2Balance.toString()),
         },
@@ -1211,7 +1283,7 @@ class NetworkService {
   }
 
   //Move ETH from L1 to L2 using the standard deposit system
-  depositETHL2 = async (value = '1', gasPrice) => {
+  depositETHL2 = async (value = '1') => {
 
     updateSignatureStatus_depositTRAD(false)
 
@@ -1220,8 +1292,7 @@ class NetworkService {
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString()),
         {
-          value: parseEther(value),
-          gasPrice: ethers.utils.parseUnits(`${gasPrice}`, 'wei'),
+          value: parseEther(value)
         }
       )
       
@@ -1243,18 +1314,20 @@ class NetworkService {
 
       return l2Receipt
     } catch(error) {
-      console.log(error)
-      return false
+      //console.log(error)
+      //return false
+      console.log("NS: depositETHL2 error:",error)
+      throw new Error(error.message)
     }
   }
 
   //Transfer funds from one account to another, on the L2
-  async transfer(address, value, currency) {
+  async transfer(address, value_Wei_String, currency) {
     try {
-      //any old ERC20 json will do....
+      //any ERC20 json will do....
       const tx = await this.L2_TEST_Contract.attach(currency).transfer(
         address,
-        parseEther(value.toString())
+        value_Wei_String
       )
       await tx.wait()
       return tx
@@ -1287,7 +1360,7 @@ class NetworkService {
         this.account,
         targetContract
       )
-      return allowance.toString()
+      return allowance //.toString()
     } catch (error) {
       console.log("NS: checkAllowance error:", error)
       throw new WebWalletError({
@@ -1301,7 +1374,7 @@ class NetworkService {
 
   /*Used when people want to fast exit - they have to deposit funds into the L2LP*/
   async approveERC20_L2LP(
-    depositAmount_string,
+    value_Wei_String,
     currencyAddress
   ) {
 
@@ -1318,12 +1391,12 @@ class NetworkService {
         this.L2LPAddress
       )
 
-      let depositAmount_BN = new BN(depositAmount_string)
+      let depositAmount_BN = new BN(value_Wei_String)
 
       if (depositAmount_BN.gt(allowance_BN)) {
         const approveStatus = await L2ERC20Contract.approve(
           this.L2LPAddress,
-          depositAmount_string
+          value_Wei_String
         )
         await approveStatus.wait()
       }
@@ -1336,7 +1409,7 @@ class NetworkService {
   }
 
   async approveERC20_L1LP(
-    depositAmount_string,
+    value_Wei_String,
     currencyAddress
   ) {
 
@@ -1352,7 +1425,7 @@ class NetworkService {
 
       const approveStatus = await ERC20Contract.approve(
         this.L1LPAddress,
-        depositAmount_string
+        value_Wei_String
       )
       await approveStatus.wait()
 
@@ -1364,7 +1437,7 @@ class NetworkService {
   }
 
   async approveERC20(
-    value,
+    value_Wei_String,
     currency,
     approveContractAddress = this.L1StandardBridgeAddress,
     contractABI = L1ERC20Json.abi
@@ -1378,12 +1451,46 @@ class NetworkService {
         this.provider.getSigner()
       )
 
-      const approveStatus = await ERC20Contract.approve(
-        approveContractAddress,
-        value
-      )
+      /***********************/
 
-      await approveStatus.wait()
+      let allowance_BN = await ERC20Contract.allowance(
+        this.account,
+        approveContractAddress
+      ) 
+      console.log("Allowance:",allowance_BN)
+
+      /* OMG IS A SPECIAL CASE - allowance needs to be 
+      set to zero, and then set to actual amount */
+      if( allowance_BN.gt(BigNumber.from(0)) && 
+          (currency.toLowerCase() === this["L1_OMG_Address"].toLowerCase())
+      ) 
+      {
+        console.log("OMG Token allowance reset")
+        const approveOMG = await ERC20Contract.approve(
+          approveContractAddress, 
+          ethers.utils.parseEther("0")
+        )
+        await approveOMG.wait()
+        console.log("OMG Token allowance set to 0:",approveOMG)
+      }
+
+      //recheck the allowance
+      allowance_BN = await ERC20Contract.allowance(
+        this.account,
+        approveContractAddress
+      )
+      
+      const allowed = allowance_BN.gte(BigNumber.from(value_Wei_String))
+
+      if(!allowed) {
+        //and now, the normal allowance transaction
+        const approveStatus = await ERC20Contract.approve(
+          approveContractAddress,
+          value_Wei_String
+        )
+        await approveStatus.wait()
+        console.log("ERC 20 L1 SWAP ops approved:",approveStatus)
+      }
 
       return true
     } catch (error) {
@@ -1393,27 +1500,63 @@ class NetworkService {
   }
 
   //Used to move ERC20 Tokens from L1 to L2
-  async depositErc20(value, currency, gasPrice, currencyL2) {
+  async depositErc20(value_Wei_String, currency, currencyL2) {
 
     updateSignatureStatus_depositTRAD(false)
 
-    try {
-      //could use any ERC20 here...
-      const L1_TEST_Contract = this.L1_TEST_Contract.attach(currency)
+    //console.log("Depositing ERC20")
 
-      const approveStatus = await L1_TEST_Contract.approve(
-        this.L1StandardBridgeAddress, //this is the spender
-        value
+    const L1_TEST_Contract = this.L1_TEST_Contract.attach(currency)
+    
+    let allowance_BN = await L1_TEST_Contract.allowance(
+      this.account,
+      this.L1StandardBridgeAddress
+    ) 
+    //console.log("Allowance:",allowance_BN)
+
+    try {
+      /* OMG IS A SPECIAL CASE - allowance needs to be 
+      set to zero, and then set to actual amount */
+      if( allowance_BN.gt(BigNumber.from(0)) && 
+          (currency.toLowerCase() === this["L1_OMG_Address"].toLowerCase())
+      ) 
+      {
+        console.log("OMG Token allowance reset")
+        const approveOMG = await L1_TEST_Contract.approve(
+          this.L1StandardBridgeAddress, 
+          ethers.utils.parseEther("0")
+        )
+        await approveOMG.wait()
+        console.log("OMG Token allowance set to 0:",approveOMG)
+      }
+
+      //recheck the allowance
+      allowance_BN = await L1_TEST_Contract.allowance(
+        this.account,
+        this.L1StandardBridgeAddress
       )
-      await approveStatus.wait()
+      
+      const allowed = allowance_BN.gte(BigNumber.from(value_Wei_String))
+
+      if(!allowed) {
+        //and now, the normal allowance transaction
+        const approveStatus = await L1_TEST_Contract.approve(
+          this.L1StandardBridgeAddress,
+          value_Wei_String
+        )
+        await approveStatus.wait()
+        console.log("ERC 20 L1 ops approved:",approveStatus)
+      }
 
       const depositTxStatus = await this.L1StandardBridgeContract.depositERC20(
         currency,
         currencyL2,
-        value,
+        value_Wei_String,
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString())
       )
+
+      console.log("depositTxStatus:",depositTxStatus)
             
       //at this point the tx has been submitted, and we are waiting...
       await depositTxStatus.wait()
@@ -1446,26 +1589,21 @@ class NetworkService {
   }
 
   //Standard 7 day exit from BOBA
-  async exitBOBA(currencyAddress, value) {
+  async exitBOBA(currencyAddress, value_Wei_String) {
 
     updateSignatureStatus_exitTRAD(false)
+
+    //now coming in as a value_Wei_String
+    const value = BigNumber.from(value_Wei_String)
 
     const allowance = await this.checkAllowance(
       currencyAddress,
       this.L2StandardBridgeAddress
     )
-    const L2_ERC20_Contract = new ethers.Contract(
-      currencyAddress,
-      L2ERC20Json.abi,
-      this.provider.getSigner()
-    )
-    const decimals = await L2_ERC20_Contract.decimals()
-    // need the frontend updates
-    if (BigNumber.from(allowance).lt(parseUnits(value, decimals))) {
+    
+    if ( allowance.lt(value) ) {
       const res = await this.approveERC20(
-        // take caution while using parseEther() with erc20
-        // l2 erc20 can be customised to have non 18 decimals
-        parseUnits(value, decimals),
+        value_Wei_String,
         currencyAddress,
         this.L2StandardBridgeAddress
       )
@@ -1474,7 +1612,7 @@ class NetworkService {
 
     const tx = await this.L2StandardBridgeContract.withdraw(
       currencyAddress,
-      parseUnits(value, decimals),
+      value_Wei_String,
       this.L1GasLimit,
       utils.formatBytes32String(new Date().getTime().toString())
     )
@@ -1493,10 +1631,10 @@ class NetworkService {
 
   /***********************************************/
   /*****                  Fee                *****/
-  /***** Fees are reported as integers, 
-   * where every int 
-   * represent 0.1%
-  *********/
+  /***** Fees are reported as integers,      *****/
+  /***** where every int                     *****/
+  /***** represents 0.1%                     *****/
+  /***********************************************/
 
   // Total exit fee
   async getTotalFeeRate() {
@@ -1532,7 +1670,7 @@ class NetworkService {
   async getL1LPInfo() {
 
     const tokenAddressList = Object.keys(this.addresses.TOKENS).reduce((acc, cur) => {
-      acc.push(this["L1_" + cur + "_Address"]);
+      acc.push(this["L1_" + cur + "_Address"].toLowerCase());
       return acc;
     }, [this.L1_ETH_Address]);
 
@@ -1566,19 +1704,19 @@ class NetworkService {
       }
       const poolTokenInfo = await L1LPContract.poolInfo(tokenAddress)
       const userTokenInfo = await L1LPContract.userInfo(tokenAddress, this.account)
-      return { tokenAddress, tokenBalance, tokenSymbol, tokenName, poolTokenInfo, userTokenInfo,decimals }
+      return { tokenAddress, tokenBalance, tokenSymbol, tokenName, poolTokenInfo, userTokenInfo, decimals }
     }
 
     tokenAddressList.forEach((tokenAddress) => L1LPInfoPromise.push(getL1LPInfoPromise(tokenAddress)))
     const L1LPInfo = await Promise.all(L1LPInfoPromise);
     
     L1LPInfo.forEach((token) => {
-      poolInfo[token.tokenAddress] = {
+      poolInfo[token.tokenAddress.toLowerCase()] = {
         symbol: token.tokenSymbol,
         name: token.tokenName,
         decimals: token.decimals,
-        l1TokenAddress: token.poolTokenInfo.l1TokenAddress,
-        l2TokenAddress: token.poolTokenInfo.l2TokenAddress,
+        l1TokenAddress: token.poolTokenInfo.l1TokenAddress.toLowerCase(),
+        l2TokenAddress: token.poolTokenInfo.l2TokenAddress.toLowerCase(),
         accUserReward: token.poolTokenInfo.accUserReward.toString(),
         accUserRewardPerShare: token.poolTokenInfo.accUserRewardPerShare.toString(),
         userDepositAmount: token.poolTokenInfo.userDepositAmount.toString(),
@@ -1603,7 +1741,7 @@ class NetworkService {
         tokenBalance: token.tokenBalance.toString()
       }
       userInfo[token.tokenAddress] = {
-        l1TokenAddress: token.tokenAddress,
+        l1TokenAddress: token.tokenAddress.toLowerCase(),
         amount: token.userTokenInfo.amount.toString(),
         pendingReward: token.userTokenInfo.pendingReward.toString(),
         rewardDebt: token.userTokenInfo.rewardDebt.toString()
@@ -1616,8 +1754,8 @@ class NetworkService {
 
     const tokenAddressList = Object.keys(this.addresses.TOKENS).reduce((acc, cur) => {
       acc.push({
-        L1: this["L1_" + cur + "_Address"],
-        L2: this["L2_" + cur + "_Address"]
+        L1: this["L1_" + cur + "_Address"].toLowerCase(),
+        L2: this["L2_" + cur + "_Address"].toLowerCase()
       });
       return acc;
     }, [{
@@ -1637,6 +1775,7 @@ class NetworkService {
     const L2LPInfoPromise = [];
 
     const getL2LPInfoPromise = async(tokenAddress, tokenAddressL1 ) => {
+      
       let tokenBalance
       let tokenSymbol
       let tokenName
@@ -1644,9 +1783,9 @@ class NetworkService {
 
       if (tokenAddress === this.L2_ETH_Address) {
         tokenBalance = await this.L2Provider.getBalance(this.L2LPAddress)
-        tokenSymbol = 'oETH'
+        tokenSymbol = 'ETH'
         tokenName = 'Ethereum'
-        decimals = 18;
+        decimals = 18
       } else {
         tokenBalance = await this.L2_TEST_Contract.attach(tokenAddress).connect(this.L2Provider).balanceOf(this.L2LPAddress)
         tokenSymbol = await this.L2_TEST_Contract.attach(tokenAddress).connect(this.L2Provider).symbol()
@@ -1660,14 +1799,15 @@ class NetworkService {
 
     tokenAddressList.forEach(({L1, L2}) => L2LPInfoPromise.push(getL2LPInfoPromise(L2, L1)))
 
-    const L2LPInfo = await Promise.all(L2LPInfoPromise);
+    const L2LPInfo = await Promise.all(L2LPInfoPromise)
+    
     L2LPInfo.forEach((token) => {
-      poolInfo[token.tokenAddress] = {
+      poolInfo[token.tokenAddress.toLowerCase()] = {
         symbol: token.tokenSymbol,
         name: token.tokenName,
         decimals: token.decimals,
-        l1TokenAddress: token.poolTokenInfo.l1TokenAddress,
-        l2TokenAddress: token.poolTokenInfo.l2TokenAddress,
+        l1TokenAddress: token.poolTokenInfo.l1TokenAddress.toLowerCase(),
+        l2TokenAddress: token.poolTokenInfo.l2TokenAddress.toLowerCase(),
         accUserReward: token.poolTokenInfo.accUserReward.toString(),
         accUserRewardPerShare: token.poolTokenInfo.accUserRewardPerShare.toString(),
         userDepositAmount: token.poolTokenInfo.userDepositAmount.toString(),
@@ -1691,8 +1831,8 @@ class NetworkService {
               ), // ( accUserReward - userDepositAmount ) / timeDuration
         tokenBalance: token.tokenBalance.toString()
       }
-      userInfo[token.tokenAddress] = {
-        l2TokenAddress: token.tokenAddress,
+      userInfo[token.tokenAddress.toLowerCase()] = {
+        l2TokenAddress: token.tokenAddress.toLowerCase(),
         amount: token.userTokenInfo.amount.toString(),
         pendingReward: token.userTokenInfo.pendingReward.toString(),
         rewardDebt: token.userTokenInfo.rewardDebt.toString()
@@ -1705,9 +1845,9 @@ class NetworkService {
   /***********************************************/
   /*****            Add Liquidity            *****/
   /***********************************************/
-  async addLiquidity(currency, value, L1orL2Pool, decimals) {
+  async addLiquidity(currency, value_Wei_String, L1orL2Pool) {
 
-    let depositAmount = powAmount(value, decimals)
+    //let depositAmount = powAmount(value, decimals)
 
     try {
       // Deposit
@@ -1715,9 +1855,9 @@ class NetworkService {
         ? this.L1LPContract
         : this.L2LPContract
       ).addLiquidity(
-        depositAmount,
+        value_Wei_String,
         currency,
-        currency === this.L1_ETH_Address ? { value: depositAmount } : {}
+        currency === this.L1_ETH_Address ? { value: value_Wei_String } : {}
       )
       await addLiquidityTX.wait()
       return true
@@ -1730,11 +1870,11 @@ class NetworkService {
   /***********************************************/
   /*****           Get Reward L1             *****/
   /***********************************************/
-  async getRewardL1(currencyL1Address, userReward_BN) {
+  async getRewardL1(currencyL1Address, value_Wei_String) {
 
     try {
       const withdrawRewardTX = await this.L1LPContract.withdrawReward(
-        userReward_BN,
+        value_Wei_String,
         currencyL1Address,
         this.account
       )
@@ -1748,11 +1888,11 @@ class NetworkService {
   /***********************************************/
   /*****           Get Reward L2             *****/
   /***********************************************/
-  async getRewardL2(currencyL2Address, userReward_BN) {
+  async getRewardL2(currencyL2Address, value_Wei_String) {
 
     try {
       const withdrawRewardTX = await this.L2LPContract.withdrawReward(
-        userReward_BN,
+        value_Wei_String,
         currencyL2Address,
         this.account
       )
@@ -1766,16 +1906,14 @@ class NetworkService {
   /***********************************************/
   /*****          Withdraw Liquidity         *****/
   /***********************************************/
-  async withdrawLiquidity(currency, value, L1orL2Pool, decimals) {
+  async withdrawLiquidity(currency, value_Wei_String, L1orL2Pool) {
     
-    let withdrawAmount = powAmount(value, decimals)
     try {
-      // Deposit
       const withdrawLiquidityTX = await (L1orL2Pool === 'L1LP'
         ? this.L1LPContract
         : this.L2LPContract
       ).withdrawLiquidity(
-        withdrawAmount,
+        value_Wei_String,
         currency,
         this.account
       )
@@ -1789,15 +1927,14 @@ class NetworkService {
   /***********************************************************/
   /***** SWAP ON to BOBA by depositing funds to the L1LP *****/
   /***********************************************************/
-  async depositL1LP(currency, value, decimals) {
+  async depositL1LP(currency, value_Wei_String) {
 
     updateSignatureStatus_depositLP(false)
-    let depositAmount = powAmount(value, decimals)
 
     const depositTX = await this.L1LPContract.clientDepositL1(
-      depositAmount.toString(),
+      value_Wei_String,
       currency,
-      currency === this.L1_ETH_Address ? { value: depositAmount } : {}
+      currency === this.L1_ETH_Address ? { value: value_Wei_String } : {}
     )
 
     //at this point the tx has been submitted, and we are waiting...
@@ -1810,6 +1947,7 @@ class NetworkService {
       depositTX.hash
     )
     console.log(' got L1->L2 message hash', l1ToL2msgHash)
+    
     const l2Receipt = await this.watcher.getL2TransactionReceipt(l1ToL2msgHash)
     console.log(' completed swap-on ! L2 tx hash:', l2Receipt.transactionHash)
 
@@ -1819,9 +1957,11 @@ class NetworkService {
   /***************************************/
   /************ L1LP Pool size ***********/
   /***************************************/
-  async L1LPBalance(tokenAddress, decimals) {
+  async L1LPBalance(tokenAddress) {
+
     let balance
     let tokenAddressLC = tokenAddress.toLowerCase()
+    
     if (
       tokenAddressLC === this.L2_ETH_Address ||
       tokenAddressLC === this.L1_ETH_Address
@@ -1833,20 +1973,18 @@ class NetworkService {
       )
     }
 
-    if(typeof(balance) === 'undefined') {
-      return logAmount('0', decimals)
-    } else {
-      return logAmount(balance.toString(), decimals)
-    }
+    return balance.toString()
 
   }
 
   /***************************************/
   /************ L2LP Pool size ***********/
   /***************************************/
-  async L2LPBalance(tokenAddress, decimals) {
+  async L2LPBalance(tokenAddress) {
+
     let balance
     let tokenAddressLC = tokenAddress.toLowerCase()
+    
     if (
       tokenAddressLC === this.L2_ETH_Address ||
       tokenAddressLC === this.L1_ETH_Address
@@ -1861,18 +1999,13 @@ class NetworkService {
       )
     }
 
-    if(typeof(balance) === 'undefined') {
-      return logAmount('0', decimals)
-    } else {
-      return logAmount(balance.toString(), decimals)
-    }
-
+    return balance.toString()
   }
 
   /**************************************************************/
   /***** SWAP OFF from BOBA by depositing funds to the L2LP *****/
   /**************************************************************/
-  async depositL2LP(currencyAddress, depositAmount_string) {
+  async depositL2LP(currencyAddress, value_Wei_String) {
 
     updateSignatureStatus_exitLP(false)
 
@@ -1887,19 +2020,19 @@ class NetworkService {
       this.L2LPAddress
     )
 
-    let depositAmount_BN = new BN(depositAmount_string)
+    let depositAmount_BN = new BN(value_Wei_String)
 
     if (depositAmount_BN.gt(allowance_BN)) {
       const approveStatus = await L2ERC20Contract.approve(
         this.L2LPAddress,
-        depositAmount_string
+        value_Wei_String
       )
       await approveStatus.wait()
       if (!approveStatus) return false
     }
 
     const depositTX = await this.L2LPContract.clientDepositL2(
-      depositAmount_string,
+      value_Wei_String,
       currencyAddress
     )
 
@@ -1932,41 +2065,6 @@ class NetworkService {
        return res.data;
     } catch(error) {
       return error
-    }
-  }
-
-  async getGasPrice({
-    network, networkLayer
-  }) {
-    if(network === 'mainnet' && networkLayer === 'L1') {
-      try {
-        const { data: { safeLow, average, fast } } = await ethGasStationAxiosInstance.get('json/ethgasAPI.json');
-        return {
-          slow: safeLow * 100000000,
-          normal: average * 100000000,
-          fast: fast * 100000000
-        };
-      } catch (error) {
-        //
-      }
-      // if not web3 oracle
-      try {
-        const _medianEstimate = await this.web3.eth.getGasPrice();
-        const medianEstimate = Number(_medianEstimate);
-        return {
-          slow: Math.max(medianEstimate / 2, 1000000000),
-          normal: medianEstimate,
-          fast: medianEstimate * 5
-        };
-      } catch (error) {
-        //
-      }
-    }
-
-    return {
-      slow: 1000000000,
-      normal: 2000000000,
-      fast: 10000000000
     }
   }
 
@@ -2171,7 +2269,8 @@ class NetworkService {
     try {
       
       const delegateCheck = await this.delegate.attach(this.delegator.address);
-      let res = delegateCheck.castVote(id, userVote //, 
+      let res = delegateCheck.castVote(id, userVote 
+      //, 
       //{
       //  gasPrice: 15000000,
       //  gasLimit: 8000000

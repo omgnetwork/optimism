@@ -88,7 +88,7 @@ class ListFarm extends React.Component {
 
   handleWithdrawToken() {
 
-    const { poolInfo, L1orL2Pool, balance } = this.state;
+    const { poolInfo, L1orL2Pool, balance } = this.state
 
     this.props.dispatch(updateWithdrawToken({
       symbol: poolInfo.symbol,
@@ -151,6 +151,7 @@ class ListFarm extends React.Component {
     } = this.state;
 
     const pageLoading = Object.keys(poolInfo).length === 0;
+    
     const { isMobile } = this.props
 
     let userReward = 0;
@@ -168,16 +169,25 @@ class ListFarm extends React.Component {
     // networkService.L1OrL2 L1: || L2
     const disabled = !L1orL2Pool.includes(networkService.L1orL2)
     const symbol = poolInfo.symbol
-    const name = poolInfo.name
+    let name = poolInfo.name
     const decimals = poolInfo.decimals
-    const logo = getCoinImage(symbol)
+    let logo = getCoinImage(symbol)
 
-    //console.log('poolinfo',poolInfo)
-    
+    //Deal with Token migration to REPv2
+    if( symbol === 'REPv2' ) {
+      name = 'AUGUR (REPv2)'
+      logo = getCoinImage('REP')
+    }
+
     if(!showAll) {
       if(!Number(logAmount(poolInfo.tokenBalance, decimals, 2))) {
         return null;
       }
+    }
+
+    let enableReward = false
+    if( Number(logAmount(userReward, decimals, 3)) >= 0.001 ) {
+      enableReward = true
     }
 
     return (
@@ -189,23 +199,21 @@ class ListFarm extends React.Component {
         ) : (
           <Grid container spacing={2} direction="row" justifyContent="center" alignItems="center" >
 
-            <S.GridItemTag item xs={4} md={1.7}>
+            <S.GridItemTag item xs={4} md={2}>
                 <img src={logo} alt="logo" width={30} />
                 <Typography variant="overline">{name}</Typography>
             </S.GridItemTag>
 
-            <S.GridItemTag item xs={4} md={1.7}>
+            <S.GridItemTag item xs={4} md={2}>
               {isMobile ? (
                 <Typography variant="overline" sx={{opacity: 0.7}}>Earned</Typography>
               ) : (null)}
               <Typography variant="body1">
-                {userReward ?
-                  `${logAmount(userReward, decimals, 2)}` : `0`
-                }
+                {userReward ? `${logAmount(userReward, decimals, 3)}` : `0`}
               </Typography>
             </S.GridItemTag>
 
-            <S.GridItemTag item xs={4} md={1.7}>
+            <S.GridItemTag item xs={4} md={2}>
               {isMobile ? (
                 <Typography variant="overline" sx={{opacity: 0.7}}>Your Stake</Typography>
               ) : (null)}
@@ -216,7 +224,7 @@ class ListFarm extends React.Component {
               </Typography>
             </S.GridItemTag>
 
-            <S.GridItemTag item xs={4} md={1.7}>
+            <S.GridItemTag item xs={4} md={2}>
               {isMobile ? (
                 <Typography variant="overline" sx={{opacity: 0.7}}>APR %</Typography>
               ) : (null)}
@@ -227,29 +235,21 @@ class ListFarm extends React.Component {
               </Typography>
             </S.GridItemTag>
 
-            <S.GridItemTag item xs={4} md={1.7}>
+            <S.GridItemTag item xs={4} md={2}>
               {isMobile ? (
-                <Typography variant="overline" sx={{opacity: 0.7}}>Liquidity</Typography>
+                <Typography variant="overline" sx={{opacity: 0.7}}>Liquidity (Balance)</Typography>
               ) : (null)}
               <Typography variant="body1">
                 {poolInfo.userDepositAmount ?
                   `${logAmount(poolInfo.userDepositAmount, decimals, 2)}` : `0`
-                }
-              </Typography>
-            </S.GridItemTag>
-
-            <S.GridItemTag item xs={4} md={1.7}>
-              {isMobile ? (
-                <Typography variant="overline" sx={{opacity: 0.7}}>Balance</Typography>
-              ) : (null)}
-              <Typography variant="body1">
+                }{' ('}
                 {poolInfo.tokenBalance ?
                   `${logAmount(poolInfo.tokenBalance, decimals, 2)}` : `0`
-                }
+                })
               </Typography>
             </S.GridItemTag>
 
-            <S.GridItemTag item xs={12} md={1.7}>
+            <S.GridItemTag item xs={12} md={2}>
               <Box
                 disabled={disabled}
                 onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
@@ -269,12 +269,12 @@ class ListFarm extends React.Component {
           <Fade in={dropDownBox}>
             <S.DropdownContent>
               <S.DropdownWrapper>
-                <Typography sx={{flex: 1}} variant="body2" component="div">{`${name}`} Earned</Typography>
-                <Typography sx={{flex: 1}} variant="body2" component="div" color="secondary">{logAmount(userReward, decimals, 2)}</Typography>
+                <Typography sx={{flex: 1}} variant="body2" component="div">{`${symbol}`} Earned</Typography>
+                <Typography sx={{flex: 1}} variant="body2" component="div" color="secondary">{logAmount(userReward, decimals, 3)}</Typography>
                 <Button
                   variant="contained"
                   fullWidth
-                  disabled={logAmount(userReward, decimals) === '0' || disabled}
+                  disabled={logAmount(userReward, decimals) === '0' || disabled || !enableReward}
                   onClick={()=>{this.handleHarvest()}}
                   loading={loading}
                   sx={{flex: 1}}
@@ -286,7 +286,8 @@ class ListFarm extends React.Component {
               <S.DropdownWrapper>
                 {logAmount(userInfo.amount, decimals) === '0' ?
                   <>
-                    <Typography sx={{flex: 1}} variant="body2" component="div">Your Stake {`${name}`}</Typography>
+                    <Typography sx={{flex: 1}} variant="body2" component="div">{`${symbol}`} Staked</Typography>
+                    <Typography sx={{flex: 1}} variant="body2" component="div" color="secondary">0.00</Typography>
                     <Button
                       variant="contained"
                       onClick={() => {this.handleStakeToken()}}
@@ -298,7 +299,7 @@ class ListFarm extends React.Component {
                     </Button>
                   </> :
                   <>
-                    <Typography variant="body2" component="div">{`${name}`} Staked</Typography>
+                    <Typography variant="body2" component="div">{`${symbol}`} Staked</Typography>
                     <Typography variant="body2" component="div" color="secondary">{logAmount(userInfo.amount, decimals)}</Typography>
                     <Box sx={{display: "flex", alignItems: "center", gap: "5px"}}>
                       <Button

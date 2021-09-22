@@ -67,16 +67,18 @@ export function depositL2LP(token, value) {
 }
 
 //DEPOSIT ETH
-export function depositETHL2(value, gasLimit) {
-  return createAction('DEPOSIT/CREATE', () =>
-    networkService.depositETHL2(value,gasLimit)
+export function depositETHL2(value) {
+  return createAction('DEPOSIT/CREATE', () => {
+      return networkService.depositETHL2(value)
+    }
   )
 }
 
 //DEPOSIT ERC20
-export function depositErc20(value, currency, gasPrice, currencyL2) {
+export function depositErc20(value, currency, currencyL2) {
+  console.log("Depositing ERC20")
   return createAction('DEPOSIT/CREATE', () =>
-    networkService.depositErc20(value, currency, gasPrice, currencyL2)
+    networkService.depositErc20(value, currency, currencyL2)
   )
 }
 
@@ -120,57 +122,11 @@ export function approveERC20_L1LP(
   )
 }
 
-// Never used?
-// export function resetApprove(
-//   value,
-//   currency,
-//   approveContractAddress,
-//   contractABI
-// ) {
-//   return createAction('APPROVE/RESET', () =>
-//     networkService.resetApprove(
-//       value,
-//       currency,
-//       approveContractAddress,
-//       contractABI
-//     )
-//   )
-// }
-
 export function transfer(recipient, value, currency) {
   return createAction('TRANSFER/CREATE', () =>
     networkService.transfer(recipient, value, currency)
   )
 }
-
-export function fetchGas (params) {
-  return createAction('GAS/GET', () => networkService.getGasPrice(params)
-  )
-}
-
-// export function fetchFees () {
-//   return async function (dispatch) {
-//     // only makes the call if fee fetch not successful before
-//     const state = store.getState();
-//     if (Object.keys(state.fees).length) {
-//       return;
-//     }
-
-//     dispatch({ type: 'FEE/GET/REQUEST' });
-//     try {
-//       const fees = await networkService.fetchFees();
-//       if (fees.length) {
-//         dispatch({
-//           type: 'FEE/GET/SUCCESS',
-//           payload: fees
-//         });
-//       }
-//     } catch (error) {
-//       console.warn('Couldnt fetch fees, retrying...');
-//       return;
-//     }
-//   };
-// }
 
 export function fetchLookUpPrice(params) {
   return createAction('PRICE/GET', () => 

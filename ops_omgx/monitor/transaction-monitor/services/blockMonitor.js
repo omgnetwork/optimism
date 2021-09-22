@@ -368,11 +368,15 @@ class BlockMonitorService extends OptimismEnv {
 
   // gets list of addresses whose messages may finalize fast
   async getWhitelist(){
-    let response = await fetch(this.filterEndpoint);
-    const filter = await response.json();
-    const filterSelect = [ filter.Proxy__L1LiquidityPool, filter.L1Message ]
-    this.whitelist = filterSelect
-    this.logger.info('Found the filter', { filterSelect })
+    try {
+      let response = await fetch(this.filterEndpoint);
+      const filter = await response.json();
+      const filterSelect = [ filter.Proxy__L1LiquidityPool, filter.L1Message ]
+      this.whitelist = filterSelect
+      this.logger.info('Found the filter', { filterSelect })
+    } catch {
+      this.logger.error('CRITICAL ERROR: Failed to fetch the Filter')
+    }
   }
 
   // checks to see if its time to look for L1 finalization

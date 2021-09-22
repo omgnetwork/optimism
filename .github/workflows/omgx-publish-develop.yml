@@ -72,9 +72,6 @@ jobs:
             docker image tag "$i" omgx/$(echo $i | awk -F'/' '{print $2}' | awk -F':' '{print $1}'):${{ github.sha }}
             docker image tag "$i" omgx/$(echo $i | awk -F'/' '{print $2}' | awk -F':' '{print $1}'):${{ github.sha }}
           done
-
-          # this is breaking now
-          # docker rmi $(docker images | grep 'ethereumoptimism/' | awk '{print $1}')
           docker images
 
       - name: Rename and retag the optimism images
