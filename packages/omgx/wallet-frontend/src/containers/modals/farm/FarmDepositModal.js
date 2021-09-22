@@ -155,6 +155,7 @@ class FarmDepositModal extends React.Component {
     } else {
       this.props.dispatch(openError("Failed to add liquidity"))
       this.setState({ loading: false, stakeValue: '', value_Wei_String: ''})
+      this.props.dispatch(closeModal("farmDepositModal"))
     }
   }
 

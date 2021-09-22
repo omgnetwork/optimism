@@ -1414,7 +1414,7 @@ class NetworkService {
   ) {
 
     console.log("approveERC20_L1LP")
-    const approveContractAddress = this.L1LPAddress,
+    const approveContractAddress = this.L1LPAddress
 
     try {
 
@@ -1423,13 +1423,12 @@ class NetworkService {
         L1ERC20Json.abi,
         this.provider.getSigner()
       )
-       /***********************/
 
       let allowance_BN = await ERC20Contract.allowance(
         this.account,
         approveContractAddress
       ) 
-      console.log("Allowance:",allowance_BN)
+      console.log("Initial allowance:",allowance_BN)
 
       /* OMG IS A SPECIAL CASE - allowance needs to be 
       set to zero, and then set to actual amount */
