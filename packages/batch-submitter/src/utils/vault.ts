@@ -1,4 +1,4 @@
-import { fs } from 'fs'
+import * as fs from 'fs'
 import { TransactionReceipt } from '@ethersproject/abstract-provider'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import fetch from 'node-fetch'
