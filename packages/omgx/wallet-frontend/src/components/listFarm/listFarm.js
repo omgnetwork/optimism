@@ -88,7 +88,7 @@ class ListFarm extends React.Component {
 
   handleWithdrawToken() {
 
-    const { poolInfo, L1orL2Pool, balance } = this.state;
+    const { poolInfo, L1orL2Pool, balance } = this.state
 
     this.props.dispatch(updateWithdrawToken({
       symbol: poolInfo.symbol,
@@ -151,6 +151,7 @@ class ListFarm extends React.Component {
     } = this.state;
 
     const pageLoading = Object.keys(poolInfo).length === 0;
+    
     const { isMobile } = this.props
 
     let userReward = 0;
@@ -184,6 +185,11 @@ class ListFarm extends React.Component {
       }
     }
 
+    let enableReward = false
+    if( Number(logAmount(userReward, decimals, 3)) >= 0.001 ) {
+      enableReward = true
+    }
+
     return (
       <S.Wrapper dropDownBox={dropDownBox}>
         {pageLoading ? (
@@ -203,9 +209,7 @@ class ListFarm extends React.Component {
                 <Typography variant="overline" sx={{opacity: 0.7}}>Earned</Typography>
               ) : (null)}
               <Typography variant="body1">
-                {userReward ?
-                  `${logAmount(userReward, decimals, 2)}` : `0`
-                }
+                {userReward ? `${logAmount(userReward, decimals, 3)}` : `0`}
               </Typography>
             </S.GridItemTag>
 
@@ -266,11 +270,11 @@ class ListFarm extends React.Component {
             <S.DropdownContent>
               <S.DropdownWrapper>
                 <Typography sx={{flex: 1}} variant="body2" component="div">{`${symbol}`} Earned</Typography>
-                <Typography sx={{flex: 1}} variant="body2" component="div" color="secondary">{logAmount(userReward, decimals, 2)}</Typography>
+                <Typography sx={{flex: 1}} variant="body2" component="div" color="secondary">{logAmount(userReward, decimals, 3)}</Typography>
                 <Button
                   variant="contained"
                   fullWidth
-                  disabled={logAmount(userReward, decimals) === '0' || disabled}
+                  disabled={logAmount(userReward, decimals) === '0' || disabled || !enableReward}
                   onClick={()=>{this.handleHarvest()}}
                   loading={loading}
                   sx={{flex: 1}}

@@ -233,9 +233,9 @@ function Account () {
           <S.CardInfo>Boba Balances</S.CardInfo>
           {(network === 'mainnet') &&
           <Typography variant="body2">
-             You are using Mainnet Beta.<br/>
+             You are using Mainnet.<br/>
              WARNING: the mainnet smart contracts are not fully audited and funds may be at risk.<br/>
-             Please exercise caution when using Mainnet Beta.
+             Please exercise caution when using Mainnet.
           </Typography>
           }
         </S.CardContentTag>
@@ -247,15 +247,13 @@ function Account () {
       </S.CardTag>
       
       {disabled &&
-        <S.LayerAlert style={{background: 'yellow'}}>
+        <S.LayerAlert style={{border: 'solid 1px yellow'}}>
           <S.AlertInfo>
-            <AlertIcon style={{color: 'black'}} />
             <S.AlertText
               variant="body2"
               component="p"
-              style={{color: 'black'}}
             >
-              Balance altering transaction in progress - please be patient
+              Note: Balance altering transaction in progress - please be patient
             </S.AlertText>
           </S.AlertInfo>
         </S.LayerAlert>

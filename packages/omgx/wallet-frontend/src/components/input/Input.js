@@ -32,6 +32,7 @@ function Input({
   unit,
   value,
   onChange,
+  onUseMax,
   sx,
   paste,
   maxValue,
@@ -39,6 +40,7 @@ function Input({
   size,
   variant,
   newStyle = false,
+  allowUseAll = false,
 }) {
 
   async function handlePaste() {
@@ -52,8 +54,8 @@ function Input({
     }
   }
 
-  function handleMaxClick() {
-    onChange({ target: { value: maxValue } })
+  function handleClickMax() {
+    onUseMax()
   }
 
   const underZero = new BN(value).lt(new BN(0)) 
@@ -62,7 +64,7 @@ function Input({
 
   //since ETH is the fee token, harder to use all b/c need to take 
   //operation-specific fees into account 
-  const allowUseAll = (unit === 'ETH') ? false : true
+  allowUseAll = (unit === 'ETH') ? false : allowUseAll
 
   return (
     <>
@@ -103,13 +105,13 @@ function Input({
               Max Amount: {Number(maxValue).toFixed(3)}
             </Typography>
 
-            {/*allowUseAll && maxValue && value !== maxValue && (
+            {allowUseAll && (
               <Box>
-                <Button onClick={handleMaxClick} variant="small" >
+                <Button onClick={handleClickMax} variant="small" >
                   Use All
                 </Button>
               </Box>
-            )*/}
+            )}
           </S.ActionsWrapper>
         )}
         {paste && (

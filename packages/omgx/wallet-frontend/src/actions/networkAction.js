@@ -68,13 +68,15 @@ export function depositL2LP(token, value) {
 
 //DEPOSIT ETH
 export function depositETHL2(value) {
-  return createAction('DEPOSIT/CREATE', () =>
-    networkService.depositETHL2(value)
+  return createAction('DEPOSIT/CREATE', () => {
+      return networkService.depositETHL2(value)
+    }
   )
 }
 
 //DEPOSIT ERC20
 export function depositErc20(value, currency, currencyL2) {
+  console.log("Depositing ERC20")
   return createAction('DEPOSIT/CREATE', () =>
     networkService.depositErc20(value, currency, currencyL2)
   )

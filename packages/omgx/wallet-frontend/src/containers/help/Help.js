@@ -38,6 +38,11 @@ class Help extends React.Component {
           </Typography>
 
           <Typography variant="body1" component="p" sx={{mt: 1, mb: 2}}>
+            <span style={{fontWeight: '700',textDecoration:'underline'}}>Ledger Hardware Wallet L1 to L2 Deposits not working</span><br/>
+            <span style={{color: 'rgba(255, 255, 255, 0.7)'}}>Please make sure that you are using a current firmware version for Ledger, for example, v2.0.0.</span>
+          </Typography>
+
+          <Typography variant="body1" component="p" sx={{mt: 1, mb: 2}}>
             <span style={{fontWeight: '700',textDecoration:'underline'}}>L1 to L2 Deposits not working</span><br/>
             <span style={{color: 'rgba(255, 255, 255, 0.7)'}}>Please make sure that you are using a current version of MetaMask, for example, 10.1.0.</span>
           </Typography>

@@ -30,33 +30,58 @@ import { selectLoading } from 'selectors/loadingSelector'
 import { selectSignatureStatus_exitTRAD } from 'selectors/signatureSelector'
 import { selectLookupPrice } from 'selectors/lookupSelector'
 
-import { amountToUsd, logAmount } from 'util/amountConvert'
+import { amountToUsd, logAmount, toWei_String } from 'util/amountConvert'
 
 import { WrapperActionsModal } from 'components/modal/Modal.styles'
 import { Box } from '@material-ui/system'
+
+import BN from 'bignumber.js'
 
 function DoExitStep({ handleClose, token }) {
 
   const dispatch = useDispatch()
 
-  const [value, setValue] = useState('')
+  const [ value, setValue ] = useState('')
+  const [ value_Wei_String, setValue_Wei_String ] = useState('0')  //support for Use Max
+
   const [disabledSubmit, setDisabledSubmit] = useState(true)
-  const exitLoading = useSelector(selectLoading(['EXIT/CREATE']))
+  const loading = useSelector(selectLoading(['EXIT/CREATE']))
+
   const signatureStatus = useSelector(selectSignatureStatus_exitTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
   
   const maxValue = logAmount(token.balance, token.decimals)
-  const valueIsValid = value > 0 && value <= maxValue
+
+  function setAmount(value) {
+    
+    console.log("setAmount")
+
+    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooBig   = new BN(value).gt(new BN(maxValue))
+
+    console.log("tooSmall",tooSmall)
+    console.log("tooBig",tooBig)
+
+    if (tooSmall || tooBig) {
+      setDisabledSubmit(true)
+    } else {
+      setDisabledSubmit(false)
+    }
+
+    setValue(value)
+  }
 
   async function doExit() {
 
-    let res = await dispatch(exitBOBA(token.address, value))
+    console.log("Amount to exit:", value_Wei_String)
+
+    let res = await dispatch(exitBOBA(token.address, value_Wei_String))
 
     if (res) {
       dispatch(
         openAlert(
           `${token.symbol} was bridged to L1. You will receive
-          ${Number(value).toFixed(2)} ${token.symbol}
+          ${Number(value).toFixed(3)} ${token.symbol}
           on L1 in 7 days.`
         )
       )
@@ -66,32 +91,28 @@ function DoExitStep({ handleClose, token }) {
     }
   }
 
-  function setExitAmount(value) {
-
-    const valid = value > 0 && value <= logAmount(token.balance, token.decimals)
-    
-    if (valid) {
-      setDisabledSubmit(false)
-    } else {
-      setDisabledSubmit(true)
-    }
-    
-    setValue(value)
-  }
-
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   let buttonLabel = 'CANCEL'
-  if( exitLoading ) buttonLabel = 'CLOSE WINDOW'
+  if( loading ) buttonLabel = 'CLOSE WINDOW'
 
   useEffect(() => {
-    if (signatureStatus && exitLoading) {
+    if (signatureStatus && loading) {
       //we are all set - can close the window
       //transaction has been sent and signed
       handleClose()
     }
-  }, [ signatureStatus, exitLoading, handleClose ])
+  }, [ signatureStatus, loading, handleClose ])
+
+  let valueIsValid = false
+
+  if( !!value &&
+      new BN(value).gt(new BN(0.0)) &&
+      new BN(value).lte(new BN(maxValue))
+  ) {
+    valueIsValid = true
+  }
 
   return (
     <>
@@ -105,7 +126,15 @@ function DoExitStep({ handleClose, token }) {
           placeholder="0.0"
           value={value}
           type="number"
-          onChange={(i)=>{setExitAmount(i.target.value)}}
+          onChange={(i)=>{
+            setAmount(i.target.value)
+            setValue_Wei_String(toWei_String(i.target.value, token.decimals))
+          }}
+          onUseMax={(i)=>{//they want to use the maximum
+            setAmount(maxValue) //so the input value updates for the user
+            setValue_Wei_String(token.balance.toString())
+          }}
+          allowUseAll={true}
           unit={token.symbol}
           maxValue={maxValue}
           variant="standard"
@@ -115,13 +144,13 @@ function DoExitStep({ handleClose, token }) {
         {valueIsValid && token && (
           <Typography variant="body2" sx={{mt: 2}}>
             {value &&
-              `You will receive ${Number(value).toFixed(2)} ${token.symbol}
+              `You will receive ${Number(value).toFixed(3)} ${token.symbol}
               ${!!amountToUsd(value, lookupPrice, token) ? `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
               on L1. Your funds will be available on L1 in 7 days.`}
           </Typography>
         )}
 
-        {exitLoading && (
+        {loading && (
           <Typography variant="body2" sx={{mt: 2, color: 'green'}}>
             This window will close when your transaction has been signed and submitted.
           </Typography>
@@ -141,8 +170,8 @@ function DoExitStep({ handleClose, token }) {
               onClick={doExit}
               color="primary"
               variant="contained"
-              loading={exitLoading}
-              tooltip={exitLoading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
+              loading={loading}
+              tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
               disabled={disabledSubmit}
               triggerTime={new Date()}
               fullWidth={isMobile}

@@ -4,7 +4,7 @@ import { useTheme } from "@material-ui/core/styles";
 function AlertIcon() {
     const theme = useTheme();
     const isLight = theme.palette.mode === 'light';
-    const color = 'black';/*theme.palette.common[isLight ? 'black' : 'white'];*/
+    const color = theme.palette.common[isLight ? 'black' : 'white'];
     return (
         <svg width="26" height="24"
             viewBox="0 0 26 24"

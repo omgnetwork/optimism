@@ -47,7 +47,7 @@ export function powAmount (amount, decimals) {
 }
 
 /* more clearly named version of this */
-export function toWei_BN(amount, decimals) {
+export function toWei_String(amount, decimals) {
 
   const x = new BigNumber(amount)
   const exp = new BigNumber(10).pow(decimals)

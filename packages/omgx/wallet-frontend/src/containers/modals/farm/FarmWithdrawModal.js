@@ -8,33 +8,72 @@ import { getFarmInfo } from 'actions/farmAction';
 import Button from 'components/button/Button';
 import Modal from 'components/modal/Modal';
 import Input from 'components/input/Input';
-import { logAmount, toWei_BN } from 'util/amountConvert';
+import { logAmount, toWei_String } from 'util/amountConvert';
 
 import networkService from 'services/networkService';
 
 import { Typography } from '@material-ui/core';
 import { WrapperActionsModal } from 'components/modal/Modal.styles';
 
+import BN from 'bignumber.js'
+
 class FarmWithdrawModal extends React.Component {
+
   constructor(props) {
     super(props)
 
-    const { open } = this.props
-    const { withdrawToken, userInfo } = this.props.farm
+    const { 
+      open 
+    } = this.props
+    
+    const { 
+      withdrawToken, 
+      userInfo 
+    } = this.props.farm
 
     this.state = {
       open,
       withdrawToken,
-      withdrawValue: '',
+      disableSubmit: true,
       userInfo,
-      LPBalance: 0,
       loading: false,
+      //each value has an approximate version and a precise version
+      value: 0,
+      value_Wei_String: '',
+      maxValue: 0,
+      maxValue_Wei_String: '',
+      LPBalance: 0,
+      LPBalance_Wei_String: '',
     }
+  }
+
+  async componentDidMount() {
+
+    const { withdrawToken } = this.props.farm
+
+    let LPBalance_Wei_String = ''
+      
+    if (withdrawToken.L1orL2Pool === 'L1LP') {
+      LPBalance_Wei_String = await networkService.L1LPBalance(withdrawToken.currency)
+    } else {
+      LPBalance_Wei_String = await networkService.L2LPBalance(withdrawToken.currency)
+    }
+    
+    //console.log("LPBalance current", LPBalance_Wei_String)
+    
+    this.setState({ 
+      LPBalance: logAmount(LPBalance_Wei_String, withdrawToken.decimals),  
+      LPBalance_Wei_String
+    })
+
+    this.setMaxTransferValue()
+
   }
 
   async componentDidUpdate(prevState) {
 
     const { open } = this.props
+
     const { withdrawToken, userInfo } = this.props.farm
 
     if (prevState.open !== open) {
@@ -42,37 +81,71 @@ class FarmWithdrawModal extends React.Component {
     }
 
     if (!isEqual(prevState.farm.withdrawToken, withdrawToken)) {
-      let LPBalance = 0
-      if (withdrawToken.L1orL2Pool === 'L1LP') {
-        LPBalance = await networkService.L1LPBalance(withdrawToken.currency, withdrawToken.decimals)
-      } else {
-        LPBalance = await networkService.L2LPBalance(withdrawToken.currency, withdrawToken.decimals)
-      }
-      this.setState({ withdrawToken, LPBalance })
+      this.setState({ withdrawToken })
     }
 
     if (!isEqual(prevState.farm.userInfo, userInfo)) {
-      this.setState({ userInfo });
+      this.setState({ userInfo })
     }
 
   }
 
-  getMaxTransferValue () {
+  setAmount(value, value_Wei_String) {
+    
+    //console.log("setAmount")
 
-    const { userInfo, withdrawToken, LPBalance } = this.state
+    const { maxValue } = this.state
 
-    let transferingBalance = 0
+    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooBig = new BN(value).gt(new BN(maxValue))
+
+    //console.log("tooSmall",tooSmall)
+    //console.log("tooBig",tooBig)
+
+    if (tooSmall || tooBig) {
+      this.setState({ 
+        value : 0,
+        value_Wei_String: '',
+        disableSubmit: true
+      })
+    } else {
+      this.setState({ 
+        value,
+        value_Wei_String,
+        disableSubmit: false
+      })
+    }
+
+  }
+
+  setMaxTransferValue() {
+
+    const { userInfo, withdrawToken, LPBalance_Wei_String } = this.state
+
+    let balance_Wei_String = ''
+
     if (typeof userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency] !== 'undefined') {
-      transferingBalance = userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency].amount
-      transferingBalance = logAmount(transferingBalance, withdrawToken.decimals)
+      balance_Wei_String = userInfo[withdrawToken.L1orL2Pool][withdrawToken.currency].amount
     }
 
     //BUT, if the current balance is lower than what you staked, can only withdraw the balance
-    //console.log("LPBalance:",LPBalance)
-    if (LPBalance < transferingBalance)
-      transferingBalance = LPBalance
+    const poolTooSmall = new BN(LPBalance_Wei_String).lt(new BN(balance_Wei_String))
 
-    return transferingBalance
+    if (poolTooSmall) {
+      console.log("pool smaller than stake",balance_Wei_String)
+      this.setState({ 
+        maxValue: logAmount(LPBalance_Wei_String, withdrawToken.decimals),
+        maxValue_Wei_String: LPBalance_Wei_String 
+      })
+    } else {
+      //pool big enough to cover entire withdrawal
+      console.log("pool large enough",LPBalance_Wei_String)
+      this.setState({
+        maxValue: logAmount(balance_Wei_String, withdrawToken.decimals), 
+        maxValue_Wei_String: balance_Wei_String
+      })
+    }
+    
   }
 
   handleClose() {
@@ -81,24 +154,32 @@ class FarmWithdrawModal extends React.Component {
 
   async handleConfirm() {
 
-    const { withdrawToken, withdrawValue } = this.state;
+    const { withdrawToken, value_Wei_String } = this.state;
 
-    this.setState({ loading: true });
+    this.setState({ loading: true })
 
     const withdrawLiquidityTX = await networkService.withdrawLiquidity(
       withdrawToken.currency,
-      toWei_BN( withdrawValue, withdrawToken.decimals),
+      value_Wei_String,
       withdrawToken.L1orL2Pool,
     )
     
     if (withdrawLiquidityTX) {
       this.props.dispatch(openAlert("Your liquidity was withdrawn."));
       this.props.dispatch(getFarmInfo());
-      this.setState({ loading: false, withdrawValue: '' });
+      this.setState({
+        loading: false,
+        value: '',
+        value_Wei_String: ''
+      })
       this.props.dispatch(closeModal("farmWithdrawModal"));
     } else {
       this.props.dispatch(openError("Failed to withdraw liquidity."));
-      this.setState({ loading: false, withdrawValue: '' });
+      this.setState({
+        loading: false,
+        value: '',
+        value_Wei_String: ''
+      })
     }
   }
 
@@ -107,9 +188,12 @@ class FarmWithdrawModal extends React.Component {
     const {
       open,
       withdrawToken, 
-      withdrawValue,
+      value,
       LPBalance,
       loading,
+      disableSubmit,
+      maxValue,
+      maxValue_Wei_String
     } = this.state
 
     return (
@@ -125,26 +209,33 @@ class FarmWithdrawModal extends React.Component {
 
         <Input
           placeholder={`Amount to withdraw`}
-          value={withdrawValue}
+          value={value}
           type="number"
-          onChange={i=>{this.setState({withdrawValue: i.target.value})}}
           unit={withdrawToken.symbol}
-          maxValue={this.getMaxTransferValue()}
+          maxValue={maxValue}
+          onChange={(i)=>{
+            this.setAmount(i.target.value, toWei_String(i.target.value, withdrawToken.decimals))
+          }}
+          allowUseAll={true}
+          onUseMax={(i)=>{
+            this.setAmount(maxValue, maxValue_Wei_String)
+          }}
           disabledSelect={true}
           variant="standard"
           newStyle
         />
 
-        {Number(withdrawValue) > Number(this.getMaxTransferValue()) &&
+        {Number(value) > Number(maxValue) &&
           <Typography variant="body2" sx={{mt: 2}}>
             You don't have enough {withdrawToken.symbol} to withdraw.
           </Typography>
         }
-        {Number(withdrawValue) > Number(LPBalance) &&
+
+        {Number(value) > Number(LPBalance) &&
           <Typography variant="body2" sx={{mt: 2}}>
-            We don't have enough {withdrawToken.symbol} in the {' '}
-            {withdrawToken.L1orL2Pool === 'L1LP' ? 'L1' : 'L2'} liquidity pool.
-            Please contact us.
+            There is currently insufficient {withdrawToken.symbol} in the {' '}
+            {withdrawToken.L1orL2Pool === 'L1LP' ? 'L1' : 'L2'} liquidity pool
+            to withdraw your full stake.
           </Typography>
         }
 
@@ -161,12 +252,7 @@ class FarmWithdrawModal extends React.Component {
             color='primary'
             size="large"
             variant="contained"
-            disabled={
-              Number(this.getMaxTransferValue()) < Number(withdrawValue) ||
-              Number(withdrawValue) > Number(LPBalance) ||
-              withdrawValue === '' ||
-              !withdrawValue
-            }
+            disabled={!!disableSubmit}
             loading={loading}
           >
             CONFIRM
