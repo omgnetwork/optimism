@@ -76,12 +76,16 @@ function Transactions({ searchHistory, transactions }) {
               <div className={styles.disclaimer}>Loading...</div>
             )}
             {paginatedTransactions.map((i, index) => {
-              const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
+              
+              const typeTX = typeof(i.typeTX) === 'undefined' ? '' : i.typeTX
+              const activity = typeof(i.activity) === 'undefined' ? '' : ' (' + i.activity + ')'
+              let metaData = typeTX + ' ' + activity
+
               const time = moment.unix(i.timeStamp).format('lll')
               let details = null
               const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
               
-              let amountTx = null;
+              let amountTx = null
               if (i.action && i.action.token) {
                 let token = tokenList[i.action.token.toLowerCase()];
                 if (chain === 'L2') {

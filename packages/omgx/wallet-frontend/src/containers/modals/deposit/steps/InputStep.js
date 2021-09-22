@@ -67,7 +67,7 @@ function InputStep({ handleClose, token }) {
       )
 
       if (res) {
-        dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
+        dispatch(setActiveHistoryTab1('Bridge to L2'))
         dispatch(openAlert('ETH bridge transaction submitted'))
         handleClose()
       } else {
@@ -80,7 +80,7 @@ function InputStep({ handleClose, token }) {
         depositErc20(value_Wei_String, token.address, token.addressL2)
       )
       if (res) {
-        dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
+        dispatch(setActiveHistoryTab1('Bridge to L2'))
         dispatch(openAlert(`${token.symbol} bridge transaction submitted`))
         handleClose()
       } else {

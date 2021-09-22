@@ -84,7 +84,13 @@ function Deposits({ searchHistory, transactions }) {
                 <div className={styles.disclaimer}>Loading deposits...</div>
               )}
               {paginatedDeposits.map((i, index) => {
-                const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
+                
+                if(i.depositL2 === false) return
+
+                const typeTX = typeof(i.typeTX) === 'undefined' ? '' : i.typeTX
+                const activity = typeof(i.activity) === 'undefined' ? '' : ' (' + i.activity + ')'
+                let metaData = typeTX + ' ' + activity
+                
                 const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
 
                 let details = null
@@ -115,7 +121,7 @@ function Deposits({ searchHistory, transactions }) {
                     title={`Hash: ${i.hash}`}
                     time={moment.unix(i.timeStamp).format('lll')}
                     blockNumber={`Block ${i.blockNumber}`}
-                    chain={`L1->L2 Deposit`}
+                    chain={`Bridge to L2`}
                     typeTX={`TX Type: ${metaData}`}
                     detail={details}
                     oriChain={chain}

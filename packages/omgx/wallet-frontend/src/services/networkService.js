@@ -936,17 +936,17 @@ class NetworkService {
 
       if (to === this.L2LPAddress.toLowerCase()) {
         //console.log("L2->L1 Swap Off")
-        return Object.assign({}, item, { typeTX: 'Fast Offramp' })
+        return Object.assign({}, item, { typeTX: 'Fast Bridge to L1' })
       }
 
       if (to === this.L1LPAddress.toLowerCase()) {
         //console.log("L1->L2 Swap On")
-        return Object.assign({}, item, { typeTX: 'Fast Onramp' })
+        return Object.assign({}, item, { typeTX: 'Fast Bridge to L2' })
       }
 
       if (to === this.L1StandardBridgeAddress.toLowerCase()) {
         //console.log("L1->L2 Traditional Deposit")
-        return Object.assign({}, item, { typeTX: 'Traditional' })
+        return Object.assign({}, item, { typeTX: 'Classic Bridge to L2' })
       }
 
       if (to === this.L1_TEST_Address.toLowerCase()) {
@@ -956,7 +956,7 @@ class NetworkService {
 
       if (to === this.L2StandardBridgeAddress.toLowerCase()) {
         //console.log("L2 Standard Bridge")
-        return Object.assign({}, item, { typeTX: 'L2 Standard Bridge' })
+        return Object.assign({}, item, { typeTX: 'Classic Bridge to L1' })
       }
 
       if (to === this.L1Message.toLowerCase()) {
@@ -999,7 +999,7 @@ class NetworkService {
         }
       }
 
-      return Object.assign({}, item, { typeTX: to })
+      return Object.assign({}, item, { typeTX: 'Approval/Other (' + to + ')' })
 
     }) //map
 

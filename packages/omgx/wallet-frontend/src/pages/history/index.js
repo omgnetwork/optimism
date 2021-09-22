@@ -47,7 +47,7 @@ function HistoryPage() {
   const [endDate, setEndDate] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
 
-  const tabList = ['All', 'L1->L2 Bridge', 'L2->L1 Bridge']
+  const tabList = ['All', 'Bridge to L2', 'Bridge to L1']
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual);
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc');
@@ -131,13 +131,13 @@ function HistoryPage() {
           chainLink={chainLink}
         /> : null
       }
-      {tabList[selectedTab] === 'L1->L2 Bridge' ?
+      {tabList[selectedTab] === 'Bridge to L2' ?
         <Deposits
           transactions={transactions}
           chainLink={chainLink}
         /> : null
       }
-      {tabList[selectedTab] === 'L2->L1 Bridge' ?
+      {tabList[selectedTab] === 'Bridge to L1' ?
         <Exits
           transactions={transactions}
           chainLink={chainLink}
