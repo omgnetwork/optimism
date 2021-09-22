@@ -130,7 +130,6 @@ function PendingTransaction() {
     //if totalNumberOfPages === 0, set to one so we don't get the strange "page 1 of 0" display
     if (totalNumberOfPages === 0) totalNumberOfPages = 1
 
-
     const currentNetwork = useSelector(selectNetwork());
     const nw = getAllNetworks();
     const theme = useTheme();
@@ -139,13 +138,7 @@ function PendingTransaction() {
         let network = nw[currentNetwork]
         let chain = item.chain === 'L1pending' ? 'L1' : item.chain;
         if (!!network && !!network[chain]) {
-            // network object should have L1 & L2
-            // endpoint name is now network specific - `?network` no longer needed
-            //if (chain === 'L1') {
-                return `${network[chain].transaction}${item.hash}`;
-            //} else {  
-            //    return `${network[chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
-            //}
+            return `${network[chain].transaction}${item.hash}`;
         }
         return '';
     }
@@ -221,7 +214,7 @@ function PendingTransaction() {
                             component="p"
                         >
                         {'Started: '}{moment.unix(i.timeStamp).format('lll')}<br/>
-                        {'Completion estimated: '}{completionTime}
+                        {'Completion after: '}{completionTime}
                         </Typography>
                     </Grid>
                     <Grid item xs={3}>

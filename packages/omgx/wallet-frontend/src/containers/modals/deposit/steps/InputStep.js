@@ -61,17 +61,21 @@ function InputStep({ handleClose, token }) {
     console.log("Amount to bridge to L2:", value_Wei_String)
 
     if(token.symbol === 'ETH') {
-      console.log("Bridging ETH to L2")
+      //console.log("Bridging ETH to L2")
       res = await dispatch(
         depositETHL2(value_Wei_String)
       )
+
       if (res) {
         dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
         dispatch(openAlert('ETH bridge transaction submitted'))
         handleClose()
+      } else {
+        dispatch(openError(`Failed to bridge ETH`))
       }
+
     } else {
-      console.log("Bridging ERC20 to L2")
+      //console.log("Bridging ERC20 to L2")
       res = await dispatch(
         depositErc20(value_Wei_String, token.address, token.addressL2)
       )

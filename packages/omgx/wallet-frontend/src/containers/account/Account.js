@@ -246,16 +246,35 @@ function Account () {
         </Box>
       </S.CardTag>
       
-      {disabled &&
-        <S.LayerAlert style={{background: 'yellow'}}>
+      {
+        <S.LayerAlert style={{border: 'solid 1px red'}}>
           <S.AlertInfo>
-            <AlertIcon style={{color: 'black'}} />
             <S.AlertText
               variant="body2"
               component="p"
-              style={{color: 'black'}}
             >
-              Balance altering transaction in progress - please be patient
+              Note: a small number of users are experiencing difficulties bridging OMG token (in particular) from L1 to L2.
+              We are working on a fix. For issue resolution status, see{' '}  
+              <a style={{color: 'white'}}
+                href={"https://github.com/omgnetwork/optimism/issues/501"}
+                target={'_blank'}
+                rel='noopener noreferrer'
+              >
+                GitHub Issue 501
+              </a>. 
+            </S.AlertText>
+          </S.AlertInfo>
+        </S.LayerAlert>
+      }
+
+      {disabled &&
+        <S.LayerAlert>
+          <S.AlertInfo>
+            <S.AlertText
+              variant="body2"
+              component="p"
+            >
+              Note: Balance altering transaction in progress - please be patient
             </S.AlertText>
           </S.AlertInfo>
         </S.LayerAlert>

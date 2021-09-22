@@ -1302,8 +1302,10 @@ class NetworkService {
 
       return l2Receipt
     } catch(error) {
-      console.log(error)
-      return false
+      //console.log(error)
+      //return false
+      console.log("NS: depositETHL2 error:",error)
+      throw new Error(error.message)
     }
   }
 
