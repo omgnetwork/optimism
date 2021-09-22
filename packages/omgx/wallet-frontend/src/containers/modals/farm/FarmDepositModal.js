@@ -173,9 +173,9 @@ class FarmDepositModal extends React.Component {
 
     let allowanceGTstake = false
 
-    if ( approvedAllowance > 0 &&
-        Number(stakeValue) > 0 &&
-        new BN(approvedAllowance).gte(powAmount(stakeValue, stakeToken.decimals))
+    if ( Number(approvedAllowance) > 0 &&
+         Number(stakeValue) > 0 &&
+         new BN(approvedAllowance).gte(powAmount(stakeValue, stakeToken.decimals))
     ) {
       allowanceGTstake = true
     }
@@ -236,7 +236,6 @@ class FarmDepositModal extends React.Component {
             </WrapperActionsModal>
           </>
         }
-
 
         {(stakeValueValid && allowanceGTstake) &&
           <>
