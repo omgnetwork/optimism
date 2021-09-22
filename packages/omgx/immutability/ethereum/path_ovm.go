@@ -10,7 +10,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math/big"
 	"strconv"
 	"strings"
 
@@ -320,17 +319,6 @@ func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *lo
 	if nonceRaw == "" {
 		return nil, fmt.Errorf("invalid nonce")
 	}
-	//	transactOpts.Nonce = util.ValidNumber(nonceRaw)
-	// TODO Ino
-	transactOpts.GasLimit = 9500000
-	var bignum, _ = new(big.Int).SetString("23000000000", 0)
-	transactOpts.GasPrice = bignum
-
-	ctcSession := &ovm_ctc.OvmCtcSession{
-		Contract:     instance,  // Generic contract caller binding to set the session for
-		CallOpts:     *callOpts, // Call options to use throughout this session
-		TransactOpts: *transactOpts,
-	}
 
 	encodedData, err := encode(data)
 	if err != nil {
@@ -347,8 +335,15 @@ func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *lo
 
 	abi, _ := abi.JSON(strings.NewReader(json_abi))
 	packed, _ := abi.Pack("appendSequencerBatch")
+	callData := append(packed, common.FromHex(encodedData)...)
+	transactOpts.GasLimit = 0
+	ctcSession := &ovm_ctc.OvmCtcSession{
+		Contract:     instance,  // Generic contract caller binding to set the session for
+		CallOpts:     *callOpts, // Call options to use throughout this session
+		TransactOpts: *transactOpts,
+	}
 
-	tx, err := ctcSession.RawAppendSequencerBatch(append(packed, common.FromHex(encodedData)...))
+	tx, err := ctcSession.RawAppendSequencerBatch(callData)
 	if err != nil {
 		return nil, err
 	}

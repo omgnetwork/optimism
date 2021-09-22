@@ -43,7 +43,7 @@ export const submitToVault = async (
   hooks: TxSubmissionHooks,
   gasPrice: number,
   provider: StaticJsonRpcProvider
-): Promise<TransactionReceipt> => {
+): Promise<string> => {
   const token = getToken(batchSigner)
 
   if (call.type === 'AppendStateBatch') {
@@ -70,7 +70,7 @@ export const submitToVault = async (
     const response = await fetch(url, requestInit)
     const data = await response.json()
     hooks.onTransactionResponse(data)
-    return toTransactionReceipt(provider, data)
+    return data.data.transaction_hash
   } else if (call.type === 'AppendSequencerBatch') {
     const url =
       batchSigner.vault_addr +
@@ -97,19 +97,13 @@ export const submitToVault = async (
     const response = await fetch(url, requestInit)
     const data = await response.json()
     hooks.onTransactionResponse(data)
-    return toTransactionReceipt(provider, data)
+    return data.data.transaction_hash
   } else if (call.type === 'AppendQueueBatch') {
     // appendQueueBatch is currently disabled.
     return
   }
 }
 
-const toTransactionReceipt = async (
-  provider: StaticJsonRpcProvider,
-  data: any
-): Promise<TransactionReceipt> => {
-  return provider.getTransactionReceipt(data.data.transaction_hash)
-}
 //needs to be stringyfied so that Vault can consume it
 const transformContexts = (contexts: BatchContext[]): any => {
   const apiContexts: any = []

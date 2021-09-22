@@ -438,9 +438,7 @@ export const run = async () => {
     new StaticJsonRpcProvider(requiredEnvVars.L2_NODE_WEB3_URL)
   )
 
-  const l1Provider = injectL2Context(
-    new StaticJsonRpcProvider(requiredEnvVars.L1_NODE_WEB3_URL)
-  )
+  const l1Provider = new StaticJsonRpcProvider(requiredEnvVars.L1_NODE_WEB3_URL)
 
   const sequencerSigner: BatchSigner = await getSequencerSigner()
   let proposerSigner: BatchSigner = await getProposerSigner()

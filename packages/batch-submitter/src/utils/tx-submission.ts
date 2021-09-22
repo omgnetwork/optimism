@@ -93,17 +93,14 @@ export const submitTransactionWithYNATM = async (
       hooks.onTransactionResponse(txResponse)
       return provider.waitForTransaction(txResponse.hash, numConfirmations)
     } else {
-      const txResponse = await submitToVault(
+      const transactionHash = await submitToVault(
         call,
         batchSigner,
         hooks,
         gasPrice,
         provider
       )
-      return provider.waitForTransaction(
-        txResponse.transactionHash,
-        numConfirmations
-      )
+      return provider.waitForTransaction(transactionHash, numConfirmations)
     }
   }
   const minGasPrice = await getGasPriceInGwei(provider)
