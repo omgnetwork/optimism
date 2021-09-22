@@ -55,6 +55,8 @@ import L2LPJson from '../deployment/artifacts-ovm/contracts/LP/L2LiquidityPool.s
 import L1ERC20Json from '../deployment/artifacts/contracts/L1ERC20.sol/L1ERC20.json'
 import L2ERC20Json from '../deployment/artifacts-ovm/optimistic-ethereum/libraries/standards/L2StandardERC20.sol/L2StandardERC20.json'
 
+import OMGJson from '../deployment/contracts/OMG/OMG.json'
+
 //OMGX L2 Contracts
 import L2ERC721Json from '../deployment/artifacts-ovm/contracts/ERC721Genesis.sol/ERC721Genesis.json'
 import L2ERC721RegJson from '../deployment/artifacts-ovm/contracts/ERC721Registry.sol/ERC721Registry.json'
@@ -70,7 +72,7 @@ import Timelock from "../deployment/rinkeby/json/Timelock.json"
 
 import { logAmount } from 'util/amountConvert'
 import { accDiv, accMul } from 'util/calculation'
-import {getNftImageUrl} from 'util/nftImage'
+import { getNftImageUrl } from 'util/nftImage'
 import { getAllNetworks } from 'util/masterConfig'
 
 import etherScanInstance from 'api/etherScanAxios'
@@ -121,6 +123,8 @@ class NetworkService {
     this.L1_TEST_Contract = null
     this.L2_TEST_Contract = null
 
+    this.L1_OMG_Contract = null
+    
     this.L1LPAddress = null
     this.L2LPAddress = null
 
@@ -482,6 +486,14 @@ class NetworkService {
       this.L1_TEST_Contract = new ethers.Contract(
         addresses.TOKENS.TEST.L1,
         L1ERC20Json.abi,
+        this.provider.getSigner()
+      )
+      console.log('L1_TEST_Contract:', this.L1_TEST_Contract.address)
+
+      /*The test token*/
+      this.L1_OMG_Contract = new ethers.Contract(
+        addresses.TOKENS.OMG.L1,
+        OMGJson,
         this.provider.getSigner()
       )
       console.log('L1_TEST_Contract:', this.L1_TEST_Contract.address)
@@ -1439,12 +1451,46 @@ class NetworkService {
         this.provider.getSigner()
       )
 
-      const approveStatus = await ERC20Contract.approve(
-        approveContractAddress,
-        value_Wei_String
-      )
+      /***********************/
 
-      await approveStatus.wait()
+      let allowance_BN = await ERC20Contract.allowance(
+        this.account,
+        approveContractAddress
+      ) 
+      console.log("Allowance:",allowance_BN)
+
+      /* OMG IS A SPECIAL CASE - allowance needs to be 
+      set to zero, and then set to actual amount */
+      if( allowance_BN.gt(BigNumber.from(0)) && 
+          (currency.toLowerCase() === this["L1_OMG_Address"].toLowerCase())
+      ) 
+      {
+        console.log("OMG Token allowance reset")
+        const approveOMG = await ERC20Contract.approve(
+          approveContractAddress, 
+          ethers.utils.parseEther("0")
+        )
+        await approveOMG.wait()
+        console.log("OMG Token allowance set to 0:",approveOMG)
+      }
+
+      //recheck the allowance
+      allowance_BN = await ERC20Contract.allowance(
+        this.account,
+        approveContractAddress
+      )
+      
+      const allowed = allowance_BN.gte(BigNumber.from(value_Wei_String))
+
+      if(!allowed) {
+        //and now, the normal allowance transaction
+        const approveStatus = await ERC20Contract.approve(
+          approveContractAddress,
+          value_Wei_String
+        )
+        await approveStatus.wait()
+        console.log("ERC 20 L1 SWAP ops approved:",approveStatus)
+      }
 
       return true
     } catch (error) {
@@ -1458,15 +1504,49 @@ class NetworkService {
 
     updateSignatureStatus_depositTRAD(false)
 
-    try {
-      //could use any ERC20 here...
-      const L1_TEST_Contract = this.L1_TEST_Contract.attach(currency)
+    //console.log("Depositing ERC20")
 
-      const approveStatus = await L1_TEST_Contract.approve(
-        this.L1StandardBridgeAddress, //this is the spender
-        value_Wei_String
+    const L1_TEST_Contract = this.L1_TEST_Contract.attach(currency)
+    
+    let allowance_BN = await L1_TEST_Contract.allowance(
+      this.account,
+      this.L1StandardBridgeAddress
+    ) 
+    //console.log("Allowance:",allowance_BN)
+
+    try {
+      /* OMG IS A SPECIAL CASE - allowance needs to be 
+      set to zero, and then set to actual amount */
+      if( allowance_BN.gt(BigNumber.from(0)) && 
+          (currency.toLowerCase() === this["L1_OMG_Address"].toLowerCase())
+      ) 
+      {
+        console.log("OMG Token allowance reset")
+        const approveOMG = await L1_TEST_Contract.approve(
+          this.L1StandardBridgeAddress, 
+          ethers.utils.parseEther("0")
+        )
+        await approveOMG.wait()
+        console.log("OMG Token allowance set to 0:",approveOMG)
+      }
+
+      //recheck the allowance
+      allowance_BN = await L1_TEST_Contract.allowance(
+        this.account,
+        this.L1StandardBridgeAddress
       )
-      await approveStatus.wait()
+      
+      const allowed = allowance_BN.gte(BigNumber.from(value_Wei_String))
+
+      if(!allowed) {
+        //and now, the normal allowance transaction
+        const approveStatus = await L1_TEST_Contract.approve(
+          this.L1StandardBridgeAddress,
+          value_Wei_String
+        )
+        await approveStatus.wait()
+        console.log("ERC 20 L1 ops approved:",approveStatus)
+      }
 
       const depositTxStatus = await this.L1StandardBridgeContract.depositERC20(
         currency,
@@ -1475,6 +1555,8 @@ class NetworkService {
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString())
       )
+
+      console.log("depositTxStatus:",depositTxStatus)
             
       //at this point the tx has been submitted, and we are waiting...
       await depositTxStatus.wait()

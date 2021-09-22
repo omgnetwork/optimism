@@ -149,6 +149,15 @@ function InputStep({ handleClose, token }) {
           </Typography>
         )}
 
+        {!!token && token.symbol === 'OMG' && (
+          <Typography variant="body2" sx={{mt: 2}}>
+            NOTE: The OMG Token was minted in 2017 and it does not conform to the ERC20 token standard. 
+            In some cases, three interactions with MetaMask are needed. If you are bridging out of a 
+            new wallet, it starts out with a 0 approval, and therefore, only two interactions with 
+            MetaMask will be needed.
+          </Typography>
+        )}
+
       </Box>
       <WrapperActionsModal>
         <Button

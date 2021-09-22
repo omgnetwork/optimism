@@ -246,29 +246,8 @@ function Account () {
         </Box>
       </S.CardTag>
       
-      {
-        <S.LayerAlert style={{border: 'solid 1px red'}}>
-          <S.AlertInfo>
-            <S.AlertText
-              variant="body2"
-              component="p"
-            >
-              Note: a small number of users are experiencing difficulties bridging OMG token (in particular) from L1 to L2.
-              We are working on a fix. For issue resolution status, see{' '}  
-              <a style={{color: 'white'}}
-                href={"https://github.com/omgnetwork/optimism/issues/501"}
-                target={'_blank'}
-                rel='noopener noreferrer'
-              >
-                GitHub Issue 501
-              </a>. 
-            </S.AlertText>
-          </S.AlertInfo>
-        </S.LayerAlert>
-      }
-
       {disabled &&
-        <S.LayerAlert>
+        <S.LayerAlert style={{border: 'solid 1px yellow'}}>
           <S.AlertInfo>
             <S.AlertText
               variant="body2"
