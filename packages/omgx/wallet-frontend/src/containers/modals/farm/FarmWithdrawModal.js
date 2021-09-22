@@ -1,19 +1,19 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { isEqual } from 'lodash';
+import React from 'react'
+import { connect } from 'react-redux'
+import { isEqual } from 'lodash'
 
-import { closeModal, openAlert, openError } from 'actions/uiAction';
-import { getFarmInfo } from 'actions/farmAction';
+import { closeModal, openAlert, openError } from 'actions/uiAction'
+import { getFarmInfo } from 'actions/farmAction'
 
-import Button from 'components/button/Button';
-import Modal from 'components/modal/Modal';
-import Input from 'components/input/Input';
-import { logAmount, toWei_String } from 'util/amountConvert';
+import Button from 'components/button/Button'
+import Modal from 'components/modal/Modal'
+import Input from 'components/input/Input'
+import { logAmount, toWei_String } from 'util/amountConvert'
 
-import networkService from 'services/networkService';
+import networkService from 'services/networkService'
 
-import { Typography } from '@material-ui/core';
-import { WrapperActionsModal } from 'components/modal/Modal.styles';
+import { Typography } from '@material-ui/core'
+import { WrapperActionsModal } from 'components/modal/Modal.styles'
 
 import BN from 'bignumber.js'
 
@@ -92,15 +92,10 @@ class FarmWithdrawModal extends React.Component {
 
   setAmount(value, value_Wei_String) {
     
-    //console.log("setAmount")
-
     const { maxValue } = this.state
 
     const tooSmall = new BN(value).lte(new BN(0.0)) 
     const tooBig = new BN(value).gt(new BN(maxValue))
-
-    //console.log("tooSmall",tooSmall)
-    //console.log("tooBig",tooBig)
 
     if (tooSmall || tooBig) {
       this.setState({ 
@@ -165,21 +160,22 @@ class FarmWithdrawModal extends React.Component {
     )
     
     if (withdrawLiquidityTX) {
-      this.props.dispatch(openAlert("Your liquidity was withdrawn."));
-      this.props.dispatch(getFarmInfo());
+      this.props.dispatch(openAlert("Your liquidity was withdrawn."))
+      this.props.dispatch(getFarmInfo())
       this.setState({
         loading: false,
         value: '',
         value_Wei_String: ''
       })
-      this.props.dispatch(closeModal("farmWithdrawModal"));
+      this.props.dispatch(closeModal("farmWithdrawModal"))
     } else {
-      this.props.dispatch(openError("Failed to withdraw liquidity."));
+      this.props.dispatch(openError("Failed to withdraw liquidity."))
       this.setState({
         loading: false,
         value: '',
         value_Wei_String: ''
       })
+      this.props.dispatch(closeModal("farmWithdrawModal"))
     }
   }
 
@@ -225,17 +221,12 @@ class FarmWithdrawModal extends React.Component {
           newStyle
         />
 
-        {Number(value) > Number(maxValue) &&
-          <Typography variant="body2" sx={{mt: 2}}>
-            You don't have enough {withdrawToken.symbol} to withdraw.
-          </Typography>
-        }
-
         {Number(value) > Number(LPBalance) &&
           <Typography variant="body2" sx={{mt: 2}}>
-            There is currently insufficient {withdrawToken.symbol} in the {' '}
+            Note: There is currently insufficient {withdrawToken.symbol} in the {' '}
             {withdrawToken.L1orL2Pool === 'L1LP' ? 'L1' : 'L2'} liquidity pool
-            to withdraw your full stake.
+            to withdraw your full stake. At this time, you can only withdraw up to 
+            {Number(LPBalance).toFixed(2)} {withdrawToken.symbol}.
           </Typography>
         }
 
@@ -269,4 +260,4 @@ const mapStateToProps = state => ({
   balance: state.balance,
 });
 
-export default connect(mapStateToProps)(FarmWithdrawModal);
+export default connect(mapStateToProps)(FarmWithdrawModal)

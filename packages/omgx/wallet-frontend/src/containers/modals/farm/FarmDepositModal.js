@@ -155,6 +155,7 @@ class FarmDepositModal extends React.Component {
     } else {
       this.props.dispatch(openError("Failed to add liquidity"))
       this.setState({ loading: false, stakeValue: '', value_Wei_String: ''})
+      this.props.dispatch(closeModal("farmDepositModal"))
     }
   }
 
@@ -173,9 +174,9 @@ class FarmDepositModal extends React.Component {
 
     let allowanceGTstake = false
 
-    if ( approvedAllowance > 0 &&
-        Number(stakeValue) > 0 &&
-        new BN(approvedAllowance).gte(powAmount(stakeValue, stakeToken.decimals))
+    if ( Number(approvedAllowance) > 0 &&
+         Number(stakeValue) > 0 &&
+         new BN(approvedAllowance).gte(powAmount(stakeValue, stakeToken.decimals))
     ) {
       allowanceGTstake = true
     }
@@ -236,7 +237,6 @@ class FarmDepositModal extends React.Component {
             </WrapperActionsModal>
           </>
         }
-
 
         {(stakeValueValid && allowanceGTstake) &&
           <>
