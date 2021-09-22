@@ -19,6 +19,9 @@ import { useSelector } from 'react-redux'
 import moment from 'moment'
 
 import { selectLoading } from 'selectors/loadingSelector'
+import { selectTokens } from 'selectors/tokenSelector'
+
+import { logAmount } from 'util/amountConvert'
 
 import Pager from 'components/pager/Pager'
 import Transaction from 'components/transaction/Transaction'
@@ -35,6 +38,7 @@ function Deposits({ searchHistory, transactions }) {
   const [page, setPage] = useState(1);
 
   const loading = useSelector(selectLoading(['TRANSACTION/GETALL']));
+  const tokenList = useSelector(selectTokens);
 
   useEffect(() => {
     setPage(1);
@@ -85,6 +89,16 @@ function Deposits({ searchHistory, transactions }) {
 
                 let details = null
 
+                let amountTx = null;
+                if (i.action && i.action.token) {
+                  const token = tokenList[i.action.token.toLowerCase()];
+                  if (!!token) {
+                    let amount = logAmount(i.action.amount, token.decimals, 3);
+                    let symbol = token[`symbol${chain}`];
+                    amountTx = `${amount} ${symbol}`;
+                  }
+                }
+
                 if( i.crossDomainMessage && i.crossDomainMessage.l2BlockHash ) {
                   details = {
                     blockHash: i.crossDomainMessage.l2BlockHash,
@@ -106,6 +120,7 @@ function Deposits({ searchHistory, transactions }) {
                     detail={details}
                     oriChain={chain}
                     oriHash={i.hash}
+                    amountTx={amountTx}
                   />
                 )
               })}

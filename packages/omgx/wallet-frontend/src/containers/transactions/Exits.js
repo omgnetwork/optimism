@@ -19,6 +19,10 @@ import moment from 'moment'
 import { useSelector } from 'react-redux'
 
 import { selectLoading } from 'selectors/loadingSelector'
+import { selectTokens } from 'selectors/tokenSelector'
+
+import { logAmount } from 'util/amountConvert'
+
 
 import Transaction from 'components/transaction/Transaction'
 import Pager from 'components/pager/Pager'
@@ -38,6 +42,7 @@ function Exits({ searchHistory, transactions, chainLink }) {
 
   const loading = useSelector(selectLoading(['EXIT/GETALL']));
 
+  const tokenList = useSelector(selectTokens);  
   const _exits = transactions.filter(i => {
     return i.hash.includes(searchHistory) && (
       i.to !== null && (
@@ -60,6 +65,17 @@ function Exits({ searchHistory, transactions, chainLink }) {
     let timeLabel = moment.unix(i.timeStamp).format('lll')
 
     const to = i.to.toLowerCase()
+
+    let amountTx = null;
+    
+    if (i.action && i.action.token) {
+      const token = Object.values(tokenList).find(t => t.addressL2.toLowerCase() === i.action.token.toLowerCase());
+      if (!!token) {
+        let amount = logAmount(i.action.amount, token.decimals, 3);
+        let symbol = token[`symbol${chain}`];
+        amountTx = `${amount} ${symbol}`;
+      }
+    }
 
     //are we dealing with a traditional exit?
     if (to === networkService.L2StandardBridgeAddress.toLowerCase()) {
@@ -101,6 +117,7 @@ function Exits({ searchHistory, transactions, chainLink }) {
         detail={details}
         oriChain={chain}
         oriHash={i.hash}
+        amountTx={amountTx}
       />
     )
   })

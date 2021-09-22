@@ -20,6 +20,9 @@ import { useSelector } from 'react-redux'
 import { isEqual, orderBy } from 'lodash'
 import { selectTransactions } from 'selectors/transactionSelector'
 import { selectNetwork } from 'selectors/setupSelector'
+import { selectTokens } from 'selectors/tokenSelector'
+
+import { logAmount } from 'util/amountConvert'
 import { getAllNetworks } from 'util/masterConfig'
 
 import AlertIcon from 'components/icons/AlertIcon'
@@ -33,7 +36,9 @@ function PendingTransaction() {
 
     const [page, setPage] = useState(1)
     const unorderedTransactions = useSelector(selectTransactions, isEqual)
-
+  
+    const tokenList = useSelector(selectTokens);
+  
     const pending = unorderedTransactions.filter((i) => {
         if (i.crossDomainMessage &&
             i.crossDomainMessage.crossDomainMessage === 1 &&
@@ -194,6 +199,21 @@ function PendingTransaction() {
 
                 let link = chainLink(i)
 
+                const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
+                let amountTx = null;
+                
+                if (i.action) {
+                    let token = tokenList[i.action.token.toLowerCase()];
+                    if (chain === 'L2') {
+                        token = Object.values(tokenList).find(t => t.addressL2.toLowerCase() === i.action.token.toLowerCase());
+                    }
+                    if (!!token) {
+                        let amount = logAmount(i.action.amount, token.decimals, 3);
+                        let symbol = token[`symbol${chain}`];
+                        amountTx = `${amount} ${symbol}`;
+                    }
+                }
+
                 return <Grid
                     key={i.hash}
                     container
@@ -240,6 +260,15 @@ function PendingTransaction() {
                             Details
                         </a>
                     </Typography>
+                    </Grid>
+                    <Grid item xs={1}>
+                        <Typography
+                            sx={{ wordBreak: 'break-all', whiteSpace: 'nowrap' }}
+                            variant="body2"
+                            component="p"
+                        >
+                            {amountTx}
+                        </Typography>
                     </Grid>
                 </Grid>
             })

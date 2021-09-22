@@ -21,6 +21,9 @@ import { Grid, Box } from '@material-ui/core';
 import moment from 'moment';
 
 import { selectLoading } from 'selectors/loadingSelector'
+import { selectTokens } from 'selectors/tokenSelector'
+
+import { logAmount } from 'util/amountConvert'
 
 import Transaction from 'components/transaction/Transaction'
 import Pager from 'components/pager/Pager'
@@ -35,6 +38,7 @@ function Transactions({ searchHistory, transactions }) {
   const [page, setPage] = useState(1)
 
   const loading = useSelector(selectLoading(['EXIT/GETALL']))
+  const tokenList = useSelector(selectTokens);
 
   useEffect(() => {
     setPage(1);
@@ -76,6 +80,19 @@ function Transactions({ searchHistory, transactions }) {
               const time = moment.unix(i.timeStamp).format('lll')
               let details = null
               const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
+              
+              let amountTx = null;
+              if (i.action && i.action.token) {
+                let token = tokenList[i.action.token.toLowerCase()];
+                if (chain === 'L2') {
+                  token = Object.values(tokenList).find(t => t.addressL2.toLowerCase() === i.action.token.toLowerCase());
+                }
+                if (!!token) {
+                  let amount = logAmount(i.action.amount, token.decimals, 3);
+                  let symbol = token[`symbol${chain}`];
+                  amountTx = `${amount} ${symbol}`;
+                }
+              }
 
               if( i.crossDomainMessage && i.crossDomainMessage.l1BlockHash ) {
                 details = {
@@ -108,6 +125,7 @@ function Transactions({ searchHistory, transactions }) {
                   detail={details}
                   oriChain={chain}
                   oriHash={i.hash}
+                  amountTx={amountTx}
                 />
               )
             })}

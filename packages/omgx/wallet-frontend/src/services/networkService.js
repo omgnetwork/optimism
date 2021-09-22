@@ -70,7 +70,7 @@ import GovernorBravoDelegate from "../deployment/rinkeby/json/GovernorBravoDeleg
 import GovernorBravoDelegator from "../deployment/rinkeby/json/GovernorBravoDelegator.json"
 import Timelock from "../deployment/rinkeby/json/Timelock.json"
 
-import { logAmount } from 'util/amountConvert'
+
 import { accDiv, accMul } from 'util/calculation'
 import { getNftImageUrl } from 'util/nftImage'
 import { getAllNetworks } from 'util/masterConfig'
