@@ -82,14 +82,11 @@ class ListAccount extends React.Component {
       chain,
       dropDownBox,
       networkLayer,
-      disabled,
-      loading
+      disabled
     } = this.state
 
     const enabled = (networkLayer === chain) ? true : false
     const logo = getCoinImage(token.symbol)
-
-    //console.log("Acconut disabled:",disabled)
 
     return (
       <>

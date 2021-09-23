@@ -19,6 +19,9 @@ import { useSelector } from 'react-redux'
 import moment from 'moment'
 
 import { selectLoading } from 'selectors/loadingSelector'
+import { selectTokens } from 'selectors/tokenSelector'
+
+import { logAmount } from 'util/amountConvert'
 
 import Pager from 'components/pager/Pager'
 import Transaction from 'components/transaction/Transaction'
@@ -35,6 +38,7 @@ function Deposits({ searchHistory, transactions }) {
   const [page, setPage] = useState(1);
 
   const loading = useSelector(selectLoading(['TRANSACTION/GETALL']));
+  const tokenList = useSelector(selectTokens);
 
   useEffect(() => {
     setPage(1);
@@ -80,10 +84,26 @@ function Deposits({ searchHistory, transactions }) {
                 <div className={styles.disclaimer}>Loading deposits...</div>
               )}
               {paginatedDeposits.map((i, index) => {
-                const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
+                
+                if(i.depositL2 === false) return
+
+                const typeTX = typeof(i.typeTX) === 'undefined' ? '' : i.typeTX
+                const activity = typeof(i.activity) === 'undefined' ? '' : ' (' + i.activity + ')'
+                let metaData = typeTX + ' ' + activity
+                
                 const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
 
                 let details = null
+
+                let amountTx = null;
+                if (i.action && i.action.token) {
+                  const token = tokenList[i.action.token.toLowerCase()];
+                  if (!!token) {
+                    let amount = logAmount(i.action.amount, token.decimals, 3);
+                    let symbol = token[`symbol${chain}`];
+                    amountTx = `${amount} ${symbol}`;
+                  }
+                }
 
                 if( i.crossDomainMessage && i.crossDomainMessage.l2BlockHash ) {
                   details = {
@@ -101,11 +121,12 @@ function Deposits({ searchHistory, transactions }) {
                     title={`Hash: ${i.hash}`}
                     time={moment.unix(i.timeStamp).format('lll')}
                     blockNumber={`Block ${i.blockNumber}`}
-                    chain={`L1->L2 Deposit`}
+                    chain={`Bridge to L2`}
                     typeTX={`TX Type: ${metaData}`}
                     detail={details}
                     oriChain={chain}
                     oriHash={i.hash}
+                    amountTx={amountTx}
                   />
                 )
               })}

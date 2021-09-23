@@ -128,7 +128,7 @@ function History() {
           <Tabs
             onClick={tab => {dispatch(setActiveHistoryTab1(tab))}}
             activeTab={activeTab1}
-            tabs={['All', 'L1->L2 Bridge', 'L2->L1 Bridge']}
+            tabs={['All', 'Bridge to L2', 'Bridge to L1']}
           />
 
           {activeTab1 === 'All' && (
@@ -138,14 +138,14 @@ function History() {
             />
           )}
 
-          {activeTab1 === 'L1->L2 Bridge' &&
+          {activeTab1 === 'Bridge to L2' &&
             <Deposits
               searchHistory={searchHistory}
               transactions={transactions}
             />
           }
 
-          {activeTab1 === 'L2->L1 Bridge' &&
+          {activeTab1 === 'Bridge to L1' &&
             <Exits
               searchHistory={searchHistory}
               transactions={transactions}

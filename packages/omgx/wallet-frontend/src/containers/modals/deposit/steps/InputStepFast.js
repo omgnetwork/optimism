@@ -89,7 +89,7 @@ function InputStepFast({ handleClose, token }) {
       res = await dispatch(depositL1LP(token.address, value_Wei_String))
       
       if (res) {
-        dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
+        dispatch(setActiveHistoryTab1('Bridge to L2'))
         dispatch(
           openAlert(
             `ETH was bridged. You will receive
@@ -126,7 +126,7 @@ function InputStepFast({ handleClose, token }) {
     )
 
     if (res) {
-      dispatch(setActiveHistoryTab1('L1->L2 Bridge'))
+      dispatch(setActiveHistoryTab1('Bridge to L2'))
       dispatch(
         openAlert(
           `${token.symbol} was bridged to the L1LP. You will receive

@@ -37,6 +37,14 @@ class Help extends React.Component {
             Common Questions
           </Typography>
 
+          
+
+          <Typography variant="body1" component="p" sx={{mt: 1, mb: 2}}>
+            <span style={{fontWeight: '700',textDecoration:'underline'}}>MetaMask does not pop up</span><br/>
+            <span style={{color: 'rgba(255, 255, 255, 0.7)'}}>Some third party popup blockers, such as uBlock Origin, can interfere with MetaMask. 
+            If MetaMask is not popping up, try disabling 3rd party popup blockers.</span>
+          </Typography>
+
           <Typography variant="body1" component="p" sx={{mt: 1, mb: 2}}>
             <span style={{fontWeight: '700',textDecoration:'underline'}}>Ledger Hardware Wallet L1 to L2 Deposits not working</span><br/>
             <span style={{color: 'rgba(255, 255, 255, 0.7)'}}>Please make sure that you are using a current firmware version for Ledger, for example, v2.0.0.</span>

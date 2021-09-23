@@ -41,7 +41,7 @@ const initialState = {
   alert: null,
   error: null,
   activeHistoryTab1: 'All',
-  activeHistoryTab2: 'L2->L1 Bridge',
+  activeHistoryTab2: 'Bridge to L1',
 };
 
 function uiReducer (state = initialState, action) {
