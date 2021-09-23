@@ -2,22 +2,22 @@ import * as React from "react";
 function DAOIcon({ color }) {
     return (
       <svg 
-          width="21" height="20"
-          viewBox="0 0 41 40"
+          width="23" height="23"
+          viewBox="0 0 25 25"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
       >
-        <path fill={color} d="M19.5,31.1c1.46,0,2.64-1.19,2.64-2.65s-1.18-2.65-2.64-2.65s-2.64,1.19-2.64,2.65,C16.86,29.92,18.04,31.1,19.5,31.1z"/>
-        <path fill={color} d="M26.77,28.45c1.46,0,2.64-1.19,2.64-2.65c0-1.46-1.18-2.65-2.64-2.65s-2.64,1.19-2.64,2.65,C24.13,27.27,25.31,28.45,26.77,28.45z"/>
-        <path fill={color} d="M20.53,23.16c1.46,0,2.64-1.19,2.64-2.65c0-1.46-1.18-2.65-2.64-2.65s-2.64,1.19-2.64,2.65,C17.89,21.97,19.07,23.16,20.53,23.16z"/>
-        <path fill={color} d="M12.15,25.81c1.46,0,2.64-1.19,2.64-2.65s-1.18-2.65-2.64-2.65s-2.64,1.19-2.64,2.65,C9.51,24.62,10.69,25.81,12.15,25.81z"/>
-        <path fill={color} d="M29.41,19.67c1.46,0,2.64-1.19,2.64-2.65s-1.18-2.65-2.64-2.65s-2.64,1.19-2.64,2.65S27.95,19.67,29.41,19.67z"/>
-        <path fill={color} d="M24.13,14.07c1.46,0,2.64-1.19,2.64-2.65s-1.18-2.65-2.64-2.65c-1.46,0-2.64,1.19-2.64,2.65,S22.67,14.07,24.13,14.07z"/>
-        <path fill={color} d="M14.79,16.71c1.46,0,2.64-1.19,2.64-2.65s-1.18-2.65-2.64-2.65s-2.64,1.19-2.64,2.65,C12.15,15.53,13.33,16.71,14.79,16.71z"/>
-        <path stroke={color} style={{fill:'none',strokeMiterlimit:10}} d="M29.41,17.02l-2.64,8.78l-7.27,2.65l-7.35-5.29c0,0,2.64-8.78,2.64-8.79l5.74,6.14L29.41,17.02z"/>
-        <circle stroke={color} style={{fill:'none',strokeMiterlimit:10}} cx="20.61" cy="19.97" r="17.25"/>
-        <line stroke={color} style={{fill:'none',strokeMiterlimit:10}} x1="29.41" y1="17.02" x2="14.79" y2="14.37"/>
-        <polyline stroke={color} style={{fill:'none',strokeMiterlimit:10}} points="24.13,11.42 20.53,20.51 19.5,28.45 "/>
+        <circle stroke={color} style={{fill:'none',strokeWidth:1.5}} cx="12.5" cy="12.5" r="10.91"/>
+        <circle fill={color} cx="17.12" cy="16.36" r="2.03"/>
+        <circle fill={color} cx="9.27" cy="7.54" r="2.03"/>
+        <circle fill={color} cx="17.74" cy="10.47" r="2.03"/>
+        <circle fill={color} cx="12.5" cy="12.5" r="2.03"/>
+        <circle fill={color} cx="6.41" cy="13.88" r="2.03"/>
+        <circle fill={color} cx="10.47" cy="18.39" r="2.03"/>
+        <circle fill={color} cx="15.09" cy="5.91" r="2.03"/>
+        <polygon  stroke={color} style={{fill:'none',strokeWidth:1.0,strokeMiterlimit:10}} points="9.27,7.54 17.74,10.47 17.12,16.36 10.47,18.39 6.41,13.88"/>
+        <polyline stroke={color} style={{fill:'none',strokeWidth:1.0,strokeMiterlimit:10}} points="17.74,10.47 12.5,12.5 10.47,18.39"/>
+        <polyline stroke={color} style={{fill:'none',strokeWidth:1.0,strokeMiterlimit:10}} points="15.09,5.91 12.5,12.5 9.27,7.54"/>
       </svg>
     );
 }

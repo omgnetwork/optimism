@@ -61,7 +61,6 @@ function History() {
 
   //sort transactions by timeStamp
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
-  //'desc' or 'asc'
 
   const transactions = orderedTransactions.filter((i) => {
     if (startDate && endDate) {
@@ -129,7 +128,7 @@ function History() {
           <Tabs
             onClick={tab => {dispatch(setActiveHistoryTab1(tab))}}
             activeTab={activeTab1}
-            tabs={['All', 'Deposits', 'Exits']}
+            tabs={['All', 'Bridge to L2', 'Bridge to L1']}
           />
 
           {activeTab1 === 'All' && (
@@ -139,14 +138,14 @@ function History() {
             />
           )}
 
-          {activeTab1 === 'Deposits' &&
+          {activeTab1 === 'Bridge to L2' &&
             <Deposits
               searchHistory={searchHistory}
               transactions={transactions}
             />
           }
 
-          {activeTab1 === 'Exits' &&
+          {activeTab1 === 'Bridge to L1' &&
             <Exits
               searchHistory={searchHistory}
               transactions={transactions}

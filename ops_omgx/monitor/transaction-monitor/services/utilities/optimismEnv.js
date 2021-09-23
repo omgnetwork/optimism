@@ -67,8 +67,8 @@ const OVM_L2_CROSS_DOMAIN_MESSENGER = "0x420000000000000000000000000000000000000
 
 class OptimismEnv {
   constructor() {
-    this.L1Provider = new ethers.providers.JsonRpcProvider(L1_NODE_WEB3_URL);
-    this.L2Provider = new ethers.providers.JsonRpcProvider(L2_NODE_WEB3_URL);
+    this.L1Provider = new ethers.providers.StaticJsonRpcProvider(L1_NODE_WEB3_URL);
+    this.L2Provider = new ethers.providers.StaticJsonRpcProvider(L2_NODE_WEB3_URL);
 
     this.MySQLHostURL = MYSQL_HOST_URL;
     this.MySQLPort = MYSQL_PORT;

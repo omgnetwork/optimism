@@ -22,9 +22,9 @@ const initialState = {
     addressL1: L1ETH,
     addressL2: L2ETH,
     symbolL1:  'ETH',
-    symbolL2:  'oETH',
-    decimals:  18,
-    name:      'Ethereum',
+    symbolL2:  'ETH',
+    decimals:     18,
+    name: 'Ethereum',
     redalert:  false,
   },
 }

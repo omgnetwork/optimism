@@ -13,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import React from 'react';
-import { CircularProgress } from '@material-ui/core';
-import { Button as ButtonMUI } from '@material-ui/core';
+import React from 'react'
+import { CircularProgress, Tooltip } from '@material-ui/core'
+import { Button as ButtonMUI } from '@material-ui/core'
 
 function Button ({
   children,
@@ -68,7 +68,8 @@ function Button ({
   }
 
   return (
-    <ButtonMUI {...muiProps}>
+  <Tooltip title={tooltip}>
+    <ButtonMUI {...muiProps} style={{minWidth: loading ? '200px' : 'none'}}>
       {children}
       {(disabled || loading) && timeDefined && (waitTime > 3) &&
         <div style={{marginLeft: '10px'}}>
@@ -81,6 +82,7 @@ function Button ({
         </div>
       }
     </ButtonMUI>
+  </Tooltip>
   )
 }
 

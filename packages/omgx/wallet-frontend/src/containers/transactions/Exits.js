@@ -19,6 +19,10 @@ import moment from 'moment'
 import { useSelector } from 'react-redux'
 
 import { selectLoading } from 'selectors/loadingSelector'
+import { selectTokens } from 'selectors/tokenSelector'
+
+import { logAmount } from 'util/amountConvert'
+
 
 import Transaction from 'components/transaction/Transaction'
 import Pager from 'components/pager/Pager'
@@ -36,23 +40,29 @@ function Exits({ searchHistory, transactions, chainLink }) {
   const [page, setPage] = useState(1);
 
 
-  const loading = useSelector(selectLoading(['EXIT/GETALL']));
+  const loading = useSelector(selectLoading(['EXIT/GETALL']))
+
+  const tokenList = useSelector(selectTokens)
 
   const _exits = transactions.filter(i => {
     return i.hash.includes(searchHistory) && (
       i.to !== null && (
         i.to.toLowerCase() === networkService.L2LPAddress.toLowerCase() ||
-        //i.to.toLowerCase() === networkService.L2_ETH_Address.toLowerCase() ||
         i.to.toLowerCase() === networkService.L2StandardBridgeAddress.toLowerCase()
       )
     )
   })
 
   const renderExits = _exits.map((i, index) => {
+    
+    //these are other types of transactions like approvals
+    if(i.exitL2 === false) return
 
-    const metaData = typeof (i.typeTX) === 'undefined' ? '' : i.typeTX
     const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
 
+    const typeTX = typeof(i.typeTX) === 'undefined' ? '' : i.typeTX
+    const activity = typeof(i.activity) === 'undefined' ? '' : ' (' + i.activity + ')'
+    let metaData = typeTX + ' ' + activity
 
     let isExitable = false
     let details = null
@@ -61,9 +71,19 @@ function Exits({ searchHistory, transactions, chainLink }) {
 
     const to = i.to.toLowerCase()
 
+    let amountTx = null;
+    
+    if (i.action && i.action.token) {
+      const token = Object.values(tokenList).find(t => t.addressL2.toLowerCase() === i.action.token.toLowerCase());
+      if (!!token) {
+        let amount = logAmount(i.action.amount, token.decimals, 3);
+        let symbol = token[`symbol${chain}`];
+        amountTx = `${amount} ${symbol}`;
+      }
+    }
+
     //are we dealing with a traditional exit?
     if (to === networkService.L2StandardBridgeAddress.toLowerCase()) {
-
 
       isExitable = moment().isAfter(moment.unix(i.crossDomainMessage.crossDomainMessageEstimateFinalizedTime))
 
@@ -92,7 +112,7 @@ function Exits({ searchHistory, transactions, chainLink }) {
     return (
       <Transaction
         key={`${index}`}
-        chain='L2->L1 Exit'
+        chain='Bridge to L1'
         title={`${chain} Hash: ${i.hash}`}
         blockNumber={`Block ${i.blockNumber}`}
         time={timeLabel}
@@ -101,6 +121,7 @@ function Exits({ searchHistory, transactions, chainLink }) {
         detail={details}
         oriChain={chain}
         oriHash={i.hash}
+        amountTx={amountTx}
       />
     )
   })
