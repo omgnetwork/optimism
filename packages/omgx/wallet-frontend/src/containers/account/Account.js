@@ -44,8 +44,6 @@ import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon'
 import PendingTransaction from './PendingTransaction'
 import useInterval from 'util/useInterval'
 
-import AlertIcon from 'components/icons/AlertIcon'
-
 const POLL_INTERVAL = 2000; //milliseconds
 
 function Account () {
@@ -85,10 +83,8 @@ function Account () {
   },[tokenList, dispatch])
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual)
-  //console.log("Transactions:",unorderedTransactions)
 
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
-  //console.log("orderedTransactions:",orderedTransactions)
 
   const pendingL1 = orderedTransactions.filter((i) => {
       if (i.chain === 'L1pending' && //use the custom API watcher for fast data on pending L1->L2 TXs

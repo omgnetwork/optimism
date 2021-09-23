@@ -68,8 +68,7 @@ function WrongNetworkModal ({ open, onClose }) {
   }
 
   async function correctChain() {
-    console.log("Correcting the chain")
-    const res = await networkService.correctChain( networkLayer )
+    await networkService.correctChain( networkLayer )
   }
 
   return (
