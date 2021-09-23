@@ -1283,7 +1283,7 @@ class NetworkService {
   }
 
   //Move ETH from L1 to L2 using the standard deposit system
-  depositETHL2 = async (value = '1') => {
+  depositETHL2 = async (value_Wei_String) => {
 
     updateSignatureStatus_depositTRAD(false)
 
@@ -1292,7 +1292,7 @@ class NetworkService {
         this.L2GasLimit,
         utils.formatBytes32String(new Date().getTime().toString()),
         {
-          value: parseEther(value)
+          value: value_Wei_String
         }
       )
       
