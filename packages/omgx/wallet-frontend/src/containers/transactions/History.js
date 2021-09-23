@@ -50,8 +50,8 @@ function History() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const dispatch = useDispatch()
-  const [startDate, setStartDate] = useState(null)
-  const [endDate, setEndDate] = useState(null)
+  const [startDate, setStartDate] = useState(new Date())
+  const [endDate, setEndDate] = useState(new Date())
 
   const [searchHistory, setSearchHistory] = useState('')
 
@@ -74,6 +74,9 @@ function History() {
       dispatch(fetchTransactions());
     });
   }, POLL_INTERVAL * 2);
+
+  console.log(startDate)
+  console.log(endDate)
 
   return (
     <>
@@ -100,8 +103,8 @@ function History() {
             selected={startDate}
             onChange={(date) => setStartDate(date)}
             selectsStart
-            startDate={startDate}
-            endDate={endDate}
+            endDate={new Date(endDate)}
+            maxDate={new Date(endDate)}
             calendarClassName={theme.palette.mode}
             placeholderText={isMobile ? "From" : ""}
             popperClassName={styles.popperStyle}
@@ -114,9 +117,8 @@ function History() {
             selected={endDate}
             onChange={(date) => setEndDate(date)}
             selectsEnd
-            startDate={startDate}
-            endDate={endDate}
-            minDate={startDate}
+            startDate={new Date(startDate)}
+            minDate={new Date(startDate)}
             calendarClassName={theme.palette.mode}
             placeholderText={isMobile ? "To" : ""}
             popperClassName={styles.popperStyle}

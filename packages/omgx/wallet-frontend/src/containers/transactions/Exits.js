@@ -56,7 +56,9 @@ function Exits({ searchHistory, transactions, chainLink }) {
   const renderExits = _exits.map((i, index) => {
     
     //these are other types of transactions like approvals
-    if(i.exitL2 === false) return
+    if(i.exitL2 === false) {
+      return null
+    }
 
     const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
 
