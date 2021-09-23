@@ -233,6 +233,17 @@ $white500: rgba(255, 255, 255, 0.5);
     color: #FFFFFF !important;
   }
 
+  .react-datepicker__day--disabled { 
+    opacity: 0.4
+  }
+  .react-datepicker__day {
+    &:hover {
+      background-color: transparent;
+      color: #fff;
+      border-radius: 50%;
+      border: 0.2px solid #CCFF00; 
+    }
+  }
   .react-datepicker__day--keyboard-selected, 
   .react-datepicker__month-text--keyboard-selected, 
   .react-datepicker__quarter-text--keyboard-selected, 

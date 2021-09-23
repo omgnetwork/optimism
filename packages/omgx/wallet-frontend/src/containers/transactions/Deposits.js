@@ -85,7 +85,9 @@ function Deposits({ searchHistory, transactions }) {
               )}
               {paginatedDeposits.map((i, index) => {
                 
-                if(i.depositL2 === false) return
+                if(i.depositL2 === false) {
+                  return null
+                }
 
                 const typeTX = typeof(i.typeTX) === 'undefined' ? '' : i.typeTX
                 const activity = typeof(i.activity) === 'undefined' ? '' : ' (' + i.activity + ')'
