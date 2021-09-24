@@ -27,10 +27,13 @@ import ListAccount from 'components/listAccount/listAccount'
 import networkService from 'services/networkService'
 
 import * as S from './Account.styles'
+
 import { selectTokens } from 'selectors/tokenSelector'
+import { selectLoading } from 'selectors/loadingSelector'
+
 import PageHeader from 'components/pageHeader/PageHeader'
 import { Box, Grid, Tab, Tabs, Typography, useMediaQuery } from '@material-ui/core'
-import { fetchGas, fetchLookUpPrice, fetchTransactions } from 'actions/networkAction'
+import { fetchLookUpPrice, fetchTransactions } from 'actions/networkAction'
 import { selectNetwork } from 'selectors/setupSelector'
 import { useTheme } from '@emotion/react'
 import { tableHeadList } from './tableHeadList'
@@ -46,7 +49,9 @@ const POLL_INTERVAL = 2000; //milliseconds
 function Account () {
 
   const networkLayer = networkService.L1orL2 === 'L1' ? 'L1' : 'L2'
+  
   const dispatch = useDispatch()
+  
   const [activeTab, setActiveTab] = useState(networkLayer === 'L1' ? 0 : 1)
 
   const childBalance = useSelector(selectlayer2Balance, isEqual)
@@ -55,6 +60,14 @@ function Account () {
   const tokenList = useSelector(selectTokens)
 
   const network = useSelector(selectNetwork())
+
+  const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
+  const exitLoading    = useSelector(selectLoading(['EXIT/CREATE']))
+
+  const disabled = depositLoading || exitLoading
+
+  //console.log("disabled:",disabled)
+  //console.log("loading:",loading)
 
   const getLookupPrice = useCallback(()=>{
     const symbolList = Object.values(tokenList).map((i)=> {
@@ -67,13 +80,11 @@ function Account () {
       }
     })
     dispatch(fetchLookUpPrice(symbolList))
-  },[tokenList,dispatch])
+  },[tokenList, dispatch])
 
   const unorderedTransactions = useSelector(selectTransactions, isEqual)
-  //console.log("Transactions:",unorderedTransactions)
 
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
-  //console.log("orderedTransactions:",orderedTransactions)
 
   const pendingL1 = orderedTransactions.filter((i) => {
       if (i.chain === 'L1pending' && //use the custom API watcher for fast data on pending L1->L2 TXs
@@ -104,17 +115,9 @@ function Account () {
     ...pendingL2
   ]
 
-  const getGasPrice = useCallback(() => {
-    dispatch(fetchGas({
-      network: network || 'local',
-      networkLayer
-    }))
-  }, [dispatch, network, networkLayer])
-
   useEffect(()=>{
     getLookupPrice()
-    getGasPrice()
-  },[childBalance, rootBalance, getLookupPrice, getGasPrice])
+  },[childBalance, rootBalance, getLookupPrice])
 
   useInterval(() => {
     batch(() => {
@@ -122,7 +125,6 @@ function Account () {
     })
   }, POLL_INTERVAL * 2)
 
-  const disabled = false
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -227,23 +229,32 @@ function Account () {
           <S.CardInfo>Boba Balances</S.CardInfo>
           {(network === 'mainnet') &&
           <Typography variant="body2">
-             You are using Mainnet Beta.<br/>
+             You are using Mainnet.<br/>
              WARNING: the mainnet smart contracts are not fully audited and funds may be at risk.<br/>
-             Please exercise caution when using Mainnet Beta.
+             Please exercise caution when using Mainnet.
           </Typography>
           }
-          {/*
-            <S.BalanceValue component ="div">{balances['oETH'].amountShort}</S.BalanceValue>
-            <Typography>oETH</Typography>
-          */}
         </S.CardContentTag>
         <Box sx={{flex: 3}}>
           <S.ContentGlass>
             <img src={Drink} href="#" width={135} alt="Boba Drink"/>
           </S.ContentGlass>
         </Box>
-
       </S.CardTag>
+      
+      {disabled &&
+        <S.LayerAlert style={{border: 'solid 1px yellow'}}>
+          <S.AlertInfo>
+            <S.AlertText
+              variant="body2"
+              component="p"
+            >
+              Note: Balance altering transaction in progress - please be patient
+            </S.AlertText>
+          </S.AlertInfo>
+        </S.LayerAlert>
+      }
+
       {pending.length > 0 &&
         <Grid sx={{margin: '10px 0px'}}>
           <Grid item xs={12}>

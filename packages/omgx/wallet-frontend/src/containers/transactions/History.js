@@ -50,8 +50,8 @@ function History() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const dispatch = useDispatch()
-  const [startDate, setStartDate] = useState(null)
-  const [endDate, setEndDate] = useState(null)
+  const [startDate, setStartDate] = useState(new Date())
+  const [endDate, setEndDate] = useState(new Date())
 
   const [searchHistory, setSearchHistory] = useState('')
 
@@ -61,7 +61,6 @@ function History() {
 
   //sort transactions by timeStamp
   const orderedTransactions = orderBy(unorderedTransactions, i => i.timeStamp, 'desc')
-  //'desc' or 'asc'
 
   const transactions = orderedTransactions.filter((i) => {
     if (startDate && endDate) {
@@ -75,6 +74,9 @@ function History() {
       dispatch(fetchTransactions());
     });
   }, POLL_INTERVAL * 2);
+
+  console.log(startDate)
+  console.log(endDate)
 
   return (
     <>
@@ -101,8 +103,8 @@ function History() {
             selected={startDate}
             onChange={(date) => setStartDate(date)}
             selectsStart
-            startDate={startDate}
-            endDate={endDate}
+            endDate={new Date(endDate)}
+            maxDate={new Date(endDate)}
             calendarClassName={theme.palette.mode}
             placeholderText={isMobile ? "From" : ""}
             popperClassName={styles.popperStyle}
@@ -115,9 +117,8 @@ function History() {
             selected={endDate}
             onChange={(date) => setEndDate(date)}
             selectsEnd
-            startDate={startDate}
-            endDate={endDate}
-            minDate={startDate}
+            startDate={new Date(startDate)}
+            minDate={new Date(startDate)}
             calendarClassName={theme.palette.mode}
             placeholderText={isMobile ? "To" : ""}
             popperClassName={styles.popperStyle}
@@ -129,7 +130,7 @@ function History() {
           <Tabs
             onClick={tab => {dispatch(setActiveHistoryTab1(tab))}}
             activeTab={activeTab1}
-            tabs={['All', 'Deposits', 'Exits']}
+            tabs={['All', 'Bridge to L2', 'Bridge to L1']}
           />
 
           {activeTab1 === 'All' && (
@@ -139,14 +140,14 @@ function History() {
             />
           )}
 
-          {activeTab1 === 'Deposits' &&
+          {activeTab1 === 'Bridge to L2' &&
             <Deposits
               searchHistory={searchHistory}
               transactions={transactions}
             />
           }
 
-          {activeTab1 === 'Exits' &&
+          {activeTab1 === 'Bridge to L1' &&
             <Exits
               searchHistory={searchHistory}
               transactions={transactions}

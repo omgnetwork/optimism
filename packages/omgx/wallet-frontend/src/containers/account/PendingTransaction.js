@@ -20,6 +20,9 @@ import { useSelector } from 'react-redux'
 import { isEqual, orderBy } from 'lodash'
 import { selectTransactions } from 'selectors/transactionSelector'
 import { selectNetwork } from 'selectors/setupSelector'
+import { selectTokens } from 'selectors/tokenSelector'
+
+import { logAmount } from 'util/amountConvert'
 import { getAllNetworks } from 'util/masterConfig'
 
 import AlertIcon from 'components/icons/AlertIcon'
@@ -33,7 +36,9 @@ function PendingTransaction() {
 
     const [page, setPage] = useState(1)
     const unorderedTransactions = useSelector(selectTransactions, isEqual)
-
+  
+    const tokenList = useSelector(selectTokens)
+  
     const pending = unorderedTransactions.filter((i) => {
         if (i.crossDomainMessage &&
             i.crossDomainMessage.crossDomainMessage === 1 &&
@@ -61,7 +66,7 @@ function PendingTransaction() {
         return false
     })
     pendingExitsStage0 = pendingExitsStage0.map(v => ({
-        ...v,label: 'L2->L1 Fast Exit',labelStatus: 'Step 0, No SR Hash yet, Pending',
+        ...v,label: 'Bridge to L1',labelStatus: 'Step 0, No SR Hash yet, Pending',
         completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
       })
     )
@@ -72,7 +77,7 @@ function PendingTransaction() {
         return false
     })
     pendingExitsStage1 = pendingExitsStage1.map(v => ({
-        ...v, label: 'L2->L1 Fast Exit', labelStatus: 'Step 1, Have SR Hash, Pending',
+        ...v, label: 'Bridge to L1', labelStatus: 'Step 1, Have SR Hash, Pending',
         completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
       })
     )
@@ -80,11 +85,11 @@ function PendingTransaction() {
     //Part 3 - exit that is not final, but we have a state root hash, and we ARE NOT using the fast message relayer
     //so this is a traditional exit 
     let pendingExitsTrad = pendingL2.filter((i) => {
-        if (i.stateRoot.stateRootHash && !i.action.fast) return true
+        if (!i.action.fast) return true
         return false
     })
     pendingExitsTrad = pendingExitsTrad.map(v => ({
-        ...v,label: 'L2->L1 Trad Exit',labelStatus: 'In 7 day window',
+        ...v,label: 'Classical Bridge to L1',labelStatus: 'In 7 day window',
         completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
       })
     )
@@ -95,19 +100,19 @@ function PendingTransaction() {
         return false
     })
     pendingDepositsFast = pendingDepositsFast.map(v => ({
-        ...v,label: 'L1->L2 Fast Deposit',labelStatus: 'Pending',
+        ...v,label: 'Bridge to L2',labelStatus: 'Pending',
         completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
       })
     )
 
-    //DEPOSIT Part 3 - deposit is not final, but we have a state root hash, and we ARE NOT using the fast message relayer
+    //DEPOSIT Part 3 - we ARE NOT using the fast message relayer
     //so this is a traditional deposit 
     let pendingDepositsTrad = pendingL1.filter((i) => {
         if (!i.action.fast) return true
         return false
     })
     pendingDepositsTrad = pendingDepositsTrad.map(v => ({
-        ...v, label: 'L1->L2 Trad Deposit', labelStatus: 'Pending',
+        ...v, label: 'Classical Bridge to L2', labelStatus: 'Pending',
         completion: v.crossDomainMessage.crossDomainMessageEstimateFinalizedTime,
       })
     )
@@ -130,7 +135,6 @@ function PendingTransaction() {
     //if totalNumberOfPages === 0, set to one so we don't get the strange "page 1 of 0" display
     if (totalNumberOfPages === 0) totalNumberOfPages = 1
 
-
     const currentNetwork = useSelector(selectNetwork());
     const nw = getAllNetworks();
     const theme = useTheme();
@@ -139,13 +143,7 @@ function PendingTransaction() {
         let network = nw[currentNetwork]
         let chain = item.chain === 'L1pending' ? 'L1' : item.chain;
         if (!!network && !!network[chain]) {
-            // network object should have L1 & L2
-            // endpoint name is now network specific - `?network` no longer needed
-            //if (chain === 'L1') {
-                return `${network[chain].transaction}${item.hash}`;
-            //} else {  
-            //    return `${network[chain].transaction}${item.hash}?network=${currentNetwork[0].toUpperCase() + currentNetwork.slice(1)}`;
-            //}
+            return `${network[chain].transaction}${item.hash}`;
         }
         return '';
     }
@@ -201,6 +199,21 @@ function PendingTransaction() {
 
                 let link = chainLink(i)
 
+                const chain = (i.chain === 'L1pending') ? 'L1' : i.chain
+                let amountTx = null;
+                
+                if (i.action) {
+                    let token = tokenList[i.action.token.toLowerCase()];
+                    if (chain === 'L2') {
+                        token = Object.values(tokenList).find(t => t.addressL2.toLowerCase() === i.action.token.toLowerCase());
+                    }
+                    if (!!token) {
+                        let amount = logAmount(i.action.amount, token.decimals, 3);
+                        let symbol = token[`symbol${chain}`];
+                        amountTx = `${amount} ${symbol}`;
+                    }
+                }
+
                 return <Grid
                     key={i.hash}
                     container
@@ -212,16 +225,16 @@ function PendingTransaction() {
                     }}
                 >
                     <Grid item xs={2}>
-                        {i.label}
+                        <span style={{fontSize: '0.9em'}}>{i.label}</span>
                     </Grid>
                     <Grid item xs={4}>
                         <Typography
-                            sx={{ wordBreak: 'break-all' }}
+                            sx={{ wordBreak: 'break-all',fontSize: '0.7em'}}
                             variant="body2"
                             component="p"
                         >
                         {'Started: '}{moment.unix(i.timeStamp).format('lll')}<br/>
-                        {'Completion estimated: '}{completionTime}
+                        {'Completion after: '}{completionTime}
                         </Typography>
                     </Grid>
                     <Grid item xs={3}>
@@ -247,6 +260,15 @@ function PendingTransaction() {
                             Details
                         </a>
                     </Typography>
+                    </Grid>
+                    <Grid item xs={1}>
+                        <Typography
+                            sx={{ wordBreak: 'break-all', whiteSpace: 'nowrap' }}
+                            variant="body2"
+                            component="p"
+                        >
+                            {amountTx}
+                        </Typography>
                     </Grid>
                 </Grid>
             })

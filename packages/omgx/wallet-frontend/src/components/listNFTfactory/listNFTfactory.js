@@ -149,7 +149,7 @@ class listNFTfactory extends React.Component {
             <Box sx={{mb: 2}}>
               <Input
                 fullwidth
-                placeholder="NFT URL (e.g. https://jimb.stanford.edu)"
+                placeholder="NFT URL (e.g. https://boba.network/wp-content/uploads/2021/08/Boba-Bug-Neon-1.png)"
                 onChange={i=>{this.setState({tokenURI: i.target.value})}}
                 value={tokenURI}
               />

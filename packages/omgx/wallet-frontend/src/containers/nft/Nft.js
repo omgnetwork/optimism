@@ -109,6 +109,8 @@ class Nft extends React.Component {
     const numberOfContracts = Object.keys(contracts).length
     const layer = networkService.L1orL2
 
+    const mintDisabled = numberOfContracts > 0 ? false : true
+
     if(layer === 'L1') {
         return <div className={styles.container}>
             <PageHeader title="NFT" />
@@ -171,7 +173,12 @@ class Nft extends React.Component {
           sx={{mt: 1, mb: 5}}
         >
           <Button size="medium" variant="contained" sx={{marginRight: 3}} onClick={()=> {this.setState({deployModalOpen: true})}}>Deploy NFT contract</Button>
-          <Button size="medium" variant="contained" onClick={()=> {this.setState({mintModalOpen: true})}}>Mint NFT</Button>
+          <Button 
+            size="medium" 
+            variant="contained" 
+            onClick={()=> {this.setState({mintModalOpen: true})}}
+            disabled={mintDisabled}
+          >Mint NFT</Button>
         </Grid>
 
         </Grid>

@@ -5,5 +5,6 @@ DATABASE_USER=`/opt/secret2env -name $SECRETNAME|grep -w postgres_user|sed 's/po
 DATABASE_PASS=`/opt/secret2env -name $SECRETNAME|grep -w postgres_pass|sed 's/postgres_pass=//g'`
 DATABASE_HOST=`/opt/secret2env -name $SECRETNAME|grep -w postgres_host|sed 's/postgres_host=//g'`
 export DATABASE_URL="postgresql://${DATABASE_USER}:${DATABASE_PASS}@${DATABASE_HOST}:5432/${DATABASE_NAME}?ssl=false"
-
-mix do ecto.create, ecto.migrate; mix phx.server
+printenv
+mix do ecto.create, ecto.migrate
+mix phx.server

@@ -35,7 +35,7 @@ const initialState = {
   etherscan: '',
   minter: false,
   netLayer: netLayerCache ? netLayerCache : 'L1'
-};
+}
 
 function setupReducer (state = initialState, action) {
   switch (action.type) {

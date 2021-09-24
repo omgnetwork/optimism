@@ -7,11 +7,10 @@ import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
 
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
-import GasPicker from 'components/gaspicker/GasPicker'
 
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectSignatureStatus_depositTRAD } from 'selectors/signatureSelector'
-import { amountToUsd, logAmount, powAmount } from 'util/amountConvert'
+import { amountToUsd, logAmount, toWei_String } from 'util/amountConvert'
 
 import { selectLookupPrice } from 'selectors/lookupSelector'
 import { Typography, useMediaQuery } from '@material-ui/core'
@@ -19,62 +18,76 @@ import { useTheme } from '@emotion/react'
 import { WrapperActionsModal } from 'components/modal/Modal.styles'
 import { Box } from '@material-ui/system'
 
+import BN from 'bignumber.js'
+
 function InputStep({ handleClose, token }) {
 
   const dispatch = useDispatch()
-  const [value, setValue] = useState('')
+
+  const [ value, setValue ] = useState('')
+  const [ value_Wei_String, setValue_Wei_String ] = useState('0')  //support for Use Max
+  
   const [disabledSubmit, setDisabledSubmit] = useState(true)
-  const [gasPrice, setGasPrice] = useState()
-  const [selectedSpeed, setSelectedSpeed] = useState('normal')
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
+  
   const signatureStatus = useSelector(selectSignatureStatus_depositTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
+
+  const maxValue = logAmount(token.balance, token.decimals)
+
+  function setAmount(value) {
+    
+    console.log("setAmount")
+
+    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooBig   = new BN(value).gt(new BN(maxValue))
+
+    console.log("tooSmall",tooSmall)
+    console.log("tooBig",tooBig)
+
+    if (tooSmall || tooBig) {
+      setDisabledSubmit(true)
+    } else {
+      setDisabledSubmit(false)
+    }
+
+    setValue(value)
+  }
 
   async function doDeposit() {
 
     let res
 
+    console.log("Amount to bridge to L2:", value_Wei_String)
+
     if(token.symbol === 'ETH') {
-      console.log("Depositing ETH")
-      if (value > 0) {
-        res = await dispatch(depositETHL2(value, gasPrice))
-        if (res) {
-          dispatch(setActiveHistoryTab1('Deposits'))
-          dispatch(openAlert('ETH deposit submitted'))
-          handleClose()
-        }
-      }
-    } else {
-      console.log("Depositing ERC20")
+      //console.log("Bridging ETH to L2")
       res = await dispatch(
-        depositErc20(powAmount(value, token.decimals), token.address, gasPrice, token.addressL2)
+        depositETHL2(value_Wei_String)
       )
+
       if (res) {
-        dispatch(setActiveHistoryTab1('Deposits'))
-        dispatch(openAlert(`${token.symbol} deposit submitted.`))
+        dispatch(setActiveHistoryTab1('Bridge to L2'))
+        dispatch(openAlert('ETH bridge transaction submitted'))
         handleClose()
       } else {
-        dispatch(openError(`Failed to deposit ${token.symbol}`))
+        dispatch(openError(`Failed to bridge ETH`))
+      }
+
+    } else {
+      //console.log("Bridging ERC20 to L2")
+      res = await dispatch(
+        depositErc20(value_Wei_String, token.address, token.addressL2)
+      )
+      if (res) {
+        dispatch(setActiveHistoryTab1('Bridge to L2'))
+        dispatch(openAlert(`${token.symbol} bridge transaction submitted`))
+        handleClose()
+      } else {
+        dispatch(openError(`Failed to bridge ${token.symbol}`))
       }
     }
   }
-
-  function setAmount(value) {
-    if (Number(value) > 0 && Number(value) < Number(token.balance)) {
-      setDisabledSubmit(false)
-    } else {
-      setDisabledSubmit(true)
-    }
-    setValue(value)
-  }
-
-  const renderGasPicker = (
-    <GasPicker
-      selectedSpeed={selectedSpeed}
-      setSelectedSpeed={setSelectedSpeed}
-      setGasPrice={setGasPrice}
-    />
-  )
 
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
@@ -92,32 +105,59 @@ function InputStep({ handleClose, token }) {
   let buttonLabel_1 = 'CANCEL'
   if( depositLoading ) buttonLabel_1 = 'CLOSE WINDOW'
 
+  let convertToUSD = false
+  
+  if( Object.keys(lookupPrice) && 
+      !!value &&
+      new BN(value).gt(new BN(0.0)) &&
+      new BN(value).lte(new BN(maxValue)) &&
+      !!amountToUsd(value, lookupPrice, token)
+  ) {
+    convertToUSD = true
+  }
+
   return (
     <>
       <Box>
         <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
-          {`Deposit ${token && token.symbol ? token.symbol : ''}`}
+          Classic Bridge {token && token.symbol ? token.symbol : ''} to L2
         </Typography>
 
         <Input
-          label="Enter amount to deposit"
-          placeholder="0.0000"
+          label="Amount to bridge to L2"
+          placeholder="0.0"
           value={value}
           type="number"
-          onChange={(i)=>setAmount(i.target.value)}
+          onChange={(i)=>{
+            setAmount(i.target.value)
+            setValue_Wei_String(toWei_String(i.target.value, token.decimals))
+          }}
+          onUseMax={(i)=>{//they want to use the maximum
+            setAmount(maxValue) //so the input value updates for the user - just for display purposes
+            setValue_Wei_String(token.balance.toString()) //this is the one that matters
+          }}
+          allowUseAll={true}
           unit={token.symbol}
-          maxValue={logAmount(token.balance, token.decimals)}
+          maxValue={maxValue}
           variant="standard"
           newStyle
         />
 
-        {Object.keys(lookupPrice) && !!value && !!amountToUsd(value, lookupPrice, token) && (
+        {!!convertToUSD && (
           <Typography variant="body1" sx={{mt: 2, fontWeight: 700}}>
             {`Amount in USD ${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
           </Typography>
         )}
 
-        {renderGasPicker}
+        {!!token && token.symbol === 'OMG' && (
+          <Typography variant="body2" sx={{mt: 2}}>
+            NOTE: The OMG Token was minted in 2017 and it does not conform to the ERC20 token standard. 
+            In some cases, three interactions with MetaMask are needed. If you are bridging out of a 
+            new wallet, it starts out with a 0 approval, and therefore, only two interactions with 
+            MetaMask will be needed.
+          </Typography>
+        )}
+
       </Box>
       <WrapperActionsModal>
         <Button
@@ -133,12 +173,12 @@ function InputStep({ handleClose, token }) {
           size="large"
           variant="contained"
           loading={depositLoading}
-          tooltip='Your swap is still pending. Please wait for confirmation.'
+          tooltip={depositLoading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L2"}
           disabled={disabledSubmit}
           triggerTime={new Date()}
           fullWidth={isMobile}
         >
-          Deposit
+          Bridge
         </Button>
       </WrapperActionsModal>
     </>

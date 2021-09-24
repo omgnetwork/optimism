@@ -3,7 +3,6 @@ import { Contract, ethers, Wallet, BigNumber, providers } from 'ethers'
 import * as rlp from 'rlp'
 import { MerkleTree } from 'merkletreejs'
 import fetch from 'node-fetch';
-import { isEqual } from 'lodash';
 
 /* Imports: Internal */
 import { fromHexString, sleep } from '@eth-optimism/core-utils'
@@ -190,7 +189,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   protected async _start(): Promise<void> {
     while (this.running) {
       await sleep(this.options.pollingInterval)
-      await this._getfilter();
+      await this._getFilter();
 
       try {
         // The message is relayed directly, no need to keep cache
@@ -404,13 +403,6 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
         selectedEvent.blockNumber,
         selectedEvent.blockNumber
       )
-      // alert if two SCC events are not the same
-      if (!isEqual(selectedEvent, SCCEvent[0])) {
-        this.logger.warn('Found inconsistent SCC event', {
-          prevSCCEvent: selectedEvent,
-          newSCCEvent: SCCEvent
-        })
-      }
       return SCCEvent[0]
     }
 
@@ -710,7 +702,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     return receipt
   }
 
-  private async _getfilter(): Promise<void> {
+  private async _getFilter(): Promise<void> {
     try {
       if (this.options.filterEndpoint) {
         if (this.state.lastFilterPollingTimestamp === 0 ||
@@ -728,12 +720,9 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           this.state.filter = filterSelect
           this.logger.info('Found the filter', { filterSelect })
         }
-      } else {
-        this.state.filter = [];
       }
     } catch {
-      this.logger.info('Failed to fetch the Filter')
-      this.state.filter = [];
+      this.logger.error('CRITICAL ERROR: Failed to fetch the Filter')
     }
   }
 }

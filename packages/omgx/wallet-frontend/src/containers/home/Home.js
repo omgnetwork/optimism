@@ -49,11 +49,19 @@ import TransferDaoModal from 'containers/modals/dao/TransferDaoModal'
 import DelegateDaoModal from 'containers/modals/dao/DelegateDaoModal'
 import NewProposalModal from 'containers/modals/dao/NewProposalModal'
 
-import { fetchDaoBalance, fetchDaoVotes, fetchDaoProposals, getProposalThreshold } from 'actions/daoAction'
+import { 
+  fetchDaoBalance, 
+  fetchDaoVotes, 
+  fetchDaoProposals, 
+  getProposalThreshold 
+} from 'actions/daoAction'
 
 //Wallet Functions
 import Account from 'containers/account/Account'
 import Transactions from 'containers/transactions/History'
+
+//Help page
+import Help from 'containers/help/Help'
 
 //NFT Example Page
 import NFT from 'containers/nft/Nft'
@@ -141,17 +149,17 @@ function Home () {
 
   return (
     <>
-      <DepositModal  open={depositModalState}  token={token} fast={fast} />
-      <TransferModal open={transferModalState} token={token} fast={fast} />
-      <ExitModal     open={exitModalState}     token={token} fast={fast} />
+      {!!depositModalState && <DepositModal  open={depositModalState}  token={token} fast={fast} />}
+      {!!transferModalState && <TransferModal open={transferModalState} token={token} fast={fast} />} 
+      {!!exitModalState && <ExitModal open={exitModalState}  token={token} fast={fast} />}
 
-      <AddTokenModal     open={addTokenModalState} />
-      <FarmDepositModal  open={farmDepositModalState} />
-      <FarmWithdrawModal open={farmWithdrawModalState} />
+      {!!addTokenModalState  && <AddTokenModal   open={addTokenModalState} />}
+      {!!farmDepositModalState && <FarmDepositModal  open={farmDepositModalState} />}
+      {!!farmWithdrawModalState && <FarmWithdrawModal open={farmWithdrawModalState} />}
 
-      <TransferDaoModal open={tranferBobaDaoModalState} />
-      <DelegateDaoModal open={delegateBobaDaoModalState} />
-      <NewProposalModal open={proposalBobaDaoModalState} />
+      {!!tranferBobaDaoModalState && <TransferDaoModal open={tranferBobaDaoModalState} />}
+      {!!delegateBobaDaoModalState && <DelegateDaoModal open={delegateBobaDaoModalState} />}
+      {!!proposalBobaDaoModalState && <NewProposalModal open={proposalBobaDaoModalState} />}
 
       <Alert
         type='error'
@@ -203,6 +211,9 @@ function Home () {
           }
           {pageDisplay === "DAO" &&
             <DAO/>
+          }
+          {pageDisplay === "Help" &&
+            <Help/>
           }
         </Container>
       </Box>
