@@ -13,6 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+import networkService from "services/networkService";
+
 //import { WebWalletError } from 'services/errorService';
 
 export function createAction (key, asyncAction) {
@@ -21,8 +23,9 @@ export function createAction (key, asyncAction) {
     try {
       const response = await asyncAction();
       //deal with metamask errors
-      if(response && response.hasOwnProperty('message') && response.hasOwnProperty('code')) { 
-        dispatch({ type: `UI/ERROR/UPDATE`, payload: response.message })
+      if(response && response.hasOwnProperty('message') && response.hasOwnProperty('code')) {
+        const errorMessage = networkService.handleMetaMaskError(response.code) ?? response.message;
+        dispatch({ type: `UI/ERROR/UPDATE`, payload: errorMessage })
         // cancel request loading state
         dispatch({ type: `${key}/ERROR` })
         return false
