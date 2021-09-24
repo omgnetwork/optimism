@@ -22,6 +22,7 @@ export function createAction (key, asyncAction) {
     dispatch({ type: `${key}/REQUEST` });
     try {
       const response = await asyncAction();
+
       //deal with metamask errors
       if(response && response.hasOwnProperty('message') && response.hasOwnProperty('code')) {
         const errorMessage = networkService.handleMetaMaskError(response.code) ?? response.message;
@@ -33,6 +34,8 @@ export function createAction (key, asyncAction) {
       dispatch({ type: `${key}/SUCCESS`, payload: response });
       return true;
     } catch (error) {
+      const errorMessage = networkService.handleMetaMaskError(error.code) ?? error.message;
+      dispatch({ type: `UI/ERROR/UPDATE`, payload: errorMessage })
       // cancel request loading state
       dispatch({ type: `${key}/ERROR` })
       console.log("createAction error:", error)

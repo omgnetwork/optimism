@@ -1285,7 +1285,7 @@ class NetworkService {
   handleMetaMaskError = (errorCode) => {
     switch (errorCode) {
       case 4001:
-        return 'Transaction was rejected'
+        return 'Transaction was rejected by user: signature denied'
       default:
         return null
     }
