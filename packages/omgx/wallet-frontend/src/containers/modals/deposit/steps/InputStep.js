@@ -33,17 +33,15 @@ function InputStep({ handleClose, token }) {
   const signatureStatus = useSelector(selectSignatureStatus_depositTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
 
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
   const maxValue = logAmount(token.balance, token.decimals)
 
   function setAmount(value) {
     
-    console.log("setAmount")
-
     const tooSmall = new BN(value).lte(new BN(0.0)) 
-    const tooBig   = new BN(value).gt(new BN(maxValue))
-
-    console.log("tooSmall",tooSmall)
-    console.log("tooBig",tooBig)
+    const tooBig = new BN(value).gt(new BN(maxValue))
 
     if (tooSmall || tooBig) {
       setDisabledSubmit(true)
@@ -89,9 +87,6 @@ function InputStep({ handleClose, token }) {
     }
   }
 
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-
   useEffect(() => {
     if (signatureStatus && depositLoading) {
       //we are all set - can close the window
@@ -132,7 +127,7 @@ function InputStep({ handleClose, token }) {
             setAmount(i.target.value)
             setValue_Wei_String(toWei_String(i.target.value, token.decimals))
           }}
-          onUseMax={(i)=>{//they want to use the maximum
+          onUseMax={(i)=>{      //they want to use the maximum
             setAmount(maxValue) //so the input value updates for the user - just for display purposes
             setValue_Wei_String(token.balance.toString()) //this is the one that matters
           }}

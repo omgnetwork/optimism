@@ -17,7 +17,7 @@ import { useTheme } from '@emotion/react'
 
 import { Typography, useMediaQuery } from '@material-ui/core'
 import { Box } from '@material-ui/system'
-import { depositL1LP, approveERC20 } from 'actions/networkAction'
+import { depositL1LP } from 'actions/networkAction'
 
 import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
 
@@ -57,15 +57,13 @@ function InputStepFast({ handleClose, token }) {
   
   const maxValue = logAmount(token.balance, token.decimals)
 
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
   function setAmount(value) {
     
-    console.log("setAmount")
-
     const tooSmall = new BN(value).lte(new BN(0.0)) 
-    const tooBig   = new BN(value).gt(new BN(maxValue))
-
-    console.log("tooSmall",tooSmall)
-    console.log("tooBig",tooBig)
+    const tooBig = new BN(value).gt(new BN(maxValue))
 
     if (tooSmall || tooBig) {
       setDisabledSubmit(true)
@@ -80,62 +78,22 @@ function InputStepFast({ handleClose, token }) {
 
     let res
 
-    console.log("Amount to bridge to L2:", value_Wei_String)
+    console.log("Fast Bridge - Amount to bridge to L2:", value_Wei_String)
 
-    if(token.symbol === 'ETH') {
-
-      console.log("ETH Fast Bridge")
-
-      res = await dispatch(depositL1LP(token.address, value_Wei_String))
+    //depositL1LP will handle approval(s) if needed
+    res = await dispatch(depositL1LP(token.address, value_Wei_String))
       
-      if (res) {
-        dispatch(setActiveHistoryTab1('Bridge to L2'))
-        dispatch(
-          openAlert(
-            `ETH was bridged. You will receive
-            ${((Number(value) * (100 - Number(feeRate)))/100).toFixed(3)}
-            ETH on L2`
-          )
-        )
-        handleClose()
-        return
-      } else {
-        dispatch(openError('Failed to bridge ETH'))
-        return
-      }
-
-    }
-
-    //at this point we know it's not ETH
-    console.log("ERC20 Fast Bridge")
-
-    res = await dispatch(
-      approveERC20(
-        value_Wei_String,
-        token.address,
-        networkService.L1LPAddress
-      )
-    )
-
-    if(!res) {
-      dispatch(openError('Failed to approve amount'))
-    }
-
-    res = await dispatch(
-      depositL1LP(token.address, value_Wei_String)
-    )
-
     if (res) {
       dispatch(setActiveHistoryTab1('Bridge to L2'))
       dispatch(
-        openAlert(
-          `${token.symbol} was bridged to the L1LP. You will receive
-           ${receivableAmount(value)} ${token.symbol} on L2`
-        )
+        openAlert(`${token.symbol} was bridged to the L1LP. You will receive
+                   {' '} ${receivableAmount(value)} ${token.symbol} on L2`)
       )
       handleClose()
+      return
     } else {
-      dispatch(openError('Failed to bridge ERC20'))
+      dispatch(openError(`Failed to bridge ${token.symbol}`))
+      return
     }
 
   }
@@ -146,9 +104,11 @@ function InputStepFast({ handleClose, token }) {
 
   useEffect(() => {
     if (typeof(token) !== 'undefined') {
+      //update the LPL2 balance
       networkService.L2LPBalance(token.addressL2).then((res) => {
         setLPBalance(Number(logAmount(res, token.decimals)).toFixed(3))
       })
+      //update the LPL2 fee rate
       networkService.getTotalFeeRate().then((feeRate) => {
         setFeeRate(feeRate)
       })
@@ -166,18 +126,15 @@ function InputStepFast({ handleClose, token }) {
   const label = 'There is a ' + feeRate + '% fee.'
 
   let buttonLabel_1 = 'CANCEL'
-  if( depositLoading || approvalLoading ) buttonLabel_1 = 'CLOSE WINDOW'
+  if( depositLoading || approvalLoading ) 
+    buttonLabel_1 = 'CLOSE WINDOW'
 
   let buttonLabel_2 = 'Bridge'
-
   if(depositLoading) {
     buttonLabel_2 = "Bridging..."
   } else if (approvalLoading) {
     buttonLabel_2 = "Approving..."
   }
-
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   let valueIsValid = false
 
@@ -206,7 +163,7 @@ function InputStepFast({ handleClose, token }) {
             setAmount(i.target.value)
             setValue_Wei_String(toWei_String(i.target.value, token.decimals))
           }}
-          onUseMax={(i)=>{//they want to use the maximum
+          onUseMax={(i)=>{      //they want to use the maximum
             setAmount(maxValue) //so the input value updates for the user
             setValue_Wei_String(token.balance.toString())
           }}

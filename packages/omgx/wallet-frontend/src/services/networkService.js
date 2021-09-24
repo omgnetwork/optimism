@@ -1314,8 +1314,6 @@ class NetworkService {
 
       return l2Receipt
     } catch(error) {
-      //console.log(error)
-      //return false
       console.log("NS: depositETHL2 error:",error)
       throw new Error(error.message)
     }
@@ -1961,14 +1959,28 @@ class NetworkService {
   /***********************************************************/
   /***** SWAP ON to BOBA by depositing funds to the L1LP *****/
   /***********************************************************/
-  async depositL1LP(currency, value_Wei_String) {
+  async depositL1LP(currencyAddress, value_Wei_String) {
 
     updateSignatureStatus_depositLP(false)
 
+    if( currencyAddress !== this.L1_ETH_Address ) {
+      
+      //we need to approve the amount first
+      const approval = await this.approveERC20(
+        value_Wei_String, 
+        currencyAddress, 
+        this.L1LPAddress,
+        L1ERC20Json.abi
+      )
+
+      await approval.wait()
+
+    } 
+
     const depositTX = await this.L1LPContract.clientDepositL1(
       value_Wei_String,
-      currency,
-      currency === this.L1_ETH_Address ? { value: value_Wei_String } : {}
+      currencyAddress,
+      currencyAddress === this.L1_ETH_Address ? { value: value_Wei_String } : {}
     )
 
     //at this point the tx has been submitted, and we are waiting...
