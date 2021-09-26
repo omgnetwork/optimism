@@ -1,6 +1,6 @@
 {
   "name": "@boba/fraud-detector",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "description": "Fraud Detector Service",
   "main": "dist/index",
@@ -9,13 +9,13 @@
     "dist/index"
   ],
   "scripts": {
-    "start": "node ./exec/run-fraud-prover.js",
+    "start": "node ./exec/run-fraud-detector.js",
     "build": "tsc -p ./tsconfig.build.json"
   },
   "keywords": [
     "optimism",
     "ethereum",
-    "fraud-prover"
+    "fraud-detector"
   ],
   "homepage": "https://github.com/ethereum-optimism/optimism-monorepo/tree/master/packages/fraud-prover#readme",
   "license": "MIT",
