@@ -104,9 +104,14 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
           nextTxPointer
         )
 
+        let fixedL2ChanID = l2ChainId
+        if (extraData.batchIndex.toNumber() < 9) {
+          fixedL2ChanID = 28
+        }
+
         const decoded = maybeDecodeSequencerBatchTransaction(
           sequencerTransaction,
-          l2ChainId
+          fixedL2ChanID
         )
 
         transactionEntries.push({
@@ -115,7 +120,8 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
             .toNumber(),
           batchIndex: extraData.batchIndex.toNumber(),
           blockNumber: BigNumber.from(context.blockNumber).toNumber(),
-          timestamp: BigNumber.from(context.timestamp).toNumber(),
+          timestamp: extraData.batchIndex.toNumber() === 70 ?
+            1631652373 : BigNumber.from(context.timestamp).toNumber(),
           gasLimit: BigNumber.from(extraData.gasLimit).toString(),
           target: SEQUENCER_ENTRYPOINT_ADDRESS,
           origin: null,
