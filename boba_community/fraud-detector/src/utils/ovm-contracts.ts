@@ -1,6 +1,6 @@
 import { Contract, providers } from 'ethers'
 import { getContractInterface } from '@eth-optimism/contracts'
-import { ZERO_ADDRESS } from './constants'
+const ZERO_ADDRESS = '0x' + '00'.repeat(20)
 
 export const loadContract = (
   name: string,

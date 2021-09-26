@@ -8,7 +8,7 @@ dotenv.config()
 
 const main = async () => {
   
-  const config: Bcfg = new Config('fraud-prover')
+  const config: Bcfg = new Config('fraud-detector')
   
   config.load({
     env: true,
@@ -19,44 +19,17 @@ const main = async () => {
 
   const L1_NODE_WEB3_URL = config.str('l1-node-web3-url', env.L1_NODE_WEB3_URL)
   const VERIFIER_WEB3_URL = config.str('verifier-web3-url', env.VERIFIER_WEB3_URL)
-
-  const ADDRESS_MANAGER_ADDRESS = config.str(
-    'address-manager-address',
-    env.ADDRESS_MANAGER_ADDRESS
-  )
-
-  const L1_WALLET_KEY = config.str('l1-wallet-key', env.L1_WALLET_KEY)
-  const MNEMONIC = config.str('mnemonic', env.MNEMONIC)
-  const HD_PATH = config.str('hd-path', env.HD_PATH)
   
-  const DEPLOY_GAS_LIMIT = config.uint(
-    'deploy-gas-limit',
-    parseInt(env.DEPLOY_GAS_LIMIT, 10) || 4000000
-  )
-  const RUN_GAS_LIMIT = config.uint(
-    'run-gas-limit',
-    parseInt(env.RUN_GAS_LIMIT, 10) || 95000000
-  )
-  const POLLING_INTERVAL = config.uint(
-    'polling-interval',
-    parseInt(env.POLLING_INTERVAL, 10) || 5000
-  )
-  const GET_LOGS_INTERVAL = config.uint(
-    'get-logs-interval',
-    parseInt(env.GET_LOGS_INTERVAL, 10) || 2000
-  )
-  const L1_START_OFFSET = config.uint(
-    'l1-start-offset',
-    parseInt(env.L1_START_OFFSET  || '1', 10)
-  )
-  const FROM_L2_TRANSACTION_INDEX = config.uint(
-    'from-l2-transaction-index',
-    parseInt(env.FROM_L2_TRANSACTION_INDEX, 10) || 0
-  )
-  const L1_BLOCK_FINALITY = config.uint(
-    'l1-block-finality',
-    parseInt(env.L1_BLOCK_FINALITY, 10) || 0
-  )
+  const ADDRESS_MANAGER_ADDRESS = config.str('address-manager-address', env.ADDRESS_MANAGER_ADDRESS)
+
+  const POLLING_INTERVAL = config.uint('polling-interval', 5000)
+  
+  const GET_LOGS_INTERVAL = config.uint('get-logs-interval', 2000)
+  
+  const L1_START_OFFSET = config.uint('l1-start-offset', 1)
+  const FROM_L2_TRANSACTION_INDEX = config.uint('from-l2-transaction-index', 10)
+  const L1_BLOCK_FINALITY = config.uint('l1-block-finality', 0)
+
   if (!ADDRESS_MANAGER_ADDRESS) {
     throw new Error('Must pass ADDRESS_MANAGER_ADDRESS')
   }
@@ -70,30 +43,18 @@ const main = async () => {
   const l2Provider = new providers.JsonRpcProvider(VERIFIER_WEB3_URL)  
   const l1Provider  = new providers.JsonRpcProvider(L1_NODE_WEB3_URL)
 
-  let wallet: Wallet
-  if (L1_WALLET_KEY) {
-    wallet = new Wallet(L1_WALLET_KEY, l1Provider)
-  } else if (MNEMONIC) {
-    wallet = Wallet.fromMnemonic(MNEMONIC, HD_PATH)
-    wallet = wallet.connect(l1Provider)
-  } else {
-    throw new Error('Must pass one of L1_WALLET_KEY or MNEMONIC')
-  }
-
   const service = new FraudProverService({
     l1RpcProvider: l1Provider,
     l2RpcProvider: l2Provider,
     addressManagerAddress: ADDRESS_MANAGER_ADDRESS,
-    l1Wallet: wallet,
-    deployGasLimit: DEPLOY_GAS_LIMIT,
-    runGasLimit: RUN_GAS_LIMIT,
-    fromL2TransactionIndex: FROM_L2_TRANSACTION_INDEX,
     pollingInterval: POLLING_INTERVAL,
-    l1StartOffset: L1_START_OFFSET,
-    l1BlockFinality: L1_BLOCK_FINALITY,
     getLogsInterval: GET_LOGS_INTERVAL,
+    l1StartOffset: L1_START_OFFSET,
+    fromL2TransactionIndex: FROM_L2_TRANSACTION_INDEX,
+    l1BlockFinality: L1_BLOCK_FINALITY,
   })
 
   await service.start()
 }
+
 export default main

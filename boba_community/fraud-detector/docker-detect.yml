@@ -1,10 +1,10 @@
 version: "3.4"
 
 x-var: &L1_NODE_WEB3_URL
-  L1_NODE_WEB3_URL=https://mainnet.infura.io/v3/INFURA_KEY
+  L1_NODE_WEB3_URL=https://mainnet.infura.io/v3/4a8ff28168f34a9d91bd84412def30ab
 
 x-var: &DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT
-  DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT=https://mainnet.infura.io/v3/INFURA_KEY
+  DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT=https://mainnet.infura.io/v3/4a8ff28168f34a9d91bd84412def30ab
 
 x-var: &L2_NODE_WEB3_URL
   L2_NODE_WEB3_URL=http://geth_l2:8545
