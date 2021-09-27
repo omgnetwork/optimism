@@ -42,6 +42,7 @@ function Transaction({
   detail,
   oriChain,
   oriHash,
+  amountTx
 }) {
 
   const [dropDownBox, setDropDownBox] = useState(false)
@@ -174,6 +175,7 @@ function Transaction({
               {blockNumber}
             </Typography>
           </div>
+          {amountTx ? <Typography variant="h4">{amountTx}</Typography> : null}
         </S.TableCell>
 
         <S.TableCell sx={{ gap: "5px" }}>
