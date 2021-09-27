@@ -52,7 +52,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
   }
 
   private state: {
-    nextUnverifiedStateRoot: number
+    L2_block: number
     lastFinalizedTxHeight: number
     nextUnfinalizedTxHeight: number
     lastQueriedL1Block: number
@@ -162,7 +162,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     
     this.state.eventCache = []
     
-    this.state.nextUnverifiedStateRoot = 
+    this.state.L2_block = 
       this.options.fromL2TransactionIndex || 0
   }
 
@@ -174,65 +174,83 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
        
       try {
         
-        this.logger.info("State Root Position",{
-          nextUnverifiedStateRoot: this.state.nextUnverifiedStateRoot
+        this.logger.info("Currently at L2 block",{
+          L2_block: this.state.L2_block
         })
 
-        let nextBatch = await this.state.l1Provider.getStateBatch(
-          this.state.nextUnverifiedStateRoot
+        //look at all L1 batches, and pick out the one that is relevant to this block
+        let nextL1_batch = await this.state.l1Provider.getStateBatch(
+          this.state.L2_block
         )
 
-        if(nextBatch === undefined) {
-          //console.log('no new batch headers to check - waiting for batches')
-          this.logger.info('Waiting for new transactions and roots...')
-          continue
-        }
+        let nextL1_batchP1 = await this.state.l1Provider.getStateBatch(
+          this.state.L2_block + 1
+        )
 
-        while (nextBatch !== undefined) {
+        console.log("next batch:",nextL1_batch)
+        console.log("next batchP1:",nextL1_batchP1)
+
+        //if(nextBatch === undefined) {
+          //console.log('no new batch headers to check - waiting for batches')
+          
+          if(nextL1_batch === undefined && nextL1_batchP1 === undefined) {
+            this.logger.info('Waiting for new transactions and roots...')
+            continue
+          } else if (nextL1_batch === undefined && nextL1_batchP1) {
+            //not getting data for this block - skip to next one
+            this.logger.info('WARNING: no data for L2 block',{dataGap: this.state.L2_block})
+            nextL1_batch = nextL1_batchP1 //skip ahead by one
+          } 
+        //}
+
+        while (nextL1_batch !== undefined) {
       
-          this.logger.info("New batch to verify", { nextBatch })
+          this.logger.info("New L1 batch to verify", { nextL1_batch })
        
           //pull all of them in one go
           //console.log("L1 state roots for this header:", nextBatch.stateRoots )
 
-          for (let i = 0; i < nextBatch.header.batchSize.toNumber(); i++) {
+          for (let i = 0; i < nextL1_batch.header.batchSize.toNumber(); i++) {
             
-            const index = nextBatch.header.prevTotalElements.toNumber() + i 
+            const L2B = nextL1_batch.header.prevTotalElements.toNumber() + i 
 
             //console.log('Checking state root for mismatch', index)
 
-            const l1StateRoot = nextBatch.stateRoots[i]
+            const l1StateRoot = nextL1_batch.stateRoots[i]
 
             const l2VStateRoot = await this.state.l2Provider.getStateRoot(
-             index + L2_GENESIS_BLOCK
+              L2B + L2_GENESIS_BLOCK
             )
             
             if (l1StateRoot !== l2VStateRoot) {
               this.logger.info('State root MISMATCH - not verified', { 
-                stateRoot: this.state.nextUnverifiedStateRoot,
-                mismatchIndex: index 
+                stateRoot: this.state.L2_block,
+                mismatchL1Batch: nextL1_batch,
+                mismatchL2Block: L2B 
               } )
               this.logger.info('L1 State Root', { l1StateRoot })
               this.logger.info('L2 State Root', { l2VStateRoot })
             } else {
               this.logger.info('State root MATCH - verified ✓', { 
-                stateRoot: this.state.nextUnverifiedStateRoot
+                batchBaseL2_block: this.state.L2_block,
+                verifiedL2_block: L2B
               })
             }
 
           }
 
-          this.state.nextUnverifiedStateRoot =
-            nextBatch.header.prevTotalElements.toNumber() +
-            nextBatch.header.batchSize.toNumber()
+          //Update the next block to look at
+          this.state.L2_block =
+            nextL1_batch.header.prevTotalElements.toNumber() +
+            nextL1_batch.header.batchSize.toNumber()
 
-          console.log('Next UnverifiedStateRoot:', 
-            this.state.nextUnverifiedStateRoot
+          console.log('Next L2 Block:', 
+            this.state.L2_block
           )
 
-          nextBatch = await this.state.l1Provider.getStateBatch(
-            this.state.nextUnverifiedStateRoot
-          )
+          // nextBatch = await this.state.l1Provider.getStateBatch(
+          //   this.state.L2_block
+          // )
 
         }
 

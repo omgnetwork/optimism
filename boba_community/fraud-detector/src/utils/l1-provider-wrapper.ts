@@ -55,10 +55,13 @@ export class L1ProviderWrapper {
         )
       )
 
+      console.log("Found Events:", events.length)
+
       //almost caught up...
       if (startingBlockNumber + 2000 >= latestL1BlockNumber) {
         cache.startingBlockNumber = latestL1BlockNumber
         cache.events = cache.events.concat(events)
+        console.log("Adding new events:", events.length)
         break
       }
 
@@ -175,32 +178,38 @@ export class L1ProviderWrapper {
     ]
   }
 
-  private async getStateBatchAppendedEventForIndex(index: number): Promise<Event> {
+  private async getStateBatchAppendedEventForIndex(L2_block: number): Promise<Event> {
     
+    //this will also update the cache, in case there are new blocks
     const events = await this.findAllEvents(
       this.OVM_StateCommitmentChain,
       this.OVM_StateCommitmentChain.filters.StateBatchAppended()
     )
 
     if (events.length === 0) {
-      console.log('L1PW OVM_StateCommitmentChain is empty - returning')
+      console.log('getStateBatchAppendedEventForIndex - L1 OVM_StateCommitmentChain is empty - returning')
       return
     }
     
-    //Great - we have some StateBatchAppended events
+    //We have StateBatchAppended events
     const matching = events.filter((event) => {
-      //for each of the events, determine if it's relevant for this index
+      //for each of the events, determine if it's relevant for this L2 Block
       const prevTotalElements = event.args._prevTotalElements.toNumber()
       const batchSize = event.args._batchSize.toNumber()
-      //console.log("Range: min <= index < prevTotalElements + batchSize:", prevTotalElements, index, prevTotalElements + batchSize)  
+      //console.log("Range: min <= index < prevTotalElements + batchSize:", prevTotalElements, L2_Block, prevTotalElements + batchSize)  
       //pick out the relevant ones
       return (
-          index >= prevTotalElements && 
-          index < prevTotalElements + batchSize
+          L2_block >= prevTotalElements && 
+          L2_block < prevTotalElements + batchSize
       )
     })
 
-    //this is going to be the main return datastructure
+    if (matching.length === 0) {
+      console.log('getStateBatchAppendedEventForIndex - no matching events for L2 Block:',L2_block)
+      return
+    }
+
+    //The main return datastructure
     const results: ethers.Event[] = []
 
     results.push(matching[0]) 
