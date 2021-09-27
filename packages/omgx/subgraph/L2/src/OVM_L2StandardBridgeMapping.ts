@@ -4,14 +4,14 @@ import {
   DepositFinalized
 } from '../generated/OVM_L2StandardBridge/OVM_L2StandardBridge'
 import {
-  SBWithdrawalInitiated,
-  SBDepositFailed,
-  SBDepositFinalized
+  StandardBridgeWithdrawalInitiated,
+  StandardBridgeDepositFailed,
+  StandardBridgeDepositFinalized
 } from '../generated/schema'
 
-export function handleSBWithdrawalInitiated(event: WithdrawalInitiated): void {
+export function handleStandardBridgeWithdrawalInitiated(event: WithdrawalInitiated): void {
   let id = event.transaction.hash.toHex()
-  let withdrawalInitiated = new SBWithdrawalInitiated(id)
+  let withdrawalInitiated = new StandardBridgeWithdrawalInitiated(id)
   withdrawalInitiated.id = id
   withdrawalInitiated.l1Token = event.params._l1Token
   withdrawalInitiated.l2Token = event.params._l2Token
@@ -23,9 +23,9 @@ export function handleSBWithdrawalInitiated(event: WithdrawalInitiated): void {
   withdrawalInitiated.save()
 }
 
-export function handleSBDepositFailed(event: DepositFailed): void {
+export function handleStandardBridgeDepositFailed(event: DepositFailed): void {
   let id = event.transaction.hash.toHex()
-  let depositFailed = new SBDepositFailed(id)
+  let depositFailed = new StandardBridgeDepositFailed(id)
   depositFailed.id = id
   depositFailed.l1Token = event.params._l1Token
   depositFailed.l2Token = event.params._l2Token
@@ -37,9 +37,9 @@ export function handleSBDepositFailed(event: DepositFailed): void {
   depositFailed.save()
 }
 
-export function handleSBDepositFinalized(event: DepositFinalized): void {
+export function handleStandardBridgeDepositFinalized(event: DepositFinalized): void {
   let id = event.transaction.hash.toHex()
-  let depositFinalized = new SBDepositFinalized(id)
+  let depositFinalized = new StandardBridgeDepositFinalized(id)
   depositFinalized.id = id
   depositFinalized.l1Token = event.params._l1Token
   depositFinalized.l2Token = event.params._l2Token

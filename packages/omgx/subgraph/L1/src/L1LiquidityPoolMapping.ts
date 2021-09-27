@@ -70,7 +70,7 @@ export function handleLPWithdrawLiquidity(event: WithdrawLiquidity): void {
   withdrawLiquidityEvent.save()
 }
 
-export function handleWithdrawReward(event: WithdrawReward): void {
+export function handleLPWithdrawReward(event: WithdrawReward): void {
   let id = event.transaction.hash.toHex()
   let withdrawReward = new LPWithdrawReward(id)
   withdrawReward.id = id
