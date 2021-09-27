@@ -29,6 +29,7 @@
     "@eth-optimism/common-ts": "^0.1.5",
     "@eth-optimism/core-utils": "^0.5.5",
     "bcfg": "^0.1.6",
+    "chalk": "^4.1.2",
     "dotenv": "^8.2.0",
     "merkle-patricia-tree": "4.0.0",
     "merkletreejs": "^0.2.10",

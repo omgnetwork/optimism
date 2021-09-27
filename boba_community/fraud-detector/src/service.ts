@@ -2,6 +2,7 @@
 import { Contract, Signer, ethers, Wallet, BigNumber, providers } from 'ethers'
 import { BaseService } from '@eth-optimism/common-ts'
 import { loadContract, loadContractFromManager } from '@eth-optimism/contracts'
+import chalk from 'chalk'
 
 const L2_GENESIS_BLOCK = 1
 
@@ -73,7 +74,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     for (let i = 0; i < 10; i++) {
       try {
         await this.options.l1RpcProvider.detectNetwork()
-        this.logger.info('Successfully connected to the L1 network.')
+        this.logger.info('Successfully connected to the L1 network')
         break
       } catch (err) {
         if (i < 9) {
@@ -93,7 +94,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     for (let i = 0; i < 10; i++) {
       try {
         await this.options.l2RpcProvider.detectNetwork()
-        this.logger.info('Successfully connected to the L2 Verifier.')
+        this.logger.info('Successfully connected to the L2 Verifier')
         break
       } catch (err) {
         if (i < 9) {
@@ -130,7 +131,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
       address: this.state.OVM_StateCommitmentChain.address,
     })
 
-    this.logger.info('Connected to all contracts.')
+    this.logger.info('Connected to all contracts')
 
     this.state.l1Provider = new L1ProviderWrapper(
       this.options.l1RpcProvider,
@@ -152,18 +153,11 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
       this.state.OVM_StateCommitmentChain.filters.StateBatchAppended()
     )
 
-    // this.logger.info('Caching events for OVM_StateCommitmentChain.StateBatchDeleted...')
-    // await this.state.l1Provider.findAllEvents(
-    //   this.state.OVM_StateCommitmentChain,
-    //   this.state.OVM_StateCommitmentChain.filters.StateBatchDeleted()
-    // )
-
     this.state.lastQueriedL1Block = this.options.l1StartOffset
     
     this.state.eventCache = []
     
-    this.state.L2_block = 
-      this.options.fromL2TransactionIndex || 0
+    this.state.L2_block = this.options.fromL2TransactionIndex || 0
   }
 
   protected async _start(): Promise<void> {
@@ -178,80 +172,43 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
           L2_block: this.state.L2_block
         })
 
-        //look at all L1 batches, and pick out the one that is relevant to this block
-        let nextL1_batch = await this.state.l1Provider.getStateBatch(
+        let nextOperatorL2block = await this.state.l1Provider.getOperatorL2block(
           this.state.L2_block
         )
 
-        let nextL1_batchP1 = await this.state.l1Provider.getStateBatch(
-          this.state.L2_block + 1
-        )
+        console.log("next operator L2 block to verify:",nextOperatorL2block)
 
-        console.log("next batch:",nextL1_batch)
-        console.log("next batchP1:",nextL1_batchP1)
-
-        //if(nextBatch === undefined) {
-          //console.log('no new batch headers to check - waiting for batches')
-          
-          if(nextL1_batch === undefined && nextL1_batchP1 === undefined) {
-            this.logger.info('Waiting for new transactions and roots...')
-            continue
-          } else if (nextL1_batch === undefined && nextL1_batchP1) {
-            //not getting data for this block - skip to next one
-            this.logger.info('WARNING: no data for L2 block',{dataGap: this.state.L2_block})
-            nextL1_batch = nextL1_batchP1 //skip ahead by one
-          } 
-        //}
-
-        while (nextL1_batch !== undefined) {
+        while (nextOperatorL2block !== undefined) {
       
-          this.logger.info("New L1 batch to verify", { nextL1_batch })
-       
-          //pull all of them in one go
-          //console.log("L1 state roots for this header:", nextBatch.stateRoots )
+          this.logger.info("Operator L2 block to verify", { nextOperatorL2block })
 
-          for (let i = 0; i < nextL1_batch.header.batchSize.toNumber(); i++) {
-            
-            const L2B = nextL1_batch.header.prevTotalElements.toNumber() + i 
+          const l1StateRoot = nextOperatorL2block.stateRoot
 
-            //console.log('Checking state root for mismatch', index)
-
-            const l1StateRoot = nextL1_batch.stateRoots[i]
-
-            const l2VStateRoot = await this.state.l2Provider.getStateRoot(
-              L2B + L2_GENESIS_BLOCK
-            )
-            
-            if (l1StateRoot !== l2VStateRoot) {
-              this.logger.info('State root MISMATCH - not verified', { 
-                stateRoot: this.state.L2_block,
-                mismatchL1Batch: nextL1_batch,
-                mismatchL2Block: L2B 
-              } )
-              this.logger.info('L1 State Root', { l1StateRoot })
-              this.logger.info('L2 State Root', { l2VStateRoot })
-            } else {
-              this.logger.info('State root MATCH - verified ✓', { 
-                batchBaseL2_block: this.state.L2_block,
-                verifiedL2_block: L2B
-              })
-            }
-
+          const l2VStateRoot = await this.state.l2Provider.getStateRoot(
+            this.state.L2_block + L2_GENESIS_BLOCK
+          )
+          
+          if (l1StateRoot !== l2VStateRoot) {
+            this.logger.info('State root MISMATCH - not verified', { 
+              L2_block: this.state.L2_block,
+              operatorSR: l1StateRoot,
+              verifierSR: l2VStateRoot
+            } )
+            console.log(chalk.red('State root MISMATCH - not verified'))
+          } else {
+            this.logger.info('State root MATCH - verified ✓', { 
+              L2_block: this.state.L2_block,
+              operatorSR: l1StateRoot,
+              verifierSR: l2VStateRoot
+            })
+            console.log(chalk.green('State root MATCH - verified ✓'))
           }
 
-          //Update the next block to look at
-          this.state.L2_block =
-            nextL1_batch.header.prevTotalElements.toNumber() +
-            nextL1_batch.header.batchSize.toNumber()
+          this.state.L2_block++ //let's check the next one, if any
 
-          console.log('Next L2 Block:', 
+          nextOperatorL2block = await this.state.l1Provider.getOperatorL2block(
             this.state.L2_block
           )
-
-          // nextBatch = await this.state.l1Provider.getStateBatch(
-          //   this.state.L2_block
-          // )
-
         }
 
       } catch (err) {

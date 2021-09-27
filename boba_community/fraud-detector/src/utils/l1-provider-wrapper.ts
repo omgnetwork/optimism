@@ -1,17 +1,28 @@
 import { ethers, Event, Contract, BigNumber, providers } from 'ethers'
 
 import {
-  StateRootBatchHeader,
+  L2block
 } from '../types'
 
 export class L1ProviderWrapper {
 
   private eventCache: {
     [topic: string]: {
-      startingBlockNumber: number
-      events: ethers.Event[]
+      starting_L1_BlockNumber: number
+      L2blocks: L2block[]
     }
   } = {}
+
+    // return {
+    //   header: {
+    //     batchIndex: event.args._batchIndex,
+    //     batchRoot: event.args._batchRoot,
+    //     batchSize: event.args._batchSize,
+    //     prevTotalElements: event.args._prevTotalElements,
+    //     extraData: event.args._extraData,
+    //   },
+    //   stateRoots,
+    // }
 
   constructor(
     public provider: providers.JsonRpcProvider,
@@ -24,51 +35,98 @@ export class L1ProviderWrapper {
     contract: Contract,
     filter: ethers.EventFilter,
     fromBlock?: number
-  ): Promise<ethers.Event[]> {
+  ): Promise<L2block[]> {
     
     //start with the cache, or if there is no cache, start from scratch
     const cache = this.eventCache[filter.topics[0] as string] || {
-      startingBlockNumber: fromBlock || this.l1StartOffset,
-      events: [],
+      starting_L1_BlockNumber: fromBlock || this.l1StartOffset,
+      L2blocks: [],
     }
 
-    let events: ethers.Event[] = []
-    let startingBlockNumber = cache.startingBlockNumber
-    let latestL1BlockNumber = await this.provider.getBlockNumber()
+    let L2blocks: L2block[] = []
+    
+    let starting_L1_BlockNumber = cache.starting_L1_BlockNumber
+    //let latest_L1_BlockNumber = 13011896 + 40000//await this.provider.getBlockNumber()
+    let latest_L1_BlockNumber = await this.provider.getBlockNumber()
 
-    console.log("Starting scan at ethereum block number:", startingBlockNumber)
-    console.log("Current ethereum block number:", latestL1BlockNumber)
+    console.log("Starting scan at Ethereum block number:", starting_L1_BlockNumber)
+    console.log("Current Ethereum block height:", latest_L1_BlockNumber)
 
-    const initial_range = latestL1BlockNumber - startingBlockNumber
+    const new_L1_blocks = latest_L1_BlockNumber - starting_L1_BlockNumber
     //console.log("Blocks to inspect:", initial_range)
 
-    while (startingBlockNumber < latestL1BlockNumber) {
+    while (starting_L1_BlockNumber < latest_L1_BlockNumber) {
 
-      events = events.concat(
-        await contract.queryFilter(
-          filter,
-          startingBlockNumber,
-          Math.min(
-            startingBlockNumber + 2000,
-            latestL1BlockNumber - this.l1BlockFinality
-          )
+      const batches_in_query_interval = await contract.queryFilter(
+        filter,
+        starting_L1_BlockNumber,
+        Math.min(
+          starting_L1_BlockNumber + 2000,
+          latest_L1_BlockNumber - this.l1BlockFinality
         )
       )
 
-      console.log("Found Events:", events.length)
+      let L2blocks_indexed = []
+
+      //batches_in_query_interval.forEach
+      await Promise.all(batches_in_query_interval.map(async batch => {
+          
+        //many of these batches have length 1, but some are longer
+        //our goal is to unpack and reindex them, and add the state roots for each L2 TX aka block
+        //console.log("this event index",event.args._batchIndex.toString()),
+        //console.log(event.args._batchSize.toString())
+        
+        const batchSize = batch.args._batchSize.toNumber()
+        const prevTotalElements = batch.args._prevTotalElements.toNumber()
+        const batchIndex = batch.args._batchIndex.toNumber()
+        const batchRoot = batch.args._batchRoot.toString()
+        const L1block = batch.blockNumber
+        
+        //Now get the roots for this batch
+        const transaction = await this.provider.getTransaction(batch.transactionHash)
+
+        const [ stateRoots, ] = this.OVM_StateCommitmentChain.interface.decodeFunctionData(
+          'appendStateBatch',
+          transaction.data
+        )
+
+        for (let idx = 0; idx < batchSize; idx++) {
+
+          const L2block = {
+            L2block: prevTotalElements + idx,
+            L1block,
+            batchRoot,
+            batchSize,
+            batchIndex,
+            prevTotalElements,
+            extraData: batch.args._extraData,
+            stateRoot: stateRoots[idx]
+          }
+          //console.log("Adding L2 Block:", block)
+          L2blocks_indexed = L2blocks_indexed.concat(L2block)
+          //console.log("Indexed:",L2blocks_indexed)
+        }
+
+      }))
+
+      //console.log("Indexed:",L2blocks_indexed)
+
+      L2blocks = L2blocks.concat(L2blocks_indexed)
+
+      //console.log("Events:",L2blocks)
 
       //almost caught up...
-      if (startingBlockNumber + 2000 >= latestL1BlockNumber) {
-        cache.startingBlockNumber = latestL1BlockNumber
-        cache.events = cache.events.concat(events)
-        console.log("Adding new events:", events.length)
+      if (starting_L1_BlockNumber + 2000 >= latest_L1_BlockNumber) {
+        cache.starting_L1_BlockNumber = latest_L1_BlockNumber
+        cache.L2blocks = cache.L2blocks.concat(L2blocks)
+        console.log("Adding new L2blocks:", L2blocks.length)
         break
       }
 
-      startingBlockNumber += 2000
-      latestL1BlockNumber = await this.provider.getBlockNumber()
+      starting_L1_BlockNumber += 2000
+      latest_L1_BlockNumber = await this.provider.getBlockNumber()
 
-      const percent_completed = (latestL1BlockNumber - startingBlockNumber) / initial_range
+      const percent_completed = (latest_L1_BlockNumber - starting_L1_BlockNumber) / new_L1_blocks
 
       console.log("CACHING", (100.00 - (percent_completed * 100.00)).toFixed(2), "% completed")
     }
@@ -76,146 +134,39 @@ export class L1ProviderWrapper {
     //adding to the master event cache...
     this.eventCache[filter.topics[0] as string] = cache
 
-    return cache.events
+    //console.log("Cache:",this.eventCache[filter.topics[0] as string])
+
+    return cache.L2blocks
   }
 
-  public async getStateBatch(
-    index: number
-  ): Promise<
-    | {
-        header: StateRootBatchHeader
-        stateRoots: string[]
-      }
-    | undefined
-  > {
-    
-    //the batch event for this state root
-    const event = await this.getStateBatchAppendedEventForIndex(index)
-
-    if (event === undefined) {
-      return
-    }
-
-    const transaction = await this.provider.getTransaction(
-      event.transactionHash
-    )
-
-    const [
-      stateRoots,
-    ] = this.OVM_StateCommitmentChain.interface.decodeFunctionData(
-      'appendStateBatch',
-      transaction.data
-    )
-
-    return {
-      header: {
-        batchIndex: event.args._batchIndex,
-        batchRoot: event.args._batchRoot,
-        batchSize: event.args._batchSize,
-        prevTotalElements: event.args._prevTotalElements,
-        extraData: event.args._extraData,
-      },
-      stateRoots,
-    }
-
-  }
-
-  public async getStateRootBatchHeader(
-    index: number
-  ): Promise<StateRootBatchHeader> {
-    
-    const event = await this.getStateBatchAppendedEventForIndex(index)
-
-    if (!event) {
-      return
-    }
-
-    return {
-      batchIndex: event.args._batchIndex,
-      batchRoot: event.args._batchRoot,
-      batchSize: event.args._batchSize,
-      prevTotalElements: event.args._prevTotalElements,
-      extraData: event.args._extraData,
-    }
-  }
-
-  public async getBatchStateRoots(
-    index: number
-  ): Promise<string[]> {
-    
-    const event = await this.getStateBatchAppendedEventForIndex(index)
-
-    if (!event) {
-      return
-    }
-
-    const transaction = await this.provider.getTransaction(
-      event.transactionHash
-    )
-
-    const [
-      stateRoots,
-    ] = this.OVM_StateCommitmentChain.interface.decodeFunctionData(
-      'appendStateBatch',
-      transaction.data
-    )
-
-    return stateRoots
-  }
-
-  public async getStateRoot(index: number): Promise<string> {
-    
-    const stateRootBatchHeader = await this.getStateRootBatchHeader(index)
-    
-    if (!stateRootBatchHeader) {
-      return
-    }
-
-    const batchStateRoots = await this.getBatchStateRoots(index)
-
-    return batchStateRoots[
-      index - stateRootBatchHeader.prevTotalElements.toNumber()
-    ]
-  }
-
-  private async getStateBatchAppendedEventForIndex(L2_block: number): Promise<Event> {
+  public async getOperatorL2block(L2blockNumber: number): Promise<L2block> {
     
     //this will also update the cache, in case there are new blocks
-    const events = await this.findAllEvents(
+    const L2blocks = await this.findAllEvents(
       this.OVM_StateCommitmentChain,
       this.OVM_StateCommitmentChain.filters.StateBatchAppended()
     )
 
-    if (events.length === 0) {
+    if (L2blocks.length === 0) {
       console.log('getStateBatchAppendedEventForIndex - L1 OVM_StateCommitmentChain is empty - returning')
       return
     }
     
-    //We have StateBatchAppended events
-    const matching = events.filter((event) => {
-      //for each of the events, determine if it's relevant for this L2 Block
-      const prevTotalElements = event.args._prevTotalElements.toNumber()
-      const batchSize = event.args._batchSize.toNumber()
-      //console.log("Range: min <= index < prevTotalElements + batchSize:", prevTotalElements, L2_Block, prevTotalElements + batchSize)  
-      //pick out the relevant ones
-      return (
-          L2_block >= prevTotalElements && 
-          L2_block < prevTotalElements + batchSize
-      )
+    const matching = L2blocks.filter((block) => {
+      return (L2blockNumber === block.L2block)
     })
 
     if (matching.length === 0) {
-      console.log('getStateBatchAppendedEventForIndex - no matching events for L2 Block:',L2_block)
+      console.log('getStateBatchAppendedEventForIndex - no matching events for L2 Block:',L2blockNumber)
       return
     }
 
     //The main return datastructure
-    const results: ethers.Event[] = []
+    const L2block: L2block[] = []
 
-    results.push(matching[0]) 
-    //The [0] accomodates very rare duplicated writes into the SCC 
-
-    return results[0]
+    L2block.push(matching[0]) //The [0] accomodates very rare duplicated writes into the SCC 
+    
+    return L2block[0]
    
   }
 
