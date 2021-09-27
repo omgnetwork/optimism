@@ -152,11 +152,11 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
       this.state.OVM_StateCommitmentChain.filters.StateBatchAppended()
     )
 
-    this.logger.info('Caching events for OVM_StateCommitmentChain.StateBatchDeleted...')
-    await this.state.l1Provider.findAllEvents(
-      this.state.OVM_StateCommitmentChain,
-      this.state.OVM_StateCommitmentChain.filters.StateBatchDeleted()
-    )
+    // this.logger.info('Caching events for OVM_StateCommitmentChain.StateBatchDeleted...')
+    // await this.state.l1Provider.findAllEvents(
+    //   this.state.OVM_StateCommitmentChain,
+    //   this.state.OVM_StateCommitmentChain.filters.StateBatchDeleted()
+    // )
 
     this.state.lastQueriedL1Block = this.options.l1StartOffset
     
@@ -171,7 +171,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     while (this.running) {
       
       await sleep(this.options.pollingInterval)
-
+       
       try {
         
         this.logger.info("State Root Position",{
@@ -233,6 +233,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
           nextBatch = await this.state.l1Provider.getStateBatch(
             this.state.nextUnverifiedStateRoot
           )
+
         }
 
       } catch (err) {

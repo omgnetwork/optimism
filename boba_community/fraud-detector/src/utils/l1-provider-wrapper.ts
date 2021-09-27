@@ -36,7 +36,11 @@ export class L1ProviderWrapper {
     let startingBlockNumber = cache.startingBlockNumber
     let latestL1BlockNumber = await this.provider.getBlockNumber()
 
+    console.log("Starting scan at ethereum block number:", startingBlockNumber)
+    console.log("Current ethereum block number:", latestL1BlockNumber)
+
     const initial_range = latestL1BlockNumber - startingBlockNumber
+    //console.log("Blocks to inspect:", initial_range)
 
     while (startingBlockNumber < latestL1BlockNumber) {
 
@@ -63,7 +67,7 @@ export class L1ProviderWrapper {
 
       const percent_completed = (latestL1BlockNumber - startingBlockNumber) / initial_range
 
-      console.log("CACHING", contract, (100.00 - (percent_completed * 100.00)).toFixed(2), "% completed")
+      console.log("CACHING", (100.00 - (percent_completed * 100.00)).toFixed(2), "% completed")
     }
 
     //adding to the master event cache...
@@ -86,7 +90,7 @@ export class L1ProviderWrapper {
     const event = await this.getStateBatchAppendedEventForIndex(index)
 
     if (event === undefined) {
-      return undefined
+      return
     }
 
     const transaction = await this.provider.getTransaction(
@@ -160,7 +164,7 @@ export class L1ProviderWrapper {
     
     const stateRootBatchHeader = await this.getStateRootBatchHeader(index)
     
-    if (stateRootBatchHeader === undefined) {
+    if (!stateRootBatchHeader) {
       return
     }
 
@@ -173,8 +177,6 @@ export class L1ProviderWrapper {
 
   private async getStateBatchAppendedEventForIndex(index: number): Promise<Event> {
     
-    //console.log("L1PW getStateBatchAppendedEventForIndex for index:", index)
-
     const events = await this.findAllEvents(
       this.OVM_StateCommitmentChain,
       this.OVM_StateCommitmentChain.filters.StateBatchAppended()
@@ -185,8 +187,6 @@ export class L1ProviderWrapper {
       return
     }
     
-    //console.log("All events: ",events)
-
     //Great - we have some StateBatchAppended events
     const matching = events.filter((event) => {
       //for each of the events, determine if it's relevant for this index
@@ -200,46 +200,14 @@ export class L1ProviderWrapper {
       )
     })
 
-    //console.log("All events that match: ",matching)
-    
-    // at this point, we have the events matching OVM_StateCommitmentChain.filters.StateBatchAppended()
-    // were some of those deleted? let's check
-    const deletions = await this.findAllEvents(
-      this.OVM_StateCommitmentChain,
-      this.OVM_StateCommitmentChain.filters.StateBatchDeleted()
-    )
-    
     //this is going to be the main return datastructure
     const results: ethers.Event[] = []
 
-    for (const event of matching) {
-      const wasDeleted = deletions.some((deletion) => {
-        return (
-          deletion.blockNumber > event.blockNumber &&
-          deletion.args._batchIndex.toNumber() ===
-            event.args._batchIndex.toNumber()
-        )
-      })
-      
-      //we want all the events, EXCEPT, those which were ultimately deleted
-      if (!wasDeleted) {
-        results.push(event)
-      }
-    }
+    results.push(matching[0]) 
+    //The [0] accomodates very rare duplicated writes into the SCC 
 
-    if (results.length === 0) {
-      //there were events, BUT, there were all deleted, and so, results.length === 0
-      return
-    } else if (results.length === 1) {
-      //this is the standard, expected return
-      //found the batch header for the state root, all good
-      return results[0]
-    } else if (results.length > 2) {
-      throw new Error(
-        `Found more than one batch header for the same state root, this shouldn't happen.`
-      )
-    }
-
+    return results[0]
+   
   }
 
 }

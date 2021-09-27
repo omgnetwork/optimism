@@ -6,6 +6,7 @@ export class L2ProviderWrapper {
   constructor(public provider: providers.JsonRpcProvider) {}
 
   public async getStateRoot(index: number): Promise<string> {
+
     const block = await this.provider.send('eth_getBlockByNumber', [
       toUnpaddedHexString(index),
       false,
@@ -13,7 +14,7 @@ export class L2ProviderWrapper {
     
     //this frequently gives null
     if (block === null) {
-      console.log("did not get a stateroot")
+      console.log("Did not get a stateroot")
       return null
     }
     else {

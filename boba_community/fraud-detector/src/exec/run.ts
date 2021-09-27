@@ -26,7 +26,11 @@ const main = async () => {
   
   const GET_LOGS_INTERVAL = config.uint('get-logs-interval', 2000)
   
-  const L1_START_OFFSET = config.uint('l1-start-offset', 1)
+  const L1_START_OFFSET = config.uint(
+    'l1-start-offset',
+    parseInt(env.L1_MAINNET_DEPLOYMENT_BLOCK  || '1', 10)
+  )
+
   const FROM_L2_TRANSACTION_INDEX = config.uint('from-l2-transaction-index', 10)
   const L1_BLOCK_FINALITY = config.uint('l1-block-finality', 0)
 
