@@ -53,11 +53,11 @@ dataSources:
           file: ./abis/OVM_L1StandardBridge.json
       eventHandlers:
         - event: ERC20DepositInitiated(indexed address,indexed address,indexed address,address,uint256,bytes)
-          handler: handleSBERC20DepositInitiated
+          handler: handleStandardBridgeERC20DepositInitiated
         - event: ERC20WithdrawalFinalized(indexed address,indexed address,indexed address,address,uint256,bytes)
-          handler: handleSBERC20WithdrawalFinalized
+          handler: handleStandardBridgeERC20WithdrawalFinalized
         - event: ETHDepositInitiated(indexed address,indexed address,uint256,bytes)
-          handler: handleSBETHDepositInitiated
+          handler: handleStandardBridgeETHDepositInitiated
         - event: ETHWithdrawalFinalized(indexed address,indexed address,uint256,bytes)
-          handler: handleSBETHWithdrawalFinalized
+          handler: handleStandardBridgeETHWithdrawalFinalized
       file: ./src/OVM_L1StandardBridgeMapping.ts
