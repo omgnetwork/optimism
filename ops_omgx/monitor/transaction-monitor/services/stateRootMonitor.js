@@ -70,10 +70,11 @@ class stateRootMonitorService extends OptimismEnv {
   }
 
   async startStateRootMonitor() {
-    const latestL1Block = await this.L1Provider.getBlockNumber();
+    const latestL1Block = (await this.L1Provider.getBlockNumber()) - this.l1BlockConfirmation;
     const latestL2Block = await this.L2Provider.getBlockNumber();
 
     const endBlock = Math.min(latestL1Block, this.endBlock);
+    if (this.startBlock > endBlock) this.startBlock = endBlock;
 
     const SCCLog = await this.OVM_StateCommitmentChainContract.queryFilter(
       this.OVM_StateCommitmentChainContract.filters.StateBatchAppended(),

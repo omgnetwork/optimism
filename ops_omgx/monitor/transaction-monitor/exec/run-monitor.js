@@ -23,11 +23,11 @@ const loop = async (func) => {
 }
 
 const main = async () => {
-  // l1 message monitor
-  const messageService = new messageMonitorService();
-  await messageService.initConnection();
+  // // l1 message monitor
+  // const messageService = new messageMonitorService();
+  // await messageService.initConnection();
 
-  loop(() => messageService.startMessageMonitor());
+  // loop(() => messageService.startMessageMonitor());
 
   // l1 bridge monitor
   const l1BridgeService = new l1BridgeMonitorService();
@@ -36,25 +36,25 @@ const main = async () => {
   loop(() => l1BridgeService.startL1BridgeMonitor());
   loop(() => l1BridgeService.startCrossDomainMessageMonitor());
 
-  // liquidity pool
-  const exitService = new exitMonitorService();
-  await exitService.initConnection();
+  // // liquidity pool
+  // const exitService = new exitMonitorService();
+  // await exitService.initConnection();
 
-  loop(() => exitService.startExitMonitor());
+  // loop(() => exitService.startExitMonitor());
 
-  // state root
-  const stateRootService = new stateRootMonitorService();
-  await stateRootService.initConnection();
+  // // state root
+  // const stateRootService = new stateRootMonitorService();
+  // await stateRootService.initConnection();
 
-  loop(() => stateRootService.startStateRootMonitor());
+  // loop(() => stateRootService.startStateRootMonitor());
 
-  // block
-  const blockService = new BlockMonitorService();
-  await blockService.initConnection();
-  await blockService.initScan();
+  // // block
+  // const blockService = new BlockMonitorService();
+  // await blockService.initConnection();
+  // await blockService.initScan();
 
-  loop(() => blockService.startTransactionMonitor());
-  loop(() => blockService.startCrossDomainMessageMonitor());
+  // loop(() => blockService.startTransactionMonitor());
+  // loop(() => blockService.startCrossDomainMessageMonitor());
 }
 
 (async () => {
