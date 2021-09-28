@@ -31,7 +31,6 @@ const main = async () => {
     parseInt(env.L1_MAINNET_DEPLOYMENT_BLOCK  || '1', 10)
   )
 
-  const FROM_L2_TRANSACTION_INDEX = config.uint('from-l2-transaction-index', 10)
   const L1_BLOCK_FINALITY = config.uint('l1-block-finality', 0)
 
   if (!ADDRESS_MANAGER_ADDRESS) {
@@ -54,7 +53,6 @@ const main = async () => {
     pollingInterval: POLLING_INTERVAL,
     getLogsInterval: GET_LOGS_INTERVAL,
     l1StartOffset: L1_START_OFFSET,
-    fromL2TransactionIndex: FROM_L2_TRANSACTION_INDEX,
     l1BlockFinality: L1_BLOCK_FINALITY,
   })
 

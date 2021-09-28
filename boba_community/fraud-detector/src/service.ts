@@ -22,9 +22,6 @@ interface FraudProverOptions {
   // within this service.
   addressManagerAddress: string
 
-  // Height of the L2 transaction to start searching for L2->L1 messages.
-  fromL2TransactionIndex?: number
-
   // Interval in seconds to wait between loops.
   pollingInterval?: number
 
@@ -39,8 +36,7 @@ interface FraudProverOptions {
 }
 
 const optionSettings = {
-  pollingInterval: { default: 5000 },
-  fromL2TransactionIndex: { default: 0 },
+  pollingInterval: { default: 1000 },
   l1StartOffset: { default: 0 },
   l1BlockFinality: { default: 0 },
   getLogsInterval: { default: 2000 },
@@ -157,7 +153,9 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     
     this.state.eventCache = []
     
-    this.state.L2_block = this.options.fromL2TransactionIndex || 0
+    this.state.L2_block = this.state.l1Provider.getEarliestL2block(this.state.OVM_StateCommitmentChain.filters.StateBatchAppended())
+    console.log('Earliest L2 block',this.state.L2_block)
+
   }
 
   protected async _start(): Promise<void> {

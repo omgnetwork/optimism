@@ -9,6 +9,7 @@ export class L1ProviderWrapper {
   private eventCache: {
     [topic: string]: {
       starting_L1_BlockNumber: number
+      earliest_L2_Block: number
       L2blocks: L2block[]
     }
   } = {}
@@ -22,13 +23,13 @@ export class L1ProviderWrapper {
 
   public async findAllEvents(
     contract: Contract,
-    filter: ethers.EventFilter,
-    fromBlock?: number
+    filter: ethers.EventFilter
   ): Promise<L2block[]> {
     
     //start with the cache, or if there is no cache, start from scratch
     const cache = this.eventCache[filter.topics[0] as string] || {
-      starting_L1_BlockNumber: fromBlock || this.l1StartOffset,
+      starting_L1_BlockNumber: this.l1StartOffset,
+      earliest_L2_Block: 100000000,
       L2blocks: [],
     }
 
@@ -53,7 +54,7 @@ export class L1ProviderWrapper {
         starting_L1_BlockNumber,
         scan_end
       )
-      
+
       console.log("Scanning L1 from", starting_L1_BlockNumber, "to", scan_end)
       console.log("New batches in this L1 interval:", batches_in_query_interval.length)
 
@@ -73,6 +74,13 @@ export class L1ProviderWrapper {
         const batchRoot = batch.args._batchRoot.toString()
         const L1block = batch.blockNumber
         
+        //this is where we will scan from in the future
+        if ( L1block + 1 > cache.starting_L1_BlockNumber ) {
+          cache.starting_L1_BlockNumber = L1block + 1
+        } 
+
+        console.log("Last good SCC batch at L1:", L1block)
+
         //Now get the roots for this batch
         const transaction = await this.provider.getTransaction(batch.transactionHash)
 
@@ -80,11 +88,20 @@ export class L1ProviderWrapper {
           'appendStateBatch',
           transaction.data
         )
-
+        
         for (let idx = 0; idx < batchSize; idx++) {
 
+          //console.log("L2 block:", prevTotalElements + idx)
+
+          const L2blockNumber = prevTotalElements + idx
+
+          if( L2blockNumber < cache.earliest_L2_Block) {
+            console.log("setting earliest L2 blocknumber to:",L2blockNumber)
+            cache.earliest_L2_Block = L2blockNumber
+          }
+
           const L2block = {
-            L2block: prevTotalElements + idx,
+            L2block: L2blockNumber,
             L1block,
             batchRoot,
             batchSize,
@@ -104,8 +121,8 @@ export class L1ProviderWrapper {
 
       //almost caught up...
       if (starting_L1_BlockNumber + 2000 >= latest_L1_BlockNumber) {
-        cache.starting_L1_BlockNumber = latest_L1_BlockNumber
         cache.L2blocks = cache.L2blocks.concat(L2blocks)
+        console.log("Adding new L2blocks:", L2blocks)
         console.log("Adding new L2blocks:", L2blocks.length)
         break
       }
@@ -120,8 +137,6 @@ export class L1ProviderWrapper {
 
     //adding to the master event cache...
     this.eventCache[filter.topics[0] as string] = cache
-
-    //console.log("Cache:",this.eventCache[filter.topics[0] as string])
 
     return cache.L2blocks
   }
@@ -155,6 +170,10 @@ export class L1ProviderWrapper {
     
     return L2block[0]
    
+  }
+
+  public getEarliestL2block(filter: ethers.EventFilter): number {
+    return this.eventCache[filter.topics[0] as string].earliest_L2_Block   
   }
 
 }
