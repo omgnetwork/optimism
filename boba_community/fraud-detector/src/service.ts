@@ -180,7 +180,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
 
         while (nextOperatorL2block !== undefined) {
       
-          this.logger.info("Operator L2 block to verify", { nextOperatorL2block })
+          //this.logger.info("Operator L2 block to verify", { nextOperatorL2block })
 
           const l1StateRoot = nextOperatorL2block.stateRoot
 
@@ -193,15 +193,19 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
               L2_block: this.state.L2_block,
               operatorSR: l1StateRoot,
               verifierSR: l2VStateRoot
-            } )
-            console.log(chalk.red('State root MISMATCH - not verified'))
+            })
+            console.log(chalk.red('\n***********************************************************'))
+            console.log(chalk.red('State root MISMATCH - not verified L2 Block number ' + this.state.L2_block.toString()))
+            console.log(chalk.red('***********************************************************\n'))
           } else {
             this.logger.info('State root MATCH - verified ✓', { 
               L2_block: this.state.L2_block,
               operatorSR: l1StateRoot,
               verifierSR: l2VStateRoot
             })
-            console.log(chalk.green('State root MATCH - verified ✓'))
+            console.log(chalk.green('\n***********************************************************'))
+            console.log(chalk.green('State root MATCH - verified ✓ L2 Block number ' + this.state.L2_block.toString()))
+            console.log(chalk.green('***********************************************************\n'))
           }
 
           this.state.L2_block++ //let's check the next one, if any

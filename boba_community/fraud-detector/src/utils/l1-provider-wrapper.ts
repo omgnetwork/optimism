@@ -13,17 +13,6 @@ export class L1ProviderWrapper {
     }
   } = {}
 
-    // return {
-    //   header: {
-    //     batchIndex: event.args._batchIndex,
-    //     batchRoot: event.args._batchRoot,
-    //     batchSize: event.args._batchSize,
-    //     prevTotalElements: event.args._prevTotalElements,
-    //     extraData: event.args._extraData,
-    //   },
-    //   stateRoots,
-    // }
-
   constructor(
     public provider: providers.JsonRpcProvider,
     public OVM_StateCommitmentChain: Contract,
@@ -46,14 +35,14 @@ export class L1ProviderWrapper {
     let L2blocks: L2block[] = []
     
     let starting_L1_BlockNumber = cache.starting_L1_BlockNumber
-    //let latest_L1_BlockNumber = 13011896 + 40000//await this.provider.getBlockNumber()
+    //let latest_L1_BlockNumber = 13011896 + 40000
     let latest_L1_BlockNumber = await this.provider.getBlockNumber()
 
-    console.log("Starting scan at Ethereum block number:", starting_L1_BlockNumber)
-    console.log("Current Ethereum block height:", latest_L1_BlockNumber)
+    //console.log("Starting scan at Ethereum block number:", starting_L1_BlockNumber)
+    //console.log("Current Ethereum block height:", latest_L1_BlockNumber)
 
     const new_L1_blocks = latest_L1_BlockNumber - starting_L1_BlockNumber
-    //console.log("Blocks to inspect:", initial_range)
+    console.log("New L1 operator blocks to verify:", new_L1_blocks)
 
     while (starting_L1_BlockNumber < latest_L1_BlockNumber) {
 
