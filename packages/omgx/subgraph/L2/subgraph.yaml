@@ -51,9 +51,9 @@ dataSources:
           file: ./abis/OVM_L2StandardBridge.json
       eventHandlers:
         - event: WithdrawalInitiated(indexed address,indexed address,indexed address,address,uint256,bytes)
-          handler: handleSBWithdrawalInitiated
+          handler: handleStandardBridgeWithdrawalInitiated
         - event: DepositFinalized(indexed address,indexed address,indexed address,address,uint256,bytes)
-          handler: handleSBDepositFinalized
+          handler: handleStandardBridgeDepositFinalized
         - event: DepositFailed(indexed address,indexed address,indexed address,address,uint256,bytes)
-          handler: handleSBDepositFailed
+          handler: handleStandardBridgeDepositFailed
       file: ./src/OVM_L2StandardBridgeMapping.ts

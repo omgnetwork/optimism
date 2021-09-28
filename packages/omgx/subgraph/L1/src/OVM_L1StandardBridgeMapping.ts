@@ -5,15 +5,15 @@ import {
   ETHWithdrawalFinalized
 } from '../generated/OVM_L1StandardBridge/OVM_L1StandardBridge'
 import {
-  SBERC20DepositInitiated,
-  SBERC20WithdrawalFinalized,
-  SBETHDepositInitiated,
-  SBETHWithdrawalFinalized
+  StandardBridgeERC20DepositInitiated,
+  StandardBridgeERC20WithdrawalFinalized,
+  StandardBridgeETHDepositInitiated,
+  StandardBridgeETHWithdrawalFinalized
 } from '../generated/schema'
 
-export function handleSBERC20DepositInitiated(event: ERC20DepositInitiated): void {
+export function handleStandardBridgeERC20DepositInitiated(event: ERC20DepositInitiated): void {
   let id = event.transaction.hash.toHex()
-  let erc20DepositInitiated = new SBERC20DepositInitiated(id)
+  let erc20DepositInitiated = new StandardBridgeERC20DepositInitiated(id)
   erc20DepositInitiated.id = id
   erc20DepositInitiated.l1Token = event.params._l1Token
   erc20DepositInitiated.l2Token = event.params._l2Token
@@ -25,9 +25,9 @@ export function handleSBERC20DepositInitiated(event: ERC20DepositInitiated): voi
   erc20DepositInitiated.save()
 }
 
-export function handleSBERC20WithdrawalFinalized(event: ERC20WithdrawalFinalized): void {
+export function handleStandardBridgeERC20WithdrawalFinalized(event: ERC20WithdrawalFinalized): void {
   let id = event.transaction.hash.toHex()
-  let erc20WithdrawalFinalized = new SBERC20WithdrawalFinalized(id)
+  let erc20WithdrawalFinalized = new StandardBridgeERC20WithdrawalFinalized(id)
   erc20WithdrawalFinalized.id = id
   erc20WithdrawalFinalized.l1Token = event.params._l1Token
   erc20WithdrawalFinalized.l2Token = event.params._l2Token
@@ -39,9 +39,9 @@ export function handleSBERC20WithdrawalFinalized(event: ERC20WithdrawalFinalized
   erc20WithdrawalFinalized.save()
 }
 
-export function handleSBETHDepositInitiated(event: ETHDepositInitiated): void {
+export function handleStandardBridgeETHDepositInitiated(event: ETHDepositInitiated): void {
   let id = event.transaction.hash.toHex()
-  let ethDepositInitiated = new SBETHDepositInitiated(id)
+  let ethDepositInitiated = new StandardBridgeETHDepositInitiated(id)
   ethDepositInitiated.id = id
   ethDepositInitiated.from = event.params._from
   ethDepositInitiated.to = event.params._to
@@ -50,9 +50,9 @@ export function handleSBETHDepositInitiated(event: ETHDepositInitiated): void {
   ethDepositInitiated.save()
 }
 
-export function handleSBETHWithdrawalFinalized(event: ETHWithdrawalFinalized): void {
+export function handleStandardBridgeETHWithdrawalFinalized(event: ETHWithdrawalFinalized): void {
   let id = event.transaction.hash.toHex()
-  let ethWithdrawalFinalized = new SBETHWithdrawalFinalized(id)
+  let ethWithdrawalFinalized = new StandardBridgeETHWithdrawalFinalized(id)
   ethWithdrawalFinalized.id = id
   ethWithdrawalFinalized.from = event.params._from
   ethWithdrawalFinalized.to = event.params._to
