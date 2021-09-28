@@ -176,7 +176,11 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
           this.state.L2_block
         )
 
-        console.log("next operator L2 block to verify:",nextOperatorL2block)
+        if(nextOperatorL2block === undefined) {
+          console.log(chalk.bgWhite('Waiting for new blocks...'))
+        } else {
+          console.log("Next operator L2 block to verify:", nextOperatorL2block)
+        }
 
         while (nextOperatorL2block !== undefined) {
       
@@ -194,18 +198,18 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
               operatorSR: l1StateRoot,
               verifierSR: l2VStateRoot
             })
-            console.log(chalk.red('\n***********************************************************'))
-            console.log(chalk.red('State root MISMATCH - not verified L2 Block number ' + this.state.L2_block.toString()))
-            console.log(chalk.red('***********************************************************\n'))
+            console.log(chalk.white.bgRed.bold('\n***********************************************************'))
+            console.log(chalk.white.bgRed.bold('State root MISMATCH - not verified L2 Block number ' + this.state.L2_block.toString()))
+            console.log(chalk.white.bgRed.bold('***********************************************************\n'))
           } else {
             this.logger.info('State root MATCH - verified ✓', { 
               L2_block: this.state.L2_block,
               operatorSR: l1StateRoot,
               verifierSR: l2VStateRoot
             })
-            console.log(chalk.green('\n***********************************************************'))
-            console.log(chalk.green('State root MATCH - verified ✓ L2 Block number ' + this.state.L2_block.toString()))
-            console.log(chalk.green('***********************************************************\n'))
+            console.log(chalk.bgGreen('\n***********************************************************'))
+            console.log(chalk.bgGreen('State root MATCH - verified ✓ L2 Block number ' + this.state.L2_block.toString()))
+            console.log(chalk.bgGreen('***********************************************************\n'))
           }
 
           this.state.L2_block++ //let's check the next one, if any

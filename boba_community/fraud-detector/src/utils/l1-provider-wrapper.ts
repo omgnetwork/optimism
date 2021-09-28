@@ -42,25 +42,27 @@ export class L1ProviderWrapper {
     //console.log("Current Ethereum block height:", latest_L1_BlockNumber)
 
     const new_L1_blocks = latest_L1_BlockNumber - starting_L1_BlockNumber
-    console.log("New L1 operator blocks to verify:", new_L1_blocks)
+    console.log("New L1 blocks to inspect:", new_L1_blocks)
 
     while (starting_L1_BlockNumber < latest_L1_BlockNumber) {
+
+      let scan_end = Math.min(starting_L1_BlockNumber + 2000, latest_L1_BlockNumber - this.l1BlockFinality)
 
       const batches_in_query_interval = await contract.queryFilter(
         filter,
         starting_L1_BlockNumber,
-        Math.min(
-          starting_L1_BlockNumber + 2000,
-          latest_L1_BlockNumber - this.l1BlockFinality
-        )
+        scan_end
       )
+      
+      console.log("Scanning L1 from", starting_L1_BlockNumber, "to", scan_end)
+      console.log("New batches in this L1 interval:", batches_in_query_interval.length)
 
       let L2blocks_indexed = []
 
       //batches_in_query_interval.forEach
       await Promise.all(batches_in_query_interval.map(async batch => {
           
-        //many of these batches have length 1, but some are longer
+        //right now, many of these batches have length 1, but some are larger
         //our goal is to unpack and reindex them, and add the state roots for each L2 TX aka block
         //console.log("this event index",event.args._batchIndex.toString()),
         //console.log(event.args._batchSize.toString())
@@ -91,18 +93,14 @@ export class L1ProviderWrapper {
             extraData: batch.args._extraData,
             stateRoot: stateRoots[idx]
           }
-          //console.log("Adding L2 Block:", block)
+
           L2blocks_indexed = L2blocks_indexed.concat(L2block)
-          //console.log("Indexed:",L2blocks_indexed)
+
         }
 
       }))
 
-      //console.log("Indexed:",L2blocks_indexed)
-
       L2blocks = L2blocks.concat(L2blocks_indexed)
-
-      //console.log("Events:",L2blocks)
 
       //almost caught up...
       if (starting_L1_BlockNumber + 2000 >= latest_L1_BlockNumber) {
@@ -146,14 +144,14 @@ export class L1ProviderWrapper {
     })
 
     if (matching.length === 0) {
-      console.log('getStateBatchAppendedEventForIndex - no matching events for L2 Block:',L2blockNumber)
+      console.log('Waiting for new Boba at block:',L2blockNumber)
       return
     }
 
     //The main return datastructure
     const L2block: L2block[] = []
 
-    L2block.push(matching[0]) //The [0] accomodates very rare duplicated writes into the SCC 
+    L2block.push(matching[0]) //The [0] accomodates very rare duplicated writes into the SCC
     
     return L2block[0]
    
