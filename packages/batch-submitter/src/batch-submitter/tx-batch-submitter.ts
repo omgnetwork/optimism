@@ -38,7 +38,6 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
   protected chainContract: CanonicalTransactionChainContract
   protected l2ChainId: number
   protected syncing: boolean
-  private disableQueueBatchAppend: boolean
   private autoFixBatchOptions: AutoFixBatchOptions
   private transactionSubmitter: TransactionSubmitter
   private gasThresholdInGwei: number
@@ -60,7 +59,6 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     blockOffset: number,
     logger: Logger,
     metrics: Metrics,
-    disableQueueBatchAppend: boolean,
     autoFixBatchOptions: AutoFixBatchOptions = {
       fixDoublePlayedDeposits: false,
       fixMonotonicity: false,
@@ -84,7 +82,6 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
       logger,
       metrics
     )
-    this.disableQueueBatchAppend = disableQueueBatchAppend
     this.autoFixBatchOptions = autoFixBatchOptions
     this.gasThresholdInGwei = 500
     this.transactionSubmitter = transactionSubmitter
@@ -146,10 +143,6 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
         'Syncing mode enabled! Skipping batch submission and clearing queue elements',
         { pendingQueueElements }
       )
-
-      if (!this.disableQueueBatchAppend) {
-        return this.submitAppendQueueBatch()
-      }
     }
     this.logger.info('Syncing mode enabled but queue is empty. Skipping...')
     return
@@ -254,30 +247,6 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
   /*********************
    * Private Functions *
    ********************/
-
-  private async submitAppendQueueBatch(): Promise<TransactionReceipt> {
-     const appendQueueBatch = (
-      appendQueueBatchArg: Function,
-      numQueuedTransactionsArg: BigNumber
-    ): AppendQueueBatch => {
-      return {
-        appendQueueBatch: appendQueueBatchArg,
-        numQueuedTransactions: numQueuedTransactionsArg,
-        type: 'AppendQueueBatch',
-      }
-    }
-    const submitTransaction = (): Promise<TransactionReceipt> => {
-      return this.transactionSubmitter.submitTransaction(
-        appendQueueBatch(
-          this.chainContract.populateTransaction.appendQueueBatch,
-          ethers.constants.MaxUint256
-        ),
-        this._makeHooks('appendQueueBatch')
-      )
-    }
-    // Empty the queue with a huge `appendQueueBatch(..)` call
-    return this._submitAndLogTx(submitTransaction, 'Cleared queue!')
-  }
 
   private async submitAppendSequencerBatch(
     batchParams: AppendSequencerBatchParams,
