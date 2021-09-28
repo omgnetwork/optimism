@@ -6,10 +6,10 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: L1LiquidityPool
-    network: rinkeby
+    network: mainnet
     source:
-      address: '0x99F5557012b681A51E5FBf39FbAa1469D6DDb390'
-      startBlock: 9098146
+      address: '0x1A26ef6575B7BBB864d984D9255C069F6c361a14'
+      startBlock: 13013879
       abi: L1LiquidityPool
     mapping:
       kind: ethereum/events
@@ -37,10 +37,10 @@ dataSources:
 
   - kind: ethereum/contract
     name: OVM_L1StandardBridge
-    network: rinkeby
+    network: mainnet
     source:
-      address: '0xDe085C82536A06b40D20654c2AbA342F2abD7077'
-      startBlock: 8845222
+      address: '0xdc1664458d2f0B6090bEa60A8793A4E66c2F1c00'
+      startBlock: 13012048
       abi: OVM_L1StandardBridge
     mapping:
       kind: ethereum/events
@@ -53,11 +53,11 @@ dataSources:
           file: ./abis/OVM_L1StandardBridge.json
       eventHandlers:
         - event: ERC20DepositInitiated(indexed address,indexed address,indexed address,address,uint256,bytes)
-          handler: handleSBERC20DepositInitiated
+          handler: handleStandardBridgeERC20DepositInitiated
         - event: ERC20WithdrawalFinalized(indexed address,indexed address,indexed address,address,uint256,bytes)
-          handler: handleSBERC20WithdrawalFinalized
+          handler: handleStandardBridgeERC20WithdrawalFinalized
         - event: ETHDepositInitiated(indexed address,indexed address,uint256,bytes)
-          handler: handleSBETHDepositInitiated
+          handler: handleStandardBridgeETHDepositInitiated
         - event: ETHWithdrawalFinalized(indexed address,indexed address,uint256,bytes)
-          handler: handleSBETHWithdrawalFinalized
+          handler: handleStandardBridgeETHWithdrawalFinalized
       file: ./src/OVM_L1StandardBridgeMapping.ts

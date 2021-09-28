@@ -2,7 +2,7 @@
   "network": "boba",
   "contracts": {
     "L2LiquidityPool": {
-      "address": "0xe469ff3C6b7002cD591427B44F0A5922D3CA0026"
+      "address": "0x3A92cA39476fF84Dc579C868D4D7dE125513B034"
     },
     "OVM_L2StandardBridge": {
       "address": "0x4200000000000000000000000000000000000010"
