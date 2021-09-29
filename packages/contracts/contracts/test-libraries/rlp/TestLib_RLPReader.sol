@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >0.5.0 <0.8.0;
-pragma experimental ABIEncoderV2;
+pragma solidity ^0.8.8;
 
 /* Library Imports */
-import { Lib_RLPReader } from "../../optimistic-ethereum/libraries/rlp/Lib_RLPReader.sol";
+import { Lib_RLPReader } from "../../libraries/rlp/Lib_RLPReader.sol";
 
 /**
  * @title TestLib_RLPReader

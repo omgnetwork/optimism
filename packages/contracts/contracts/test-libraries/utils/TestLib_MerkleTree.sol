@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >0.5.0 <0.8.0;
-pragma experimental ABIEncoderV2;
+pragma solidity ^0.8.8;
 
 /* Library Imports */
-import { Lib_MerkleTree } from "../../optimistic-ethereum/libraries/utils/Lib_MerkleTree.sol";
+import { Lib_MerkleTree } from "../../libraries/utils/Lib_MerkleTree.sol";
 
 /**
  * @title TestLib_MerkleTree

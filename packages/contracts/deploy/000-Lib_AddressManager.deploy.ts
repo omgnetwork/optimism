@@ -17,14 +17,8 @@ const deployFn: DeployFunction = async (hre) => {
 
   await registerAddress({
     hre,
-    name: 'OVM_L2CrossDomainMessenger',
-    address: predeploys.OVM_L2CrossDomainMessenger,
-  })
-
-  await registerAddress({
-    hre,
-    name: 'OVM_DecompressionPrecompileAddress',
-    address: predeploys.OVM_SequencerEntrypoint,
+    name: 'L2CrossDomainMessenger',
+    address: predeploys.L2CrossDomainMessenger,
   })
 
   await registerAddress({
@@ -37,12 +31,6 @@ const deployFn: DeployFunction = async (hre) => {
     hre,
     name: 'OVM_Proposer',
     address: (hre as any).deployConfig.ovmProposerAddress,
-  })
-
-  await registerAddress({
-    hre,
-    name: 'OVM_L2BatchMessageRelayer',
-    address: (hre as any).deployConfig.ovmRelayerAddress,
   })
 }
 
