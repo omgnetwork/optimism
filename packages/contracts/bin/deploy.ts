@@ -38,11 +38,8 @@ const parseEnv = () => {
       'number'
     ),
     ctcMaxTransactionGasLimit: ensure('MAX_TRANSACTION_GAS_LIMIT', 'number'),
-    emMinTransactionGasLimit: ensure('MIN_TRANSACTION_GAS_LIMIT', 'number'),
-    emMaxtransactionGasLimit: ensure('MAX_TRANSACTION_GAS_LIMIT', 'number'),
-    emMaxGasPerQueuePerEpoch: ensure('MAX_GAS_PER_QUEUE_PER_EPOCH', 'number'),
-    emSecondsPerEpoch: ensure('ECONDS_PER_EPOCH', 'number'),
-    emOvmChainId: ensure('CHAIN_ID', 'number'),
+    ctcL2GasDiscountDivisor: ensure('L2_GAS_DISCOUNT_DIVISOR', 'number'),
+    ctcEnqueueGasCost: ensure('ENQUEUE_GAS_COST', 'number'),
     sccFraudProofWindow: ensure('FRAUD_PROOF_WINDOW_SECONDS', 'number'),
     sccSequencerPublishWindow: ensure(
       'SEQUENCER_PUBLISH_WINDOW_SECONDS',
@@ -58,15 +55,12 @@ const main = async () => {
     l1BlockTimeSeconds: config.l1BlockTimeSeconds,
     ctcForceInclusionPeriodSeconds: config.ctcForceInclusionPeriodSeconds,
     ctcMaxTransactionGasLimit: config.ctcMaxTransactionGasLimit,
-    emMinTransactionGasLimit: config.emMinTransactionGasLimit,
-    emMaxtransactionGasLimit: config.emMaxtransactionGasLimit,
-    emMaxGasPerQueuePerEpoch: config.emMaxGasPerQueuePerEpoch,
-    emSecondsPerEpoch: config.emSecondsPerEpoch,
-    emOvmChainId: config.emOvmChainId,
+    ctcL2GasDiscountDivisor: config.ctcL2GasDiscountDivisor,
+    ctcEnqueueGasCost: config.ctcEnqueueGasCost,
     sccFraudProofWindow: config.sccFraudProofWindow,
     sccSequencerPublishWindow: config.sccFraudProofWindow,
     ovmSequencerAddress: sequencer.address,
-    ovmProposerAddress: proposer.address,
+    ovmProposerAddress: sequencer.address, // was previously proposer.address, but merged to experimental branch
     ovmRelayerAddress: relayer.address,
     ovmAddressManagerOwner: deployer.address,
     noCompile: process.env.NO_COMPILE ? true : false,
@@ -77,7 +71,6 @@ const main = async () => {
   // get the hardhat-deploy stuff merged. Woot.
   const nicknames = {
     Lib_AddressManager: 'AddressManager',
-    mockOVM_BondManager: 'OVM_BondManager',
   }
 
   const contracts: any = dirtree(

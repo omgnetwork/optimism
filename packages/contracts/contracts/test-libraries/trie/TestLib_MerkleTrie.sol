@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >0.5.0 <0.8.0;
+pragma solidity ^0.8.8;
 
 /* Library Imports */
-import { Lib_MerkleTrie } from "../../optimistic-ethereum/libraries/trie/Lib_MerkleTrie.sol";
+import { Lib_MerkleTrie } from "../../libraries/trie/Lib_MerkleTrie.sol";
 
 /**
  * @title TestLib_MerkleTrie

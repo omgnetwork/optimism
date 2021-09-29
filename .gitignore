@@ -10,9 +10,7 @@ yarn.lock
 
 dist
 artifacts
-artifacts-ovm
 cache
-cache-ovm
 
 l2geth/build/bin
 
