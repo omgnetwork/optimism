@@ -59,12 +59,12 @@ function TransferModal ({ open, token, minHeight }) {
   if(token) {
     maxValue = logAmount(token.balance, token.decimals)
   }
-  
+
   function setAmount(value) {
-    
+
     console.log("setAmount")
 
-    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooSmall = new BN(value).lte(new BN(0.0))
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
     console.log("tooSmall",tooSmall)
@@ -80,7 +80,7 @@ function TransferModal ({ open, token, minHeight }) {
   }
 
   async function submit () {
-    if ( token.address && recipient ) 
+    if ( token.address && recipient )
     {
       try {
         console.log("Amount to transfer:", value_Wei_String)
@@ -91,7 +91,6 @@ function TransferModal ({ open, token, minHeight }) {
           dispatch(openAlert('Transaction submitted'))
           handleClose()
         } else {
-          //error handled elsewhere
           handleClose()
         }
       } catch (err) {
@@ -109,7 +108,7 @@ function TransferModal ({ open, token, minHeight }) {
 
   //checked
   let convertToUSD = false
-  if( Object.keys(lookupPrice) && 
+  if( Object.keys(lookupPrice) &&
       !!value &&
       new BN(value).gt(new BN(0.0)) &&
       new BN(value).lte(new BN(maxValue)) &&

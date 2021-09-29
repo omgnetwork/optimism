@@ -859,8 +859,6 @@ class NetworkService {
       'L1'
     ).get(`&address=${this.account}`)
 
-    //console.log("responseL1",responseL1)
-
     if (responseL1.status === 200) {
       const transactionsL1 = await responseL1.data
       if (transactionsL1.status === '1') {
@@ -1404,12 +1402,13 @@ class NetworkService {
           value_Wei_String
         )
         await approveStatus.wait()
+        return approveStatus
       }
 
-      return true
+      return allowance_BN
     } catch (error) {
       console.log("NS: approveERC20_L2LP error:", error)
-      return false
+      return error
     }
   }
 
@@ -1466,12 +1465,13 @@ class NetworkService {
         )
         await approveStatus.wait()
         console.log("ERC 20 L1 BRIDGE ops approved:",approveStatus)
+        return approveStatus
       }
+      return allowance_BN;
 
-      return true
     } catch (error) {
       console.log("NS: approveERC20_L1LP error:", error)
-      return false
+      return error
     }
   }
 
@@ -1918,9 +1918,9 @@ class NetworkService {
         this.account
       )
       await withdrawRewardTX.wait()
-      return true
+      return withdrawRewardTX
     } catch (err) {
-      return false
+      return err
     }
   }
 
@@ -1936,9 +1936,9 @@ class NetworkService {
         this.account
       )
       await withdrawRewardTX.wait()
-      return true
+      return withdrawRewardTX
     } catch (err) {
-      return false
+      return err
     }
   }
 
@@ -1957,9 +1957,9 @@ class NetworkService {
         this.account
       )
       await withdrawLiquidityTX.wait()
-      return true
+      return withdrawLiquidityTX
     } catch (err) {
-      return false
+      return err
     }
   }
 

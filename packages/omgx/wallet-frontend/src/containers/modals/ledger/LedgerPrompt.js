@@ -70,7 +70,7 @@ function LedgerPrompt ({
               type='outline'
               className={styles.button}
             >
-              CANCEL
+              Cancel
             </Button>
             <Button
               className={styles.button}
@@ -78,7 +78,7 @@ function LedgerPrompt ({
               type='primary'
               loading={loading}
             >
-              SIGN
+              Sign
             </Button>
           </div>
         </>

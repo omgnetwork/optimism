@@ -18,6 +18,7 @@ import { getCoinImage } from 'util/coinImage';
 
 import { Box, Typography, Fade, Grid, CircularProgress } from '@material-ui/core';
 import * as S from "./ListFarm.styles"
+import { getRewardL1, getRewardL2 } from 'actions/networkAction';
 
 class ListFarm extends React.Component {
 
@@ -118,15 +119,15 @@ class ListFarm extends React.Component {
     let getRewardTX = null;
 
     if(networkService.L1orL2 === 'L1') {
-      getRewardTX = await networkService.getRewardL1(
+      getRewardTX = await this.props.dispatch(getRewardL1(
         poolInfo.l1TokenAddress,
         userReward
-      )
+      ))
     } else if (networkService.L1orL2 === 'L2') {
-      getRewardTX = await networkService.getRewardL2(
+      getRewardTX = await this.props.dispatch(getRewardL2(
         poolInfo.l2TokenAddress,
         userReward
-      )
+      ))
     } else {
       console.log("handleHarvest(): Chain not set")
     }
@@ -136,7 +137,6 @@ class ListFarm extends React.Component {
       this.props.dispatch(getFarmInfo())
       this.setState({ loading: false })
     } else {
-      this.props.dispatch(openError("Failed to get reward"))
       this.setState({ loading: false })
     }
 
@@ -151,7 +151,7 @@ class ListFarm extends React.Component {
     } = this.state;
 
     const pageLoading = Object.keys(poolInfo).length === 0;
-    
+
     const { isMobile } = this.props
 
     let userReward = 0;

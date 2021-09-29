@@ -50,8 +50,8 @@ function NewProposalModal({ open }) {
     }
 
     const submit = async () => {
-        let res = await dispatch(createDaoProposal({ 
-            votingThreshold, 
+        let res = await dispatch(createDaoProposal({
+            votingThreshold,
             text: !!proposeText ? `${proposeText}@@${proposalUri}` : null
         }));
 
@@ -125,7 +125,7 @@ function NewProposalModal({ open }) {
                     color='neutral'
                     size="large"
                 >
-                    CANCEL
+                    Cancel
                 </Button>
 
                 <Button
@@ -136,7 +136,7 @@ function NewProposalModal({ open }) {
                     // loading={loading} // TODO: Implement loading base on the action trigger
                     disabled={disabledProposal()}
                 >
-                    PROPOSE
+                    Propose
                 </Button>
             </WrapperActionsModal>
         </Modal >

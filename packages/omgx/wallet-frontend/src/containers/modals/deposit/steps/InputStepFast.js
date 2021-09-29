@@ -160,7 +160,7 @@ function InputStepFast({ handleClose, token }) {
 
   const label = 'There is a ' + feeRate + '% fee.'
 
-  let buttonLabel_1 = 'CANCEL'
+  let buttonLabel_1 = 'Cancel'
   if( depositLoading || approvalLoading ) buttonLabel_1 = 'CLOSE WINDOW'
 
   let buttonLabel_2 = 'Bridge'

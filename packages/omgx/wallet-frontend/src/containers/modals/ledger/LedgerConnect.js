@@ -160,7 +160,7 @@ function LedgerConnect ({ submit, open }) {
 
           <div className={styles.buttons}>
             <Button onClick={handleClose} type='outline' className={styles.button}>
-              {contractDataError ? 'CANCEL' : 'NO'}
+              {contractDataError ? 'Cancel' : 'No'}
             </Button>
             <Button
               className={styles.button}
@@ -168,7 +168,7 @@ function LedgerConnect ({ submit, open }) {
               type='primary'
               loading={loading}
             >
-              {contractDataError ? 'CONTINUE' : 'YES'}
+              {contractDataError ? 'Continue' : 'Yes'}
             </Button>
           </div>
         </>
@@ -208,14 +208,14 @@ function LedgerConnect ({ submit, open }) {
 
               <div className={styles.buttons}>
                 <Button onClick={() => setStep(steps.usingLedger)} type='outline' className={styles.button}>
-                  CANCEL
+                  Cancel
                 </Button>
                 <Button
                   className={styles.button}
                   onClick={handleAddressConfirm}
                   type='primary'
                 >
-                  CONFIRM
+                  Confirm
                 </Button>
               </div>
             </>
