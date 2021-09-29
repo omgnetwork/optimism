@@ -15,14 +15,12 @@ An executable fraud detector and docker script for running a *Verifier*, a *DTL*
 This repo allows you to: 
 
 1. Run your own Boba geth L2 on your computer. In this case, the geth L2 will run in its `Verifier` mode. In `Verifier` mode, the geth 
-will sync from L1 and uses the transaction data from the L1 contracts to compute what the state roots should be, *if the operator is honest*.
+will sync from L1 and use the transaction data from the L1 contracts to compute what the state roots should be, *if the operator is honest*.
 
-2. A separate service, the *fraud-detector*, can then be used to discover potential fraud. Briefly, the fraud detection steps consist of 
-requesting a state root from Boba Mainnet L1 and requesting a state root from *your* 
-Verifier. If those state roots match, then, the operator has been honest. If they do not match, then, that **might** be due to fraud, or, could also 
-indicate indexing or timestamp errors, or chain configuration errors.
+2. A separate service, the *fraud-detector*, can then be used to discover potential fraud. Briefly, the fraud detection process consists of 
+requesting a state root from Boba Mainnet L1 and requesting a state root from your Verifier. If those state roots match, then, the operator has been honest. If they do not match, then, that **might** be due to fraud, or, could also indicate indexing or timestamp errors, or chain configuration errors.
 
-The central idea is that if two systems looks at the same transactions, then they should generate the same state roots. If they don't, then there is a problem somewhere. Fundamentally, the security of rollups has little to do with math or cryptography - rather, security arises from publicly depositing transactions and their state roots (in this case into the Boba L1 contracts), and then, **having many independent people check those data for possible discrepancies**.
+The central idea is that if two (or more) systems look at the same transactions, then they should all generate the same state roots. If they don't, then there is a problem somewhere. Fundamentally, the security of rollups has little to do with math or cryptography - rather, security arises from the operator publicly depositing transactions and their corresponding state roots, and then, **having many independent nodes check those data for possible discrepancies**.
 
 ## 1. Errors and State Root Mismatches in the Boba Mainnet
 
@@ -32,7 +30,7 @@ The central idea is that if two systems looks at the same transactions, then the
 
 ## 2. What do when you discover a state root mismatch
 
-Congratulations! The security of the L2 depends on community monitoring of the operator's actions. If you have discovered a state root mismatch, please file a GitHub issue (https://github.com/omgnetwork/optimism/issues). We should have a good response / clarification for you quickly. In the future, with the Boba governance token, additional mechanisms will be developed to incentivize and reward community monitoring of the Boba L2.  
+Congratulations! The security of the L2 depends on community monitoring of the operator's actions. If you have discovered a state root mismatch, please file a GitHub issue (https://github.com/omgnetwork/optimism/issues). We should have a good response / clarification for you quickly. In the future, with the Boba governance token, additional mechanisms will be released to incentivize and reward community monitoring of the Boba L2.  
 
 ## 3. STEP 1: Running a local system with Verifier and Data Transport Layer (DTL)
 
