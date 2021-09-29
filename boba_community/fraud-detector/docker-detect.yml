@@ -10,11 +10,11 @@ x-var: &L2_NODE_WEB3_URL
   L2_NODE_WEB3_URL=http://geth_l2:8545
 
 x-var: &DEPLOYER_HTTP
-  DEPLOYER_HTTP=http://deployer:8081
+  DEPLOYER_HTTP=http://replica.boba.network:8081
 
 x-var: &DEPLOYER_URL
-  DEPLOYER_URL=http://deployer:8081
-  
+  DEPLOYER_URL=http://replica.boba.network:8081
+
 x-var: &ADDRESS_MANAGER_ADDRESS
   ADDRESS_MANAGER_ADDRESS=${ADDRESS_MANAGER_ADDRESS}
 
@@ -26,13 +26,6 @@ x-var: &ETH1_CTC_DEPLOYMENT_HEIGHT
 
 services:
 
-  deployer:
-    image: omgx/deployer-mainnet:production-v1
-    restart: always
-    entrypoint: ./bin/serve_dump.sh
-    ports:
-      - 8082:8081
-
   data_transport_layer:
     image: omgx/data-transport-layer:rc1.0-surgery
     environment:
@@ -41,8 +34,8 @@ services:
       - *DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT
       - *DATA_TRANSPORT_LAYER__ADDRESS_MANAGER
       - DATA_TRANSPORT_LAYER__SYNC_FROM_L1=true
-      - DATA_TRANSPORT_LAYER__SYNC_FROM_L2=true
-      - DATA_TRANSPORT_LAYER__L2_RPC_ENDPOINT=https://mainnet.boba.network
+      - DATA_TRANSPORT_LAYER__SYNC_FROM_L2=false
+      - DATA_TRANSPORT_LAYER__L2_RPC_ENDPOINT=https://replica.boba.network
       - DATA_TRANSPORT_LAYER__L2_CHAIN_ID=288
       - DATA_TRANSPORT_LAYER__DB_PATH=/db
       - DATA_TRANSPORT_LAYER__SERVER_PORT=7878
@@ -52,9 +45,14 @@ services:
       - DATA_TRANSPORT_LAYER__LOGS_PER_POLLING_INTERVAL=2000
       - DATA_TRANSPORT_LAYER__DANGEROUSLY_CATCH_ALL_ERRORS=true
       - DATA_TRANSPORT_LAYER__SERVER_HOSTNAME=0.0.0.0
-      - URL=http://deployer:8081/addresses.json
+      - URL=http://replica.boba.network:8081/addresses.json
       - RETRIES=1000
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     ports:
       - 7879:7878
 
@@ -89,8 +87,8 @@ services:
       - NO_USB=true
       - GCMODE=archive
       - NO_DISCOVER=true
-      - ROLLUP_STATE_DUMP_PATH=http://deployer:8081/state-dump.latest.json
-      - URL=http://deployer:8081/addresses.json
+      - ROLLUP_STATE_DUMP_PATH=https://replica.boba.network:8081/state-dump.latest.json
+      - URL=https://replica.boba.network:8081/addresses.json
       - ROLLUP_ENABLE_L2_GAS_POLLING=true
       - ROLLUP_ENFORCE_FEES=true
       - ETH1_L1_FEE_WALLET_ADDRESS=0xbF159Ba5E5917551c70E377ADf21eD3736209fCE
@@ -100,6 +98,11 @@ services:
       - RETRIES=1000
     restart: always
     entrypoint: sh ./geth.sh
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     ports:
       - 8547:8545
       - 8548:8546
