@@ -53,11 +53,11 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 	if cfg.privateKey == nil {
 		return nil, errNoPrivateKey
 	}
-	if cfg.l2ChainID == nil {
+	if cfg.chainID == nil {
 		return nil, errNoChainID
 	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(cfg.privateKey, cfg.l2ChainID)
+	opts, err := bind.NewKeyedTransactorWithChainID(cfg.privateKey, cfg.chainID)
 	if err != nil {
 		return nil, err
 	}
@@ -111,8 +111,8 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 
 		// Only update the gas price when it must be changed by at least
 		// a paramaterizable amount.
-		if !isDifferenceSignificant(currentPrice.Uint64(), updatedGasPrice, cfg.l2GasPriceSignificanceFactor) {
-			log.Info("gas price did not significantly change", "min-factor", cfg.l2GasPriceSignificanceFactor,
+		if !isDifferenceSignificant(currentPrice.Uint64(), updatedGasPrice, cfg.significanceFactor) {
+			log.Info("gas price did not significantly change", "min-factor", cfg.significanceFactor,
 				"current-price", currentPrice, "next-price", updatedGasPrice)
 			txNotSignificantCounter.Inc(1)
 			return nil
@@ -124,14 +124,14 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 			return err
 		}
 
-		log.Debug("updating L2 gas price", "tx.gasPrice", tx.GasPrice(), "tx.gasLimit", tx.Gas(),
+		log.Debug("sending transaction", "tx.gasPrice", tx.GasPrice(), "tx.gasLimit", tx.Gas(),
 			"tx.data", hexutil.Encode(tx.Data()), "tx.to", tx.To().Hex(), "tx.nonce", tx.Nonce())
 		pre := time.Now()
 		if err := backend.SendTransaction(context.Background(), tx); err != nil {
 			return err
 		}
 		txSendTimer.Update(time.Since(pre))
-		log.Info("L2 gas price transaction sent", "hash", tx.Hash().Hex())
+		log.Info("transaction sent", "hash", tx.Hash().Hex())
 
 		gasPriceGauge.Update(int64(updatedGasPrice))
 		txSendCounter.Inc(1)
@@ -146,7 +146,7 @@ func wrapUpdateL2GasPriceFn(backend DeployContractBackend, cfg *Config) (func(ui
 			}
 			txConfTimer.Update(time.Since(pre))
 
-			log.Info("L2 gas price transaction confirmed", "hash", tx.Hash().Hex(),
+			log.Info("transaction confirmed", "hash", tx.Hash().Hex(),
 				"gas-used", receipt.GasUsed, "blocknumber", receipt.BlockNumber)
 		}
 		return nil

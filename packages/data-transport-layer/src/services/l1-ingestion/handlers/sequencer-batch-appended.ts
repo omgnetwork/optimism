@@ -36,15 +36,15 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
     // TODO: We need to update our events so that we actually have enough information to parse this
     // batch without having to pull out this extra event. For the meantime, we need to find this
     // "TransactonBatchAppended" event to get the rest of the data.
-    const CanonicalTransactionChain = getContractFactory(
-      'CanonicalTransactionChain'
+    const OVM_CanonicalTransactionChain = getContractFactory(
+      'OVM_CanonicalTransactionChain'
     )
       .attach(event.address)
       .connect(l1RpcProvider)
 
     const batchSubmissionEvent = (
-      await CanonicalTransactionChain.queryFilter(
-        CanonicalTransactionChain.filters.TransactionBatchAppended(),
+      await OVM_CanonicalTransactionChain.queryFilter(
+        OVM_CanonicalTransactionChain.filters.TransactionBatchAppended(),
         eventBlock.number,
         eventBlock.number
       )
@@ -104,7 +104,7 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
           nextTxPointer
         )
 
-        const decoded = decodeSequencerBatchTransaction(
+        const decoded = maybeDecodeSequencerBatchTransaction(
           sequencerTransaction,
           l2ChainId
         )
@@ -116,12 +116,12 @@ export const handleEventsSequencerBatchAppended: EventHandlerSet<
           batchIndex: extraData.batchIndex.toNumber(),
           blockNumber: BigNumber.from(context.blockNumber).toNumber(),
           timestamp: BigNumber.from(context.timestamp).toNumber(),
-          gasLimit: BigNumber.from(0).toString(),
-          target: constants.AddressZero,
+          gasLimit: BigNumber.from(extraData.gasLimit).toString(),
+          target: SEQUENCER_ENTRYPOINT_ADDRESS,
           origin: null,
           data: toHexString(sequencerTransaction),
           queueOrigin: 'sequencer',
-          value: decoded.value,
+          value: decoded ? decoded.value : '0x0',
           queueIndex: null,
           decoded,
           confirmed: true,
@@ -249,23 +249,27 @@ const parseSequencerBatchTransaction = (
   return calldata.slice(offset + 3, offset + 3 + transactionLength)
 }
 
-const decodeSequencerBatchTransaction = (
+const maybeDecodeSequencerBatchTransaction = (
   transaction: Buffer,
   l2ChainId: number
-): DecodedSequencerBatchTransaction => {
-  const decodedTx = ethers.utils.parseTransaction(transaction)
+): DecodedSequencerBatchTransaction | null => {
+  try {
+    const decodedTx = ethers.utils.parseTransaction(transaction)
 
-  return {
-    nonce: BigNumber.from(decodedTx.nonce).toString(),
-    gasPrice: BigNumber.from(decodedTx.gasPrice).toString(),
-    gasLimit: BigNumber.from(decodedTx.gasLimit).toString(),
-    value: toRpcHexString(decodedTx.value),
-    target: decodedTx.to ? toHexString(decodedTx.to) : null,
-    data: toHexString(decodedTx.data),
-    sig: {
-      v: parseSignatureVParam(decodedTx.v, l2ChainId),
-      r: toHexString(decodedTx.r),
-      s: toHexString(decodedTx.s),
-    },
+    return {
+      nonce: BigNumber.from(decodedTx.nonce).toString(),
+      gasPrice: BigNumber.from(decodedTx.gasPrice).toString(),
+      gasLimit: BigNumber.from(decodedTx.gasLimit).toString(),
+      value: toRpcHexString(decodedTx.value),
+      target: decodedTx.to ? toHexString(decodedTx.to):null, // Maybe null this out for creations?
+      data: toHexString(decodedTx.data),
+      sig: {
+        v: parseSignatureVParam(decodedTx.v, l2ChainId),
+        r: toHexString(decodedTx.r),
+        s: toHexString(decodedTx.s),
+      },
+    }
+  } catch (err) {
+    return null
   }
 }

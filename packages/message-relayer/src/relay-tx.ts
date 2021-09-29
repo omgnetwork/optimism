@@ -78,7 +78,7 @@ export const getMessagesByTransactionHash = async (
 
   const l2CrossDomainMessenger = new ethers.Contract(
     l2CrossDomainMessengerAddress,
-    getContractInterface('L2CrossDomainMessenger'),
+    getContractInterface('OVM_L2CrossDomainMessenger'),
     l2RpcProvider
   )
 
@@ -92,11 +92,17 @@ export const getMessagesByTransactionHash = async (
 
   // Decode the messages and turn them into a nicer struct.
   const sentMessages = sentMessageEvents.map((sentMessageEvent) => {
+    const encodedMessage = sentMessageEvent.args.message
+    const decodedMessage = l2CrossDomainMessenger.interface.decodeFunctionData(
+      'relayMessage',
+      encodedMessage
+    )
+
     return {
-      target: sentMessageEvent.args.target,
-      sender: sentMessageEvent.args.sender,
-      message: sentMessageEvent.args.message, // decoded message
-      messageNonce: sentMessageEvent.args.messageNonce.toNumber(),
+      target: decodedMessage._target,
+      sender: decodedMessage._sender,
+      message: decodedMessage._message,
+      messageNonce: decodedMessage._messageNonce.toNumber(),
     }
   })
 
@@ -110,7 +116,7 @@ export const getMessagesByTransactionHash = async (
  * @returns Encoded message.
  */
 const encodeCrossDomainMessage = (message: CrossDomainMessage): string => {
-  return getContractInterface('L2CrossDomainMessenger').encodeFunctionData(
+  return getContractInterface('OVM_L2CrossDomainMessenger').encodeFunctionData(
     'relayMessage',
     [message.target, message.sender, message.message, message.messageNonce]
   )
@@ -131,7 +137,7 @@ export const getStateBatchAppendedEventByTransactionIndex = async (
 ): Promise<ethers.Event | null> => {
   const l1StateCommitmentChain = new ethers.Contract(
     l1StateCommitmentChainAddress,
-    getContractInterface('StateCommitmentChain'),
+    getContractInterface('OVM_StateCommitmentChain'),
     l1RpcProvider
   )
 
@@ -213,7 +219,7 @@ export const getStateRootBatchByTransactionIndex = async (
 ): Promise<StateRootBatch | null> => {
   const l1StateCommitmentChain = new ethers.Contract(
     l1StateCommitmentChainAddress,
-    getContractInterface('StateCommitmentChain'),
+    getContractInterface('OVM_StateCommitmentChain'),
     l1RpcProvider
   )
 
@@ -370,7 +376,7 @@ export const getMessagesAndProofsForL2Transaction = async (
     // We need to calculate the specific storage slot that demonstrates that this message was
     // actually included in the L2 chain. The following calculation is based on the fact that
     // messages are stored in the following mapping on L2:
-    // https://github.com/ethereum-optimism/optimism/blob/c84d3450225306abbb39b4e7d6d82424341df2be/packages/contracts/contracts/L2/predeploys/OVM_L2ToL1MessagePasser.sol#L23
+    // https://github.com/ethereum-optimism/optimism/blob/c84d3450225306abbb39b4e7d6d82424341df2be/packages/contracts/contracts/optimistic-ethereum/OVM/predeploys/OVM_L2ToL1MessagePasser.sol#L23
     // You can read more about how Solidity storage slots are computed for mappings here:
     // https://docs.soliditylang.org/en/v0.8.4/internals/layout_in_storage.html#mappings-and-dynamic-arrays
     const messageSlot = ethers.utils.keccak256(

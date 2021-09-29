@@ -1155,19 +1155,5 @@ func newFrontierInstructionSet() JumpTable {
 			valid:      true,
 			writes:     true,
 		},
-		L1MESSAGESENDER: {
-			execute:     opL1MessageSender,
-			constantGas: GasQuickStep,
-			minStack:    minStack(0, 1),
-			maxStack:    maxStack(0, 1),
-			valid:       true,
-		},
-		L1BLOCKNUMBER: {
-			execute:     opL1BlockNumber,
-			constantGas: GasQuickStep,
-			minStack:    minStack(0, 1),
-			maxStack:    maxStack(0, 1),
-			valid:       true,
-		},
 	}
 }

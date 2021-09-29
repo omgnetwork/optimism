@@ -13,6 +13,7 @@ import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
 import 'hardhat-deploy'
 import '@typechain/hardhat'
+import '@eth-optimism/hardhat-ovm'
 import './tasks/deploy'
 import './tasks/l2-gasprice'
 import './tasks/set-owner'
@@ -38,33 +39,32 @@ const config: HardhatUserConfig = {
       tags: ['local'],
       hardfork: 'istanbul',
     },
+    // Add this network to your config!
     optimism: {
       url: 'http://127.0.0.1:8545',
+      ovm: true,
       saveDeployments: false,
     },
     'optimism-kovan': {
       chainId: 69,
       url: 'https://kovan.optimism.io',
       accounts: [privateKey],
+      gasPrice: 15000000,
+      ovm: true,
     },
     'optimism-mainnet': {
       chainId: 10,
       url: 'https://mainnet.optimism.io',
       accounts: [privateKey],
+      gasPrice: 15000000,
+      ovm: true,
     },
   },
   mocha: {
     timeout: 50000,
   },
   solidity: {
-    compilers: [
-      {
-        version: '0.8.8',
-      },
-      {
-        version: '0.5.17', // Required for WETH9
-      },
-    ],
+    version: '0.7.6',
     settings: {
       optimizer: { enabled: true, runs: 200 },
       metadata: {
@@ -76,6 +76,9 @@ const config: HardhatUserConfig = {
         },
       },
     },
+  },
+  ovm: {
+    solcVersion: '0.7.6+commit.3b061308',
   },
   typechain: {
     outDir: 'dist/types',

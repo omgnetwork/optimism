@@ -138,6 +138,7 @@ var (
 		utils.GoerliFlag,
 		utils.VMEnableDebugFlag,
 		utils.NetworkIdFlag,
+		utils.ChainIdFlag,
 		utils.EthStatsURLFlag,
 		utils.FakePoWFlag,
 		utils.NoCompactionFlag,
@@ -154,16 +155,23 @@ var (
 	optimismFlags = []cli.Flag{
 		utils.Eth1SyncServiceEnable,
 		utils.Eth1CanonicalTransactionChainDeployHeightFlag,
+		utils.Eth1L1CrossDomainMessengerAddressFlag,
+		utils.Eth1L1FeeWalletAddressFlag,
+		utils.Eth1StandardBridgeAddressFlag,
+		utils.Eth1ChainIdFlag,
 		utils.RollupClientHttpFlag,
 		utils.RollupEnableVerifierFlag,
+		utils.RollupAddressManagerOwnerAddressFlag,
 		utils.RollupTimstampRefreshFlag,
 		utils.RollupPollIntervalFlag,
+		utils.RollupStateDumpPathFlag,
 		utils.RollupMaxCalldataSizeFlag,
 		utils.RollupBackendFlag,
 		utils.RollupEnforceFeesFlag,
 		utils.RollupMinL2GasLimitFlag,
 		utils.RollupFeeThresholdDownFlag,
 		utils.RollupFeeThresholdUpFlag,
+		utils.GasPriceOracleOwnerAddress,
 	}
 
 	rpcFlags = []cli.Flag{

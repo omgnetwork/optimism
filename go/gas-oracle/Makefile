@@ -9,8 +9,6 @@ LDFLAGSSTRING +=-X main.GitDate=$(GITDATE)
 LDFLAGSSTRING +=-X main.GitVersion=$(GITVERSION)
 LDFLAGS :=-ldflags "$(LDFLAGSSTRING)"
 
-CONTRACTS_PATH := "../../packages/contracts/artifacts/contracts"
-
 gas-oracle:
 	env GO111MODULE=on go build $(LDFLAGS)
 
@@ -23,16 +21,11 @@ test:
 lint:
 	golangci-lint run ./...
 
-abi:
-	cat $(CONTRACTS_PATH)/L2/predeploys/OVM_GasPriceOracle.sol/OVM_GasPriceOracle.json \
-		| jq '{abi,bytecode}' \
-		> abis/OVM_GasPriceOracle.json
-
-binding: abi
+binding:
 	$(eval temp := $(shell mktemp))
 
 	cat abis/OVM_GasPriceOracle.json \
-		| jq -r .bytecode > $(temp)
+		| jq -r .bin > $(temp)
 
 	cat abis/OVM_GasPriceOracle.json \
 		| jq .abi \

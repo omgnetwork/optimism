@@ -1,4 +1,3 @@
-/* Imports: Internal */
 import { getContractInterface } from '../../../src/contract-defs'
 
 export const encodeXDomainCalldata = (
@@ -7,7 +6,7 @@ export const encodeXDomainCalldata = (
   message: string,
   messageNonce: number
 ): string => {
-  return getContractInterface('L2CrossDomainMessenger').encodeFunctionData(
+  return getContractInterface('OVM_L2CrossDomainMessenger').encodeFunctionData(
     'relayMessage',
     [target, sender, message, messageNonce]
   )

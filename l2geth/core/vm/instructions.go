@@ -897,9 +897,14 @@ func makeLog(size int) executionFunc {
 			topics[i] = common.BigToHash(stack.pop())
 		}
 
+		contractAddr := contract.Address()
+		if UsingOVM {
+			contractAddr = interpreter.evm.OvmADDRESS()
+		}
+
 		d := memory.GetCopy(mStart.Int64(), mSize.Int64())
 		interpreter.evm.StateDB.AddLog(&types.Log{
-			Address: contract.Address(),
+			Address: contractAddr,
 			Topics:  topics,
 			Data:    d,
 			// This is a non-consensus field, but assigned here because
@@ -966,15 +971,4 @@ func makeSwap(size int64) executionFunc {
 		stack.swap(int(size))
 		return nil, nil
 	}
-}
-
-// OVM opcodes
-func opL1MessageSender(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	stack.push(interpreter.intPool.get().SetBytes(interpreter.evm.L1MessageSender.Bytes()))
-	return nil, nil
-}
-
-func opL1BlockNumber(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	stack.push(math.U256(interpreter.intPool.get().Set(interpreter.evm.L1BlockNumber)))
-	return nil, nil
 }

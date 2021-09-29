@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.8;
+pragma solidity >0.7.0 <0.9.0;
+pragma experimental ABIEncoderV2;
 
 contract MockL2CrossDomainMessenger {
     struct MessageData {
@@ -9,12 +10,7 @@ contract MockL2CrossDomainMessenger {
         uint256 messageNonce;
     }
 
-    event SentMessage(
-        address indexed target,
-        address sender,
-        bytes message,
-        uint256 messageNonce,
-        uint256 gasLimit);
+    event SentMessage(bytes message);
 
     function emitSentMessageEvent(
         MessageData memory _message
@@ -22,11 +18,13 @@ contract MockL2CrossDomainMessenger {
         public
     {
         emit SentMessage(
-            _message.target,
-            _message.sender,
-            _message.message,
-            _message.messageNonce,
-            0
+            abi.encodeWithSignature(
+                "relayMessage(address,address,bytes,uint256)",
+                _message.target,
+                _message.sender,
+                _message.message,
+                _message.messageNonce
+            )
         );
     }
 

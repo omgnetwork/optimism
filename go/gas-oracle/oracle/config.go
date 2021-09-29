@@ -15,10 +15,8 @@ import (
 
 // Config represents the configuration options for the gas oracle
 type Config struct {
-	l1ChainID                    *big.Int
-	l2ChainID                    *big.Int
+	chainID                      *big.Int
 	ethereumHttpUrl              string
-	layerTwoHttpUrl              string
 	gasPriceOracleAddress        common.Address
 	privateKey                   *ecdsa.PrivateKey
 	gasPrice                     *big.Int
@@ -28,10 +26,7 @@ type Config struct {
 	maxPercentChangePerEpoch     float64
 	averageBlockGasLimitPerEpoch float64
 	epochLengthSeconds           uint64
-	l2GasPriceSignificanceFactor float64
-	l1BaseFeeSignificanceFactor  float64
-	enableL1BaseFee              bool
-	enableL2GasPrice             bool
+	significanceFactor           float64
 	// Metrics config
 	MetricsEnabled          bool
 	MetricsHTTP             string
@@ -47,18 +42,14 @@ type Config struct {
 func NewConfig(ctx *cli.Context) *Config {
 	cfg := Config{}
 	cfg.ethereumHttpUrl = ctx.GlobalString(flags.EthereumHttpUrlFlag.Name)
-	cfg.layerTwoHttpUrl = ctx.GlobalString(flags.LayerTwoHttpUrlFlag.Name)
 	addr := ctx.GlobalString(flags.GasPriceOracleAddressFlag.Name)
 	cfg.gasPriceOracleAddress = common.HexToAddress(addr)
 	cfg.targetGasPerSecond = ctx.GlobalUint64(flags.TargetGasPerSecondFlag.Name)
 	cfg.maxPercentChangePerEpoch = ctx.GlobalFloat64(flags.MaxPercentChangePerEpochFlag.Name)
 	cfg.averageBlockGasLimitPerEpoch = ctx.GlobalFloat64(flags.AverageBlockGasLimitPerEpochFlag.Name)
 	cfg.epochLengthSeconds = ctx.GlobalUint64(flags.EpochLengthSecondsFlag.Name)
-	cfg.l2GasPriceSignificanceFactor = ctx.GlobalFloat64(flags.L2GasPriceSignificanceFactorFlag.Name)
+	cfg.significanceFactor = ctx.GlobalFloat64(flags.SignificanceFactorFlag.Name)
 	cfg.floorPrice = ctx.GlobalUint64(flags.FloorPriceFlag.Name)
-	cfg.l1BaseFeeSignificanceFactor = ctx.GlobalFloat64(flags.L1BaseFeeSignificanceFactorFlag.Name)
-	cfg.enableL1BaseFee = ctx.GlobalBool(flags.EnableL1BaseFeeFlag.Name)
-	cfg.enableL2GasPrice = ctx.GlobalBool(flags.EnableL2GasPriceFlag.Name)
 
 	if ctx.GlobalIsSet(flags.PrivateKeyFlag.Name) {
 		hex := ctx.GlobalString(flags.PrivateKeyFlag.Name)
@@ -72,13 +63,9 @@ func NewConfig(ctx *cli.Context) *Config {
 		log.Crit("No private key configured")
 	}
 
-	if ctx.GlobalIsSet(flags.L1ChainIDFlag.Name) {
-		chainID := ctx.GlobalUint64(flags.L1ChainIDFlag.Name)
-		cfg.l1ChainID = new(big.Int).SetUint64(chainID)
-	}
-	if ctx.GlobalIsSet(flags.L2ChainIDFlag.Name) {
-		chainID := ctx.GlobalUint64(flags.L2ChainIDFlag.Name)
-		cfg.l2ChainID = new(big.Int).SetUint64(chainID)
+	if ctx.GlobalIsSet(flags.ChainIDFlag.Name) {
+		chainID := ctx.GlobalUint64(flags.ChainIDFlag.Name)
+		cfg.chainID = new(big.Int).SetUint64(chainID)
 	}
 
 	if ctx.GlobalIsSet(flags.TransactionGasPriceFlag.Name) {

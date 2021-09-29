@@ -18,11 +18,9 @@ copies or substantial portions of the Software.
 
 */
 
-pragma solidity ^0.8.8;
+pragma solidity ^0.7.0;
 
-// Can't do this until the package is published.
-//import { iOVM_L1BlockNumber } from "@eth-optimism/contracts/iOVM_L1BlockNumber";
-import { iOVM_L1BlockNumber } from "./OVMContextStorage.sol";
+pragma experimental ABIEncoderV2;
 
 /// @title OVMMulticall - Aggregate results from multiple read-only function calls
 contract OVMMulticall {
@@ -46,14 +44,8 @@ contract OVMMulticall {
         timestamp = block.timestamp;
     }
 
-    function getCurrentL1BlockNumber() public view returns (uint256) {
-        return iOVM_L1BlockNumber(
-            0x4200000000000000000000000000000000000013
-        ).getL1BlockNumber();
-    }
-
-    function getCurrentBlockNumber() public view returns (uint256) {
-        return block.number;
+    function getCurrentBlockNumber() public view returns (uint256 blockNumber) {
+        blockNumber = block.number;
     }
 
     function getChainID() external view returns (uint256) {

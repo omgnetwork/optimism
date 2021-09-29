@@ -1,4 +1,4 @@
-pragma solidity ^0.8.8;
+pragma solidity >=0.7.0;
 
 contract ICrossDomainMessenger {
     address public xDomainMessageSender;

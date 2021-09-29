@@ -507,7 +507,7 @@ func (w *worker) mainLoop() {
 				w.pendingMu.Unlock()
 
 			} else {
-				log.Debug("Problem committing transaction", "msg", err)
+				log.Debug("Problem committing transaction: %w", err)
 			}
 
 		case ev := <-w.txsCh:

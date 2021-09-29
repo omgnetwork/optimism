@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - 'develop'
-      - 'experimental'
+      - 'mm/dtl-deployer-combined'
 
 jobs:
 
@@ -66,12 +66,12 @@ jobs:
         working-directory: ./ops
         run: |
           for i in $(docker images --format "{{.Repository}}:{{.Tag}}" | grep omgx); do
-            docker image tag "$i" omgx/$(echo $i | awk -F'/' '{print $2}' | awk -F':' '{print $1}'):experimental
+            docker image tag "$i" omgx/$(echo $i | awk -F'/' '{print $2}' | awk -F':' '{print $1}'):latest
           done
 
           for i in $(docker images --format "{{.Repository}}:{{.Tag}}" | grep ethereumoptimism); do
-            docker image tag "$i" omgx/$(echo $i | awk -F'/' '{print $2}' | awk -F':' '{print $1}'):experimental
-            docker image tag "$i" omgx/$(echo $i | awk -F'/' '{print $2}' | awk -F':' '{print $1}'):experimental
+            docker image tag "$i" omgx/$(echo $i | awk -F'/' '{print $2}' | awk -F':' '{print $1}'):latest
+            docker image tag "$i" omgx/$(echo $i | awk -F'/' '{print $2}' | awk -F':' '{print $1}'):latest
           done
           docker images
 

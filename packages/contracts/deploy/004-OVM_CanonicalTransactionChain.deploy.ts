@@ -15,19 +15,17 @@ const deployFn: DeployFunction = async (hre) => {
 
   await deployAndRegister({
     hre,
-    name: 'CanonicalTransactionChain',
+    name: 'OVM_CanonicalTransactionChain',
     args: [
       Lib_AddressManager.address,
       (hre as any).deployConfig.ctcForceInclusionPeriodSeconds,
       (hre as any).deployConfig.ctcForceInclusionPeriodBlocks,
       (hre as any).deployConfig.ctcMaxTransactionGasLimit,
-      (hre as any).deployConfig.ctcL2GasDiscountDivisor,
-      (hre as any).deployConfig.ctcEnqueueGasCost,
     ],
   })
 }
 
 deployFn.dependencies = ['Lib_AddressManager']
-deployFn.tags = ['CanonicalTransactionChain']
+deployFn.tags = ['OVM_CanonicalTransactionChain']
 
 export default deployFn

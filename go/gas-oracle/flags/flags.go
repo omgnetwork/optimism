@@ -8,24 +8,13 @@ var (
 	EthereumHttpUrlFlag = cli.StringFlag{
 		Name:   "ethereum-http-url",
 		Value:  "http://127.0.0.1:8545",
-		Usage:  "L1 HTTP Endpoint",
+		Usage:  "Sequencer HTTP Endpoint",
 		EnvVar: "GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL",
 	}
-	LayerTwoHttpUrlFlag = cli.StringFlag{
-		Name:   "layer-two-http-url",
-		Value:  "http://127.0.0.1:9545",
-		Usage:  "Sequencer HTTP Endpoint",
-		EnvVar: "GAS_PRICE_ORACLE_LAYER_TWO_HTTP_URL",
-	}
-	L1ChainIDFlag = cli.Uint64Flag{
-		Name:   "l1-chain-id",
-		Usage:  "L1 Chain ID",
-		EnvVar: "GAS_PRICE_ORACLE_L1_CHAIN_ID",
-	}
-	L2ChainIDFlag = cli.Uint64Flag{
-		Name:   "l2-chain-id",
+	ChainIDFlag = cli.Uint64Flag{
+		Name:   "chain-id",
 		Usage:  "L2 Chain ID",
-		EnvVar: "GAS_PRICE_ORACLE_L2_CHAIN_ID",
+		EnvVar: "GAS_PRICE_ORACLE_CHAIN_ID",
 	}
 	GasPriceOracleAddressFlag = cli.StringFlag{
 		Name:   "gas-price-oracle-address",
@@ -42,16 +31,6 @@ var (
 		Name:   "transaction-gas-price",
 		Usage:  "Hardcoded tx.gasPrice, not setting it uses gas estimation",
 		EnvVar: "GAS_PRICE_ORACLE_TRANSACTION_GAS_PRICE",
-	}
-	EnableL1BaseFeeFlag = cli.BoolFlag{
-		Name:   "enable-l1-base-fee",
-		Usage:  "Enable updating the L1 base fee",
-		EnvVar: "GAS_PRICE_ORACLE_ENABLE_L1_BASE_FEE",
-	}
-	EnableL2GasPriceFlag = cli.BoolFlag{
-		Name:   "enable-l2-gas-price",
-		Usage:  "Enable updating the L2 gas price",
-		EnvVar: "GAS_PRICE_ORACLE_ENABLE_L2_GAS_PRICE",
 	}
 	LogLevelFlag = cli.IntFlag{
 		Name:   "loglevel",
@@ -89,13 +68,7 @@ var (
 		Usage:  "length of epochs in seconds",
 		EnvVar: "GAS_PRICE_ORACLE_EPOCH_LENGTH_SECONDS",
 	}
-	L1BaseFeeSignificanceFactorFlag = cli.Float64Flag{
-		Name:   "l1-base-fee-significant-factor",
-		Value:  0.10,
-		Usage:  "only update when the L1 base fee changes by more than this factor",
-		EnvVar: "GAS_PRICE_ORACLE_L1_BASE_FEE_SIGNIFICANT_FACTOR",
-	}
-	L2GasPriceSignificanceFactorFlag = cli.Float64Flag{
+	SignificanceFactorFlag = cli.Float64Flag{
 		Name:   "significant-factor",
 		Value:  0.05,
 		Usage:  "only update when the gas price changes by more than this factor",
@@ -156,10 +129,7 @@ var (
 
 var Flags = []cli.Flag{
 	EthereumHttpUrlFlag,
-	LayerTwoHttpUrlFlag,
-	L1ChainIDFlag,
-	L2ChainIDFlag,
-	L1BaseFeeSignificanceFactorFlag,
+	ChainIDFlag,
 	GasPriceOracleAddressFlag,
 	PrivateKeyFlag,
 	TransactionGasPriceFlag,
@@ -169,10 +139,8 @@ var Flags = []cli.Flag{
 	MaxPercentChangePerEpochFlag,
 	AverageBlockGasLimitPerEpochFlag,
 	EpochLengthSecondsFlag,
-	L2GasPriceSignificanceFactorFlag,
+	SignificanceFactorFlag,
 	WaitForReceiptFlag,
-	EnableL1BaseFeeFlag,
-	EnableL2GasPriceFlag,
 	MetricsEnabledFlag,
 	MetricsHTTPFlag,
 	MetricsPortFlag,

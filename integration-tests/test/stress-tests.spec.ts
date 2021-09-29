@@ -15,7 +15,8 @@ import {
 } from './shared/stress-test-helpers'
 
 /* Imports: Artifacts */
-import simpleStorageJson from '../artifacts/contracts/SimpleStorage.sol/SimpleStorage.json'
+import l1SimpleStorageJson from '../artifacts/contracts/SimpleStorage.sol/SimpleStorage.json'
+import l2SimpleStorageJson from '../artifacts-ovm/contracts/SimpleStorage.sol/SimpleStorage.json'
 
 // Need a big timeout to allow for all transactions to be processed.
 // For some reason I can't figure out how to set the timeout on a per-suite basis
@@ -33,13 +34,13 @@ describe('stress tests', () => {
   let L1SimpleStorage: Contract
   beforeEach(async () => {
     const factory__L1SimpleStorage = new ContractFactory(
-      simpleStorageJson.abi,
-      simpleStorageJson.bytecode,
+      l1SimpleStorageJson.abi,
+      l1SimpleStorageJson.bytecode,
       env.l1Wallet
     )
     const factory__L2SimpleStorage = new ContractFactory(
-      simpleStorageJson.abi,
-      simpleStorageJson.bytecode,
+      l2SimpleStorageJson.abi,
+      l2SimpleStorageJson.bytecode,
       env.l2Wallet
     )
     L1SimpleStorage = await factory__L1SimpleStorage.deploy()

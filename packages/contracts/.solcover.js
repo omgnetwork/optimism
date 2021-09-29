@@ -1,7 +1,8 @@
 module.exports = {
   skipFiles: [
     './test-helpers',
-    './test-libraries'
+    './test-libraries',
+    './optimistic-ethereum/mockOVM'
   ],
   mocha: {
     grep: "@skip-on-coverage",

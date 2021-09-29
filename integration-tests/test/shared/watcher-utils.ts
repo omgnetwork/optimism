@@ -13,10 +13,10 @@ export const initWatcher = async (
   AddressManager: Contract
 ) => {
   const l1MessengerAddress = await AddressManager.getAddress(
-    'Proxy__L1CrossDomainMessenger'
+    'Proxy__OVM_L1CrossDomainMessenger'
   )
   const l2MessengerAddress = await AddressManager.getAddress(
-    'L2CrossDomainMessenger'
+    'OVM_L2CrossDomainMessenger'
   )
   return new Watcher({
     l1: {
