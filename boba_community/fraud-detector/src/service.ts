@@ -154,6 +154,12 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     this.state.eventCache = []
     
     this.state.L2_block = this.state.l1Provider.getEarliestL2block(this.state.OVM_StateCommitmentChain.filters.StateBatchAppended())
+
+    //skip the first 10 blocks right after genesis that had the wrong chainID 
+    if (this.state.L2_block < 10 ) {
+      this.state.L2_block = 10
+    }
+
     console.log('Earliest L2 block',this.state.L2_block)
 
   }
