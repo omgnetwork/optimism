@@ -56,18 +56,15 @@ export class L1ProviderWrapper {
       )
 
       console.log("Scanning L1 from", starting_L1_BlockNumber, "to", scan_end)
-      console.log("New batches in this L1 interval:", batches_in_query_interval.length)
+      console.log("New SSC batches in this L1 interval:", batches_in_query_interval.length)
 
       let L2blocks_indexed = []
 
       //batches_in_query_interval.forEach
       await Promise.all(batches_in_query_interval.map(async batch => {
           
-        //right now, many of these batches have length 1, but some are larger
-        //our goal is to unpack and reindex them, and add the state roots for each L2 TX aka block
-        //console.log("this event index",event.args._batchIndex.toString()),
-        //console.log(event.args._batchSize.toString())
-        
+        //many of the batches have length 1, but some are larger
+        //goal is to unpack and reindex them, and add the state roots for each L2 TX aka block        
         const batchSize = batch.args._batchSize.toNumber()
         const prevTotalElements = batch.args._prevTotalElements.toNumber()
         const batchIndex = batch.args._batchIndex.toNumber()
@@ -79,7 +76,7 @@ export class L1ProviderWrapper {
           cache.starting_L1_BlockNumber = L1block + 1
         } 
 
-        console.log("Last good SCC batch at L1:", L1block)
+        console.log("Last good SCC batch at L1 block:", L1block)
 
         //Now get the roots for this batch
         const transaction = await this.provider.getTransaction(batch.transactionHash)
@@ -90,8 +87,6 @@ export class L1ProviderWrapper {
         )
         
         for (let idx = 0; idx < batchSize; idx++) {
-
-          //console.log("L2 block:", prevTotalElements + idx)
 
           const L2blockNumber = prevTotalElements + idx
 
@@ -122,8 +117,7 @@ export class L1ProviderWrapper {
       //almost caught up...
       if (starting_L1_BlockNumber + 2000 >= latest_L1_BlockNumber) {
         cache.L2blocks = cache.L2blocks.concat(L2blocks)
-        console.log("Adding new L2blocks:", L2blocks)
-        console.log("Adding new L2blocks:", L2blocks.length)
+        console.log("Adding", L2blocks.length, "new L2blocks:", L2blocks)
         break
       }
 
@@ -131,7 +125,6 @@ export class L1ProviderWrapper {
       latest_L1_BlockNumber = await this.provider.getBlockNumber()
 
       const percent_completed = (latest_L1_BlockNumber - starting_L1_BlockNumber) / new_L1_blocks
-
       console.log("CACHING", (100.00 - (percent_completed * 100.00)).toFixed(2), "% completed")
     }
 
@@ -159,7 +152,7 @@ export class L1ProviderWrapper {
     })
 
     if (matching.length === 0) {
-      console.log('Waiting for new Boba at block:',L2blockNumber)
+      //console.log('Waiting for new Boba at block:',L2blockNumber)
       return
     }
 

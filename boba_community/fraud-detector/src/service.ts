@@ -175,7 +175,7 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
         )
 
         if(nextOperatorL2block === undefined) {
-          console.log(chalk.bgWhite('Waiting for new blocks...'))
+          console.log(chalk.bgWhite('\nWaiting for new blocks at L2 block ', this.state.L2_block))
         } else {
           console.log("Next operator L2 block to verify:", nextOperatorL2block)
         }
@@ -210,7 +210,8 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
             console.log(chalk.bgGreen('***********************************************************\n'))
           }
 
-          this.state.L2_block++ //let's check the next one, if any
+          //and now, move on to the next block
+          this.state.L2_block++
 
           nextOperatorL2block = await this.state.l1Provider.getOperatorL2block(
             this.state.L2_block

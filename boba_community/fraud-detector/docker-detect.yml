@@ -1,37 +1,24 @@
 version: "3.4"
 
 x-var: &L1_NODE_WEB3_URL
-  L1_NODE_WEB3_URL=https://mainnet.infura.io/v3/4a8ff28168f34a9d91bd84412def30ab
+  L1_NODE_WEB3_URL=${L1_NODE_WEB3_URL}
 
 x-var: &DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT
-  DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT=https://mainnet.infura.io/v3/4a8ff28168f34a9d91bd84412def30ab
+  DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT=${L1_NODE_WEB3_URL}
 
 x-var: &L2_NODE_WEB3_URL
   L2_NODE_WEB3_URL=http://geth_l2:8545
 
-x-var: &DEPLOYER_HTTP
-  DEPLOYER_HTTP=http://deployer:8081
-
-x-var: &DEPLOYER_URL
-  DEPLOYER_URL=http://deployer:8081
-
 x-var: &ADDRESS_MANAGER_ADDRESS
-  ADDRESS_MANAGER_ADDRESS=0x8376ac6C3f73a25Dd994E0b0669ca7ee0C02F089
+  ADDRESS_MANAGER_ADDRESS=${ADDRESS_MANAGER_ADDRESS}
 
 x-var: &DATA_TRANSPORT_LAYER__ADDRESS_MANAGER
-  DATA_TRANSPORT_LAYER__ADDRESS_MANAGER=0x8376ac6C3f73a25Dd994E0b0669ca7ee0C02F089
+  DATA_TRANSPORT_LAYER__ADDRESS_MANAGER=${ADDRESS_MANAGER_ADDRESS}
 
 x-var: &ETH1_CTC_DEPLOYMENT_HEIGHT
-  ETH1_CTC_DEPLOYMENT_HEIGHT=13011896
+  ETH1_CTC_DEPLOYMENT_HEIGHT=${L1_MAINNET_DEPLOYMENT_BLOCK}
 
 services:
-
-  deployer:
-    image: omgx/deployer-mainnet:production-v1
-    restart: always
-    entrypoint: ./bin/serve_dump.sh
-    ports:
-      - 8082:8081
 
   data_transport_layer:
     image: omgx/data-transport-layer:rc1.0-surgery
@@ -52,7 +39,7 @@ services:
       - DATA_TRANSPORT_LAYER__LOGS_PER_POLLING_INTERVAL=2000
       - DATA_TRANSPORT_LAYER__DANGEROUSLY_CATCH_ALL_ERRORS=true
       - DATA_TRANSPORT_LAYER__SERVER_HOSTNAME=0.0.0.0
-      - URL=http://deployer:8081/addresses.json
+      - URL=https://replica.boba.network:8081/addresses.json
       - RETRIES=1000
     restart: always
     ports:
@@ -89,12 +76,8 @@ services:
       - NO_USB=true
       - GCMODE=archive
       - NO_DISCOVER=true
-      - ROLLUP_STATE_DUMP_PATH=http://deployer:8081/state-dump.latest.json
-      - URL=http://deployer:8081/addresses.json
-      - ROLLUP_ENABLE_L2_GAS_POLLING=true
-      - ROLLUP_ENFORCE_FEES=true
-      - ETH1_L1_FEE_WALLET_ADDRESS=0xbF159Ba5E5917551c70E377ADf21eD3736209fCE
-      - ROLLUP_GAS_PRICE_ORACLE_OWNER_ADDRESS=0xd86D22c02E301BE7C35e3Ef20962f614cAf32B76
+      - ROLLUP_STATE_DUMP_PATH=https://replica.boba.network:8081/state-dump.latest.json
+      - URL=https://replica.boba.network:8081/addresses.json
       - ROLLUP_BACKEND=l1
       - ROLLUP_VERIFIER_ENABLE=true
       - RETRIES=1000
