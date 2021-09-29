@@ -189,6 +189,8 @@ Resources:
               Value: true
             - Name: ETH1_CONFIRMATION_DEPTH
               Value: 0
+            - Name: VERBOSITY
+              Value: 3
           EntryPoint:
             - "/geth.sh"
           MountPoints:

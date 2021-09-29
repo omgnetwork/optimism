@@ -185,6 +185,8 @@ Resources:
                     Fn::ImportValue: !Sub "${InfrastructureStackName}:DomainName"
             - Name: RPC_ADDR
               Value: "0.0.0.0"
+            - Name: VERBOSITY
+              Value: "3"
           EntryPoint:
             - "/geth.sh"
           MountPoints:
