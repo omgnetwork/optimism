@@ -46,7 +46,7 @@ type LPWithdrawReward @entity {
   token: Bytes
 }
 
-type SBWithdrawalInitiated @entity {
+type StandardBridgeWithdrawalInitiated @entity {
   id: ID!
   l1Token: Bytes
   l2Token: Bytes
@@ -56,7 +56,7 @@ type SBWithdrawalInitiated @entity {
   data: Bytes
 }
 
-type SBDepositFinalized @entity {
+type StandardBridgeDepositFinalized @entity {
   id: ID!
   l1Token: Bytes
   l2Token: Bytes
@@ -66,7 +66,7 @@ type SBDepositFinalized @entity {
   data: Bytes
 }
 
-type SBDepositFailed @entity {
+type StandardBridgeDepositFailed @entity {
   id: ID!
   l1Token: Bytes
   l2Token: Bytes

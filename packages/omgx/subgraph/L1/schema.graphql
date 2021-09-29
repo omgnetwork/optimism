@@ -46,7 +46,7 @@ type LPWithdrawReward @entity {
   token: Bytes
 }
 
-type SBETHDepositInitiated @entity {
+type StandardBridgeETHDepositInitiated @entity {
   id: ID!
   from: Bytes
   to: Bytes
@@ -54,7 +54,7 @@ type SBETHDepositInitiated @entity {
   data: Bytes
 }
 
-type SBERC20DepositInitiated @entity {
+type StandardBridgeERC20DepositInitiated @entity {
   id: ID!
   l1Token: Bytes
   l2Token: Bytes
@@ -64,7 +64,7 @@ type SBERC20DepositInitiated @entity {
   data: Bytes
 }
 
-type SBETHWithdrawalFinalized @entity {
+type StandardBridgeETHWithdrawalFinalized @entity {
   id: ID!
   from: Bytes
   to: Bytes
@@ -72,7 +72,7 @@ type SBETHWithdrawalFinalized @entity {
   data: Bytes
 }
 
-type SBERC20WithdrawalFinalized @entity {
+type StandardBridgeERC20WithdrawalFinalized @entity {
   id: ID!
   l1Token: Bytes
   l2Token: Bytes
