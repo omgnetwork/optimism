@@ -55,8 +55,8 @@ const main = async () => {
     throw new Error('Must pass VERIFIER_WEB3_URL')
   }
 
-  const l2Provider = new providers.JsonRpcProvider(VERIFIER_WEB3_URL)  
-  const l1Provider  = new providers.JsonRpcProvider(L1_NODE_WEB3_URL)
+  const l2Provider = new providers.StaticJsonRpcProvider(VERIFIER_WEB3_URL)  
+  const l1Provider  = new providers.StaticJsonRpcProvider(L1_NODE_WEB3_URL)
 
   const service = new FraudProverService({
     l1RpcProvider: l1Provider,
