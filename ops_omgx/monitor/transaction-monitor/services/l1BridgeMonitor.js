@@ -69,8 +69,10 @@ class l1BridgeMonitorService extends OptimismEnv {
   }
 
   async startL1BridgeMonitor() {
-    const latestL1Block = await this.L1Provider.getBlockNumber();
+    const latestL1Block = (await this.L1Provider.getBlockNumber() - this.l1BlockConfirmation);
+
     const endBlock = Math.min(latestL1Block, this.endBlock);
+    if (this.startBlock > endBlock) this.startBlock = endBlock;
 
     const [userRewardFeeRate, ownerRewardFeeRate] = await Promise.all([
       this.L2LiquidityPoolContract.userRewardFeeRate(),
@@ -262,7 +264,7 @@ class l1BridgeMonitorService extends OptimismEnv {
         }
         this.logger.info(`Found L1 LP cross domain message ${eachCrossDomainMessage}`);
       } else {
-        this.logger.info(`No L1 LP cross domain message found ${eachCrossDomainMessage}`);
+        // this.logger.info(`No L1 LP cross domain message found ${eachCrossDomainMessage}`);
       }
     }
 
