@@ -6,8 +6,8 @@
     "build": "graph build",
     "prepare:rinkeby": "mustache config/rinkeby.json subgraph.template.yaml > subgraph.yaml",
     "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
-    "deploy:subgraph:rinkeby": "graph deploy --studio boba-network",
-    "deploy:subgraph:mainnet": "graph deploy --studio boba-network"
+    "deploy:subgraph:rinkeby": "graph deploy --studio boba-network-rinkeby",
+    "deploy:subgraph:mainnet": "graph deploy --studio boba-network-mainnet"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.20.1",
