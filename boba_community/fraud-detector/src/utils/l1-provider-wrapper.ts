@@ -56,7 +56,7 @@ export class L1ProviderWrapper {
       )
 
       console.log("Scanning L1 from", starting_L1_BlockNumber, "to", scan_end)
-      console.log("New SSC batches in this L1 interval:", batches_in_query_interval.length)
+      //console.log("New SSC batches in this L1 interval:", batches_in_query_interval.length)
 
       let L2blocks_indexed = []
 
@@ -76,7 +76,7 @@ export class L1ProviderWrapper {
           cache.starting_L1_BlockNumber = L1block + 1
         } 
 
-        console.log("Last good SCC batch at L1 block:", L1block)
+        //console.log("Last good SCC batch at L1 block:", L1block)
 
         //Now get the roots for this batch
         const transaction = await this.provider.getTransaction(batch.transactionHash)

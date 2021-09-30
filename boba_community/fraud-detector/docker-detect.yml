@@ -6,20 +6,17 @@ x-var: &L1_NODE_WEB3_URL
 x-var: &DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT
   DATA_TRANSPORT_LAYER__L1_RPC_ENDPOINT=${L1_NODE_WEB3_URL}
 
-x-var: &L2_NODE_WEB3_URL
-  L2_NODE_WEB3_URL=http://geth_l2:8545
-
 x-var: &DEPLOYER_HTTP
   DEPLOYER_HTTP=http://replica.boba.network:8081
-
-x-var: &DEPLOYER_URL
-  DEPLOYER_URL=http://replica.boba.network:8081
 
 x-var: &ADDRESS_MANAGER_ADDRESS
   ADDRESS_MANAGER_ADDRESS=${ADDRESS_MANAGER_ADDRESS}
 
 x-var: &DATA_TRANSPORT_LAYER__ADDRESS_MANAGER
   DATA_TRANSPORT_LAYER__ADDRESS_MANAGER=${ADDRESS_MANAGER_ADDRESS}
+
+x-var: &L1_MAINNET_DEPLOYMENT_BLOCK
+  L1_MAINNET_DEPLOYMENT_BLOCK=${L1_MAINNET_DEPLOYMENT_BLOCK}
 
 x-var: &ETH1_CTC_DEPLOYMENT_HEIGHT
   ETH1_CTC_DEPLOYMENT_HEIGHT=${L1_MAINNET_DEPLOYMENT_BLOCK}
@@ -106,3 +103,18 @@ services:
     ports:
       - 8547:8545
       - 8548:8546
+
+  fraud_detector:
+    image: omgx/fraud-detector:latest
+    environment:
+      - *L1_NODE_WEB3_URL
+      - *ADDRESS_MANAGER_ADDRESS
+      - *DEPLOYER_HTTP
+      - *L1_MAINNET_DEPLOYMENT_BLOCK
+      - VERIFIER_WEB3_URL=http://geth_l2:8545
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"

@@ -87,17 +87,17 @@ export class FraudProverService extends BaseService<FraudProverOptions> {
     }
 
     this.logger.info('Trying to connect to the Verifier...')
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 1000; i++) {
       try {
         await this.options.l2RpcProvider.detectNetwork()
         this.logger.info('Successfully connected to the L2 Verifier')
         break
       } catch (err) {
-        if (i < 9) {
-          this.logger.info('Unable to connect to L2 Verifier', {
-            retryAttemptsRemaining: 10 - i,
+        if (i < 999) {
+          this.logger.info('Waiting to connect to the L2 Verifier', {
+            retryAttemptsRemaining: 1000 - i,
           })
-          await sleep(1000)
+          await sleep(10000)
         } else {
           throw new Error(
             `Unable to connect to the L2 Verifier, check that your L2 Verifier endpoint is correct.`
