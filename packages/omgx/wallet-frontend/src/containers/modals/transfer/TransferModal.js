@@ -44,7 +44,7 @@ function TransferModal ({ open, token, minHeight }) {
 
   const [ recipient, setRecipient ] = useState('')
 
-  const [ disabledSubmit, setDisabledSubmit ] = useState(true)
+  const [ validValue, setValidValue ] = useState(false)
 
   const loading = useSelector(selectLoading([ 'TRANSFER/CREATE' ]))
   const wAddress = networkService.account ? networkService.account : ''
@@ -62,18 +62,13 @@ function TransferModal ({ open, token, minHeight }) {
 
   function setAmount(value) {
 
-    console.log("setAmount")
-
     const tooSmall = new BN(value).lte(new BN(0.0))
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
-    console.log("tooSmall",tooSmall)
-    console.log("tooBig",tooBig)
-
     if (tooSmall || tooBig) {
-      setDisabledSubmit(true)
+      setValidValue(false)
     } else {
-      setDisabledSubmit(false)
+      setValidValue(true)
     }
 
     setValue(value)
@@ -110,14 +105,13 @@ function TransferModal ({ open, token, minHeight }) {
   let convertToUSD = false
   if( Object.keys(lookupPrice) &&
       !!value &&
-      new BN(value).gt(new BN(0.0)) &&
-      new BN(value).lte(new BN(maxValue)) &&
+      validValue &&
       !!amountToUsd(value, lookupPrice, token)
   ) {
     convertToUSD = true
   }
 
-  if(typeof(token) === 'undefined') return
+  //if(typeof(token) === 'undefined') return
 
   return (
     <Modal open={open} onClose={handleClose} maxWidth="md" minHeight="500px">
@@ -193,7 +187,7 @@ function TransferModal ({ open, token, minHeight }) {
             variant="contained"
             loading={loading}
             tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
-            disabled={disabledSubmit}
+            disabled={!validValue}
             triggerTime={new Date()}
             fullWidth={isMobile}
             size="large"

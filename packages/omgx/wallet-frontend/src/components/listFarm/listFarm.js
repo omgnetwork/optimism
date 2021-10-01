@@ -4,7 +4,7 @@ import { isEqual } from 'lodash';
 import { logAmount, powAmount } from 'util/amountConvert';
 import { BigNumber } from 'ethers';
 
-import { openAlert, openError, openModal } from 'actions/uiAction';
+import { openAlert, openModal } from 'actions/uiAction';
 import { getFarmInfo, updateStakeToken, updateWithdrawToken } from 'actions/farmAction';
 
 import Button from 'components/button/Button';

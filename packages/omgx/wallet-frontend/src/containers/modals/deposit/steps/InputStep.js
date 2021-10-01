@@ -27,7 +27,7 @@ function InputStep({ handleClose, token }) {
   const [ value, setValue ] = useState('')
   const [ value_Wei_String, setValue_Wei_String ] = useState('0')  //support for Use Max
 
-  const [disabledSubmit, setDisabledSubmit] = useState(true)
+  const [ validValue, setValidValue ] = useState(false)
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
 
   const signatureStatus = useSelector(selectSignatureStatus_depositTRAD)
@@ -37,18 +37,13 @@ function InputStep({ handleClose, token }) {
 
   function setAmount(value) {
 
-    console.log("setAmount")
-
     const tooSmall = new BN(value).lte(new BN(0.0))
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
-    console.log("tooSmall",tooSmall)
-    console.log("tooBig",tooBig)
-
     if (tooSmall || tooBig) {
-      setDisabledSubmit(true)
+      setValidValue(false)
     } else {
-      setDisabledSubmit(false)
+      setValidValue(true)
     }
 
     setValue(value)
@@ -98,8 +93,7 @@ function InputStep({ handleClose, token }) {
 
   if( Object.keys(lookupPrice) &&
       !!value &&
-      new BN(value).gt(new BN(0.0)) &&
-      new BN(value).lte(new BN(maxValue)) &&
+      validValue &&
       !!amountToUsd(value, lookupPrice, token)
   ) {
     convertToUSD = true
@@ -163,7 +157,7 @@ function InputStep({ handleClose, token }) {
           variant="contained"
           loading={depositLoading}
           tooltip={depositLoading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L2"}
-          disabled={disabledSubmit}
+          disabled={!validValue}
           triggerTime={new Date()}
           fullWidth={isMobile}
         >

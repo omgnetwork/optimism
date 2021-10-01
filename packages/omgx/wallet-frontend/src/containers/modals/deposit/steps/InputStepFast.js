@@ -47,7 +47,7 @@ function InputStepFast({ handleClose, token }) {
 
   const [LPBalance, setLPBalance] = useState(0)
   const [feeRate, setFeeRate] = useState(0)
-  const [disabledSubmit, setDisabledSubmit] = useState(true)
+  const [ validValue, setValidValue ] = useState(false)
 
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
   const approvalLoading = useSelector(selectLoading(['APPROVE/CREATE']))
@@ -59,18 +59,13 @@ function InputStepFast({ handleClose, token }) {
 
   function setAmount(value) {
 
-    console.log("setAmount")
-
     const tooSmall = new BN(value).lte(new BN(0.0))
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
-    console.log("tooSmall",tooSmall)
-    console.log("tooBig",tooBig)
-
     if (tooSmall || tooBig) {
-      setDisabledSubmit(true)
+      setValidValue(false)
     } else {
-      setDisabledSubmit(false)
+      setValidValue(true)
     }
 
     setValue(value)
@@ -174,15 +169,6 @@ function InputStepFast({ handleClose, token }) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
-  let valueIsValid = false
-
-  if( !!value &&
-      new BN(value).gt(new BN(0.0)) &&
-      new BN(value).lte(new BN(maxValue))
-  ) {
-    valueIsValid = true
-  }
-
   return (
     <>
       <Box>
@@ -212,7 +198,7 @@ function InputStepFast({ handleClose, token }) {
           newStyle
         />
 
-        {valueIsValid && token && (
+        {validValue && token && (
           <Typography variant="body2" sx={{mt: 2}}>
             {`You will receive ${receivableAmount(value)} ${token.symbol} ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''} on L2.`}
           </Typography>
@@ -255,7 +241,7 @@ function InputStepFast({ handleClose, token }) {
           variant="contained"
           loading={depositLoading || approvalLoading}
           tooltip={depositLoading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L2"}
-          disabled={disabledSubmit}
+          disabled={!validValue}
           triggerTime={new Date()}
           size="large"
           fullWidth={isMobile}
