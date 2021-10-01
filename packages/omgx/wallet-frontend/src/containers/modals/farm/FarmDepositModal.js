@@ -60,7 +60,12 @@ class FarmDepositModal extends React.Component {
         approvedAllowance = approvedAllowance.toString()
       }
 
-      this.setState({ approvedAllowance, stakeToken })
+      this.setState({
+        approvedAllowance,
+        stakeToken,
+        maxValue: logAmount(stakeToken.balance, stakeToken.decimals),
+        maxValue_Wei_String: stakeToken.balance.toString()
+      })
     }
 
   }
@@ -74,24 +79,24 @@ class FarmDepositModal extends React.Component {
     this.props.dispatch(closeModal("farmDepositModal"))
   }
 
-  handleStakeValue(value) {
+  handleStakeValue(value, value_Wei_String) {
 
-    const { stakeToken } = this.state
+    const { maxValue } = this.state
 
-    if( value &&
-        Number(value) > 0.0 &&
-        Number(value) <= Number(this.getMaxTransferValue())
-    ) {
-        this.setState({
-          stakeValue: value,
-          stakeValueValid: true,
-          value_Wei_String: toWei_String(value, stakeToken.decimals)
-        })
-    } else {
+    const tooSmall = new BN(value).lte(new BN(0.0))
+    const tooBig = new BN(value).gt(new BN(maxValue))
+
+    if (tooBig || tooSmall) {
       this.setState({
         stakeValue: value,
         stakeValueValid: false,
         value_Wei_String: ''
+      })
+    } else {
+      this.setState({
+        value_Wei_String,
+        stakeValue: value,
+        stakeValueValid: true
       })
     }
   }
@@ -169,6 +174,7 @@ class FarmDepositModal extends React.Component {
       //stakeValueBadEntry,
       approvedAllowance,
       loading,
+      maxValue_Wei_String
     } = this.state
 
 
@@ -199,8 +205,12 @@ class FarmDepositModal extends React.Component {
             type="number"
             unit={stakeToken.symbol}
             maxValue={this.getMaxTransferValue()}
-            onChange={i=>{this.handleStakeValue(i.target.value)}}
-            onUseMax={i=>{this.handleStakeValue(this.getMaxTransferValue())}}
+            onChange={i => {
+              this.handleStakeValue(i.target.value, toWei_String(i.target.value, stakeToken.decimals))
+            }}
+            onUseMax={i => {
+              this.handleStakeValue(this.getMaxTransferValue(), maxValue_Wei_String)
+            }}
             allowUseAll={true}
             newStyle
             variant="standard"

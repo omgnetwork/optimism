@@ -60,7 +60,7 @@ class FarmWithdrawModal extends React.Component {
       LPBalance_Wei_String = await networkService.L2LPBalance(withdrawToken.currency)
     }
 
-    //console.log("LPBalance current", LPBalance_Wei_String)
+    console.log("LPBalance current", LPBalance_Wei_String)
 
     this.setState({
       LPBalance: logAmount(LPBalance_Wei_String, withdrawToken.decimals),
