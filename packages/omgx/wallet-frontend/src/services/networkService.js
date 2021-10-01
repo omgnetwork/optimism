@@ -1420,6 +1420,9 @@ class NetworkService {
     console.log("approveERC20_L1LP")
     const approveContractAddress = this.L1LPAddress
 
+    let allowance_BN = BigNumber.from("0")
+    let allowed = false
+
     try {
 
       const ERC20Contract = new ethers.Contract(
@@ -1428,34 +1431,41 @@ class NetworkService {
         this.provider.getSigner()
       )
 
-      let allowance_BN = await ERC20Contract.allowance(
-        this.account,
-        approveContractAddress
-      )
-      console.log("Initial allowance:",allowance_BN)
+      if( currency !== this.L1_ETH_Address ) {
 
-      /* OMG IS A SPECIAL CASE - allowance needs to be
-      set to zero, and then set to actual amount */
-      if( allowance_BN.gt(BigNumber.from(0)) &&
-          (currency.toLowerCase() === this["L1_OMG_Address"].toLowerCase())
-      )
-      {
-        console.log("OMG Token allowance reset")
-        const approveOMG = await ERC20Contract.approve(
-          approveContractAddress,
-          ethers.utils.parseEther("0")
+        let allowance_BN = await ERC20Contract.allowance(
+          this.account,
+          approveContractAddress
         )
-        await approveOMG.wait()
-        console.log("OMG Token allowance set to 0:",approveOMG)
+        console.log("Initial allowance:",allowance_BN)
+
+        /* OMG IS A SPECIAL CASE - allowance needs to be
+        set to zero, and then set to actual amount */
+        if( allowance_BN.gt(BigNumber.from(0)) &&
+            (currency.toLowerCase() === this["L1_OMG_Address"].toLowerCase())
+        )
+        {
+          console.log("OMG Token allowance reset")
+          const approveOMG = await ERC20Contract.approve(
+            approveContractAddress,
+            ethers.utils.parseEther("0")
+          )
+          await approveOMG.wait()
+          console.log("OMG Token allowance set to 0:",approveOMG)
+        }
+
+        //recheck the allowance
+        allowance_BN = await ERC20Contract.allowance(
+          this.account,
+          approveContractAddress
+        )
+
+        allowed = allowance_BN.gte(BigNumber.from(value_Wei_String))
+
+      } else {
+        //we are dealing with ETH - go straight to approve
+
       }
-
-      //recheck the allowance
-      allowance_BN = await ERC20Contract.allowance(
-        this.account,
-        approveContractAddress
-      )
-
-      const allowed = allowance_BN.gte(BigNumber.from(value_Wei_String))
 
       if(!allowed) {
         //and now, the normal allowance transaction
@@ -1467,7 +1477,8 @@ class NetworkService {
         console.log("ERC 20 L1 BRIDGE ops approved:",approveStatus)
         return approveStatus
       }
-      return allowance_BN;
+
+      return allowance_BN
 
     } catch (error) {
       console.log("NS: approveERC20_L1LP error:", error)

@@ -87,9 +87,9 @@ export function farmL2(value_Wei_String, currencyAddress) {
     networkService.approveERC20_L2LP(value_Wei_String, currencyAddress)
   )
 }
-export function getRewardL1(currencyL2Address, value_Wei_String) {
+export function getRewardL1(currencyL1Address, value_Wei_String) {
   return createAction('FARM/HARVEST', () =>
-    networkService.getRewardL1(currencyL2Address, value_Wei_String)
+    networkService.getRewardL1(currencyL1Address, value_Wei_String)
   )
 }
 export function getRewardL2(currencyL2Address, value_Wei_String) {
@@ -99,7 +99,7 @@ export function getRewardL2(currencyL2Address, value_Wei_String) {
 }
 export function withdrawLiquidity(currency, value_Wei_String, L1orL2Pool) {
   return createAction('FARM/WITHDRAW', () =>
-    networkService.getRewardL2(currency, value_Wei_String, L1orL2Pool)
+    networkService.withdrawLiquidity(currency, value_Wei_String, L1orL2Pool)
   )
 }
 
