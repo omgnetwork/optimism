@@ -65,6 +65,8 @@ const L2_CROSS_DOMAIN_MESSAGE_WAITING_TIME = env.L2_CROSS_DOMAIN_MESSAGE_WAITING
 const OVM_L2_STANDARD_BRIDGE_ADDRESS = env.OVM_L2_STANDARD_BRIDGE_ADDRESS || "0x4200000000000000000000000000000000000010"
 const OVM_L2_CROSS_DOMAIN_MESSENGER = "0x4200000000000000000000000000000000000007";
 
+const L1_BLOCK_CONFIRMATION = env.L1_BLOCK_CONFIRMATION || 0;
+
 class OptimismEnv {
   constructor() {
     this.L1Provider = new ethers.providers.StaticJsonRpcProvider(L1_NODE_WEB3_URL);
@@ -132,6 +134,8 @@ class OptimismEnv {
     this.l2CrossDomainMessageWaitingTime = L2_CROSS_DOMAIN_MESSAGE_WAITING_TIME;
 
     this.watcher = null;
+
+    this.l1BlockConfirmation = L1_BLOCK_CONFIRMATION;
   }
 
   async initOptimismEnv() {

@@ -123,20 +123,20 @@ function TransferModal ({ open, token, minHeight }) {
     <Modal open={open} onClose={handleClose} maxWidth="md" minHeight="500px">
       <Box>
         <Typography variant="h2" sx={{fontWeight: 700, mb: 2}}>
-          Transfer
+          L2->L2 Transfer
         </Typography>
 
         <Typography variant="body1" sx={{mb: 1}}>
-          From Address: {wAddress}
+          From L2 Address: {wAddress}
         </Typography>
 
         <Typography variant="body1" sx={{mb: 1}}>
-          To Address
+          To L2 Address:
         </Typography>
 
         <Box sx={{display: 'flex', flexDirection: 'column'}}>
           <Input
-            placeholder='Recipient address (0x...)'
+            placeholder='Recipient address on the Boba L2 (0x...)'
             value={recipient}
             onChange={i => setRecipient(i.target.value)}
             fullWidth
@@ -170,6 +170,12 @@ function TransferModal ({ open, token, minHeight }) {
             {`Value in USD: $${amountToUsd(value, lookupPrice, token).toFixed(2)}`}
           </Typography>
         )}
+
+        <Typography variant="body2" sx={{mt: 2}}>
+          NOTE: This L2->L2 transfer function is for transfers from one L2 wallet to another L2 wallet.
+          You cannot directly transfer funds from an L2 wallet to an L1 address.  
+        </Typography>
+
       </Box>
       <WrapperActionsModal>
         {!isMobile ? (

@@ -95,6 +95,22 @@
              "rinkeby":"0x2B203de02AD6109521e09985b3aF9B8c62541Cd6",
              "mainnet": "0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"
           }
+      },
+      {
+         "name": "Frax",
+         "symbol": "FRAX",
+         "address": {
+             "rinkeby":"0x54717398c107ab24ec82bca3f3c2d4dda34c5f1a",
+             "mainnet": "0x853d955acef822db058eb8505911ed77f175b99e"
+          }
+      },
+      {
+         "name": "Frax Share",
+         "symbol": "FXS",
+         "address": {
+             "rinkeby":"0x8ca351669fcb3434fb7a174309db3ae252e96c8c",
+             "mainnet": "0x3432b6a60d23ca0dfca7761b7ab56459d9c964d0"
+          }
       }
    ]
 }

@@ -13,6 +13,7 @@ import { Counter } from 'prom-client'
 import express, { Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
+import fs from 'fs'
 
 export interface L1DataTransportServiceOptions {
   nodeEnv: string
@@ -113,7 +114,7 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
 
         return res.json(aList)
       } catch (e) {
-        return res.status(400).json({
+        return res.status(500).json({
           error: e.toString(),
         })
       }
@@ -132,7 +133,7 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
 
         return res.json(aList)
       } catch (e) {
-        return res.status(400).json({
+        return res.status(500).json({
           error: e.toString(),
         })
       }
@@ -163,12 +164,12 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
           } else { throw e; }
         }
 
-        this.logger.info("MMDBG Will store", rb)
+        this.logger.info("Will store new addresses.json", rb)
         await this.state.db.put("address-list", JSON.stringify(rb))
-        this.logger.info("MMDBG Stored")
+        this.logger.info("Stored addresses.json")
         return res.sendStatus(201).end()
       } catch (e) {
-        return res.status(400).json({
+        return res.status(500).json({
           error: e.toString(),
         })
       }
@@ -182,12 +183,12 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
         // As with the base list, we could add future restrictions on changing
         // certain critical addresses. For now we allow anything.
 
-        this.logger.info("MMDBG Will store", rb)
+        this.logger.info("Will store new omgx-addr.json", rb)
         await this.state.db.put("omgx-addr", JSON.stringify(rb))
-        this.logger.info("MMDBG Stored")
+        this.logger.info("Stored omgx-addr.json")
         return res.sendStatus(201).end()
       } catch (e) {
-        return res.status(400).json({
+        return res.status(500).json({
           error: e.toString(),
         })
       }
@@ -195,18 +196,40 @@ export class L1DataTransportService extends BaseService<L1DataTransportServiceOp
 
     this.state.addressRegistry['get']("/state-dump.latest.json", async (req, res) => {
       try {
-        //const sd = await this.state.db.get("state-dump")
-        //return res.send()
         return res.sendFile("/opt/optimism/packages/data-transport-layer/state-dumps/state-dump.latest.json")
-
       } catch (e) {
-        return res.status(400).json({
+        return res.status(500).json({
           error: e.toString(),
         })
       }
     })
+
+    this.state.addressRegistry['put']("/state-dump.latest.json", async (req, res) => {
+      try {
+        this.logger.info("addressRegistry PUT request for state-dump file")
+
+        req.pipe(fs.createWriteStream("/opt/optimism/packages/data-transport-layer/state-dumps/state-dump.latest.json_TMP"))
+
+        await fs.rename(
+          "/opt/optimism/packages/data-transport-layer/state-dumps/state-dump.latest.json_TMP",
+          "/opt/optimism/packages/data-transport-layer/state-dumps/state-dump.latest.json",
+          (err) => { if (err) { throw err; } }
+        )
+
+        this.logger.info("Saved new state-dump.latest.json")
+        return res.sendStatus(201).end()
+
+        //return res.sendFile("/opt/optimism/packages/data-transport-layer/state-dumps/state-dump.latest.json")
+
+      } catch (e) {
+        return res.status(500).json({
+          error: e.toString(),
+        })
+      }
+    })
+
     this.state.arServer = this.state.addressRegistry.listen(this.options.arPort,this.options.hostname)
-    this.logger.info("MMDBG addressRegistry server listening", {hostname:this.options.hostname, port:this.options.arPort})
+    this.logger.info("addressRegistry server listening", {hostname:this.options.hostname, port:this.options.arPort})
 
     if (this.options.cfgAddressManager) {
       this.logger.warn("Using legacy cfgAddressManager address")

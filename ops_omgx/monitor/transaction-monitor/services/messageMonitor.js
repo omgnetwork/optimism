@@ -80,7 +80,7 @@ class messageMonitorService extends OptimismEnv {
         data: JSON.parse(JSON.stringify(filterPendingMessages))
       })
     } else {
-      this.logger.info('All messages have been relayed');
+      // this.logger.info('All messages have been relayed');
     }
     await sleep(this.messageMonitorInterval);
   }
