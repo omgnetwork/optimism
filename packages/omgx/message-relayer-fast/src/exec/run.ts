@@ -75,7 +75,7 @@ const main = async () => {
   )
   const RESUBMISSION_TIMEOUT = config.uint(
     'resubmission-timeout',
-    parseInt(env.RESUBMISSION_TIMEOUT, 10) || 5
+    parseInt(env.RESUBMISSION_TIMEOUT, 10) || 60
   )
   const NUM_CONFIRMATIONS = config.uint(
     'num-confirmations',
