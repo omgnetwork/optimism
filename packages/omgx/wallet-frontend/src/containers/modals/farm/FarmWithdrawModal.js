@@ -16,19 +16,20 @@ import { Typography } from '@material-ui/core'
 import { WrapperActionsModal } from 'components/modal/Modal.styles'
 
 import BN from 'bignumber.js'
+import { withdrawLiquidity } from 'actions/networkAction'
 
 class FarmWithdrawModal extends React.Component {
 
   constructor(props) {
     super(props)
 
-    const { 
-      open 
+    const {
+      open
     } = this.props
-    
-    const { 
-      withdrawToken, 
-      userInfo 
+
+    const {
+      withdrawToken,
+      userInfo
     } = this.props.farm
 
     this.state = {
@@ -52,17 +53,17 @@ class FarmWithdrawModal extends React.Component {
     const { withdrawToken } = this.props.farm
 
     let LPBalance_Wei_String = ''
-      
+
     if (withdrawToken.L1orL2Pool === 'L1LP') {
       LPBalance_Wei_String = await networkService.L1LPBalance(withdrawToken.currency)
     } else {
       LPBalance_Wei_String = await networkService.L2LPBalance(withdrawToken.currency)
     }
-    
+
     //console.log("LPBalance current", LPBalance_Wei_String)
-    
-    this.setState({ 
-      LPBalance: logAmount(LPBalance_Wei_String, withdrawToken.decimals),  
+
+    this.setState({
+      LPBalance: logAmount(LPBalance_Wei_String, withdrawToken.decimals),
       LPBalance_Wei_String
     })
 
@@ -91,20 +92,20 @@ class FarmWithdrawModal extends React.Component {
   }
 
   setAmount(value, value_Wei_String) {
-    
+
     const { maxValue } = this.state
 
-    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooSmall = new BN(value).lte(new BN(0.0))
     const tooBig = new BN(value).gt(new BN(maxValue))
 
     if (tooSmall || tooBig) {
-      this.setState({ 
+      this.setState({
         value : 0,
         value_Wei_String: '',
         disableSubmit: true
       })
     } else {
-      this.setState({ 
+      this.setState({
         value,
         value_Wei_String,
         disableSubmit: false
@@ -128,19 +129,19 @@ class FarmWithdrawModal extends React.Component {
 
     if (poolTooSmall) {
       console.log("pool smaller than stake",balance_Wei_String)
-      this.setState({ 
+      this.setState({
         maxValue: logAmount(LPBalance_Wei_String, withdrawToken.decimals),
-        maxValue_Wei_String: LPBalance_Wei_String 
+        maxValue_Wei_String: LPBalance_Wei_String
       })
     } else {
       //pool big enough to cover entire withdrawal
       console.log("pool large enough",LPBalance_Wei_String)
       this.setState({
-        maxValue: logAmount(balance_Wei_String, withdrawToken.decimals), 
+        maxValue: logAmount(balance_Wei_String, withdrawToken.decimals),
         maxValue_Wei_String: balance_Wei_String
       })
     }
-    
+
   }
 
   handleClose() {
@@ -153,12 +154,12 @@ class FarmWithdrawModal extends React.Component {
 
     this.setState({ loading: true })
 
-    const withdrawLiquidityTX = await networkService.withdrawLiquidity(
+    const withdrawLiquidityTX = await this.props.dispatch(withdrawLiquidity(
       withdrawToken.currency,
       value_Wei_String,
       withdrawToken.L1orL2Pool,
-    )
-    
+    ))
+
     if (withdrawLiquidityTX) {
       this.props.dispatch(openAlert("Your liquidity was withdrawn."))
       this.props.dispatch(getFarmInfo())
@@ -169,7 +170,6 @@ class FarmWithdrawModal extends React.Component {
       })
       this.props.dispatch(closeModal("farmWithdrawModal"))
     } else {
-      this.props.dispatch(openError("Failed to withdraw liquidity."))
       this.setState({
         loading: false,
         value: '',
@@ -183,7 +183,7 @@ class FarmWithdrawModal extends React.Component {
 
     const {
       open,
-      withdrawToken, 
+      withdrawToken,
       value,
       LPBalance,
       loading,
@@ -193,12 +193,12 @@ class FarmWithdrawModal extends React.Component {
     } = this.state
 
     return (
-      
-      <Modal 
-        open={open} 
+
+      <Modal
+        open={open}
         onClose={()=>{this.handleClose()}}
       >
-        
+
         <Typography variant="h2" sx={{fontWeight: 700, mb: 3}}>
           Withdraw {`${withdrawToken.symbol}`}
         </Typography>
@@ -225,7 +225,7 @@ class FarmWithdrawModal extends React.Component {
           <Typography variant="body2" sx={{mt: 2}}>
             Note: There is currently insufficient {withdrawToken.symbol} in the {' '}
             {withdrawToken.L1orL2Pool === 'L1LP' ? 'L1' : 'L2'} liquidity pool
-            to withdraw your full stake. At this time, you can only withdraw up to 
+            to withdraw your full stake. At this time, you can only withdraw up to
             {Number(LPBalance).toFixed(2)} {withdrawToken.symbol}.
           </Typography>
         }
@@ -236,7 +236,7 @@ class FarmWithdrawModal extends React.Component {
             color="neutral"
             size="large"
           >
-            CANCEL
+            Cancel
           </Button>
           <Button
             onClick={()=>{this.handleConfirm()}}
@@ -246,7 +246,7 @@ class FarmWithdrawModal extends React.Component {
             disabled={!!disableSubmit}
             loading={loading}
           >
-            CONFIRM
+            Confirm
           </Button>
         </WrapperActionsModal>
       </Modal>

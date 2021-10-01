@@ -54,14 +54,14 @@ function InputStepFast({ handleClose, token }) {
 
   const lookupPrice = useSelector(selectLookupPrice)
   const signatureStatus = useSelector(selectSignatureStatus_depositLP)
-  
+
   const maxValue = logAmount(token.balance, token.decimals)
 
   function setAmount(value) {
-    
+
     console.log("setAmount")
 
-    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooSmall = new BN(value).lte(new BN(0.0))
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
     console.log("tooSmall",tooSmall)
@@ -87,7 +87,7 @@ function InputStepFast({ handleClose, token }) {
       console.log("ETH Fast Bridge")
 
       res = await dispatch(depositL1LP(token.address, value_Wei_String))
-      
+
       if (res) {
         dispatch(setActiveHistoryTab1('Bridge to L2'))
         dispatch(
@@ -98,9 +98,6 @@ function InputStepFast({ handleClose, token }) {
           )
         )
         handleClose()
-        return
-      } else {
-        dispatch(openError('Failed to bridge ETH'))
         return
       }
 
@@ -134,8 +131,6 @@ function InputStepFast({ handleClose, token }) {
         )
       )
       handleClose()
-    } else {
-      dispatch(openError('Failed to bridge ERC20'))
     }
 
   }
@@ -165,7 +160,7 @@ function InputStepFast({ handleClose, token }) {
 
   const label = 'There is a ' + feeRate + '% fee.'
 
-  let buttonLabel_1 = 'CANCEL'
+  let buttonLabel_1 = 'Cancel'
   if( depositLoading || approvalLoading ) buttonLabel_1 = 'CLOSE WINDOW'
 
   let buttonLabel_2 = 'Bridge'
@@ -225,9 +220,9 @@ function InputStepFast({ handleClose, token }) {
 
         {!!token && token.symbol === 'OMG' && (
           <Typography variant="body2" sx={{mt: 2}}>
-            NOTE: The OMG Token was minted in 2017 and it does not conform to the ERC20 token standard. 
-            In some cases, three interactions with MetaMask are needed. If you are bridging out of a 
-            new wallet, it starts out with a 0 approval, and therefore, only two interactions with 
+            NOTE: The OMG Token was minted in 2017 and it does not conform to the ERC20 token standard.
+            In some cases, three interactions with MetaMask are needed. If you are bridging out of a
+            new wallet, it starts out with a 0 approval, and therefore, only two interactions with
             MetaMask will be needed.
           </Typography>
         )}

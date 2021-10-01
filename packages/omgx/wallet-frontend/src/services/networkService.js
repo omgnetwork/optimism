@@ -64,7 +64,7 @@ import L2ERC721RegJson from '../deployment/artifacts-ovm/contracts/ERC721Registr
 import L2TokenPoolJson from '../deployment/artifacts-ovm/contracts/TokenPool.sol/TokenPool.json'
 import AtomicSwapJson from '../deployment/artifacts-ovm/contracts/AtomicSwap.sol/AtomicSwap.json'
 
-// DAO 
+// DAO
 import Comp from "../deployment/rinkeby/json/Comp.json"
 import GovernorBravoDelegate from "../deployment/rinkeby/json/GovernorBravoDelegate.json"
 import GovernorBravoDelegator from "../deployment/rinkeby/json/GovernorBravoDelegator.json"
@@ -124,7 +124,7 @@ class NetworkService {
     this.L2_TEST_Contract = null
 
     this.L1_OMG_Contract = null
-    
+
     this.L1LPAddress = null
     this.L2LPAddress = null
 
@@ -209,13 +209,13 @@ class NetworkService {
         this.L2Provider
       )
 
-      //what types of NFTs does this address already own? 
+      //what types of NFTs does this address already own?
       const addresses = await registry.lookupAddress(
         receiverAddress
       )
 
       //console.log("the receiver's NFT contract addresses:", addresses)
-      
+
       //the receiverAddress already knows about this contract
       const alreadyHaveAddresss = addresses.find((str) => str.toLowerCase() === contractAddress.toLowerCase())
 
@@ -401,7 +401,7 @@ class NetworkService {
 
       // defines the set of possible networks
       const nw = getAllNetworks()
-      
+
       this.L1Provider = new ethers.providers.StaticJsonRpcProvider(
         nw[masterSystemConfig]['L1']['rpcUrl']
       )
@@ -596,12 +596,12 @@ class NetworkService {
   }
 
   async addL2Network() {
-    
+
     console.log("MetaMask: Adding network to MetaMask")
 
     const nw = getAllNetworks()
     const masterConfig = store.getState().setup.masterConfig
-    
+
     const chainParam = {
       chainId: '0x' + nw[masterConfig].L2.chainId.toString(16),
       chainName: nw[masterConfig].L2.name,
@@ -610,7 +610,7 @@ class NetworkService {
     }
 
     console.log("MetaMask: Adding ", chainParam)
-    
+
     // connect to the wallet
     this.provider = new ethers.providers.Web3Provider(window.ethereum)
     let res = await this.provider.send('wallet_addEthereumChain', [chainParam, this.account])
@@ -620,7 +620,7 @@ class NetworkService {
     } else {
       console.log("MetaMask - Error adding new RPC: ", res)
     }
-    
+
   }
 
   /* Yes, this almost complete dupicates async switchChain( layer )
@@ -629,7 +629,7 @@ class NetworkService {
 
     const nw = getAllNetworks()
     const masterConfig = store.getState().setup.masterConfig
-    
+
     //the chainParams are only needed for the L2's
     const chainParam = {
       chainId: '0x' + nw[masterConfig].L2.chainId.toString(16),
@@ -640,7 +640,7 @@ class NetworkService {
 
     // connect to the wallet
     this.provider = new ethers.providers.Web3Provider(window.ethereum)
-    
+
     /********************* Switch to Mainnet L2 ****************/
     if (masterConfig === 'mainnet' && targetLayer === 'L2') {
       //ok, so then, we want to switch to 'mainnet' && 'L2'
@@ -660,8 +660,8 @@ class NetworkService {
         }
       }
     } else if ( masterConfig === 'mainnet' && targetLayer === 'L1') {
-      //ok, so then, we want to switch to 'mainnet' && 'L1' - no need to add 
-      //if(fail) since mainnet L1 is always there unless the planet 
+      //ok, so then, we want to switch to 'mainnet' && 'L1' - no need to add
+      //if(fail) since mainnet L1 is always there unless the planet
       //has been vaporized by space aliens with a blaster ray
       try {
         await this.provider.send('wallet_switchEthereumChain',[{ chainId: '0x1' }]) //ChainID 1
@@ -728,7 +728,7 @@ class NetworkService {
       } catch (switchError) {
         console.log("MetaMask - could not switch to Local L1")
       }
-    } 
+    }
   }
 
   async switchChain( layer ) {
@@ -740,7 +740,7 @@ class NetworkService {
 
     const nw = getAllNetworks()
     const masterConfig = store.getState().setup.masterConfig
-    
+
     const chainParam = {
       chainId: '0x' + nw[masterConfig].L2.chainId.toString(16),
       chainName: nw[masterConfig].L2.name,
@@ -750,7 +750,7 @@ class NetworkService {
 
     // connect to the wallet
     this.provider = new ethers.providers.Web3Provider(window.ethereum)
-    
+
     /********************* Switch to Mainnet L2 ****************/
     if (masterConfig === 'mainnet' && this.L1orL2 === 'L1') {
       //ok, so then, we want to switch to 'mainnet' && 'L2'
@@ -770,8 +770,8 @@ class NetworkService {
         }
       }
     } else if ( masterConfig === 'mainnet' && this.L1orL2 === 'L2') {
-      //ok, so then, we want to switch to 'mainnet' && 'L1' - no need to add 
-      //if(fail) since mainnet L1 is always there unless the planet 
+      //ok, so then, we want to switch to 'mainnet' && 'L1' - no need to add
+      //if(fail) since mainnet L1 is always there unless the planet
       //has been vaporized by space aliens with a blaster ray
       try {
         await this.provider.send('wallet_switchEthereumChain',[{ chainId: '0x1' }]) //ChainID 1
@@ -838,7 +838,7 @@ class NetworkService {
       } catch (switchError) {
         console.log("MetaMask - could not switch to Local L1")
       }
-    } 
+    }
   }
 
   async getTransactions() {
@@ -847,7 +847,7 @@ class NetworkService {
     if (this.masterSystemConfig === 'local') return
 
     console.log("Getting transactions...")
-    
+
     let txL1 = []
     let txL1pending = []
     let txL2 = []
@@ -859,8 +859,6 @@ class NetworkService {
       'L1'
     ).get(`&address=${this.account}`)
 
-    //console.log("responseL1",responseL1)
-
     if (responseL1.status === 200) {
       const transactionsL1 = await responseL1.data
       if (transactionsL1.status === '1') {
@@ -868,7 +866,7 @@ class NetworkService {
         txL1 = transactionsL1.result.map(v => ({
           ...v,
           blockNumber: parseInt(v.blockNumber), //fix bug - sometimes this is string, sometimes an integer
-          timeStamp: parseInt(v.timeStamp),     //fix bug - sometimes this is string, sometimes an integer 
+          timeStamp: parseInt(v.timeStamp),     //fix bug - sometimes this is string, sometimes an integer
           chain: 'L1'
         }))
         //console.log("txL1",txL1)
@@ -885,7 +883,7 @@ class NetworkService {
     })
 
     if (responseL2.status === 201) {
-      //add the chain: 'L2' field 
+      //add the chain: 'L2' field
       txL2 = responseL2.data.map(v => ({...v, chain: 'L2'}))
       //console.log("txL2",txL2)
       //const annotated = await this.parseTransaction( [...txL1, ...txL2] )
@@ -901,12 +899,12 @@ class NetworkService {
     })
 
     if (responseL1pending.status === 201) {
-      //add the chain: 'L1pending' field 
+      //add the chain: 'L1pending' field
       txL1pending = responseL1pending.data.map(v => ({...v, chain: 'L1pending'}))
       //console.log("txL1pending",txL1pending)
-      const annotated = await this.parseTransaction( 
+      const annotated = await this.parseTransaction(
         [
-          ...txL1, 
+          ...txL1,
           ...txL2,
           ...txL1pending //the new data product
         ]
@@ -1034,7 +1032,7 @@ class NetworkService {
 
   }
 
-  //goal is to find your NFTs and NFT contracts based on local cache and registry data 
+  //goal is to find your NFTs and NFT contracts based on local cache and registry data
   async fetchNFTs() {
 
     //the current list of contracts we know about
@@ -1057,7 +1055,7 @@ class NetworkService {
       L2ERC721RegJson.abi,
       this.L2Provider
     )
-    
+
     //This account's NFT contract addresses in that registry
     const addresses = await registry.lookupAddress(this.account)
     //console.log("Step 3 - Blockchain NFT wallet addresses:", addresses)
@@ -1083,7 +1081,7 @@ class NetworkService {
         const newContract = {
           name: nftName,
           symbol: nftSymbol,
-          owner: owner.toLowerCase(), 
+          owner: owner.toLowerCase(),
           address,
         }
 
@@ -1154,9 +1152,9 @@ class NetworkService {
           )
 
           const nftMeta = await contract.getTokenURI(tokenID)
-          
+
           const meta = nftMeta.split('#')
-          
+
           const time = new Date(parseInt(meta[0]))
 
           const mintedTime = String(
@@ -1173,11 +1171,11 @@ class NetworkService {
           const UUID = address.substring(1, 6) + '_' + tokenID.toString() + '_' + this.account.substring(1, 6)
 
           const { url , attributes = []} = await getNftImageUrl(meta[1])
-          
+
           // Uncomment Just to test locally
           // const { url , attributes = []} = await getNftImageUrl('https://boredapeyachtclub.com/api/mutants/111');
           // const { url , attributes = []} = await getNftImageUrl('ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/6190');
-          
+
           const NFT = {
             UUID,
             mintedTime,
@@ -1282,11 +1280,18 @@ class NetworkService {
     }
   }
 
+  handleMetaMaskError = (errorCode) => {
+    switch (errorCode) {
+      case 4001:
+        return 'Transaction was rejected by user: signature denied'
+      default:
+        return null
+    }
+  }
+
   //Move ETH from L1 to L2 using the standard deposit system
   depositETHL2 = async (value_Wei_String) => {
-
     updateSignatureStatus_depositTRAD(false)
-
     try {
       const depositTxStatus = await this.L1StandardBridgeContract.depositETH(
         this.L2GasLimit,
@@ -1295,7 +1300,7 @@ class NetworkService {
           value: value_Wei_String
         }
       )
-      
+
       //at this point the tx has been submitted, and we are waiting...
       await depositTxStatus.wait()
 
@@ -1314,10 +1319,8 @@ class NetworkService {
 
       return l2Receipt
     } catch(error) {
-      //console.log(error)
-      //return false
       console.log("NS: depositETHL2 error:",error)
-      throw new Error(error.message)
+      return error
     }
   }
 
@@ -1399,12 +1402,13 @@ class NetworkService {
           value_Wei_String
         )
         await approveStatus.wait()
+        return approveStatus
       }
 
-      return true
+      return allowance_BN
     } catch (error) {
       console.log("NS: approveERC20_L2LP error:", error)
-      return false
+      return error
     }
   }
 
@@ -1416,6 +1420,9 @@ class NetworkService {
     console.log("approveERC20_L1LP")
     const approveContractAddress = this.L1LPAddress
 
+    let allowance_BN = BigNumber.from("0")
+    let allowed = false
+
     try {
 
       const ERC20Contract = new ethers.Contract(
@@ -1424,34 +1431,41 @@ class NetworkService {
         this.provider.getSigner()
       )
 
-      let allowance_BN = await ERC20Contract.allowance(
-        this.account,
-        approveContractAddress
-      ) 
-      console.log("Initial allowance:",allowance_BN)
+      if( currency !== this.L1_ETH_Address ) {
 
-      /* OMG IS A SPECIAL CASE - allowance needs to be 
-      set to zero, and then set to actual amount */
-      if( allowance_BN.gt(BigNumber.from(0)) && 
-          (currency.toLowerCase() === this["L1_OMG_Address"].toLowerCase())
-      ) 
-      {
-        console.log("OMG Token allowance reset")
-        const approveOMG = await ERC20Contract.approve(
-          approveContractAddress, 
-          ethers.utils.parseEther("0")
+        let allowance_BN = await ERC20Contract.allowance(
+          this.account,
+          approveContractAddress
         )
-        await approveOMG.wait()
-        console.log("OMG Token allowance set to 0:",approveOMG)
-      }
+        console.log("Initial allowance:",allowance_BN)
 
-      //recheck the allowance
-      allowance_BN = await ERC20Contract.allowance(
-        this.account,
-        approveContractAddress
-      )
-      
-      const allowed = allowance_BN.gte(BigNumber.from(value_Wei_String))
+        /* OMG IS A SPECIAL CASE - allowance needs to be
+        set to zero, and then set to actual amount */
+        if( allowance_BN.gt(BigNumber.from(0)) &&
+            (currency.toLowerCase() === this["L1_OMG_Address"].toLowerCase())
+        )
+        {
+          console.log("OMG Token allowance reset")
+          const approveOMG = await ERC20Contract.approve(
+            approveContractAddress,
+            ethers.utils.parseEther("0")
+          )
+          await approveOMG.wait()
+          console.log("OMG Token allowance set to 0:",approveOMG)
+        }
+
+        //recheck the allowance
+        allowance_BN = await ERC20Contract.allowance(
+          this.account,
+          approveContractAddress
+        )
+
+        allowed = allowance_BN.gte(BigNumber.from(value_Wei_String))
+
+      } else {
+        //we are dealing with ETH - go straight to approve
+
+      }
 
       if(!allowed) {
         //and now, the normal allowance transaction
@@ -1461,12 +1475,14 @@ class NetworkService {
         )
         await approveStatus.wait()
         console.log("ERC 20 L1 BRIDGE ops approved:",approveStatus)
+        return approveStatus
       }
 
-      return true
+      return allowance_BN
+
     } catch (error) {
       console.log("NS: approveERC20_L1LP error:", error)
-      return false
+      return error
     }
   }
 
@@ -1490,18 +1506,18 @@ class NetworkService {
       let allowance_BN = await ERC20Contract.allowance(
         this.account,
         approveContractAddress
-      ) 
+      )
       console.log("Allowance:",allowance_BN)
 
-      /* OMG IS A SPECIAL CASE - allowance needs to be 
+      /* OMG IS A SPECIAL CASE - allowance needs to be
       set to zero, and then set to actual amount */
-      if( allowance_BN.gt(BigNumber.from(0)) && 
+      if( allowance_BN.gt(BigNumber.from(0)) &&
           (currency.toLowerCase() === this["L1_OMG_Address"].toLowerCase())
-      ) 
+      )
       {
         console.log("OMG Token allowance reset")
         const approveOMG = await ERC20Contract.approve(
-          approveContractAddress, 
+          approveContractAddress,
           ethers.utils.parseEther("0")
         )
         await approveOMG.wait()
@@ -1513,7 +1529,7 @@ class NetworkService {
         this.account,
         approveContractAddress
       )
-      
+
       const allowed = allowance_BN.gte(BigNumber.from(value_Wei_String))
 
       if(!allowed) {
@@ -1541,23 +1557,23 @@ class NetworkService {
     //console.log("Depositing ERC20")
 
     const L1_TEST_Contract = this.L1_TEST_Contract.attach(currency)
-    
+
     let allowance_BN = await L1_TEST_Contract.allowance(
       this.account,
       this.L1StandardBridgeAddress
-    ) 
+    )
     //console.log("Allowance:",allowance_BN)
 
     try {
-      /* OMG IS A SPECIAL CASE - allowance needs to be 
+      /* OMG IS A SPECIAL CASE - allowance needs to be
       set to zero, and then set to actual amount */
-      if( allowance_BN.gt(BigNumber.from(0)) && 
+      if( allowance_BN.gt(BigNumber.from(0)) &&
           (currency.toLowerCase() === this["L1_OMG_Address"].toLowerCase())
-      ) 
+      )
       {
         console.log("OMG Token allowance reset")
         const approveOMG = await L1_TEST_Contract.approve(
-          this.L1StandardBridgeAddress, 
+          this.L1StandardBridgeAddress,
           ethers.utils.parseEther("0")
         )
         await approveOMG.wait()
@@ -1569,7 +1585,7 @@ class NetworkService {
         this.account,
         this.L1StandardBridgeAddress
       )
-      
+
       const allowed = allowance_BN.gte(BigNumber.from(value_Wei_String))
 
       if(!allowed) {
@@ -1591,7 +1607,7 @@ class NetworkService {
       )
 
       console.log("depositTxStatus:",depositTxStatus)
-            
+
       //at this point the tx has been submitted, and we are waiting...
       await depositTxStatus.wait()
 
@@ -1634,7 +1650,7 @@ class NetworkService {
       currencyAddress,
       this.L2StandardBridgeAddress
     )
-    
+
     if ( allowance.lt(value) ) {
       const res = await this.approveERC20(
         value_Wei_String,
@@ -1655,7 +1671,7 @@ class NetworkService {
     await tx.wait()
 
     //can close window now
-    updateSignatureStatus_exitTRAD(true)    
+    updateSignatureStatus_exitTRAD(true)
 
     const [L2ToL1msgHash] = await this.watcher.getMessageHashesFromL2Tx(tx.hash)
     console.log(' got L2->L1 message hash', L2ToL1msgHash)
@@ -1743,7 +1759,7 @@ class NetworkService {
 
     tokenAddressList.forEach((tokenAddress) => L1LPInfoPromise.push(getL1LPInfoPromise(tokenAddress)))
     const L1LPInfo = await Promise.all(L1LPInfoPromise);
-    
+
     L1LPInfo.forEach((token) => {
       poolInfo[token.tokenAddress.toLowerCase()] = {
         symbol: token.tokenSymbol,
@@ -1793,7 +1809,7 @@ class NetworkService {
       });
       return acc;
     }, [{
-      L1: this.L1_ETH_Address, 
+      L1: this.L1_ETH_Address,
       L2: this.L2_ETH_Address
     }]);
 
@@ -1809,7 +1825,7 @@ class NetworkService {
     const L2LPInfoPromise = [];
 
     const getL2LPInfoPromise = async(tokenAddress, tokenAddressL1 ) => {
-      
+
       let tokenBalance
       let tokenSymbol
       let tokenName
@@ -1834,7 +1850,7 @@ class NetworkService {
     tokenAddressList.forEach(({L1, L2}) => L2LPInfoPromise.push(getL2LPInfoPromise(L2, L1)))
 
     const L2LPInfo = await Promise.all(L2LPInfoPromise)
-    
+
     L2LPInfo.forEach((token) => {
       poolInfo[token.tokenAddress.toLowerCase()] = {
         symbol: token.tokenSymbol,
@@ -1913,9 +1929,9 @@ class NetworkService {
         this.account
       )
       await withdrawRewardTX.wait()
-      return true
+      return withdrawRewardTX
     } catch (err) {
-      return false
+      return err
     }
   }
 
@@ -1931,9 +1947,9 @@ class NetworkService {
         this.account
       )
       await withdrawRewardTX.wait()
-      return true
+      return withdrawRewardTX
     } catch (err) {
-      return false
+      return err
     }
   }
 
@@ -1941,7 +1957,7 @@ class NetworkService {
   /*****          Withdraw Liquidity         *****/
   /***********************************************/
   async withdrawLiquidity(currency, value_Wei_String, L1orL2Pool) {
-    
+
     try {
       const withdrawLiquidityTX = await (L1orL2Pool === 'L1LP'
         ? this.L1LPContract
@@ -1952,9 +1968,9 @@ class NetworkService {
         this.account
       )
       await withdrawLiquidityTX.wait()
-      return true
+      return withdrawLiquidityTX
     } catch (err) {
-      return false
+      return err
     }
   }
 
@@ -1981,7 +1997,7 @@ class NetworkService {
       depositTX.hash
     )
     console.log(' got L1->L2 message hash', l1ToL2msgHash)
-    
+
     const l2Receipt = await this.watcher.getL2TransactionReceipt(l1ToL2msgHash)
     console.log(' completed swap-on ! L2 tx hash:', l2Receipt.transactionHash)
 
@@ -1995,7 +2011,7 @@ class NetworkService {
 
     let balance
     let tokenAddressLC = tokenAddress.toLowerCase()
-    
+
     if (
       tokenAddressLC === this.L2_ETH_Address ||
       tokenAddressLC === this.L1_ETH_Address
@@ -2018,7 +2034,7 @@ class NetworkService {
 
     let balance
     let tokenAddressLC = tokenAddress.toLowerCase()
-    
+
     if (
       tokenAddressLC === this.L2_ETH_Address ||
       tokenAddressLC === this.L1_ETH_Address
@@ -2108,7 +2124,7 @@ class NetworkService {
 
   // get DAO Balance
   async getDaoBalance() {
-    
+
     if(this.masterSystemConfig !== 'rinkeby' || this.L1orL2 !== 'L2') return
 
     try {
@@ -2161,10 +2177,10 @@ class NetworkService {
   async getProposalThreshold() {
 
     if(this.masterSystemConfig !== 'rinkeby' || this.L1orL2 !== 'L2') return
-      
+
     try {
       // get the threshold proposal only in case of L2
-      if(this.L1orL2 === 'L2') { 
+      if(this.L1orL2 === 'L2') {
         const delegateCheck = await this.delegate.attach(this.delegator.address)
         let rawThreshold = await delegateCheck.proposalThreshold()
         return { threshold: formatEther(rawThreshold) }
@@ -2193,7 +2209,7 @@ class NetworkService {
         [voting]
       )]
       let description = !text ? `# Changing Proposal Threshold to ${votingThreshold} Comp` : text;
-      
+
       //let setGas = {
       //  gasPrice: 15000000,
       //  gasLimit: 8000000
@@ -2216,16 +2232,16 @@ class NetworkService {
 
   //Fetch Proposals
   async fetchProposals() {
-    
+
     if(this.masterSystemConfig !== 'rinkeby' || this.L1orL2 !== 'L2') return
-      
+
     const delegateCheck = await this.delegate.attach(this.delegator.address)
 
     try {
       let proposalList = [];
       const proposalCounts = await delegateCheck.proposalCount()
       const totalProposals = await proposalCounts.toNumber() - 1 //it's always off by one??
-      
+
       const filter = delegateCheck.filters.ProposalCreated(
         null,
         null,
@@ -2237,13 +2253,13 @@ class NetworkService {
         null,
         null
       )
-      
+
       const descriptionList = await delegateCheck.queryFilter(filter)
 
       for (let i = 0; i < totalProposals; i++) {
-        
+
         let proposalID = descriptionList[i].args[0]
-        
+
         //this is a number such as 2
         let proposalData = await delegateCheck.proposals(proposalID)
 
@@ -2260,7 +2276,7 @@ class NetworkService {
 
         let state = await delegateCheck.state(proposalID)
         //console.log("State:", proposalStates[state])
-        
+
         let againstVotes = parseInt(formatEther(proposalData.againstVotes))
         let forVotes = parseInt(formatEther(proposalData.forVotes))
         let abstainVotes = parseInt(formatEther(proposalData.abstainVotes))
@@ -2269,13 +2285,13 @@ class NetworkService {
         let endBlock = proposalData.endBlock.toString()
 
         let proposal = await delegateCheck.getActions(i+2)
-        
+
         const { hasVoted } = await delegateCheck.getReceipt(proposalID, this.account)//delegateCheck.address)
 
         //console.log("Has voted:", hasVoted)
 
         let description = descriptionList[i].args[8].toString()
-        
+
         proposalList.push({
            id: proposalID.toString(),
            proposal,
@@ -2287,7 +2303,7 @@ class NetworkService {
            state: proposalStates[state],
            startBlock,
            endBlock,
-           hasVoted 
+           hasVoted
         })
 
       }
@@ -2298,13 +2314,13 @@ class NetworkService {
     }
   }
 
-  //Cast vote for proposal 
+  //Cast vote for proposal
   async castProposalVote({id, userVote}) {
     try {
-      
+
       const delegateCheck = await this.delegate.attach(this.delegator.address);
-      let res = delegateCheck.castVote(id, userVote 
-      //, 
+      let res = delegateCheck.castVote(id, userVote
+      //,
       //{
       //  gasPrice: 15000000,
       //  gasLimit: 8000000

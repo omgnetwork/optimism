@@ -95,7 +95,7 @@ function AddTokenModal ({ open }) {
               color="neutral"
               size="large"
             >
-              CANCEL
+              Cancel
             </Button>
             <Button
               onClick={handleLookup}
@@ -104,7 +104,7 @@ function AddTokenModal ({ open }) {
               disabled={!tokenContractAddress}
               size="large"
             >
-              LOOKUP
+              Lookup
             </Button>
           </WrapperActionsModal>
         }
@@ -116,7 +116,7 @@ function AddTokenModal ({ open }) {
               color="neutral"
               size="large"
             >
-              CANCEL
+              Cancel
             </Button>
             <Button
               onClick={handleClose}
@@ -124,7 +124,7 @@ function AddTokenModal ({ open }) {
               variant="contained"
               size="large"
             >
-              OK
+              Ok
             </Button>
           </WrapperActionsModal>
         }

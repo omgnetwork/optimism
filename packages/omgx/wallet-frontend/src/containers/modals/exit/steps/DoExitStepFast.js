@@ -52,14 +52,14 @@ function DoExitStepFast({ handleClose, token }) {
 
   const lookupPrice = useSelector(selectLookupPrice)
   const signatureStatus = useSelector(selectSignatureStatus_exitLP)
-  
+
   const maxValue = logAmount(token.balance, token.decimals)
 
   function setAmount(value) {
-    
+
     console.log("setAmount")
 
-    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooSmall = new BN(value).lte(new BN(0.0))
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
     console.log("tooSmall",tooSmall)
@@ -92,13 +92,11 @@ function DoExitStepFast({ handleClose, token }) {
     if (res) {
       dispatch(
           openAlert(
-            `${token.symbol} was bridged. You will receive 
+            `${token.symbol} was bridged. You will receive
             ${receivableAmount(value)} ${token.symbol} on L1.`
           )
         )
       handleClose()
-    } else {
-      dispatch(openError(`Failed to fast bridge funds to L1`))
     }
 
   }
@@ -141,9 +139,9 @@ function DoExitStepFast({ handleClose, token }) {
   ) {
     valueIsValid = true
   }
-  
-  let buttonLabel = 'CANCEL'
-  if( loading ) buttonLabel = 'CLOSE WINDOW'
+
+  let buttonLabel = 'Cancel'
+  if( loading ) buttonLabel = 'Close'
 
   return (
     <>

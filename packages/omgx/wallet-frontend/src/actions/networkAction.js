@@ -76,6 +76,33 @@ export function depositErc20(value, currency, currencyL2) {
   )
 }
 
+//FARM
+export function farmL1(value_Wei_String, currencyAddress) {
+  return createAction('FARM/CREATE', () =>
+    networkService.approveERC20_L1LP(value_Wei_String, currencyAddress)
+  )
+}
+export function farmL2(value_Wei_String, currencyAddress) {
+  return createAction('FARM/CREATE', () =>
+    networkService.approveERC20_L2LP(value_Wei_String, currencyAddress)
+  )
+}
+export function getRewardL1(currencyL1Address, value_Wei_String) {
+  return createAction('FARM/HARVEST', () =>
+    networkService.getRewardL1(currencyL1Address, value_Wei_String)
+  )
+}
+export function getRewardL2(currencyL2Address, value_Wei_String) {
+  return createAction('FARM/HARVEST', () =>
+    networkService.getRewardL2(currencyL2Address, value_Wei_String)
+  )
+}
+export function withdrawLiquidity(currency, value_Wei_String, L1orL2Pool) {
+  return createAction('FARM/WITHDRAW', () =>
+    networkService.withdrawLiquidity(currency, value_Wei_String, L1orL2Pool)
+  )
+}
+
 export function approveERC20(
   value,
   currency,
@@ -123,6 +150,6 @@ export function transfer(recipient, value, currency) {
 }
 
 export function fetchLookUpPrice(params) {
-  return createAction('PRICE/GET', () => 
+  return createAction('PRICE/GET', () =>
     networkService.fetchLookUpPrice(params))
 }

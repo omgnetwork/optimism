@@ -49,14 +49,14 @@ function DoExitStep({ handleClose, token }) {
 
   const signatureStatus = useSelector(selectSignatureStatus_exitTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
-  
+
   const maxValue = logAmount(token.balance, token.decimals)
 
   function setAmount(value) {
-    
+
     console.log("setAmount")
 
-    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooSmall = new BN(value).lte(new BN(0.0))
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
     console.log("tooSmall",tooSmall)
@@ -86,16 +86,14 @@ function DoExitStep({ handleClose, token }) {
         )
       )
       handleClose()
-    } else {
-      dispatch(openError(`Failed to bridge to L1`))
     }
   }
 
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
-  let buttonLabel = 'CANCEL'
-  if( loading ) buttonLabel = 'CLOSE WINDOW'
+  let buttonLabel = 'Cancel'
+  if( loading ) buttonLabel = 'Close'
 
   useEffect(() => {
     if (signatureStatus && loading) {

@@ -16,6 +16,7 @@ import networkService from 'services/networkService';
 import { Typography } from '@material-ui/core';
 import { WrapperActionsModal } from 'components/modal/Modal.styles';
 import { Box } from '@material-ui/system';
+import { farmL1, farmL2 } from 'actions/networkAction';
 
 class FarmDepositModal extends React.Component {
 
@@ -104,16 +105,16 @@ class FarmDepositModal extends React.Component {
     let approveTX
 
     if (stakeToken.L1orL2Pool === 'L2LP') {
-      approveTX = await networkService.approveERC20_L2LP(
+      approveTX = await this.props.dispatch(farmL2(
         value_Wei_String,
         stakeToken.currency,
-      )
+      ))
     }
     else if (stakeToken.L1orL2Pool === 'L1LP') {
-      approveTX = await networkService.approveERC20_L1LP(
+      approveTX = await this.props.dispatch(farmL1(
         value_Wei_String,
         stakeToken.currency,
-      )
+      ))
     }
 
     if (approveTX) {
@@ -130,7 +131,6 @@ class FarmDepositModal extends React.Component {
 
       this.setState({ approvedAllowance, loading: false })
     } else {
-      this.props.dispatch(openError("Failed to approve amount"))
       this.setState({ loading: false })
     }
   }
@@ -221,7 +221,7 @@ class FarmDepositModal extends React.Component {
                 color="neutral"
                 size="large"
               >
-                CANCEL
+                Cancel
               </Button>
               <Button
                 onClick={()=>{this.handleApprove()}}
@@ -232,7 +232,7 @@ class FarmDepositModal extends React.Component {
                 variant="contained"
                 // fullWidth={isMobile}
               >
-                APPROVE AMOUNT
+                Approve amount
               </Button>
             </WrapperActionsModal>
           </>
@@ -249,7 +249,7 @@ class FarmDepositModal extends React.Component {
                 color="neutral"
                 size="large"
               >
-                CANCEL
+                Cancel
               </Button>
               <Button
                 onClick={()=>{this.handleConfirm()}}
@@ -260,7 +260,7 @@ class FarmDepositModal extends React.Component {
                 variant="contained"
                 // fullWidth={isMobile}
               >
-                STAKE!
+                Stake!
               </Button>
             </WrapperActionsModal>
           </>

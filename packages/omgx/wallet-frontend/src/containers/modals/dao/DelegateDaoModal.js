@@ -66,7 +66,7 @@ function DelegateDaoModal({ open }) {
                     color='neutral'
                     className={styles.button}
                 >
-                    CANCEL
+                    Cancel
                 </Button>
 
                 <Button

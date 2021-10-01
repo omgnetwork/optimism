@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { depositETHL2, depositErc20 } from 'actions/networkAction'
-import { openAlert, openError, setActiveHistoryTab1 } from 'actions/uiAction'
+import { setActiveHistoryTab1 } from 'actions/uiAction'
 
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
@@ -26,20 +26,20 @@ function InputStep({ handleClose, token }) {
 
   const [ value, setValue ] = useState('')
   const [ value_Wei_String, setValue_Wei_String ] = useState('0')  //support for Use Max
-  
+
   const [disabledSubmit, setDisabledSubmit] = useState(true)
   const depositLoading = useSelector(selectLoading(['DEPOSIT/CREATE']))
-  
+
   const signatureStatus = useSelector(selectSignatureStatus_depositTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
 
   const maxValue = logAmount(token.balance, token.decimals)
 
   function setAmount(value) {
-    
+
     console.log("setAmount")
 
-    const tooSmall = new BN(value).lte(new BN(0.0)) 
+    const tooSmall = new BN(value).lte(new BN(0.0))
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
     console.log("tooSmall",tooSmall)
@@ -65,28 +65,17 @@ function InputStep({ handleClose, token }) {
       res = await dispatch(
         depositETHL2(value_Wei_String)
       )
-
-      if (res) {
-        dispatch(setActiveHistoryTab1('Bridge to L2'))
-        dispatch(openAlert('ETH bridge transaction submitted'))
-        handleClose()
-      } else {
-        dispatch(openError(`Failed to bridge ETH`))
-      }
-
     } else {
       //console.log("Bridging ERC20 to L2")
       res = await dispatch(
         depositErc20(value_Wei_String, token.address, token.addressL2)
       )
-      if (res) {
-        dispatch(setActiveHistoryTab1('Bridge to L2'))
-        dispatch(openAlert(`${token.symbol} bridge transaction submitted`))
-        handleClose()
-      } else {
-        dispatch(openError(`Failed to bridge ${token.symbol}`))
-      }
     }
+    if (res) {
+      dispatch(setActiveHistoryTab1('Bridge to L2'))
+      handleClose();
+    }
+
   }
 
   const theme = useTheme()
@@ -102,12 +91,12 @@ function InputStep({ handleClose, token }) {
 
   console.log("Loading:", depositLoading)
 
-  let buttonLabel_1 = 'CANCEL'
-  if( depositLoading ) buttonLabel_1 = 'CLOSE WINDOW'
+  let buttonLabel_1 = 'Cancel'
+  if( depositLoading ) buttonLabel_1 = 'Close'
 
   let convertToUSD = false
-  
-  if( Object.keys(lookupPrice) && 
+
+  if( Object.keys(lookupPrice) &&
       !!value &&
       new BN(value).gt(new BN(0.0)) &&
       new BN(value).lte(new BN(maxValue)) &&
@@ -151,9 +140,9 @@ function InputStep({ handleClose, token }) {
 
         {!!token && token.symbol === 'OMG' && (
           <Typography variant="body2" sx={{mt: 2}}>
-            NOTE: The OMG Token was minted in 2017 and it does not conform to the ERC20 token standard. 
-            In some cases, three interactions with MetaMask are needed. If you are bridging out of a 
-            new wallet, it starts out with a 0 approval, and therefore, only two interactions with 
+            NOTE: The OMG Token was minted in 2017 and it does not conform to the ERC20 token standard.
+            In some cases, three interactions with MetaMask are needed. If you are bridging out of a
+            new wallet, it starts out with a 0 approval, and therefore, only two interactions with
             MetaMask will be needed.
           </Typography>
         )}

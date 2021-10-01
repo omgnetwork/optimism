@@ -81,7 +81,7 @@ function TransferDaoModal({ open = false }) {
                     color='neutral'
                     className={styles.button}
                 >
-                    CANCEL
+                    Cancel
                 </Button>
 
                 <Button
@@ -92,7 +92,7 @@ function TransferDaoModal({ open = false }) {
                     // loading={loading} // TODO: Implement loading base on the action trigger
                     disabled={disabledTransfer}
                 >
-                    TRANSFER
+                    Transfer
                 </Button>
             </div>
         </Modal>
