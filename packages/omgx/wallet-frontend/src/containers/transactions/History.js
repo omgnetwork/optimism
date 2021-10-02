@@ -50,8 +50,12 @@ function History() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const dispatch = useDispatch()
-  const [startDate, setStartDate] = useState(new Date())
-  const [endDate, setEndDate] = useState(new Date())
+
+  const now = new Date()
+  const last_week = new Date(now.getFullYear(), now.getMonth(), now.getDate()-7)
+
+  const [startDate, setStartDate] = useState(last_week)
+  const [endDate, setEndDate] = useState(now)
 
   const [searchHistory, setSearchHistory] = useState('')
 

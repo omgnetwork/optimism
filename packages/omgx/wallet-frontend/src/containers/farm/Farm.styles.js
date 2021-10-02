@@ -1,5 +1,5 @@
 import { styled } from '@material-ui/core/styles'
-import { Box, Typography } from "@material-ui/core";
+import { Box, Typography, Grid } from "@material-ui/core"
 
 export const TableHeading = styled(Box)(({ theme }) => ({
   padding: "20px",
@@ -51,3 +51,46 @@ export const AlertInfo = styled(Box)`
   align-items: center;
   flex: 1;
 `;
+
+export const Wrapper = styled(Box)(({ theme, ...props }) => ({
+  borderRadius: '8px',
+  background: props.dropDownBox ? theme.palette.background.dropdown : theme.palette.background.secondary,
+  [theme.breakpoints.down('md')]: {
+    padding: ' 30px 10px',
+  },
+  [theme.breakpoints.up('md')]: {
+    padding: '20px',
+  },
+}));
+
+export const GridItemTag = styled(Grid)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const DropdownWrapper = styled(Box)`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  width: 100%;
+  padding: 16px;
+  margin-top: 16px;
+  background-color: ${props => props.theme.palette.background.secondary};
+  border-radius: 12px;
+  text-align: left;
+`;
+
+export const DropdownContent = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  [theme.breakpoints.down('md')]: {
+    flexDirection: 'column',
+    gap: '0',
+  },
+  [theme.breakpoints.up('md')]: {
+    flexDirection: 'row',
+    gap: '16px',
+  },
+}));

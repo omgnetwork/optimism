@@ -28,11 +28,11 @@ import AlertIcon from 'components/icons/AlertIcon'
 import networkService from 'services/networkService'
 
 import * as S from './Farm.styles'
-import { Box, FormControlLabel, Checkbox, Typography } from '@material-ui/core'
+import { Box, FormControlLabel, Checkbox, Typography, Fade, Grid } from '@material-ui/core'
 import PageHeader from 'components/pageHeader/PageHeader'
 import { tableHeadList } from './tableHeadList'
 import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher'
-
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 
 class Farm extends React.Component {
 
@@ -70,7 +70,10 @@ class Farm extends React.Component {
       layer2,
       lpChoice: initialLayer,
       poolTab: initialViewLayer,
-      showMDO: false //MDO = my deposits only
+      showMDO: false, //MDO = my deposits only
+      showMSO: false, //MSO = my stakes only
+      dropDownBox: false,
+      dropDownBoxInit: true
     }
 
   }
@@ -175,6 +178,12 @@ class Farm extends React.Component {
     })
   }
 
+  handleCheckBoxStakes = (e) =>{
+    this.setState({
+      showMSO: e.target.checked
+    })
+  }
+
   render() {
     const {
       // Pool
@@ -183,7 +192,9 @@ class Farm extends React.Component {
       userInfo,
       lpChoice,
       poolTab,
-      showMDO
+      showMDO,
+      showMSO,
+      dropDownBox,
     } = this.state
 
     const { isMobile } = this.props
@@ -194,24 +205,62 @@ class Farm extends React.Component {
       <>
         <PageHeader title="Earn" />
 
-        <Box sx={{ my: 3, width: '100%' }}>
-        <Typography variant="body2" sx={{mt: 2, fontSize: '0.7em'}}>
-          <span style={{fontWeight: '700'}}>The Math</span>. The operating principles of cross-chain swap pools are similar (but not identical) to AMMs. For cross-chain swapping, 
-          liquidity providers and users deposit (and withdraw) funds. Those operations constantly change the pools' liquidity and available balance. 
-          The <span style={{fontWeight: '700'}}>POOL LIQUIDITY</span> refers to the funds provided by the liquidity 
-          providers. The <span style={{fontWeight: '700'}}>POOL BALANCE</span> refers to the amount of funds currently in the pool.
-          <br/><span style={{fontWeight: '700'}}>Deposit example</span>. When you stake 10 OMG into the L2 pool, then the pool's liquidity and balance both increase by 10 OMG. 
-          <br/><span style={{fontWeight: '700'}}>Swap On example</span>. When a user moves 10 OMG from L1 to L2, then they pay 10 OMG into the L1 pool (whose balance increases by 10 OMG). 
-          Shortly after that, the L2 pool's balance decreases by 10 OMG, as funds flow out to the user's L2 wallet. 
-          Note that swap operations do not change the pool's liquidity, but only the pool's current balance.
-          <br/><span style={{fontWeight: '700'}}>Pool rebalancing</span>. When capital inflows (L1->L2) match outflows (L2->L1), the pools will remain balanced and the role of staking is to provide 
-          'lubrication' to the system. However, sudden ingresses and egresses can drive the balances to become sharply asymmetric, with all available balances 
-          residing either on the L2 side (in a mass exit) or on the L1 side (in a mass entry). 
-          In the current (v1) system, the pool operator is responsible for periodic pool rebalancing, by using classic deposit and exit operations to move funds from one pool to another. There is however 
-          a more elegant supply-and-demand answer which is that staking fees could be made to scale inversely with pool balance. 
-          Thus, when pool balances are low, a spike in APR would attract new liquidity into the pools with low balances.
-        </Typography>
-      </Box>
+      <S.Wrapper dropDownBox={dropDownBox}>
+          
+          <Grid container spacing={2} direction="row" justifyContent="left" alignItems="center" >
+        
+            <S.GridItemTag item xs={10} md={10}>
+              <Typography variant="body2" sx={{mt: 2, fontSize: '0.8em'}}>
+                In <span style={{fontWeight: '700'}}>Cross-chain Bridge Pools</span>, 
+                liquidity providers and users can stake, deposit, and withdraw funds. Those 
+                operations constantly change the pools' liquidity and available balance. 
+                {' '}<span style={{fontWeight: '700'}}>POOL LIQUIDITY</span> refers to the total funds staked by the liquidity providers, while 
+                {' '}<span style={{fontWeight: '700'}}>POOL BALANCE</span> to the amount of funds currently in the pool.
+              </Typography>
+            </S.GridItemTag>
+
+            <S.GridItemTag item xs={2} md={2}>
+              Learn More
+              <Box
+                onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
+                sx={{display: 'flex', cursor: 'pointer', color: "#0ebf9a", transform: dropDownBox ? "rotate(-180deg)" : ""}}
+              >
+                <ExpandMoreIcon />
+              </Box>
+            </S.GridItemTag>
+          </Grid>
+
+        {/*********************************************/
+        /**************  Drop Down Box ****************/
+        /**********************************************/
+        }
+        {dropDownBox ? (
+          <Fade in={dropDownBox}>
+            <S.DropdownContent>
+              <S.DropdownWrapper>
+                <Typography variant="body2" sx={{mt: 1, fontSize: '0.7em'}}>
+                  <span style={{fontWeight: '700'}}>Staking example</span>. When you stake 10 OMG into the L2 pool, then the pool's liquidity and balance both increase by 10 OMG. 
+                  <br/><br/>
+                  <span style={{fontWeight: '700'}}>Swap On (Fast Bridge) example</span>. When a wallet user moves 10 OMG from L1 to L2 using the fast bridge, then
+                  they first deposit 10 OMG into the L1 pool, whose balance thus increases by 10 OMG. 
+                  Next, the L2 pool's balance decreases by 9.99 OMG, as funds flow to the user's L2 wallet. 
+                  Note that swap operations do not change the pool's liquidity, but only the pool's current balance. 
+                  The difference between what was deposited into the L1 pool (10 OMG) and what was sent 
+                  to the user on the L2 (9.99 OMG), equal to 0.01 OMG, remains in the L2 pool and is ultimately claimed by the liquidity providers. 
+                  <br/><br/>
+                  <span style={{fontWeight: '700'}}>Pool rebalancing</span>. When capital inflows (L1->L2) match outflows (L2->L1), the pools will remain balanced and the role of 
+                  staking is to provide 'lubrication' to the system. However, sudden ingresses and egresses can drive the balances to become sharply asymmetric, with all funds 
+                  residing either on the L2 side (in a mass exit) or on the L1 side (in a mass entry). 
+                  In the current (v1) system, the pool operator is responsible for periodic pool rebalancing, using classic deposit and exit operations to move funds from one pool to another. 
+                  There is however a more elegant supply-and-demand answer which is that staking fees could be made to scale inversely with pool balance. 
+                  Thus, when pool balances are low, a spike in APR would attract new liquidity into the pools with low balances.
+                </Typography>
+              </S.DropdownWrapper>
+            </S.DropdownContent>
+          </Fade>
+        ) : null }
+
+      </S.Wrapper>
 
         <Box sx={{ my: 3, width: '100%' }}>
           <Box sx={{ mb: 2, display: 'flex' }}>
@@ -227,11 +276,22 @@ class Farm extends React.Component {
                 <Checkbox
                   checked={showMDO}
                   onChange={this.handleCheckBox}
-                  name="my deposits only"
+                  name="my tokens only"
                   color="primary"
                 />
               }
-              label="My Deposits Only"
+              label="My Tokens Only"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showMSO}
+                  onChange={this.handleCheckBoxStakes}
+                  name="my stakes only"
+                  color="primary"
+                />
+              }
+              label="My Stakes Only"
             />
           </Box>
 
@@ -291,6 +351,7 @@ class Farm extends React.Component {
                     decimals={ret[1]}
                     isMobile={isMobile}
                     showAll={!showMDO}
+                    showStakes={!showMSO}
                   />
                 )
               })}
@@ -310,6 +371,7 @@ class Farm extends React.Component {
                     decimals={ret[1]}
                     isMobile={isMobile}
                     showAll={!showMDO}
+                    showStakes={!showMSO}
                   />
                 )
               })}

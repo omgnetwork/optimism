@@ -31,7 +31,8 @@ class ListFarm extends React.Component {
       userInfo,
       L1orL2Pool,
       balance,
-      showAll
+      showAll,
+      showStakes
     } = this.props;
 
     this.state = {
@@ -41,6 +42,7 @@ class ListFarm extends React.Component {
       poolInfo,
       userInfo,
       showAll,
+      showStakes,
       //drop down box
       dropDownBox: false,
       dropDownBoxInit: true,
@@ -51,7 +53,7 @@ class ListFarm extends React.Component {
 
   componentDidUpdate(prevState) {
 
-    const { poolInfo, userInfo, balance, showAll } = this.props;
+    const { poolInfo, userInfo, balance, showAll, showStakes } = this.props;
 
     if (!isEqual(prevState.poolInfo, poolInfo)) {
       this.setState({ poolInfo });
@@ -67,6 +69,10 @@ class ListFarm extends React.Component {
 
     if (!isEqual(prevState.showAll, showAll)) {
       this.setState({ showAll });
+    }
+
+    if (!isEqual(prevState.showStakes, showStakes)) {
+      this.setState({ showStakes });
     }
 
   }
@@ -146,7 +152,7 @@ class ListFarm extends React.Component {
 
     const {
       poolInfo, userInfo,
-      dropDownBox, showAll,
+      dropDownBox, showAll, showStakes,
       loading, L1orL2Pool
     } = this.state;
 
@@ -181,6 +187,12 @@ class ListFarm extends React.Component {
 
     if(!showAll) {
       if(!Number(logAmount(poolInfo.tokenBalance, decimals, 2))) {
+        return null;
+      }
+    }
+
+    if(!showStakes) {
+      if(!Number(logAmount(userInfo.amount, decimals, 2))) {
         return null;
       }
     }
