@@ -3,6 +3,7 @@ import { Contract, ethers, Wallet, BigNumber, providers } from 'ethers'
 import * as rlp from 'rlp'
 import { MerkleTree } from 'merkletreejs'
 import fetch from 'node-fetch';
+import * as ynatm from '@eth-optimism/ynatm';
 
 /* Imports: Internal */
 import { fromHexString, sleep } from '@eth-optimism/core-utils'
@@ -56,6 +57,15 @@ interface MessageRelayerOptions {
   filterEndpoint?: string
 
   filterPollingInterval?: number
+
+  // gas fee
+  maxGasPriceInGwei?: number
+
+  gasRetryIncrement?: number
+
+  numConfirmations?: number
+
+  resubmissionTimeout?: number
 }
 
 const optionSettings = {
@@ -635,69 +645,37 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       return
     }
 
-    const result = await this.state.OVM_L1CrossDomainMessenger.connect(
-      this.options.l1Wallet
-    ).relayMessage(
-      message.target,
-      message.sender,
-      message.message,
-      message.messageNonce,
-      proof,
-      {
-        gasLimit: this.options.relayGasLimit,
-      }
-    )
-
-    this.logger.info('Relay message transaction sent', {
-      transactionHash: result,
-    })
-
-    try {
-      const receipt = await result.wait()
-
-      this.logger.info('Relay message included in block', {
-        transactionHash: receipt.transactionHash,
-        blockNumber: receipt.blockNumber,
-        gasUsed: receipt.gasUsed.toString(),
-        confirmations: receipt.confirmations,
-        status: receipt.status,
-      })
-    } catch (err) {
-      this.logger.error('Real relay attempt failed, skipping.', {
-        message: err.toString(),
-        stack: err.stack,
-        code: err.code,
-      })
-      return
+    const sendTxAndWaitForReceipt = async (gasPrice): Promise<any> => {
+      const txResponse = await this.state.OVM_L1CrossDomainMessenger.connect(
+        this.options.l1Wallet
+      ).relayMessage(
+        message.target,
+        message.sender,
+        message.message,
+        message.messageNonce,
+        proof,
+        { gasPrice }
+      )
+      return this.options.l1Wallet.provider.waitForTransaction(
+        txResponse.hash,
+        this.options.numConfirmations
+      )
     }
-    this.logger.info('Message successfully relayed to Layer 1!')
-  }
 
-  private async _relayMultiMessageToL1(
-    messages: Array<BatchMessage>
-  ): Promise<any> {
-
-    const result = await this.state.OVM_L1MultiMessageRelayer.connect(
-      this.options.l1Wallet
-    ).batchRelayMessages(messages, {
-      gasLimit: this.options.relayGasLimit,
-    })
-
-    this.logger.info('Relay message transaction sent', {
-      transactionHash: result,
-    })
+    const minGasPrice = await this._getGasPriceInGwei(this.options.l1Wallet)
 
     let receipt
-
     try {
-      receipt = await result.wait()
+      receipt = await ynatm.send({
+        sendTransactionFunction: sendTxAndWaitForReceipt,
+        minGasPrice: ynatm.toGwei(minGasPrice),
+        maxGasPrice: ynatm.toGwei(this.options.maxGasPriceInGwei),
+        gasPriceScalingFunction: ynatm.LINEAR(this.options.gasRetryIncrement),
+        delay: this.options.resubmissionTimeout,
+      })
 
-      this.logger.info('Relay messages included in block', {
-        transactionHash: receipt.transactionHash,
-        blockNumber: receipt.blockNumber,
-        gasUsed: receipt.gasUsed.toString(),
-        confirmations: receipt.confirmations,
-        status: receipt.status,
+      this.logger.info('Relay message transaction sent', {
+        transactionHash: receipt.hash,
       })
     } catch (err) {
       this.logger.error('Relay attempt failed, skipping.', {
@@ -707,8 +685,56 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
       })
       return
     }
+
+    this.logger.info('Message successfully relayed to Layer 1!')
+  }
+
+  private async _relayMultiMessageToL1(
+    messages: Array<BatchMessage>
+  ): Promise<any> {
+
+    const sendTxAndWaitForReceipt = async (gasPrice): Promise<any> => {
+      const txResponse = await this.state.OVM_L1MultiMessageRelayer.connect(
+        this.options.l1Wallet
+      ).batchRelayMessages(messages, { gasPrice })
+      return this.options.l1Wallet.provider.waitForTransaction(
+        txResponse.hash,
+        this.options.numConfirmations
+      )
+    }
+
+    const minGasPrice = await this._getGasPriceInGwei(this.options.l1Wallet)
+
+    let receipt
+    try {
+      receipt = await ynatm.send({
+        sendTransactionFunction: sendTxAndWaitForReceipt,
+        minGasPrice: ynatm.toGwei(minGasPrice),
+        maxGasPrice: ynatm.toGwei(this.options.maxGasPriceInGwei),
+        gasPriceScalingFunction: ynatm.LINEAR(this.options.gasRetryIncrement),
+        delay: this.options.resubmissionTimeout,
+      })
+
+      this.logger.info('Relay message transaction sent', {
+        transactionHash: receipt.hash,
+      })
+    } catch (err) {
+      this.logger.error('Relay attempt failed, skipping.', {
+        message: err.toString(),
+        stack: err.stack,
+        code: err.code,
+      })
+      return
+    }
+
     this.logger.info('Message Batch successfully relayed to Layer 1!')
     return receipt
+  }
+
+  private async _getGasPriceInGwei(signer): Promise<number> {
+    return parseInt(
+      ethers.utils.formatUnits(await signer.getGasPrice(), 'gwei'), 10
+    )
   }
 
   private async _getFilter(): Promise<void> {
