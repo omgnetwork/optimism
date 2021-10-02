@@ -28,10 +28,11 @@ import AlertIcon from 'components/icons/AlertIcon'
 import networkService from 'services/networkService'
 
 import * as S from './Farm.styles'
-import { Box, FormControlLabel, Checkbox } from '@material-ui/core';
-import PageHeader from 'components/pageHeader/PageHeader';
-import { tableHeadList } from './tableHeadList';
-import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher';
+import { Box, FormControlLabel, Checkbox, Typography } from '@material-ui/core'
+import PageHeader from 'components/pageHeader/PageHeader'
+import { tableHeadList } from './tableHeadList'
+import LayerSwitcher from 'components/mainMenu/layerSwitcher/LayerSwitcher'
+
 
 class Farm extends React.Component {
 
@@ -192,6 +193,25 @@ class Farm extends React.Component {
     return (
       <>
         <PageHeader title="Earn" />
+
+        <Box sx={{ my: 3, width: '100%' }}>
+        <Typography variant="body2" sx={{mt: 2, fontSize: '0.7em'}}>
+          <span style={{fontWeight: '700'}}>The Math</span>. The operating principles of cross-chain swap pools are similar (but not identical) to AMMs. For cross-chain swapping, 
+          liquidity providers and users deposit (and withdraw) funds. Those operations constantly change the pools' liquidity and available balance. 
+          The <span style={{fontWeight: '700'}}>POOL LIQUIDITY</span> refers to the funds provided by the liquidity 
+          providers. The <span style={{fontWeight: '700'}}>POOL BALANCE</span> refers to the amount of funds currently in the pool.
+          <br/><span style={{fontWeight: '700'}}>Deposit example</span>. When you stake 10 OMG into the L2 pool, then the pool's liquidity and balance both increase by 10 OMG. 
+          <br/><span style={{fontWeight: '700'}}>Swap On example</span>. When a user moves 10 OMG from L1 to L2, then they pay 10 OMG into the L1 pool (whose balance increases by 10 OMG). 
+          Shortly after that, the L2 pool's balance decreases by 10 OMG, as funds flow out to the user's L2 wallet. 
+          Note that swap operations do not change the pool's liquidity, but only the pool's current balance.
+          <br/><span style={{fontWeight: '700'}}>Pool rebalancing</span>. When capital inflows (L1->L2) match outflows (L2->L1), the pools will remain balanced and the role of staking is to provide 
+          'lubrication' to the system. However, sudden ingresses and egresses can drive the balances to become sharply asymmetric, with all available balances 
+          residing either on the L2 side (in a mass exit) or on the L1 side (in a mass entry). 
+          In the current (v1) system, the pool operator is responsible for periodic pool rebalancing, by using classic deposit and exit operations to move funds from one pool to another. There is however 
+          a more elegant supply-and-demand answer which is that staking fees could be made to scale inversely with pool balance. 
+          Thus, when pool balances are low, a spike in APR would attract new liquidity into the pools with low balances.
+        </Typography>
+      </Box>
 
         <Box sx={{ my: 3, width: '100%' }}>
           <Box sx={{ mb: 2, display: 'flex' }}>
