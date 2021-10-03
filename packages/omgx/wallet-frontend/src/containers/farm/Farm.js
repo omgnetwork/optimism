@@ -211,20 +211,21 @@ class Farm extends React.Component {
         
             <S.GridItemTag item xs={10} md={10}>
               <Typography variant="body2" sx={{mt: 2, fontSize: '0.8em'}}>
-                In <span style={{fontWeight: '700'}}>Cross-chain Bridge Pools</span>, 
-                liquidity providers and users can stake, deposit, and withdraw funds. Those 
-                operations constantly change the pools' liquidity and available balance. 
-                {' '}<span style={{fontWeight: '700'}}>POOL LIQUIDITY</span> refers to the total funds staked by the liquidity providers, while 
-                {' '}<span style={{fontWeight: '700'}}>POOL BALANCE</span> to the amount of funds currently in the pool.
+                The supply of tokens in the pools reflects the staking and bridging activities of all users.
+                {' '}<span style={{fontWeight: '700'}}>LIQUIDITY</span> denotes the funds staked by liquidity providers, while the 
+                {' '}<span style={{fontWeight: '700'}}>BALANCE</span> refers to the amount of funds currently in each pool.
               </Typography>
             </S.GridItemTag>
 
-            <S.GridItemTag item xs={2} md={2}>
+            <S.GridItemTag 
+              item 
+              xs={2} 
+              md={2}
+              onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
+              sx={{color: "#0ebf9a"}}
+            >
               Learn More
-              <Box
-                onClick={()=>{this.setState({ dropDownBox: !dropDownBox, dropDownBoxInit: false })}}
-                sx={{display: 'flex', cursor: 'pointer', color: "#0ebf9a", transform: dropDownBox ? "rotate(-180deg)" : ""}}
-              >
+              <Box sx={{display: 'flex', cursor: 'pointer', transform: dropDownBox ? "rotate(-180deg)" : ""}}>
                 <ExpandMoreIcon />
               </Box>
             </S.GridItemTag>
@@ -241,19 +242,19 @@ class Farm extends React.Component {
                 <Typography variant="body2" sx={{mt: 1, fontSize: '0.7em'}}>
                   <span style={{fontWeight: '700'}}>Staking example</span>. When you stake 10 OMG into the L2 pool, then the pool's liquidity and balance both increase by 10 OMG. 
                   <br/><br/>
-                  <span style={{fontWeight: '700'}}>Swap On (Fast Bridge) example</span>. When a wallet user moves 10 OMG from L1 to L2 using the fast bridge, then
-                  they first deposit 10 OMG into the L1 pool, whose balance thus increases by 10 OMG. 
-                  Next, the L2 pool's balance decreases by 9.99 OMG, as funds flow to the user's L2 wallet. 
-                  Note that swap operations do not change the pool's liquidity, but only the pool's current balance. 
+                  <span style={{fontWeight: '700'}}>Fast Bridge example</span>. When a user bridges 10 OMG from L1 to L2 using the fast bridge,  
+                  they send 10 OMG to the L1 pool, increasing its balance by 10 OMG. Next, 9.99 OMG flow out from the L2 pool to the user's L2 wallet, completing the bridge. 
+                  Note that bridge operations do not change the pool's liquidity, but only its current balance. 
                   The difference between what was deposited into the L1 pool (10 OMG) and what was sent 
-                  to the user on the L2 (9.99 OMG), equal to 0.01 OMG, remains in the L2 pool and is ultimately claimed by the liquidity providers. 
+                  to the user on the L2 (9.99 OMG), equal to 0.01 OMG, is sent to the reward pool, for later harvesting by liquidity providers. 
                   <br/><br/>
-                  <span style={{fontWeight: '700'}}>Pool rebalancing</span>. When capital inflows (L1->L2) match outflows (L2->L1), the pools will remain balanced and the role of 
-                  staking is to provide 'lubrication' to the system. However, sudden ingresses and egresses can drive the balances to become sharply asymmetric, with all funds 
-                  residing either on the L2 side (in a mass exit) or on the L1 side (in a mass entry). 
-                  In the current (v1) system, the pool operator is responsible for periodic pool rebalancing, using classic deposit and exit operations to move funds from one pool to another. 
-                  There is however a more elegant supply-and-demand answer which is that staking fees could be made to scale inversely with pool balance. 
-                  Thus, when pool balances are low, a spike in APR would attract new liquidity into the pools with low balances.
+                  <span style={{fontWeight: '700'}}>Pool rebalancing</span>. In some circumstances, excess balances can accumulate on one chain. For example, if many people 
+                  bridge from L1 to L2, then L1 pool balances will increase, while L2 balances will decrease. In the current (v1) system, the pool operator is responsible 
+                  for pool rebalancing, when and if needed, using 'classic' deposit and exit operations to move funds from one pool to another.
+                  <br/><br/> 
+                  <span style={{fontWeight: '700'}}>Future work</span>. A more elegant approach to pool balancing is an 'automatic' 
+                  supply-and-demand approach, in which staking rewards scale inversely (and non-linearly) with pool balances. Thus, when pool balances 
+                  are very low, a spike in rewards would attract new liquidity into low-balance pools.
                 </Typography>
               </S.DropdownWrapper>
             </S.DropdownContent>

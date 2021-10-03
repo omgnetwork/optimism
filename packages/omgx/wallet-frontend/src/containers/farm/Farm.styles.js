@@ -65,7 +65,7 @@ export const Wrapper = styled(Box)(({ theme, ...props }) => ({
 
 export const GridItemTag = styled(Grid)`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
 `;
 

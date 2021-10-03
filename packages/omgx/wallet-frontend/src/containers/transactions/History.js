@@ -42,7 +42,7 @@ import useInterval from 'util/useInterval'
 import PageHeader from 'components/pageHeader/PageHeader'
 import Transactions from './Transactions'
 
-const POLL_INTERVAL = 5000; //milliseconds
+import { POLL_INTERVAL } from 'util/constant'
 
 function History() {
 
@@ -52,7 +52,7 @@ function History() {
   const dispatch = useDispatch()
 
   const now = new Date()
-  const last_week = new Date(now.getFullYear(), now.getMonth(), now.getDate()-7)
+  const last_week = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
 
   const [startDate, setStartDate] = useState(last_week)
   const [endDate, setEndDate] = useState(now)
@@ -77,7 +77,7 @@ function History() {
     batch(() => {
       dispatch(fetchTransactions());
     });
-  }, POLL_INTERVAL * 2);
+  }, POLL_INTERVAL);
 
   console.log(startDate)
   console.log(endDate)
