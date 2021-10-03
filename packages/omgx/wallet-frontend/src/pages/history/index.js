@@ -76,7 +76,7 @@ function HistoryPage() {
     batch(() => {
       dispatch(fetchTransactions())
     })
-  }, POLL_INTERVAL * 2)
+  }, POLL_INTERVAL)
 
   console.log(['transactions', transactions]);
 
