@@ -44,7 +44,7 @@ import NetworkSwitcherIcon from 'components/icons/NetworkSwitcherIcon'
 import PendingTransaction from './PendingTransaction'
 import useInterval from 'util/useInterval'
 
-const POLL_INTERVAL = 2000; //milliseconds
+import { POLL_INTERVAL } from 'util/constant'
 
 function Account () {
 
@@ -123,7 +123,7 @@ function Account () {
     batch(() => {
       dispatch(fetchTransactions())
     })
-  }, POLL_INTERVAL * 2)
+  }, POLL_INTERVAL)
 
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))

@@ -21,7 +21,7 @@ import { useTheme } from '@emotion/react'
 import { Typography, useMediaQuery } from '@material-ui/core'
 
 import { exitBOBA } from 'actions/networkAction'
-import { openAlert, openError } from 'actions/uiAction'
+import { openAlert } from 'actions/uiAction'
 
 import Button from 'components/button/Button'
 import Input from 'components/input/Input'
@@ -44,28 +44,31 @@ function DoExitStep({ handleClose, token }) {
   const [ value, setValue ] = useState('')
   const [ value_Wei_String, setValue_Wei_String ] = useState('0')  //support for Use Max
 
-  const [disabledSubmit, setDisabledSubmit] = useState(true)
+  const [ validValue, setValidValue ] = useState(false)
   const loading = useSelector(selectLoading(['EXIT/CREATE']))
 
   const signatureStatus = useSelector(selectSignatureStatus_exitTRAD)
   const lookupPrice = useSelector(selectLookupPrice)
 
   const maxValue = logAmount(token.balance, token.decimals)
+  console.log("maxValue",maxValue) //this is now a float represented as a string
 
   function setAmount(value) {
+    //this function can accomadate strings, numbers, 
+    //and BigNumbers since it's based on "bignumber.js"
 
-    console.log("setAmount")
+    //console.log("setAmount")
 
     const tooSmall = new BN(value).lte(new BN(0.0))
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
-    console.log("tooSmall",tooSmall)
-    console.log("tooBig",tooBig)
+    //console.log("tooSmall",tooSmall)
+    //console.log("tooBig",tooBig)
 
     if (tooSmall || tooBig) {
-      setDisabledSubmit(true)
+      setValidValue(false)
     } else {
-      setDisabledSubmit(false)
+      setValidValue(true)
     }
 
     setValue(value)
@@ -103,15 +106,6 @@ function DoExitStep({ handleClose, token }) {
     }
   }, [ signatureStatus, loading, handleClose ])
 
-  let valueIsValid = false
-
-  if( !!value &&
-      new BN(value).gt(new BN(0.0)) &&
-      new BN(value).lte(new BN(maxValue))
-  ) {
-    valueIsValid = true
-  }
-
   return (
     <>
       <Box>
@@ -129,7 +123,7 @@ function DoExitStep({ handleClose, token }) {
             setValue_Wei_String(toWei_String(i.target.value, token.decimals))
           }}
           onUseMax={(i)=>{//they want to use the maximum
-            setAmount(maxValue) //so the input value updates for the user
+            setAmount(maxValue) //so the display value updates for the user
             setValue_Wei_String(token.balance.toString())
           }}
           allowUseAll={true}
@@ -139,7 +133,7 @@ function DoExitStep({ handleClose, token }) {
           newStyle
         />
 
-        {valueIsValid && token && (
+        {validValue && token && (
           <Typography variant="body2" sx={{mt: 2}}>
             {value &&
               `You will receive ${Number(value).toFixed(3)} ${token.symbol}
@@ -170,7 +164,7 @@ function DoExitStep({ handleClose, token }) {
               variant="contained"
               loading={loading}
               tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
-              disabled={disabledSubmit}
+              disabled={!validValue}
               triggerTime={new Date()}
               fullWidth={isMobile}
               size="large"

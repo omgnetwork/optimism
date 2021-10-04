@@ -31,15 +31,24 @@ export function createAction (key, asyncAction) {
         dispatch({ type: `${key}/ERROR` })
         return false
       }
-      dispatch({ type: `${key}/SUCCESS`, payload: response });
-      return true;
+      dispatch({ type: `${key}/SUCCESS`, payload: response })
+      return true
     } catch (error) {
+      console.log("Error RAW:", {error})
+      if(error.message.includes('NETWORK_ERROR')) {
+        console.log("Internet down")
+        return false
+      }
+      if(error.message.includes('Network Error')) {
+        console.log("Internet down")
+        return false
+      }
       const errorMessage = networkService.handleMetaMaskError(error.code) ?? error.message;
       dispatch({ type: `UI/ERROR/UPDATE`, payload: errorMessage })
       // cancel request loading state
       dispatch({ type: `${key}/ERROR` })
       console.log("createAction error:", error)
-      return false;
+      return false
     }
-  };
+  }
 }

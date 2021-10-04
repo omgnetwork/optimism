@@ -73,7 +73,7 @@ import FarmWrapper from 'containers/farm/FarmWrapper'
 
 import Alert from 'components/alert/Alert'
 
-const POLL_INTERVAL = 5000 //milliseconds
+import { POLL_INTERVAL } from 'util/constant'
 
 function Home () {
 
@@ -128,7 +128,7 @@ function Home () {
     batch(() => {
       dispatch(fetchExits())
     })
-  }, POLL_INTERVAL * 2)
+  }, POLL_INTERVAL)
 
   //get all account balances
   useInterval(() => {

@@ -18,7 +18,7 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { depositL2LP } from 'actions/networkAction'
-import { openAlert, openError } from 'actions/uiAction'
+import { openAlert } from 'actions/uiAction'
 
 import { selectLoading } from 'selectors/loadingSelector'
 import { selectSignatureStatus_exitLP } from 'selectors/signatureSelector'
@@ -46,7 +46,7 @@ function DoExitStepFast({ handleClose, token }) {
 
   const [LPBalance, setLPBalance] = useState(0)
   const [feeRate, setFeeRate] = useState(0)
-  const [disabledSubmit, setDisabledSubmit] = useState(true)
+  const [validValue, setValidValue] = useState(false)
 
   const loading = useSelector(selectLoading(['EXIT/CREATE']))
 
@@ -57,18 +57,18 @@ function DoExitStepFast({ handleClose, token }) {
 
   function setAmount(value) {
 
-    console.log("setAmount")
+    //console.log("setAmount")
 
     const tooSmall = new BN(value).lte(new BN(0.0))
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
-    console.log("tooSmall",tooSmall)
-    console.log("tooBig",tooBig)
+    //console.log("tooSmall",tooSmall)
+    //console.log("tooBig",tooBig)
 
     if (tooSmall || tooBig) {
-      setDisabledSubmit(true)
+      setValidValue(false)
     } else {
-      setDisabledSubmit(false)
+      setValidValue(true)
     }
 
     setValue(value)
@@ -131,15 +131,6 @@ function DoExitStepFast({ handleClose, token }) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
-  let valueIsValid = false
-
-  if( !!value &&
-      new BN(value).gt(new BN(0.0)) &&
-      new BN(value).lte(new BN(maxValue))
-  ) {
-    valueIsValid = true
-  }
-
   let buttonLabel = 'Cancel'
   if( loading ) buttonLabel = 'Close'
 
@@ -172,7 +163,7 @@ function DoExitStepFast({ handleClose, token }) {
           variant="standard"
         />
 
-        {valueIsValid && token && (
+        {validValue && token && (
           <Typography variant="body2" sx={{mt: 2}}>
             {value &&
               `You will receive
@@ -212,7 +203,7 @@ function DoExitStepFast({ handleClose, token }) {
             variant='contained'
             loading={loading}
             tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
-            disabled={disabledSubmit}
+            disabled={!validValue}
             triggerTime={new Date()}
             fullWidth={isMobile}
             size='large'
