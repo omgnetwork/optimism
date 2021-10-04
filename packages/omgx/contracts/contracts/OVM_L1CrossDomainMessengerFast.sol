@@ -47,6 +47,7 @@ contract OVM_L1CrossDomainMessengerFast is iOVM_L1CrossDomainMessenger, Lib_Addr
     mapping (bytes32 => bool) public blockedMessages;
     mapping (bytes32 => bool) public relayedMessages;
     mapping (bytes32 => bool) public successfulMessages;
+    mapping (bytes32 => bool) public failureMessages;
 
     address internal xDomainMsgSender = DEFAULT_XDOMAIN_SENDER;
 
@@ -175,6 +176,11 @@ contract OVM_L1CrossDomainMessengerFast is iOVM_L1CrossDomainMessenger, Lib_Addr
             "Provided message has already been received."
         );
 
+        require(
+            blockedMessages[xDomainCalldataHash] == false,
+            "Provided message has been blocked."
+        );
+
         xDomainMsgSender = _sender;
         (bool success, ) = _target.call(_message);
         xDomainMsgSender = DEFAULT_XDOMAIN_SENDER;
@@ -184,6 +190,11 @@ contract OVM_L1CrossDomainMessengerFast is iOVM_L1CrossDomainMessenger, Lib_Addr
         if (success == true) {
             successfulMessages[xDomainCalldataHash] = true;
             emit RelayedMessage(xDomainCalldataHash);
+        } else {
+            failureMessages[xDomainCalldataHash] = true;
+            // it allows us to relay again if anything goes wrong
+            blockedMessages[xDomainCalldataHash] == true;
+            emit FailedRelayedMessage(xDomainCalldataHash);
         }
 
         // Store an identifier that can be used to prove that the given message was relayed by some

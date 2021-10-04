@@ -103,7 +103,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     timeSinceLastRelayS: number
     timeOfLastRelayS: number
     messageBuffer: Array<BatchMessage>
-  timeOfLastPendingRelay: any
+    timeOfLastPendingRelay: any
   }
 
   protected async _init(): Promise<void> {
@@ -262,7 +262,12 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           /* parse this to make sure that the mesaage was actually relayed */
           // clear out buffer only if the messages are relayed to L1 successfully
           if (
-            await this._wasMessageRelayed(this.state.messageBuffer[0].message)
+            await this._wereMessagesRelayed(
+              this.state.messageBuffer.reduce((acc, cur) => {
+                acc.push(cur.message)
+                return acc
+              }, [])
+            )
           ) {
             //clear out the buffer so we do not double relay, which will just
             // waste gas
@@ -341,6 +346,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
             })
             if (await this._wasMessageRelayed(message)) {
               this.logger.info('Message has already been relayed, skipping.')
+              continue
+            }
+
+            if (await this._wasMessageBlocked(message)) {
+              this.logger.info('Message has been blocked, skipping.')
               continue
             }
 
@@ -577,6 +587,23 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     return this.state.OVM_L1CrossDomainMessenger.successfulMessages(
       message.encodedMessageHash
     )
+  }
+
+  private async _wasMessageBlocked(message: SentMessage): Promise<boolean> {
+    return this.state.OVM_L1CrossDomainMessenger.blockedMessages(
+      message.encodedMessageHash
+    )
+  }
+
+  private async _wereMessagesRelayed(
+    messages: Array<SentMessage>
+  ): Promise<boolean> {
+    const promisePayload = messages.reduce((acc, cur) => {
+      acc.push(this._wasMessageRelayed(cur), this._wasMessageBlocked(cur))
+      return acc
+    }, [])
+    const messageRelayedStatus = await Promise.all(promisePayload)
+    return messageRelayedStatus.some((ele) => ele)
   }
 
   private async _getMessageProof(

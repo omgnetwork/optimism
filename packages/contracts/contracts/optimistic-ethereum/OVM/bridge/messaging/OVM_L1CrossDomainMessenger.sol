@@ -70,6 +70,7 @@ contract OVM_L1CrossDomainMessenger is
     mapping (bytes32 => bool) public blockedMessages;
     mapping (bytes32 => bool) public relayedMessages;
     mapping (bytes32 => bool) public successfulMessages;
+    mapping (bytes32 => bool) public failureMessages;
 
     address internal xDomainMsgSender = DEFAULT_XDOMAIN_SENDER;
 
@@ -278,6 +279,9 @@ contract OVM_L1CrossDomainMessenger is
             successfulMessages[xDomainCalldataHash] = true;
             emit RelayedMessage(xDomainCalldataHash);
         } else {
+            failureMessages[xDomainCalldataHash] = true;
+            // it allows us to relay again if anything goes wrong
+            blockedMessages[xDomainCalldataHash] == true;
             emit FailedRelayedMessage(xDomainCalldataHash);
         }
 
