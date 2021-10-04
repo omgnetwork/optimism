@@ -1,13 +1,22 @@
 import { expect } from '../setup'
 
 /* External Imports */
-import { ethers } from 'hardhat'
+import { ethers as hardhatEthers } from 'hardhat'
 import '@nomiclabs/hardhat-ethers'
-import { Signer, ContractFactory, Contract, BigNumber } from 'ethers'
+import {
+  Signer,
+  ContractFactory,
+  Contract,
+  BigNumber,
+  ethers,
+  providers,
+} from 'ethers'
 import ganache from 'ganache-core'
-import sinon from 'sinon'
-import { Web3Provider } from '@ethersproject/providers'
-
+import {
+  StaticJsonRpcProvider,
+  TransactionReceipt,
+  Web3Provider,
+} from '@ethersproject/providers'
 import scc from '@eth-optimism/contracts/artifacts/contracts/optimistic-ethereum/OVM/chain/OVM_StateCommitmentChain.sol/OVM_StateCommitmentChain.json'
 import { getContractInterface, predeploys } from '@eth-optimism/contracts'
 import { smockit, MockContract } from '@eth-optimism/smock'
@@ -26,29 +35,22 @@ import {
   StateBatchSubmitter,
   TX_BATCH_SUBMITTER_LOG_TAG,
   STATE_BATCH_SUBMITTER_LOG_TAG,
-  BatchSubmitter,
   YnatmTransactionSubmitter,
   ResubmissionConfig,
+  BatchSigner,
 } from '../../src'
 
-import {
-  QueueOrigin,
-  Batch,
-  Signature,
-  remove0x,
-} from '@eth-optimism/core-utils'
+import { QueueOrigin, Batch, remove0x } from '@eth-optimism/core-utils'
 import { Logger, Metrics } from '@eth-optimism/common-ts'
 
-const DUMMY_ADDRESS = '0x' + '00'.repeat(20)
 const EXAMPLE_STATE_ROOT =
   '0x16b7f83f409c7195b1f4fde5652f1b54a4477eacb6db7927691becafba5f8801'
 const MAX_GAS_LIMIT = 8_000_000
 const MAX_TX_SIZE = 100_000
 const MIN_TX_SIZE = 1_000
 const MIN_GAS_PRICE_IN_GWEI = 1
-const MAX_GAS_PRICE_IN_GWEI = 70
 const GAS_RETRY_INCREMENT = 5
-const GAS_THRESHOLD_IN_GWEI = 120
+const GAS_THRESHOLD_IN_GWEI = 140
 
 // Helper functions
 interface QueueElement {
@@ -66,11 +68,7 @@ const getQueueElement = async (
   const nextQueueElement = await ctcContract.getQueueElement(nextQueueIndex)
   return nextQueueElement
 }
-const DUMMY_SIG: Signature = {
-  r: '11'.repeat(32),
-  s: '22'.repeat(32),
-  v: 1,
-}
+
 // A transaction batch submitter which skips the validate batch check
 class TransactionBatchSubmitter extends RealTransactionBatchSubmitter {
   protected async _validateBatch(batch: Batch): Promise<boolean> {
@@ -82,10 +80,27 @@ const testMetrics = new Metrics({ prefix: 'bs_test' })
 describe('BatchSubmitter', () => {
   let signer: Signer
   let sequencer: Signer
+  const l1ProviderReal = hardhatEthers.provider
+  const l1Provider = {
+    getGasPrice: async () => {
+      const gas = await l1ProviderReal.getGasPrice()
+      return gas
+    },
+    waitForTransaction: async (
+      hash: string,
+      _numConfirmations: number,
+      timeout?: number
+    ): Promise<TransactionReceipt> => {
+      const wait = await l1ProviderReal.waitForTransaction(
+        hash,
+        _numConfirmations
+      )
+      return wait
+    },
+  } as StaticJsonRpcProvider
   before(async () => {
-    ;[signer, sequencer] = await ethers.getSigners()
+    ;[signer, sequencer] = await hardhatEthers.getSigners()
   })
-
   let AddressManager: Contract
   let Mock__OVM_ExecutionManager: MockContract
   let Mock__OVM_BondManager: MockContract
@@ -198,11 +213,10 @@ describe('BatchSubmitter', () => {
     )
   })
 
-  afterEach(() => {
-    sinon.restore()
-  })
-
-  const createBatchSubmitter = (timeout: number): TransactionBatchSubmitter => {
+  const createBatchSubmitter = (
+    timeout: number,
+    l1ProviderMock?: providers.StaticJsonRpcProvider
+  ): TransactionBatchSubmitter => {
     const resubmissionConfig: ResubmissionConfig = {
       resubmissionTimeout: 100000,
       minGasPriceInGwei: MIN_GAS_PRICE_IN_GWEI,
@@ -210,12 +224,14 @@ describe('BatchSubmitter', () => {
       gasRetryIncrement: GAS_RETRY_INCREMENT,
     }
     const txBatchTxSubmitter = new YnatmTransactionSubmitter(
-      sequencer,
+      createBatchSigner(sequencer),
+      l1Provider,
       resubmissionConfig,
       1
     )
     return new TransactionBatchSubmitter(
-      sequencer,
+      createBatchSigner(sequencer),
+      l1ProviderMock || l1ProviderReal,
       l2Provider as any,
       MIN_TX_SIZE,
       MAX_TX_SIZE,
@@ -229,8 +245,7 @@ describe('BatchSubmitter', () => {
       txBatchTxSubmitter,
       1,
       new Logger({ name: TX_BATCH_SUBMITTER_LOG_TAG }),
-      testMetrics,
-      false
+      testMetrics
     )
   }
 
@@ -241,7 +256,7 @@ describe('BatchSubmitter', () => {
         timestamp: number
       }> = []
 
-      let batchSubmitter
+      let batchSubmitter: TransactionBatchSubmitter
       beforeEach(async () => {
         for (let i = 1; i < 15; i++) {
           await OVM_CanonicalTransactionChain.enqueue(
@@ -362,15 +377,22 @@ describe('BatchSubmitter', () => {
         l2Provider.setL2BlockData({
           queueOrigin: QueueOrigin.L1ToL2,
         } as any)
-
         const highGasPriceWei = BigNumber.from(600).mul(1_000_000_000)
-
-        sinon
-          .stub(sequencer, 'getGasPrice')
-          .callsFake(async () => highGasPriceWei)
-
+        let getGasPriceCalled = false
+        const l1ProviderMocked = {
+          _isProvider: true,
+          getBalance: l1ProviderReal.getBalance,
+          call: l1ProviderReal.call,
+          getGasPrice: async () => {
+            getGasPriceCalled = true
+            return highGasPriceWei
+          },
+        } as StaticJsonRpcProvider
+        // we want to mock out the l1Provider so that we can return a custom getGasPrice method response
+        // so that we test - Do not submit batch if gas price above threshold lines
+        batchSubmitter = createBatchSubmitter(0, l1ProviderMocked)
         const receipt = await batchSubmitter.submitNextBatch()
-        expect(sequencer.getGasPrice).to.have.been.calledOnce
+        expect(getGasPriceCalled).to.be.true
         expect(receipt).to.be.undefined
       })
 
@@ -381,13 +403,25 @@ describe('BatchSubmitter', () => {
         } as any)
 
         const lowGasPriceWei = BigNumber.from(2).mul(1_000_000_000)
-
-        sinon
-          .stub(sequencer, 'getGasPrice')
-          .callsFake(async () => lowGasPriceWei)
-
+        let getGasPriceCalled = 0
+        //stubbing
+        l1Provider.waitForTransaction = async (
+          hash: string,
+          _numConfirmations: number,
+          timeout?: number
+        ): Promise<TransactionReceipt> => {
+          const wft = await l1ProviderReal.waitForTransaction(
+            hash,
+            _numConfirmations
+          )
+          return wft
+        }
+        l1Provider.getGasPrice = async () => {
+          getGasPriceCalled += 1
+          return lowGasPriceWei
+        }
         const receipt = await batchSubmitter.submitNextBatch()
-        expect(sequencer.getGasPrice).to.have.been.calledTwice
+        expect(getGasPriceCalled).to.be.equal(1)
         expect(receipt).to.not.be.undefined
       })
     })
@@ -436,12 +470,14 @@ describe('BatchSubmitter', () => {
         gasRetryIncrement: GAS_RETRY_INCREMENT,
       }
       const stateBatchTxSubmitter = new YnatmTransactionSubmitter(
-        sequencer,
+        createBatchSigner(sequencer),
+        l1Provider,
         resubmissionConfig,
         1
       )
       stateBatchSubmitter = new StateBatchSubmitter(
-        sequencer,
+        createBatchSigner(sequencer),
+        l1ProviderReal,
         l2Provider as any,
         MIN_TX_SIZE,
         MAX_TX_SIZE,
@@ -494,3 +530,12 @@ describe('Batch Submitter with Ganache', () => {
     await server.close()
   })
 })
+
+const createBatchSigner = (signer: Signer): BatchSigner => {
+  return {
+    signer,
+    address: undefined,
+    token: undefined,
+    vault_addr: undefined,
+  }
+}

@@ -13,9 +13,18 @@ import {
 import { Gauge, Histogram, Counter } from 'prom-client'
 import { RollupInfo, sleep } from '@eth-optimism/core-utils'
 import { Logger, Metrics } from '@eth-optimism/common-ts'
-import { getContractFactory } from 'old-contracts'
+import { getContractInterface } from '@eth-optimism/contracts'
+import { getBalance, getBatchSignerAddress } from './provider-helper'
+
+export interface BatchSigner {
+  // one or the other, not both!
+  address: string
+  vault_addr: string
+  token: string
+  signer: Signer
+}
 /* Internal Imports */
-import { TxSubmissionHooks } from '..'
+import { TxSubmissionHooks, AppendStateBatch } from '..'
 
 export interface BlockRange {
   start: number
@@ -42,7 +51,8 @@ export abstract class BatchSubmitter {
   protected metrics: BatchSubmitterMetrics
 
   constructor(
-    readonly signer: Signer,
+    readonly batchSigner: BatchSigner,
+    readonly l1Provider: providers.StaticJsonRpcProvider,
     readonly l2Provider: providers.StaticJsonRpcProvider,
     readonly minTxSize: number,
     readonly maxTxSize: number,
@@ -81,7 +91,7 @@ export abstract class BatchSubmitter {
 
     this.logger.info('Readying to submit next batch...', {
       l2ChainId: this.l2ChainId,
-      batchSubmitterAddress: await this.signer.getAddress(),
+      batchSubmitterAddress: await getBatchSignerAddress(this.batchSigner),
     })
 
     if (this.syncing === true) {
@@ -99,8 +109,8 @@ export abstract class BatchSubmitter {
   }
 
   protected async _hasEnoughETHToCoverGasCosts(): Promise<boolean> {
-    const address = await this.signer.getAddress()
-    const balance = await this.signer.getBalance()
+    const address = await getBatchSignerAddress(this.batchSigner)
+    const balance = await getBalance(this.l1Provider, address)
     const ether = utils.formatEther(balance)
     const num = parseFloat(ether)
 
@@ -134,9 +144,11 @@ export abstract class BatchSubmitter {
     ctcAddress: string
     sccAddress: string
   }> {
-    const addressManager = (
-      await getContractFactory('Lib_AddressManager', this.signer)
-    ).attach(this.addressManagerAddress)
+    const addressManager = new Contract(
+      this.addressManagerAddress,
+      getContractInterface('Lib_AddressManager'),
+      this.l1Provider
+    )
     const sccAddress = await addressManager.getAddress(
       'OVM_StateCommitmentChain'
     )
@@ -244,11 +256,6 @@ export abstract class BatchSubmitter {
     }
 
     this.logger.info('Received transaction receipt', { receipt })
-    // this.logger.info(successMessage, {
-    //   block:receipt.blockNumber,
-    //   status:receipt.status,
-    //   txHash:receipt.transactionHash,
-    // })
     this.logger.info(successMessage)
     this.metrics.batchesSubmitted.inc()
     this.metrics.submissionGasUsed.observe(

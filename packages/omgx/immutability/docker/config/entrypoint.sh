@@ -194,8 +194,7 @@ else
     test_plugin
 fi
 
-
-if [ -n "$TEST" ]; then 
+if [ -n "$TEST" ]; then
     echo "Dying."
 else
     echo "Don't exit until vault dies."

@@ -10,7 +10,11 @@ import {
 } from '@ethersproject/providers'
 import * as dotenv from 'dotenv'
 import Config from 'bcfg'
-
+import { BatchSigner } from '../batch-submitter/batch-submitter'
+import {
+  getBatchSignerAddress,
+  getTransactionCountBlock,
+} from '../batch-submitter/provider-helper'
 /* Internal Imports */
 import {
   TransactionBatchSubmitter,
@@ -64,7 +68,6 @@ interface RequiredEnvVars {
 
 /* Optional Env Vars
  * FRAUD_SUBMISSION_ADDRESS
- * DISABLE_QUEUE_BATCH_APPEND
  * SEQUENCER_PRIVATE_KEY
  * PROPOSER_PRIVATE_KEY
  * MNEMONIC
@@ -77,6 +80,11 @@ interface RequiredEnvVars {
  * DEBUG_IMPERSONATE_SEQUENCER_ADDRESS
  * DEBUG_IMPERSONATE_PROPOSER_ADDRESS
  * RUN_METRICS_SERVER
+ * VAULT_ADDR
+ * PROPOSER_ADDRESS
+ * PROPOSER_TOKEN
+ * SEQUENCER_ADDRESS
+ * SEQUENCER_TOKEN
  */
 
 export const run = async () => {
@@ -138,8 +146,8 @@ export const run = async () => {
     env.DEBUG_IMPERSONATE_PROPOSER_ADDRESS
   )
 
-  const getSequencerSigner = async (): Promise<Signer> => {
-    const l1Provider = new StaticJsonRpcProvider(
+  const getSequencerSigner = async (): Promise<BatchSigner> => {
+    const l1ProviderTmp = new StaticJsonRpcProvider(
       requiredEnvVars.L1_NODE_WEB3_URL
     )
 
@@ -147,26 +155,55 @@ export const run = async () => {
       if (!DEBUG_IMPERSONATE_SEQUENCER_ADDRESS) {
         throw new Error('Must pass DEBUG_IMPERSONATE_SEQUENCER_ADDRESS')
       }
-      await l1Provider.send('hardhat_impersonateAccount', [
+      await l1ProviderTmp.send('hardhat_impersonateAccount', [
         DEBUG_IMPERSONATE_SEQUENCER_ADDRESS,
       ])
-      return l1Provider.getSigner(DEBUG_IMPERSONATE_SEQUENCER_ADDRESS)
+      return {
+        signer: l1ProviderTmp.getSigner(DEBUG_IMPERSONATE_SEQUENCER_ADDRESS),
+        address: undefined,
+        vault_addr: undefined,
+        token: undefined,
+      }
     }
 
-    if (SEQUENCER_PRIVATE_KEY) {
-      return new Wallet(SEQUENCER_PRIVATE_KEY, l1Provider)
+    // if the SEQUENCER_ADDRESS is present
+    // it takes precedence over a sequencer private key
+    // this means all eth transactions go through the vault
+    if (SEQUENCER_ADDRESS) {
+      logger.info('Sequencer in Vault')
+      return {
+        signer: undefined,
+        address: SEQUENCER_ADDRESS,
+        token: SEQUENCER_TOKEN,
+        vault_addr: VAULT_ADDR,
+      }
+    } else if (SEQUENCER_PRIVATE_KEY) {
+      console.log('SEQUENCER_PRIVATE_KEY')
+      return {
+        signer: new Wallet(SEQUENCER_PRIVATE_KEY, l1ProviderTmp),
+        address: undefined,
+        vault_addr: undefined,
+        token: undefined,
+      }
     } else if (SEQUENCER_MNEMONIC) {
-      return Wallet.fromMnemonic(SEQUENCER_MNEMONIC, SEQUENCER_HD_PATH).connect(
-        l1Provider
-      )
+      const sig = Wallet.fromMnemonic(
+        SEQUENCER_MNEMONIC,
+        SEQUENCER_HD_PATH
+      ).connect(l1ProviderTmp)
+      return {
+        signer: sig,
+        address: undefined,
+        vault_addr: undefined,
+        token: undefined,
+      }
     }
     throw new Error(
-      'Must pass one of SEQUENCER_PRIVATE_KEY, MNEMONIC, or SEQUENCER_MNEMONIC'
+      'Must pass one of SEQUENCER_PRIVATE_KEY, MNEMONIC, SEQUENCER_MNEMONIC or SEQUENCER_ADDRESS'
     )
   }
 
-  const getProposerSigner = async (): Promise<Signer> => {
-    const l1Provider = new StaticJsonRpcProvider(
+  const getProposerSigner = async (): Promise<BatchSigner> => {
+    const l1ProviderTmp = new StaticJsonRpcProvider(
       requiredEnvVars.L1_NODE_WEB3_URL
     )
 
@@ -174,21 +211,49 @@ export const run = async () => {
       if (!DEBUG_IMPERSONATE_PROPOSER_ADDRESS) {
         throw new Error('Must pass DEBUG_IMPERSONATE_PROPOSER_ADDRESS')
       }
-      await l1Provider.send('hardhat_impersonateAccount', [
+      await l1ProviderTmp.send('hardhat_impersonateAccount', [
         DEBUG_IMPERSONATE_PROPOSER_ADDRESS,
       ])
-      return l1Provider.getSigner(DEBUG_IMPERSONATE_PROPOSER_ADDRESS)
+      return {
+        signer: l1ProviderTmp.getSigner(DEBUG_IMPERSONATE_PROPOSER_ADDRESS),
+        address: undefined,
+        vault_addr: undefined,
+        token: undefined,
+      }
     }
 
-    if (PROPOSER_PRIVATE_KEY) {
-      return new Wallet(PROPOSER_PRIVATE_KEY, l1Provider)
+    // if the PROPOSER_ADDRESS is present
+    // it takes precedence over a sequencer private key
+    // this means all eth transactions go through the vault
+    if (PROPOSER_ADDRESS) {
+      logger.info('Proposer in Vault')
+      return {
+        address: PROPOSER_ADDRESS,
+        signer: undefined,
+        token: PROPOSER_TOKEN,
+        vault_addr: VAULT_ADDR,
+      }
+    } else if (PROPOSER_PRIVATE_KEY) {
+      return {
+        signer: new Wallet(PROPOSER_PRIVATE_KEY, l1ProviderTmp),
+        address: undefined,
+        vault_addr: undefined,
+        token: undefined,
+      }
     } else if (PROPOSER_MNEMONIC) {
-      return Wallet.fromMnemonic(PROPOSER_MNEMONIC, PROPOSER_HD_PATH).connect(
-        l1Provider
-      )
+      const sig = Wallet.fromMnemonic(
+        PROPOSER_MNEMONIC,
+        PROPOSER_HD_PATH
+      ).connect(l1ProviderTmp)
+      return {
+        signer: sig,
+        address: undefined,
+        vault_addr: undefined,
+        token: undefined,
+      }
     }
     throw new Error(
-      'Must pass one of PROPOSER_PRIVATE_KEY, MNEMONIC, or PROPOSER_MNEMONIC'
+      'Must pass one of PROPOSER_PRIVATE_KEY, MNEMONIC, PROPOSER_MNEMONIC or PROPOSER_ADDRESS'
     )
   }
 
@@ -200,10 +265,6 @@ export const run = async () => {
   const FRAUD_SUBMISSION_ADDRESS = config.str(
     'fraud-submisison-address',
     env.FRAUD_SUBMISSION_ADDRESS || 'no fraud'
-  )
-  const DISABLE_QUEUE_BATCH_APPEND = config.bool(
-    'disable-queue-batch-append',
-    !!env.DISABLE_QUEUE_BATCH_APPEND
   )
   const MIN_GAS_PRICE_IN_GWEI = config.uint(
     'min-gas-price-in-gwei',
@@ -222,32 +283,59 @@ export const run = async () => {
     parseInt(env.GAS_THRESHOLD_IN_GWEI, 10) || 100
   )
 
-  // Private keys & mnemonics
-  const SEQUENCER_PRIVATE_KEY = config.str(
-    'sequencer-private-key',
-    env.SEQUENCER_PRIVATE_KEY
-  )
-  // Kept for backwards compatibility
-  const PROPOSER_PRIVATE_KEY = config.str(
-    'proposer-private-key',
-    env.PROPOSER_PRIVATE_KEY || env.SEQUENCER_PRIVATE_KEY
-  )
-  const SEQUENCER_MNEMONIC = config.str(
-    'sequencer-mnemonic',
-    env.SEQUENCER_MNEMONIC || env.MNEMONIC
-  )
-  const PROPOSER_MNEMONIC = config.str(
-    'proposer-mnemonic',
-    env.PROPOSER_MNEMONIC || env.MNEMONIC
-  )
-  const SEQUENCER_HD_PATH = config.str(
-    'sequencer-hd-path',
-    env.SEQUENCER_HD_PATH || env.HD_PATH
-  )
-  const PROPOSER_HD_PATH = config.str(
-    'proposer-hd-path',
-    env.PROPOSER_HD_PATH || env.HD_PATH
-  )
+  let SEQUENCER_PRIVATE_KEY
+  let SEQUENCER_HD_PATH
+  let SEQUENCER_MNEMONIC
+  let SEQUENCER_ADDRESS
+  let SEQUENCER_TOKEN
+  let VAULT_ADDR
+  if (env.SEQUENCER_ADDRESS === undefined) {
+    // Private keys & mnemonics
+    SEQUENCER_PRIVATE_KEY = config.str(
+      'sequencer-private-key',
+      env.SEQUENCER_PRIVATE_KEY
+    )
+    SEQUENCER_HD_PATH = config.str(
+      'sequencer-hd-path',
+      env.SEQUENCER_HD_PATH || env.HD_PATH
+    )
+    SEQUENCER_MNEMONIC = config.str(
+      'sequencer-mnemonic',
+      env.SEQUENCER_MNEMONIC || env.MNEMONIC
+    )
+  } else {
+    SEQUENCER_ADDRESS = config.str('sequencer-address', env.SEQUENCER_ADDRESS)
+    SEQUENCER_TOKEN = config.str('sequencer-vault-token', env.SEQUENCER_TOKEN)
+    VAULT_ADDR = config.str('vault-url', env.VAULT_ADDR)
+  }
+
+  let PROPOSER_PRIVATE_KEY
+  let PROPOSER_MNEMONIC
+  let PROPOSER_HD_PATH
+  let PROPOSER_ADDRESS
+  let PROPOSER_TOKEN
+
+  if (env.PROPOSER_ADDRESS === undefined) {
+    // Kept for backwards compatibility
+    PROPOSER_PRIVATE_KEY = config.str(
+      'proposer-private-key',
+      env.PROPOSER_PRIVATE_KEY || env.SEQUENCER_PRIVATE_KEY
+    )
+    PROPOSER_MNEMONIC = config.str(
+      'proposer-mnemonic',
+      env.PROPOSER_MNEMONIC || env.MNEMONIC
+    )
+    PROPOSER_HD_PATH = config.str(
+      'proposer-hd-path',
+      env.PROPOSER_HD_PATH || env.HD_PATH
+    )
+  } else {
+    PROPOSER_ADDRESS = config.str(
+      'proposer-address',
+      env.PROPOSER_ADDRESS || env.SEQUENCER_ADDRESS
+    )
+    PROPOSER_TOKEN = config.str('proposer-vault-token', env.PROPOSER_TOKEN)
+  }
 
   // Auto fix batch options -- TODO: Remove this very hacky config
   const AUTO_FIX_BATCH_OPTIONS_CONF = config.str(
@@ -345,11 +433,13 @@ export const run = async () => {
     new StaticJsonRpcProvider(requiredEnvVars.L2_NODE_WEB3_URL)
   )
 
-  const sequencerSigner: Signer = await getSequencerSigner()
-  let proposerSigner: Signer = await getProposerSigner()
+  const l1Provider = new StaticJsonRpcProvider(requiredEnvVars.L1_NODE_WEB3_URL)
 
-  const sequencerAddress = await sequencerSigner.getAddress()
-  const proposerAddress = await proposerSigner.getAddress()
+  const sequencerSigner: BatchSigner = await getSequencerSigner()
+  let proposerSigner: BatchSigner = await getProposerSigner()
+
+  const sequencerAddress = await getBatchSignerAddress(sequencerSigner)
+  const proposerAddress = await getBatchSignerAddress(proposerSigner)
   // If the sequencer & proposer are the same, use a single wallet
   if (sequencerAddress === proposerAddress) {
     proposerSigner = sequencerSigner
@@ -370,11 +460,13 @@ export const run = async () => {
   const txBatchTxSubmitter: TransactionSubmitter =
     new YnatmTransactionSubmitter(
       sequencerSigner,
+      l1Provider,
       resubmissionConfig,
       requiredEnvVars.NUM_CONFIRMATIONS
     )
   const txBatchSubmitter = new TransactionBatchSubmitter(
     sequencerSigner,
+    l1Provider,
     l2Provider,
     requiredEnvVars.MIN_L1_TX_SIZE,
     requiredEnvVars.MAX_L1_TX_SIZE,
@@ -389,18 +481,20 @@ export const run = async () => {
     BLOCK_OFFSET,
     logger.child({ name: TX_BATCH_SUBMITTER_LOG_TAG }),
     metrics,
-    DISABLE_QUEUE_BATCH_APPEND,
     autoFixBatchOptions
   )
 
   const stateBatchTxSubmitter: TransactionSubmitter =
     new YnatmTransactionSubmitter(
       proposerSigner,
+      l1Provider,
       resubmissionConfig,
       requiredEnvVars.NUM_CONFIRMATIONS
     )
+
   const stateBatchSubmitter = new StateBatchSubmitter(
     proposerSigner,
+    l1Provider,
     l2Provider,
     requiredEnvVars.MIN_L1_TX_SIZE,
     requiredEnvVars.MAX_L1_TX_SIZE,
@@ -424,16 +518,28 @@ export const run = async () => {
   ): Promise<void> => {
     // Clear all pending transactions
     if (clearPendingTxs) {
+      //https://github.com/ethereum-optimism/batch-submitter/pull/17
+      //this seems to be a develop-debug feature chunk of code
+      //and it wont work with Vault
       try {
-        const pendingTxs = await sequencerSigner.getTransactionCount('pending')
-        const latestTxs = await sequencerSigner.getTransactionCount('latest')
+        const address = await getBatchSignerAddress(sequencerSigner)
+        const pendingTxs = await getTransactionCountBlock(
+          l1Provider,
+          address,
+          'pending'
+        )
+        const latestTxs = await getTransactionCountBlock(
+          l1Provider,
+          address,
+          'latest'
+        )
         if (pendingTxs > latestTxs) {
           logger.info(
             'Detected pending transactions. Clearing all transactions!'
           )
           for (let i = latestTxs; i < pendingTxs; i++) {
-            const response = await sequencerSigner.sendTransaction({
-              to: await sequencerSigner.getAddress(),
+            const response = await sequencerSigner.signer.sendTransaction({
+              to: address,
               value: 0,
               nonce: i,
             })
@@ -446,7 +552,7 @@ export const run = async () => {
             logger.debug('empty transaction data', {
               data: response.data,
             })
-            await sequencerSigner.provider.waitForTransaction(
+            await l1Provider.waitForTransaction(
               response.hash,
               requiredEnvVars.NUM_CONFIRMATIONS
             )

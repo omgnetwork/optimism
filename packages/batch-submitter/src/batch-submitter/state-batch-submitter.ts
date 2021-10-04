@@ -1,8 +1,8 @@
 /* External Imports */
 import { Promise as bPromise } from 'bluebird'
-import { Contract, Signer, providers } from 'ethers'
+import { Contract, providers } from 'ethers'
 import { TransactionReceipt } from '@ethersproject/abstract-provider'
-import { getContractFactory } from 'old-contracts'
+import { getContractInterface } from '@eth-optimism/contracts'
 import {
   L2Block,
   RollupInfo,
@@ -10,10 +10,10 @@ import {
   remove0x,
 } from '@eth-optimism/core-utils'
 import { Logger, Metrics } from '@eth-optimism/common-ts'
-
 /* Internal Imports */
-import { BlockRange, BatchSubmitter } from '.'
-import { TransactionSubmitter } from '../utils'
+import { BlockRange, BatchSubmitter, BatchSigner } from '.'
+import { TransactionSubmitter, AppendStateBatch } from '../utils'
+import { getBatchSignerAddress, getTransactionCount } from './provider-helper'
 
 export class StateBatchSubmitter extends BatchSubmitter {
   // TODO: Change this so that we calculate start = scc.totalElements() and end = ctc.totalElements()!
@@ -27,7 +27,8 @@ export class StateBatchSubmitter extends BatchSubmitter {
   private transactionSubmitter: TransactionSubmitter
 
   constructor(
-    signer: Signer,
+    batch_signer: BatchSigner,
+    l1Provider: providers.StaticJsonRpcProvider,
     l2Provider: providers.StaticJsonRpcProvider,
     minTxSize: number,
     maxTxSize: number,
@@ -45,7 +46,8 @@ export class StateBatchSubmitter extends BatchSubmitter {
     fraudSubmissionAddress: string
   ) {
     super(
-      signer,
+      batch_signer,
+      l1Provider,
       l2Provider,
       minTxSize,
       maxTxSize,
@@ -93,12 +95,17 @@ export class StateBatchSubmitter extends BatchSubmitter {
       return
     }
 
-    this.chainContract = (
-      await getContractFactory('OVM_StateCommitmentChain', this.signer)
-    ).attach(sccAddress)
-    this.ctcContract = (
-      await getContractFactory('OVM_CanonicalTransactionChain', this.signer)
-    ).attach(ctcAddress)
+    this.chainContract = new Contract(
+      sccAddress,
+      getContractInterface('OVM_StateCommitmentChain'),
+      this.l1Provider
+    )
+
+    this.ctcContract = new Contract(
+      ctcAddress,
+      getContractInterface('OVM_CanonicalTransactionChain'),
+      this.l1Provider
+    )
 
     this.logger.info('Connected Optimism contracts', {
       stateCommitmentChain: this.chainContract.address,
@@ -169,19 +176,33 @@ export class StateBatchSubmitter extends BatchSubmitter {
       return
     }
 
-    const offsetStartsAtIndex = startBlock - this.blockOffset
     this.logger.debug('Submitting batch.', { calldata })
-
-    // Generate the transaction we will repeatedly submit
-    const nonce = await this.signer.getTransactionCount()
-    const tx = await this.chainContract.populateTransaction.appendStateBatch(
-      batch,
-      offsetStartsAtIndex,
-      { nonce }
+    const offsetStartsAtIndex = startBlock - this.blockOffset
+    const nonce = await getTransactionCount(
+      this.l1Provider,
+      await getBatchSignerAddress(this.batchSigner)
     )
     const submitTransaction = (): Promise<TransactionReceipt> => {
+      const appendStateBatch = (
+        appendStateBatchArg: Function,
+        batchArg: any[],
+        offsetStartsAtIndexArg: number
+      ): AppendStateBatch => {
+        return {
+          appendStateBatch: appendStateBatchArg,
+          batch: batchArg,
+          offsetStartsAtIndex: offsetStartsAtIndexArg,
+          nonce,
+          address: this.chainContract.address,
+          type: 'AppendStateBatch',
+        }
+      }
       return this.transactionSubmitter.submitTransaction(
-        tx,
+        appendStateBatch(
+          this.chainContract.populateTransaction.appendStateBatch,
+          batch,
+          offsetStartsAtIndex
+        ),
         this._makeHooks('appendStateBatch')
       )
     }

@@ -21,9 +21,10 @@ export { encodeAppendSequencerBatch, BatchContext, AppendSequencerBatchParams }
 export class CanonicalTransactionChainContract extends Contract {
   public customPopulateTransaction = {
     appendSequencerBatch: async (
-      batch: AppendSequencerBatchParams
+      batch: AppendSequencerBatchParams,
+      nonce: number
     ): Promise<ethers.PopulatedTransaction> => {
-      const nonce = await this.signer.getTransactionCount()
+      //this is only called in non-vault case
       const to = this.address
       const data = getEncodedCalldata(batch)
       const gasLimit = await this.signer.provider.estimateGas({

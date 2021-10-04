@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -22,7 +23,6 @@ import (
 	"github.com/omgnetwork/immutability-eth-plugin/contracts/ovm_ctc"
 	"github.com/omgnetwork/immutability-eth-plugin/contracts/ovm_scc"
 	"github.com/omgnetwork/immutability-eth-plugin/util"
-	"golang.org/x/crypto/sha3"
 )
 
 const ovm string = "ovm"
@@ -141,7 +141,6 @@ func OvmPaths(b *PluginBackend) []*framework.Path {
 	}
 }
 
-//this goes into L1
 func (b *PluginBackend) pathOvmAppendStateBatch(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
 	config, err := b.configured(ctx, req)
 	if err != nil {
@@ -193,19 +192,12 @@ func (b *PluginBackend) pathOvmAppendStateBatch(ctx context.Context, req *logica
 	var batch = make([][32]byte, len(inputBatchArr))
 
 	for i, s := range inputBatchArr {
-		var buf []byte
-		hash := sha3.NewLegacyKeccak256()
-		hash.Write([]byte(s))
-		buf = hash.Sum(buf)
-		if len(buf) != 32 {
+		var b = common.FromHex(s)
+		if len(b) != 32 {
 			return nil, fmt.Errorf("invalid batch element - not the right size")
 		}
-		batchByteElement := [32]byte{}
-		copy(batchByteElement[:], buf[0:32])
-		batch[i] = batchByteElement
+		copy(batch[i][:], b[0:32])
 	}
-	// log.Print(batch)
-	// get the AppendStateBatch function arguments from JSON DONE
 
 	instance, err := ovm_scc.NewOvmScc(contractAddress, client)
 	if err != nil {
@@ -258,7 +250,6 @@ func (b *PluginBackend) pathOvmAppendStateBatch(ctx context.Context, req *logica
 }
 
 func (b *PluginBackend) pathEncodeAppendSequencerBatch(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
-	//log.Print(util.PrettyPrint(data))
 
 	encodedData, err := encode(data)
 	if err != nil {
@@ -272,7 +263,6 @@ func (b *PluginBackend) pathEncodeAppendSequencerBatch(ctx context.Context, req 
 }
 
 func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
-	//log.Print(util.PrettyPrint(data))
 
 	config, err := b.configured(ctx, req)
 	if err != nil {
@@ -307,7 +297,7 @@ func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *lo
 	}
 
 	instance, err := ovm_ctc.NewOvmCtc(contractAddress, client)
-	//instance.OvmCtcTransactor.
+
 	if err != nil {
 		return nil, err
 	}
@@ -329,21 +319,31 @@ func (b *PluginBackend) pathOvmAppendSequencerBatch(ctx context.Context, req *lo
 	if nonceRaw == "" {
 		return nil, fmt.Errorf("invalid nonce")
 	}
-	transactOpts.Nonce = util.ValidNumber(nonceRaw)
-
-	ctcSession := &ovm_ctc.OvmCtcSession{
-		Contract:     instance,  // Generic contract caller binding to set the session for
-		CallOpts:     *callOpts, // Call options to use throughout this session
-		TransactOpts: *transactOpts,
-	}
 
 	encodedData, err := encode(data)
 	if err != nil {
 		return nil, err
 	}
 
-	tx, err := ctcSession.RawAppendSequencerBatch([]byte(encodedData))
+	json_abi := `[{
+      "inputs": [],
+      "name": "appendSequencerBatch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }]`
 
+	abi, _ := abi.JSON(strings.NewReader(json_abi))
+	packed, _ := abi.Pack("appendSequencerBatch")
+	callData := append(packed, common.FromHex(encodedData)...)
+	transactOpts.GasLimit = 0
+	ctcSession := &ovm_ctc.OvmCtcSession{
+		Contract:     instance,  // Generic contract caller binding to set the session for
+		CallOpts:     *callOpts, // Call options to use throughout this session
+		TransactOpts: *transactOpts,
+	}
+
+	tx, err := ctcSession.RawAppendSequencerBatch(callData)
 	if err != nil {
 		return nil, err
 	}

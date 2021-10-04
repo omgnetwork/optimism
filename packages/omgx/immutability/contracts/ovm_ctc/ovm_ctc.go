@@ -8,15 +8,14 @@
 package ovm_ctc
 
 import (
-	"math/big"
-	"strings"
-
 	ethereum "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
+	"math/big"
+	"strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -760,7 +759,7 @@ func (_OvmCtc *OvmCtcTransactorSession) AppendSequencerBatch() (*types.Transacti
 // these three were manually added so that we get an interface to RawTransact
 // Solidity: function RawAppendSequencerBatch() returns()
 func (_OvmCtc *OvmCtcTransactor) RawAppendSequencerBatch(opts *bind.TransactOpts, calldata []byte) (*types.Transaction, error) {
-	return _OvmCtc.contract.RawTransact(opts, append([]byte("0xd0f89344"), calldata...))
+	return _OvmCtc.contract.RawTransact(opts, calldata)
 }
 
 // AppendSequencerBatch is a paid mutator transaction binding the contract method 0xd0f89344.

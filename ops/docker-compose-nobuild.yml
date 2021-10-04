@@ -209,3 +209,18 @@ services:
     environment:
       GAS_PRICE_ORACLE_ETHEREUM_HTTP_URL: http://l2geth:8545
       GAS_PRICE_ORACLE_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+
+  vault:
+    image: omgx/vault
+    deploy:
+       replicas: 0
+    ports:
+      - "127.0.0.1:8200:8200"
+    volumes:
+      - "/tmp/vault_auth:/vault/config:rw"
+    entrypoint:
+      - "/bin/sh"
+      - -ec
+      - |
+        sleep 2
+        /vault/vault.sh

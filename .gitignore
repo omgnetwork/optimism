@@ -42,6 +42,9 @@ env-mainnet.yml
 
 .serverless
 
+ops/vault/data
+append-sequencer-batch.hcl
+append-state-batch-proposer.hcl
 # subgraph
 build
 generated

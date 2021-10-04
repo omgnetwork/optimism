@@ -26,13 +26,12 @@ jobs:
       run: |
             cd ops_omgx
             ./cfn-devenv.sh stop --stack-name integration
-            ./cfn-devenv.sh restart --stack-name integration --service-name l1-proxy
-            ./cfn-devenv.sh restart --stack-name integration --service-name deployer
+            ./cfn-devenv.sh stop --stack-name integration-replica
 
     - name: Update All other services
       run: |
             cd ops_omgx
-            rm -rf cloudformation/deployer-rinkeby.yaml
+            rm -rf cloudformation/deployer-rinkeby.yaml cloudformation/dummy-transaction.yaml cloudformation/omgx-monitor.yaml
             ./cfn-devenv.sh update --stack-name integration --secret-name ${{ github.event.inputs.secretname }} --deploy-tag ${{ github.sha }}
-            cd cloudformation
-            aws cloudformation update-stack --stack-name integration-l1l2test --capabilities CAPABILITY_NAMED_IAM --template-body=file://04-l1-l2-test-scheduled-ecs-task.yaml --region us-east-1 --parameters ParameterKey=SecretName,ParameterValue=${{ github.event.inputs.secretname }}
+            ./cfn-devenv.sh restart --stack-name integration
+            ./cfn-devenv.sh restart --stack-name integration-replica

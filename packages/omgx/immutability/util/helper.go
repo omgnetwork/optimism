@@ -30,11 +30,6 @@ import (
 	"github.com/pborman/uuid"
 	"golang.org/x/crypto/scrypt"
 
-	"github.com/ethereum/go-ethereum"
-
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 )
@@ -143,29 +138,6 @@ func ZeroKey(k *ecdsa.PrivateKey) {
 	for i := range b {
 		b[i] = 0
 	}
-}
-
-// EstimateGas attempts to determine the cost for a contract deploy... super annoying
-func EstimateGas(opts *bind.TransactOpts, abi abi.ABI, bytecode []byte, backend bind.ContractBackend, params ...interface{}) (uint64, error) {
-	var input []byte
-	packed, err := abi.Pack("", params...)
-	if err != nil {
-		return 0, fmt.Errorf("failed to pack parameters: %v", err)
-	}
-	input = append(bytecode, packed...)
-	msg := ethereum.CallMsg{From: opts.From, To: nil, Value: opts.Value, Data: input}
-	gasLimit, err := backend.EstimateGas(ensureContext(opts.Context), msg)
-	if err != nil {
-		return 0, fmt.Errorf("failed to estimate gas needed: %v", err)
-	}
-	return gasLimit, nil
-}
-
-func ensureContext(ctx context.Context) context.Context {
-	if ctx == nil {
-		return context.TODO()
-	}
-	return ctx
 }
 
 type cipherparamsJSON struct {

@@ -1,4 +1,4 @@
-yarn 
+yarn
 yarn build
 
 docker-compose build -- builder
@@ -9,13 +9,13 @@ docker-compose build -- deployer
 
 docker rmi $(docker images -f "dangling=true" -q)
 
-docker-compose build -- l2geth 
+docker-compose build -- l2geth
 docker-compose build -- l1_chain
 docker-compose build -- batch_submitter
 docker-compose build -- dtl
 docker-compose build -- relayer
 docker-compose build -- integration_tests
-
+docker-compose -f docker-compose.yml -f ../packages/omgx/immutability/docker/docker-compose-vault-test.yml build -- vault
 docker rmi $(docker images -f "dangling=true" -q)
 
 docker ps
