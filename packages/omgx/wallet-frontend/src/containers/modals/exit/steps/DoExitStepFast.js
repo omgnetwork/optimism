@@ -17,7 +17,7 @@ import React, { useState, useEffect } from 'react'
 
 import { useDispatch, useSelector } from 'react-redux'
 
-import { depositL2LP } from 'actions/networkAction'
+import { depositL2LP, fastExitAll } from 'actions/networkAction'
 import { openAlert } from 'actions/uiAction'
 
 import { selectLoading } from 'selectors/loadingSelector'
@@ -101,6 +101,28 @@ function DoExitStepFast({ handleClose, token }) {
 
   }
 
+  async function doExitAll() {
+
+    console.log("Amount to exit:", token.balance.toString())
+
+    let res = await dispatch(
+      fastExitAll(
+        token.address
+      )
+    )
+
+    if (res) {
+      dispatch(
+          openAlert(
+            `${token.symbol} was bridged. You will receive
+            ${receivableAmount(value)} ${token.symbol} minus gas fees (if bridging ETH) on L1.`
+          )
+        )
+      handleClose()
+    }
+
+  }
+
   useEffect(() => {
     if (typeof(token) !== 'undefined') {
       networkService.L1LPBalance(token.addressL1).then((res) => {
@@ -109,6 +131,9 @@ function DoExitStepFast({ handleClose, token }) {
       networkService.getTotalFeeRate().then((feeRate) => {
         setFeeRate(feeRate)
       })
+      // networkService.getFastExitAllCost(token.address).then((fee) => {
+      //   console.log("fee:",fee)
+      // })
     }
     // to clean up state and fix the
     // error in console for max state update.
@@ -189,6 +214,20 @@ function DoExitStepFast({ handleClose, token }) {
         )}
       </Box>
 
+          <Button
+            onClick={doExitAll}
+            color='primary'
+            variant='contained'
+            loading={loading}
+            tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
+            disabled={false}
+            triggerTime={new Date()}
+            fullWidth={isMobile}
+            size='large'
+          >
+            Bridge All to L1
+          </Button>
+
       <WrapperActionsModal>
           <Button
             onClick={handleClose}
@@ -210,6 +249,7 @@ function DoExitStepFast({ handleClose, token }) {
           >
             Bridge to L1
           </Button>
+
       </WrapperActionsModal>
     </>
   )

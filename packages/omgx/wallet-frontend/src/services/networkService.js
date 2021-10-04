@@ -2055,6 +2055,104 @@ class NetworkService {
   /**************************************************************/
   /***** SWAP OFF from BOBA by depositing funds to the L2LP *****/
   /**************************************************************/
+  async fastExitAll(currencyAddress) {
+
+    updateSignatureStatus_exitLP(false)
+
+    let costToExit_BN = BigNumber.from("0")
+    let approvalGas_BN = BigNumber.from("0")
+    let approvalCost_BN = BigNumber.from("0")
+
+    const L2ERC20Contract = new ethers.Contract(
+      currencyAddress,
+      L2ERC20Json.abi,
+      this.provider.getSigner()
+    )
+
+    let balance_BN = await L2ERC20Contract.balanceOf(
+      this.account
+    )
+    console.log("Initial Balance (ETH)", utils.formatEther(balance_BN))
+
+    let allowance_BN = await L2ERC20Contract.allowance(
+      this.account,
+      this.L2LPAddress
+    )
+    //console.log("Allowance:",allowance_BN.toString())
+
+    if (balance_BN.gt(allowance_BN)) {
+
+      //Estimate gas
+      const tx = await L2ERC20Contract.populateTransaction.approve(
+        this.L2LPAddress,
+        balance_BN
+      )
+
+      approvalGas_BN = await this.L2Provider.estimateGas(tx)
+      approvalCost_BN = approvalGas_BN.mul('15000000')
+
+      console.log("Cost to Approve", utils.formatEther(approvalCost_BN))
+
+      const approveStatus = await L2ERC20Contract.approve(
+        this.L2LPAddress,
+        balance_BN
+      )
+      await approveStatus.wait()
+
+      if (!approveStatus) 
+        return false
+
+    } else {
+      //console.log("Balance:",balance_BN)
+      console.log("Allowance is already suitable:", utils.formatEther(allowance_BN))
+    }
+   
+    balance_BN = balance_BN.sub(approvalCost_BN)
+    console.log("Balance after approval", utils.formatEther(balance_BN))
+    
+    const tx2 = await this.L2LPContract.populateTransaction.clientDepositL2(
+      BigNumber.from("1"), //can be any number that is small enough
+      currencyAddress
+    )
+    //console.log("tx2",tx2)
+
+    const despositGas_BN = await this.L2Provider.estimateGas(tx2)
+    
+    let despositCost_BN = despositGas_BN.mul('16000000')
+//    despositCost_BN = despositCost_BN.mul('1.01')
+    console.log("Deposit gas cost (ETH)", utils.formatEther(despositCost_BN))
+
+    let amount_BN = balance_BN.sub(despositCost_BN)
+    console.log("Amount to exit (ETH)", utils.formatEther(amount_BN))
+
+    const depositTX = await this.L2LPContract.clientDepositL2(
+      amount_BN.toString(),
+      currencyAddress
+    )
+
+    //at this point the tx has been submitted, and we are waiting...
+    await depositTX.wait()
+
+    //closes the modal
+    updateSignatureStatus_exitLP(true)
+
+    // Waiting for the response from L1
+    const [L2ToL1msgHash] = await this.fastWatcher.getMessageHashesFromL2Tx(
+      depositTX.hash
+    )
+    console.log(' got L2->L1 message hash', L2ToL1msgHash)
+
+    const L1Receipt = await this.fastWatcher.getL1TransactionReceipt(
+      L2ToL1msgHash
+    )
+    console.log(' completed Deposit! L1 tx hash:', L1Receipt.transactionHash)
+
+    return L1Receipt
+  }
+
+  /**************************************************************/
+  /***** SWAP OFF from BOBA by depositing funds to the L2LP *****/
+  /**************************************************************/
   async depositL2LP(currencyAddress, value_Wei_String) {
 
     updateSignatureStatus_exitLP(false)
