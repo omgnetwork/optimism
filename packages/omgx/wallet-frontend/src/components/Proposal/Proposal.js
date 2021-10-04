@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import React, { useState, useEffect } from 'react';
-import {Typography, useTheme} from '@material-ui/core';
+import {Typography, useTheme, Link} from '@material-ui/core';
 
 import { useDispatch } from 'react-redux';
 
@@ -65,7 +65,7 @@ function Proposal({
             let descList = description.split('@@')
             if(descList[1] !== '') {
                 //should validate http link
-                return  <>{descList[0]}&nbsp;&nbsp;<a className={styles.href} target="_blank" rel="noopener noreferrer" href={descList[1]}>MORE DETAILS</a>  </>
+                return  <>{descList[0]}&nbsp;&nbsp;<Link color="inherit" variant="body2" className={styles.href} target="_blank" rel="noopener noreferrer" href={descList[1]}>MORE DETAILS</Link>  </>
             } else {
                 return  <>{descList[0]}</>
             }
