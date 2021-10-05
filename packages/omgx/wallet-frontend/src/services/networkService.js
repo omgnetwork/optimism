@@ -2060,9 +2060,10 @@ class NetworkService {
 
     updateSignatureStatus_exitLP(false)
 
-    let costToExit_BN = BigNumber.from("0")
     let approvalGas_BN = BigNumber.from("0")
     let approvalCost_BN = BigNumber.from("0")
+
+    console.log("Address:",currencyAddress)
 
     const L2ERC20Contract = new ethers.Contract(
       currencyAddress,
@@ -2073,13 +2074,13 @@ class NetworkService {
     let balance_BN = await L2ERC20Contract.balanceOf(
       this.account
     )
-    console.log("Initial Balance (ETH)", utils.formatEther(balance_BN))
+    console.log("Initial Balance:", utils.formatEther(balance_BN))
 
     let allowance_BN = await L2ERC20Contract.allowance(
       this.account,
       this.L2LPAddress
     )
-    //console.log("Allowance:",allowance_BN.toString())
+    console.log("Allowance:",utils.formatEther(allowance_BN))
 
     if (balance_BN.gt(allowance_BN)) {
 
@@ -2091,8 +2092,7 @@ class NetworkService {
 
       approvalGas_BN = await this.L2Provider.estimateGas(tx)
       approvalCost_BN = approvalGas_BN.mul('15000000')
-
-      console.log("Cost to Approve", utils.formatEther(approvalCost_BN))
+      console.log("Cost to Approve:", utils.formatEther(approvalCost_BN))
 
       const approveStatus = await L2ERC20Contract.approve(
         this.L2LPAddress,
@@ -2105,11 +2105,15 @@ class NetworkService {
 
     } else {
       //console.log("Balance:",balance_BN)
-      console.log("Allowance is already suitable:", utils.formatEther(allowance_BN))
+      console.log("Allowance already suitable:", utils.formatEther(allowance_BN))
     }
-   
-    balance_BN = balance_BN.sub(approvalCost_BN)
-    console.log("Balance after approval", utils.formatEther(balance_BN))
+    
+    
+    if(currencyAddress === this.L2_ETH_Address) {
+      //if fee token, need to debit allowance cost if any
+      balance_BN = balance_BN.sub(approvalCost_BN)
+      console.log("ETH: Balance after approval", utils.formatEther(balance_BN)) 
+    }  
     
     const tx2 = await this.L2LPContract.populateTransaction.clientDepositL2(
       balance_BN,
@@ -2118,12 +2122,16 @@ class NetworkService {
     //console.log("tx2",tx2)
 
     const despositGas_BN = await this.L2Provider.estimateGas(tx2)
-    
-    let despositCost_BN = despositGas_BN.mul('15000000')
+    const despositCost_BN = despositGas_BN.mul('15000000')
     console.log("Deposit gas cost (ETH)", utils.formatEther(despositCost_BN))
 
-    let amount_BN = balance_BN.sub(despositCost_BN)
-    console.log("Amount to exit (ETH)", utils.formatEther(amount_BN))
+    let amount_BN = balance_BN
+    
+    if(currencyAddress === this.L2_ETH_Address) {
+      //if fee token, need to consider cost to exit
+      amount_BN = balance_BN.sub(despositCost_BN)
+    }
+    console.log("Amount to exit:", utils.formatEther(amount_BN))
 
     const depositTX = await this.L2LPContract.clientDepositL2(
       amount_BN.toString(),
