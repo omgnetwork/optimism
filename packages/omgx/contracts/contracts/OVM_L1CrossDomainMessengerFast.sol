@@ -30,6 +30,17 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
  */
 contract OVM_L1CrossDomainMessengerFast is iOVM_L1CrossDomainMessenger, Lib_AddressResolver, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
 
+    /**********
+     * Events *
+     **********/
+
+    event MessageBlocked(
+        bytes32 indexed _xDomainCalldataHash
+    );
+
+    event MessageAllowed(
+        bytes32 indexed _xDomainCalldataHash
+    );
 
     /*************
      * Constants *
