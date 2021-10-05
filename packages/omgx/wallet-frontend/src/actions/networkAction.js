@@ -62,9 +62,9 @@ export function depositL2LP(token, value) {
 
 //SWAP RELATED - Depositing into the L2LP triggers the swap-exit - variant of depositL2LP
 //that handles Exit All 
-export function fastExitAll(token, value) {
+export function fastExitAll(token) {
   return createAction('EXIT/CREATE', () =>
-    networkService.fastExitAll(token, value)
+    networkService.fastExitAll(token)
   )
 }
 

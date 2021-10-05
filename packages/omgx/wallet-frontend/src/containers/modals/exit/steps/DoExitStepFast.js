@@ -188,6 +188,20 @@ function DoExitStepFast({ handleClose, token }) {
           variant="standard"
         />
 
+        <Button
+          onClick={doExitAll}
+          color='primary'
+          variant='contained'
+          loading={loading}
+          tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
+          disabled={false}
+          triggerTime={new Date()}
+          fullWidth={isMobile}
+          size='small'
+        >
+          Bridge All to L1
+        </Button>
+
         {validValue && token && (
           <Typography variant="body2" sx={{mt: 2}}>
             {value &&
@@ -214,42 +228,29 @@ function DoExitStepFast({ handleClose, token }) {
         )}
       </Box>
 
-          <Button
-            onClick={doExitAll}
-            color='primary'
-            variant='contained'
-            loading={loading}
-            tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
-            disabled={false}
-            triggerTime={new Date()}
-            fullWidth={isMobile}
-            size='large'
-          >
-            Bridge All to L1
-          </Button>
+
 
       <WrapperActionsModal>
-          <Button
-            onClick={handleClose}
-            color='neutral'
-            size='large'
-          >
-            {buttonLabel}
-          </Button>
-          <Button
-            onClick={doExit}
-            color='primary'
-            variant='contained'
-            loading={loading}
-            tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
-            disabled={!validValue}
-            triggerTime={new Date()}
-            fullWidth={isMobile}
-            size='large'
-          >
-            Bridge to L1
-          </Button>
-
+        <Button
+          onClick={handleClose}
+          color='neutral'
+          size='large'
+        >
+          {buttonLabel}
+        </Button>
+        <Button
+          onClick={doExit}
+          color='primary'
+          variant='contained'
+          loading={loading}
+          tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
+          disabled={!validValue}
+          triggerTime={new Date()}
+          fullWidth={isMobile}
+          size='large'
+        >
+          Bridge to L1
+        </Button>
       </WrapperActionsModal>
     </>
   )
