@@ -246,33 +246,50 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           this.state.messageBuffer.length >= this.options.minBatchSize
             ? true : false
 
+        // check gas price
+        const gasPrice = await this.options.l1RpcProvider.getGasPrice()
+        const gasPriceGwei = Number(ethers.utils.formatUnits(gasPrice, 'gwei'))
+        const gasPriceAcceptable =
+          gasPriceGwei < this.options.maxGasPriceInGwei ? true : false
+
         if (this.state.messageBuffer.length !== 0 && (bufferFull || timeOut) && pendingTXTimeOut) {
-          if (bufferFull) {
-            console.log('Buffer full: flushing')
-          }
-          if (timeOut) {
-            console.log('Buffer timeout: flushing')
-          }
+          if (gasPriceAcceptable) {
+            if (bufferFull) {
+              console.log('Buffer full: flushing')
+            }
+            if (timeOut) {
+              console.log('Buffer timeout: flushing')
+            }
 
-          const receipt = await this._relayMultiMessageToL1(
-            this.state.messageBuffer.reduce((acc, cur) => {
-              acc.push(cur.payload)
-              return acc
-            }, [])
-          )
+            const receipt = await this._relayMultiMessageToL1(
+              this.state.messageBuffer.reduce((acc, cur) => {
+                acc.push(cur.payload)
+                return acc
+              }, [])
+            )
 
-          console.log('Receipt:', receipt)
+            console.log('Receipt:', receipt)
 
-          /* parse this to make sure that the mesaage was actually relayed */
-          // clear out buffer only if the messages are relayed to L1 successfully
-          if (
-            await this._wasMessageRelayed(this.state.messageBuffer[0].message)
-          ) {
-            //clear out the buffer so we do not double relay, which will just
-            // waste gas
-            this.state.messageBuffer = []
-            this.state.timeOfLastPendingRelay = false
+            /* parse this to make sure that the mesaage was actually relayed */
+            // clear out buffer only if the messages are relayed to L1 successfully
+            if (
+              await this._wereMessagesRelayed(
+                this.state.messageBuffer.reduce((acc, cur) => {
+                  acc.push(cur.message)
+                  return acc
+                }, [])
+              )
+            ) {
+              //clear out the buffer so we do not double relay, which will just
+              // waste gas
+              this.state.messageBuffer = []
+              this.state.timeOfLastPendingRelay = false
+            } else {
+              // add the time interval between two tx
+              this.state.timeOfLastPendingRelay = Date.now()
+            }
           } else {
+            console.log('Current gas price is unacceptable')
             // add the time interval between two tx
             this.state.timeOfLastPendingRelay = Date.now()
           }
@@ -345,6 +362,16 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
             })
             if (await this._wasMessageRelayed(message)) {
               this.logger.info('Message has already been relayed, skipping.')
+              continue
+            }
+
+            if (await this._wasMessageBlocked(message)) {
+              this.logger.info('Message has been blocked, skipping.')
+              continue
+            }
+
+            if (await this._wasMessageFailed(message)) {
+              this.logger.info('Last message was failed, skipping.')
               continue
             }
 
@@ -569,6 +596,29 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     return this.state.OVM_L1CrossDomainMessenger.successfulMessages(
       message.encodedMessageHash
     )
+  }
+
+  private async _wasMessageBlocked(message: SentMessage): Promise<boolean> {
+    return this.state.OVM_L1CrossDomainMessenger.blockedMessages(
+      message.encodedMessageHash
+    )
+  }
+
+  private async _wasMessageFailed(message: SentMessage): Promise<boolean> {
+    return this.state.OVM_L1CrossDomainMessenger.failedMessages(
+      message.encodedMessageHash
+    )
+  }
+
+  private async _wereMessagesRelayed(
+    messages: Array<SentMessage>
+  ): Promise<boolean> {
+    const promisePayload = messages.reduce((acc, cur) => {
+      acc.push(this._wasMessageRelayed(cur), this._wasMessageFailed(cur))
+      return acc
+    }, [])
+    const messageRelayedStatus = await Promise.all(promisePayload)
+    return messageRelayedStatus.some((ele) => ele)
   }
 
   private async _getMessageProof(
