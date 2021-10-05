@@ -48,6 +48,10 @@ function _Alert ({ children, open, onClose, type = 'success', duration = 3000, p
       <Alert
         onClose={onClose}
         severity={type}
+        sx={{
+          maxWidth: '600px',
+          wordWrap: 'break-word'
+        }}
       >
         {children}
       </Alert>
