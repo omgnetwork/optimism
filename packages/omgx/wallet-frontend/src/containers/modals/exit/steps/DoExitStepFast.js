@@ -186,8 +186,11 @@ function DoExitStepFast({ handleClose, token }) {
           maxValue={maxValue}
           newStyle
           variant="standard"
+          loading={loading}
+          onExitAll={doExitAll}
+          allowExitAll={true}
         />
-
+{/* 
         <Button
           onClick={doExitAll}
           color='primary'
@@ -200,7 +203,7 @@ function DoExitStepFast({ handleClose, token }) {
           size='small'
         >
           Bridge All to L1
-        </Button>
+        </Button> */}
 
         {validValue && token && (
           <Typography variant="body2" sx={{mt: 2}}>

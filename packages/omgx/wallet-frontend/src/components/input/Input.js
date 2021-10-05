@@ -41,6 +41,9 @@ function Input({
   variant,
   newStyle = false,
   allowUseAll = false,
+  allowExitAll = false,
+  onExitAll,
+  loading,
 }) {
 
   async function handlePaste() {
@@ -109,6 +112,21 @@ function Input({
               <Box>
                 <Button onClick={handleClickMax} variant="small" >
                   Use All
+                </Button>
+              </Box>
+            )}
+            {allowExitAll && (
+              <Box>
+                <Button 
+                  onClick={onExitAll}
+                  variant="small" 
+                  size="small"
+                  sx={{margin: '10px 0px'}}
+                  loading={loading}
+                  triggerTime={new Date()}
+                  tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
+                >
+                  Bridge All to L1
                 </Button>
               </Box>
             )}
