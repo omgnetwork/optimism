@@ -1394,7 +1394,8 @@ class NetworkService {
         this.L2LPAddress
       )
 
-      let depositAmount_BN = new BN(value_Wei_String)
+      //let depositAmount_BN = new BN(value_Wei_String)
+      let depositAmount_BN = BigNumber.from(value_Wei_String)
 
       if (depositAmount_BN.gt(allowance_BN)) {
         const approveStatus = await L2ERC20Contract.approve(
@@ -2111,15 +2112,14 @@ class NetworkService {
     console.log("Balance after approval", utils.formatEther(balance_BN))
     
     const tx2 = await this.L2LPContract.populateTransaction.clientDepositL2(
-      BigNumber.from("1"), //can be any number that is small enough
+      balance_BN,
       currencyAddress
     )
     //console.log("tx2",tx2)
 
     const despositGas_BN = await this.L2Provider.estimateGas(tx2)
     
-    let despositCost_BN = despositGas_BN.mul('16000000')
-//    despositCost_BN = despositCost_BN.mul('1.01')
+    let despositCost_BN = despositGas_BN.mul('15000000')
     console.log("Deposit gas cost (ETH)", utils.formatEther(despositCost_BN))
 
     let amount_BN = balance_BN.sub(despositCost_BN)
@@ -2168,7 +2168,8 @@ class NetworkService {
       this.L2LPAddress
     )
 
-    let depositAmount_BN = new BN(value_Wei_String)
+    //let depositAmount_BN = new BN(value_Wei_String)
+    let depositAmount_BN = BigNumber.from(value_Wei_String)
 
     if (depositAmount_BN.gt(allowance_BN)) {
       const approveStatus = await L2ERC20Contract.approve(
