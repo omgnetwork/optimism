@@ -126,7 +126,7 @@ function Input({
                   triggerTime={new Date()}
                   tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
                 >
-                  Bridge All to L1
+                  Bridge All
                 </Button>
               </Box>
             )}

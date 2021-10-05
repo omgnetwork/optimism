@@ -231,7 +231,7 @@ function Account () {
           <Typography variant="body2">
              You are using Mainnet.<br/>
              WARNING: the mainnet smart contracts are not fully audited and funds may be at risk.<br/>
-             Please exercise caution when using Mainnet.
+             Please be cautious when using Mainnet.
           </Typography>
           }
         </S.CardContentTag>
@@ -249,7 +249,7 @@ function Account () {
               variant="body2"
               component="p"
             >
-              Note: Balance altering transaction in progress - please be patient
+              Balance altering transaction in progress - please be patient
             </S.AlertText>
           </S.AlertInfo>
         </S.LayerAlert>
