@@ -58,6 +58,7 @@ export const InputWrapper = styled(Box)(({ theme }) => ({
 export const ActionsWrapper = styled(Box)`
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   flex: 3;
+  margin-left: 10px;
 `;
