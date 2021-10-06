@@ -90,13 +90,6 @@ export class L2IngestionService extends BaseService<L2IngestionServiceOptions> {
       typeof this.options.l2RpcProvider === 'string'
         ? new StaticJsonRpcProvider(this.options.l2RpcProvider)
         : this.options.l2RpcProvider
-
-    this.state.l2RpcProvider.on('debug', (info) => {
-      if (info.action === 'request'){
-        this.logger.info('ethers', info.request)
-      }
-    })
-
   }
 
   protected async _start(): Promise<void> {

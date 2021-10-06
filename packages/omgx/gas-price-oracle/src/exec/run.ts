@@ -106,6 +106,8 @@ const main = async () => {
   const l1Provider = new providers.StaticJsonRpcProvider(L1_NODE_WEB3_URL)
   const l2Provider = new providers.StaticJsonRpcProvider(L2_NODE_WEB3_URL)
 
+
+
   const gasPriceOracleOwnerWallet = new Wallet(GAS_PRICE_ORACLE_OWNER_PRIVATE_KEY, l2Provider)
 
   // Fixed address

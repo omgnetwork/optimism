@@ -77,6 +77,12 @@ export class GasPriceOracleService extends BaseService<GasPriceOracleOptions> {
 
     this.state = { } as any;
 
+    this.options.l1RpcProvider.on('debug', (info) => {
+      if (info.action === 'request'){
+        this.logger.info('ethers', info.request)
+      }
+    })
+
     this.logger.info('Connecting to OVM_GasPriceOracle...')
     this.state.OVM_GasPriceOracle = loadContract(
       'OVM_GasPriceOracle',
