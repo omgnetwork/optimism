@@ -113,6 +113,12 @@ export class L1IngestionService extends BaseService<L1IngestionServiceOptions> {
         ? new StaticJsonRpcProvider(this.options.l1RpcProvider)
         : this.options.l1RpcProvider
 
+    this.state.l1RpcProvider.on('debug', (info) => {
+      if (info.action === 'request'){
+        this.logger.info('ethers', info.request)
+      }
+   })
+
     this.logger.info('Using AddressManager', {
       addressManager: this.options.addressManager,
     })

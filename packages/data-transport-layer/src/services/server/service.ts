@@ -97,10 +97,23 @@ export class L1TransportServer extends BaseService<L1TransportServerOptions> {
         ? new StaticJsonRpcProvider(this.options.l1RpcProvider)
         : this.options.l1RpcProvider
 
+    this.state.l1RpcProvider.on('debug', (info) => {
+      if (info.action === 'request'){
+        this.logger.info('ethers', info.request)
+      }
+    })
+
     this.state.l2RpcProvider =
       typeof this.options.l2RpcProvider === 'string'
         ? new StaticJsonRpcProvider(this.options.l2RpcProvider)
         : this.options.l2RpcProvider
+
+    this.state.l2RpcProvider.on('debug', (info) => {
+      if (info.action === 'request'){
+        this.logger.info('ethers', info.request)
+      }
+    })
+
 
     this.state.baseBlock = 0
     this.state.baseTime = 0
