@@ -62,6 +62,8 @@ interface MessageRelayerOptions {
   numConfirmations?: number
 
   resubmissionTimeout?: number
+
+  maxWaitTxTimeS: number
 }
 
 const optionSettings = {
@@ -75,6 +77,7 @@ const optionSettings = {
   l1StartOffset: { default: 0 },
   getLogsInterval: { default: 2000 },
   filterPollingInterval: { default: 60000 },
+  maxWaitTxTimeS: { default: 180 },
 }
 
 export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
@@ -238,7 +241,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           console.log('\n***********************************')
           console.log('Next tx since last tx submitted', pendingTXSecondsElapsed)
           pendingTXTimeOut =
-            pendingTXSecondsElapsed > this.options.maxWaitTimeS ? true : false
+            pendingTXSecondsElapsed > this.options.maxWaitTxTimeS ? true : false
         }
 
         //console.log('Current buffer size:', this.state.messageBuffer.length)
@@ -612,11 +615,13 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   private async _wereMessagesRelayed(
     messages: Array<SentMessage>
   ): Promise<boolean> {
+    this.logger.info('Relay messages: ', { messages })
     const promisePayload = messages.reduce((acc, cur) => {
       acc.push(this._wasMessageRelayed(cur), this._wasMessageFailed(cur))
       return acc
     }, [])
     const messageRelayedStatus = await Promise.all(promisePayload)
+    this.logger.info('Relay messages status: ', { messageRelayedStatus })
     return messageRelayedStatus.some((ele) => ele)
   }
 
@@ -768,6 +773,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     const sendTxAndWaitForReceipt = async (gasPrice): Promise<any> => {
       // Generate the transaction we will repeatedly submit
       const nonce = await this.options.l1Wallet.getTransactionCount()
+      this.logger.info('Relay message nonce', { nonce })
       const txResponse = await this.state.OVM_L1MultiMessageRelayerFast.connect(
         this.options.l1Wallet
       ).batchRelayMessages(messages, { gasPrice, nonce })
@@ -828,6 +834,8 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           this.state.filter = filterSelect
           this.logger.info('Found the filter', { filterSelect })
         }
+      } else {
+        this.state.filter = ["0x1A26ef6575B7BBB864d984D9255C069F6c361a14"]
       }
     } catch {
       this.logger.error('CRITICAL ERROR: Failed to fetch the Filter')
