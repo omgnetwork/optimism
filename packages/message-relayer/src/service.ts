@@ -66,6 +66,8 @@ interface MessageRelayerOptions {
   numConfirmations?: number
 
   resubmissionTimeout?: number
+
+  maxWaitTxTimeS: number
 }
 
 const optionSettings = {
@@ -79,6 +81,7 @@ const optionSettings = {
   l1StartOffset: { default: 0 },
   getLogsInterval: { default: 2000 },
   filterPollingInterval: { default: 60000 },
+  maxWaitTxTimeS: { default: 180 },
 }
 
 export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
@@ -234,7 +237,7 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           console.log('\n***********************************')
           console.log('Next tx since last tx submitted', pendingTXSecondsElapsed)
           pendingTXTimeOut =
-            pendingTXSecondsElapsed > this.options.maxWaitTimeS ? true : false
+            pendingTXSecondsElapsed > this.options.maxWaitTxTimeS ? true : false
         }
 
         //console.log('Current buffer size:', this.state.messageBuffer.length)
