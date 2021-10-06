@@ -138,9 +138,12 @@ export const run = async () => {
     env.DEBUG_IMPERSONATE_PROPOSER_ADDRESS
   )
 
-  const setEtherDebug = (provider: StaticJsonRpcProvider) => {
+  const setEtherDebug = (configs: { provider: StaticJsonRpcProvider }) => {
+    const { provider } = configs
     provider.on('debug', (info) => {
-      console.log(info)
+      if (info.action === 'request') {
+        logger.info('ethers', info.request)
+      }
     })
   }
 
@@ -148,6 +151,7 @@ export const run = async () => {
     const l1Provider = new StaticJsonRpcProvider(
       requiredEnvVars.L1_NODE_WEB3_URL
     )
+    setEtherDebug({ provider: l1Provider })
 
     if (useHardhat) {
       if (!DEBUG_IMPERSONATE_SEQUENCER_ADDRESS) {
@@ -175,6 +179,7 @@ export const run = async () => {
     const l1Provider = new StaticJsonRpcProvider(
       requiredEnvVars.L1_NODE_WEB3_URL
     )
+    setEtherDebug({ provider: l1Provider })
 
     if (useHardhat) {
       if (!DEBUG_IMPERSONATE_PROPOSER_ADDRESS) {
