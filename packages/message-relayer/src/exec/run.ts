@@ -5,6 +5,8 @@ import { Logger, LoggerOptions } from '@eth-optimism/common-ts'
 import * as Sentry from '@sentry/node'
 import * as dotenv from 'dotenv'
 import Config from 'bcfg'
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { StaticJsonRpcProvider } from '@ethersproject/providers'
 
 dotenv.config()
 
@@ -43,7 +45,10 @@ const main = async () => {
     'address-manager-address',
     env.ADDRESS_MANAGER_ADDRESS
   )
-  const RELAYER_PRIVATE_KEY = config.str('relayer-private-key', env.RELAYER_PRIVATE_KEY)
+  const RELAYER_PRIVATE_KEY = config.str(
+    'relayer-private-key',
+    env.RELAYER_PRIVATE_KEY
+  )
   const MNEMONIC = config.str('mnemonic', env.MNEMONIC)
   const HD_PATH = config.str('hd-path', env.HD_PATH)
   //batch system
@@ -79,10 +84,8 @@ const main = async () => {
     'from-l2-transaction-index',
     parseInt(env.FROM_L2_TRANSACTION_INDEX, 10) || 0
   )
-  const FILTER_ENDPOINT = config.str(
-    'filter-endpoint',
-    env.FILTER_ENDPOINT
-  ) || ''
+  const FILTER_ENDPOINT =
+    config.str('filter-endpoint', env.FILTER_ENDPOINT) || ''
   const FILTER_POLLING_INTERVAL = config.uint(
     'filter-polling-interval',
     parseInt(env.FILTER_POLLING_INTERVAL, 10) || 60000
@@ -101,7 +104,7 @@ const main = async () => {
   )
   const NUM_CONFIRMATIONS = config.uint(
     'num-confirmations',
-    parseInt(env.NUM_CONFIRMATIONS, 10) ||  0
+    parseInt(env.NUM_CONFIRMATIONS, 10) || 0
   )
 
   if (!ADDRESS_MANAGER_ADDRESS) {
@@ -114,8 +117,18 @@ const main = async () => {
     throw new Error('Must pass L2_NODE_WEB3_URL')
   }
 
+  const setEtherDebug = (configs: { provider: StaticJsonRpcProvider }) => {
+    const { provider } = configs
+    provider.on('debug', (info) => {
+      if (info.action === 'request') {
+        logger.info('ethers', info.request)
+      }
+    })
+  }
+
   const l2Provider = new providers.StaticJsonRpcProvider(L2_NODE_WEB3_URL)
   const l1Provider = new providers.StaticJsonRpcProvider(L1_NODE_WEB3_URL)
+  setEtherDebug({ provider: l1Provider })
 
   let wallet: Wallet
   if (RELAYER_PRIVATE_KEY) {

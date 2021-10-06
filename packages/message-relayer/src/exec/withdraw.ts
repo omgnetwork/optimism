@@ -7,11 +7,14 @@
 /* Imports: External */
 import { ethers } from 'ethers'
 import { predeploys, getContractInterface } from '@eth-optimism/contracts'
+import { Logger, LoggerOptions } from '@eth-optimism/common-ts'
 import { sleep } from '@eth-optimism/core-utils'
 import dotenv from 'dotenv'
 
 /* Imports: Internal */
 import { getMessagesAndProofsForL2Transaction } from '../relay-tx'
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { StaticJsonRpcProvider } from '@ethersproject/providers'
 
 dotenv.config()
 const l1RpcProviderUrl = process.env.WITHDRAW__L1_RPC_URL
@@ -21,6 +24,19 @@ const l1StateCommitmentChainAddress =
   process.env.WITHDRAW__STATE_COMMITMENT_CHAIN_ADDRESS
 const l1CrossDomainMessengerAddress =
   process.env.WITHDRAW__L1_CROSS_DOMAIN_MESSENGER_ADDRESS
+const loggerOptions: LoggerOptions = {
+  name: 'Message_Relayer',
+}
+const logger = new Logger(loggerOptions)
+
+const setEtherDebug = (configs: { provider: StaticJsonRpcProvider }) => {
+  const { provider } = configs
+  provider.on('debug', (info) => {
+    if (info.action === 'request') {
+      logger.info('ethers', info.request)
+    }
+  })
+}
 
 const main = async () => {
   const l2TransactionHash = process.argv[2]
@@ -28,7 +44,10 @@ const main = async () => {
     throw new Error(`must provide l2 transaction hash`)
   }
 
-  const l1RpcProvider = new ethers.providers.StaticJsonRpcProvider(l1RpcProviderUrl)
+  const l1RpcProvider = new ethers.providers.StaticJsonRpcProvider(
+    l1RpcProviderUrl
+  )
+  setEtherDebug({ provider: l1RpcProvider })
   const l1Wallet = new ethers.Wallet(l1PrivateKey, l1RpcProvider)
   const l1WalletBalance = await l1Wallet.getBalance()
   console.log(`relayer address: ${l1Wallet.address}`)
