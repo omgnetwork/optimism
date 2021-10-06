@@ -767,9 +767,11 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   ): Promise<any> {
 
     const sendTxAndWaitForReceipt = async (gasPrice): Promise<any> => {
+      // Generate the transaction we will repeatedly submit
+      const nonce = await this.options.l1Wallet.getTransactionCount()
       const txResponse = await this.state.OVM_L1MultiMessageRelayerFast.connect(
         this.options.l1Wallet
-      ).batchRelayMessages(messages, { gasPrice })
+      ).batchRelayMessages(messages, { gasPrice, nonce })
       const tx = await this.options.l1Wallet.provider.waitForTransaction(
         txResponse.hash,
         this.options.numConfirmations
