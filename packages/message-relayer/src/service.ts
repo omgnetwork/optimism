@@ -257,15 +257,6 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
               console.log('Buffer timeout: flushing')
             }
 
-            const receipt = await this._relayMultiMessageToL1(
-              this.state.messageBuffer.reduce((acc, cur) => {
-                acc.push(cur.payload)
-                return acc
-              }, [])
-            )
-
-            console.log('Receipt:', receipt)
-
             /* parse this to make sure that the mesaage was actually relayed */
             // clear out buffer only if the messages are relayed to L1 successfully
             if (
@@ -281,6 +272,14 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
               this.state.messageBuffer = []
               this.state.timeOfLastPendingRelay = false
             } else {
+              const receipt = await this._relayMultiMessageToL1(
+                this.state.messageBuffer.reduce((acc, cur) => {
+                  acc.push(cur.payload)
+                  return acc
+                }, [])
+              )
+
+              console.log('Receipt:', receipt)
               // add the time interval between two tx
               this.state.timeOfLastPendingRelay = Date.now()
             }
@@ -772,11 +771,12 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
   private async _relayMultiMessageToL1(
     messages: Array<BatchMessage>
   ): Promise<any> {
-
     const sendTxAndWaitForReceipt = async (gasPrice): Promise<any> => {
+      // Generate the transaction we will repeatedly submit
+      const nonce = await this.options.l1Wallet.getTransactionCount()
       const txResponse = await this.state.OVM_L1MultiMessageRelayer.connect(
         this.options.l1Wallet
-      ).batchRelayMessages(messages, { gasPrice })
+      ).batchRelayMessages(messages, { gasPrice, nonce })
       const tx = await this.options.l1Wallet.provider.waitForTransaction(
         txResponse.hash,
         this.options.numConfirmations
