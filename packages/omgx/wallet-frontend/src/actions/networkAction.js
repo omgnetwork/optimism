@@ -60,7 +60,15 @@ export function depositL2LP(token, value) {
   )
 }
 
-//DEPOSIT ETH
+//SWAP RELATED - Depositing into the L2LP triggers the swap-exit - variant of depositL2LP
+//that handles Exit All 
+export function fastExitAll(token) {
+  return createAction('EXIT/CREATE', () =>
+    networkService.fastExitAll(token)
+  )
+}
+
+//CLASSICAL DEPOSIT ETH
 export function depositETHL2(value) {
   return createAction('DEPOSIT/CREATE', () => {
       return networkService.depositETHL2(value)
