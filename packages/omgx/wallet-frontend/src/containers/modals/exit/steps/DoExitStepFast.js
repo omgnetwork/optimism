@@ -218,13 +218,13 @@ function DoExitStepFast({ handleClose, token }) {
           </Typography>
         )}
 
-        {l1gas && Number(l1gas) > Number(l2FeeBalance) && (
+        {Number(l1gas) > 0 && Number(l1gas) > Number(l2FeeBalance) && (
           <Typography variant="body2" sx={{mt: 2, fontSize: '0.8em', fontWeight: '700', color: 'red'}}>
             {ETHstring}
           </Typography>
         )}
 
-        {l1gas && l1gas && Number(l1gas) <= Number(l2FeeBalance) && (
+        {Number(l1gas) > 0 && Number(l1gas) <= Number(l2FeeBalance) && (
           <Typography variant="body2" sx={{mt: 2, fontSize: '0.7em'}}>
             {ETHstring}
           </Typography>
