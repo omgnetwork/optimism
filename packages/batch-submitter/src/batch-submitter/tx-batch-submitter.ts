@@ -80,7 +80,7 @@ export class TransactionBatchSubmitter extends BatchSubmitter {
     )
     this.disableQueueBatchAppend = disableQueueBatchAppend
     this.autoFixBatchOptions = autoFixBatchOptions
-    this.gasThresholdInGwei = 500
+    this.gasThresholdInGwei = gasThresholdInGwei
     this.transactionSubmitter = transactionSubmitter
   }
 
