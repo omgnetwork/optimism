@@ -57,7 +57,7 @@ const main = async () => {
   )
   const MAX_WAIT_TX_TIME_S = config.uint(
     'max-wait-tx-time-s',
-    parseInt(env.MAX_WAIT_TIME_S, 10) || 180
+    parseInt(env.MAX_WAIT_TX_TIME_S, 10) || 180
   )
   const RELAY_GAS_LIMIT = config.uint(
     'relay-gas-limit',
