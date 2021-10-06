@@ -834,8 +834,6 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
           this.state.filter = filterSelect
           this.logger.info('Found the filter', { filterSelect })
         }
-      } else {
-        this.state.filter = ["0x1A26ef6575B7BBB864d984D9255C069F6c361a14"]
       }
     } catch {
       this.logger.error('CRITICAL ERROR: Failed to fetch the Filter')
