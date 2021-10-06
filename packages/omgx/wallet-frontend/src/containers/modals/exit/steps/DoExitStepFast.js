@@ -133,8 +133,7 @@ function DoExitStepFast({ handleClose, token }) {
         setl1gas(fee)
       })
       networkService.getL2FeeBalance().then((ETHbalance) => {
-        //setL2FeeBalance(ETHbalance)
-        setL2FeeBalance(0.005)
+        setL2FeeBalance(ETHbalance)
       })
     }
     // to clean up state and fix the
