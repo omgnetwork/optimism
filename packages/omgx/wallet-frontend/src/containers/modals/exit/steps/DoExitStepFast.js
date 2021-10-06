@@ -42,11 +42,14 @@ function DoExitStepFast({ handleClose, token }) {
   const dispatch = useDispatch()
 
   const [ value, setValue ] = useState('')
-  const [ value_Wei_String, setValue_Wei_String ] = useState('0')  //support for Use Max
+  const [ value_Wei_String, setValue_Wei_String ] = useState('0')
 
-  const [LPBalance, setLPBalance] = useState(0)
-  const [feeRate, setFeeRate] = useState(0)
-  const [validValue, setValidValue] = useState(false)
+  const [ LPBalance, setLPBalance ] = useState(0)
+  const [ feeRate, setFeeRate ] = useState(0)
+  const [ l1gas, setl1gas ] = useState(0)
+  const [ l2FeeBalance, setL2FeeBalance ] = useState(0)
+
+  const [ validValue, setValidValue ] = useState(false)
 
   const loading = useSelector(selectLoading(['EXIT/CREATE']))
 
@@ -57,15 +60,10 @@ function DoExitStepFast({ handleClose, token }) {
 
   function setAmount(value) {
 
-    //console.log("setAmount")
-
     const tooSmall = new BN(value).lte(new BN(0.0))
     const tooBig   = new BN(value).gt(new BN(maxValue))
 
-    //console.log("tooSmall",tooSmall)
-    //console.log("tooBig",tooBig)
-
-    if (tooSmall || tooBig) {
+    if (tooSmall || tooBig || (Number(l1gas) > Number(l2FeeBalance))) {
       setValidValue(false)
     } else {
       setValidValue(true)
@@ -131,15 +129,20 @@ function DoExitStepFast({ handleClose, token }) {
       networkService.getTotalFeeRate().then((feeRate) => {
         setFeeRate(feeRate)
       })
-      // networkService.getFastExitAllCost(token.address).then((fee) => {
-      //   console.log("fee:",fee)
-      // })
+      networkService.getFastExitCost(token.address).then((fee) => {
+        setl1gas(fee)
+      })
+      networkService.getL2FeeBalance().then((ETHbalance) => {
+        //setL2FeeBalance(ETHbalance)
+        setL2FeeBalance(0.005)
+      })
     }
     // to clean up state and fix the
     // error in console for max state update.
     return ()=>{
       setLPBalance(0)
       setFeeRate(0)
+      setl1gas(0)
     }
   }, [ token ])
 
@@ -159,9 +162,27 @@ function DoExitStepFast({ handleClose, token }) {
   let buttonLabel = 'Cancel'
   if( loading ) buttonLabel = 'Close'
 
+  let ETHstring = ''
+
+  if(l1gas && Number(l1gas) > 0) {
+    if(Number(l1gas) > Number(l2FeeBalance)){
+      ETHstring = `The estimated gas fee for this transaction (approval + bridge) is ${Number(l1gas).toFixed(4)} ETH. 
+      WARNING: your L2 ETH balance of ${Number(l2FeeBalance).toFixed(4)} is too small to cover this transaction. 
+      THE TRANSACTION WILL FAIL.` 
+    } else if (Number(l1gas) > Number(l2FeeBalance) * 0.9) {
+      ETHstring = `The estimated gas fee for this transaction (approval + bridge) is ${Number(l1gas).toFixed(4)} ETH. 
+      CAUTION: your L2 ETH balance of ${Number(l2FeeBalance).toFixed(4)} is very close to the estimated cost. 
+      This transaction might fail. It would be safer to have slightly more ETH in your L2 wallet to cover gas fees.` 
+    } else {
+      ETHstring = `The estimated gas fee for this transaction (approval + bridge) is ${Number(l1gas).toFixed(4)} ETH. 
+      Your L2 ETH balance of ${Number(l2FeeBalance).toFixed(4)} is sufficent to cover this transaction.` 
+    }
+  }
+
   return (
     <>
       <Box>
+
         <Typography variant="h2" sx={{fontWeight: 700, mb: 1}}>
           Fast Bridge to L1
         </Typography>
@@ -177,11 +198,6 @@ function DoExitStepFast({ handleClose, token }) {
             setAmount(i.target.value)
             setValue_Wei_String(toWei_String(i.target.value, token.decimals))
           }}
-          onUseMax={(i)=>{//they want to use the maximum
-            setAmount(maxValue) //so the input value updates for the user
-            setValue_Wei_String(token.balance.toString())
-          }}
-          allowUseAll={true}
           unit={token.symbol}
           maxValue={maxValue}
           newStyle
@@ -190,20 +206,6 @@ function DoExitStepFast({ handleClose, token }) {
           onExitAll={doExitAll}
           allowExitAll={true}
         />
-{/* 
-        <Button
-          onClick={doExitAll}
-          color='primary'
-          variant='contained'
-          loading={loading}
-          tooltip={loading ? "Your transaction is still pending. Please wait for confirmation." : "Click here to bridge your funds to L1"}
-          disabled={false}
-          triggerTime={new Date()}
-          fullWidth={isMobile}
-          size='small'
-        >
-          Bridge All to L1
-        </Button> */}
 
         {validValue && token && (
           <Typography variant="body2" sx={{mt: 2}}>
@@ -214,6 +216,18 @@ function DoExitStepFast({ handleClose, token }) {
               ${!!amountToUsd(value, lookupPrice, token) ?  `($${amountToUsd(value, lookupPrice, token).toFixed(2)})`: ''}
               on L1.`
             }
+          </Typography>
+        )}
+
+        {l1gas && Number(l1gas) > Number(l2FeeBalance) && (
+          <Typography variant="body2" sx={{mt: 2, fontSize: '0.8em', fontWeight: '700', color: 'red'}}>
+            {ETHstring}
+          </Typography>
+        )}
+
+        {l1gas && l1gas && Number(l1gas) <= Number(l2FeeBalance) && (
+          <Typography variant="body2" sx={{mt: 2, fontSize: '0.7em'}}>
+            {ETHstring}
           </Typography>
         )}
 

@@ -1203,6 +1203,19 @@ class NetworkService {
     })
   }
 
+  async getL2FeeBalance() {
+    try {
+      const layer2Balance = await this.L2Provider.getBalance(this.account)
+      return utils.formatEther(layer2Balance)
+    } catch (error) {
+      throw new WebWalletError({
+        originalError: error,
+        reportToSentry: false,
+        reportToUi: false,
+      })
+    }
+  }
+
   async getBalances() {
     try {
 
@@ -2051,6 +2064,36 @@ class NetworkService {
     }
 
     return balance.toString()
+  }
+
+  async getFastExitCost(currencyAddress) {
+
+    const L2ERC20Contract = new ethers.Contract(
+      currencyAddress,
+      L2ERC20Json.abi,
+      this.provider.getSigner()
+    )
+
+    const tx = await L2ERC20Contract.populateTransaction.approve(
+      this.L2LPAddress,
+      utils.parseEther('1.0')
+    )
+
+    const approvalGas_BN = await this.L2Provider.estimateGas(tx)
+    const approvalCost_BN = approvalGas_BN.mul('15000000')
+    console.log("Approve (ETH):", utils.formatEther(approvalCost_BN))
+
+    const tx2 = await this.L2LPContract.populateTransaction.clientDepositL2(
+      utils.parseEther('0'), //needs to be zero here otherwise will fail due to allowance
+      currencyAddress
+    )
+
+    const despositGas_BN = await this.L2Provider.estimateGas(tx2)
+    const despositCost_BN = despositGas_BN.mul('15000000')
+    console.log("Deposit gas cost (ETH)", utils.formatEther(despositCost_BN))
+    
+    //returns total cost in ETH
+    return utils.formatEther(despositCost_BN.add(approvalCost_BN))
   }
 
   /**************************************************************/

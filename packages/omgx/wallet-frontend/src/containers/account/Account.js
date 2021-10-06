@@ -249,7 +249,7 @@ function Account () {
               variant="body2"
               component="p"
             >
-              Balance altering transaction in progress - please be patient
+              Transaction in progress - please be patient
             </S.AlertText>
           </S.AlertInfo>
         </S.LayerAlert>
