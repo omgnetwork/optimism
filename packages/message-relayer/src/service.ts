@@ -257,15 +257,6 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
               console.log('Buffer timeout: flushing')
             }
 
-            const receipt = await this._relayMultiMessageToL1(
-              this.state.messageBuffer.reduce((acc, cur) => {
-                acc.push(cur.payload)
-                return acc
-              }, [])
-            )
-
-            console.log('Receipt:', receipt)
-
             /* parse this to make sure that the mesaage was actually relayed */
             // clear out buffer only if the messages are relayed to L1 successfully
             if (
@@ -281,6 +272,14 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
               this.state.messageBuffer = []
               this.state.timeOfLastPendingRelay = false
             } else {
+              const receipt = await this._relayMultiMessageToL1(
+                this.state.messageBuffer.reduce((acc, cur) => {
+                  acc.push(cur.payload)
+                  return acc
+                }, [])
+              )
+
+              console.log('Receipt:', receipt)
               // add the time interval between two tx
               this.state.timeOfLastPendingRelay = Date.now()
             }
