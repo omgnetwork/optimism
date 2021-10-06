@@ -115,6 +115,12 @@ export class MessageRelayerService extends BaseService<MessageRelayerOptions> {
     // Need to improve this, sorry.
     this.state = {} as any
 
+    this.options.l1RpcProvider.on('debug', (info) => {
+      if (info.action === 'request'){
+        this.logger.info('ethers', info.request)
+      }
+    })
+
     const address = await this.options.l1Wallet.getAddress()
     this.logger.info('Using L1 EOA', { address })
 
