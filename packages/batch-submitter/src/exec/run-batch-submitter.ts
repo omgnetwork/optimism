@@ -138,6 +138,12 @@ export const run = async () => {
     env.DEBUG_IMPERSONATE_PROPOSER_ADDRESS
   )
 
+  const setEtherDebug = (provider: StaticJsonRpcProvider) => {
+    provider.on('debug', (info) => {
+      console.log(info)
+    })
+  }
+
   const getSequencerSigner = async (): Promise<Signer> => {
     const l1Provider = new StaticJsonRpcProvider(
       requiredEnvVars.L1_NODE_WEB3_URL
