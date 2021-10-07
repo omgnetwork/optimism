@@ -1700,6 +1700,23 @@ class NetworkService {
   /***** represents 0.1%                     *****/
   /***********************************************/
 
+  // Total exit fee for L1
+
+  async getL1TotalFeeRate() {
+    const L1LPContract = new ethers.Contract(
+      this.L1LPAddress,
+      L1LPJson.abi,
+      this.L1Provider
+    )
+    const [userRewardFeeRate, ownerRewardFeeRate] = await Promise.all([
+      L1LPContract.userRewardFeeRate(),
+      L1LPContract.ownerRewardFeeRate()
+    ])
+    const feeRate = Number(userRewardFeeRate) + Number(ownerRewardFeeRate)
+    
+    return (feeRate / 10).toFixed(1)
+  }
+
   // Total exit fee
   async getTotalFeeRate() {
     const L2LPContract = new ethers.Contract(

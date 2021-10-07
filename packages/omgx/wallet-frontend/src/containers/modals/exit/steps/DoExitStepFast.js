@@ -126,7 +126,7 @@ function DoExitStepFast({ handleClose, token }) {
       networkService.L1LPBalance(token.addressL1).then((res) => {
         setLPBalance(Number(logAmount(res, token.decimals)).toFixed(3))
       })
-      networkService.getTotalFeeRate().then((feeRate) => {
+      networkService.getL1TotalFeeRate().then((feeRate) => {
         setFeeRate(feeRate)
       })
       networkService.getFastExitCost(token.address).then((fee) => {
