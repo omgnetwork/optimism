@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.13
+
+### Patch Changes
+
+- 7f7f35c3: contracts: remove l1 contracts from l2 state dump process
+- Updated dependencies [e0be02e1]
+- Updated dependencies [8da04505]
+  - @eth-optimism/core-utils@0.6.0
+
+## 0.4.12
+
+### Patch Changes
+
+- 468779ce: Add a getter to the ERC20 bridge interfaces, to return the address of the corresponding cross domain bridge
+
 ## 0.4.11
 
 ### Patch Changes
