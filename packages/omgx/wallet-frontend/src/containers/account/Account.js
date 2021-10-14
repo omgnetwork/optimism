@@ -228,11 +228,20 @@ function Account () {
         <S.CardContentTag>
           <S.CardInfo>Boba Balances</S.CardInfo>
           {(network === 'mainnet') &&
+          <>
           <Typography variant="body2">
              You are using Mainnet.<br/>
              WARNING: the mainnet smart contracts are not fully audited and funds may be at risk.<br/>
              Please be cautious when using Mainnet.
           </Typography>
+          <Typography variant="body2" style={{color: 'yellow',fontSize: '1.0em'}}>
+             NOTICE NOTICE NOTICE<br/>
+             Boba mainnet will be upgraded to v2 on October 28 at 00:00 UTC. Services will be offline during the regenesis, 
+             which is expected to take less than 12 hours. 
+             As part of the transition to v2, the classical 7-day bridge to L2 will be paused for the seven days prior 
+             (Oct. 21 to 28). The fast bridges will remain active, except during the regenesis itself.  
+          </Typography>
+          </>
           }
         </S.CardContentTag>
         <Box sx={{flex: 3}}>
