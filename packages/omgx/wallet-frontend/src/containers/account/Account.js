@@ -238,8 +238,8 @@ function Account () {
              NOTICE NOTICE NOTICE<br/>
              Boba mainnet will be upgraded to v2 on October 28 at 00:00 UTC. Services will be offline during the regenesis, 
              which is expected to take less than 12 hours. 
-             As part of the transition to v2, the classical 7-day bridge from L2 to L1 will be paused for the seven days prior 
-             (Oct. 21 to 28). The fast bridges will remain active, except during the regenesis itself.  
+             As part of the transition to v2, the classical 7-day bridge from L2 to L1 HAS NOW BEEN PAUSED, and will resume post-regenesis.
+             The fast bridges will remain active, except during the regenesis itself.  
           </Typography>
           </>
           }

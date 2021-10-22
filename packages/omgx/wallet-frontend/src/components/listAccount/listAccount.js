@@ -203,10 +203,10 @@ class ListAccount extends React.Component {
               {enabled && chain === 'L2' &&
                 <>
                   <Button
-                    onClick={()=>{this.handleModalClick('exitModal', token, false)}}
+                    onClick={()=>{}}
                     variant="outlined"
-                    disabled={disabled}
-                    tooltip="Classic Bridge to L1. This option is always available but has a 7 day delay before receiving your funds."
+                    disabled={true}
+                    tooltip="Classic Bridge to L1. CURRENTLY DISABLED due to pending regenesis."
                     fullWidth
                   >
                     Bridge to L1
