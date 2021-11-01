@@ -4,10 +4,7 @@ import * as Sentry from '@sentry/node'
 import { Logger, Metrics, createMetricsServer } from '@eth-optimism/common-ts'
 import { exit } from 'process'
 import { Signer, Wallet } from 'ethers'
-import {
-  StaticJsonRpcProvider,
-  TransactionReceipt,
-} from '@ethersproject/providers'
+import { JsonRpcProvider, StaticJsonRpcProvider, TransactionReceipt } from '@ethersproject/providers'
 import * as dotenv from 'dotenv'
 import Config from 'bcfg'
 
@@ -138,9 +135,7 @@ export const run = async () => {
   )
 
   const getSequencerSigner = async (): Promise<Signer> => {
-    const l1Provider = new StaticJsonRpcProvider(
-      requiredEnvVars.L1_NODE_WEB3_URL
-    )
+    const l1Provider = new StaticJsonRpcProvider(requiredEnvVars.L1_NODE_WEB3_URL)
 
     if (useHardhat) {
       if (!DEBUG_IMPERSONATE_SEQUENCER_ADDRESS) {
@@ -165,9 +160,8 @@ export const run = async () => {
   }
 
   const getProposerSigner = async (): Promise<Signer> => {
-    const l1Provider = new StaticJsonRpcProvider(
-      requiredEnvVars.L1_NODE_WEB3_URL
-    )
+
+    const l1Provider = new StaticJsonRpcProvider(requiredEnvVars.L1_NODE_WEB3_URL)
 
     if (useHardhat) {
       if (!DEBUG_IMPERSONATE_PROPOSER_ADDRESS) {

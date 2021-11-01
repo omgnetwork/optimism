@@ -24,6 +24,10 @@ import (
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
+
+//	"bytes"
+//	"github.com/ethereum/go-ethereum/log"
+//	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning
@@ -83,6 +87,8 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *common.Address, gp *GasPool, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *uint64, cfg vm.Config) (*types.Receipt, error) {
 	var msg Message
 	var err error
+//log.Debug("MMDBG state_processor.go entering ApplyTransaction")
+
 	if !vm.UsingOVM {
 		msg, err = tx.AsMessage(types.MakeSigner(config, header.Number))
 		if err != nil {
@@ -115,6 +121,10 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	vmenv := vm.NewEVM(context, statedb, config, cfg)
 	// Apply the transaction to the current state (included in the env)
 	_, gas, failed, err := ApplyMessage(vmenv, msg, gp)
+	//result, gas, failed, err := ApplyMessage(vmenv, msg, gp)
+
+//log.Debug("MMDBG state_processor.go ApplyMessage result", "failed", failed, "err", err, "gas", gas, "result", hexutil.Bytes(result), "turing", bytes.Contains(result, []byte("_OMGXTURING_")))
+
 	if err != nil {
 		return nil, err
 	}
@@ -142,6 +152,7 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *commo
 	receipt.BlockHash = statedb.BlockHash()
 	receipt.BlockNumber = header.Number
 	receipt.TransactionIndex = uint(statedb.TxIndex())
+//log.Debug("MMDBG state_processor.go leaving ApplyTransaction", "receipt", receipt)
 
 	return receipt, err
 }

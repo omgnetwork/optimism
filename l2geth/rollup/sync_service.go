@@ -789,6 +789,7 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 	if tx == nil {
 		return errors.New("nil transaction passed to applyTransactionToTip")
 	}
+//log.Debug("MMDBG sync_service.go entering applyTransactionToTip")
 	// Queue Origin L1 to L2 transactions must have a timestamp that is set by
 	// the L1 block that holds the transaction. This should never happen but is
 	// a sanity check to prevent fraudulent execution.
@@ -842,13 +843,14 @@ func (s *SyncService) applyTransactionToTip(tx *types.Transaction) error {
 		s.SetLatestEnqueueIndex(tx.GetMeta().QueueIndex)
 	}
 	// The index was set above so it is safe to dereference
-	log.Debug("Applying transaction to tip", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex())
 
 	txs := types.Transactions{tx}
 	s.txFeed.Send(core.NewTxsEvent{Txs: txs})
 	// Block until the transaction has been added to the chain
+	log.Debug("MMDBG sync_service.go Waiting to apply", "index", *tx.GetMeta().Index, "hash", tx.Hash().Hex())
 	log.Trace("Waiting for transaction to be added to chain", "hash", tx.Hash().Hex())
 	<-s.chainHeadCh
+//log.Debug("MMDBG sync_service leaving applyTransactionToTip")
 
 	return nil
 }
@@ -964,7 +966,11 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 		return err
 	}
 	s.txLock.Lock()
-	defer s.txLock.Unlock()
+	log.Debug("MMDBG sync_service.go acquired txLock in ValidateAndApply")
+	defer func() {
+	  log.Debug("MMDBG sync_service.go deferred txLock release")
+	  s.txLock.Unlock()
+	}()
 	log.Trace("Sequencer transaction validation", "hash", tx.Hash().Hex())
 
 	qo := tx.QueueOrigin()
@@ -974,7 +980,8 @@ func (s *SyncService) ValidateAndApplySequencerTransaction(tx *types.Transaction
 	if err := s.txpool.ValidateTx(tx); err != nil {
 		return fmt.Errorf("invalid transaction: %w", err)
 	}
-	return s.applyTransaction(tx)
+	ret := s.applyTransaction(tx)
+	return ret
 }
 
 // syncer represents a function that can sync remote items and then returns the

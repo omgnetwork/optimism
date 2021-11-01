@@ -761,6 +761,10 @@ func (w *worker) commitTransaction(tx *types.Transaction, coinbase common.Addres
 	snap := w.current.state.Snapshot()
 
 	receipt, err := core.ApplyTransaction(w.chainConfig, w.chain, &coinbase, w.current.gasPool, w.current.state, w.current.header, tx, &w.current.header.GasUsed, *w.chain.GetVMConfig())
+
+	if err != nil || receipt.Status != 1 {
+		log.Warn("MMDBG worker.go ApplyTransaction result", "err", err, "receipt", receipt)
+	}
 	if err != nil {
 		w.current.state.RevertToSnapshot(snap)
 		return nil, err
@@ -890,6 +894,7 @@ func (w *worker) commitTransactions(txs *types.TransactionsByPriceAndNonce, coin
 // on reading from a channel that is written to when a new block is added to the
 // chain.
 func (w *worker) commitNewTx(tx *types.Transaction) error {
+//log.Debug("MMDBG worker.go entering commitNewTx")
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 	tstart := time.Now()
@@ -947,6 +952,7 @@ func (w *worker) commitNewTx(tx *types.Transaction) error {
 	if w.commitTransactions(txs, w.coinbase, nil) {
 		return errors.New("Cannot commit transaction in miner")
 	}
+//log.Debug("MMDBG worker.go leaving commitNewTx")
 	return w.commit(nil, w.fullTaskHook, true, tstart)
 }
 

@@ -23,6 +23,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -31,6 +32,9 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rollup/dump"
+
+	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/ethereum/go-ethereum/rpc"
 )
 
 // codec is a decoder for the return values of the execution manager. It decodes
@@ -178,6 +182,10 @@ func run(evm *EVM, contract *Contract, input []byte, readOnly bool) ([]byte, err
 				}(evm.interpreter)
 				evm.interpreter = interpreter
 			}
+			if !bytes.HasPrefix((contract.Address()).Bytes(), deadPrefix) {
+				log.Debug("MMDBG processing contract", "Address", contract.Address().Hex())
+			}
+
 			return interpreter.Run(contract, input, readOnly)
 		}
 	}
@@ -217,6 +225,26 @@ type Context struct {
 	OvmL2CrossDomainMessenger dump.OvmDumpAccount
 	OvmETH                    dump.OvmDumpAccount
 	OvmL2StandardBridge       dump.OvmDumpAccount
+}
+
+// FIXME - should move this somewhere else.
+// For now, only caches the most recent result. Can be extended with a map of
+// multiple requests, but that needs some logic to expire/purge old entries.
+// "key" for now is simply the request URL. May need tighter scope in the future,
+// e.g. per contract. That would also allow different expiration thresholds for
+// different users.
+//
+// Another future enhancement could be to allow an external program to pre-load
+// results into the cache on a periodic basis (e.g. updating the latest market
+// prices for various tokens). Contracts would then be able to access this data
+// without the latency of making an off-chain JSON-RPC call. This is similar to
+// some of the earlier concepts for a "Turing" mechanism.
+
+var turingCache struct {
+	lock		sync.RWMutex
+	expires		time.Time
+	key		string
+	value		[]byte
 }
 
 // EVM is the Ethereum Virtual Machine base object and provides
@@ -319,11 +347,133 @@ func (evm *EVM) Interpreter() Interpreter {
 	return evm.interpreter
 }
 
+// In response to an off-chain Turing request, obtain the requested data and
+// rewrite the parameters so that the contract can be called a second time.
+// FIXME - needs error handling. For now, bails out and lets the contract
+// be called a second time with the original parameters. 2nd failure is not intercepted.
+
+func omgxTuringCall(reqString []byte, oldValue hexutil.Bytes) hexutil.Bytes {
+	var responseStringEnc string
+	var responseString []byte
+	var reqFields [4]string
+
+	prefix := make([]byte, 4)
+	copy(prefix,oldValue[0:4])
+
+	// If decoding fails, we'll return a "0" parameter which should fail a
+	// "require" in the contract without generating another OMGX_TURING marker.
+	// FIXME - would be cleaner to return nil here and put better error handling
+	// into l2geth to avoid that second call into the contract.
+
+	// Some other consistency checks. Probably OK to remove these at some point.
+	rest := oldValue[4:]	
+	rlen := len(rest)
+	method_idx := rest[0:32] // This value is preserved and passed back on the 2nd call
+	bad := append(prefix, method_idx...)
+	bad = append(bad, hexutil.MustDecode(fmt.Sprintf("0x%064x", 0))...)
+	
+	log.Debug ("MMDBG decode oldValue", "prefix", prefix, "rest", rest, "rlen", rlen)
+
+	if (rlen < 128) {
+		log.Warn("MMDBG Unexpected oldValue in omgxTuringCall", "len < 128", rlen)
+		return bad
+	}
+
+	rType_big := new(big.Int).SetBytes(rest[32:64]) // 1 for Request, 2 for Response
+	rType := int(rType_big.Uint64())
+	if (rType != 1) {
+		log.Warn("MMDBG unexpected oldValue in omgxTuringCall", "rType", rType)
+		return bad
+	}
+
+	if err := rlp.Decode(bytes.NewReader(reqString), &reqFields); err != nil {
+		log.Warn("MMDBG RLP decoding failed", "err", err)
+		return bad
+	} else {
+		log.Debug("MMDBG RLP decoded OK", "reqFields", reqFields)
+	}
+
+	reqVer := reqFields[0]
+
+	if reqVer != "\x01" {
+		log.Warn("MMDBG Unexpected request version", "ver", hexutil.Bytes(reqVer))
+		return bad
+	}
+	reqUrl := reqFields[1]
+	reqMethod := reqFields[2]
+	reqValue := reqFields[3]
+
+	var ret hexutil.Bytes
+
+	turingCache.lock.Lock()
+	if reqValue == turingCache.key && time.Now().Before(turingCache.expires) {
+		ret = turingCache.value
+	}
+	turingCache.lock.Unlock()
+
+	if ret != nil {
+		log.Debug("MMDBG turingCache hit for", "key", reqValue)
+		return ret
+	}
+
+	client,err := rpc.Dial(reqUrl)
+	if client != nil {
+		log.Debug("MMDBG Calling off-chain client at", "url", reqFields[1])
+		if err := client.Call(&responseStringEnc, reqMethod, hexutil.Bytes(reqValue)); err != nil {
+			log.Warn("MMDBG client error", "err", err)
+			return bad
+		}
+		responseString, err = hexutil.Decode(responseStringEnc)
+		if err != nil {
+			log.Warn("MMDBG error decoding responseString", "err", err)
+			return bad
+		}
+	} else {
+		log.Warn("MMDBG Failed to create client for off-chain request", "err", err)
+		return bad
+	}
+
+	log.Debug("MMDBG Generating Turing response", "Request", reqValue, "Response", responseString)
+
+	rsLen := len(responseString)
+
+	new_val := hexutil.MustDecode(fmt.Sprintf("0x%064x", rsLen))
+	rsBytes := []byte(responseString)
+	new_val = append(new_val, rsBytes...)
+
+	tmpLen := len(new_val) % 32
+	if tmpLen > 0 {
+		pad := bytes.Repeat([]byte{0}, 32 - tmpLen)
+		new_val = append(new_val, pad...)
+	}
+	ret = append(prefix, method_idx...)
+	ret = append(ret, hexutil.MustDecode(fmt.Sprintf("0x%064x", 2))...)
+	ret = append(ret, hexutil.MustDecode(fmt.Sprintf("0x%064x", 96))...)
+	ret = append(ret, new_val...)
+
+	log.Debug("MMDBG Modified parameters", "newValue", ret)
+
+	turingCache.lock.Lock()
+	turingCache.key = reqValue
+	turingCache.expires = time.Now().Add(2*time.Second)
+	turingCache.value = ret
+	turingCache.lock.Unlock()
+
+	log.Debug("MMDBG turingCache entry stored for", "key", reqValue)
+	return ret
+}
+
+
 // Call executes the contract associated with the addr with the given input as
 // parameters. It also handles any necessary value transfer required and takes
 // the necessary steps to create accounts and reverses the state in case of an
 // execution error or failed value transfer.
 func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error) {
+//log.Debug("MMDBG entering evm Call", "input", hexutil.Bytes(input))
+if !bytes.HasPrefix(addr.Bytes(), deadPrefix) {
+log.Debug("MMDBG entering Call", "depth", evm.depth, "addr", addr, "input", hexutil.Bytes(input), "gas", gas);
+}
+
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}
@@ -409,6 +559,28 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 	ret, err = run(evm, contract, input, false)
 
+	if ! bytes.HasPrefix(contract.CodeAddr.Bytes(), deadPrefix) {
+		//log.Debug("MMDBG evm.go run", "contract", contract.CodeAddr, "ret", hexutil.Bytes(ret), "err", err)
+	}
+
+	if err != nil {
+		if ! bytes.HasPrefix(contract.CodeAddr.Bytes(), deadPrefix) {
+			isTuring := bytes.Contains(ret, []byte("_OMGXTURING_"))
+			log.Debug("MMDBG evm.go run result", "err", err, "ret", hexutil.Bytes(ret), "input", hexutil.Bytes(input), "contract", contract.CodeAddr, "turing", isTuring)
+
+			if isTuring && UsingOVM {
+				ii := bytes.Index(ret, []byte("_OMGXTURING_"))
+				rest := ret[ii+12:]
+
+				new_in := omgxTuringCall(rest, input)
+
+				//evm.StateDB.RevertToSnapshot(snapshot) // FIXME?
+				ret, err = run(evm, contract, new_in, false)
+				log.Debug("MMDBG evm.go run2 result", "err", err, "ret", hexutil.Bytes(ret), "new_in", hexutil.Bytes(new_in), "contract", contract.CodeAddr, "turing", bytes.Contains(ret, []byte("_OMGXTURING_")))
+			}
+		}
+	}
+
 	// If all of these very particular conditions hold then we're guaranteed to be in a successful
 	// L1 => L2 message. It's not pretty, but it works. Broke this out into a series of checks to
 	// make it a bit more legible.
@@ -468,6 +640,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 					// execution with empty returndata
 					_ = codec.Unpack(&inner, "call", returnData.ReturnData)
 					if !inner.Success {
+						log.Debug("MMDBG evm.go errExecutionReverted")
 						err = errExecutionReverted
 					}
 					ret = inner.ReturnData
@@ -479,6 +652,9 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 				log.Debug("Reached the end of an OVM execution", "Return Data", hexutil.Encode(ret), "Error", err)
 			}
 		}
+	}
+	if !bytes.HasPrefix(addr.Bytes(), deadPrefix) {
+		log.Debug("MMDBG exiting Call", "depth", evm.depth, "addr", addr, "ret", hexutil.Bytes(ret), "err", err);
 	}
 
 	return ret, contract.Gas, err
@@ -565,6 +741,9 @@ func (evm *EVM) DelegateCall(caller ContractRef, addr common.Address, input []by
 // Opcodes that attempt to perform such modifications will result in exceptions
 // instead of performing the modifications.
 func (evm *EVM) StaticCall(caller ContractRef, addr common.Address, input []byte, gas uint64) (ret []byte, leftOverGas uint64, err error) {
+if !bytes.HasPrefix(addr.Bytes(), deadPrefix) {
+log.Debug("MMDBG in StaticCall", "addr", addr);
+}
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}

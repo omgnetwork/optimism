@@ -41,6 +41,7 @@ env-mainnet.yml
 *.log
 
 .serverless
+__pycache__
 
 # subgraph
 build

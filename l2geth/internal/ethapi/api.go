@@ -377,7 +377,10 @@ func (s *PrivateAccountAPI) SendTransaction(ctx context.Context, args SendTxArgs
 		log.Warn("Failed transaction send attempt", "from", args.From, "to", args.To, "value", args.Value.ToInt(), "err", err)
 		return common.Hash{}, err
 	}
-	return SubmitTransaction(ctx, s.b, signed)
+        //log.Debug("MMDBG api.go entering SendTransaction")
+	ret, err := SubmitTransaction(ctx, s.b, signed)
+        //log.Debug("MMDBG api.go SendTransaction returning", "RET", ret, "ERR", err)
+	return ret, err
 }
 
 // SignTransaction will create a transaction from the given arguments and
@@ -1718,7 +1721,11 @@ func (s *PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, encod
 	// L1Timestamp and L1BlockNumber will be set right before execution
 	txMeta := types.NewTransactionMeta(nil, 0, nil, types.QueueOriginSequencer, nil, nil, encodedTx)
 	tx.SetTransactionMeta(txMeta)
-	return SubmitTransaction(ctx, s.b, tx)
+
+        log.Debug("MMDBG api.go entering SendRawTransaction", "TX", tx)
+	ret, err := SubmitTransaction(ctx, s.b, tx)
+        log.Debug("MMDBG api.go SendRawTransaction returning", "RET", ret, "ERR", err)  // ret is (type common.Hash)
+	return ret, err
 }
 
 // Sign calculates an ECDSA signature for:
