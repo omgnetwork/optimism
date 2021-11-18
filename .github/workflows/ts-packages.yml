@@ -40,7 +40,7 @@ jobs:
 
       - name: Install Dependencies
         # only install dependencies if there was a change in the deps
-        # if: steps.yarn-cache.outputs.cache-hit != 'true'
+         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
       - name: Build
@@ -155,7 +155,7 @@ jobs:
 
       - name: Install Dependencies
         # only install dependencies if there was a change in the deps
-        # if: steps.yarn-cache.outputs.cache-hit != 'true'
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
       # - name: Lint JS and TS

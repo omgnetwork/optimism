@@ -15,6 +15,7 @@
     "test:integration": "hardhat --network optimism test",
     "test:integration:live": "IS_LIVE_NETWORK=true hardhat --network optimism-live test",
     "test:sync": "hardhat --network optimism test sync-tests/*.spec.ts --no-compile",
+    "test": "hardhat --network optimism test test/stress-tests-erc20.spec.ts --no-compile",
     "clean": "rimraf cache artifacts artifacts-ovm cache-ovm"
   },
   "devDependencies": {

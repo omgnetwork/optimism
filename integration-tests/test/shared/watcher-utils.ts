@@ -30,6 +30,36 @@ export const initWatcher = async (
   })
 }
 
+export const initWatcherFast = async (
+  l1Provider: JsonRpcProvider,
+  l2Provider: JsonRpcProvider,
+  AddressManager: Contract
+) => {
+  let l1MessengerAddress = await AddressManager.getAddress(
+    'Proxy__OVM_L1CrossDomainMessengerFast'
+  )
+
+  if (l1MessengerAddress === '0x0000000000000000000000000000000000000000') {
+    l1MessengerAddress = await AddressManager.getAddress(
+      'OVM_L1CrossDomainMessengerFast'
+    )
+  }
+
+  const l2MessengerAddress = await AddressManager.getAddress(
+    'OVM_L2CrossDomainMessenger'
+  )
+  return new Watcher({
+    l1: {
+      provider: l1Provider,
+      messengerAddress: l1MessengerAddress,
+    },
+    l2: {
+      provider: l2Provider,
+      messengerAddress: l2MessengerAddress,
+    },
+  })
+}
+
 export interface CrossDomainMessagePair {
   tx: Transaction
   receipt: TransactionReceipt

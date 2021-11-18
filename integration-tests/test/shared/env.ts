@@ -17,10 +17,13 @@ import {
   getL1Bridge,
   getL2Bridge,
   IS_LIVE_NETWORK,
+  L1_LIQUIDITY_POOL_ADDRESS,
+  L2_LIQUIDITY_POOL_ADDRESS,
   sleep,
 } from './utils'
 import {
   initWatcher,
+  initWatcherFast,
   CrossDomainMessagePair,
   Direction,
   waitForXDomainTransaction,
@@ -43,10 +46,15 @@ export class OptimismEnv {
 
   // The L1 <> L2 State watcher
   watcher: Watcher
+  watcherFast: Watcher
 
   // The wallets
   l1Wallet: Wallet
   l2Wallet: Wallet
+
+  // Liquidity pool address
+  l1LiquidityPoolAddress: string
+  l2LiquidityPoolAddress: string
 
   constructor(args: any) {
     this.addressManager = args.addressManager
@@ -57,8 +65,11 @@ export class OptimismEnv {
     this.l2Messenger = args.l2Messenger
     this.gasPriceOracle = args.gasPriceOracle
     this.watcher = args.watcher
+    this.watcherFast = args.watcherFast
     this.l1Wallet = args.l1Wallet
     this.l2Wallet = args.l2Wallet
+    this.l1LiquidityPoolAddress = args.l1LiquidityPoolAddress
+    this.l2LiquidityPoolAddress = args.l2LiquidityPoolAddress
     this.ctc = args.ctc
     this.scc = args.scc
   }
@@ -66,6 +77,11 @@ export class OptimismEnv {
   static async new(): Promise<OptimismEnv> {
     const addressManager = getAddressManager(l1Wallet)
     const watcher = await initWatcher(l1Provider, l2Provider, addressManager)
+    const watcherFast = await initWatcherFast(
+      l1Provider,
+      l2Provider,
+      addressManager
+    )
     const l1Bridge = await getL1Bridge(l1Wallet, addressManager)
 
     // fund the user if needed
@@ -111,8 +127,11 @@ export class OptimismEnv {
       l2Bridge,
       l2Messenger,
       watcher,
+      watcherFast,
       l1Wallet,
       l2Wallet,
+      l1LiquidityPoolAddress: L1_LIQUIDITY_POOL_ADDRESS,
+      l2LiquidityPoolAddress: L2_LIQUIDITY_POOL_ADDRESS,
     })
   }
 

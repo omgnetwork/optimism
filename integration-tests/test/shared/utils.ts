@@ -31,6 +31,12 @@ if (process.env.IS_LIVE_NETWORK === 'true') {
 const env = cleanEnv(process.env, {
   L1_URL: str({ default: 'http://localhost:9545' }),
   L2_URL: str({ default: 'http://localhost:8545' }),
+  L1_LIQUIDITY_POOL_ADDRESS: str({
+    default: '0x4c5859f0F772848b2D91F1D83E2Fe57935348029',
+  }),
+  L2_LIQUIDITY_POOL_ADDRESS: str({
+    default: '0x202CCe504e04bEd6fC0521238dDf04Bc9E8E15aB',
+  }),
   VERIFIER_URL: str({ default: 'http://localhost:8547' }),
   REPLICA_URL: str({ default: 'http://localhost:8549' }),
   L1_POLLING_INTERVAL: num({ default: 10 }),
@@ -75,6 +81,9 @@ export const OVM_ETH_ADDRESS = predeploys.OVM_ETH
 
 export const L2_CHAINID = env.L2_CHAINID
 export const IS_LIVE_NETWORK = env.IS_LIVE_NETWORK
+
+export const L1_LIQUIDITY_POOL_ADDRESS = env.L1_LIQUIDITY_POOL_ADDRESS
+export const L2_LIQUIDITY_POOL_ADDRESS = env.L2_LIQUIDITY_POOL_ADDRESS
 
 export const getAddressManager = (provider: any) => {
   return getContractFactory('Lib_AddressManager')

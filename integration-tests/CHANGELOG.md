@@ -4,6 +4,7 @@
 
 ### Patch Changes
 
+- 1b30c5c6: Add ERC20 and ETH stress tests
 - 918c08ca: Bump ethers dependency to 5.4.x to support eip1559
 
 ## 0.2.2
